@@ -18,6 +18,8 @@ export interface TokenItemProps {
   subAmounts?: AmountDetails;
   theme?: string;
   onDepositBtc?: Function;
+  isBtcOfOwallet?: boolean;
+  isBtcToken?: boolean;
 }
 
 const TokenItem: React.FC<TokenItemProps> = ({
@@ -29,12 +31,15 @@ const TokenItem: React.FC<TokenItemProps> = ({
   onClickTransfer,
   convertKwt,
   subAmounts,
-  theme
+  theme,
+  isBtcOfOwallet,
+  isBtcToken
 }) => {
-  const tokenIcon = tokensIcon.find(tok => tok.coinGeckoId === token.coinGeckoId)
+  const tokenIcon = tokensIcon.find((tok) => tok.coinGeckoId === token.coinGeckoId);
+  const isActive = isBtcToken ? isBtcOfOwallet && active : active;
   return (
     <div
-      className={classNames(styles.tokenWrapper, styles[theme], { [styles.active]: active }, className)}
+      className={classNames(styles.tokenWrapper, styles[theme], { [styles.active]: isActive }, className)}
       onClick={(event) => {
         event.stopPropagation();
         onClick();
@@ -67,7 +72,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
         </div>
       </div>
       <div>
-        {active && (
+        {isActive && (
           <TransferConvertToken
             token={token}
             subAmounts={subAmounts}

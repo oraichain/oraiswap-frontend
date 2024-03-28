@@ -10,13 +10,15 @@ import { ThemeContext } from 'context/theme-context';
 import styles from './tokenItem.module.scss';
 import { NomicContext } from 'context/nomic-context';
 
-export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, ...props }) => {
+export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, isBtcOfOwallet, ...props }) => {
   const { theme } = useContext(ThemeContext);
   const isLightTheme = theme == 'light';
   const nomic = useContext(NomicContext);
+  const disableBtn = !isBtcOfOwallet || !nomic.depositAddress?.bitcoinAddress;
+
   return (
     <>
-      <TokenItem {...props} />
+      <TokenItem isBtcOfOwallet={isBtcOfOwallet} {...props} />
       <div className={styles.tokenItemsBtc}>
         <div className={styles.tokenItems}>
           <div>{isLightTheme ? <DepositBtcLight /> : <DepositBtcDark />}</div>
@@ -26,7 +28,7 @@ export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, ...props 
           </div>
         </div>
         <div>
-          <Button disabled={!nomic.depositAddress?.bitcoinAddress} onClick={() => onDepositBtc()} type="primary">
+          <Button disabled={disableBtn} onClick={() => onDepositBtc()} type="primary">
             Deposit
           </Button>
         </div>

@@ -28,9 +28,12 @@ const getCosmWasmClient = async (
     const client = await cosmwasm.SigningCosmWasmClient.createWithSigner(
       tmClient,
       wallet,
-      options ?? {
-        gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
-      }
+      options
+        ? { ...options, broadcastPollIntervalMs: 600 }
+        : {
+            gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom),
+            broadcastPollIntervalMs: 600
+          }
     );
     return { wallet, client, defaultAddress };
   } catch (error) {

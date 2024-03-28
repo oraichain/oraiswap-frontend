@@ -80,7 +80,7 @@ import { useGetFeeConfig, useUsdtToBtc } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
-
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { NomicContext } from 'context/nomic-context';
 import { Decimal } from '@cosmjs/math';
 import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
@@ -92,6 +92,9 @@ import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
 import ModalConfirm from '../../components/ConfirmModal';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
+import useWalletReducer from 'hooks/useWalletReducer';
+import { isMobile } from '@walletconnect/browser-utils';
+
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -108,6 +111,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [, setTxHash] = useState('');
   const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
 
   const [theme] = useConfigReducer('theme');
   const [oraiAddress] = useConfigReducer('address');
@@ -634,40 +638,58 @@ const Balance: React.FC<BalanceProps> = () => {
                   usd += getUsd(subAmount, t, prices);
                 }
                 // TODO: hardcode check bitcoinTestnet need update later
-                const TokenItemELement: React.FC<TokenItemProps> =
-                  t.chainId === bitcoinChainId && t?.coinGeckoId === 'bitcoin' ? TokenItemBtc : TokenItem;
+                const isOwallet =
+                  walletByNetworks.cosmos &&
+                  walletByNetworks.cosmos === 'owallet' &&
+                  window.owallet &&
+                  //@ts-ignore
+                  window.owallet?.isOwallet;
 
+                const isBtcToken = t.chainId === bitcoinChainId && t?.coinGeckoId === 'bitcoin';
+                const TokenItemELement: React.FC<TokenItemProps> = isBtcToken ? TokenItemBtc : TokenItem;
                 return (
-                  <TokenItemELement
-                    onDepositBtc={async () => {
-                      setIsDepositBtcModal(true);
-                    }}
-                    className={classNames(styles.tokens_element, styles[theme])}
-                    key={t.denom}
-                    amountDetail={{ amount: amount.toString(), usd }}
-                    subAmounts={subAmounts}
-                    active={from?.denom === t.denom}
-                    token={t}
-                    theme={theme}
-                    onClick={() => {
-                      if (t.denom !== from?.denom) {
-                        onClickToken(t);
-                      }
-                    }}
-                    onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
-                      await onClickTransfer(fromAmount, from, to, filterNetwork);
-                    }}
-                    convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
-                      try {
-                        const result = await convertKwt(transferAmount, fromToken);
-                        processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
-                      } catch (ex) {
-                        displayToast(TToastType.TX_FAILED, {
-                          message: ex.message
-                        });
-                      }
-                    }}
-                  />
+                  <div key={t.denom}>
+                    {!isOwallet && !isMobile() && isBtcToken && (
+                      <div className={styles.info}>
+                        <div>
+                          <TooltipIcon width={20} height={20} />
+                        </div>
+                        <span>Feature only supported on Owallet. Please connect Cosmos with Owallet</span>
+                      </div>
+                    )}
+                    <TokenItemELement
+                      onDepositBtc={async () => {
+                        setIsDepositBtcModal(true);
+                      }}
+                      isBtcOfOwallet={isOwallet || isMobile()}
+                      isBtcToken={isBtcToken}
+                      className={classNames(styles.tokens_element, styles[theme])}
+                      key={t.denom}
+                      amountDetail={{ amount: amount.toString(), usd }}
+                      subAmounts={subAmounts}
+                      active={from?.denom === t.denom}
+                      token={t}
+                      theme={theme}
+                      onClick={() => {
+                        if (t.denom !== from?.denom) {
+                          onClickToken(t);
+                        }
+                      }}
+                      onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
+                        await onClickTransfer(fromAmount, from, to, filterNetwork);
+                      }}
+                      convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
+                        try {
+                          const result = await convertKwt(transferAmount, fromToken);
+                          processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
+                        } catch (ex) {
+                          displayToast(TToastType.TX_FAILED, {
+                            message: ex.message
+                          });
+                        }
+                      }}
+                    />
+                  </div>
                 );
               })}
             </div>
