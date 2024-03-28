@@ -34,7 +34,8 @@ export const HeaderTab: React.FC<{
     price: number;
     isError?: boolean;
   };
-}> = ({ setHideChart, hideChart, priceUsd, priceChange }) => {
+  percentChangeUsd: string | number;
+}> = ({ setHideChart, hideChart, priceUsd, priceChange, percentChangeUsd }) => {
   const theme = useTheme();
 
   const filterTime = useSelector(selectCurrentSwapFilterTime);
@@ -55,6 +56,7 @@ export const HeaderTab: React.FC<{
   const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
 
   const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
+  const isIncrementUsd = percentChangeUsd && Number(percentChangeUsd) > 0;
 
   const percentPriceChange = calculateFinalPriceChange(
     !!isPairReverseSymbol,
@@ -135,7 +137,12 @@ export const HeaderTab: React.FC<{
       <div className={cx('headerBottom')}>
         <div className={cx('priceUsd')}>
           {tab === TAB_CHART_SWAP.TOKEN ? (
-            <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+            <div>
+              <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+              <span className={cx('percent', isIncrementUsd ? 'increment' : 'decrement')}>
+                {(isIncrementUsd ? '+' : '') + percentChangeUsd}%
+              </span>
+            </div>
           ) : (
             !priceChange.isError && (
               <div className={cx('bottom')}>

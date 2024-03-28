@@ -143,6 +143,23 @@
         // color: $neutron-text-body-light;
         color: theme-get('neutral-1');
       }
+
+      .percent {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 100%;
+        padding-left: 6px;
+
+        &.increment {
+          @include theme() {
+            color: theme-get('success-surface-default');
+          }
+        }
+
+        &.decrement {
+          color: $red;
+        }
+      }
     }
 
     .bottom {
