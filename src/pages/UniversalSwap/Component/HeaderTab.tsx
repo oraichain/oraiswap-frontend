@@ -12,7 +12,12 @@ import {
   setFilterTimeSwap,
   setTabChartSwap
 } from 'reducer/chartSlice';
-import { selectCurrentToChain, selectCurrentToToken, selectCurrentToken } from 'reducer/tradingSlice';
+import {
+  selectCurrentFromToken,
+  selectCurrentToChain,
+  selectCurrentToToken,
+  selectCurrentToken
+} from 'reducer/tradingSlice';
 import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
 import { calculateFinalPriceChange } from '../helpers';
 import styles from './HeaderTab.module.scss';
@@ -27,6 +32,7 @@ export const HeaderTab: React.FC<{
   priceChange: {
     price_change: number;
     price: number;
+    isError?: boolean;
   };
 }> = ({ setHideChart, hideChart, priceUsd, priceChange }) => {
   const theme = useTheme();
@@ -35,6 +41,7 @@ export const HeaderTab: React.FC<{
   const tab = useSelector(selectCurrentSwapTabChart);
   const currentToChain = useSelector(selectCurrentToChain);
   const currentToToken = useSelector(selectCurrentToToken);
+  const currentFromToken = useSelector(selectCurrentFromToken);
   const dispatch = useDispatch();
 
   const { data: prices } = useCoinGeckoPrices();
@@ -58,24 +65,45 @@ export const HeaderTab: React.FC<{
   const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
   const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
 
-  let IconToToken = DefaultIcon;
+  let [ToTokenIcon, FromTokenIcon] = [DefaultIcon, DefaultIcon];
   if (currentToToken && Object.keys(currentToToken.IconLight || currentToToken.Icon).length > 0) {
-    IconToToken = theme === 'light' ? currentToToken.IconLight || currentToToken.Icon : currentToToken.Icon;
+    ToTokenIcon = theme === 'light' ? currentToToken.IconLight || currentToToken.Icon : currentToToken.Icon;
+  }
+  if (currentFromToken && Object.keys(currentFromToken.IconLight || currentFromToken.Icon).length > 0) {
+    FromTokenIcon = theme === 'light' ? currentFromToken.IconLight || currentFromToken.Icon : currentFromToken.Icon;
   }
 
   return (
     <div className={cx('headerTab')}>
       <div className={cx('headerTop')}>
         <div>
-          {currentToToken && currentToChain && (
-            <div className={cx('tokenInfo')}>
-              <div>
-                <IconToToken />
-              </div>
-              <span>{currentToToken?.name || currentToToken?.denom}</span>
-              <span className={cx('tokenName')}>{currentToChain}</span>
-            </div>
-          )}
+          {tab === TAB_CHART_SWAP.TOKEN
+            ? currentToToken &&
+              currentToChain && (
+                <div className={cx('tokenInfo')}>
+                  <div>
+                    <ToTokenIcon />
+                  </div>
+                  <span>{currentToToken?.name || currentToToken?.denom}</span>
+                  <span className={cx('tokenName')}>{currentToChain}</span>
+                </div>
+              )
+            : currentToToken &&
+              currentFromToken && (
+                <div className={cx('tokenInfo')}>
+                  <div className={cx('icons')}>
+                    <div className={cx('formIcon')}>
+                      <FromTokenIcon />
+                    </div>
+                    <div className={cx('toIcon')}>
+                      <ToTokenIcon />
+                    </div>
+                  </div>
+                  <span>
+                    {currentFromToken?.name || currentFromToken?.denom}/{currentToToken?.name || currentToToken?.denom}
+                  </span>
+                </div>
+              )}
         </div>
         <div className={cx('tabEyes')}>
           {!hideChart && (
@@ -114,16 +142,18 @@ export const HeaderTab: React.FC<{
           {tab === TAB_CHART_SWAP.TOKEN ? (
             <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
           ) : (
-            <div className={cx('bottom')}>
-              <div className={cx('balance')}>
-                {`1 ${baseDenom} ≈ ${
-                  isPairReverseSymbol ? (1 / currentPrice || 0).toFixed(6) : currentPrice.toFixed(6)
-                } ${quoteDenom}`}
+            !priceChange.isError && (
+              <div className={cx('bottom')}>
+                <div className={cx('balance')}>
+                  {`1 ${baseDenom} ≈ ${
+                    isPairReverseSymbol ? (1 / currentPrice || 0).toFixed(6) : currentPrice.toFixed(6)
+                  } ${quoteDenom}`}
+                </div>
+                <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
+                  {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%
+                </div>
               </div>
-              <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
-                {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%
-              </div>
-            </div>
+            )
           )}
         </div>
         {tab === TAB_CHART_SWAP.TOKEN && !hideChart && (
