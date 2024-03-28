@@ -3,13 +3,16 @@ import { oraichainTokens, parseTokenInfoRawDenom, CW20_DECIMALS } from '@oraicha
 import { useEffect, useState } from 'react';
 import { FILTER_TIME_CHART } from 'reducer/type';
 import axios from 'rest/request';
+import { toFixedIfNecessary } from 'pages/Pools/helpers';
 
 export const useChartUsdPrice = (
   type: FILTER_TIME_CHART,
   token: CoinGeckoId,
-  onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>
+  onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>,
+  onUpdatePricePercent?: React.Dispatch<React.SetStateAction<string | number>>
 ) => {
   const [currentData, setCurrentData] = useState([]);
+  const [changePercent, setChangePercent] = useState<string | number>(0);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,6 +53,13 @@ export const useChartUsdPrice = (
         };
       });
 
+      if (fmtData?.length) {
+        const pricePercent = getPriceUsdChange(fmtData[0]?.value || 0, fmtData[fmtData.length - 1]?.value || 0);
+
+        setChangePercent(pricePercent);
+        onUpdatePricePercent && onUpdatePricePercent(pricePercent);
+      }
+
       setCurrentData(fmtData);
       if (fmtData.length > 0) {
         setCurrentItem({ ...fmtData[fmtData.length - 1] });
@@ -74,6 +84,7 @@ export const useChartUsdPrice = (
   // }, [currentData]);
 
   return {
+    changePercent,
     currentData,
     currentItem,
     onCrossMove,
@@ -119,4 +130,9 @@ export const getDataPriceMarket = async (tokenDenom: string, type: FILTER_TIME_C
     console.error('getCoinPriceMarket', e);
     return [];
   }
+};
+
+export const getPriceUsdChange = (startValue: number, endValue: number) => {
+  if (!endValue) return '0.00';
+  return toFixedIfNecessary((((endValue - startValue) / endValue) * 100).toString(), 2);
 };

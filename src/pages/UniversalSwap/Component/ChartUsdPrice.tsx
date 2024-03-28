@@ -14,11 +14,13 @@ import styles from './ChartUsdPrice.module.scss';
 const ChartUsdPrice = ({
   filterDay,
   onUpdateCurrentItem,
+  onUpdatePricePercent,
   // token,
   activeAnimation = false
 }: {
   filterDay: FILTER_TIME_CHART;
   onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>;
+  onUpdatePricePercent?: React.Dispatch<React.SetStateAction<number>>;
   // token?: CoinGeckoId;
   activeAnimation?: boolean;
 }) => {
@@ -33,8 +35,9 @@ const ChartUsdPrice = ({
     currentData: data,
     currentItem,
     onCrossMove: crossMove,
-    onMouseLeave
-  } = useChartUsdPrice(filterDay, currentToToken?.coinGeckoId, onUpdateCurrentItem);
+    onMouseLeave,
+    changePercent
+  } = useChartUsdPrice(filterDay, currentToToken?.coinGeckoId, onUpdateCurrentItem, onUpdatePricePercent);
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
