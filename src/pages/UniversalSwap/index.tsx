@@ -1,5 +1,6 @@
 import { TVChartContainer } from '@oraichain/oraidex-common-ui';
 import { isMobile } from '@walletconnect/browser-utils';
+import { ReactComponent as NoChartData } from 'assets/images/nochart_data.svg';
 import cn from 'classnames/bind';
 import { PAIRS_CHART } from 'config/pools';
 import useTheme from 'hooks/useTheme';
@@ -10,7 +11,13 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { selectCurrentSwapFilterTime, selectCurrentSwapTabChart } from 'reducer/chartSlice';
-import { selectChartTimeFrame, selectCurrentToken, setChartTimeFrame } from 'reducer/tradingSlice';
+import {
+  selectChartTimeFrame,
+  selectCurrentFromToken,
+  selectCurrentToToken,
+  selectCurrentToken,
+  setChartTimeFrame
+} from 'reducer/tradingSlice';
 import { TAB_CHART_SWAP } from 'reducer/type';
 import { AssetsTab, HeaderTab, HistoryTab, TabsTxs } from './Component';
 import ChartUsdPrice from './Component/ChartUsdPrice';
@@ -39,6 +46,8 @@ const Swap: React.FC = () => {
 
   const [priceUsd, setPriceUsd] = useState(0);
   const currentPair = useSelector(selectCurrentToken);
+  const currentFromToken = useSelector(selectCurrentFromToken);
+  const currentToToken = useSelector(selectCurrentToToken);
   const filterTimeChartUsd = useSelector(selectCurrentSwapFilterTime);
 
   const tf = useSelector(selectChartTimeFrame);
@@ -89,13 +98,23 @@ const Swap: React.FC = () => {
                   </div>
 
                   <div className={cx(`chartItem`, tabChart === TAB_CHART_SWAP.POOL ? 'activeChart' : '')}>
-                    <TVChartContainer
-                      theme={theme}
-                      currentPair={currentPair}
-                      pairsChart={PAIRS_CHART}
-                      setChartTimeFrame={handleChangeChartTimeFrame}
-                      baseUrl={process.env.REACT_APP_BASE_API_URL}
-                    />
+                    {!priceChange.isError && currentFromToken && currentToToken ? (
+                      <TVChartContainer
+                        theme={theme}
+                        currentPair={currentPair}
+                        pairsChart={PAIRS_CHART}
+                        setChartTimeFrame={handleChangeChartTimeFrame}
+                        baseUrl={process.env.REACT_APP_BASE_API_URL}
+                      />
+                    ) : (
+                      <div className={cx('nodata-wrapper')}>
+                        <NoChartData />
+                        <div className={cx('nodata-content')}>
+                          <p className={cx('nodata-title')}>No data available</p>
+                          <p>Switch to Token Price view to see the price chart in USD</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>

@@ -55,6 +55,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   selectCurrentToChain,
   selectCurrentToken,
+  setCurrentFromToken,
   setCurrentToChain,
   setCurrentToToken,
   setCurrentToken
@@ -253,6 +254,7 @@ const SwapComponent: React.FC<{
     originalFromToken,
     originalToToken
   );
+
   useEffect(() => {
     // const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
@@ -270,6 +272,12 @@ const SwapComponent: React.FC<{
       dispatch(setCurrentToToken(originalToToken));
     }
   }, [originalToToken, toToken]);
+
+  useEffect(() => {
+    if (fromToken && originalFromToken) {
+      dispatch(setCurrentFromToken(originalFromToken));
+    }
+  }, [originalFromToken, fromToken]);
 
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
   const isAverageRatio = averageRatio && averageRatio.amount;

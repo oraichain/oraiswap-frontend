@@ -36,6 +36,22 @@
       .tokenName {
         color: $neutron-text-body-light;
       }
+
+      .icons {
+        display: flex;
+        position: relative;
+
+        .fromIcon {
+          position: relative;
+          z-index: 1;
+        }
+
+        .toIcon {
+          margin-left: -10px;
+          position: relative;
+          z-index: 0;
+        }
+      }
     }
 
     .tabEyes {
@@ -119,7 +135,7 @@
     line-height: 100%;
 
     .priceUsd {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 500;
       line-height: 100%;
 
@@ -140,7 +156,7 @@
       }
 
       .balance {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 500;
         line-height: 100%;
       }

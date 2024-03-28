@@ -81,6 +81,7 @@ export interface TradingState {
   chartTimeFrame: number;
   currentToChain: NetworkName | '';
   currentToToken: TokenItemType | null;
+  currentFromToken: TokenItemType | null;
 }
 
 export interface PoolChartState {
