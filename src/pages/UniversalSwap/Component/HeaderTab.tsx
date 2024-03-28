@@ -126,13 +126,8 @@ export const HeaderTab: React.FC<{
               </button>
             </div>
           )}
-          <div className={cx('eyesWrapper')}>
-            <img
-              className={cx('eyes')}
-              src={hideChart ? ChartImg : HideImg}
-              alt="eyes"
-              onClick={() => setHideChart(!hideChart)}
-            />
+          <div className={cx('eyesWrapper')} onClick={() => setHideChart(!hideChart)}>
+            <img className={cx('eyes')} src={hideChart ? ChartImg : HideImg} alt="eyes" />
           </div>
         </div>
       </div>
