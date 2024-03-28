@@ -72,7 +72,12 @@ const Swap: React.FC = () => {
                     priceChange={priceChange}
                   />
                 )}
-                <div className={cx('tv-chart', hideChart || priceChange.isError ? 'hidden' : '')}>
+                <div
+                  className={cx(
+                    'tv-chart'
+                    // hideChart || priceChange.isError ? 'hidden' : ''
+                  )}
+                >
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
                   <div
                     className={cx(

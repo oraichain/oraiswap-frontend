@@ -2,16 +2,13 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { useEffect, useRef } from 'react';
-import { FILTER_DAY, FILTER_TIME_CHART } from 'reducer/type';
-import styles from './ChartUsdPrice.module.scss';
-import { useChartUsdPrice } from '../hooks/useChartUsdPrice';
-import { formatTimeDataChart } from '../helpers';
-import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
-import { selectCurrentToToken } from 'reducer/tradingSlice';
 import { useSelector } from 'react-redux';
-import { parseTokenInfoRawDenom } from '@oraichain/oraidex-common';
+import { selectCurrentToToken } from 'reducer/tradingSlice';
+import { FILTER_TIME_CHART } from 'reducer/type';
+import { formatTimeDataChart } from '../helpers';
+import { useChartUsdPrice } from '../hooks/useChartUsdPrice';
+import styles from './ChartUsdPrice.module.scss';
 
 const ChartUsdPrice = ({
   filterDay,

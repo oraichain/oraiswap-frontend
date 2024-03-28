@@ -1,5 +1,5 @@
 import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
-import { oraichainTokens, parseTokenInfoRawDenom } from '@oraichain/oraidex-common';
+import { oraichainTokens, parseTokenInfoRawDenom, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { useEffect, useState } from 'react';
 import { FILTER_TIME_CHART } from 'reducer/type';
 import axios from 'rest/request';
@@ -38,7 +38,7 @@ export const useChartUsdPrice = (
   const onChangeRange = async (type: FILTER_TIME_CHART = FILTER_TIME_CHART.DAY) => {
     try {
       setIsLoading(true);
-      const tokenOnOraichain = oraichainTokens.find((t) => t.coinGeckoId === token);
+      const tokenOnOraichain = oraichainTokens.find((t) => t.coinGeckoId === token && t.decimals === CW20_DECIMALS);
       const tokenDenom = parseTokenInfoRawDenom(tokenOnOraichain);
 
       const data = await getDataPriceMarket(tokenDenom, type);
