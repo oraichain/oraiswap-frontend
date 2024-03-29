@@ -1,25 +1,41 @@
+import { CW20_DECIMALS, oraichainTokens, parseTokenInfoRawDenom, toDisplay } from '@oraichain/oraidex-common';
 import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
-import { oraichainTokens, parseTokenInfoRawDenom, CW20_DECIMALS } from '@oraichain/oraidex-common';
+import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useEffect, useState } from 'react';
 import { FILTER_TIME_CHART } from 'reducer/type';
 import axios from 'rest/request';
-import { toFixedIfNecessary } from 'pages/Pools/helpers';
+
+export enum ChartTokenType {
+  Price = 'Price',
+  Volume = 'Volume'
+}
+
+export type ChartDataValue = {
+  value: number;
+  time: number;
+  volume: number;
+};
+
+const KeyMapByChartType: Record<ChartTokenType, keyof ChartDataValue> = {
+  [ChartTokenType.Price]: 'value',
+  [ChartTokenType.Volume]: 'volume'
+};
 
 export const useChartUsdPrice = (
   type: FILTER_TIME_CHART,
   token: CoinGeckoId,
+  chartType: ChartTokenType,
   onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>,
   onUpdatePricePercent?: React.Dispatch<React.SetStateAction<string | number>>
 ) => {
-  const [currentData, setCurrentData] = useState([]);
+  const [currentData, setCurrentData] = useState<ChartDataValue[]>([]);
   const [changePercent, setChangePercent] = useState<string | number>(0);
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const [currentItem, setCurrentItem] = useState<{
-    value: number;
-    time: string | number;
-  }>({ value: 0, time: 0 });
+  const [currentItem, setCurrentItem] = useState<ChartDataValue>({ value: 0, time: 0, volume: 0 });
+
+  const keyValue = KeyMapByChartType[chartType];
 
   const onCrossMove = (item) => {
     if (!item) return;
@@ -38,16 +54,16 @@ export const useChartUsdPrice = (
   const onMouseLeave = () => {
     if (currentData.length > 0) {
       setCurrentItem(currentData[currentData.length - 1]);
-      onUpdateCurrentItem && onUpdateCurrentItem(currentData[currentData.length - 1]?.value || 0);
+      onUpdateCurrentItem && onUpdateCurrentItem(currentData[currentData.length - 1]?.[keyValue] || 0);
 
       const pricePercent = getPriceUsdChange(
-        currentData[0]?.value || 0,
-        currentData[currentData.length - 1]?.value || 0
+        currentData[0]?.[keyValue] || 0,
+        currentData[currentData.length - 1]?.[keyValue] || 0
       );
       setChangePercent(pricePercent);
       onUpdatePricePercent && onUpdatePricePercent(pricePercent);
     } else {
-      setCurrentItem({ value: 0, time: 0 });
+      setCurrentItem({ value: 0, time: 0, volume: 0 });
       onUpdateCurrentItem && onUpdateCurrentItem(0);
     }
   };
@@ -63,12 +79,16 @@ export const useChartUsdPrice = (
       const fmtData = (data || []).map((item) => {
         return {
           time: Number(item.time) * 1000,
-          value: item.close || 0
+          value: item.close || 0,
+          volume: toFixedIfNecessary(toDisplay(Number(item.volume || 0).toString()).toString(), 2)
         };
       });
 
       if (fmtData?.length) {
-        const pricePercent = getPriceUsdChange(fmtData[0]?.value || 0, fmtData[fmtData.length - 1]?.value || 0);
+        const pricePercent = getPriceUsdChange(
+          fmtData[0]?.[keyValue] || 0,
+          fmtData[fmtData.length - 1]?.[keyValue] || 0
+        );
 
         setChangePercent(pricePercent);
         onUpdatePricePercent && onUpdatePricePercent(pricePercent);
@@ -77,9 +97,9 @@ export const useChartUsdPrice = (
       setCurrentData(fmtData);
       if (fmtData.length > 0) {
         setCurrentItem({ ...fmtData[fmtData.length - 1] });
-        onUpdateCurrentItem && onUpdateCurrentItem(fmtData[fmtData.length - 1]?.value || 0);
+        onUpdateCurrentItem && onUpdateCurrentItem(fmtData[fmtData.length - 1]?.[keyValue] || 0);
       } else {
-        setCurrentItem({ value: 0, time: 0 });
+        setCurrentItem({ value: 0, time: 0, volume: 0 });
         onUpdateCurrentItem && onUpdateCurrentItem(0);
       }
       setIsLoading(false);
@@ -93,10 +113,6 @@ export const useChartUsdPrice = (
     onChangeRange(type);
   }, [type, token]);
 
-  // useEffect(() => {
-  //   onMouseLeave();
-  // }, [currentData]);
-
   return {
     changePercent,
     currentData,
@@ -105,7 +121,6 @@ export const useChartUsdPrice = (
     onMouseLeave
   };
 };
-export const MINIMUM_YEAR_STATISTIC = 2000;
 
 // map to seconds
 export const FILTER_DAYS = {

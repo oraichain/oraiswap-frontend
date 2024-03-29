@@ -25,6 +25,7 @@ import { TransactionProcess } from './Modals';
 import SwapComponent from './SwapV3';
 import { initPairSwap } from './SwapV3/hooks/useFillToken';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
+import { ChartTokenType } from './hooks/useChartUsdPrice';
 import styles from './index.module.scss';
 const cx = cn.bind(styles);
 
@@ -44,6 +45,7 @@ const Swap: React.FC = () => {
 
   const tabChart = useSelector(selectCurrentSwapTabChart);
 
+  const [chartTokenType, setChartTokenType] = useState(ChartTokenType.Price);
   const [priceUsd, setPriceUsd] = useState(0);
   const [percentChangeUsd, setPercentChangeUsd] = useState<string | number>(0);
   const currentPair = useSelector(selectCurrentToken);
@@ -75,6 +77,8 @@ const Swap: React.FC = () => {
               <>
                 {/* {!priceChange.isError && ( */}
                 <HeaderTab
+                  chartTokenType={chartTokenType}
+                  setChartTokenType={setChartTokenType}
                   setHideChart={setHideChart}
                   hideChart={hideChart}
                   toTokenDenom={toTokenDenom}
@@ -97,6 +101,7 @@ const Swap: React.FC = () => {
                       filterDay={filterTimeChartUsd}
                       onUpdateCurrentItem={setPriceUsd}
                       onUpdatePricePercent={setPercentChangeUsd}
+                      chartTokenType={chartTokenType}
                     />
                   </div>
 

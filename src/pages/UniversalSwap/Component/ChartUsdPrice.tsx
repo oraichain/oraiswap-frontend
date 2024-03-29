@@ -1,27 +1,31 @@
 import useConfigReducer from 'hooks/useConfigReducer';
 import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
 import { TIMER } from 'pages/CoHarvest/constants';
-import { formatDateChart } from 'pages/CoHarvest/helpers';
+import { formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
 import { numberWithCommas, toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentToToken } from 'reducer/tradingSlice';
 import { FILTER_TIME_CHART } from 'reducer/type';
 import { formatTimeDataChart } from '../helpers';
-import { useChartUsdPrice } from '../hooks/useChartUsdPrice';
+import { ChartTokenType, useChartUsdPrice } from '../hooks/useChartUsdPrice';
 import styles from './ChartUsdPrice.module.scss';
+
+export type ChartUsdPropsType = {
+  filterDay: FILTER_TIME_CHART;
+  onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>;
+  onUpdatePricePercent?: React.Dispatch<React.SetStateAction<number>>;
+  activeAnimation?: boolean;
+  chartTokenType: ChartTokenType;
+};
 
 const ChartUsdPrice = ({
   filterDay,
   onUpdateCurrentItem,
   onUpdatePricePercent,
-  activeAnimation = false
-}: {
-  filterDay: FILTER_TIME_CHART;
-  onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>;
-  onUpdatePricePercent?: React.Dispatch<React.SetStateAction<number>>;
-  activeAnimation?: boolean;
-}) => {
+  activeAnimation = false,
+  chartTokenType = ChartTokenType.Price
+}: ChartUsdPropsType) => {
   const chartRef = useRef(null);
   const containerRef = useRef(null);
   const serieRef = useRef(null);
@@ -33,9 +37,14 @@ const ChartUsdPrice = ({
     currentData: data,
     currentItem,
     onCrossMove: crossMove,
-    onMouseLeave,
-    changePercent
-  } = useChartUsdPrice(filterDay, currentToToken?.coinGeckoId, onUpdateCurrentItem, onUpdatePricePercent);
+    onMouseLeave
+  } = useChartUsdPrice(
+    filterDay,
+    currentToToken?.coinGeckoId,
+    chartTokenType,
+    onUpdateCurrentItem,
+    onUpdatePricePercent
+  );
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -70,7 +79,7 @@ const ChartUsdPrice = ({
       borderVisible: false,
       scaleMargins: {
         top: 0.2,
-        bottom: 0.2
+        bottom: chartTokenType === ChartTokenType.Price ? 0.2 : 0
       }
     },
     leftPriceScale: {
@@ -88,6 +97,10 @@ const ChartUsdPrice = ({
       locale: 'en-US',
       dateFormat: 'dd MMM, yyyy',
       priceFormatter: (price) => {
+        if (chartTokenType === ChartTokenType.Volume) {
+          return formatNumberKMB(Number(price));
+        }
+
         return `$${numberWithCommas(toFixedIfNecessary(Number(price).toString(), 6), undefined, {
           maximumFractionDigits: 6
         })}`;
@@ -153,13 +166,7 @@ const ChartUsdPrice = ({
         bottomColor: theme === 'light' ? '#fff' : '#181A17',
         lineColor: theme === 'light' ? '#A6BE93' : '#A6BE93',
         lineWidth: 3
-        //   lastPriceAnimation: LastPriceAnimationMode.OnDataUpdate
       });
-
-      // // priceScaleId: left | right
-      //   chart.priceScale('right').applyOptions({
-      //     borderVisible: false
-      //   });
 
       chartRef.current = chart;
     }
@@ -183,15 +190,28 @@ const ChartUsdPrice = ({
     // remove current series
     chartRef.current.removeSeries(serieRef.current);
 
-    serieRef.current = chartRef.current.addAreaSeries({
-      topColor: theme === 'light' ? '#EEF9E5' : '#32392D',
-      bottomColor: theme === 'light' ? '#fff' : '#181A17',
-      lineColor: theme === 'light' ? '#A6BE93' : '#A6BE93',
-      lineWidth: 3
-    });
+    if (chartTokenType === ChartTokenType.Volume) {
+      serieRef.current = chartRef.current.addHistogramSeries({
+        color: theme === 'light' ? '#A6BE93' : '#A6BE93'
+      });
+    } else {
+      serieRef.current = chartRef.current.addAreaSeries({
+        topColor: theme === 'light' ? '#EEF9E5' : '#32392D',
+        bottomColor: theme === 'light' ? '#fff' : '#181A17',
+        lineColor: theme === 'light' ? '#A6BE93' : '#A6BE93',
+        lineWidth: 3
+      });
+    }
 
     // update new theme series with current data
     let newData = data?.map((val) => {
+      if (chartTokenType === ChartTokenType.Volume) {
+        return {
+          ...val,
+          value: val.volume,
+          time: Math.floor(new Date(val?.time).getTime() / 1000)
+        };
+      }
       return {
         ...val,
         time: Math.floor(new Date(val?.time).getTime() / 1000)
@@ -200,19 +220,7 @@ const ChartUsdPrice = ({
 
     serieRef?.current?.setData(newData);
     chartRef?.current?.timeScale()?.fitContent();
-  }, [theme, data]);
-
-  useEffect(() => {
-    // When data is updated
-    let newData = data?.map((val) => {
-      return {
-        ...val,
-        time: Math.floor(new Date(val?.time).getTime() / 1000)
-      };
-    });
-    serieRef?.current?.setData(newData);
-    chartRef?.current?.timeScale()?.fitContent();
-  }, [data]);
+  }, [theme, data, chartTokenType]);
 
   const showTime = formatTimeDataChart(currentItem?.time || 0, filterDay, data?.[data?.length - 1]?.time);
 

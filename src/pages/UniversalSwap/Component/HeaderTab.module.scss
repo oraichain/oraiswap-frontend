@@ -159,6 +159,10 @@
         &.decrement {
           color: $red;
         }
+
+        &.hidePercent {
+          display: none;
+        }
       }
     }
 
@@ -169,7 +173,6 @@
 
       @include theme() {
         color: theme-get('neutral-1');
-        // color: $neutron-text-body-light;
       }
 
       .balance {
@@ -203,6 +206,16 @@
           color: $red;
         }
       }
+    }
+
+    .filter_wrapper {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+
+      gap: 8px;
+
+      flex-wrap: wrap;
     }
 
     .filter_day_wrapper {
@@ -245,6 +258,10 @@
             background: theme-get('neutral-surface-bg-section-5');
             color: theme-get('neutral-surface-bg-3');
           }
+        }
+
+        @include medium-desktop {
+          padding: 0 12px;
         }
       }
     }

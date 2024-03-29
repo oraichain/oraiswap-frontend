@@ -21,10 +21,11 @@ import {
 import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
 import { calculateFinalPriceChange } from '../helpers';
 import styles from './HeaderTab.module.scss';
+import { ChartTokenType } from '../hooks/useChartUsdPrice';
 
 const cx = cn.bind(styles);
 
-export const HeaderTab: React.FC<{
+export type HeaderTabPropsType = {
   hideChart: boolean;
   setHideChart: (isHideChart: boolean) => void;
   toTokenDenom: string;
@@ -35,7 +36,20 @@ export const HeaderTab: React.FC<{
     isError?: boolean;
   };
   percentChangeUsd: string | number;
-}> = ({ setHideChart, hideChart, priceUsd, priceChange, percentChangeUsd }) => {
+
+  chartTokenType: ChartTokenType;
+  setChartTokenType: React.Dispatch<React.SetStateAction<ChartTokenType>>;
+};
+
+export const HeaderTab: React.FC<HeaderTabPropsType> = ({
+  setHideChart,
+  hideChart,
+  priceUsd,
+  priceChange,
+  percentChangeUsd,
+  chartTokenType,
+  setChartTokenType
+}) => {
   const theme = useTheme();
 
   const filterTime = useSelector(selectCurrentSwapFilterTime);
@@ -138,7 +152,11 @@ export const HeaderTab: React.FC<{
           {tab === TAB_CHART_SWAP.TOKEN ? (
             <div>
               <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
-              <span className={cx('percent', isIncrementUsd ? 'increment' : 'decrement')}>
+              <span
+                className={cx('percent', isIncrementUsd ? 'increment' : 'decrement', {
+                  hidePercent: chartTokenType === ChartTokenType.Volume
+                })}
+              >
                 {(isIncrementUsd ? '+' : '') + Number(percentChangeUsd).toFixed(2)}%
               </span>
             </div>
@@ -158,20 +176,37 @@ export const HeaderTab: React.FC<{
           )}
         </div>
         {tab === TAB_CHART_SWAP.TOKEN && !hideChart && (
-          <div className={cx('filter_day_wrapper')}>
-            {LIST_FILTER_TIME.map((e) => {
-              return (
-                <button
-                  key={'time-key-chart' + e.label}
-                  className={cx(`filter_day`, e.value === filterTime ? 'active' : '')}
-                  onClick={() => {
-                    dispatch(setFilterTimeSwap(e.value));
-                  }}
-                >
-                  {e.label}
-                </button>
-              );
-            })}
+          <div className={cx('filter_wrapper')}>
+            <div className={cx('filter_day_wrapper')}>
+              {[ChartTokenType.Price, ChartTokenType.Volume].map((type) => {
+                return (
+                  <button
+                    key={'time-key-chart' + type}
+                    className={cx(`filter_day`, type === chartTokenType ? 'active' : '')}
+                    onClick={() => {
+                      setChartTokenType(type);
+                    }}
+                  >
+                    {type}
+                  </button>
+                );
+              })}
+            </div>
+            <div className={cx('filter_day_wrapper')}>
+              {LIST_FILTER_TIME.map((e) => {
+                return (
+                  <button
+                    key={'time-key-chart' + e.label}
+                    className={cx(`filter_day`, e.value === filterTime ? 'active' : '')}
+                    onClick={() => {
+                      dispatch(setFilterTimeSwap(e.value));
+                    }}
+                  >
+                    {e.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
