@@ -23,6 +23,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import SwitchDarkImg from 'assets/icons/switch.svg';
 import SwitchLightImg from 'assets/icons/switch_light.svg';
+// import IconOirSettings from 'assets/icons/iconoir_settings.svg';
+import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
@@ -56,6 +58,7 @@ import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
+import { ReactComponent as IconTooltip } from 'assets/icons/icon_tooltip.svg';
 import {
   AMOUNT_BALANCE_ENTRIES,
   SwapDirection,
@@ -63,7 +66,7 @@ import {
   filterNonPoolEvmTokens,
   getSwapType
 } from '../helpers';
-import InputSwap from './InputSwapV3';
+import InputSwap from './InputSwapV4';
 import { useGetTransHistory, useSimulate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
@@ -455,14 +458,6 @@ const SwapComponent: React.FC<{
         <div className={cx('swap-box')}>
           <div className={cx('header')}>
             <div className={cx('title')}>Universal Swap & Bridge</div>
-            <TooltipIcon
-              placement="bottom-end"
-              visible={visible}
-              setVisible={setVisible}
-              content={
-                <SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} userSlippage={userSlippage} />
-              }
-            />
             <button className={cx('btn')} onClick={refreshBalances}>
               <RefreshImg />
             </button>
@@ -470,6 +465,7 @@ const SwapComponent: React.FC<{
           <div className={cx('from')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
+                type={'from'}
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
                 Icon={FromIcon}
@@ -489,7 +485,7 @@ const SwapComponent: React.FC<{
                   </div>
                 </div>
               )}
-              <div className={cx('coeff')}>
+              {/* <div className={cx('coeff')}>
                 {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
                   <button
                     className={cx(`${coe === coeff && 'is-active'}`)}
@@ -514,7 +510,7 @@ const SwapComponent: React.FC<{
                     {text}
                   </button>
                 ))}
-              </div>
+              </div> */}
             </div>
           </div>
           <div className={cx('swap-icon')}>
@@ -539,6 +535,7 @@ const SwapComponent: React.FC<{
           <div className={cx('to')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
+                type={'to'}
                 balance={toTokenBalance}
                 originalToken={originalToToken}
                 disable={true}
@@ -560,9 +557,34 @@ const SwapComponent: React.FC<{
 
           <div className={cx('recipient')}>
             <div className={cx('label')}>Recipient address:</div>
-            <div>
-              <span className={cx('address')}>{reduceString(addressTransfer, 10, 8)}</span>
-              {/* <span className={cx('paste')}>PASTE</span> */}
+            <div className={cx('content')}>
+              <span className={cx('address')}>{reduceString(addressTransfer, 10, 10)}</span>
+              <span className={cx('paste')}>PASTE</span>
+            </div>
+          </div>
+
+          <div className={cx('slippage')}>
+            <div className={cx('label')}>
+              <span>Slippage tolerance</span>
+              <IconTooltip width={20} height={20} />
+            </div>
+            <div className={cx('info')}>
+              <span className={cx('value')}>{userSlippage}%</span>
+              <span className={cx('icon')}>
+                <TooltipIcon
+                  placement="bottom-end"
+                  visible={visible}
+                  icon={<IconOirSettings />}
+                  setVisible={setVisible}
+                  content={
+                    <SlippageModal
+                      setVisible={setVisible}
+                      setUserSlippage={setUserSlippage}
+                      userSlippage={userSlippage}
+                    />
+                  }
+                />
+              </span>
             </div>
           </div>
 
