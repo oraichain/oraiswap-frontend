@@ -114,7 +114,6 @@ const notAllowDenom = Object.values(evmDenomsMap).flat();
 const notAllowBEP20Token = [KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT];
 export const swapFromTokens = flattenTokens.filter((token) => {
   return (
-    token.chainId === 'Oraichain' &&
     !notAllowDenom.includes(token?.denom) &&
     !notAllowSwapCoingeckoIds.includes(token.coinGeckoId) &&
     !notAllowSwapFromChainIds.includes(token.chainId) &&
@@ -132,7 +131,6 @@ const notAllowSwapToChainIds = [
 ];
 export const swapToTokens = flattenTokens.filter((token) => {
   return (
-    token.chainId === 'Oraichain' &&
     !notAllowDenom.includes(token?.denom) &&
     !notAllowSwapCoingeckoIds.includes(token.coinGeckoId) &&
     !notAllowSwapToChainIds.includes(token.chainId) &&
