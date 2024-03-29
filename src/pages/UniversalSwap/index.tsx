@@ -119,7 +119,7 @@ const Swap: React.FC = () => {
                         <NoChartData />
                         <div className={cx('nodata-content')}>
                           <p className={cx('nodata-title')}>No data available</p>
-                          <p>Switch to Token Price view to see the price chart in USD</p>
+                          <p>Please try switching to Simple view</p>
                         </div>
                       </div>
                     )}

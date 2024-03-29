@@ -113,6 +113,10 @@ export const useChartUsdPrice = (
     onChangeRange(type);
   }, [type, token]);
 
+  useEffect(() => {
+    onMouseLeave();
+  }, [chartType]);
+
   return {
     changePercent,
     currentData,

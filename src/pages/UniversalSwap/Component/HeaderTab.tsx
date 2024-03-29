@@ -20,8 +20,8 @@ import {
 } from 'reducer/tradingSlice';
 import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
 import { calculateFinalPriceChange } from '../helpers';
-import styles from './HeaderTab.module.scss';
 import { ChartTokenType } from '../hooks/useChartUsdPrice';
+import styles from './HeaderTab.module.scss';
 
 const cx = cn.bind(styles);
 
