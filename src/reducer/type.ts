@@ -211,6 +211,6 @@ export enum TAB_CHART {
 }
 
 export enum TAB_CHART_SWAP {
-  TOKEN = 'Token Price',
-  POOL = 'Pool Price'
+  TOKEN = 'Simple',
+  POOL = 'Advance'
 }

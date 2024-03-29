@@ -26,12 +26,26 @@ export const useChartUsdPrice = (
 
     setCurrentItem(item);
     onUpdateCurrentItem && onUpdateCurrentItem(item?.value || 0);
+
+    if (currentData?.length) {
+      const pricePercent = getPriceUsdChange(currentData[0]?.value || 0, item?.value || 0);
+
+      setChangePercent(pricePercent);
+      onUpdatePricePercent && onUpdatePricePercent(pricePercent);
+    }
   };
 
   const onMouseLeave = () => {
     if (currentData.length > 0) {
       setCurrentItem(currentData[currentData.length - 1]);
       onUpdateCurrentItem && onUpdateCurrentItem(currentData[currentData.length - 1]?.value || 0);
+
+      const pricePercent = getPriceUsdChange(
+        currentData[0]?.value || 0,
+        currentData[currentData.length - 1]?.value || 0
+      );
+      setChangePercent(pricePercent);
+      onUpdatePricePercent && onUpdatePricePercent(pricePercent);
     } else {
       setCurrentItem({ value: 0, time: 0 });
       onUpdateCurrentItem && onUpdateCurrentItem(0);

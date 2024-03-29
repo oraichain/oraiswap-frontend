@@ -15,13 +15,11 @@ const ChartUsdPrice = ({
   filterDay,
   onUpdateCurrentItem,
   onUpdatePricePercent,
-  // token,
   activeAnimation = false
 }: {
   filterDay: FILTER_TIME_CHART;
   onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>;
   onUpdatePricePercent?: React.Dispatch<React.SetStateAction<number>>;
-  // token?: CoinGeckoId;
   activeAnimation?: boolean;
 }) => {
   const chartRef = useRef(null);
@@ -63,6 +61,10 @@ const ChartUsdPrice = ({
   }, []);
 
   const defaultOption: DeepPartial<ChartOptions> = {
+    handleScroll: {
+      vertTouchDrag: false
+    },
+
     rightPriceScale: {
       borderColor: theme === 'light' ? '#EFEFEF' : '#232521',
       borderVisible: false,
@@ -128,6 +130,9 @@ const ChartUsdPrice = ({
       rightBarStaysOnScroll: true,
       lockVisibleTimeRangeOnResize: true,
       ticksVisible: false,
+
+      fixLeftEdge: true,
+      fixRightEdge: true,
 
       tickMarkFormatter: (time: Time, tickMarkType: TickMarkType, locale: string) => {
         // formatTime Feb 1, Mar 2,....

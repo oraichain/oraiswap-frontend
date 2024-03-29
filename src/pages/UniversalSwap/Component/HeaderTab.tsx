@@ -46,7 +46,6 @@ export const HeaderTab: React.FC<{
   const dispatch = useDispatch();
 
   const { data: prices } = useCoinGeckoPrices();
-  const filterTimeChartUsd = useSelector(selectCurrentSwapFilterTime);
   const currentPair = useSelector(selectCurrentToken);
 
   const [baseContractAddr, quoteContractAddr] = currentPair.info.split('-');
@@ -140,7 +139,7 @@ export const HeaderTab: React.FC<{
             <div>
               <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
               <span className={cx('percent', isIncrementUsd ? 'increment' : 'decrement')}>
-                {(isIncrementUsd ? '+' : '') + percentChangeUsd}%
+                {(isIncrementUsd ? '+' : '') + Number(percentChangeUsd).toFixed(2)}%
               </span>
             </div>
           ) : (
