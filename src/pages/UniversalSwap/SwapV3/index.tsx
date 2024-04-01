@@ -52,7 +52,7 @@ import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
@@ -75,6 +75,10 @@ import { useFillToken } from './hooks/useFillToken';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { isMobile } from '@walletconnect/browser-utils';
 import { reduceString } from 'libs/utils';
+import { chainInfosWithIcon } from 'config/chainInfos';
+import SelectToken from './SelectToken';
+import SelectChain from './SelectChain';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -86,8 +90,13 @@ const SwapComponent: React.FC<{
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const { data: prices } = useCoinGeckoPrices();
+
+  const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
+  const [isSelectChainTo, setIsSelectChainTo] = useState(false);
+
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
+
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [coe, setCoe] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -415,6 +424,10 @@ const SwapComponent: React.FC<{
 
   const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
   const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
+  const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
+  const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
+  const FromIconNetwork = theme === 'light' ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
+  const ToIconNetwork = theme === 'light' ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
 
   useEffect(() => {
     (async () => {
@@ -452,6 +465,14 @@ const SwapComponent: React.FC<{
     walletByNetworks.tron
   ]);
 
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    setIsSelectFrom(false);
+    setIsSelectTo(false);
+    setIsSelectChainFrom(false);
+    setIsSelectChainTo(false);
+  });
+
   return (
     <div className={cx('swap-box-wrapper')}>
       <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
@@ -469,8 +490,10 @@ const SwapComponent: React.FC<{
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
                 Icon={FromIcon}
-                setIsSelectFrom={setIsSelectFrom}
+                setIsSelectChain={setIsSelectChainFrom}
+                setIsSelectToken={setIsSelectFrom}
                 token={originalFromToken}
+                IconNetwork={FromIconNetwork}
                 amount={fromAmountToken}
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
@@ -540,10 +563,12 @@ const SwapComponent: React.FC<{
                 originalToken={originalToToken}
                 disable={true}
                 Icon={ToIcon}
-                setIsSelectFrom={setIsSelectTo}
+                setIsSelectChain={setIsSelectChainTo}
+                setIsSelectToken={setIsSelectTo}
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
+                IconNetwork={ToIconNetwork}
                 usdPrice={usdPriceShow}
               />
 
@@ -675,7 +700,15 @@ const SwapComponent: React.FC<{
         </div>
       </LoadingBox>
 
-      {isSelectTo && (
+      <div ref={ref}>
+        {isSelectTo && <SelectToken setIsSelectToken={setIsSelectTo} isSelectToken={isSelectTo} />}
+        {isSelectFrom && <SelectToken setIsSelectToken={setIsSelectFrom} isSelectToken={isSelectFrom} />}
+
+        {isSelectChainTo && <SelectChain setIsSelectToken={setIsSelectChainTo} isSelectToken={isSelectChainTo} />}
+        {isSelectChainFrom && <SelectChain setIsSelectToken={setIsSelectChainFrom} isSelectToken={isSelectChainFrom} />}
+      </div>
+
+      {/* {isSelectTo && (
         <SelectTokenModalV2
           close={() => setIsSelectTo(false)}
           prices={prices}
@@ -689,9 +722,9 @@ const SwapComponent: React.FC<{
           searchTokenName={searchTokenName}
           title="Receive Token List"
         />
-      )}
+      )} */}
 
-      {isSelectFrom && (
+      {/* {isSelectFrom && (
         <SelectTokenModalV2
           close={() => setIsSelectFrom(false)}
           prices={prices}
@@ -705,7 +738,7 @@ const SwapComponent: React.FC<{
           searchTokenName={searchTokenName}
           title="Pay Token List"
         />
-      )}
+      )} */}
     </div>
   );
 };

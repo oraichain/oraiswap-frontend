@@ -10,7 +10,9 @@ const cx = cn.bind(styles);
 
 interface InputSwapProps {
   Icon: CoinIcon;
-  setIsSelectFrom: (value: boolean) => void;
+  IconNetwork: CoinIcon;
+  setIsSelectToken: (value: boolean) => void;
+  setIsSelectChain: (value: boolean) => void;
   token: TokenItemType;
   amount: number;
   tokenFee: number;
@@ -25,7 +27,9 @@ interface InputSwapProps {
 
 export default function InputSwapV4({
   Icon,
-  setIsSelectFrom,
+  IconNetwork,
+  setIsSelectToken,
+  setIsSelectChain,
   token,
   amount,
   onChangeAmount,
@@ -42,7 +46,13 @@ export default function InputSwapV4({
       <div className={cx('input-swap-balance')}>
         <div className={cx('select-chain')}>
           <span>{type} </span>
-          <span>{token?.org}</span>
+          <div className={cx('left')} onClick={() => setIsSelectChain(true)}>
+            <div className={cx('icon')}>{IconNetwork && <IconNetwork className={cx('logo')} />}</div>
+            <div className={cx('section')}>
+              <div className={cx('name')}>{token?.org}</div>
+            </div>
+            <img src={ArrowImg} alt="arrow" />
+          </div>
         </div>
         <div className={cx('show-balance')}>
           <TokenBalance
@@ -54,10 +64,13 @@ export default function InputSwapV4({
             prefix="Balance: "
             decimalScale={6}
           />
+
+          {/* {type === 'from' && <div className={cx('percent')}>50%</div>}
+          {type === 'from' && <div className={cx('percent')}>100%</div>} */}
         </div>
       </div>
       <div className={cx('input-swap-box')}>
-        <div className={cx('box-select')} onClick={() => setIsSelectFrom(true)}>
+        <div className={cx('box-select')} onClick={() => setIsSelectToken(true)}>
           <div className={cx('left')}>
             <div className={cx('icon')}>{Icon && <Icon className={cx('logo')} />}</div>
             <div className={cx('section')}>
@@ -66,8 +79,8 @@ export default function InputSwapV4({
             <img src={ArrowImg} alt="arrow" />
           </div>
         </div>
-        <div>
-          <div>
+        <div className={cx('box-input')}>
+          <div className={cx('input')}>
             <NumberFormat
               placeholder="0"
               thousandSeparator

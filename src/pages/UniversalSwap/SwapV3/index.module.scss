@@ -11,6 +11,14 @@
   .custom-loader-root {
     border-radius: 24px;
   }
+
+  .select-box {
+    padding-top: 10px;
+    transition: all 1s ease;
+    .hidden {
+      height: 0;
+    }
+  }
 }
 
 .swap-box {

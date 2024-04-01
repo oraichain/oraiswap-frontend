@@ -1,0 +1,120 @@
+.selectChainWrap {
+  width: 100%;
+  height: 80%;
+  // border: 1px solid var(--Colors-Neutral-Border-border-bold, #dfe0de);
+  // background: var(--Colors-Neutral-Surface-bg, #fff);
+  border: 1px solid #494949;
+  background: #181a17;
+  // box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+  position: absolute;
+  top: 20%;
+  border-radius: 24px;
+
+  .selectToken {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    // color: var(--Colors-Neutral-Text-title, #232521);
+    color: #efefef;
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    .selectTokenHeader {
+      display: flex;
+      justify-content: space-between;
+
+      .selectTokenHeaderTitle {
+        text-align: center;
+        font-variant-numeric: lining-nums tabular-nums;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 150%;
+      }
+
+      .selectTokenHeaderClose {
+        cursor: pointer;
+      }
+    }
+
+    .selectTokenSearch {
+    }
+
+    .selectTokenNetwork {
+      .selectTokenNetworkTitle {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 150%;
+      }
+      .selectTokenNetworkList {
+        padding-top: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        .selectTokenNetworkItem {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          padding: 8px;
+          height: 40px;
+          text-align: center;
+          // border-radius: var(--Dimension-Corner-Radius-button, 99px);
+          // background: var(--Colors-Neutral-Surface-bg-section-2, #31332E);
+          border-radius: 99px;
+          background: #31332e;
+          width: calc(100% / 7);
+          border: 0.5px solid inherit;
+          &:hover {
+            //             border-radius: var(--Dimension-Corner-Radius-button, 99px);
+            // border: 1px solid var(--Colors-Neutral-Border-border-btn-default, #232521);
+            // background: var(--Colors-Neutral-Surface-bg-dropdown-hover, #EFEFEF);
+            border: 0.5px solid #efefef;
+          }
+        }
+      }
+    }
+
+    .selectTokenAll {
+      .selectTokenTitle {
+        // color: var(--Colors-Neutral-Text-title, #EFEFEF);
+        color: #efefef;
+        font-size: 14px;
+        line-height: 150%;
+      }
+
+      .selectTokenItem {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px;
+        cursor: pointer;
+        &:hover {
+          background-color: gray;
+        }
+        .selectTokenItemLeft {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          .selectTokenItemLeftImg {
+            display: flex;
+            align-items: center;
+            position: relative;
+            .selectTokenItemLeftImgChain {
+              width: 14px;
+              height: 14px;
+              border-radius: 2px;
+              position: absolute;
+              top: 60%;
+              left: 15px;
+              z-index: 1;
+            }
+          }
+        }
+        .selectTokenItemRight {
+          text-align: right;
+        }
+      }
+    }
+  }
+}
