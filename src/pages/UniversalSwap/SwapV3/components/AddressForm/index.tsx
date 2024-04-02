@@ -58,6 +58,9 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
     .map((e) => e.chainId);
 
   const fmtListNetworks = networks.filter((n) => {
+    if (!addressBook?.token) {
+      return n;
+    }
     return allChainOfToken.includes(n.chainId);
   });
 
