@@ -1,11 +1,10 @@
-import { CustomChainInfo, TokenItemType } from '@oraichain/oraidex-common';
+import { CustomChainInfo, TokenItemType, flattenTokens } from '@oraichain/oraidex-common';
 import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as SelectTokenIcon } from 'assets/icons/select_token.svg';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { Button } from 'components/Button';
 import ToggleSwitch from 'components/ToggleSwitch';
-import { oraichainTokens } from 'config/bridgeTokens';
 import { networks } from 'helper';
 import useTheme from 'hooks/useTheme';
 import { useCallback, useEffect, useState } from 'react';
@@ -23,6 +22,7 @@ import SelectInput from '../SelectInput';
 import styles from './index.module.scss';
 import { getTokenIcon } from 'pages/UniversalSwap/helpers';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 
 const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
   const theme = useTheme();
@@ -52,6 +52,14 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
   }, [currentEdit, currentStep, tokenTo]);
 
   const CurrentTokenIcon = getTokenIcon(currentToken, theme);
+
+  const allChainOfToken = flattenTokens
+    .filter((tk) => addressBook?.token?.coinGeckoId === tk.coinGeckoId)
+    .map((e) => e.chainId);
+
+  const fmtListNetworks = networks.filter((n) => {
+    return allChainOfToken.includes(n.chainId);
+  });
 
   const renderTokenItem = useCallback(
     (token: TokenItemType) => {
@@ -138,7 +146,7 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
           <SelectInput
             title="Select token"
             warningText="Ensure that the selected token matches your entered address to avoid potential loss of funds"
-            listItem={oraichainTokens}
+            listItem={oraichainTokensWithIcon.filter((e) => e.decimals === 6)}
             prefix={
               CurrentTokenIcon ? (
                 <div className={styles.tokenIcon}>
@@ -184,7 +192,7 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
         <SelectInput
           title="Select network"
           warningText="Ensure that the selected network matches your entered address to avoid potential loss of funds"
-          listItem={networks}
+          listItem={fmtListNetworks}
           value={currentNetwork}
           label={currentNetwork && <div>{currentNetwork?.chainName}</div>}
           onChange={(item: CustomChainInfo) => {

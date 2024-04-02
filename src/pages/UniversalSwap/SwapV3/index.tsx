@@ -76,7 +76,7 @@ import useWalletReducer from 'hooks/useWalletReducer';
 import { isMobile } from '@walletconnect/browser-utils';
 import { reduceString } from 'libs/utils';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
-import { AddressManagementStep } from 'reducer/type';
+import { AddressBookType, AddressManagementStep } from 'reducer/type';
 import AddressBook from './components/AddressBook';
 import InputCommon from './components/InputCommon';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
@@ -627,6 +627,7 @@ const SwapComponent: React.FC<{
 
           <div className={cx('recipient')}>
             <InputCommon
+              isOnViewPort={currentAddressManagementStep === AddressManagementStep.INIT}
               title="Recipient address"
               value={addressTransfer}
               onChange={(val) => setAddressTransfer(val)}
@@ -802,39 +803,12 @@ const SwapComponent: React.FC<{
         />
       </div>
 
-      {/* {isSelectTo && (
-        <SelectTokenModalV2
-          close={() => setIsSelectTo(false)}
-          prices={prices}
-          items={filteredToTokens}
-          amounts={amounts}
-          setToken={(denom) => {
-            setSwapTokens([fromTokenDenom, denom]);
-            handleUpdateQueryURL([fromTokenDenom, denom]);
-          }}
-          setSearchTokenName={setSearchTokenName}
-          searchTokenName={searchTokenName}
-          title="Receive Token List"
-        />
-      )} */}
-      {/* {isSelectFrom && (
-        <SelectTokenModalV2
-          close={() => setIsSelectFrom(false)}
-          prices={prices}
-          items={filteredFromTokens}
-          amounts={amounts}
-          setToken={(denom) => {
-            setSwapTokens([denom, toTokenDenom]);
-            handleUpdateQueryURL([denom, toTokenDenom]);
-          }}
-          setSearchTokenName={setSearchTokenName}
-          searchTokenName={searchTokenName}
-          title="Pay Token List"
-        />
-      )}
-    )} */}
-
-      {currentAddressManagementStep !== AddressManagementStep.INIT && <AddressBook tokenTo={originalToToken} />}
+      <AddressBook
+        onSelected={(addr: string) => {
+          setAddressTransfer(addr);
+        }}
+        tokenTo={originalToToken}
+      />
     </div>
   );
 };

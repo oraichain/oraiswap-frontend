@@ -15,11 +15,11 @@ import {
   setCurrentAddressBookStep,
   setEditedWallet
 } from 'reducer/addressBook';
-import { AddressManagementStep } from 'reducer/type';
+import { AddressBookType, AddressManagementStep } from 'reducer/type';
 import AddressBookForm from '../AddressForm';
 import styles from './index.module.scss';
 
-const AddressBook = ({ tokenTo }: { tokenTo: TokenItemType }) => {
+const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelected: (addr: string) => void }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
   const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
@@ -34,7 +34,11 @@ const AddressBook = ({ tokenTo }: { tokenTo: TokenItemType }) => {
   const otherAddressNetwork = listAddresses.filter((a) => a.network.chainName !== tokenTo?.chainId);
 
   return (
-    <div className={styles.addressBookWrapper}>
+    <div
+      className={`${styles.addressBookWrapper} ${
+        currentAddressManagementStep !== AddressManagementStep.INIT ? styles.active : ''
+      }`}
+    >
       <div className={styles.overlay}></div>
       <div className={styles.addressBook} ref={ref}>
         {[AddressManagementStep.CREATE, AddressManagementStep.EDIT].includes(currentAddressManagementStep) ? (
@@ -64,7 +68,13 @@ const AddressBook = ({ tokenTo }: { tokenTo: TokenItemType }) => {
 
                   return (
                     <div className={styles.item} key={key}>
-                      <div className={styles.content}>
+                      <div
+                        className={styles.content}
+                        onClick={() => {
+                          item?.address && onSelected(item?.address);
+                          dispatch(setCurrentAddressBookStep(AddressManagementStep.INIT));
+                        }}
+                      >
                         {IconToken ? (
                           <div className={styles.tokenIcon}>
                             <IconToken />
@@ -103,7 +113,9 @@ const AddressBook = ({ tokenTo }: { tokenTo: TokenItemType }) => {
                   );
                 })}
 
-                {otherAddressNetwork?.length > 0 && <div className={styles.divider}></div>}
+                {addressesWithCurrentNetwork?.length > 0 && otherAddressNetwork?.length > 0 && (
+                  <div className={styles.divider}></div>
+                )}
 
                 {otherAddressNetwork?.length > 0 && (
                   <span className={styles.warning}>Sending assets to other networks may not be credited</span>
@@ -113,7 +125,7 @@ const AddressBook = ({ tokenTo }: { tokenTo: TokenItemType }) => {
                   const IconToken = getTokenIcon(item.token, theme);
 
                   return (
-                    <div key={`otherAddressNetwork-${key}`} className={`${styles.item} ${styles.blur}`}>
+                    <div key={`otherAddressNetwork-${key}`} className={`${styles.item} ${styles.inactive}`}>
                       <div className={styles.content}>
                         {IconToken ? (
                           <div className={styles.tokenIcon}>

@@ -10,7 +10,8 @@ import {
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   TokenItemType,
   getTokenOnOraichain,
-  getTokenOnSpecificChainId
+  getTokenOnSpecificChainId,
+  oraichainTokens
 } from '@oraichain/oraidex-common';
 import {
   isEvmNetworkNativeSwapSupported,
@@ -19,7 +20,8 @@ import {
   // swapFromTokens,
   // swapToTokens
 } from '@oraichain/oraidex-universal-swap';
-import { flattenTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
 import { generateError } from 'libs/utils';
 import { PairToken } from 'reducer/type';
@@ -252,7 +254,7 @@ export const calculateFinalPriceChange = (
 
 export const getTokenIcon = (token: TokenItemType, theme: string) => {
   let tokenIcon;
-  const tokenInfo = flattenTokens.find((e) => e.coinGeckoId === token?.coinGeckoId);
+  const tokenInfo = oraichainTokensWithIcon.find((e) => e.coinGeckoId === token?.coinGeckoId);
 
   if (tokenInfo && Object.keys(tokenInfo.IconLight || tokenInfo.Icon || {}).length > 0) {
     tokenIcon = theme === 'light' ? tokenInfo?.IconLight || tokenInfo?.Icon : tokenInfo?.Icon;

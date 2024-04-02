@@ -12,14 +12,16 @@ const InputCommon: FC<{
 
   extraButton?: ReactNode;
   showPreviewOnBlur?: boolean;
-}> = ({ title, onChange, value, suffix, extraButton, showPreviewOnBlur }) => {
+
+  isOnViewPort?: boolean;
+}> = ({ title, onChange, value, suffix, extraButton, showPreviewOnBlur, isOnViewPort = true }) => {
   const [active, setActive] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>();
   const ref = useRef();
 
   useOnClickOutside(ref, () => {
-    if (!value || showPreviewOnBlur) {
+    if ((!value || showPreviewOnBlur) && isOnViewPort) {
       setActive(false);
     }
     inputRef.current?.blur();
@@ -30,7 +32,7 @@ const InputCommon: FC<{
     if (!showPreviewOnBlur && value !== '') {
       setActive(!!value);
     }
-  }, [value]);
+  }, [value, showPreviewOnBlur]);
 
   return (
     <div

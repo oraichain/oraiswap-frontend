@@ -79,39 +79,40 @@ const SelectInput = <T extends object>({
         </div>
       )}
 
-      <div className={`${styles.overlay} ${active ? styles.showOverlay : ''}`}></div>
-
-      <div className={`${styles.listWrapper} ${active ? styles.active : ''}`} ref={ref}>
-        <span className={styles.title}>{listTitle || title}</span>
-        <div
-          className={styles.close}
-          onClick={() => {
-            setActive(false);
-          }}
-        >
-          <CloseIcon />
-        </div>
-        <div className={`${styles.warning} ${styles[theme]}`}>
-          <div>
-            <TooltipIcon width={20} height={20} />
+      <div className={`${styles.listWithOverlay}  ${active ? styles.active : ''}`}>
+        <div className={`${styles.overlay}`}></div>
+        <div className={styles.listWrapper} ref={ref}>
+          <span className={styles.title}>{listTitle || title}</span>
+          <div
+            className={styles.close}
+            onClick={() => {
+              setActive(false);
+            }}
+          >
+            <CloseIcon />
           </div>
-          <span>{warningText}</span>
-        </div>
-        <div className={styles.list}>
-          {listItem?.map((item, key) => {
-            return (
-              <div
-                className={`${styles.item} ${isEqual(value, item) ? styles.activeItem : ''}`}
-                key={key}
-                onClick={() => {
-                  onChange(item);
-                  setActive(false);
-                }}
-              >
-                {renderItem(item)}
-              </div>
-            );
-          })}
+          <div className={`${styles.warning} ${styles[theme]}`}>
+            <div>
+              <TooltipIcon width={20} height={20} />
+            </div>
+            <span>{warningText}</span>
+          </div>
+          <div className={styles.list}>
+            {listItem?.map((item, key) => {
+              return (
+                <div
+                  className={`${styles.item} ${isEqual(value, item) ? styles.activeItem : ''}`}
+                  key={key}
+                  onClick={() => {
+                    onChange(item);
+                    setActive(false);
+                  }}
+                >
+                  {renderItem(item)}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

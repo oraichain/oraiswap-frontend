@@ -11,6 +11,13 @@ $padding-default: 16px;
 
   bottom: 0;
 
+  transition: all 0.3s;
+  transform: translateY(100%);
+
+  &.active {
+    transform: translateY(0);
+  }
+
   .overlay {
     position: absolute;
     top: 0;
@@ -122,13 +129,16 @@ $padding-default: 16px;
       justify-content: space-between;
       gap: 8px;
 
-      &.blur {
+      &.inactive {
         .content {
           opacity: 0.5;
+
+          cursor: not-allowed;
         }
       }
 
       .content {
+        cursor: pointer;
         display: flex;
         flex: 1;
         align-items: center;
@@ -164,7 +174,6 @@ $padding-default: 16px;
         }
 
         .info {
-          cursor: pointer;
           display: flex;
           flex-direction: column;
           gap: 8px;
@@ -221,11 +230,12 @@ $padding-default: 16px;
 
     .divider {
       width: calc(100% - 32px);
-      height: 1px;
-
+      border-bottom: 1px solid;
       margin: auto;
+      border-color: var(--Colors-Neutral-Border-border-default, #232521);
 
-      background: var(--Colors-Neutral-Border-border-default, #232521);
+      // height: 1px;
+      // background: var(--Colors-Neutral-Border-border-default, #232521);
     }
 
     .warning {
