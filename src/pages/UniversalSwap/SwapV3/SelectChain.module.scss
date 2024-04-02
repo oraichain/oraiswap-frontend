@@ -1,0 +1,119 @@
+.selectChainWrap {
+  width: 100%;
+  height: 90%;
+  // border: 1px solid var(--Colors-Neutral-Border-border-bold, #dfe0de);
+  // background: var(--Colors-Neutral-Surface-bg, #fff);
+  border: 1px solid #494949;
+  background: #181a17;
+  // box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+  position: absolute;
+  top: 10%;
+  border-radius: 24px;
+
+  transition: all 0.3s;
+  transform: translateY(100%);
+  &.active {
+    transform: translateY(0);
+  }
+
+  .selectChain {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    // color: var(--Colors-Neutral-Text-title, #232521);
+    color: #efefef;
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    .selectChainHeader {
+      display: flex;
+      justify-content: space-between;
+
+      .selectChainHeaderTitle {
+        text-align: center;
+        font-variant-numeric: lining-nums tabular-nums;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 150%;
+      }
+
+      .selectChainHeaderClose {
+        cursor: pointer;
+      }
+    }
+
+    .selectChainSearch {
+    }
+
+    .selectChainNetwork {
+      .selectChainNetworkTitle {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 150%;
+      }
+      .selectChainNetworkList {
+        padding-top: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        .selectChainNetworkItem {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          padding: 8px;
+          height: 40px;
+          text-align: center;
+          // border-radius: var(--Dimension-Corner-Radius-button, 99px);
+          // background: var(--Colors-Neutral-Surface-bg-section-2, #31332E);
+          border-radius: 99px;
+          background: #31332e;
+          width: calc(100% / 7);
+          border: 0.5px solid inherit;
+          &:hover {
+            // border-radius: var(--Dimension-Corner-Radius-button, 99px);
+            // border: 1px solid var(--Colors-Neutral-Border-border-btn-default, #232521);
+            // background: var(--Colors-Neutral-Surface-bg-dropdown-hover, #EFEFEF);
+            border: 0.5px solid #efefef;
+          }
+        }
+      }
+    }
+
+    .selectChainList {
+      .selectChainTitle {
+        // color: var(--Colors-Neutral-Text-title, #EFEFEF);
+        color: #efefef;
+        font-size: 18px;
+        line-height: 150%;
+      }
+      .selectChainItems {
+        font-size: 16px;
+        font-weight: 500;
+        overflow-y: auto;
+        max-height: 550px;
+        // border-radius: 8px;
+        .selectChainItem {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          padding: 12px;
+          height: 65px;
+          cursor: pointer;
+          .selectChainItemLeft {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            .selectChainItemLogo {
+              width: 24px;
+              height: 24px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

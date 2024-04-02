@@ -25,6 +25,7 @@ import SwitchDarkImg from 'assets/icons/switch.svg';
 import SwitchLightImg from 'assets/icons/switch_light.svg';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
+import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
@@ -51,12 +52,13 @@ import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
+import { ReactComponent as IconTooltip } from 'assets/icons/icon_tooltip.svg';
 import {
   AMOUNT_BALANCE_ENTRIES,
   SwapDirection,
@@ -64,7 +66,7 @@ import {
   filterNonPoolEvmTokens,
   getSwapType
 } from '../helpers';
-import InputSwap from './InputSwapV3';
+import InputSwap from './InputSwapV4';
 import { useGetTransHistory, useSimulate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
@@ -78,6 +80,10 @@ import { AddressManagementStep } from 'reducer/type';
 import AddressBook from './components/AddressBook';
 import InputCommon from './components/InputCommon';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
+import { chainInfosWithIcon } from 'config/chainInfos';
+import SelectToken from './SelectToken';
+import SelectChain from './SelectChain';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -89,8 +95,16 @@ const SwapComponent: React.FC<{
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const { data: prices } = useCoinGeckoPrices();
+
+  const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
+  const [isSelectChainTo, setIsSelectChainTo] = useState(false);
+
+  const [selectChainFrom, setSelectChainFrom] = useState('Oraichain');
+  const [selectChainTo, setSelectChainTo] = useState('Oraichain');
+
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
+
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [coe, setCoe] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -421,6 +435,10 @@ const SwapComponent: React.FC<{
 
   const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
   const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
+  const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
+  const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
+  const FromIconNetwork = theme === 'light' ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
+  const ToIconNetwork = theme === 'light' ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
 
   useEffect(() => {
     (async () => {
@@ -458,20 +476,36 @@ const SwapComponent: React.FC<{
     walletByNetworks.tron
   ]);
 
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    setIsSelectFrom(false);
+    setIsSelectTo(false);
+    setIsSelectChainFrom(false);
+    setIsSelectChainTo(false);
+  });
+
+  const onChangePercentAmount = async (coeff) => {
+    if (coeff === coe) {
+      setCoe(0);
+      setSwapAmount([0, 0]);
+      return;
+    }
+    const finalAmount = calcMaxAmount({
+      maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals),
+      token: originalFromToken,
+      coeff,
+      gas: GAS_ESTIMATION_SWAP_DEFAULT
+    });
+    onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
+    setCoe(coeff);
+  };
+
   return (
     <div className={cx('swap-box-wrapper')}>
       <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
         <div className={cx('swap-box')}>
           <div className={cx('header')}>
             <div className={cx('title')}>Universal Swap & Bridge</div>
-            <TooltipIcon
-              placement="bottom-end"
-              visible={visible}
-              setVisible={setVisible}
-              content={
-                <SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} userSlippage={userSlippage} />
-              }
-            />
             <button className={cx('btn')} onClick={refreshBalances}>
               <RefreshImg />
             </button>
@@ -479,11 +513,16 @@ const SwapComponent: React.FC<{
           <div className={cx('from')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
+                type={'from'}
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
                 Icon={FromIcon}
-                setIsSelectFrom={setIsSelectFrom}
+                onChangePercentAmount={onChangePercentAmount}
+                setIsSelectChain={setIsSelectChainFrom}
+                setIsSelectToken={setIsSelectFrom}
+                selectChain={selectChainFrom}
                 token={originalFromToken}
+                IconNetwork={FromIconNetwork}
                 amount={fromAmountToken}
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
@@ -498,7 +537,7 @@ const SwapComponent: React.FC<{
                   </div>
                 </div>
               )}
-              <div className={cx('coeff')}>
+              {/* <div className={cx('coeff')}>
                 {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
                   <button
                     className={cx(`${coe === coeff && 'is-active'}`)}
@@ -523,7 +562,7 @@ const SwapComponent: React.FC<{
                     {text}
                   </button>
                 ))}
-              </div>
+              </div> */}
             </div>
           </div>
           <div className={cx('swap-icon')}>
@@ -548,14 +587,18 @@ const SwapComponent: React.FC<{
           <div className={cx('to')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
+                type={'to'}
                 balance={toTokenBalance}
                 originalToken={originalToToken}
                 disable={true}
                 Icon={ToIcon}
-                setIsSelectFrom={setIsSelectTo}
+                selectChain={selectChainTo}
+                setIsSelectChain={setIsSelectChainTo}
+                setIsSelectToken={setIsSelectTo}
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
+                IconNetwork={ToIconNetwork}
                 usdPrice={usdPriceShow}
               />
 
@@ -575,11 +618,12 @@ const SwapComponent: React.FC<{
           >
             <div className={cx('label')}>Recipient address:</div>
 
-            <div>
-              <span className={cx('address')}>{reduceString(addressTransfer, 10, 8)}</span>
+            <div className={cx('content')}>
+              <span className={cx('address')}>{reduceString(addressTransfer, 10, 10)}</span>
               <span className={cx('paste')}>PASTE</span>
             </div>
-          </div> */}
+          </div>
+          */}
 
           <div className={cx('recipient')}>
             <InputCommon
@@ -613,6 +657,30 @@ const SwapComponent: React.FC<{
                 </div>
               }
             />
+          </div>
+          <div className={cx('slippage')}>
+            <div className={cx('label')}>
+              <span>Slippage tolerance</span>
+              <IconTooltip width={20} height={20} />
+            </div>
+            <div className={cx('info')}>
+              <span className={cx('value')}>{userSlippage}%</span>
+              <span className={cx('icon')}>
+                <TooltipIcon
+                  placement="bottom-end"
+                  visible={visible}
+                  icon={<IconOirSettings />}
+                  setVisible={setVisible}
+                  content={
+                    <SlippageModal
+                      setVisible={setVisible}
+                      setUserSlippage={setUserSlippage}
+                      userSlippage={userSlippage}
+                    />
+                  }
+                />
+              </span>
+            </div>
           </div>
 
           {(() => {
@@ -701,8 +769,40 @@ const SwapComponent: React.FC<{
           </div>
         </div>
       </LoadingBox>
+      <div ref={ref}>
+        <SelectToken
+          setIsSelectToken={setIsSelectTo}
+          amounts={amounts}
+          prices={prices}
+          items={filteredToTokens}
+          isSelectToken={isSelectTo}
+        />
+        <SelectToken
+          setIsSelectToken={setIsSelectFrom}
+          amounts={amounts}
+          prices={prices}
+          items={filteredToTokens}
+          isSelectToken={isSelectFrom}
+        />
+        <SelectChain
+          setIsSelectToken={setIsSelectChainTo}
+          amounts={amounts}
+          selectChain={selectChainTo}
+          setSelectChain={setSelectChainTo}
+          prices={prices}
+          isSelectToken={isSelectChainTo}
+        />
+        <SelectChain
+          setIsSelectToken={setIsSelectChainFrom}
+          amounts={amounts}
+          prices={prices}
+          selectChain={selectChainFrom}
+          setSelectChain={setSelectChainFrom}
+          isSelectToken={isSelectChainFrom}
+        />
+      </div>
 
-      {isSelectTo && (
+      {/* {isSelectTo && (
         <SelectTokenModalV2
           close={() => setIsSelectTo(false)}
           prices={prices}
@@ -716,9 +816,8 @@ const SwapComponent: React.FC<{
           searchTokenName={searchTokenName}
           title="Receive Token List"
         />
-      )}
-
-      {isSelectFrom && (
+      )} */}
+      {/* {isSelectFrom && (
         <SelectTokenModalV2
           close={() => setIsSelectFrom(false)}
           prices={prices}
@@ -733,6 +832,7 @@ const SwapComponent: React.FC<{
           title="Pay Token List"
         />
       )}
+    )} */}
 
       {currentAddressManagementStep !== AddressManagementStep.INIT && <AddressBook tokenTo={originalToToken} />}
     </div>
