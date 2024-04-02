@@ -12,6 +12,7 @@ import CheckImg from 'assets/icons/check.svg';
 import { getTotalUsd } from 'libs/utils';
 import { tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { Themes } from 'context/theme-context';
 
 const cx = cn.bind(styles);
 interface InputSwapProps {
@@ -19,21 +20,18 @@ interface InputSwapProps {
   selectChain: string;
   setSelectChain?: any;
   setIsSelectToken?: React.Dispatch<React.SetStateAction<boolean>>;
-  networkFilter?: string;
   amounts: AmountDetails;
+  theme: Themes;
   prices: CoinGeckoPrices<string>;
-  items?: TokenItemType[] | CustomChainInfo[] | any;
 }
 
 export default function SelectChain({
-  networkFilter,
-  selectChain,
   isSelectToken,
   setIsSelectToken,
   setSelectChain,
   amounts,
   prices,
-  items
+  theme
 }: InputSwapProps) {
   return (
     <>
@@ -61,12 +59,11 @@ export default function SelectChain({
                 .filter((net) => !['kawaii_6886-1'].includes(net.chainId))
                 .map((item) => {
                   const networkIcon = chainIcons.find((chainIcon) => chainIcon.chainId === item.chainId);
-                  const network = item;
-                  const key = network.chainId.toString();
-                  const title = network.chainName;
+                  const key = item.chainId.toString();
+                  const title = item.chainName;
                   const subAmounts = Object.fromEntries(
                     Object.entries(amounts).filter(
-                      ([denom]) => tokenMap[denom] && tokenMap[denom].chainId === network.chainId
+                      ([denom]) => tokenMap[denom] && tokenMap[denom].chainId === item.chainId
                     )
                   );
                   const totalUsd = getTotalUsd(subAmounts, prices);
@@ -81,7 +78,11 @@ export default function SelectChain({
                       }}
                     >
                       <div className={styles.selectChainItemLeft}>
-                        <networkIcon.Icon className={styles.selectChainItemLogo} />
+                        {theme === 'light' ? (
+                          <networkIcon.IconLight className={styles.selectChainItemLogo} />
+                        ) : (
+                          <networkIcon.Icon className={styles.selectChainItemLogo} />
+                        )}
                         <div className={styles.selectChainItemTitle}>
                           <div>{title}</div>
                         </div>

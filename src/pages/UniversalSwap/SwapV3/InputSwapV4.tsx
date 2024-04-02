@@ -6,6 +6,7 @@ import NumberFormat from 'react-number-format';
 import { TokenInfo } from 'types/token';
 import styles from './InputSwapV4.module.scss';
 import { chainInfosWithIcon } from 'config/chainInfos';
+import { Themes } from 'context/theme-context';
 
 const cx = cn.bind(styles);
 
@@ -31,6 +32,7 @@ interface InputSwapProps {
   type?: string;
   selectChain: string;
   onChangePercentAmount?: (coff: number) => void;
+  theme: Themes;
 }
 
 export default function InputSwapV4({
@@ -49,16 +51,24 @@ export default function InputSwapV4({
   usdPrice,
   type,
   selectChain,
-  onChangePercentAmount
+  onChangePercentAmount,
+  theme
 }: InputSwapProps) {
   const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
+  const isLightMode = theme === 'light';
   return (
     <>
       <div className={cx('input-swap-balance')}>
         <div className={cx('select-chain')}>
           <span>{type} </span>
           <div className={cx('left')} onClick={() => setIsSelectChain(true)}>
-            <div className={cx('icon')}>{IconNetwork && <chainInfo.Icon className={cx('logo')} />}</div>
+            <div className={cx('icon')}>
+              {IconNetwork && isLightMode ? (
+                <chainInfo.IconLight className={cx('logo')} />
+              ) : (
+                <chainInfo.Icon className={cx('logo')} />
+              )}
+            </div>
             <div className={cx('section')}>
               <div className={cx('name')}>{chainInfo.chainName}</div>
             </div>

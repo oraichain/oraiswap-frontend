@@ -105,6 +105,9 @@ const SwapComponent: React.FC<{
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
 
+  const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
+  const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
+
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [coe, setCoe] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -160,8 +163,8 @@ const SwapComponent: React.FC<{
   };
 
   // get token on oraichain to simulate swap amount.
-  const originalFromToken = tokenMap[fromTokenDenom];
-  const originalToToken = tokenMap[toTokenDenom];
+  const originalFromToken = tokenMap[fromTokenDenomSwap];
+  const originalToToken = tokenMap[toTokenDenomSwap];
   const isEvmSwap = isEvmSwappable({
     fromChainId: originalFromToken.chainId,
     toChainId: originalToToken.chainId,
@@ -171,11 +174,11 @@ const SwapComponent: React.FC<{
 
   // if evm swappable then no need to get token on oraichain because we can swap on evm. Otherwise, get token on oraichain. If cannot find => fallback to original token
   const fromToken = isEvmSwap
-    ? tokenMap[fromTokenDenom]
-    : getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId) ?? tokenMap[fromTokenDenom];
+    ? tokenMap[fromTokenDenomSwap]
+    : getTokenOnOraichain(tokenMap[fromTokenDenomSwap].coinGeckoId) ?? tokenMap[fromTokenDenomSwap];
   const toToken = isEvmSwap
-    ? tokenMap[toTokenDenom]
-    : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
+    ? tokenMap[toTokenDenomSwap]
+    : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
 
   const remoteTokenDenomFrom = originalFromToken.contractAddress
     ? originalFromToken.prefix + originalFromToken.contractAddress
@@ -216,7 +219,7 @@ const SwapComponent: React.FC<{
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-  }, [fromTokenDenom, toTokenDenom]);
+  }, [toTokenDenomSwap, fromTokenDenomSwap]);
 
   const { fee } = useSwapFee({
     fromToken: originalFromToken,
@@ -484,7 +487,7 @@ const SwapComponent: React.FC<{
     setIsSelectChainTo(false);
   });
 
-  const onChangePercentAmount = async (coeff) => {
+  const onChangePercentAmount = (coeff) => {
     if (coeff === coe) {
       setCoe(0);
       setSwapAmount([0, 0]);
@@ -498,6 +501,18 @@ const SwapComponent: React.FC<{
     });
     onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
     setCoe(coeff);
+  };
+
+  const handleChangeToken = (token, type) => {
+    if (type === 'from') {
+      setSelectChainFrom(token.chainId);
+      setIsSelectFrom(false);
+      setFromTokenDenom(token.denom);
+      return;
+    }
+    setSelectChainTo(token.chainId);
+    setIsSelectTo(false);
+    setToTokenDenom(token.denom);
   };
 
   return (
@@ -517,6 +532,7 @@ const SwapComponent: React.FC<{
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
                 Icon={FromIcon}
+                theme={theme}
                 onChangePercentAmount={onChangePercentAmount}
                 setIsSelectChain={setIsSelectChainFrom}
                 setIsSelectToken={setIsSelectFrom}
@@ -537,32 +553,6 @@ const SwapComponent: React.FC<{
                   </div>
                 </div>
               )}
-              {/* <div className={cx('coeff')}>
-                {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
-                  <button
-                    className={cx(`${coe === coeff && 'is-active'}`)}
-                    key={coeff}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (coeff === coe) {
-                        setCoe(0);
-                        setSwapAmount([0, 0]);
-                        return;
-                      }
-                      const finalAmount = calcMaxAmount({
-                        maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals),
-                        token: originalFromToken,
-                        coeff,
-                        gas: GAS_ESTIMATION_SWAP_DEFAULT
-                      });
-                      onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
-                      setCoe(coeff);
-                    }}
-                  >
-                    {text}
-                  </button>
-                ))}
-              </div> */}
             </div>
           </div>
           <div className={cx('swap-icon')}>
@@ -577,7 +567,7 @@ const SwapComponent: React.FC<{
                     !isEvmNetworkNativeSwapSupported(toToken.chainId)
                   )
                     return;
-                  setSwapTokens([toTokenDenom, fromTokenDenom]);
+                  setSwapTokens([toTokenDenomSwap, fromTokenDenomSwap]);
                   setSwapAmount([toAmountToken, fromAmountToken]);
                 }}
                 alt="ant"
@@ -589,6 +579,7 @@ const SwapComponent: React.FC<{
               <InputSwap
                 type={'to'}
                 balance={toTokenBalance}
+                theme={theme}
                 originalToken={originalToToken}
                 disable={true}
                 Icon={ToIcon}
@@ -775,19 +766,24 @@ const SwapComponent: React.FC<{
           setIsSelectToken={setIsSelectTo}
           amounts={amounts}
           prices={prices}
+          handleChangeToken={(token) => handleChangeToken(token, 'to')}
           items={filteredToTokens}
+          theme={theme}
           isSelectToken={isSelectTo}
         />
         <SelectToken
           setIsSelectToken={setIsSelectFrom}
           amounts={amounts}
           prices={prices}
+          theme={theme}
           items={filteredToTokens}
+          handleChangeToken={(token) => handleChangeToken(token, 'from')}
           isSelectToken={isSelectFrom}
         />
         <SelectChain
           setIsSelectToken={setIsSelectChainTo}
           amounts={amounts}
+          theme={theme}
           selectChain={selectChainTo}
           setSelectChain={setSelectChainTo}
           prices={prices}
@@ -796,6 +792,7 @@ const SwapComponent: React.FC<{
         <SelectChain
           setIsSelectToken={setIsSelectChainFrom}
           amounts={amounts}
+          theme={theme}
           prices={prices}
           selectChain={selectChainFrom}
           setSelectChain={setSelectChainFrom}
