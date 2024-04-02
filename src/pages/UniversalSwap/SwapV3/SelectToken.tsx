@@ -76,7 +76,10 @@ export default function SelectToken({
           <div className={styles.selectTokenNetwork}>
             <div className={styles.selectTokenNetworkTitle}>Network</div>
             <div className={styles.selectTokenNetworkList}>
-              <div className={styles.selectTokenNetworkItem} onClick={() => setTextChain('')}>
+              <div
+                className={cx('selectTokenNetworkItem', textChain === '' ? 'active' : '')}
+                onClick={() => setTextChain('')}
+              >
                 All
               </div>
               {chainIcons
@@ -84,7 +87,11 @@ export default function SelectToken({
                 .map((e, i) => {
                   return (
                     i < 5 && (
-                      <div key={i} className={styles.selectTokenNetworkItem} onClick={() => setTextChain(e.chainId)}>
+                      <div
+                        key={i}
+                        className={cx('selectTokenNetworkItem', textChain === e.chainId ? 'active' : '')}
+                        onClick={() => setTextChain(e.chainId)}
+                      >
                         {<e.Icon width={18} height={18} />}
                       </div>
                     )
@@ -140,13 +147,13 @@ export default function SelectToken({
                           </div>
                         </div>
                         <div>
-                          <div>{token.name}</div>
-                          <div>{token.org}</div>
+                          <div className={styles.selectTokenItemTokenName}>{token.name}</div>
+                          <div className={styles.selectTokenItemTokenOrg}>{token.org}</div>
                         </div>
                       </div>
                       <div className={styles.selectTokenItemRight}>
-                        <div>{balance} </div>
-                        <div>{formatDisplayUsdt(usd)}</div>
+                        <div className={styles.selectTokenItemTokenBalance}>{balance} </div>
+                        <div className={styles.selectTokenItemTokenUsd}>{formatDisplayUsdt(usd)}</div>
                       </div>
                     </div>
                   );

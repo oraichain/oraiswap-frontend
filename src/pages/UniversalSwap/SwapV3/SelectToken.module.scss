@@ -20,8 +20,8 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    max-height: 550px;
+    // overflow-y: auto;
+    // max-height: 550px;
     gap: 24px;
     width: 100%;
     // color: var(--Colors-Neutral-Text-title, #232521);
@@ -76,6 +76,9 @@
           background: #31332e;
           width: calc(100% / 7);
           border: 0.5px solid inherit;
+          &.active {
+            border: 0.5px solid #efefef;
+          }
           &:hover {
             //             border-radius: var(--Dimension-Corner-Radius-button, 99px);
             // border: 1px solid var(--Colors-Neutral-Border-border-btn-default, #232521);
@@ -88,8 +91,8 @@
 
     .selectTokenAll {
       .selectTokenList {
-        // overflow-y: auto;
-        // height: 290px;
+        overflow-y: auto;
+        height: 290px;
         .selectTokenTitle {
           // color: var(--Colors-Neutral-Text-title, #EFEFEF);
           color: #efefef;
@@ -103,6 +106,7 @@
           padding: 12px;
           cursor: pointer;
           &:hover {
+            border-radius: 8px;
             background-color: gray;
           }
           .selectTokenItemLeft {
@@ -124,9 +128,24 @@
                 border-radius: 50%;
               }
             }
+            .selectTokenItemTokenName {
+              color: #f7f7f7;
+            }
+
+            .selectTokenItemTokenOrg {
+              color: #979995;
+            }
           }
           .selectTokenItemRight {
             text-align: right;
+            .selectTokenItemTokenBalance {
+              // color: var(--Colors-Neutral-Text-text-token-name, #181a17);
+              color: #f7f7f7;
+              font-weight: 500;
+            }
+            .selectTokenItemTokenUsd {
+              color: #979995;
+            }
           }
         }
       }
