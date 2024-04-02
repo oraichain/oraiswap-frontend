@@ -11,6 +11,7 @@ import { getSubAmountDetails } from 'rest/api';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import React from 'react';
+import { Themes } from 'context/theme-context';
 
 const cx = cn.bind(styles);
 interface InputSwapProps {
@@ -19,7 +20,8 @@ interface InputSwapProps {
   items?: TokenItemType[] | CustomChainInfo[] | any;
   amounts: AmountDetails;
   prices: CoinGeckoPrices<string>;
-  handleChangeToken?: any;
+  handleChangeToken?: (token: TokenItemType) => void;
+  theme: Themes;
 }
 
 interface GetIconInterface {
@@ -32,14 +34,21 @@ interface GetIconInterface {
 }
 
 const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, height }: GetIconInterface) => {
-  let tokenOrNetworkIcon;
   if (type === 'token') {
-    tokenOrNetworkIcon = flattenTokensWithIcon.find((tokenWithIcon) => tokenWithIcon.coinGeckoId === coinGeckoId);
+    const tokenIcon = flattenTokensWithIcon.find((tokenWithIcon) => tokenWithIcon.coinGeckoId === coinGeckoId);
+    return isLightTheme ? (
+      <tokenIcon.IconLight className={cx('logo')} width={width} height={height} />
+    ) : (
+      <tokenIcon.Icon className={cx('logo')} width={width} height={height} />
+    );
   } else {
-    tokenOrNetworkIcon = chainIcons.find((chain) => chain.chainId === chainId);
+    const networkIcon = chainIcons.find((chain) => chain.chainId === chainId);
+    return isLightTheme ? (
+      <networkIcon.IconLight className={cx('logo')} width={width} height={height} />
+    ) : (
+      <networkIcon.Icon className={cx('logo')} width={width} height={height} />
+    );
   }
-  if (isLightTheme) return <tokenOrNetworkIcon.IconLight className={cx('logo')} width={width} height={height} />;
-  return <tokenOrNetworkIcon.Icon className={cx('logo')} width={width} height={height} />;
 };
 
 export default function SelectToken({
@@ -48,7 +57,8 @@ export default function SelectToken({
   items,
   amounts,
   prices,
-  handleChangeToken
+  handleChangeToken,
+  theme
 }: InputSwapProps) {
   const [textChain, setTextChain] = React.useState('');
   const [textSearch, setTextSearch] = React.useState('');
@@ -108,7 +118,7 @@ export default function SelectToken({
                 .filter((item) => (textSearch ? [textSearch.toLowerCase()].includes(item.org.toLowerCase()) : item))
                 .map((token) => {
                   const tokenIcon = getIcon({
-                    isLightTheme: false,
+                    isLightTheme: theme === 'light',
                     type: 'token',
                     coinGeckoId: token.coinGeckoId,
                     width: 30,
@@ -116,7 +126,7 @@ export default function SelectToken({
                   });
 
                   const networkIcon = getIcon({
-                    isLightTheme: false,
+                    isLightTheme: theme === 'light',
                     type: 'network',
                     chainId: token.chainId,
                     width: 16,

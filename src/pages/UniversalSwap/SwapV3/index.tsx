@@ -524,6 +524,7 @@ const SwapComponent: React.FC<{
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
                 Icon={FromIcon}
+                theme={theme}
                 onChangePercentAmount={onChangePercentAmount}
                 setIsSelectChain={setIsSelectChainFrom}
                 setIsSelectToken={setIsSelectFrom}
@@ -570,6 +571,7 @@ const SwapComponent: React.FC<{
               <InputSwap
                 type={'to'}
                 balance={toTokenBalance}
+                theme={theme}
                 originalToken={originalToToken}
                 disable={true}
                 Icon={ToIcon}
@@ -717,12 +719,14 @@ const SwapComponent: React.FC<{
           prices={prices}
           handleChangeToken={(token) => handleChangeToken(token, 'to')}
           items={filteredToTokens}
+          theme={theme}
           isSelectToken={isSelectTo}
         />
         <SelectToken
           setIsSelectToken={setIsSelectFrom}
           amounts={amounts}
           prices={prices}
+          theme={theme}
           items={filteredToTokens}
           handleChangeToken={(token) => handleChangeToken(token, 'from')}
           isSelectToken={isSelectFrom}
@@ -730,6 +734,7 @@ const SwapComponent: React.FC<{
         <SelectChain
           setIsSelectToken={setIsSelectChainTo}
           amounts={amounts}
+          theme={theme}
           selectChain={selectChainTo}
           setSelectChain={setSelectChainTo}
           prices={prices}
@@ -738,6 +743,7 @@ const SwapComponent: React.FC<{
         <SelectChain
           setIsSelectToken={setIsSelectChainFrom}
           amounts={amounts}
+          theme={theme}
           prices={prices}
           selectChain={selectChainFrom}
           setSelectChain={setSelectChainFrom}

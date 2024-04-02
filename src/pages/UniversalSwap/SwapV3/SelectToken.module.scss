@@ -107,7 +107,7 @@
           cursor: pointer;
           &:hover {
             border-radius: 8px;
-            background-color: gray;
+            border: 1px solid gray;
           }
           .selectTokenItemLeft {
             display: flex;
