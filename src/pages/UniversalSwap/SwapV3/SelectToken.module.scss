@@ -11,6 +11,11 @@
   top: 20%;
   border-radius: 24px;
 
+  transition: all 0.3s;
+  transform: translateY(100%);
+  &.active {
+    transform: translateY(0);
+  }
   .selectToken {
     padding: 16px;
     display: flex;

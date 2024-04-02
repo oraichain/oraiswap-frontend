@@ -94,6 +94,9 @@ const SwapComponent: React.FC<{
   const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
   const [isSelectChainTo, setIsSelectChainTo] = useState(false);
 
+  const [selectChainFrom, setSelectChainFrom] = useState('Oraichain');
+  const [selectChainTo, setSelectChainTo] = useState('Oraichain');
+
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
 
@@ -492,6 +495,7 @@ const SwapComponent: React.FC<{
                 Icon={FromIcon}
                 setIsSelectChain={setIsSelectChainFrom}
                 setIsSelectToken={setIsSelectFrom}
+                selectChain={selectChainFrom}
                 token={originalFromToken}
                 IconNetwork={FromIconNetwork}
                 amount={fromAmountToken}
@@ -563,6 +567,7 @@ const SwapComponent: React.FC<{
                 originalToken={originalToToken}
                 disable={true}
                 Icon={ToIcon}
+                selectChain={selectChainTo}
                 setIsSelectChain={setIsSelectChainTo}
                 setIsSelectToken={setIsSelectTo}
                 token={originalToToken}
@@ -699,15 +704,26 @@ const SwapComponent: React.FC<{
           </div>
         </div>
       </LoadingBox>
-
       <div ref={ref}>
-        {isSelectTo && <SelectToken setIsSelectToken={setIsSelectTo} isSelectToken={isSelectTo} />}
-        {isSelectFrom && <SelectToken setIsSelectToken={setIsSelectFrom} isSelectToken={isSelectFrom} />}
-
-        {isSelectChainTo && <SelectChain setIsSelectToken={setIsSelectChainTo} isSelectToken={isSelectChainTo} />}
-        {isSelectChainFrom && <SelectChain setIsSelectToken={setIsSelectChainFrom} isSelectToken={isSelectChainFrom} />}
+        <SelectToken setIsSelectToken={setIsSelectTo} isSelectToken={isSelectTo} />
+        <SelectToken setIsSelectToken={setIsSelectFrom} isSelectToken={isSelectFrom} />
+        <SelectChain
+          setIsSelectToken={setIsSelectChainTo}
+          amounts={amounts}
+          selectChain={selectChainTo}
+          setSelectChain={setSelectChainTo}
+          prices={prices}
+          isSelectToken={isSelectChainTo}
+        />
+        <SelectChain
+          setIsSelectToken={setIsSelectChainFrom}
+          amounts={amounts}
+          prices={prices}
+          selectChain={selectChainFrom}
+          setSelectChain={setSelectChainFrom}
+          isSelectToken={isSelectChainFrom}
+        />
       </div>
-
       {/* {isSelectTo && (
         <SelectTokenModalV2
           close={() => setIsSelectTo(false)}
@@ -723,7 +739,6 @@ const SwapComponent: React.FC<{
           title="Receive Token List"
         />
       )} */}
-
       {/* {isSelectFrom && (
         <SelectTokenModalV2
           close={() => setIsSelectFrom(false)}

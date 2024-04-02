@@ -16,7 +16,7 @@ interface InputSwapProps {
 export default function SelectToken({ setIsSelectToken, isSelectToken }: InputSwapProps) {
   return (
     <>
-      <div className={cx('selectTokenWrap')}>
+      <div className={cx('selectTokenWrap', isSelectToken ? 'active' : '')}>
         <div className={styles.selectToken}>
           <div className={styles.selectTokenHeader}>
             <div />

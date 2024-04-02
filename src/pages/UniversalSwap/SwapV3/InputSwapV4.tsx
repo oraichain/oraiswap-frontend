@@ -23,6 +23,7 @@ interface InputSwapProps {
   setCoe?: React.Dispatch<React.SetStateAction<number>>;
   usdPrice: string;
   type?: string;
+  selectChain: string;
 }
 
 export default function InputSwapV4({
@@ -39,7 +40,8 @@ export default function InputSwapV4({
   originalToken,
   setCoe,
   usdPrice,
-  type
+  type,
+  selectChain
 }: InputSwapProps) {
   return (
     <>
