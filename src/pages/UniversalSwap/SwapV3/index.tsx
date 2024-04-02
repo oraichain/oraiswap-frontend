@@ -23,6 +23,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import SwitchDarkImg from 'assets/icons/switch.svg';
 import SwitchLightImg from 'assets/icons/switch_light.svg';
+import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
@@ -72,6 +73,11 @@ import { useFillToken } from './hooks/useFillToken';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { isMobile } from '@walletconnect/browser-utils';
 import { reduceString } from 'libs/utils';
+import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
+import { AddressManagementStep } from 'reducer/type';
+import AddressBook from './components/AddressBook';
+import InputCommon from './components/InputCommon';
+import { useCopyClipboard } from 'hooks/useCopyClipboard';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -104,6 +110,9 @@ const SwapComponent: React.FC<{
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [addressTransfer, setAddressTransfer] = useState('');
+  const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
+  const { handleReadClipboard } = useCopyClipboard();
+
   useGetFeeConfig();
 
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
@@ -558,12 +567,52 @@ const SwapComponent: React.FC<{
             </div>
           </div>
 
-          <div className={cx('recipient')}>
+          {/* <div
+            className={cx('recipient')}
+            onClick={() => {
+              dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+            }}
+          >
             <div className={cx('label')}>Recipient address:</div>
+
             <div>
               <span className={cx('address')}>{reduceString(addressTransfer, 10, 8)}</span>
-              {/* <span className={cx('paste')}>PASTE</span> */}
+              <span className={cx('paste')}>PASTE</span>
             </div>
+          </div> */}
+
+          <div className={cx('recipient')}>
+            <InputCommon
+              title="Recipient address"
+              value={addressTransfer}
+              onChange={(val) => setAddressTransfer(val)}
+              showPreviewOnBlur
+              suffix={
+                <div
+                  onClick={() => {
+                    handleReadClipboard((text) => setAddressTransfer(text));
+                  }}
+                >
+                  PASTE
+                </div>
+              }
+              extraButton={
+                <div className={cx('extraBtn')}>
+                  <BookIcon
+                    onClick={() => {
+                      dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                    }}
+                  />
+                  <span
+                    onClick={() => {
+                      dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                    }}
+                  >
+                    Address Book
+                  </span>
+                </div>
+              }
+            />
           </div>
 
           {(() => {
@@ -684,6 +733,8 @@ const SwapComponent: React.FC<{
           title="Pay Token List"
         />
       )}
+
+      {currentAddressManagementStep !== AddressManagementStep.INIT && <AddressBook tokenTo={originalToToken} />}
     </div>
   );
 };

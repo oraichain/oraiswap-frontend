@@ -24,6 +24,8 @@ import Menu from './Menu';
 import './index.scss';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectAddressBookList, setAddressBookList } from 'reducer/addressBook';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -39,6 +41,10 @@ const App = () => {
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const mobileMode = isMobile();
   const ethOwallet = window.eth_owallet;
+
+  const currentAddressBook = useSelector(selectAddressBookList);
+  const dispatch = useDispatch();
+
   // useTronEventListener();
 
   // TODO: polyfill evm, tron, need refactor
@@ -105,12 +111,15 @@ const App = () => {
   // clear persist storage when update version
   useEffect(() => {
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
+    const prevAddressBook = currentAddressBook;
+
     const clearPersistStorage = () => {
       persistor.pause();
       persistor.flush().then(() => {
         return persistor.purge();
       });
       setPersistVersion(PERSIST_VER);
+      dispatch(setAddressBookList(prevAddressBook));
     };
 
     if (isClearPersistStorage) clearPersistStorage();
