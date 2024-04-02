@@ -20,6 +20,8 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    max-height: 550px;
     gap: 24px;
     width: 100%;
     // color: var(--Colors-Neutral-Text-title, #232521);
@@ -44,6 +46,9 @@
     }
 
     .selectTokenSearch {
+      .selectTokenSearchInput {
+        width: 100%;
+      }
     }
 
     .selectTokenNetwork {
@@ -82,42 +87,47 @@
     }
 
     .selectTokenAll {
-      .selectTokenTitle {
-        // color: var(--Colors-Neutral-Text-title, #EFEFEF);
-        color: #efefef;
-        font-size: 14px;
-        line-height: 150%;
-      }
-
-      .selectTokenItem {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px;
-        cursor: pointer;
-        &:hover {
-          background-color: gray;
+      .selectTokenList {
+        // overflow-y: auto;
+        // height: 290px;
+        .selectTokenTitle {
+          // color: var(--Colors-Neutral-Text-title, #EFEFEF);
+          color: #efefef;
+          font-size: 14px;
+          line-height: 150%;
         }
-        .selectTokenItemLeft {
+
+        .selectTokenItem {
           display: flex;
-          align-items: center;
-          gap: 10px;
-          .selectTokenItemLeftImg {
+          justify-content: space-between;
+          padding: 12px;
+          cursor: pointer;
+          &:hover {
+            background-color: gray;
+          }
+          .selectTokenItemLeft {
             display: flex;
             align-items: center;
-            position: relative;
-            .selectTokenItemLeftImgChain {
-              width: 14px;
-              height: 14px;
-              border-radius: 2px;
-              position: absolute;
-              top: 60%;
-              left: 15px;
-              z-index: 1;
+            gap: 10px;
+            .selectTokenItemLeftImg {
+              display: flex;
+              align-items: center;
+              position: relative;
+              .selectTokenItemLeftImgChain {
+                border-radius: 2px;
+                position: absolute;
+                top: 60%;
+                left: 15px;
+                z-index: 1;
+                width: 16.5px;
+                height: 16.5px;
+                border-radius: 50%;
+              }
             }
           }
-        }
-        .selectTokenItemRight {
-          text-align: right;
+          .selectTokenItemRight {
+            text-align: right;
+          }
         }
       }
     }

@@ -476,6 +476,22 @@ const SwapComponent: React.FC<{
     setIsSelectChainTo(false);
   });
 
+  const onChangePercentAmount = async (coeff) => {
+    if (coeff === coe) {
+      setCoe(0);
+      setSwapAmount([0, 0]);
+      return;
+    }
+    const finalAmount = calcMaxAmount({
+      maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals),
+      token: originalFromToken,
+      coeff,
+      gas: GAS_ESTIMATION_SWAP_DEFAULT
+    });
+    onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
+    setCoe(coeff);
+  };
+
   return (
     <div className={cx('swap-box-wrapper')}>
       <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
@@ -493,6 +509,7 @@ const SwapComponent: React.FC<{
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
                 Icon={FromIcon}
+                onChangePercentAmount={onChangePercentAmount}
                 setIsSelectChain={setIsSelectChainFrom}
                 setIsSelectToken={setIsSelectFrom}
                 selectChain={selectChainFrom}
@@ -705,8 +722,20 @@ const SwapComponent: React.FC<{
         </div>
       </LoadingBox>
       <div ref={ref}>
-        <SelectToken setIsSelectToken={setIsSelectTo} isSelectToken={isSelectTo} />
-        <SelectToken setIsSelectToken={setIsSelectFrom} isSelectToken={isSelectFrom} />
+        <SelectToken
+          setIsSelectToken={setIsSelectTo}
+          amounts={amounts}
+          prices={prices}
+          items={filteredToTokens}
+          isSelectToken={isSelectTo}
+        />
+        <SelectToken
+          setIsSelectToken={setIsSelectFrom}
+          amounts={amounts}
+          prices={prices}
+          items={filteredToTokens}
+          isSelectToken={isSelectFrom}
+        />
         <SelectChain
           setIsSelectToken={setIsSelectChainTo}
           amounts={amounts}

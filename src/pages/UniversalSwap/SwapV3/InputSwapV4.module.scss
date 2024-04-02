@@ -120,10 +120,15 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    .percent {
-      border-radius: 99px;
-      background: #aee67f;
-      padding: 2px 8px;
+    .coeff {
+      display: flex;
+      gap: 6px;
+      .percent {
+        border-radius: 99px;
+        background: #aee67f;
+        color: black;
+        padding: 2px 8px;
+      }
     }
   }
 }

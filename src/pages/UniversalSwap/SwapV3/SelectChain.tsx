@@ -1,4 +1,4 @@
-import { CoinIcon, TokenItemType } from '@oraichain/oraidex-common';
+import { CoinIcon, TokenItemType, CustomChainInfo } from '@oraichain/oraidex-common';
 import { TokenInfo } from 'types/token';
 import styles from './SelectChain.module.scss';
 import SearchInput from 'components/SearchInput';
@@ -22,6 +22,7 @@ interface InputSwapProps {
   networkFilter?: string;
   amounts: AmountDetails;
   prices: CoinGeckoPrices<string>;
+  items?: TokenItemType[] | CustomChainInfo[] | any;
 }
 
 export default function SelectChain({
@@ -31,7 +32,8 @@ export default function SelectChain({
   setIsSelectToken,
   setSelectChain,
   amounts,
-  prices
+  prices,
+  items
 }: InputSwapProps) {
   return (
     <>
@@ -75,6 +77,7 @@ export default function SelectChain({
                       className={styles.selectChainItem}
                       onClick={() => {
                         setSelectChain(item.chainId);
+                        setIsSelectToken(false);
                       }}
                     >
                       <div className={styles.selectChainItemLeft}>

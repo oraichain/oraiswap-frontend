@@ -5,8 +5,14 @@ import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { TokenInfo } from 'types/token';
 import styles from './InputSwapV4.module.scss';
+import { chainInfosWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
+
+export const AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP: [number, string, string][] = [
+  [0.5, '50%', 'half'],
+  [1, '100%', 'max']
+];
 
 interface InputSwapProps {
   Icon: CoinIcon;
@@ -24,6 +30,7 @@ interface InputSwapProps {
   usdPrice: string;
   type?: string;
   selectChain: string;
+  onChangePercentAmount?: (coff: number) => void;
 }
 
 export default function InputSwapV4({
@@ -41,17 +48,19 @@ export default function InputSwapV4({
   setCoe,
   usdPrice,
   type,
-  selectChain
+  selectChain,
+  onChangePercentAmount
 }: InputSwapProps) {
+  const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
   return (
     <>
       <div className={cx('input-swap-balance')}>
         <div className={cx('select-chain')}>
           <span>{type} </span>
           <div className={cx('left')} onClick={() => setIsSelectChain(true)}>
-            <div className={cx('icon')}>{IconNetwork && <IconNetwork className={cx('logo')} />}</div>
+            <div className={cx('icon')}>{IconNetwork && <chainInfo.Icon className={cx('logo')} />}</div>
             <div className={cx('section')}>
-              <div className={cx('name')}>{token?.org}</div>
+              <div className={cx('name')}>{chainInfo.chainName}</div>
             </div>
             <img src={ArrowImg} alt="arrow" />
           </div>
@@ -67,8 +76,22 @@ export default function InputSwapV4({
             decimalScale={6}
           />
 
-          {/* {type === 'from' && <div className={cx('percent')}>50%</div>}
-          {type === 'from' && <div className={cx('percent')}>100%</div>} */}
+          {type === 'from' && (
+            <div className={cx('coeff')}>
+              {AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP.map(([coeff, text]) => (
+                <button
+                  key={coeff}
+                  className={cx('percent')}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onChangePercentAmount(coeff);
+                  }}
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className={cx('input-swap-box')}>
