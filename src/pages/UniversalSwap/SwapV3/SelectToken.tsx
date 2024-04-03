@@ -72,6 +72,7 @@ export default function SelectToken({
   return (
     <>
       <div className={cx('selectTokenWrap', isSelectToken ? 'active' : '')}>
+        <div className={styles.selectTokenOverlay} onClick={() => setIsSelectToken(false)}></div>
         <div className={styles.selectToken}>
           <div className={styles.selectTokenHeader}>
             <div />
@@ -128,8 +129,11 @@ export default function SelectToken({
             <div className={styles.selectTokenTitle}>Select token</div>
             <div className={styles.selectTokenList}>
               {items
-                .filter((item) => (textChain ? item.chainId === textChain : item))
-                .filter((item) => (textSearch ? [textSearch.toLowerCase()].includes(item.org.toLowerCase()) : item))
+                .filter(
+                  (item) =>
+                    (textChain ? item.chainId === textChain : true) &&
+                    (textSearch ? item.org.toLowerCase().includes(textSearch.toLowerCase()) : true)
+                )
                 .map((token) => {
                   const tokenIcon = getIcon({
                     isLightTheme,

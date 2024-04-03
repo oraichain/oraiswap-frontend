@@ -21,8 +21,8 @@ import {
   isSupportedNoPoolSwapEvm
 } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
-import SwitchDarkImg from 'assets/icons/switch.svg';
-import SwitchLightImg from 'assets/icons/switch_light.svg';
+import SwitchDarkImg from 'assets/icons/switch-new.svg';
+import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
@@ -30,7 +30,7 @@ import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { tokenMap } from 'config/bridgeTokens';
+import { flattenTokens, tokenMap } from 'config/bridgeTokens';
 import { ethers } from 'ethers';
 import {
   floatToPercent,
@@ -220,6 +220,30 @@ const SwapComponent: React.FC<{
     );
     setFilteredFromTokens(filteredFromTokens);
   }, [toTokenDenomSwap, fromTokenDenomSwap]);
+
+  useEffect(() => {
+    if (fromTokenDenom && toTokenDenom) {
+      setFromTokenDenom(fromTokenDenom);
+      setToTokenDenom(toTokenDenom);
+    }
+  }, [fromTokenDenom, toTokenDenom]);
+
+  const setTokenDenomFromChain = (chainId, setTokenDenom) => {
+    if (chainId) {
+      const tokenInfo = flattenTokens.find((flat) => flat.chainId === chainId);
+      if (tokenInfo) {
+        setTokenDenom(tokenInfo.denom);
+      }
+    }
+  };
+
+  useEffect(() => {
+    setTokenDenomFromChain(selectChainFrom, setFromTokenDenom);
+  }, [selectChainFrom]);
+
+  useEffect(() => {
+    setTokenDenomFromChain(selectChainTo, setToTokenDenom);
+  }, [selectChainTo]);
 
   const { fee } = useSwapFee({
     fromToken: originalFromToken,
@@ -567,6 +591,9 @@ const SwapComponent: React.FC<{
                     !isEvmNetworkNativeSwapSupported(toToken.chainId)
                   )
                     return;
+
+                  setSelectChainFrom(selectChainTo);
+                  setSelectChainTo(selectChainFrom);
                   setSwapTokens([toTokenDenomSwap, fromTokenDenomSwap]);
                   setSwapAmount([toAmountToken, fromAmountToken]);
                 }}

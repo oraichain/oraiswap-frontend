@@ -63,15 +63,18 @@
       font-size: 28px;
       font-weight: 500;
 
-      // @include theme() {
-      //   color: theme-get('colors-neutral-surface-bg-section-3');
-      // }
+      @include theme() {
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
 
       @include mobile {
         width: 100%;
       }
     }
     .usd {
+      @include theme() {
+        color: theme-get('colors-neutral-text-body');
+      }
       // max-width: 100%;
       display: flex;
       justify-content: flex-end;

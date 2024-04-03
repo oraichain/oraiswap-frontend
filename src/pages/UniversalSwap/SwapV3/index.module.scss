@@ -468,8 +468,8 @@
       border-radius: 50%;
       // background-color: #f7f7f7;
       cursor: pointer;
-      height: 38px;
-      width: 38px;
+      height: 24px;
+      width: 24px;
 
       @include theme() {
         background-color: theme-get('neutral-surface-bg-section');
