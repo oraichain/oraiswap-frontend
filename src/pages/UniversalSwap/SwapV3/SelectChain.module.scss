@@ -1,15 +1,13 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
 .selectChainWrap {
   width: 100%;
-  height: 90%;
-  // border: 1px solid var(--Colors-Neutral-Border-border-bold, #dfe0de);
-  // background: var(--Colors-Neutral-Surface-bg, #fff);
-  border: 1px solid #494949;
-  background: #181a17;
-  // box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
-  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+  height: 100%;
+
   position: absolute;
-  top: 10%;
-  border-radius: 24px;
+  bottom: 0;
 
   transition: all 0.3s;
   transform: translateY(100%);
@@ -17,14 +15,34 @@
     transform: translateY(0);
   }
 
+  .selectChainOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+    opacity: 0.25;
+    background: var(--Colors-Universal-Base-1000, #000);
+
+    width: 100%;
+    height: 100%;
+  }
+
   .selectChain {
+    height: 70%;
+    border-radius: 24px;
+    @include theme() {
+      background-color: theme-get('colors-neutral-surface-bg');
+      color: theme-get('colors-neutral-text-text-token-name');
+      border: 1px solid theme-get('colors-neutral-border-border-bold');
+    }
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 12px;
     width: 100%;
-    // color: var(--Colors-Neutral-Text-title, #232521);
-    color: #efefef;
+    position: absolute;
+    bottom: 0;
     font-family: 'IBM Plex Sans';
     font-style: normal;
     .selectChainHeader {
@@ -66,17 +84,16 @@
           padding: 8px;
           height: 40px;
           text-align: center;
-          // border-radius: var(--Dimension-Corner-Radius-button, 99px);
-          // background: var(--Colors-Neutral-Surface-bg-section-2, #31332E);
+          @include theme() {
+            background: theme-get('colors-neutral-surface-bg-section-2');
+          }
           border-radius: 99px;
-          background: #31332e;
           width: calc(100% / 7);
-          border: 0.5px solid inherit;
+          border: 1px solid inherit;
           &:hover {
-            // border-radius: var(--Dimension-Corner-Radius-button, 99px);
-            // border: 1px solid var(--Colors-Neutral-Border-border-btn-default, #232521);
-            // background: var(--Colors-Neutral-Surface-bg-dropdown-hover, #EFEFEF);
-            border: 0.5px solid #efefef;
+            @include theme() {
+              border: 1px solid theme-get('colors-neutral-surface-bg-dropdown-hover');
+            }
           }
         }
       }
@@ -84,8 +101,9 @@
 
     .selectChainList {
       .selectChainTitle {
-        // color: var(--Colors-Neutral-Text-title, #EFEFEF);
-        color: #efefef;
+        @include theme() {
+          color: theme-get('colors-neutral-text-title');
+        }
         font-size: 18px;
         line-height: 150%;
       }
@@ -93,15 +111,25 @@
         font-size: 16px;
         font-weight: 500;
         overflow-y: auto;
-        max-height: 550px;
-        // border-radius: 8px;
+        max-height: 600px;
+        .selectChainItemAll {
+          @include theme() {
+            border-bottom: 1px solid theme-get('colors-neutral-surface-bg-dropdown-hover');
+          }
+        }
+        .selectChainItem:hover {
+          border-radius: 6px;
+          @include theme() {
+            background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
+          }
+        }
+        .selectChainItemAll,
         .selectChainItem {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 10px;
           padding: 12px;
-          height: 65px;
+          height: 53px;
           cursor: pointer;
           .selectChainItemLeft {
             display: flex;

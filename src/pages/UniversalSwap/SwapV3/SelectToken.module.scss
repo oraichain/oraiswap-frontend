@@ -4,30 +4,46 @@
 
 .selectTokenWrap {
   width: 100%;
-  height: 80%;
-  @include theme() {
-    background-color: theme-get('colors-neutral-surface-bg');
-    color: theme-get('colors-neutral-text-text-token-name');
-    border: 1px solid theme-get('colors-neutral-border-border-bold');
-  }
-  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+  height: 100%;
+
   position: absolute;
-  top: 20%;
-  border-radius: 24px;
+  bottom: 0;
 
   transition: all 0.3s;
   transform: translateY(100%);
   &.active {
     transform: translateY(0);
   }
+  .selectTokenOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+    opacity: 0.25;
+    background: var(--Colors-Universal-Base-1000, #000);
+
+    width: 100%;
+    height: 100%;
+  }
   .selectToken {
     padding: 16px;
     display: flex;
+    border-radius: 24px;
+
     flex-direction: column;
     // overflow-y: auto;
     // max-height: 550px;
-    gap: 24px;
+    position: absolute;
     width: 100%;
+
+    bottom: 0;
+    gap: 24px;
+    @include theme() {
+      background-color: theme-get('colors-neutral-surface-bg');
+      color: theme-get('colors-neutral-text-text-token-name');
+      border: 1px solid theme-get('colors-neutral-border-border-bold');
+    }
     @include theme() {
       color: theme-get('colors-neutral-text-title');
     }
@@ -103,7 +119,7 @@
     .selectTokenAll {
       .selectTokenList {
         overflow-y: auto;
-        height: 290px;
+        height: 380px;
         .selectTokenTitle {
           @include theme() {
             color: theme-get('colors-neutral-text-title');
@@ -120,6 +136,9 @@
           &:hover {
             border-radius: 8px;
             // border: 1px solid gray;
+            @include theme() {
+              background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
+            }
           }
           .selectTokenItemLeft {
             display: flex;

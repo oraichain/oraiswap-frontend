@@ -36,6 +36,7 @@ export default function SelectChain({
   return (
     <>
       <div className={cx('selectChainWrap', isSelectToken ? 'active' : '')}>
+        <div className={styles.selectChainOverlay} onClick={() => setIsSelectToken(false)}></div>
         <div className={styles.selectChain}>
           <div className={styles.selectChainHeader}>
             <div />
@@ -46,7 +47,7 @@ export default function SelectChain({
           </div>
           <div className={styles.selectChainList}>
             <div className={styles.selectChainItems}>
-              <div className={styles.selectChainItem}>
+              <div className={styles.selectChainItemAll}>
                 <div className={styles.selectChainItemLeft}>
                   <img className={styles.selectChainItemLogo} src={NetworkImg} alt="network" />
                   <div className={styles.selectChainItemTitle}>
@@ -56,7 +57,7 @@ export default function SelectChain({
                 <div className={styles.selectChainItemValue}>$0</div>
               </div>
               {networks
-                .filter((net) => !['kawaii_6886-1'].includes(net.chainId))
+                .filter((net) => !['kawaii_6886-1', 'bitcoin', 'noble-1', 'Neutaro-1'].includes(net.chainId))
                 .map((item) => {
                   const networkIcon = chainIcons.find((chainIcon) => chainIcon.chainId === item.chainId);
                   const key = item.chainId.toString();
