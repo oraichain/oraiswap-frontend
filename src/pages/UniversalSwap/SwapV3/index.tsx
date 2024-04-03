@@ -720,6 +720,7 @@ const SwapComponent: React.FC<{
           handleChangeToken={(token) => handleChangeToken(token, 'to')}
           items={filteredToTokens}
           theme={theme}
+          selectChain={selectChainTo}
           isSelectToken={isSelectTo}
         />
         <SelectToken
@@ -727,6 +728,7 @@ const SwapComponent: React.FC<{
           amounts={amounts}
           prices={prices}
           theme={theme}
+          selectChain={selectChainFrom}
           items={filteredToTokens}
           handleChangeToken={(token) => handleChangeToken(token, 'from')}
           isSelectToken={isSelectFrom}

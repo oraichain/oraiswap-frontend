@@ -10,7 +10,7 @@ import { getUsd, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails } from 'rest/api';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Themes } from 'context/theme-context';
 
 const cx = cn.bind(styles);
@@ -22,6 +22,7 @@ interface InputSwapProps {
   prices: CoinGeckoPrices<string>;
   handleChangeToken?: (token: TokenItemType) => void;
   theme: Themes;
+  selectChain: string;
 }
 
 interface GetIconInterface {
@@ -58,10 +59,15 @@ export default function SelectToken({
   amounts,
   prices,
   handleChangeToken,
-  theme
+  theme,
+  selectChain
 }: InputSwapProps) {
-  const [textChain, setTextChain] = React.useState('');
-  const [textSearch, setTextSearch] = React.useState('');
+  const [textChain, setTextChain] = useState('');
+  const [textSearch, setTextSearch] = useState('');
+  useEffect(() => {
+    if (selectChain && selectChain !== textChain) setTextChain(selectChain);
+  }, [selectChain]);
+
   return (
     <>
       <div className={cx('selectTokenWrap', isSelectToken ? 'active' : '')}>

@@ -28,13 +28,15 @@
     line-height: 150%;
     font-family: 'IBM Plex Sans';
     @include theme() {
-      background-color: theme-get('neutral-5');
+      color: theme-get('colors-neutral-text-text-token-name');
+      background-color: theme-get('colors-neutral-surface-bg-section-3');
     }
 
     .left {
       display: flex;
       align-items: center;
       gap: 8px;
+
       .icon {
         display: flex;
         align-items: center;
@@ -61,9 +63,9 @@
       font-size: 28px;
       font-weight: 500;
 
-      @include theme() {
-        color: theme-get('neutral-1');
-      }
+      // @include theme() {
+      //   color: theme-get('colors-neutral-surface-bg-section-3');
+      // }
 
       @include mobile {
         width: 100%;
@@ -84,7 +86,7 @@
   padding-bottom: 10px;
 
   @include theme() {
-    color: theme-get('neutral-9');
+    color: theme-get('colors-neutral-text-body-on-section');
   }
 
   font-size: 14px;
@@ -94,9 +96,17 @@
     display: flex;
     align-items: center;
     gap: 10px;
+
     .left {
       @include theme() {
         background-color: theme-get('neutral-5');
+      }
+      .section {
+        .name {
+          @include theme() {
+            color: theme-get('colors-neutral-text-text-token-name');
+          }
+        }
       }
       cursor: pointer;
       padding: 4px 8px;
@@ -121,7 +131,8 @@
   }
   .show-balance {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
     gap: 8px;
     .coeff {
       display: flex;
@@ -130,7 +141,7 @@
         border-radius: 99px;
         background: #aee67f;
         color: black;
-        padding: 2px 8px;
+        padding: 2px 10px;
       }
     }
   }

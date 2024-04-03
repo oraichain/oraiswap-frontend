@@ -50,6 +50,11 @@ $primary-text-highlight: #d7f5bf;
 // for dark-light mode
 $themes: (
   dark: (
+    'colors-neutral-text-text-token-name': #f7f7f7,
+    'colors-neutral-text-body-on-section': #979995,
+    'colors-primary-surface-default': #aee67f,
+    'colors-neutral-text-text-btn-default': #292f23,
+    'colors-neutral-surface-bg-section-3': #494949,
     'text-color': white,
     'text-color-secondary': #fff,
     'bg-connect-wallet': #232521,
@@ -143,6 +148,11 @@ $themes: (
     'neutral-text-btn-default': #152703
   ),
   light: (
+    'colors-neutral-text-text-token-name': #181a17,
+    'colors-neutral-text-body-on-section': #686a66,
+    'colors-primary-surface-default': #aee67f,
+    'colors-neutral-text-text-btn-default': #292f23,
+    'colors-neutral-surface-bg-section-3': #dfe0de,
     'text-color': #272b30,
     'bg-connect-wallet': #f7f7f7,
     'text-color-secondary': #a871df,

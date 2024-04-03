@@ -60,7 +60,7 @@ export default function InputSwapV4({
     <>
       <div className={cx('input-swap-balance')}>
         <div className={cx('select-chain')}>
-          <span>{type} </span>
+          <span>{type}</span>
           <div className={cx('left')} onClick={() => setIsSelectChain(true)}>
             <div className={cx('icon')}>
               {IconNetwork && isLightMode ? (
