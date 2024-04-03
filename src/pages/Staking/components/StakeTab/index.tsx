@@ -60,11 +60,11 @@ const StakeTab = () => {
   const handleBond = async () => {
     if (!amount) return displayToast(TToastType.TX_FAILED, { message: 'Stake Amount is required' });
 
-    const oraiAddress = await handleCheckAddress('Oraichain');
-
     setLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      const oraiAddress = await handleCheckAddress('Oraichain');
+
       // generate bonding msg
       const msg = generateMiningMsgs({
         type: Type.BOND_STAKING_CW20,
