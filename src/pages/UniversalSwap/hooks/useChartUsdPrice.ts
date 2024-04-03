@@ -31,6 +31,7 @@ export const useChartUsdPrice = (
   const [currentData, setCurrentData] = useState<ChartDataValue[]>([]);
   const [changePercent, setChangePercent] = useState<string | number>(0);
 
+  // TODO: add loading animation later.
   const [isLoading, setIsLoading] = useState(false);
 
   const [currentItem, setCurrentItem] = useState<ChartDataValue>({ value: 0, time: 0, volume: 0 });
