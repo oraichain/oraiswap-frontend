@@ -11,12 +11,11 @@
   gap: 8px;
 
   padding: 12px 8px 12px 16px;
+  border-radius: var(--Dimension-Corner-Radius-card-inner, 8px);
 
-  border-radius: 8px;
-
-  @include theme {
-    background: theme-get('neutral-surface-bg-section');
-    color: theme-get('neutral-9');
+  @include theme() {
+    background-color: theme-get('colors-neutral-surface-bg-section');
+    color: theme-get('colors-neutral-text-body-on-section');
   }
 
   font-size: 14px;
@@ -69,11 +68,10 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
-    border-radius: 99px;
-
-    @include theme {
-      background: theme-get('neutral-surface-bg-section-5');
-      color: theme-get('neutral-text-text-token-name');
+    border-radius: var(--Dimension-Corner-Radius-button, 99px);
+    @include theme() {
+      background-color: theme-get('colors-neutral-surface-bg-section-3');
+      color: theme-get('colors-neutral-text-body-on-row');
     }
 
     font-size: 14px;

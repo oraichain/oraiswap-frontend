@@ -1,11 +1,15 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
 .selectTokenWrap {
   width: 100%;
   height: 80%;
-  // border: 1px solid var(--Colors-Neutral-Border-border-bold, #dfe0de);
-  // background: var(--Colors-Neutral-Surface-bg, #fff);
-  border: 1px solid #494949;
-  background: #181a17;
-  // box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+  @include theme() {
+    background-color: theme-get('colors-neutral-surface-bg');
+    color: theme-get('colors-neutral-text-text-token-name');
+    border: 1px solid theme-get('colors-neutral-border-border-bold');
+  }
   box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
   position: absolute;
   top: 20%;
@@ -24,8 +28,9 @@
     // max-height: 550px;
     gap: 24px;
     width: 100%;
-    // color: var(--Colors-Neutral-Text-title, #232521);
-    color: #efefef;
+    @include theme() {
+      color: theme-get('colors-neutral-text-title');
+    }
     font-family: 'IBM Plex Sans';
     font-style: normal;
     .selectTokenHeader {
@@ -70,20 +75,26 @@
           padding: 8px;
           height: 40px;
           text-align: center;
-          // border-radius: var(--Dimension-Corner-Radius-button, 99px);
-          // background: var(--Colors-Neutral-Surface-bg-section-2, #31332E);
+          @include theme() {
+            background-color: theme-get('colors-neutral-surface-bg-section-2');
+            color: theme-get('colors-neutral-text-text-token-name');
+          }
           border-radius: 99px;
           background: #31332e;
           width: calc(100% / 7);
-          border: 0.5px solid inherit;
+          border: 1px solid inherit;
           &.active {
-            border: 0.5px solid #efefef;
+            @include theme() {
+              border: 1px solid theme-get('colors-neutral-border-border-btn-default');
+            }
           }
           &:hover {
-            //             border-radius: var(--Dimension-Corner-Radius-button, 99px);
+            //  border-radius: var(--Dimension-Corner-Radius-button, 99px);
             // border: 1px solid var(--Colors-Neutral-Border-border-btn-default, #232521);
             // background: var(--Colors-Neutral-Surface-bg-dropdown-hover, #EFEFEF);
-            border: 0.5px solid #efefef;
+            @include theme() {
+              border: 1px solid theme-get('colors-neutral-border-border-btn-default');
+            }
           }
         }
       }
@@ -94,8 +105,9 @@
         overflow-y: auto;
         height: 290px;
         .selectTokenTitle {
-          // color: var(--Colors-Neutral-Text-title, #EFEFEF);
-          color: #efefef;
+          @include theme() {
+            color: theme-get('colors-neutral-text-title');
+          }
           font-size: 14px;
           line-height: 150%;
         }
@@ -107,7 +119,7 @@
           cursor: pointer;
           &:hover {
             border-radius: 8px;
-            border: 1px solid gray;
+            // border: 1px solid gray;
           }
           .selectTokenItemLeft {
             display: flex;
@@ -128,23 +140,31 @@
                 border-radius: 50%;
               }
             }
+
             .selectTokenItemTokenName {
-              color: #f7f7f7;
+              @include theme() {
+                color: theme-get('colors-neutral-text-text-token-name');
+              }
             }
 
             .selectTokenItemTokenOrg {
-              color: #979995;
+              @include theme() {
+                color: theme-get('colors-neutral-text-body');
+              }
             }
           }
           .selectTokenItemRight {
             text-align: right;
             .selectTokenItemTokenBalance {
-              // color: var(--Colors-Neutral-Text-text-token-name, #181a17);
-              color: #f7f7f7;
               font-weight: 500;
+              @include theme() {
+                color: theme-get('colors-neutral-text-text-token-name');
+              }
             }
             .selectTokenItemTokenUsd {
-              color: #979995;
+              @include theme() {
+                color: theme-get('colors-neutral-text-body');
+              }
             }
           }
         }

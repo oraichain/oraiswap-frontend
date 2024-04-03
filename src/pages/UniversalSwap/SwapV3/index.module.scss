@@ -364,10 +364,9 @@
   justify-content: space-between;
   width: 100%;
   margin-top: 6px;
-
+  font-family: 'IBM Plex Sans';
   @include theme() {
     background-color: theme-get('neutral-6');
-    color: theme-get('neutral-9');
   }
 
   border-radius: 8px;
