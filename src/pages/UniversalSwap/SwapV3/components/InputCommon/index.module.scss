@@ -12,9 +12,11 @@
 
   padding: 12px 8px 12px 16px;
   border-radius: var(--Dimension-Corner-Radius-card-inner, 8px);
-  background: var(--Colors-Neutral-Surface-bg-section, #232521);
 
-  color: var(--Colors-Neutral-Text-body-on-section, #979995);
+  @include theme() {
+    background-color: theme-get('colors-neutral-surface-bg-section');
+    color: theme-get('colors-neutral-text-body-on-section');
+  }
 
   font-size: 14px;
   font-weight: 400;
@@ -64,9 +66,10 @@
     align-items: center;
     gap: 10px;
     border-radius: var(--Dimension-Corner-Radius-button, 99px);
-    background: var(--Colors-Neutral-Surface-bg-section-3, #494949);
-
-    color: var(--Colors-Neutral-Text-body-on-row, #efefef);
+    @include theme() {
+      background-color: theme-get('colors-neutral-surface-bg-section-3');
+      color: theme-get('colors-neutral-text-body-on-row');
+    }
 
     font-size: 14px;
     font-weight: 400;

@@ -10,10 +10,10 @@ import { Themes } from 'context/theme-context';
 
 const cx = cn.bind(styles);
 
-export const AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP: [number, string, string][] = [
-  [0.5, '50%', 'half'],
-  [1, '100%', 'max']
-];
+// export const AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP: [number, string, string][] = [
+//   [0.5, '50%', 'half'],
+//   [1, '100%', 'max']
+// ];
 
 interface InputSwapProps {
   Icon: CoinIcon;
@@ -75,7 +75,15 @@ export default function InputSwapV4({
             <img src={ArrowImg} alt="arrow" />
           </div>
         </div>
-        <div className={cx('show-balance')}>
+        <div
+          className={cx('show-balance', type === 'from' && 'is-enable-coeff')}
+          onClick={(event) => {
+            if (type === 'from') {
+              event.stopPropagation();
+              onChangePercentAmount(1);
+            }
+          }}
+        >
           <TokenBalance
             balance={{
               amount: balance,
@@ -85,23 +93,6 @@ export default function InputSwapV4({
             prefix="Balance: "
             decimalScale={6}
           />
-
-          {type === 'from' && (
-            <div className={cx('coeff')}>
-              {AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP.map(([coeff, text]) => (
-                <button
-                  key={coeff}
-                  className={cx('percent')}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onChangePercentAmount(coeff);
-                  }}
-                >
-                  {text}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
       <div className={cx('input-swap-box')}>

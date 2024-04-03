@@ -134,6 +134,12 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 8px;
+    &.is-enable-coeff {
+      cursor: pointer;
+      &:hover {
+        font-weight: 500;
+      }
+    }
     .coeff {
       display: flex;
       gap: 6px;

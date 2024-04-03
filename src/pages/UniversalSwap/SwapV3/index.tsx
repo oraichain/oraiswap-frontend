@@ -625,6 +625,7 @@ const SwapComponent: React.FC<{
               showPreviewOnBlur
               suffix={
                 <div
+                  className={cx('paste')}
                   onClick={() => {
                     handleReadClipboard((text) => setAddressTransfer(text));
                   }}

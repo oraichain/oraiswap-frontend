@@ -64,6 +64,7 @@ export default function SelectToken({
 }: InputSwapProps) {
   const [textChain, setTextChain] = useState('');
   const [textSearch, setTextSearch] = useState('');
+  const isLightTheme = theme === 'light';
   useEffect(() => {
     if (selectChain && selectChain !== textChain) setTextChain(selectChain);
   }, [selectChain]);
@@ -86,10 +87,10 @@ export default function SelectToken({
               onSearch={(text) => {
                 setTextSearch(text);
               }}
-              theme={'light'}
+              theme={theme}
             />
           </div>
-          <div className={styles.selectTokenNetwork}>
+          {/* <div className={styles.selectTokenNetwork}>
             <div className={styles.selectTokenNetworkTitle}>Network</div>
             <div className={styles.selectTokenNetworkList}>
               <div
@@ -101,6 +102,13 @@ export default function SelectToken({
               {chainIcons
                 .filter((chain) => !['kawaii_6886-1', 'bitcoin'].includes(chain.chainId))
                 .map((e, i) => {
+                  const networkIcon = getIcon({
+                    isLightTheme,
+                    type: 'network',
+                    chainId: e.chainId,
+                    width: 18,
+                    height: 18
+                  });
                   return (
                     i < 5 && (
                       <div
@@ -108,14 +116,14 @@ export default function SelectToken({
                         className={cx('selectTokenNetworkItem', textChain === e.chainId ? 'active' : '')}
                         onClick={() => setTextChain(e.chainId)}
                       >
-                        {<e.Icon width={18} height={18} />}
+                        {networkIcon}
                       </div>
                     )
                   );
                 })}
               <div className={styles.selectTokenNetworkItem}>5+</div>
             </div>
-          </div>
+          </div> */}
           <div className={styles.selectTokenAll}>
             <div className={styles.selectTokenTitle}>Select token</div>
             <div className={styles.selectTokenList}>
@@ -124,7 +132,7 @@ export default function SelectToken({
                 .filter((item) => (textSearch ? [textSearch.toLowerCase()].includes(item.org.toLowerCase()) : item))
                 .map((token) => {
                   const tokenIcon = getIcon({
-                    isLightTheme: theme === 'light',
+                    isLightTheme,
                     type: 'token',
                     coinGeckoId: token.coinGeckoId,
                     width: 30,
@@ -132,7 +140,7 @@ export default function SelectToken({
                   });
 
                   const networkIcon = getIcon({
-                    isLightTheme: theme === 'light',
+                    isLightTheme,
                     type: 'network',
                     chainId: token.chainId,
                     width: 16,
