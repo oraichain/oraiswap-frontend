@@ -23,9 +23,9 @@ $padding-default: 16px;
     top: 0;
     left: 0;
 
-    border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+    border-radius: 12px;
     opacity: 0.25;
-    background: var(--Colors-Universal-Base-1000, #000);
+    background: #000;
 
     width: 100%;
     height: 100%;
@@ -39,9 +39,14 @@ $padding-default: 16px;
   align-items: flex-start;
   gap: 12px;
 
-  border-radius: var(--Dimension-Corner-Radius-menu, 12px);
-  border: 1px solid var(--Colors-Neutral-Border-border-bold, #494949);
-  background: var(--Colors-Neutral-Surface-bg, #181a17);
+  border-radius: 12px;
+
+  border: 1px solid;
+
+  @include theme {
+    border-color: theme-get('neutral-border-border-bold');
+    background: theme-get('neutral-surface-bg-2');
+  }
 
   position: absolute;
   width: 100%;
@@ -74,7 +79,10 @@ $padding-default: 16px;
       justify-content: space-between;
       align-items: center;
 
-      color: var(--Colors-Neutral-Text-title, #efefef);
+      @include theme {
+        color: theme-get('neutral-text-title-2');
+      }
+
       font-size: 18px;
       font-weight: 600;
       line-height: 150%;
@@ -87,6 +95,12 @@ $padding-default: 16px;
 
       svg {
         cursor: pointer;
+
+        @include theme {
+          path {
+            fill: theme-get('neutral-text-title-2');
+          }
+        }
       }
     }
 
@@ -108,13 +122,19 @@ $padding-default: 16px;
       justify-content: center;
       gap: 16px;
 
-      color: var(--Colors-Neutral-Text-body, #979995);
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+
       font-size: 14px;
       font-weight: 400;
       line-height: 150%; /* 21px */
 
       .titleNodata {
-        color: var(--Colors-Neutral-Text-title, #efefef);
+        @include theme {
+          color: theme-get('neutral-text-title-2');
+        }
+
         font-size: 14px;
         font-weight: 400;
         line-height: 150%; /* 21px */
@@ -147,8 +167,11 @@ $padding-default: 16px;
         justify-content: center;
         gap: 8px;
 
-        border-radius: var(--Dimension-Corner-Radius-row-on-menu, 8px);
-        background: var(--Colors-Neutral-Surface-bg-section, #232521);
+        border-radius: 8px;
+
+        @include theme {
+          background: theme-get('neutral-surface-bg-section');
+        }
 
         .selectTokenIcon {
           display: flex;
@@ -156,12 +179,20 @@ $padding-default: 16px;
           justify-content: center;
           align-items: center;
 
-          border-radius: var(--Dimension-Corner-Radius-avatar, 20px);
-          background: var(--Colors-Neutral-Surface-bg-section-2, #31332e);
+          border-radius: 20px;
+          @include theme {
+            background: theme-get('neutral-surface-bg-section-6');
+          }
 
           svg {
             width: 20px;
             height: 20px;
+
+            @include theme {
+              path {
+                stroke: theme-get('neutral-text-text-token-name-2');
+              }
+            }
           }
         }
 
@@ -170,6 +201,12 @@ $padding-default: 16px;
             vertical-align: middle;
             width: 30px;
             height: 30px;
+
+            @include theme {
+              path {
+                stroke: theme-get('neutral-text-text-token-name-2');
+              }
+            }
           }
         }
 
@@ -180,14 +217,18 @@ $padding-default: 16px;
           flex: 1 0 0;
 
           .name {
-            color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+            @include theme {
+              color: theme-get('neutral-text-text-token-name-2');
+            }
             font-size: 16px;
             font-weight: 500;
             line-height: 150%; /* 24px */
           }
 
           .address {
-            color: var(--Colors-Neutral-Text-title, #efefef);
+            @include theme {
+              color: theme-get('neutral-text-title-2');
+            }
             font-size: 12px;
             font-weight: 500;
             line-height: 150%; /* 18px */
@@ -201,10 +242,13 @@ $padding-default: 16px;
             .chain {
               padding: 4px;
 
-              border-radius: var(--Dimension-Corner-Radius-tab-toggle-inner, 4px);
-              background: var(--Colors-Primary-Surface-default-subtle, #292f23);
+              border-radius: 4px;
 
-              color: var(--Colors-Primary-Text-text-link, #89a571);
+              @include theme {
+                background: theme-get('primary-surface-default-subtle');
+                color: theme-get('primary-text-text-link');
+              }
+
               font-size: 12px;
               font-weight: 500;
               line-height: 150%; /* 18px */
@@ -212,10 +256,13 @@ $padding-default: 16px;
 
             .memo {
               padding: 4px;
-              border-radius: var(--Dimension-Corner-Radius-tab-toggle-inner, 4px);
-              background: var(--Colors-Neutral-Surface-bg-section-3, #494949);
+              border-radius: 4px;
 
-              color: var(--Colors-Neutral-Text-title, #efefef);
+              @include theme {
+                background: theme-get('neutral-surface-bg-section-5');
+                color: theme-get('neutral-text-title-2');
+              }
+
               font-size: 12px;
               font-weight: 500;
               line-height: 150%; /* 18px */
@@ -225,22 +272,33 @@ $padding-default: 16px;
       }
       .edit {
         cursor: pointer;
+
+        svg {
+          @include theme {
+            path {
+              stroke: theme-get('neutral-9');
+            }
+          }
+        }
       }
     }
 
     .divider {
-      width: calc(100% - 32px);
+      width: calc(100% - 2 * $padding-default);
       border-bottom: 1px solid;
       margin: auto;
-      border-color: var(--Colors-Neutral-Border-border-default, #232521);
 
-      // height: 1px;
-      // background: var(--Colors-Neutral-Border-border-default, #232521);
+      @include theme {
+        border-color: theme-get('neutral-surface-bg-btn-disabled');
+      }
     }
 
     .warning {
       padding: 0 16px;
-      color: var(--Colors-Warning-Border-default-dark, #ad9c00);
+
+      @include theme {
+        color: theme-get('warning-text-default');
+      }
 
       font-size: 14px;
       font-weight: 400;

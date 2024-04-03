@@ -80,7 +80,7 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
                             <IconToken />
                           </div>
                         ) : (
-                          <div className={styles.tokenIcon}>
+                          <div className={styles.selectTokenIcon}>
                             <SelectTokenIcon />
                           </div>
                         )}

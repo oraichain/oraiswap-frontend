@@ -245,6 +245,12 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
 
             dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
           }}
+          disabled={
+            !addressBook?.walletName ||
+            !addressBook?.address ||
+            !addressBook?.network ||
+            !(addressBook?.isUniversal || addressBook?.token)
+          }
         >
           Save
         </Button>

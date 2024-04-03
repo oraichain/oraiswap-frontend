@@ -20,8 +20,10 @@
     svg {
       cursor: pointer;
 
-      path {
-        fill: #efefef;
+      @include theme {
+        path {
+          fill: theme-get('neutral-text-title-2');
+        }
       }
     }
   }
@@ -44,12 +46,21 @@
     align-items: center;
     flex-shrink: 0;
 
-    border-radius: var(--Dimension-Corner-Radius-avatar, 20px);
-    background: var(--Colors-Neutral-Surface-bg-section-2, #31332e);
+    border-radius: 20px;
+
+    @include theme {
+      background: theme-get('neutral-surface-bg-section-6');
+    }
 
     svg {
       width: 20px;
       height: 20px;
+
+      @include theme {
+        path {
+          stroke: theme-get('neutral-text-text-token-name-2');
+        }
+      }
     }
   }
 
@@ -58,7 +69,10 @@
     justify-content: space-between;
     align-items: center;
 
-    color: var(--Colors-Neutral-Text-title, #efefef);
+    @include theme {
+      color: theme-get('neutral-text-title-2');
+    }
+
     font-size: 18px;
     font-weight: 600;
     line-height: 150%;
@@ -100,10 +114,25 @@
       vertical-align: middle;
     }
 
-    color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+    @include theme {
+      color: theme-get('neutral-text-text-dropdown');
+    }
+
     font-size: 16px;
     font-weight: 500;
     line-height: 150%; /* 24px */
+  }
+
+  .checkbox {
+    @include theme {
+      color: theme-get('neutral-text-text-dropdown');
+    }
+  }
+
+  .desc {
+    @include theme {
+      color: theme-get('neutral-8');
+    }
   }
 
   .btn {
