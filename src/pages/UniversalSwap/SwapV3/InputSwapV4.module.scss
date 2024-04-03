@@ -50,6 +50,9 @@
 
   .box-input {
     width: 50%;
+    .input {
+      text-align: right;
+    }
     .amount {
       flex-grow: 1;
       max-width: 100%;
