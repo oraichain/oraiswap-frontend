@@ -108,9 +108,9 @@ const SwapComponent: React.FC<{
   const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
   const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
 
+  const [openSetting, setOpenSetting] = useState(false);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [coe, setCoe] = useState(0);
-  const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -685,8 +685,9 @@ const SwapComponent: React.FC<{
             </div>
             <div className={cx('info')}>
               <span className={cx('value')}>{userSlippage}%</span>
-              <span className={cx('icon')}>
-                <TooltipIcon
+              <span className={cx('icon')} onClick={() => setOpenSetting(true)}>
+                <IconOirSettings onClick={() => setOpenSetting(true)} />
+                {/* <TooltipIcon
                   placement="bottom-end"
                   visible={visible}
                   icon={<IconOirSettings />}
@@ -698,7 +699,7 @@ const SwapComponent: React.FC<{
                       userSlippage={userSlippage}
                     />
                   }
-                />
+                /> */}
               </span>
             </div>
           </div>
@@ -836,6 +837,16 @@ const SwapComponent: React.FC<{
         }}
         tokenTo={originalToToken}
       />
+
+      <div className={cx('setting', openSetting ? 'activeSetting' : '')}>
+        <div className={cx('overlay')} onClick={() => setOpenSetting(false)}></div>
+        <SlippageModal
+          setVisible={setOpenSetting}
+          setUserSlippage={setUserSlippage}
+          userSlippage={userSlippage}
+          isBotomSheet
+        />
+      </div>
     </div>
   );
 };
