@@ -36,6 +36,7 @@ export default function SelectChain({
   return (
     <>
       <div className={cx('selectChainWrap', isSelectToken ? 'active' : '')}>
+        <div className={styles.selectChainOverlay} onClick={() => setIsSelectToken(false)}></div>
         <div className={styles.selectChain}>
           <div className={styles.selectChainHeader}>
             <div />
