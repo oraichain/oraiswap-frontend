@@ -12,6 +12,10 @@ import { fetchRoundBid } from 'rest/api';
 import { BidStatus, TIMER } from '../constants';
 import { Bid, BiddingInfo, BiddingInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
 
+export const getDateNowToSecond = () => {
+  return Math.floor(Date.now() / TIMER.MILLISECOND);
+};
+
 export const useGetRound = () => {
   const [round, setRound] = useState(0);
 
@@ -73,8 +77,8 @@ export const useGetBidding = (round: number) => {
     placeholderData: {
       bid_info: {
         round: 0,
-        start_time: Date.now(),
-        end_time: Date.now(),
+        start_time: getDateNowToSecond(),
+        end_time: getDateNowToSecond(),
         total_bid_amount: '0',
         total_bid_matched: '0'
       },
@@ -111,8 +115,8 @@ export const useGetBiddingFilter = (round: number) => {
     placeholderData: {
       bid_info: {
         round: 0,
-        start_time: Date.now(),
-        end_time: Date.now(),
+        start_time: getDateNowToSecond(),
+        end_time: getDateNowToSecond(),
         total_bid_amount: '0',
         total_bid_matched: '0'
       },
@@ -152,8 +156,8 @@ export const useGetListBiddingRoundInfo = (round: number) => {
         return {
           bid_info: {
             round,
-            start_time: Date.now(),
-            end_time: Date.now(),
+            start_time: getDateNowToSecond(),
+            end_time: getDateNowToSecond(),
             total_bid_amount: '0',
             total_bid_matched: '0'
           },
@@ -181,8 +185,8 @@ export const useGetListBiddingRoundInfo = (round: number) => {
       return {
         bid_info: {
           round,
-          start_time: Date.now(),
-          end_time: Date.now(),
+          start_time: getDateNowToSecond(),
+          end_time: getDateNowToSecond(),
           total_bid_amount: '0',
           total_bid_matched: '0'
         },
