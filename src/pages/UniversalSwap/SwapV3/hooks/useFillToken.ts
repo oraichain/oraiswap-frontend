@@ -6,6 +6,17 @@ export const FROM_QUERY_KEY = 'from';
 export const TO_QUERY_KEY = 'to';
 export const TYPE_QUERY_TYPE = 'type';
 
+export const initPairSwap = (): [string, string] => {
+  const queryString = window.location?.search;
+
+  const params = new URLSearchParams(queryString || '');
+
+  const currentFromDenom = params.get(FROM_QUERY_KEY);
+  const currentToDenom = params.get(TO_QUERY_KEY);
+
+  return [currentFromDenom || 'usdt', currentToDenom || 'orai'];
+};
+
 // URL: /universalswap?from=orai&to=usdt
 export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) => {
   const location = useLocation();
@@ -49,12 +60,6 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
 
     const originalFromToken = tokenMap[fromDenom];
     const originalToToken = tokenMap[toDenom];
-
-    // TODO: check kwt or milky
-    if ([originalFromToken, originalToToken].find((e) => ['kawaii-islands', 'milky-token'].includes(e?.coinGeckoId))) {
-      navigate(pathname);
-      return;
-    }
 
     if (originalFromToken && originalToToken) {
       setSwapTokens([fromDenom, toDenom]);
