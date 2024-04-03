@@ -363,7 +363,6 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding: 8px 16px;
   margin-top: 6px;
 
   @include theme() {
@@ -400,6 +399,21 @@
       font-weight: 400;
       line-height: 150%;
     }
+  }
+}
+
+.extraBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  color: var(--Colors-Primary-Text-text-link, #89a571);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 150%; /* 21px */
+
+  svg {
+    vertical-align: middle;
   }
 }
 

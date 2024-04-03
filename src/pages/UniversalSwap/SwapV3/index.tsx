@@ -23,9 +23,9 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import SwitchDarkImg from 'assets/icons/switch.svg';
 import SwitchLightImg from 'assets/icons/switch_light.svg';
-// import IconOirSettings from 'assets/icons/iconoir_settings.svg';
-import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
+import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
+import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
@@ -75,6 +75,11 @@ import { useFillToken } from './hooks/useFillToken';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { isMobile } from '@walletconnect/browser-utils';
 import { reduceString } from 'libs/utils';
+import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
+import { AddressBookType, AddressManagementStep } from 'reducer/type';
+import AddressBook from './components/AddressBook';
+import InputCommon from './components/InputCommon';
+import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import { chainInfosWithIcon } from 'config/chainInfos';
 import SelectToken from './SelectToken';
 import SelectChain from './SelectChain';
@@ -122,6 +127,9 @@ const SwapComponent: React.FC<{
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [addressTransfer, setAddressTransfer] = useState('');
+  const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
+  const { handleReadClipboard } = useCopyClipboard();
+
   useGetFeeConfig();
 
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
@@ -593,14 +601,55 @@ const SwapComponent: React.FC<{
             </div>
           </div>
 
-          <div className={cx('recipient')}>
+          {/* <div
+            className={cx('recipient')}
+            onClick={() => {
+              dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+            }}
+          >
             <div className={cx('label')}>Recipient address:</div>
+
             <div className={cx('content')}>
               <span className={cx('address')}>{reduceString(addressTransfer, 10, 10)}</span>
               <span className={cx('paste')}>PASTE</span>
             </div>
           </div>
+          */}
 
+          <div className={cx('recipient')}>
+            <InputCommon
+              isOnViewPort={currentAddressManagementStep === AddressManagementStep.INIT}
+              title="Recipient address"
+              value={addressTransfer}
+              onChange={(val) => setAddressTransfer(val)}
+              showPreviewOnBlur
+              suffix={
+                <div
+                  onClick={() => {
+                    handleReadClipboard((text) => setAddressTransfer(text));
+                  }}
+                >
+                  PASTE
+                </div>
+              }
+              extraButton={
+                <div className={cx('extraBtn')}>
+                  <BookIcon
+                    onClick={() => {
+                      dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                    }}
+                  />
+                  <span
+                    onClick={() => {
+                      dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                    }}
+                  >
+                    Address Book
+                  </span>
+                </div>
+              }
+            />
+          </div>
           <div className={cx('slippage')}>
             <div className={cx('label')}>
               <span>Slippage tolerance</span>
@@ -752,36 +801,13 @@ const SwapComponent: React.FC<{
           isSelectToken={isSelectChainFrom}
         />
       </div>
-      {/* {isSelectTo && (
-        <SelectTokenModalV2
-          close={() => setIsSelectTo(false)}
-          prices={prices}
-          items={filteredToTokens}
-          amounts={amounts}
-          setToken={(denom) => {
-            setSwapTokens([fromTokenDenom, denom]);
-            handleUpdateQueryURL([fromTokenDenom, denom]);
-          }}
-          setSearchTokenName={setSearchTokenName}
-          searchTokenName={searchTokenName}
-          title="Receive Token List"
-        />
-      )} */}
-      {/* {isSelectFrom && (
-        <SelectTokenModalV2
-          close={() => setIsSelectFrom(false)}
-          prices={prices}
-          items={filteredFromTokens}
-          amounts={amounts}
-          setToken={(denom) => {
-            setSwapTokens([denom, toTokenDenom]);
-            handleUpdateQueryURL([denom, toTokenDenom]);
-          }}
-          setSearchTokenName={setSearchTokenName}
-          searchTokenName={searchTokenName}
-          title="Pay Token List"
-        />
-      )} */}
+
+      <AddressBook
+        onSelected={(addr: string) => {
+          setAddressTransfer(addr);
+        }}
+        tokenTo={originalToToken}
+      />
     </div>
   );
 };

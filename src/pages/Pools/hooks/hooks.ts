@@ -23,8 +23,8 @@ import { RewardPoolType } from 'reducer/config';
 export const calculateLpPoolsV3 = (lpAddresses: string[], res: AggregateResult) => {
   const lpTokenData = Object.fromEntries(
     lpAddresses.map((lpAddress, ind) => {
-      const data = res.return_data[ind];
-      if (!data.success) {
+      const data = res.return_data?.[ind];
+      if (!data?.success) {
         return [lpAddress, {}];
       }
       return [lpAddress, fromBinary(data.data)];
