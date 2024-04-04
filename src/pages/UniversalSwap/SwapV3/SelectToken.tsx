@@ -132,7 +132,7 @@ export default function SelectToken({
                 .filter(
                   (item) =>
                     (textChain ? item.chainId === textChain : true) &&
-                    (textSearch ? item.org.toLowerCase().includes(textSearch.toLowerCase()) : true)
+                    (textSearch ? item.name.toLowerCase().includes(textSearch.toLowerCase()) : true)
                 )
                 .map((token) => {
                   const tokenIcon = getIcon({

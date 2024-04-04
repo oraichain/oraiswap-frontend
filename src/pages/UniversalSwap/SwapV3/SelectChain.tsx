@@ -13,6 +13,7 @@ import { getTotalUsd } from 'libs/utils';
 import { tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { Themes } from 'context/theme-context';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 interface InputSwapProps {
@@ -33,6 +34,15 @@ export default function SelectChain({
   prices,
   theme
 }: InputSwapProps) {
+  const isAllowChainId = (chainId) => ['kawaii_6886-1', 'bitcoin', 'noble-1', 'Neutaro-1'].includes(chainId);
+  const totalUsd = networks.reduce((acc, cur) => {
+    if (isAllowChainId(cur.chainId)) return acc;
+    const subAmounts = Object.fromEntries(
+      Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === cur.chainId)
+    );
+    const totalUsd = getTotalUsd(subAmounts, prices);
+    return acc + totalUsd;
+  }, 0);
   return (
     <>
       <div className={cx('selectChainWrap', isSelectToken ? 'active' : '')}>
@@ -54,10 +64,10 @@ export default function SelectChain({
                     <div>{'All networks'}</div>
                   </div>
                 </div>
-                <div className={styles.selectChainItemValue}>$0</div>
+                <div className={styles.selectChainItemValue}>{formatDisplayUsdt(totalUsd)}</div>
               </div>
               {networks
-                .filter((net) => !['kawaii_6886-1', 'bitcoin', 'noble-1', 'Neutaro-1'].includes(net.chainId))
+                .filter((net) => !isAllowChainId(net.chainId))
                 .map((item) => {
                   const networkIcon = chainIcons.find((chainIcon) => chainIcon.chainId === item.chainId);
                   const key = item.chainId.toString();

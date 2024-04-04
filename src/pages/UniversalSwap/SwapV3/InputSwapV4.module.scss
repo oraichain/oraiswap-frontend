@@ -20,9 +20,13 @@
     justify-content: space-between;
     height: 30px;
     padding: 24px 16px;
+    font-size: 20px;
+    @include mobile {
+      padding: 20px 12px;
+      font-size: 16px;
+    }
     border-radius: 99px;
     cursor: pointer;
-    font-size: 20px;
     font-style: normal;
     font-weight: 600;
     line-height: 150%;
@@ -91,14 +95,25 @@
   @include theme() {
     color: theme-get('colors-neutral-text-body-on-section');
   }
-
   font-size: 14px;
+  @include mobile {
+    font-size: 12px;
+    padding-bottom: 0;
+  }
+
+  &.is-enable-coeff {
+    align-items: flex-start;
+  }
+
   font-weight: 400;
 
   .select-chain {
     display: flex;
     align-items: center;
     gap: 10px;
+    @include mobile {
+      gap: 2px;
+    }
 
     .left {
       @include theme() {
@@ -111,12 +126,21 @@
           }
         }
       }
+      img {
+        @include mobile {
+          width: 16px;
+          height: 16px;
+        }
+      }
       cursor: pointer;
       padding: 4px 8px;
+      gap: 8px;
+      @include mobile {
+        gap: 4px;
+      }
       border-radius: 99px;
       display: flex;
       align-items: center;
-      gap: 8px;
       .icon {
         display: flex;
         align-items: center;
@@ -125,6 +149,10 @@
         .logo {
           width: 22px;
           height: 22px;
+          @include mobile {
+            width: 18px;
+            height: 18px;
+          }
         }
       }
     }
@@ -134,13 +162,19 @@
   }
   .show-balance {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: flex-end;
+    justify-content: flex-end;
+    @include mobile {
+      flex-direction: column;
+    }
     gap: 8px;
+
     &.is-enable-coeff {
       cursor: pointer;
       &:hover {
-        font-weight: 500;
+        // font-weight: 500;
       }
     }
     .coeff {
