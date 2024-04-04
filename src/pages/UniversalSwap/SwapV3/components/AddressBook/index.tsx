@@ -34,13 +34,19 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
   const otherAddressNetwork = listAddresses.filter((a) => a.network.chainName !== tokenTo?.chainId);
 
   return (
-    <div
-      className={`${styles.addressBookWrapper} ${
-        currentAddressManagementStep !== AddressManagementStep.INIT ? styles.active : ''
-      }`}
-    >
-      <div className={styles.overlay}></div>
-      <div className={styles.addressBook} ref={ref}>
+    <div>
+      {currentAddressManagementStep !== AddressManagementStep.INIT && (
+        <div
+          className={styles.overlay}
+          onClick={() => dispatch(setCurrentAddressBookStep(AddressManagementStep.INIT))}
+        ></div>
+      )}
+      <div
+        className={`${styles.addressBook} ${
+          currentAddressManagementStep !== AddressManagementStep.INIT ? styles.active : ''
+        }`}
+        // ref={ref}
+      >
         {[AddressManagementStep.CREATE, AddressManagementStep.EDIT].includes(currentAddressManagementStep) ? (
           <AddressBookForm tokenTo={tokenTo} />
         ) : (

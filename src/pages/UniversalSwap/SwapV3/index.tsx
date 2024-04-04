@@ -838,8 +838,15 @@ const SwapComponent: React.FC<{
         tokenTo={originalToToken}
       />
 
+      {openSetting && (
+        <div
+          className={cx('overlay')}
+          onClick={() => {
+            setOpenSetting(false);
+          }}
+        ></div>
+      )}
       <div className={cx('setting', openSetting ? 'activeSetting' : '')}>
-        <div className={cx('overlay')} onClick={() => setOpenSetting(false)}></div>
         <SlippageModal
           setVisible={setOpenSetting}
           setUserSlippage={setUserSlippage}

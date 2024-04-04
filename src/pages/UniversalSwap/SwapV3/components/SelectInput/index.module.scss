@@ -12,27 +12,26 @@
   top: 0;
   left: 0;
 
-  transition: all 0.3s;
+  transition: all 0.5s;
   transform: translateY(100%);
 
   &.active {
     transform: translateY(0);
   }
-
-  .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-
-    border-radius: 12px;
-    opacity: 0.25;
-    background: #000;
-
-    width: 100%;
-    height: 100%;
-  }
 }
 
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  border-radius: 12px;
+  opacity: 0.25;
+  background: #000;
+
+  width: 100%;
+  height: 100%;
+}
 .selectInput {
   cursor: pointer;
   display: flex;
@@ -91,9 +90,16 @@
     left: 0;
     z-index: 1;
 
+    transition: all 0.5s;
+    transform: translateY(100%);
+
+    &.active {
+      transform: translateY(0);
+    }
+
     display: flex;
     width: 100%;
-    height: 500px;
+    height: 90%;
     padding: 8px;
     flex-direction: column;
     align-items: flex-start;
@@ -180,7 +186,7 @@
 
     .list {
       width: 100%;
-      height: 370px;
+      height: 100%;
       overflow-y: auto;
 
       .item {
