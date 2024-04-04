@@ -20,9 +20,13 @@
     justify-content: space-between;
     height: 30px;
     padding: 24px 16px;
+    font-size: 20px;
+    @include mobile {
+      padding: 20px 12px;
+      font-size: 16px;
+    }
     border-radius: 99px;
     cursor: pointer;
-    font-size: 20px;
     font-style: normal;
     font-weight: 600;
     line-height: 150%;
@@ -91,15 +95,21 @@
   @include theme() {
     color: theme-get('colors-neutral-text-body-on-section');
   }
-
   font-size: 14px;
+  @include mobile {
+    font-size: 12px;
+    padding-bottom: 0;
+  }
+
   font-weight: 400;
 
   .select-chain {
     display: flex;
     align-items: center;
     gap: 10px;
-
+    @include mobile {
+      gap: 2px;
+    }
     .left {
       @include theme() {
         background-color: theme-get('neutral-5');
@@ -113,10 +123,14 @@
       }
       cursor: pointer;
       padding: 4px 8px;
+      gap: 8px;
+      @include mobile {
+        padding: 2px 4px;
+        gap: 4px;
+      }
       border-radius: 99px;
       display: flex;
       align-items: center;
-      gap: 8px;
       .icon {
         display: flex;
         align-items: center;
@@ -125,6 +139,10 @@
         .logo {
           width: 22px;
           height: 22px;
+          @include mobile {
+            width: 18px;
+            height: 18px;
+          }
         }
       }
     }
@@ -137,6 +155,7 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 8px;
+
     &.is-enable-coeff {
       cursor: pointer;
       &:hover {

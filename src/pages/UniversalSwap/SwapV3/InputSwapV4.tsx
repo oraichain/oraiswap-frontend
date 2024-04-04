@@ -90,7 +90,7 @@ export default function InputSwapV4({
               decimals: originalToken?.decimals,
               denom: originalToken?.symbol || token?.name || ''
             }}
-            prefix="Balance: "
+            prefix="Bal: "
             decimalScale={6}
           />
         </div>
