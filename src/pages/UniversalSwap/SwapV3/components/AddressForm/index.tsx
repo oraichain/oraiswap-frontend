@@ -149,7 +149,9 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
           <SelectInput
             title="Select token"
             warningText="Ensure that the selected token matches your entered address to avoid potential loss of funds"
-            listItem={oraichainTokensWithIcon.filter((e) => e.decimals === 6)}
+            listItem={oraichainTokensWithIcon.filter(
+              (e) => e.decimals === 6 && !['kawaii-islands', 'milky-token'].includes(e.coinGeckoId)
+            )}
             prefix={
               CurrentTokenIcon ? (
                 <div className={styles.tokenIcon}>
@@ -165,7 +167,7 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
             label={currentToken && <div>{currentToken?.name}</div>}
             onChange={(item: TokenItemType) => {
               setAddressBook((addressBook) => {
-                return { ...addressBook, token: item, isUniversal: false, network: null };
+                return { ...addressBook, token: item, isUniversal: false, network: fmtListNetworks?.[0] || null };
               });
             }}
             renderItem={renderTokenItem}
