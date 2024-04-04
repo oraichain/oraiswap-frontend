@@ -101,6 +101,10 @@
     padding-bottom: 0;
   }
 
+  &.is-enable-coeff {
+    align-items: flex-start;
+  }
+
   font-weight: 400;
 
   .select-chain {
@@ -110,6 +114,7 @@
     @include mobile {
       gap: 2px;
     }
+
     .left {
       @include theme() {
         background-color: theme-get('neutral-5');
@@ -121,11 +126,16 @@
           }
         }
       }
+      img {
+        @include mobile {
+          width: 16px;
+          height: 16px;
+        }
+      }
       cursor: pointer;
       padding: 4px 8px;
       gap: 8px;
       @include mobile {
-        padding: 2px 4px;
         gap: 4px;
       }
       border-radius: 99px;
@@ -152,14 +162,19 @@
   }
   .show-balance {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: flex-end;
+    justify-content: flex-end;
+    @include mobile {
+      flex-direction: column;
+    }
     gap: 8px;
 
     &.is-enable-coeff {
       cursor: pointer;
       &:hover {
-        font-weight: 500;
+        // font-weight: 500;
       }
     }
     .coeff {

@@ -28,12 +28,11 @@
   }
   .selectToken {
     padding: 16px;
+
     display: flex;
     border-radius: 24px;
 
     flex-direction: column;
-    // overflow-y: auto;
-    // max-height: 550px;
     position: absolute;
     width: 100%;
 
@@ -157,6 +156,12 @@
                 width: 16.5px;
                 height: 16.5px;
                 border-radius: 50%;
+                svg {
+                  @include theme() {
+                    background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
+                  }
+                  border-radius: 50%;
+                }
               }
             }
 
