@@ -36,6 +36,7 @@
     color: theme-get('colors-neutral-text-text-token-name');
     border: 1px solid theme-get('colors-neutral-border-border-bold');
   }
+  overflow: auto;
   padding: 16px;
   display: flex;
   flex-direction: column;

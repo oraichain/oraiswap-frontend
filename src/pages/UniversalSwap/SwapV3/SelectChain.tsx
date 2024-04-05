@@ -34,7 +34,8 @@ export default function SelectChain({
   prices,
   theme
 }: InputSwapProps) {
-  const isAllowChainId = (chainId) => ['kawaii_6886-1', 'bitcoin', 'noble-1', 'Neutaro-1'].includes(chainId);
+  // const isAllowChainId = (chainId) => ['kawaii_6886-1', 'bitcoin', 'noble-1', 'Neutaro-1'].includes(chainId);
+  const isAllowChainId = (chainId) => ['kawaii_6886-1', 'bitcoin'].includes(chainId);
   const totalUsd = networks.reduce((acc, cur) => {
     if (isAllowChainId(cur.chainId)) return acc;
     const subAmounts = Object.fromEntries(
