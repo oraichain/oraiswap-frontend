@@ -62,6 +62,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 }
 
 const timer = {};
+
 async function loadTokens(
   dispatch: Dispatch,
   { oraiAddress, metamaskAddress, tronAddress, btcAddress }: LoadTokenParams
@@ -149,6 +150,41 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
 
   // get all cw20 token contract
   const cw20Tokens = [...oraichainTokens.filter((t) => t.contractAddress)];
+
+  const data = toBinary({
+    balance: { address }
+  });
+
+  const multicall = new MulticallQueryClient(window.client, network.multicall);
+
+  const res = await multicall.aggregate({
+    queries: cw20Tokens.map((t) => ({
+      address: t.contractAddress,
+      data
+    }))
+  });
+
+  const amountDetails = Object.fromEntries(
+    cw20Tokens.map((t, ind) => {
+      if (!res.return_data[ind].success) {
+        return [t.denom, 0];
+      }
+      const balanceRes = fromBinary(res.return_data[ind].data) as OraiswapTokenTypes.BalanceResponse;
+      const amount = balanceRes.balance;
+      return [t.denom, amount];
+    })
+  );
+
+  dispatch(updateAmounts(amountDetails));
+}
+
+async function loadCw20BalanceWithSpecificTokens(dispatch: Dispatch, address: string, specificTokens: string[]) {
+  if (!address) return;
+
+  // get all cw20 token contract
+  const cw20Tokens = [
+    ...oraichainTokens.filter((t) => t.contractAddress && specificTokens.includes(t.contractAddress))
+  ];
 
   const data = toBinary({
     balance: { address }
@@ -298,3 +334,19 @@ export default function useLoadTokens(): (params: LoadTokenParams) => Promise<vo
   const dispatch = useDispatch();
   return loadTokens.bind(null, dispatch);
 }
+
+export function useLoadOraichainTokens(): (oraiAddress: string, specificTokens: string[]) => Promise<void> {
+  const dispatch = useDispatch();
+  return loadOraichainToken.bind(null, dispatch);
+}
+
+export const loadOraichainToken = async (dispatch: Dispatch, oraiAddress: string, specificTokens: string[]) => {
+  clearTimeout(timer[oraiAddress]);
+
+  timer[oraiAddress] = setTimeout(async () => {
+    await Promise.all([
+      loadNativeBalance(dispatch, oraiAddress, { chainId: network.chainId, rpc: network.rpc }),
+      loadCw20BalanceWithSpecificTokens(dispatch, oraiAddress, specificTokens)
+    ]);
+  }, 2000);
+};
