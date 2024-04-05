@@ -1,5 +1,6 @@
 @import 'src/styles/mixins';
 @import 'src/styles/themes';
+@import 'src/styles/variables';
 
 .noticeWrapper {
   z-index: 900;
@@ -8,7 +9,7 @@
   align-items: center;
   position: fixed;
   top: $menu-height;
-  left: 218px;
+  left: $sidebar-width;
 
   @include mobile {
     left: 0;

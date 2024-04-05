@@ -31,7 +31,7 @@ html {
     display: flex;
 
     .appRight {
-      margin-left: 218px;
+      margin-left: $sidebar-width;
       width: 100%;
 
       @include mobile {
