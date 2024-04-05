@@ -20,7 +20,7 @@ import { AddressBookType, AddressManagementStep } from 'reducer/type';
 import InputCommon from '../InputCommon';
 import SelectInput from '../SelectInput';
 import styles from './index.module.scss';
-import { getTokenIcon } from 'pages/UniversalSwap/helpers';
+import { checkValidateAddressWithNetwork, getTokenIcon } from 'pages/UniversalSwap/helpers';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 
@@ -86,6 +86,12 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
     );
   }, []);
 
+  const validAddress = !addressBook?.address
+    ? {
+        isValid: true
+      }
+    : checkValidateAddressWithNetwork(addressBook?.address, tokenTo?.chainId);
+
   return (
     <div className={styles.addressBookForm}>
       <div className={styles.header}>
@@ -143,6 +149,7 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
             });
           }}
           value={addressBook?.address}
+          error={!validAddress?.isValid && 'Invalid address'}
         />
 
         <div className={styles.selectToken}>

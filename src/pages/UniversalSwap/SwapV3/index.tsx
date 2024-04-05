@@ -51,7 +51,7 @@ import { getUsd, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
+import { checkValidateAddressWithNetwork, generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -539,6 +539,17 @@ const SwapComponent: React.FC<{
     setToTokenDenom(token.denom);
   };
 
+  const validAddress = !(
+    walletByNetworks.cosmos ||
+    walletByNetworks.bitcoin ||
+    walletByNetworks.evm ||
+    walletByNetworks.tron
+  )
+    ? {
+        isValid: true
+      }
+    : checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+
   return (
     <div className={cx('swap-box-wrapper')}>
       <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
@@ -676,6 +687,7 @@ const SwapComponent: React.FC<{
                   </span>
                 </div>
               }
+              error={!validAddress?.isValid && 'Invalid address'}
             />
           </div>
           <div className={cx('slippage')}>
