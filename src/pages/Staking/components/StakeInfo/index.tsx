@@ -18,12 +18,13 @@ import { ORAIX_TOKEN_INFO, USDC_TOKEN_INFO } from 'pages/Staking/constants';
 import { useGetLockInfo, useGetMyStakeRewardInfo } from 'pages/Staking/hooks';
 import { useState } from 'react';
 import styles from './index.module.scss';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 
 const StakeInfo = () => {
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const { data: prices } = useCoinGeckoPrices();
-
+  const loadOraichainToken = useLoadOraichainTokens();
   const { myStakeRewardInfo, refetchMyStakeRewardInfo } = useGetMyStakeRewardInfo(
     ORAIX_TOKEN_INFO.contractAddress,
     address
@@ -55,7 +56,7 @@ const StakeInfo = () => {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-
+        loadOraichainToken(address, [USDC_TOKEN_INFO.contractAddress]);
         refetchMyStakeRewardInfo();
         refetchLockInfo();
       }
