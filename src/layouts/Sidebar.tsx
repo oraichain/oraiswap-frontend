@@ -4,6 +4,7 @@ import { ReactComponent as BtcDashboardIcon } from 'assets/icons/ic_btc_dashboar
 import { ReactComponent as PoolIcon } from 'assets/icons/ic_pools.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_staking.svg';
 import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalswap.svg';
+import { ReactComponent as OraidexBetaIcon } from 'assets/icons/ic_beta.svg';
 import { ReactComponent as LogoDownloadOwalletIcon } from 'assets/icons/logo_download.svg';
 import { ReactComponent as DownloadOwalletIcon } from 'assets/icons/logo_owallet_gateway.svg';
 import { ReactComponent as DownloadOwalletIconDark } from 'assets/icons/logo_owallet_gateway_dark.svg';
@@ -31,7 +32,7 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
         <a
           target="_blank"
           href={to}
-          className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme])}
+          className={classNames(styles.menu_item, styles[theme])}
           onClick={() => {
             setOpen(!open);
             onClick(to);
@@ -74,6 +75,7 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
             {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
+            {renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, <OraidexBetaIcon />, true)}
           </div>
         </div>
 

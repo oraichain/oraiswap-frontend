@@ -1,7 +1,9 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
+import { ReactComponent as OraidexBetaIcon } from 'assets/icons/ic_beta.svg';
 import { ReactComponent as BridgeIcon } from 'assets/icons/ic_bridge.svg';
+import { ReactComponent as BtcDashboardIcon } from 'assets/icons/ic_btc_dashboard.svg';
 import { ReactComponent as CohavestIcon } from 'assets/icons/ic_cohavest.svg';
 import { ReactComponent as ExternalLinkIcon } from 'assets/icons/ic_external_link.svg';
 import { ReactComponent as FuturesIcon } from 'assets/icons/ic_futures.svg';
@@ -15,7 +17,6 @@ import { ReactComponent as TelegramIcon } from 'assets/icons/ic_telegram.svg';
 import { ReactComponent as TwitterIcon } from 'assets/icons/ic_twitter.svg';
 import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalswap.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
-import { ReactComponent as BtcDashboardIcon } from 'assets/icons/ic_btc_dashboard.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import classNames from 'classnames';
@@ -121,6 +122,7 @@ const Menu: React.FC = () => {
       {renderLink('/staking', 'Staking', setLink, false, <StakingIcon />)}
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}
+      {renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, true, <OraidexBetaIcon />)}
       <div className={styles.divider}></div>
       {renderLink('https://orderbook.oraidex.io', 'Order Book', () => {}, true, <OrderbookIcon />)}
       {renderLink('https://futures.oraidex.io', 'Futures Trading', () => {}, true, <FuturesIcon />)}
