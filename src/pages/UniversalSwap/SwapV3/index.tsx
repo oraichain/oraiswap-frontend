@@ -11,7 +11,8 @@ import {
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay
+  toDisplay,
+  NetworkChainId
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
@@ -133,6 +134,7 @@ const SwapComponent: React.FC<{
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [addressTransfer, setAddressTransfer] = useState('');
+  const [initAddressTransfer, setInitAddressTransfer] = useState('');
   const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
   const { handleReadClipboard } = useCopyClipboard();
 
@@ -384,6 +386,8 @@ const SwapComponent: React.FC<{
         simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
       }
 
+      const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
+
       const univeralSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -397,6 +401,9 @@ const SwapComponent: React.FC<{
             // @ts-ignore
             averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
           relayerFee: relayerFeeUniversal
+
+          // TODO: add recipientAddress
+          // recipientAddress: isCustomRecipient && addressTransfer
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
@@ -487,6 +494,7 @@ const SwapComponent: React.FC<{
         const findNetwork = networks.find((net) => net.chainId === originalToToken.chainId);
         const address = await getAddressTransfer(findNetwork, walletByNetworks);
         setAddressTransfer(address);
+        setInitAddressTransfer(address);
       }
     })();
   }, [
@@ -722,9 +730,11 @@ const SwapComponent: React.FC<{
               !toAmountToken ||
               fromAmountTokenBalance > fromTokenBalance || // insufficent fund
               !addressTransfer ||
+              !validAddress.isValid ||
               canSwapTo;
 
             let disableMsg: string;
+            if (!validAddress.isValid) disableMsg = `Recipient address not found`;
             if (!addressTransfer) disableMsg = `Recipient address not found`;
             if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
             if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
@@ -828,7 +838,7 @@ const SwapComponent: React.FC<{
           amounts={amounts}
           theme={theme}
           selectChain={selectChainTo}
-          setSelectChain={(chain: string) => {
+          setSelectChain={(chain: NetworkChainId) => {
             setSelectChainTo(chain);
             setTokenDenomFromChain(chain, 'to');
           }}
@@ -841,7 +851,7 @@ const SwapComponent: React.FC<{
           theme={theme}
           prices={prices}
           selectChain={selectChainFrom}
-          setSelectChain={(chain: string) => {
+          setSelectChain={(chain: NetworkChainId) => {
             setSelectChainFrom(chain);
             setTokenDenomFromChain(chain, 'from');
           }}

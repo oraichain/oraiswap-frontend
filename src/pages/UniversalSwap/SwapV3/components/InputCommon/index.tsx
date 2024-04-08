@@ -3,6 +3,7 @@ import styles from './index.module.scss';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { reduceString } from 'libs/utils';
 import { ReactComponent as ErrorIcon } from 'assets/icons/icon_error.svg';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { isMobile } from '@walletconnect/browser-utils';
 
 const REDUCE_STRING_ADDRESS = 8;
@@ -75,7 +76,16 @@ const InputCommon: FC<{
             )}
           </div>
         )}
-        {suffix && <div className={styles.suffix}>{suffix}</div>}
+        {suffix && (
+          <div className={styles.suffix}>
+            {value && active && (
+              <div className={styles.clear} onClick={() => onChange('')}>
+                <CloseIcon />
+              </div>
+            )}
+            <div className={styles.paste}>{suffix}</div>
+          </div>
+        )}
       </div>
 
       {showError && error && (
