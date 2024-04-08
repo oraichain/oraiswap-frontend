@@ -10,7 +10,7 @@ import Metamask from 'libs/metamask';
 import Bitcoin from 'libs/bitcoin';
 
 // polyfill
-Tendermint37Client.detectVersion = () => {};
+Tendermint37Client.detectVersion = () => { };
 Tendermint37Client.prototype.status = function () {
   const chainInfo = chainInfos.find((chain) => chain.networkType === 'cosmos' && chain.rpc === this.client.url);
   return {
@@ -144,4 +144,15 @@ if (typeof BigInt === 'undefined') {
   };
 
   (window as any).BigInt = MyBigInt;
+}
+
+// polyfill abort timeout for some old browser not support.
+if (!('timeout' in AbortSignal)) {
+  AbortSignal.prototype.timeout = function (delay: number) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), delay);
+    // Allow Node.js processes to exit early if only the timeout is running
+    timeoutId?.unref?.();
+    return controller.signal;
+  }
 }
