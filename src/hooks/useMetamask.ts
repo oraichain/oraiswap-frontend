@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import useLoadTokens from './useLoadTokens';
 import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
-import { getAddressByEIP191, getWalletByNetworkCosmosFromStorage } from 'helper';
+import { getAddressByEIP191, getWalletByNetworkFromStorage } from 'helper';
 
 const loadAccounts = async (): Promise<string[]> => {
   if (!window.ethereum) return;
@@ -27,40 +27,42 @@ export function useEagerConnect() {
   const loadTokenAmounts = useLoadTokens();
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  const [oraichainAddress, setOraiAddress] = useConfigReducer('address');
+  const [, setOraiAddress] = useConfigReducer('address');
   const { pathname } = useLocation();
   const [chainInfo] = useConfigReducer('chainInfo');
   const mobileMode = isMobile();
 
-  const connect = async (accounts?: string[]) => {
+  const connect = async (accounts?: string[], currentConnectingEvmWalletType?: string) => {
     try {
       accounts = Array.isArray(accounts) ? accounts : await loadAccounts();
       if (accounts && accounts?.length > 0) {
-        const walletType = getWalletByNetworkCosmosFromStorage();
         const metamaskAddress = ethers.utils.getAddress(accounts[0]);
-        let addrAccounts = {
-          metamaskAddress,
-          oraiAddress: undefined
-        };
 
-        if (walletType === 'eip191' && !oraichainAddress) {
+        // current connecting evm wallet
+        if (currentConnectingEvmWalletType) {
+          loadTokenAmounts({ metamaskAddress });
+          setMetamaskAddress(metamaskAddress);
+          return;
+        }
+
+        const walletByNetworks = getWalletByNetworkFromStorage();
+
+        if (walletByNetworks.cosmos === 'eip191') {
           const isSwitchEIP = true;
           const oraiAddress = await getAddressByEIP191(isSwitchEIP);
-          addrAccounts = {
-            ...addrAccounts,
-            oraiAddress
-          };
           setOraiAddress(oraiAddress);
           setCosmosAddress({
             Oraichain: oraiAddress
           });
+          loadTokenAmounts({ oraiAddress });
         }
 
-        loadTokenAmounts(addrAccounts);
-        setMetamaskAddress(metamaskAddress);
+        if (walletByNetworks.evm === 'metamask') {
+          loadTokenAmounts({ metamaskAddress });
+          setMetamaskAddress(metamaskAddress);
+        }
       } else {
         setMetamaskAddress(undefined);
-        console.error('Connect metamask failed!');
       }
     } catch (error) {
       console.log({ errorConnectMetmask: error });

@@ -29,8 +29,7 @@ const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
-  const [walletTypeStore] = useConfigReducer('walletTypeStore');
+  const [, setBtcAddress] = useConfigReducer('btcAddress');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
@@ -126,29 +125,11 @@ const App = () => {
   }, [mobileMode]);
 
   useEffect(() => {
-    (async () => {
-      if (![leapWalletType, 'eip191'].includes(walletTypeStore) || isMobile()) {
-        window.addEventListener('keplr_keystorechange', keplrHandler);
-      }
-    })();
+    window.addEventListener('keplr_keystorechange', keplrHandler);
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
     };
-  }, [walletTypeStore]);
-
-  const keplrGasPriceCheck = async () => {
-    try {
-      const gasPrice = await getNetworkGasPrice(network.chainId);
-      if (!gasPrice) {
-        displayToast(TToastType.TX_INFO, {
-          message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
-          customLink: 'https://www.youtube.com/watch?v=QMqCVUfxDAk'
-        });
-      }
-    } catch (error) {
-      console.log('Error keplrGasPriceCheck: ', error);
-    }
-  };
+  }, []);
 
   const keplrHandler = async () => {
     try {
@@ -165,7 +146,7 @@ const App = () => {
       if (walletByNetworks.cosmos || mobileMode) {
         oraiAddress = await window.Keplr.getKeplrAddr();
         if (oraiAddress) {
-          const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
+          const { listAddressCosmos } = await getListAddressCosmos(oraiAddress, walletByNetworks.cosmos);
           setCosmosAddress(listAddressCosmos);
           setOraiAddress(oraiAddress);
         }
