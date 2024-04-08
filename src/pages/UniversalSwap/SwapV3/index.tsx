@@ -94,19 +94,25 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
-  const { data: prices } = useCoinGeckoPrices();
+  const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
+  const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
+
+  // get token on oraichain to simulate swap amount.
+  const originalFromToken = tokenMap[fromTokenDenomSwap];
+  const originalToToken = tokenMap[toTokenDenomSwap];
+
+  const [selectChainFrom, setSelectChainFrom] = useState(originalFromToken.chainId);
+  const [selectChainTo, setSelectChainTo] = useState(originalToToken.chainId);
 
   const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
   const [isSelectChainTo, setIsSelectChainTo] = useState(false);
 
-  const [selectChainFrom, setSelectChainFrom] = useState('Oraichain');
-  const [selectChainTo, setSelectChainTo] = useState('Oraichain');
-
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
 
-  const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
-  const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
+  const { data: prices } = useCoinGeckoPrices();
+
+  const [visible, setVisible] = useState(false);
 
   const [openSetting, setOpenSetting] = useState(false);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
@@ -162,9 +168,6 @@ const SwapComponent: React.FC<{
     setSwapAmount([displayAmount, toAmountToken]);
   };
 
-  // get token on oraichain to simulate swap amount.
-  const originalFromToken = tokenMap[fromTokenDenomSwap];
-  const originalToToken = tokenMap[toTokenDenomSwap];
   const isEvmSwap = isEvmSwappable({
     fromChainId: originalFromToken.chainId,
     toChainId: originalToToken.chainId,
@@ -226,24 +229,17 @@ const SwapComponent: React.FC<{
       setFromTokenDenom(fromTokenDenom);
       setToTokenDenom(toTokenDenom);
     }
-  }, [fromTokenDenom, toTokenDenom]);
+  }, []);
 
-  const setTokenDenomFromChain = (chainId, setTokenDenom, denom) => {
+  const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
     if (chainId) {
-      const tokenInfo = flattenTokens.find((flat) => flat.chainId === chainId && flat.denom !== denom);
+      const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId); //&& flat.denom !== denom
+
       if (tokenInfo) {
-        setTokenDenom(tokenInfo.denom);
+        handleChangeToken(tokenInfo, type);
       }
     }
   };
-
-  useEffect(() => {
-    setTokenDenomFromChain(selectChainFrom, setFromTokenDenom, toTokenDenom);
-  }, [selectChainFrom]);
-
-  useEffect(() => {
-    setTokenDenomFromChain(selectChainTo, setToTokenDenom, fromTokenDenom);
-  }, [selectChainTo]);
 
   const { fee } = useSwapFee({
     fromToken: originalFromToken,
@@ -532,16 +528,38 @@ const SwapComponent: React.FC<{
     const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
     const setIsSelect = isFrom ? setIsSelectFrom : setIsSelectTo;
 
-    setSelectChain(token.chainId);
-    setIsSelect(false);
-
     if (token.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap)) {
       setFromTokenDenom(toTokenDenomSwap);
       setToTokenDenom(fromTokenDenomSwap);
+
+      setSelectChainFrom(selectChainTo);
+      setSelectChainTo(selectChainFrom);
+
+      handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
     } else {
-      setFromTokenDenom(isFrom ? token.denom : fromTokenDenom);
-      setToTokenDenom(isFrom ? toTokenDenom : token.denom);
+      setFromTokenDenom(isFrom ? token.denom : fromTokenDenomSwap);
+      setToTokenDenom(isFrom ? toTokenDenomSwap : token.denom);
+      setSelectChain(token.chainId);
+      handleUpdateQueryURL(isFrom ? [token.denom, toTokenDenomSwap] : [fromTokenDenomSwap, token.denom]);
     }
+
+    setIsSelect(false);
+  };
+
+  const handleRotateSwapDirection = () => {
+    // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
+    // because non-evm token cannot be swapped to evm token with no Oraichain pool
+    if (isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) && !isEvmNetworkNativeSwapSupported(toToken.chainId)) {
+      return;
+    }
+
+    setSelectChainFrom(selectChainTo);
+    setSelectChainTo(selectChainFrom);
+    setSwapTokens([toTokenDenomSwap, fromTokenDenomSwap]);
+    setFromTokenDenom(toTokenDenomSwap);
+    setToTokenDenom(fromTokenDenomSwap);
+    setSwapAmount([toAmountToken, fromAmountToken]);
+    handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
   };
 
   const validAddress = !(
@@ -596,23 +614,10 @@ const SwapComponent: React.FC<{
             </div>
           </div>
           <div className={cx('swap-icon')}>
-            <div className={cx('wrap-img')}>
+            <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
               <img
                 src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
-                onClick={() => {
-                  // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
-                  // because non-evm token cannot be swapped to evm token with no Oraichain pool
-                  if (
-                    isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) &&
-                    !isEvmNetworkNativeSwapSupported(toToken.chainId)
-                  )
-                    return;
-
-                  setSelectChainFrom(selectChainTo);
-                  setSelectChainTo(selectChainFrom);
-                  setSwapTokens([toTokenDenomSwap, fromTokenDenomSwap]);
-                  setSwapAmount([toAmountToken, fromAmountToken]);
-                }}
+                onClick={handleRotateSwapDirection}
                 alt="ant"
               />
             </div>
@@ -643,21 +648,6 @@ const SwapComponent: React.FC<{
               </div>
             </div>
           </div>
-
-          {/* <div
-            className={cx('recipient')}
-            onClick={() => {
-              dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
-            }}
-          >
-            <div className={cx('label')}>Recipient address:</div>
-
-            <div className={cx('content')}>
-              <span className={cx('address')}>{reduceString(addressTransfer, 10, 10)}</span>
-              <span className={cx('paste')}>PASTE</span>
-            </div>
-          </div>
-          */}
 
           <div className={cx('recipient')}>
             <InputCommon
@@ -698,25 +688,24 @@ const SwapComponent: React.FC<{
           <div className={cx('slippage')}>
             <div className={cx('label')}>
               <span>Slippage tolerance</span>
-              <IconTooltip width={20} height={20} />
+
+              <TooltipIcon
+                placement="top-start"
+                visible={visible}
+                icon={<IconTooltip />}
+                setVisible={setVisible}
+                content={
+                  <div className={cx('tooltip', theme)}>
+                    Set your maximum price slippage. If the price changes beyond this, your transaction may not be
+                    successful.
+                  </div>
+                }
+              />
             </div>
             <div className={cx('info')}>
               <span className={cx('value')}>{userSlippage}%</span>
               <span className={cx('icon')} onClick={() => setOpenSetting(true)}>
                 <IconOirSettings onClick={() => setOpenSetting(true)} />
-                {/* <TooltipIcon
-                  placement="bottom-end"
-                  visible={visible}
-                  icon={<IconOirSettings />}
-                  setVisible={setVisible}
-                  content={
-                    <SlippageModal
-                      setVisible={setVisible}
-                      setUserSlippage={setUserSlippage}
-                      userSlippage={userSlippage}
-                    />
-                  }
-                /> */}
               </span>
             </div>
           </div>
@@ -812,7 +801,10 @@ const SwapComponent: React.FC<{
           setIsSelectToken={setIsSelectTo}
           amounts={amounts}
           prices={prices}
-          handleChangeToken={(token) => handleChangeToken(token, 'to')}
+          handleChangeToken={(token) => {
+            handleChangeToken(token, 'to');
+            // handleUpdateQueryURL([fromTokenDenomSwap, token.denom]);
+          }}
           items={filteredToTokens}
           theme={theme}
           selectChain={selectChainTo}
@@ -825,7 +817,10 @@ const SwapComponent: React.FC<{
           theme={theme}
           selectChain={selectChainFrom}
           items={filteredToTokens}
-          handleChangeToken={(token) => handleChangeToken(token, 'from')}
+          handleChangeToken={(token) => {
+            handleChangeToken(token, 'from');
+            // handleUpdateQueryURL([token.denom, toTokenDenomSwap]);
+          }}
           isSelectToken={isSelectFrom}
         />
         <SelectChain
@@ -833,7 +828,10 @@ const SwapComponent: React.FC<{
           amounts={amounts}
           theme={theme}
           selectChain={selectChainTo}
-          setSelectChain={setSelectChainTo}
+          setSelectChain={(chain: string) => {
+            setSelectChainTo(chain);
+            setTokenDenomFromChain(chain, 'to');
+          }}
           prices={prices}
           isSelectToken={isSelectChainTo}
         />
@@ -843,7 +841,10 @@ const SwapComponent: React.FC<{
           theme={theme}
           prices={prices}
           selectChain={selectChainFrom}
-          setSelectChain={setSelectChainFrom}
+          setSelectChain={(chain: string) => {
+            setSelectChainFrom(chain);
+            setTokenDenomFromChain(chain, 'from');
+          }}
           isSelectToken={isSelectChainFrom}
         />
       </div>

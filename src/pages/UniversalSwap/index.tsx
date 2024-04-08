@@ -15,10 +15,11 @@ import { DuckDb } from 'libs/duckdb';
 import useTheme from 'hooks/useTheme';
 import { PAIRS_CHART } from 'config/pools';
 import { useGetPriceChange } from 'pages/Pools/hooks';
+import { initPairSwap } from './SwapV3/hooks/useFillToken';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
-  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(['orai', 'usdt']);
+  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(initPairSwap);
   const [hideChart, setHideChart] = useState<boolean>(false);
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);

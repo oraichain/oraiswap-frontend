@@ -3,6 +3,10 @@ import styles from './index.module.scss';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { reduceString } from 'libs/utils';
 import { ReactComponent as ErrorIcon } from 'assets/icons/icon_error.svg';
+import { isMobile } from '@walletconnect/browser-utils';
+
+const REDUCE_STRING_ADDRESS = 8;
+const REDUCE_STRING_ADDRESS_MOBILE = 6;
 
 const InputCommon: FC<{
   title: string;
@@ -20,6 +24,7 @@ const InputCommon: FC<{
 }> = ({ title, onChange, value, suffix, extraButton, showPreviewOnBlur, isOnViewPort = true, error }) => {
   const [active, setActive] = useState(false);
   const [showError, setShowError] = useState(false);
+  const mobileMode = isMobile();
 
   const inputRef = useRef<HTMLInputElement>();
   const ref = useRef();
@@ -61,7 +66,15 @@ const InputCommon: FC<{
           />
           {extraButton && <div className={`${styles.extraBtn} ${active ? styles.activeExtra : ''}`}>{extraButton}</div>}
         </div>
-        {!active && value && showPreviewOnBlur && <div className={styles.prev}>{reduceString(value, 8, 8)}</div>}
+        {!active && value && showPreviewOnBlur && (
+          <div className={styles.prev}>
+            {reduceString(
+              value,
+              mobileMode ? REDUCE_STRING_ADDRESS_MOBILE : REDUCE_STRING_ADDRESS,
+              mobileMode ? REDUCE_STRING_ADDRESS_MOBILE : REDUCE_STRING_ADDRESS
+            )}
+          </div>
+        )}
         {suffix && <div className={styles.suffix}>{suffix}</div>}
       </div>
 
