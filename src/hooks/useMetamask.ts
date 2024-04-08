@@ -27,7 +27,7 @@ export function useEagerConnect() {
   const loadTokenAmounts = useLoadTokens();
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  const [, setOraiAddress] = useConfigReducer('address');
+  const [oraichainAddress, setOraiAddress] = useConfigReducer('address');
   const { pathname } = useLocation();
   const [chainInfo] = useConfigReducer('chainInfo');
   const mobileMode = isMobile();
@@ -43,7 +43,7 @@ export function useEagerConnect() {
           oraiAddress: undefined
         };
 
-        if (walletType === 'eip191') {
+        if (walletType === 'eip191' && !oraichainAddress) {
           const isSwitchEIP = true;
           const oraiAddress = await getAddressByEIP191(isSwitchEIP);
           addrAccounts = {
