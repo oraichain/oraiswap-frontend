@@ -228,9 +228,9 @@ const SwapComponent: React.FC<{
     }
   }, [fromTokenDenom, toTokenDenom]);
 
-  const setTokenDenomFromChain = (chainId, setTokenDenom) => {
+  const setTokenDenomFromChain = (chainId, setTokenDenom, denom) => {
     if (chainId) {
-      const tokenInfo = flattenTokens.find((flat) => flat.chainId === chainId);
+      const tokenInfo = flattenTokens.find((flat) => flat.chainId === chainId && flat.denom !== denom);
       if (tokenInfo) {
         setTokenDenom(tokenInfo.denom);
       }
@@ -238,11 +238,11 @@ const SwapComponent: React.FC<{
   };
 
   useEffect(() => {
-    setTokenDenomFromChain(selectChainFrom, setFromTokenDenom);
+    setTokenDenomFromChain(selectChainFrom, setFromTokenDenom, toTokenDenom);
   }, [selectChainFrom]);
 
   useEffect(() => {
-    setTokenDenomFromChain(selectChainTo, setToTokenDenom);
+    setTokenDenomFromChain(selectChainTo, setToTokenDenom, fromTokenDenom);
   }, [selectChainTo]);
 
   const { fee } = useSwapFee({
@@ -528,15 +528,20 @@ const SwapComponent: React.FC<{
   };
 
   const handleChangeToken = (token, type) => {
-    if (type === 'from') {
-      setSelectChainFrom(token.chainId);
-      setIsSelectFrom(false);
-      setFromTokenDenom(token.denom);
-      return;
+    const isFrom = type === 'from';
+    const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
+    const setIsSelect = isFrom ? setIsSelectFrom : setIsSelectTo;
+
+    setSelectChain(token.chainId);
+    setIsSelect(false);
+
+    if (token.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap)) {
+      setFromTokenDenom(toTokenDenomSwap);
+      setToTokenDenom(fromTokenDenomSwap);
+    } else {
+      setFromTokenDenom(isFrom ? token.denom : fromTokenDenom);
+      setToTokenDenom(isFrom ? toTokenDenom : token.denom);
     }
-    setSelectChainTo(token.chainId);
-    setIsSelectTo(false);
-    setToTokenDenom(token.denom);
   };
 
   const validAddress = !(
