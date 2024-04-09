@@ -36,6 +36,12 @@ const addressBookSlice = createSlice({
 
       state.addresses = newList;
     },
+
+    removeAddressBookItem: (state, action: PayloadAction<AddressBookType>) => {
+      const newList = state.addresses?.filter((a) => a.id !== action.payload?.id);
+
+      state.addresses = newList;
+    },
     setEditedWallet: (state, action: PayloadAction<AddressBookType>) => {
       state.currentEditedWallet = action.payload;
     }
@@ -48,6 +54,7 @@ export const {
   setAddressBookList,
   addAddressBookList,
   editAddressBookList,
+  removeAddressBookItem,
   setEditedWallet
 } = addressBookSlice.actions;
 

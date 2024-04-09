@@ -139,11 +139,18 @@
     flex: 1;
     display: flex;
     align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
     width: 100%;
     padding: 0 16px;
 
     button {
       width: 100%;
+    }
+
+    @include mobile {
+      flex-direction: column-reverse;
+      gap: 8px;
     }
   }
 }

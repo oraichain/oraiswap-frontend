@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   addAddressBookList,
   editAddressBookList,
+  removeAddressBookItem,
   selectCurrentAddressBookStep,
   selectEditedWallet,
   setCurrentAddressBookStep
@@ -249,10 +250,20 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
         />
       </div>
       <div className={styles.btn}>
+        {currentStep === AddressManagementStep.EDIT && (
+          <Button
+            type="error"
+            onClick={() => {
+              dispatch(removeAddressBookItem(addressBook));
+              dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+            }}
+          >
+            Remove address
+          </Button>
+        )}
         <Button
           type="primary"
           onClick={() => {
-            console.log('addressBook', addressBook);
             if (currentStep === AddressManagementStep.CREATE) {
               dispatch(addAddressBookList(addressBook));
             } else if (currentStep === AddressManagementStep.EDIT) {
@@ -265,7 +276,8 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
             !addressBook?.walletName ||
             !addressBook?.address ||
             !addressBook?.network ||
-            !(addressBook?.isUniversal || addressBook?.token)
+            !(addressBook?.isUniversal || addressBook?.token) ||
+            !validAddress.isValid
           }
         >
           Save
