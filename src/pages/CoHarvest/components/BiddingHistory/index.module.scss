@@ -15,11 +15,8 @@
   }
 
   .historyList {
-    width: 34%;
-
-    @include medium-desktop {
-      width: 44%;
-    }
+    width: 35%;
+    min-width: 300px;
 
     @include mobile {
       width: 100%;
@@ -27,11 +24,7 @@
   }
 
   .historyDetail {
-    width: calc(66% - 40px);
-
-    @include medium-desktop {
-      width: 54%;
-    }
+    width: calc(65% - 40px);
 
     @include mobile {
       width: 100%;

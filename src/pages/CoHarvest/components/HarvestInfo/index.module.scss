@@ -21,6 +21,14 @@
       display: flex;
       justify-content: space-between;
 
+      @include medium-desktop {
+        flex-direction: column;
+      }
+
+      @include mobile {
+        flex-direction: row;
+      }
+
       @include small-mobile {
         flex-direction: column;
       }

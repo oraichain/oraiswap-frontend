@@ -29,6 +29,7 @@ import { RootState } from 'store/configure';
 import InputBalance from '../InputBalance';
 import InputRange from '../InputRange';
 import styles from './index.module.scss';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 
 export type BiddingProps = {
   openExplainModal: () => void;
@@ -44,6 +45,7 @@ const Bidding = ({ openExplainModal, isEnd, round, isStarted, isCurrentRound, ba
   const [amount, setAmount] = useState();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
+  const loadOraichainToken = useLoadOraichainTokens();
   const balance = amounts['oraix'];
   const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
   const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
@@ -199,6 +201,7 @@ const Bidding = ({ openExplainModal, isEnd, round, isStarted, isCurrentRound, ba
                 refetchAllBidPoolRound();
                 refetchHistoryBidPool();
                 refetchBiddingInfo();
+                loadOraichainToken(address, [ORAIX_TOKEN_INFO.contractAddress]);
                 // setAmount(undefined);
                 // setRange(1);
               }
