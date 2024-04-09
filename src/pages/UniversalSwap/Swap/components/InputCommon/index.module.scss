@@ -89,6 +89,12 @@
         height: 100%;
         padding: 4px 0;
       }
+
+      &.isDefault {
+        @include theme() {
+          color: theme-get('colors-neutral-text-body-on-section');
+        }
+      }
     }
   }
 
@@ -113,11 +119,13 @@
       cursor: pointer;
       display: flex;
       height: 25px;
+      width: 25px;
       padding: 8px;
       justify-content: center;
       align-items: center;
       gap: 10px;
       border-radius: var(--Dimension-Corner-Radius-button, 99px);
+
       @include theme() {
         background-color: theme-get('colors-neutral-surface-bg-section-3');
         color: theme-get('colors-neutral-text-body-on-row');
@@ -126,6 +134,14 @@
       font-size: 14px;
       font-weight: 400;
       line-height: 150%;
+
+      svg {
+        path {
+          @include theme {
+            fill: theme-get('colors-neutral-text-body-on-row');
+          }
+        }
+      }
     }
 
     .paste {

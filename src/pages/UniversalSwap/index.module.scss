@@ -4,7 +4,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 100px;
+  gap: 64px;
   flex-wrap: nowrap;
   width: 100%;
 
@@ -41,6 +41,10 @@
     &.w40 {
       width: 100%;
       max-width: 500px;
+
+      @include medium-desktop {
+        max-width: 400px;
+      }
     }
   }
 }

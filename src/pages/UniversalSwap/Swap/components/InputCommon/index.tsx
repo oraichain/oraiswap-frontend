@@ -10,6 +10,7 @@ const REDUCE_STRING_ADDRESS = 8;
 const REDUCE_STRING_ADDRESS_MOBILE = 6;
 
 const InputCommon: FC<{
+  defaultValue?: string;
   title: string;
   onChange: (value: string) => void;
   value?: string;
@@ -22,7 +23,17 @@ const InputCommon: FC<{
   isOnViewPort?: boolean;
 
   error?: string;
-}> = ({ title, onChange, value, suffix, extraButton, showPreviewOnBlur, isOnViewPort = true, error }) => {
+}> = ({
+  title,
+  onChange,
+  value,
+  suffix,
+  extraButton,
+  showPreviewOnBlur,
+  isOnViewPort = true,
+  error,
+  defaultValue = ''
+}) => {
   const [active, setActive] = useState(false);
   const [showError, setShowError] = useState(false);
   const mobileMode = isMobile();
@@ -59,7 +70,9 @@ const InputCommon: FC<{
         <div className={styles.prefix}>
           <p>{title}</p>
           <input
-            className={`${styles.input} ${active ? styles.activeInput : ''}`}
+            className={`${styles.input} ${active ? styles.activeInput : ''} ${
+              value === defaultValue ? styles.isDefault : ''
+            }`}
             ref={inputRef}
             type="text"
             value={value}
@@ -78,8 +91,8 @@ const InputCommon: FC<{
         )}
         {suffix && (
           <div className={styles.suffix}>
-            {value && active && (
-              <div className={styles.clear} onClick={() => onChange('')}>
+            {value !== defaultValue && value && active && (
+              <div className={styles.clear} onClick={() => onChange(defaultValue)}>
                 <CloseIcon />
               </div>
             )}

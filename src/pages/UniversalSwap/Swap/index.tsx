@@ -655,6 +655,7 @@ const SwapComponent: React.FC<{
               value={addressTransfer}
               onChange={(val) => setAddressTransfer(val)}
               showPreviewOnBlur
+              defaultValue={initAddressTransfer}
               suffix={
                 <div
                   className={cx('paste')}

@@ -166,10 +166,15 @@
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: flex-end;
+
     @include mobile {
       flex-direction: column;
     }
     gap: 8px;
+
+    & > span {
+      text-align: right;
+    }
 
     &.is-enable-coeff {
       cursor: pointer;
