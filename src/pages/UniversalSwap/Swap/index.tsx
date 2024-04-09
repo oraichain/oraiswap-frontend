@@ -393,10 +393,11 @@ const SwapComponent: React.FC<{
             // @ts-ignore
             averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
           relayerFee: relayerFeeUniversal,
-          recipientAddress: isCustomRecipient && addressTransfer
+          recipientAddress: isCustomRecipient ? addressTransfer : ''
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
+
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
