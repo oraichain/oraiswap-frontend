@@ -1,4 +1,9 @@
-import { CustomChainInfo, TokenItemType, flattenTokens } from '@oraichain/oraidex-common';
+import {
+  CustomChainInfo,
+  TokenItemType,
+  flattenTokens,
+  checkValidateAddressWithNetwork
+} from '@oraichain/oraidex-common';
 import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as SelectTokenIcon } from 'assets/icons/select_token.svg';
@@ -20,7 +25,7 @@ import { AddressBookType, AddressManagementStep } from 'reducer/type';
 import InputCommon from '../InputCommon';
 import SelectInput from '../SelectInput';
 import styles from './index.module.scss';
-import { checkValidateAddressWithNetwork, getTokenIcon } from 'pages/UniversalSwap/helpers';
+import { getTokenIcon } from 'pages/UniversalSwap/helpers';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 
@@ -90,7 +95,7 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
     ? {
         isValid: true
       }
-    : checkValidateAddressWithNetwork(addressBook?.address, tokenTo?.chainId);
+    : checkValidateAddressWithNetwork(addressBook?.address, currentNetwork?.chainId || tokenTo?.chainId);
 
   return (
     <div className={styles.addressBookForm}>
@@ -108,7 +113,9 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
           />
         </div>
 
-        <span className={styles.title}> Add new Address</span>
+        <span className={styles.title}>
+          {currentStep === AddressManagementStep.EDIT ? 'Edit Address' : 'Add new Address'}
+        </span>
 
         <div
           className={styles.close}

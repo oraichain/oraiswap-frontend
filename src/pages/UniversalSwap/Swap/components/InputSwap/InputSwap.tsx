@@ -4,7 +4,7 @@ import cn from 'classnames/bind';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { TokenInfo } from 'types/token';
-import styles from './InputSwapV4.module.scss';
+import styles from './InputSwap.module.scss';
 import { chainInfosWithIcon } from 'config/chainInfos';
 import { Themes } from 'context/theme-context';
 

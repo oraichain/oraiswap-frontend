@@ -3,8 +3,7 @@ import {
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
-  INJECTIVE_CONTRACT,
-  INJECTIVE_ORAICHAIN_DENOM,
+  NetworkChainId,
   TRON_DENOM,
   TokenItemType,
   calculateMinReceive,
@@ -12,7 +11,7 @@ import {
   network,
   toAmount,
   toDisplay,
-  NetworkChainId
+  checkValidateAddressWithNetwork
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
@@ -22,16 +21,19 @@ import {
   isSupportedNoPoolSwapEvm
 } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
-import SwitchDarkImg from 'assets/icons/switch-new.svg';
-import SwitchLightImg from 'assets/icons/switch-new-light.svg';
+import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
-import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
+import { ReactComponent as IconTooltip } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
+import SwitchLightImg from 'assets/icons/switch-new-light.svg';
+import SwitchDarkImg from 'assets/icons/switch-new.svg';
+import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
+import { chainInfosWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
   floatToPercent,
@@ -39,54 +41,44 @@ import {
   getSpecialCoingecko,
   getTransactionUrl,
   handleCheckAddress,
-  handleCheckChainEvmWallet,
   handleErrorTransaction,
   networks
 } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import useLoadTokens from 'hooks/useLoadTokens';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
+import useWalletReducer from 'hooks/useWalletReducer';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { checkValidateAddressWithNetwork, generateNewSymbol } from 'pages/UniversalSwap/helpers';
+import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import { AddressManagementStep } from 'reducer/type';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
-import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
-import { ReactComponent as IconTooltip } from 'assets/icons/icon_tooltip.svg';
-import {
-  AMOUNT_BALANCE_ENTRIES,
-  SwapDirection,
-  checkEvmAddress,
-  filterNonPoolEvmTokens,
-  getSwapType
-} from '../helpers';
-import InputSwap from './InputSwapV4';
+import { SlippageModal, TooltipIcon } from '../Modals';
+import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, getSwapType } from '../helpers';
+import AddressBook from './components/AddressBook';
+import InputCommon from './components/InputCommon';
+import InputSwap from './components/InputSwap/InputSwap';
+import SelectChain from './components/SelectChain/SelectChain';
+import SelectToken from './components/SelectToken/SelectToken';
 import { useGetTransHistory, useSimulate } from './hooks';
+import { useFillToken } from './hooks/useFillToken';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
-import { useFillToken } from './hooks/useFillToken';
-import useWalletReducer from 'hooks/useWalletReducer';
-import { isMobile } from '@walletconnect/browser-utils';
-import { reduceString } from 'libs/utils';
-import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
-import { AddressBookType, AddressManagementStep } from 'reducer/type';
-import AddressBook from './components/AddressBook';
-import InputCommon from './components/InputCommon';
-import { useCopyClipboard } from 'hooks/useCopyClipboard';
-import { chainInfosWithIcon } from 'config/chainInfos';
-import SelectToken from './SelectToken';
-import SelectChain from './SelectChain';
-import useOnClickOutside from 'hooks/useOnClickOutside';
 
 const cx = cn.bind(styles);
+
 // TODO: hardcode decimal relayerFee
 const RELAYER_DECIMAL = 6;
 
@@ -400,10 +392,8 @@ const SwapComponent: React.FC<{
           simulatePrice:
             // @ts-ignore
             averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-          relayerFee: relayerFeeUniversal
-
-          // TODO: add recipientAddress
-          // recipientAddress: isCustomRecipient && addressTransfer
+          relayerFee: relayerFeeUniversal,
+          recipientAddress: isCustomRecipient && addressTransfer
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
@@ -813,7 +803,6 @@ const SwapComponent: React.FC<{
           prices={prices}
           handleChangeToken={(token) => {
             handleChangeToken(token, 'to');
-            // handleUpdateQueryURL([fromTokenDenomSwap, token.denom]);
           }}
           items={filteredToTokens}
           theme={theme}
@@ -829,7 +818,6 @@ const SwapComponent: React.FC<{
           items={filteredToTokens}
           handleChangeToken={(token) => {
             handleChangeToken(token, 'from');
-            // handleUpdateQueryURL([token.denom, toTokenDenomSwap]);
           }}
           isSelectToken={isSelectFrom}
         />

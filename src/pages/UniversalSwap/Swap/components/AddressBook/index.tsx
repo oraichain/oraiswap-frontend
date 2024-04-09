@@ -15,9 +15,10 @@ import {
   setCurrentAddressBookStep,
   setEditedWallet
 } from 'reducer/addressBook';
-import { AddressBookType, AddressManagementStep } from 'reducer/type';
+import { AddressManagementStep } from 'reducer/type';
 import AddressBookForm from '../AddressForm';
 import styles from './index.module.scss';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 
 const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelected: (addr: string) => void }) => {
   const dispatch = useDispatch();
@@ -30,15 +31,22 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
     dispatch(setCurrentAddressBookStep(AddressManagementStep.INIT));
   });
 
-  const addressesWithCurrentNetwork = listAddresses.filter((a) => a.network.chainId === tokenTo?.chainId);
-  const otherAddressNetwork = listAddresses.filter((a) => a.network.chainName !== tokenTo?.chainId);
+  const addressesWithCurrentNetwork = listAddresses.filter(
+    (a) => a.network.chainId === tokenTo?.chainId && (a.isUniversal || a.token.coinGeckoId === tokenTo?.coinGeckoId)
+  );
+  const otherAddressNetwork = listAddresses.filter(
+    (a) => a.network.chainName !== tokenTo?.chainId || (!a.isUniversal && a.token.coinGeckoId !== tokenTo?.coinGeckoId)
+  );
 
   return (
     <div>
       {currentAddressManagementStep !== AddressManagementStep.INIT && (
         <div
           className={styles.overlay}
-          onClick={() => dispatch(setCurrentAddressBookStep(AddressManagementStep.INIT))}
+          onClick={() =>
+            currentAddressManagementStep === AddressManagementStep.SELECT &&
+            dispatch(setCurrentAddressBookStep(AddressManagementStep.INIT))
+          }
         ></div>
       )}
       <div
@@ -69,6 +77,18 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
 
             {listAddresses?.length > 0 ? (
               <div className={styles.list}>
+                {addressesWithCurrentNetwork?.length > 0 && (
+                  <div className={`${styles.warningBox} ${styles[theme]}`}>
+                    <div>
+                      <TooltipIcon width={20} height={20} />
+                    </div>
+                    <span>
+                      Ensure that the token and network of the selected address match your entered token to avoid
+                      potential loss of funds
+                    </span>
+                  </div>
+                )}
+
                 {addressesWithCurrentNetwork.map((item, key) => {
                   const IconToken = getTokenIcon(item.token, theme);
 
@@ -124,7 +144,7 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
                 )}
 
                 {otherAddressNetwork?.length > 0 && (
-                  <span className={styles.warning}>Sending assets to other networks may not be credited</span>
+                  <span className={styles.warning}>Sending assets to the addresses below may not be credited</span>
                 )}
 
                 {otherAddressNetwork?.map((item, key) => {

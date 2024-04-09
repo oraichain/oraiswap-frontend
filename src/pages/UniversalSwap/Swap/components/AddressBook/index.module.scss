@@ -326,3 +326,43 @@ $padding-default: 16px;
     }
   }
 }
+
+.warningBox {
+  margin: 0 16px;
+  display: flex;
+  gap: 12px;
+  background: $light-shade-color;
+  padding: 8px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 150%; /* 21px */
+
+  span {
+    color: $yellow-brown-color;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+
+    path {
+      stroke: $yellow-brown-color;
+    }
+  }
+
+  &.dark {
+    background: $warning-surface-default-subtle;
+    span {
+      color: $warning-surface-default;
+    }
+
+    svg {
+      path {
+        stroke: $warning-surface-default;
+      }
+    }
+  }
+}
