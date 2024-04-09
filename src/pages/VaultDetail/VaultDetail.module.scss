@@ -1,0 +1,71 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.vaultDetail {
+    max-width: 90%;
+    margin: 40px auto 0;
+
+    @media screen and (max-width: 1200px) {
+        max-width: 95%;
+    }
+
+    @include small-mobile {
+        margin-top: 85px;
+    }
+
+    .backWrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px;
+        border-bottom: 2px;
+        margin-bottom: 16px;
+        gap: 8px;
+
+        @include small-mobile {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .back {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            width: fit-content;
+
+            @include mobile {
+                text-decoration: underline;
+            }
+
+            .backIcon {
+                @include theme() {
+                    path {
+                        stroke: theme-get('neutral-text-text-token-name');
+                    }
+                }
+            }
+
+            span {
+                margin-left: 5px;
+                border-bottom: 2px solid transparent;
+
+                @include theme() {
+                    color: theme-get('neutral-text-text-token-name');
+
+                    &:hover {
+                        border-color: theme-get('neutral-text-text-token-name');
+                    }
+
+                    @include mobile {
+                        &:hover {
+                            border: none;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
