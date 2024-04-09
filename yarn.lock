@@ -2980,9 +2980,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.78":
-  version "1.0.82"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.82.tgz#4b8ae4a7cbe383eac7c6aaffd7d4fa7dd76954f9"
-  integrity sha512-KtQeV5f4YqFTFalmJLTzn3iK5d4C1yHvZuKSI/gQoksW4himXg7vHLpQEwMIeakcDdQVVWldQ+ozRH/aL5k8OA==
+  version "1.0.83"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.83.tgz#2e525f8210904ff709e9c9d364322a85c55ae17a"
+  integrity sha512-nVPlhhOvAvo5Cz/Z45K5l1CBEspfljD1BlUFe9pqld+Uc5spCF5trJcYhN7/512+B/3Kaathy3n7AB+nk6/TBQ==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"
