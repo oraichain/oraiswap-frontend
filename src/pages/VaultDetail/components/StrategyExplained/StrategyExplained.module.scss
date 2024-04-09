@@ -1,0 +1,30 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.explain {
+  .explainContent {
+    margin-bottom: 24px;
+
+    h3 {
+      @include theme() {
+        color: theme-get('neutral-text-text-token-name');
+      }
+
+      margin-bottom: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 150%;
+    }
+
+    p {
+      @include theme() {
+        color: theme-get('neutral-text-title');
+      }
+
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%;
+    }
+  }
+}

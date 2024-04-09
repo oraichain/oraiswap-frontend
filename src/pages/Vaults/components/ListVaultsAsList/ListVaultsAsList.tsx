@@ -7,7 +7,6 @@ import styles from './ListVaultsAsList.module.scss';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as BoostIconDark } from 'assets/icons/ic_apr_boost_dark.svg';
 import { ReactComponent as BoostIconLight } from 'assets/icons/ic_apr_boost_light.svg';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 
 type ListPoolProps = {};
 

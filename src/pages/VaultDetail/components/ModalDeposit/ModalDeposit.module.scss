@@ -1,0 +1,247 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.modal {
+  max-width: 568px;
+
+  @include small-mobile {
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  .container {
+    background-color: #121511;
+
+    &.light {
+      background: #fff;
+    }
+
+    margin: auto;
+    border-radius: 16px;
+    padding: 24px;
+    max-height: 100vh;
+    overflow-y: auto;
+
+    @include small-mobile {
+      padding: 24px 10px;
+
+      border-end-end-radius: 0px;
+      border-end-start-radius: 0px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      line-height: normal;
+      margin-bottom: 24px;
+
+      .btn-group {
+        display: flex;
+        align-items: center;
+
+        .btn-close {
+          margin-left: 18px;
+          cursor: pointer;
+          width: 30px;
+          height: 30px;
+        }
+      }
+    }
+
+    .title {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 22px;
+      line-height: 100%;
+      /* identical to box height, or 22px */
+
+      font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+
+      /* aiRight/White */
+
+      color: #ffffff;
+
+      &.light {
+        color: $light-text-color;
+      }
+    }
+
+    .switch {
+      margin: 38px 0;
+      display: flex;
+      flex-direction: row;
+
+      padding: 6px;
+
+      /* aiRight/Dark BG */
+
+      background: #141416;
+
+      &.light {
+        background: $light-bg-btn-active-gray;
+        color: $light-text-color-gray;
+      }
+
+      border-radius: 16px;
+
+      font-style: normal;
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 100%;
+      /* identical to box height, or 18px */
+
+      /* aiRight/Gray 5 */
+
+      color: #dee1eb;
+
+      div {
+        width: calc((100% - 12px) / 2);
+        text-align: center;
+        padding: 13.5px;
+        cursor: pointer;
+      }
+
+      .active-tab {
+        color: #333333;
+
+        background: #ffffff;
+        border-radius: 12px;
+
+        line-height: 100%;
+      }
+    }
+
+    .swap-icon {
+      padding: 12px;
+      height: 48px;
+      text-align: center;
+
+      img {
+        margin: auto;
+        height: 24px;
+        width: 24px;
+      }
+    }
+
+    .detail {
+      margin-top: 32px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+
+      .arrow-down {
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        border-radius: 50%;
+        border: 6px solid;
+        border-color: #121511;
+
+        &.light {
+          border-color: #fff;
+        }
+
+        .inner-arrow {
+          display: flex;
+          padding: 8px;
+          border-radius: 50%;
+          background-color: #232521;
+
+          &.light {
+            background-color: #f7f7f7;
+          }
+        }
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 16px;
+        border-radius: 8px;
+
+        background-color: #232521;
+        color: #f7f7f7;
+
+        &.light {
+          color: #232521;
+          background-color: #f7f7f7;
+        }
+
+        .row-title {
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 150%;
+        }
+
+        .row-amount {
+          font-size: 18px;
+          font-style: normal;
+          font-weight: 600;
+          line-height: 150%;
+        }
+      }
+    }
+
+    .btn-confirm {
+      display: flex;
+      margin-top: 12px;
+
+      button {
+        gap: 10px;
+        width: 100%;
+      }
+    }
+  }
+}
+
+//responsive
+@media (max-width: 575px) {
+  .modal {
+    .container {
+      max-height: 85vh;
+
+      .title {
+        font-size: 18px;
+      }
+
+      .supply {
+        padding: 16px 0;
+
+        .header {
+          .title {
+            font-size: 16px;
+          }
+        }
+
+        .input {
+          .amount {
+            width: 100%;
+            font-size: 18px;
+          }
+
+          .token {
+            .title {
+              font-size: 16px;
+              height: 36px;
+
+              .des {
+                font-size: 14px;
+              }
+            }
+          }
+        }
+      }
+
+      .switch {
+        padding: 0;
+        font-size: 16px;
+        margin: 24px 0;
+      }
+    }
+  }
+}

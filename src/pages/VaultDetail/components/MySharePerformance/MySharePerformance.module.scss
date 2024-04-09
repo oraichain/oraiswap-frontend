@@ -2,58 +2,79 @@
 @import 'src/styles/variables';
 @import 'src/styles/themes';
 
-.listVaultsWrapper {
-  margin-top: 35px;
+.mySharePerformance {
+  width: 30%;
+  max-width: 380px;
+  min-width: 320px;
+  padding: 29px 24px;
+  border-radius: 16px;
+  border: 1px solid;
+  height: fit-content;
 
-  .header {
+  @include theme() {
+    border-color: theme-get('primary-text-text-link');
+    background-color: theme-get('primary-surface-default-subtle');
+    color: theme-get('primary-surface-default-dark-4');
+  }
+
+  .title {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 150%;
 
-    h3 {
-      @include theme() {
-        color: theme-get('color-neutral-text-title');
-      }
-
-      font-size: 24px;
-      font-weight: 500;
-      line-height: 120%;
-    }
-
-    .viewType {
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      padding: 6px;
-      gap: 6px;
-
-      div {
-        display: flex;
-        padding: 4px;
-        border-radius: 8px;
-        cursor: pointer;
-      }
-
-      @include theme() {
-        background-color: theme-get('color-neutrol-border-default');
-      }
-
-      .active {
-        background-color: $white-color;
-
-        svg {
-          path {
-            stroke: $raisin-black
-          }
+    svg {
+      path {
+        @include theme() {
+          stroke: theme-get('primary-surface-default-dark-4');
         }
       }
     }
   }
-}
 
-.listVault {
-  margin-top: 44px;
-  display: grid;
-  grid-template-columns: auto auto auto;
-  gap: 24px;
-  width: fit-content;
+  .performInfo {
+    margin-bottom: 34px;
+
+    .key {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%;
+      margin-bottom: 10px;
+    }
+
+    .amount {
+      font-size: 24px;
+
+      @include medium-desktop {
+        font-size: 20px;
+      }
+
+      @include mobile {
+        font-size: 14px;
+      }
+
+      font-style: normal;
+      font-weight: 500;
+      line-height: 120%;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+  }
+
+  .cta {
+    display: flex;
+    gap: 12px;
+
+    button {
+      padding: 14.5px 32px;
+    }
+
+    button:first-child {
+      background-color: transparent;
+    }
+  }
 }

@@ -2,58 +2,32 @@
 @import 'src/styles/variables';
 @import 'src/styles/themes';
 
-.listVaultsWrapper {
-  margin-top: 35px;
+.vaultDetailInfo {
+  width: 60%;
 
-  .header {
-    display: flex;
-    justify-content: space-between;
-
-    h3 {
-      @include theme() {
-        color: theme-get('color-neutral-text-title');
-      }
-
-      font-size: 24px;
-      font-weight: 500;
-      line-height: 120%;
-    }
-
-    .viewType {
-      border-radius: 12px;
+  .vaultName {
+    .strategy {
       display: flex;
       align-items: center;
-      padding: 6px;
-      gap: 6px;
+      gap: 10px;
 
-      div {
-        display: flex;
-        padding: 4px;
-        border-radius: 8px;
-        cursor: pointer;
-      }
+      .strategyName {
+        @include theme() {
+          color: theme-get('neutral-text-title');
+        }
 
-      @include theme() {
-        background-color: theme-get('color-neutrol-border-default');
-      }
+        .strategyNameTitle {
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 150%;
+        }
 
-      .active {
-        background-color: $white-color;
-
-        svg {
-          path {
-            stroke: $raisin-black
-          }
+        .strategyNameValue {
+          font-size: 24px;
+          font-weight: 600;
+          line-height: 150%;
         }
       }
     }
   }
-}
-
-.listVault {
-  margin-top: 44px;
-  display: grid;
-  grid-template-columns: auto auto auto;
-  gap: 24px;
-  width: fit-content;
 }
