@@ -1,0 +1,59 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.listVaultsWrapper {
+  margin-top: 35px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+
+    h3 {
+      @include theme() {
+        color: theme-get('color-neutral-text-title');
+      }
+
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 120%;
+    }
+
+    .viewType {
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 6px;
+      gap: 6px;
+
+      div {
+        display: flex;
+        padding: 4px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      @include theme() {
+        background-color: theme-get('color-neutrol-border-default');
+      }
+
+      .active {
+        background-color: $white-color;
+
+        svg {
+          path {
+            stroke: $raisin-black
+          }
+        }
+      }
+    }
+  }
+}
+
+.listVault {
+  margin-top: 44px;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 24px;
+  width: fit-content;
+}

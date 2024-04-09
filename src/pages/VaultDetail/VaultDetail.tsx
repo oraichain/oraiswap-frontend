@@ -3,6 +3,8 @@ import Content from 'layouts/Content';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './VaultDetail.module.scss';
+import { VaultDetailInfo } from './components/VaultDetailInfo';
+import { MySharePerformance } from './components/MySharePerformance';
 
 export const VaultDetail: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +22,11 @@ export const VaultDetail: React.FC = () => {
             <BackIcon className={styles.backIcon} />
             <span>Back to all vaults</span>
           </div>
+        </div>
+
+        <div className={styles.vaultDetailContent}>
+          <VaultDetailInfo />
+          <MySharePerformance />
         </div>
       </div>
     </Content>
