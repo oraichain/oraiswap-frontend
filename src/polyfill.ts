@@ -3,14 +3,14 @@
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import _BigInt from 'big-integer';
 import { chainInfos } from 'config/chainInfos';
-import { getWalletByNetworkCosmosFromStorage } from 'helper';
+import { getWalletByNetworkFromStorage } from 'helper';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 
 import Bitcoin from 'libs/bitcoin';
 
 // polyfill
-Tendermint37Client.detectVersion = () => { };
+Tendermint37Client.detectVersion = () => {};
 Tendermint37Client.prototype.status = function () {
   const chainInfo = chainInfos.find((chain) => chain.networkType === 'cosmos' && chain.rpc === this.client.url);
   return {
@@ -26,10 +26,11 @@ window.TronWeb = require('tronweb');
 window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 // enable Keplr
-const walletType = getWalletByNetworkCosmosFromStorage();
-window.Keplr = new Keplr(walletType);
+const walletType = getWalletByNetworkFromStorage();
+window.Keplr = new Keplr(walletType?.cosmos);
 
-window.ethereumDapp = window.ethereum;
+// window.ethereumDapp = window.ethereum;
+window.ethereumDapp = walletType?.evm === 'owallet' ? window.eth_owallet : window.ethereum;
 window.Bitcoin = new Bitcoin();
 window.Metamask = new Metamask(window.tronWeb);
 
@@ -154,5 +155,5 @@ if (!('timeout' in AbortSignal)) {
     // Allow Node.js processes to exit early if only the timeout is running
     timeoutId?.unref?.();
     return controller.signal;
-  }
+  };
 }
