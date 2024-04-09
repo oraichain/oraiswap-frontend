@@ -61,7 +61,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     if (!window.ethereumDapp || !window.ethereumDapp.chainId) {
       await window.Metamask.switchNetwork(Networks.bsc);
     }
-    await connect();
+    await connect(undefined, walletType);
   };
 
   const handleConnectWalletInTronNetwork = async (walletType: WalletType) => {
