@@ -1,0 +1,20 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.vaults {
+    width: fit-content;
+    padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+
+    padding-left: 50px;
+    padding-right: 50px;
+
+    @include medium-desktop {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+}

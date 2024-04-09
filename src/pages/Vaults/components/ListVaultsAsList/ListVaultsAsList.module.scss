@@ -1,0 +1,23 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.listVault {
+  .listVaultView {
+    .strategy {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .infoApr {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      @include theme() {
+        color: theme-get('primary-sufface-default-dark-4');
+      }
+    }
+  }
+}
