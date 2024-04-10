@@ -223,7 +223,7 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
           renderItem={renderNetworkItem}
         />
 
-        <InputCommon
+        {/* <InputCommon
           title="Memo (Required if send to KuCoin address)"
           onChange={(value) => {
             setAddressBook((addressBook) => {
@@ -234,7 +234,7 @@ const AddressBookForm = ({ tokenTo }: { tokenTo: TokenItemType }) => {
             });
           }}
           value={addressBook?.memo}
-        />
+        /> */}
 
         <InputCommon
           title="Wallet name"
