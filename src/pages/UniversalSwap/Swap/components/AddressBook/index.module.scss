@@ -211,7 +211,7 @@ $padding-default: 16px;
 
             @include theme {
               path {
-                stroke: theme-get('neutral-text-text-token-name-2');
+                // stroke: theme-get('neutral-text-text-token-name-2');
               }
             }
           }
@@ -239,6 +239,8 @@ $padding-default: 16px;
             font-size: 12px;
             font-weight: 500;
             line-height: 150%; /* 18px */
+
+            word-break: break-word;
           }
 
           .extraInfo {

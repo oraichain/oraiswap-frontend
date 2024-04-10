@@ -29,8 +29,7 @@ window.Networks = require('@oraichain/ethereum-multicall').Networks;
 const walletType = getWalletByNetworkFromStorage();
 window.Keplr = new Keplr(walletType?.cosmos);
 
-// window.ethereumDapp = window.ethereum;
-window.ethereumDapp = walletType?.evm === 'owallet' ? window.eth_owallet : window.ethereum;
+window.ethereumDapp = window.ethereum;
 window.Bitcoin = new Bitcoin();
 window.Metamask = new Metamask(window.tronWeb);
 

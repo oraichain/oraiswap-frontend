@@ -380,23 +380,31 @@ const SwapComponent: React.FC<{
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
 
-      const univeralSwapHandler = new UniversalSwapHandler(
-        {
-          sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
-          originalFromToken,
-          originalToToken,
-          fromAmount: fromAmountToken,
-          simulateAmount,
-          userSlippage,
-          amounts: amountsBalance,
-          simulatePrice:
-            // @ts-ignore
-            averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-          relayerFee: relayerFeeUniversal,
-          recipientAddress: isCustomRecipient ? addressTransfer : ''
-        },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
-      );
+      const initSwapData = {
+        sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
+        originalFromToken,
+        originalToToken,
+        fromAmount: fromAmountToken,
+        simulateAmount,
+        userSlippage,
+        amounts: amountsBalance,
+        simulatePrice:
+          // @ts-ignore
+          averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
+        relayerFee: relayerFeeUniversal
+      };
+
+      const compileSwapData = isCustomRecipient
+        ? {
+            ...initSwapData,
+            recipientAddress: addressTransfer
+          }
+        : initSwapData;
+
+      const univeralSwapHandler = new UniversalSwapHandler(compileSwapData, {
+        cosmosWallet: window.Keplr,
+        evmWallet: new Metamask(window.tronWebDapp)
+      });
 
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
@@ -484,6 +492,7 @@ const SwapComponent: React.FC<{
       if (originalToToken.chainId) {
         const findNetwork = networks.find((net) => net.chainId === originalToToken.chainId);
         const address = await getAddressTransfer(findNetwork, walletByNetworks);
+
         setAddressTransfer(address);
         setInitAddressTransfer(address);
       }
@@ -495,7 +504,9 @@ const SwapComponent: React.FC<{
     tronAddress,
     walletByNetworks.evm,
     walletByNetworks.cosmos,
-    walletByNetworks.tron
+    walletByNetworks.tron,
+    window?.ethereumDapp,
+    window?.tronWebDapp
   ]);
 
   const ref = useRef(null);
