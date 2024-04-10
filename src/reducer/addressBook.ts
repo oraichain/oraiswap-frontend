@@ -12,7 +12,7 @@ const initialState: AddressBookManagementState = {
 
 export const updateAddressBookBackup = (data: AddressBookType[]) => {
   try {
-    const addressBookBackup = JSON.stringify(data);
+    const addressBookBackup = JSON.stringify(data || []);
     localStorage.setItem(ADDRESS_BOOK_KEY_BACKUP, addressBookBackup);
   } catch (error) {
     console.log('error backup storage', error);
