@@ -1,14 +1,12 @@
-import { useState } from 'react';
-import styles from './ListVaults.module.scss';
-import { ListVaultsAsColumn } from '../ListVaultsAsColumn';
 import { ReactComponent as ViewAsColumn } from 'assets/icons/ic_view_column.svg';
 import { ReactComponent as ViewAsList } from 'assets/icons/ic_view_list.svg';
+import { useVaultStore } from 'pages/Vaults/hooks';
+import { ListVaultsAsColumn } from '../ListVaultsAsColumn';
 import { ListVaultsAsList } from '../ListVaultsAsList';
-
-export type ViewType = 'column' | 'list';
+import styles from './ListVaults.module.scss';
 
 export const ListVaults = () => {
-  const [viewType, setViewType] = useState<ViewType>('column');
+  const { viewType, setViewType } = useVaultStore();
 
   const generateVaultList = () => {
     return viewType === 'column' ? <ListVaultsAsColumn /> : <ListVaultsAsList />;
