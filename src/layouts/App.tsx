@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { persistor } from 'store/configure';
-import { PERSIST_VER } from 'store/constants';
+import { ADDRESS_BOOK_KEY_BACKUP, PERSIST_VER } from 'store/constants';
 import Menu from './Menu';
 import './index.scss';
 import { NoticeBanner } from './NoticeBanner';
@@ -110,7 +110,6 @@ const App = () => {
   // clear persist storage when update version
   useEffect(() => {
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
-    const prevAddressBook = currentAddressBook;
 
     const clearPersistStorage = () => {
       persistor.pause();
@@ -118,14 +117,18 @@ const App = () => {
         return persistor.purge();
       });
       setPersistVersion(PERSIST_VER);
-      dispatch(setAddressBookList(prevAddressBook));
     };
 
     if (isClearPersistStorage) clearPersistStorage();
 
-    // if (window.keplr && !isMobile()) {
-    //   keplrGasPriceCheck();
-    // }
+    try {
+      const restoredAddressBookJSON = localStorage.getItem(ADDRESS_BOOK_KEY_BACKUP);
+      const restoredAddressBook = JSON.parse(restoredAddressBookJSON);
+
+      dispatch(setAddressBookList(restoredAddressBook));
+    } catch (error) {
+      console.log('error', error);
+    }
   }, []);
 
   useEffect(() => {
