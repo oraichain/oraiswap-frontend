@@ -8,6 +8,15 @@
       display: flex;
       align-items: center;
       gap: 8px;
+
+      @include mobile {
+        font-size: 12px;
+        gap: 4px;
+
+        .strategyNameTitle {
+          font-size: 12px;
+        }
+      }
     }
 
     .infoApr {
@@ -15,9 +24,20 @@
       align-items: center;
       gap: 8px;
 
+      @include mobile {
+        font-size: 12px;
+        gap: 4px;
+      }
+
       @include theme() {
         color: theme-get('primary-sufface-default-dark-4');
       }
+    }
+  }
+
+  .tvl {
+    @include mobile {
+      font-size: 12px;
     }
   }
 }

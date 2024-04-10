@@ -5,18 +5,28 @@
 .listVaultsWrapper {
   margin-top: 35px;
 
+  @include mobile {
+    margin-top: 15px;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 
     h3 {
       @include theme() {
         color: theme-get('color-neutral-text-title');
       }
 
+      margin-bottom: 0;
       font-size: 24px;
       font-weight: 500;
       line-height: 120%;
+
+      @include mobile {
+        font-size: 18px;
+      }
     }
 
     .viewType {

@@ -3,6 +3,10 @@
 @import 'src/styles/themes';
 
 .explain {
+  @include mobile {
+    margin-top: 16px;
+  }
+
   .explainContent {
     margin-bottom: 24px;
 

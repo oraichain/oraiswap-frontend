@@ -13,10 +13,7 @@
     align-items: center;
     gap: 4px;
     align-self: stretch;
-
-    margin-bottom: 16px;
     border-radius: 99px;
-
     font-size: 16px;
     font-weight: 500;
     line-height: 150%;
@@ -28,6 +25,11 @@
     }
 
     .tab {
+      @include mobile {
+        padding: 12px 18px;
+        font-size: 14px;
+      }
+
       cursor: pointer;
       display: flex;
       padding: 12px 24px;
@@ -51,5 +53,10 @@
   .tabContent {
     padding-bottom: 24px;
     padding-top: 14px;
+
+    @include mobile {
+      padding-top: 0;
+    }
+
   }
 }

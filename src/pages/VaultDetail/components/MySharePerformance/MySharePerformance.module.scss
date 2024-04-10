@@ -11,6 +11,10 @@
   border: 1px solid;
   height: fit-content;
 
+  @include mobile {
+    width: auto;
+  }
+
   @include theme() {
     border-color: theme-get('primary-text-text-link');
     background-color: theme-get('primary-surface-default-subtle');
@@ -53,7 +57,7 @@
       }
 
       @include mobile {
-        font-size: 14px;
+        font-size: 20px;
       }
 
       font-style: normal;
@@ -68,13 +72,21 @@
   .cta {
     display: flex;
     gap: 12px;
+    justify-content: space-between;
 
     button {
+      width: 45%;
       padding: 14.5px 32px;
     }
 
     button:first-child {
       background-color: transparent;
+    }
+
+    @include mobile {
+      button {
+        height: 36px;
+      }
     }
   }
 }

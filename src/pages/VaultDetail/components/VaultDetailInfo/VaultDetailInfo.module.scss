@@ -5,6 +5,10 @@
 .vaultDetailInfo {
   width: 60%;
 
+  @include mobile {
+    width: 100%;
+  }
+
   .vaultName {
     .strategy {
       display: flex;

@@ -7,6 +7,7 @@ import styles from './ListVaultsAsList.module.scss';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as BoostIconDark } from 'assets/icons/ic_apr_boost_dark.svg';
 import { ReactComponent as BoostIconLight } from 'assets/icons/ic_apr_boost_light.svg';
+import { isMobile } from '@walletconnect/browser-utils';
 
 type ListPoolProps = {};
 
@@ -101,15 +102,15 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       width: '25%',
       align: 'left',
       sortField: 'tvl',
-      accessor: (data) => <span className={!data.tvl && styles.my_stake_lp}>{formatDisplayUsdt(data.tvl)}</span>
+      accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvl)}</span>
     },
     claimable: {
       name: 'My Share',
       width: '25%',
-      align: 'left',
+      align: isMobile() ? 'right' : 'left',
       sortField: 'myShare',
       accessor: (data) => {
-        return <span className={styles.text_number}>{data.myShare} USDT</span>;
+        return <span className={styles.tvl}>${data.myShare}</span>;
       }
     }
   };

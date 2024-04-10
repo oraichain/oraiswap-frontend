@@ -6,6 +6,10 @@
   border-radius: 12px;
   margin-top: 24px;
 
+  @include mobile {
+    margin-bottom: 16px;
+  }
+
   @include theme() {
     background-color: theme-get('neutral-surface-bg-section');
   }
@@ -13,9 +17,20 @@
   .overviewContainer {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
     padding: 20px 16px;
 
+    @include mobile {
+      .info:nth-child(2) {
+        margin-bottom: 24px;
+      }
+    }
+
     .info {
+      @include mobile {
+        width: 40%;
+      }
+
       h4 {
         @include theme() {
           color: theme-get('neutral-text-body-on-section');

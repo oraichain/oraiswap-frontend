@@ -4,9 +4,13 @@ import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.sv
 import useTheme from 'hooks/useTheme';
 import { VaultDetailOverview } from '../VaultDetailOverview';
 import { VaultInfoTabs } from '../VaultInfoTabs';
+import { isMobile } from '@walletconnect/browser-utils';
+import { MySharePerformance } from '../MySharePerformance';
 
 export const VaultDetailInfo = () => {
   const theme = useTheme();
+  const mobileMode = isMobile();
+
   return (
     <div className={styles.vaultDetailInfo}>
       <div className={styles.vaultName}>
@@ -21,6 +25,7 @@ export const VaultDetailInfo = () => {
         </div>
       </div>
       <VaultDetailOverview />
+      {mobileMode && <MySharePerformance />}
       <VaultInfoTabs />
     </div>
   );

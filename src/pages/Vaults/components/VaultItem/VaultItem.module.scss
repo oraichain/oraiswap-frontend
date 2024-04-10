@@ -44,11 +44,28 @@
           line-height: 150%;
         }
       }
+
+      @include mobile {
+        .strategyNameTitle {
+          font-size: 12px;
+        }
+
+        .strategyName {
+          .strategyNameValue {
+            font-size: 20px;
+          }
+        }
+      }
     }
   }
 
   .vaultContent {
     padding: 24px;
+
+    @include mobile {
+      padding: 16px;
+    }
+
     display: flex;
     flex-direction: column;
     align-items: flex-start;

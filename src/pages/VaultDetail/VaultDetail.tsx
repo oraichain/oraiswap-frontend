@@ -5,9 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import styles from './VaultDetail.module.scss';
 import { VaultDetailInfo } from './components/VaultDetailInfo';
 import { MySharePerformance } from './components/MySharePerformance';
+import { isMobile } from '@walletconnect/browser-utils';
 
 export const VaultDetail: React.FC = () => {
   const navigate = useNavigate();
+  const mobileMode = isMobile();
 
   return (
     <Content nonBackground>
@@ -26,7 +28,7 @@ export const VaultDetail: React.FC = () => {
 
         <div className={styles.vaultDetailContent}>
           <VaultDetailInfo />
-          <MySharePerformance />
+          {!mobileMode && <MySharePerformance />}
         </div>
       </div>
     </Content>

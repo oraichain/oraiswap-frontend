@@ -42,3 +42,20 @@ export const WhatIsVault = () => {
     </div>
   );
 };
+
+export const WhatIsVaultMobile = () => {
+  return (
+    <div className={styles.whatIsVaultMobile}>
+      <div className={styles.content}>
+        <div className={styles.vaultLeft}>
+          <h1 className={styles.heading}>What is the vault?</h1>
+          <p className={styles.description}>
+            OraiDEX empowers you to tap into automated trading and collect rewards through our smart contract vaults.
+            Simply deposit your USDT to start earning.
+          </p>
+        </div>
+      </div>
+      <MyTotalSharePerf />
+    </div>
+  );
+};

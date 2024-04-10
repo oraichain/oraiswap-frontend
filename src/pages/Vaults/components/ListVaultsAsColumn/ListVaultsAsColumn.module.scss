@@ -8,4 +8,10 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 30px;
   width: fit-content;
+
+  @include mobile {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
 }
