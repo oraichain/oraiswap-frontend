@@ -138,6 +138,7 @@ export const SharePriceChart = ({
     const toolTipMargin = 15;
     // Create and style the tooltip html element
     const toolTip = document.createElement('div');
+    // @ts-ignore
     toolTip.style = `width: 106px; height: 100px; position: absolute; display: none; box-sizing: border-box; text-align: left; z-index: 1000; top: 12px; left: 12px; pointer-events: none;`;
     toolTip.style.background = theme === 'light' ? '#FFF' : '#31332E';
     toolTip.style.fontWeight = '500';

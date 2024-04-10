@@ -55,7 +55,6 @@ export const ModalWithdraw: FC<any> = ({ isOpen, close, open, onLiquidityChange,
           token={null}
           setAmountFromPercent={setDepositAmount}
           totalAmount={1n}
-          amountInUsdt={unbondAmountInUsdt}
           prefixText="Max Available to Withdraw: "
         />
         {(() => {

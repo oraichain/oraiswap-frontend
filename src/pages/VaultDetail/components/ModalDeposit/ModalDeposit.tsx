@@ -55,7 +55,6 @@ export const ModalDeposit: FC<any> = ({ isOpen, close, open, onLiquidityChange, 
           token={null}
           setAmountFromPercent={setDepositAmount}
           totalAmount={1n}
-          amountInUsdt={unbondAmountInUsdt}
         />
         {(() => {
           let disableMsg: string;
