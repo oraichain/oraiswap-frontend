@@ -13,16 +13,17 @@ interface ModalProps {
   setUserSlippage: React.Dispatch<React.SetStateAction<number>>;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   userSlippage: number;
+  isBotomSheet?: boolean;
 }
 
-export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) => {
+export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible, isBotomSheet }) => {
   const DEFAULT_INFDEX_SLIPPAGE_OPTION = OPTIONS_SLIPPAGE.indexOf(DEFAULT_SLIPPAGE);
   const [indexChosenOption, setIndexChosenOption] = useState(DEFAULT_INFDEX_SLIPPAGE_OPTION);
   const [theme] = useConfigReducer('theme');
   const [manualSlippage, setManualSlippage] = useState(DEFAULT_SLIPPAGE);
 
   return (
-    <div className={cx('setting', `${theme}-modal`)}>
+    <div className={cx('setting', `${theme}-modal`, { isBotomSheet })}>
       <div className={cx('header')}>
         <div className={cx('title')}>
           <TransSetting className={cx('btn')} />

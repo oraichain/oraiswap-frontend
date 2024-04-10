@@ -86,24 +86,25 @@
   }
 
   .content {
+    min-height: 350px;
+    width: 100%;
+  }
+
+  .columnList {
+    overflow-y: hidden;
     overflow-x: auto;
 
     &::-webkit-scrollbar {
       height: 4px;
     }
 
-    min-height: 350px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
 
-    .columnList {
-      display: flex;
-      justify-content: space-between;
-      // min-width: 900px;
-      padding: 0 16px;
-
-      @include mobile {
-        padding: 0;
-        min-width: 900px;
-      }
+    @include mobile {
+      padding: 0;
     }
   }
 }

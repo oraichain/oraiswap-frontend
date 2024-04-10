@@ -5,11 +5,20 @@
 .swap-box-wrapper {
   border-radius: 24px;
   position: sticky;
-  top: 117px;
+  top: 140px;
+  overflow: hidden;
   z-index: 1;
 
   .custom-loader-root {
     border-radius: 24px;
+  }
+
+  .select-box {
+    padding-top: 10px;
+    transition: all 1s ease;
+    .hidden {
+      height: 0;
+    }
   }
 }
 
@@ -43,7 +52,7 @@
     align-items: center;
     width: 100%;
     gap: 12px;
-    padding: 10px 10px 16px;
+    padding: 0 0 10px 0;
 
     .title {
       font-style: normal;
@@ -286,9 +295,7 @@
     /* identical to box height, or 24px */
 
     text-align: center;
-    font-feature-settings: 'tnum' on,
-    'lnum' on,
-    'zero' on;
+    font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
 
     .token {
       cursor: pointer;
@@ -356,31 +363,96 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
+  margin-top: 6px;
+  font-family: 'IBM Plex Sans';
+  @include theme() {
+    background-color: theme-get('neutral-6');
+  }
+
+  border-radius: 8px;
+  font-size: 15px;
+
+  @include mobile() {
+    font-size: 14px;
+  }
+
+  .content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    .address {
+      cursor: pointer;
+    }
+
+    .paste {
+      padding: 2px 8px;
+      @include theme() {
+        background-color: theme-get('neutral-surface-bg-section-5');
+      }
+      border-radius: 99px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%;
+    }
+  }
+}
+
+.extraBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  @include theme {
+    color: theme-get('primary-text-text-link');
+  }
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 150%; /* 21px */
+
+  svg {
+    vertical-align: middle;
+
+    path {
+      @include theme {
+        stroke: theme-get('primary-text-text-link');
+      }
+    }
+  }
+}
+
+.slippage {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
   padding: 8px 16px;
   margin-top: 6px;
-
   @include theme() {
     background-color: theme-get('neutral-6');
     color: theme-get('neutral-9');
   }
 
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 15px;
 
   @include mobile() {
     font-size: 14px;
   }
-
-  .address {
-    cursor: pointer;
-    // padding-right: 6px;
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
-  .paste {
-    padding: 2px 8px;
-    // background: #494949;
-    border-radius: 99px;
-    cursor: pointer;
+  .info {
+    display: flex;
+    gap: 8px;
+    .icon {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
   }
 }
 
@@ -416,8 +488,8 @@
       border-radius: 50%;
       // background-color: #f7f7f7;
       cursor: pointer;
-      height: 38px;
-      width: 38px;
+      height: 24px;
+      width: 24px;
 
       @include theme() {
         background-color: theme-get('neutral-surface-bg-section');
@@ -510,5 +582,62 @@
     .value {
       text-align: right;
     }
+  }
+}
+
+.setting {
+  width: 100%;
+  height: 30%;
+
+  position: absolute;
+  bottom: 0;
+
+  transition: all 0.5s;
+  transform: translateY(100%);
+
+  &.activeSetting {
+    transform: translateY(0);
+  }
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  border-radius: 12px;
+  opacity: 0.25;
+  background: #000;
+
+  width: 100%;
+  height: 100%;
+}
+
+.tooltip {
+  color: #efefef;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+  text-align: left;
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  border-color: #494949;
+  background: #121511;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+
+  &.light {
+    color: #494949;
+    border-color: #dfe0de;
+    background: #fff;
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+  }
+
+  @include mobile {
+    font-size: 12px;
+    padding: 8px;
+    width: calc(100% - 20px);
   }
 }

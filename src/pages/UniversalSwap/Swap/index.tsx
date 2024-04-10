@@ -3,15 +3,15 @@ import {
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
-  INJECTIVE_CONTRACT,
-  INJECTIVE_ORAICHAIN_DENOM,
+  NetworkChainId,
   TRON_DENOM,
   TokenItemType,
   calculateMinReceive,
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay
+  toDisplay,
+  checkValidateAddressWithNetwork
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
@@ -21,14 +21,19 @@ import {
   isSupportedNoPoolSwapEvm
 } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
-import SwitchDarkImg from 'assets/icons/switch.svg';
-import SwitchLightImg from 'assets/icons/switch_light.svg';
+import { isMobile } from '@walletconnect/browser-utils';
+import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
+import { ReactComponent as IconTooltip } from 'assets/icons/icon_tooltip.svg';
+import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
+import SwitchLightImg from 'assets/icons/switch-new-light.svg';
+import SwitchDarkImg from 'assets/icons/switch-new.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { tokenMap } from 'config/bridgeTokens';
+import { flattenTokens, tokenMap } from 'config/bridgeTokens';
+import { chainInfosWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
   floatToPercent,
@@ -36,22 +41,26 @@ import {
   getSpecialCoingecko,
   getTransactionUrl,
   handleCheckAddress,
-  handleCheckChainEvmWallet,
   handleErrorTransaction,
   networks
 } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import useLoadTokens from 'hooks/useLoadTokens';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
+import useWalletReducer from 'hooks/useWalletReducer';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { genCurrentChain, generateNewSymbol, generateNewSymbolV2 } from 'pages/UniversalSwap/helpers';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
+import { AddressManagementStep } from 'reducer/type';
+import { genCurrentChain, generateNewSymbol, generateNewSymbolV2 } from 'pages/UniversalSwap/helpers';
 import {
   selectCurrentToChain,
   selectCurrentToken,
@@ -62,25 +71,21 @@ import {
 } from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
-import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
-import {
-  AMOUNT_BALANCE_ENTRIES,
-  SwapDirection,
-  checkEvmAddress,
-  filterNonPoolEvmTokens,
-  getSwapType
-} from '../helpers';
-import InputSwap from './InputSwapV3';
+import { SlippageModal, TooltipIcon } from '../Modals';
+import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, getSwapType } from '../helpers';
+import AddressBook from './components/AddressBook';
+import InputCommon from './components/InputCommon';
+import InputSwap from './components/InputSwap/InputSwap';
+import SelectChain from './components/SelectChain/SelectChain';
+import SelectToken from './components/SelectToken/SelectToken';
 import { useGetTransHistory, useSimulate } from './hooks';
+import { useFillToken } from './hooks/useFillToken';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
-import { useFillToken } from './hooks/useFillToken';
-import useWalletReducer from 'hooks/useWalletReducer';
-import { isMobile } from '@walletconnect/browser-utils';
-import { reduceString } from 'libs/utils';
 
 const cx = cn.bind(styles);
+
 // TODO: hardcode decimal relayerFee
 const RELAYER_DECIMAL = 6;
 
@@ -89,12 +94,29 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
-  const { data: prices } = useCoinGeckoPrices();
+  const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
+  const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
+
+  // get token on oraichain to simulate swap amount.
+  const originalFromToken = tokenMap[fromTokenDenomSwap];
+  const originalToToken = tokenMap[toTokenDenomSwap];
+
+  const [selectChainFrom, setSelectChainFrom] = useState(originalFromToken.chainId);
+  const [selectChainTo, setSelectChainTo] = useState(originalToToken.chainId);
+
+  const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
+  const [isSelectChainTo, setIsSelectChainTo] = useState(false);
+
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
+
+  const { data: prices } = useCoinGeckoPrices();
+
+  const [visible, setVisible] = useState(false);
+
+  const [openSetting, setOpenSetting] = useState(false);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [coe, setCoe] = useState(0);
-  const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -112,6 +134,10 @@ const SwapComponent: React.FC<{
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [addressTransfer, setAddressTransfer] = useState('');
+  const [initAddressTransfer, setInitAddressTransfer] = useState('');
+  const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
+  const { handleReadClipboard } = useCopyClipboard();
+
   useGetFeeConfig();
 
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
@@ -144,9 +170,6 @@ const SwapComponent: React.FC<{
     setSwapAmount([displayAmount, toAmountToken]);
   };
 
-  // get token on oraichain to simulate swap amount.
-  const originalFromToken = tokenMap[fromTokenDenom];
-  const originalToToken = tokenMap[toTokenDenom];
   const isEvmSwap = isEvmSwappable({
     fromChainId: originalFromToken.chainId,
     toChainId: originalToToken.chainId,
@@ -156,11 +179,11 @@ const SwapComponent: React.FC<{
 
   // if evm swappable then no need to get token on oraichain because we can swap on evm. Otherwise, get token on oraichain. If cannot find => fallback to original token
   const fromToken = isEvmSwap
-    ? tokenMap[fromTokenDenom]
-    : getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId) ?? tokenMap[fromTokenDenom];
+    ? tokenMap[fromTokenDenomSwap]
+    : getTokenOnOraichain(tokenMap[fromTokenDenomSwap].coinGeckoId) ?? tokenMap[fromTokenDenomSwap];
   const toToken = isEvmSwap
-    ? tokenMap[toTokenDenom]
-    : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
+    ? tokenMap[toTokenDenomSwap]
+    : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
 
   const remoteTokenDenomFrom = originalFromToken.contractAddress
     ? originalFromToken.prefix + originalFromToken.contractAddress
@@ -201,7 +224,24 @@ const SwapComponent: React.FC<{
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-  }, [fromTokenDenom, toTokenDenom]);
+  }, [toTokenDenomSwap, fromTokenDenomSwap]);
+
+  useEffect(() => {
+    if (fromTokenDenom && toTokenDenom) {
+      setFromTokenDenom(fromTokenDenom);
+      setToTokenDenom(toTokenDenom);
+    }
+  }, []);
+
+  const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
+    if (chainId) {
+      const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId); //&& flat.denom !== denom
+
+      if (tokenInfo) {
+        handleChangeToken(tokenInfo, type);
+      }
+    }
+  };
 
   const { fee } = useSwapFee({
     fromToken: originalFromToken,
@@ -364,22 +404,34 @@ const SwapComponent: React.FC<{
         simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
       }
 
-      const univeralSwapHandler = new UniversalSwapHandler(
-        {
-          sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
-          originalFromToken,
-          originalToToken,
-          fromAmount: fromAmountToken,
-          simulateAmount,
-          userSlippage,
-          amounts: amountsBalance,
-          simulatePrice:
-            // @ts-ignore
-            averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-          relayerFee: relayerFeeUniversal
-        },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
-      );
+      const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
+
+      const initSwapData = {
+        sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
+        originalFromToken,
+        originalToToken,
+        fromAmount: fromAmountToken,
+        simulateAmount,
+        userSlippage,
+        amounts: amountsBalance,
+        simulatePrice:
+          // @ts-ignore
+          averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
+        relayerFee: relayerFeeUniversal
+      };
+
+      const compileSwapData = isCustomRecipient
+        ? {
+            ...initSwapData,
+            recipientAddress: addressTransfer
+          }
+        : initSwapData;
+
+      const univeralSwapHandler = new UniversalSwapHandler(compileSwapData, {
+        cosmosWallet: window.Keplr,
+        evmWallet: new Metamask(window.tronWebDapp)
+      });
+
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
@@ -438,6 +490,10 @@ const SwapComponent: React.FC<{
 
   const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
   const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
+  const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
+  const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
+  const FromIconNetwork = theme === 'light' ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
+  const ToIconNetwork = theme === 'light' ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
 
   useEffect(() => {
     (async () => {
@@ -462,7 +518,9 @@ const SwapComponent: React.FC<{
       if (originalToToken.chainId) {
         const findNetwork = networks.find((net) => net.chainId === originalToToken.chainId);
         const address = await getAddressTransfer(findNetwork, walletByNetworks);
+
         setAddressTransfer(address);
+        setInitAddressTransfer(address);
       }
     })();
   }, [
@@ -472,8 +530,84 @@ const SwapComponent: React.FC<{
     tronAddress,
     walletByNetworks.evm,
     walletByNetworks.cosmos,
-    walletByNetworks.tron
+    walletByNetworks.tron,
+    window?.ethereumDapp,
+    window?.tronWebDapp
   ]);
+
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    setIsSelectFrom(false);
+    setIsSelectTo(false);
+    setIsSelectChainFrom(false);
+    setIsSelectChainTo(false);
+  });
+
+  const onChangePercentAmount = (coeff) => {
+    if (coeff === coe) {
+      setCoe(0);
+      setSwapAmount([0, 0]);
+      return;
+    }
+    const finalAmount = calcMaxAmount({
+      maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals),
+      token: originalFromToken,
+      coeff,
+      gas: GAS_ESTIMATION_SWAP_DEFAULT
+    });
+    onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
+    setCoe(coeff);
+  };
+
+  const handleChangeToken = (token, type) => {
+    const isFrom = type === 'from';
+    const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
+    const setIsSelect = isFrom ? setIsSelectFrom : setIsSelectTo;
+
+    if (token.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap)) {
+      setFromTokenDenom(toTokenDenomSwap);
+      setToTokenDenom(fromTokenDenomSwap);
+
+      setSelectChainFrom(selectChainTo);
+      setSelectChainTo(selectChainFrom);
+
+      handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
+    } else {
+      setFromTokenDenom(isFrom ? token.denom : fromTokenDenomSwap);
+      setToTokenDenom(isFrom ? toTokenDenomSwap : token.denom);
+      setSelectChain(token.chainId);
+      handleUpdateQueryURL(isFrom ? [token.denom, toTokenDenomSwap] : [fromTokenDenomSwap, token.denom]);
+    }
+
+    setIsSelect(false);
+  };
+
+  const handleRotateSwapDirection = () => {
+    // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
+    // because non-evm token cannot be swapped to evm token with no Oraichain pool
+    if (isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) && !isEvmNetworkNativeSwapSupported(toToken.chainId)) {
+      return;
+    }
+
+    setSelectChainFrom(selectChainTo);
+    setSelectChainTo(selectChainFrom);
+    setSwapTokens([toTokenDenomSwap, fromTokenDenomSwap]);
+    setFromTokenDenom(toTokenDenomSwap);
+    setToTokenDenom(fromTokenDenomSwap);
+    setSwapAmount([toAmountToken, fromAmountToken]);
+    handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
+  };
+
+  const validAddress = !(
+    walletByNetworks.cosmos ||
+    walletByNetworks.bitcoin ||
+    walletByNetworks.evm ||
+    walletByNetworks.tron
+  )
+    ? {
+        isValid: true
+      }
+    : checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
 
   return (
     <div className={cx('swap-box-wrapper')}>
@@ -481,14 +615,6 @@ const SwapComponent: React.FC<{
         <div className={cx('swap-box')}>
           <div className={cx('header')}>
             <div className={cx('title')}>Universal Swap & Bridge</div>
-            <TooltipIcon
-              placement="bottom-end"
-              visible={visible}
-              setVisible={setVisible}
-              content={
-                <SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} userSlippage={userSlippage} />
-              }
-            />
             <button className={cx('btn')} onClick={refreshBalances}>
               <RefreshImg />
             </button>
@@ -496,11 +622,17 @@ const SwapComponent: React.FC<{
           <div className={cx('from')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
+                type={'from'}
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
                 Icon={FromIcon}
-                setIsSelectFrom={setIsSelectFrom}
+                theme={theme}
+                onChangePercentAmount={onChangePercentAmount}
+                setIsSelectChain={setIsSelectChainFrom}
+                setIsSelectToken={setIsSelectFrom}
+                selectChain={selectChainFrom}
                 token={originalFromToken}
+                IconNetwork={FromIconNetwork}
                 amount={fromAmountToken}
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
@@ -515,36 +647,10 @@ const SwapComponent: React.FC<{
                   </div>
                 </div>
               )}
-              <div className={cx('coeff')}>
-                {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
-                  <button
-                    className={cx(`${coe === coeff && 'is-active'}`)}
-                    key={coeff}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (coeff === coe) {
-                        setCoe(0);
-                        setSwapAmount([0, 0]);
-                        return;
-                      }
-                      const finalAmount = calcMaxAmount({
-                        maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals),
-                        token: originalFromToken,
-                        coeff,
-                        gas: GAS_ESTIMATION_SWAP_DEFAULT
-                      });
-                      onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
-                      setCoe(coeff);
-                    }}
-                  >
-                    {text}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
           <div className={cx('swap-icon')}>
-            <div className={cx('wrap-img')}>
+            <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
               <img
                 src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
                 onClick={() => {
@@ -566,14 +672,19 @@ const SwapComponent: React.FC<{
           <div className={cx('to')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
+                type={'to'}
                 balance={toTokenBalance}
+                theme={theme}
                 originalToken={originalToToken}
                 disable={true}
                 Icon={ToIcon}
-                setIsSelectFrom={setIsSelectTo}
+                selectChain={selectChainTo}
+                setIsSelectChain={setIsSelectChainTo}
+                setIsSelectToken={setIsSelectTo}
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
+                IconNetwork={ToIconNetwork}
                 usdPrice={usdPriceShow}
               />
 
@@ -586,10 +697,64 @@ const SwapComponent: React.FC<{
           </div>
 
           <div className={cx('recipient')}>
-            <div className={cx('label')}>Recipient address:</div>
-            <div>
-              <span className={cx('address')}>{reduceString(addressTransfer, 10, 8)}</span>
-              {/* <span className={cx('paste')}>PASTE</span> */}
+            <InputCommon
+              isOnViewPort={currentAddressManagementStep === AddressManagementStep.INIT}
+              title="Recipient address"
+              value={addressTransfer}
+              onChange={(val) => setAddressTransfer(val)}
+              showPreviewOnBlur
+              defaultValue={initAddressTransfer}
+              suffix={
+                <div
+                  className={cx('paste')}
+                  onClick={() => {
+                    handleReadClipboard((text) => setAddressTransfer(text));
+                  }}
+                >
+                  PASTE
+                </div>
+              }
+              extraButton={
+                <div className={cx('extraBtn')}>
+                  <BookIcon
+                    onClick={() => {
+                      dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                    }}
+                  />
+                  <span
+                    onClick={() => {
+                      dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                    }}
+                  >
+                    Address Book
+                  </span>
+                </div>
+              }
+              error={!validAddress?.isValid && 'Invalid address'}
+            />
+          </div>
+          <div className={cx('slippage')}>
+            <div className={cx('label')}>
+              <span>Slippage tolerance</span>
+
+              <TooltipIcon
+                placement="top-start"
+                visible={visible}
+                icon={<IconTooltip />}
+                setVisible={setVisible}
+                content={
+                  <div className={cx('tooltip', theme)}>
+                    Set your maximum price slippage. If the price changes beyond this, your transaction may not be
+                    successful.
+                  </div>
+                }
+              />
+            </div>
+            <div className={cx('info')}>
+              <span className={cx('value')}>{userSlippage}%</span>
+              <span className={cx('icon')} onClick={() => setOpenSetting(true)}>
+                <IconOirSettings onClick={() => setOpenSetting(true)} />
+              </span>
             </div>
           </div>
 
@@ -605,9 +770,11 @@ const SwapComponent: React.FC<{
               !toAmountToken ||
               fromAmountTokenBalance > fromTokenBalance || // insufficent fund
               !addressTransfer ||
+              !validAddress.isValid ||
               canSwapTo;
 
             let disableMsg: string;
+            if (!validAddress.isValid) disableMsg = `Recipient address not found`;
             if (!addressTransfer) disableMsg = `Recipient address not found`;
             if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
             if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
@@ -679,38 +846,80 @@ const SwapComponent: React.FC<{
           </div>
         </div>
       </LoadingBox>
-
-      {isSelectTo && (
-        <SelectTokenModalV2
-          close={() => setIsSelectTo(false)}
+      <div ref={ref}>
+        <SelectToken
+          setIsSelectToken={setIsSelectTo}
+          amounts={amounts}
           prices={prices}
+          handleChangeToken={(token) => {
+            handleChangeToken(token, 'to');
+          }}
           items={filteredToTokens}
-          amounts={amounts}
-          setToken={(denom) => {
-            setSwapTokens([fromTokenDenom, denom]);
-            handleUpdateQueryURL([fromTokenDenom, denom]);
-          }}
-          setSearchTokenName={setSearchTokenName}
-          searchTokenName={searchTokenName}
-          title="Receive Token List"
+          theme={theme}
+          selectChain={selectChainTo}
+          isSelectToken={isSelectTo}
         />
-      )}
-
-      {isSelectFrom && (
-        <SelectTokenModalV2
-          close={() => setIsSelectFrom(false)}
+        <SelectToken
+          setIsSelectToken={setIsSelectFrom}
+          amounts={amounts}
           prices={prices}
-          items={filteredFromTokens}
-          amounts={amounts}
-          setToken={(denom) => {
-            setSwapTokens([denom, toTokenDenom]);
-            handleUpdateQueryURL([denom, toTokenDenom]);
+          theme={theme}
+          selectChain={selectChainFrom}
+          items={filteredToTokens}
+          handleChangeToken={(token) => {
+            handleChangeToken(token, 'from');
           }}
-          setSearchTokenName={setSearchTokenName}
-          searchTokenName={searchTokenName}
-          title="Pay Token List"
+          isSelectToken={isSelectFrom}
         />
+        <SelectChain
+          setIsSelectToken={setIsSelectChainTo}
+          amounts={amounts}
+          theme={theme}
+          selectChain={selectChainTo}
+          setSelectChain={(chain: NetworkChainId) => {
+            setSelectChainTo(chain);
+            setTokenDenomFromChain(chain, 'to');
+          }}
+          prices={prices}
+          isSelectToken={isSelectChainTo}
+        />
+        <SelectChain
+          setIsSelectToken={setIsSelectChainFrom}
+          amounts={amounts}
+          theme={theme}
+          prices={prices}
+          selectChain={selectChainFrom}
+          setSelectChain={(chain: NetworkChainId) => {
+            setSelectChainFrom(chain);
+            setTokenDenomFromChain(chain, 'from');
+          }}
+          isSelectToken={isSelectChainFrom}
+        />
+      </div>
+
+      <AddressBook
+        onSelected={(addr: string) => {
+          setAddressTransfer(addr);
+        }}
+        tokenTo={originalToToken}
+      />
+
+      {openSetting && (
+        <div
+          className={cx('overlay')}
+          onClick={() => {
+            setOpenSetting(false);
+          }}
+        ></div>
       )}
+      <div className={cx('setting', openSetting ? 'activeSetting' : '')}>
+        <SlippageModal
+          setVisible={setOpenSetting}
+          setUserSlippage={setUserSlippage}
+          userSlippage={userSlippage}
+          isBotomSheet
+        />
+      </div>
     </div>
   );
 };

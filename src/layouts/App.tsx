@@ -19,18 +19,19 @@ import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { persistor } from 'store/configure';
-import { PERSIST_VER } from 'store/constants';
+import { ADDRESS_BOOK_KEY_BACKUP, PERSIST_VER } from 'store/constants';
 import Menu from './Menu';
 import './index.scss';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectAddressBookList, setAddressBookList } from 'reducer/addressBook';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
-  const [walletTypeStore] = useConfigReducer('walletTypeStore');
+  const [, setBtcAddress] = useConfigReducer('btcAddress');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
@@ -39,6 +40,10 @@ const App = () => {
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const mobileMode = isMobile();
   const ethOwallet = window.eth_owallet;
+
+  const currentAddressBook = useSelector(selectAddressBookList);
+  const dispatch = useDispatch();
+
   // useTronEventListener();
 
   // TODO: polyfill evm, tron, need refactor
@@ -105,6 +110,7 @@ const App = () => {
   // clear persist storage when update version
   useEffect(() => {
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
+
     const clearPersistStorage = () => {
       persistor.pause();
       persistor.flush().then(() => {
@@ -115,9 +121,14 @@ const App = () => {
 
     if (isClearPersistStorage) clearPersistStorage();
 
-    // if (window.keplr && !isMobile()) {
-    //   keplrGasPriceCheck();
-    // }
+    try {
+      const restoredAddressBookJSON = localStorage.getItem(ADDRESS_BOOK_KEY_BACKUP);
+      const restoredAddressBook = JSON.parse(restoredAddressBookJSON);
+
+      dispatch(setAddressBookList(restoredAddressBook));
+    } catch (error) {
+      console.log('error', error);
+    }
   }, []);
 
   useEffect(() => {
@@ -126,29 +137,11 @@ const App = () => {
   }, [mobileMode]);
 
   useEffect(() => {
-    (async () => {
-      if (![leapWalletType, 'eip191'].includes(walletTypeStore) || isMobile()) {
-        window.addEventListener('keplr_keystorechange', keplrHandler);
-      }
-    })();
+    window.addEventListener('keplr_keystorechange', keplrHandler);
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
     };
-  }, [walletTypeStore]);
-
-  const keplrGasPriceCheck = async () => {
-    try {
-      const gasPrice = await getNetworkGasPrice(network.chainId);
-      if (!gasPrice) {
-        displayToast(TToastType.TX_INFO, {
-          message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
-          customLink: 'https://www.youtube.com/watch?v=QMqCVUfxDAk'
-        });
-      }
-    } catch (error) {
-      console.log('Error keplrGasPriceCheck: ', error);
-    }
-  };
+  }, []);
 
   const keplrHandler = async () => {
     try {
@@ -165,7 +158,7 @@ const App = () => {
       if (walletByNetworks.cosmos || mobileMode) {
         oraiAddress = await window.Keplr.getKeplrAddr();
         if (oraiAddress) {
-          const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
+          const { listAddressCosmos } = await getListAddressCosmos(oraiAddress, walletByNetworks.cosmos);
           setCosmosAddress(listAddressCosmos);
           setOraiAddress(oraiAddress);
         }

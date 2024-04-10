@@ -121,3 +121,20 @@
     transform: scale(0.75);
   }
 }
+
+.toggle-switch-light {
+  .toggle-switch-label {
+    border: 0 solid $label-colour-light;
+  }
+  .toggle-switch-inner {
+    &:before {
+      background-color: $toggle-colour-light;
+    }
+  }
+  .toggle-switch-inner:after {
+    background-color: $label-colour-light;
+  }
+  .toggle-switch-switch {
+    border: 0 solid $label-colour-light;
+  }
+}

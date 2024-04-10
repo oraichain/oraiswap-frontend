@@ -2980,9 +2980,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.78":
-  version "1.0.79"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.79.tgz#0733f306f62affc749c5a7e3bd001a279b36a31f"
-  integrity sha512-32KgG9vQrxVfFzUfIEgxIc4nHMKcw/Rvm01uT7nNamRszhW1xHToHpxsdGVSTAQJU1QXkXiXa2TKpDlKkovjSw==
+  version "1.0.83"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.83.tgz#2e525f8210904ff709e9c9d364322a85c55ae17a"
+  integrity sha512-nVPlhhOvAvo5Cz/Z45K5l1CBEspfljD1BlUFe9pqld+Uc5spCF5trJcYhN7/512+B/3Kaathy3n7AB+nk6/TBQ==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"
@@ -2993,7 +2993,7 @@
     "@ethersproject/providers" "^5.0.10"
     "@injectivelabs/sdk-ts" "1.12.1"
     "@keplr-wallet/types" "^0.11.38"
-    "@oraichain/oraidex-contracts-sdk" "^1.0.43"
+    "@oraichain/oraidex-contracts-sdk" latest
     bignumber.js "^9.1.2"
     cosmjs-types "0.8.0"
     ethers "^5.0.15"
@@ -3013,10 +3013,15 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.43.tgz#d8c8e425d8104356dc0afaa78530d2e9df3c4fe9"
   integrity sha512-FpCnSjgMPsyTnkwiq/myYtOE4fN6B0gStJfskDen3TxYZc0SKxYzCt7jLP02gkEHnMl4QAiaa4QFBlnC2Lcm8g==
 
+"@oraichain/oraidex-contracts-sdk@latest":
+  version "1.0.44"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.44.tgz#9ff41ec388dd92ba112c2eef545d11fd6e18c684"
+  integrity sha512-fMY/QOzO/afPlAVkLGH1bcpJTs6V/URrJju2r4UoE9f5HUWC/6OC6+H5dWuIgq26frp8wjH23mNCQAlmHzji8g==
+
 "@oraichain/oraidex-universal-swap@^1.0.49":
-  version "1.0.68"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.68.tgz#3a19b60131a26fbce9d1a5ac5e378d133839db92"
-  integrity sha512-ezEK7kuLGcoKbIs1KClvRh8aJ+ILJ1YY38Dwox3aEzkOY2BBcOjPMeKwpQT9AvWJGYzUqOoxWlWz0yuVQyXN5Q==
+  version "1.0.70"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.70.tgz#93d40495484c66ab00d0b47494b29b19e479c8fa"
+  integrity sha512-H5nQDShw3+1Tka/yFeLRrioyLRFjiewndsKePQvI1ilXkayxOv9sugzbZYx/WdiVapGrOeYD6+yX/O60jzBVng==
   dependencies:
     "@oraichain/oraidex-common" "^1.0.78"
     "@oraichain/oraidex-contracts-sdk" "^1.0.43"

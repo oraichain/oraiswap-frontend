@@ -3,7 +3,7 @@
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import _BigInt from 'big-integer';
 import { chainInfos } from 'config/chainInfos';
-import { getWalletByNetworkCosmosFromStorage } from 'helper';
+import { getWalletByNetworkFromStorage } from 'helper';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 
@@ -26,8 +26,8 @@ window.TronWeb = require('tronweb');
 window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 // enable Keplr
-const walletType = getWalletByNetworkCosmosFromStorage();
-window.Keplr = new Keplr(walletType);
+const walletType = getWalletByNetworkFromStorage();
+window.Keplr = new Keplr(walletType?.cosmos);
 
 window.ethereumDapp = window.ethereum;
 window.Bitcoin = new Bitcoin();
@@ -144,4 +144,15 @@ if (typeof BigInt === 'undefined') {
   };
 
   (window as any).BigInt = MyBigInt;
+}
+
+// polyfill abort timeout for some old browser not support.
+if (!('timeout' in AbortSignal)) {
+  AbortSignal.prototype.timeout = function (delay: number) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), delay);
+    // Allow Node.js processes to exit early if only the timeout is running
+    timeoutId?.unref?.();
+    return controller.signal;
+  };
 }

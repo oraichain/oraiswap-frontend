@@ -1,0 +1,206 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.input-swap-box {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  input::placeholder {
+    @include theme() {
+      color: theme-get('neutral-text-body');
+      opacity: 0.5;
+    }
+  }
+
+  .box-select {
+    display: flex;
+    justify-content: space-between;
+    height: 30px;
+    padding: 24px 16px;
+    font-size: 20px;
+    @include mobile {
+      padding: 20px 12px;
+      font-size: 16px;
+    }
+    border-radius: 99px;
+    cursor: pointer;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 150%;
+    font-family: 'IBM Plex Sans';
+    @include theme() {
+      color: theme-get('colors-neutral-text-text-token-name');
+      background-color: theme-get('colors-neutral-surface-bg-section-3');
+    }
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .logo {
+          width: 27.5px;
+          height: 27.5px;
+        }
+      }
+    }
+  }
+
+  .box-input {
+    width: 50%;
+    .input {
+      text-align: right;
+    }
+    .amount {
+      flex-grow: 1;
+      max-width: 100%;
+      width: inherit;
+      text-align: right;
+      font-size: 28px;
+      font-weight: 500;
+
+      @include theme() {
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
+
+      @include mobile {
+        width: 100%;
+      }
+    }
+    .usd {
+      @include theme() {
+        color: theme-get('colors-neutral-text-body');
+      }
+      // max-width: 100%;
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+}
+
+.input-swap-balance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+
+  @include theme() {
+    color: theme-get('colors-neutral-text-body-on-section');
+  }
+  font-size: 14px;
+  @include mobile {
+    font-size: 12px;
+    padding-bottom: 0;
+  }
+
+  &.is-enable-coeff {
+    align-items: flex-start;
+  }
+
+  font-weight: 400;
+
+  .select-chain {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    @include mobile {
+      gap: 2px;
+    }
+
+    .left {
+      @include theme() {
+        background-color: theme-get('neutral-5');
+      }
+      .section {
+        .name {
+          @include theme() {
+            color: theme-get('colors-neutral-text-text-token-name');
+          }
+        }
+      }
+      img {
+        @include mobile {
+          width: 16px;
+          height: 16px;
+        }
+      }
+      cursor: pointer;
+      padding: 4px 8px;
+      gap: 8px;
+      @include mobile {
+        gap: 4px;
+      }
+      border-radius: 99px;
+      display: flex;
+      align-items: center;
+      .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .logo {
+          width: 22px;
+          height: 22px;
+          @include mobile {
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+    span {
+      text-transform: capitalize;
+    }
+  }
+  .show-balance {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: flex-end;
+
+    @include mobile {
+      flex-direction: column;
+    }
+    gap: 8px;
+
+    & > span {
+      text-align: right;
+    }
+
+    &.is-enable-coeff {
+      cursor: pointer;
+      &:hover {
+        // font-weight: 500;
+      }
+    }
+    .coeff {
+      display: flex;
+      gap: 6px;
+      .percent {
+        border-radius: 99px;
+        background: #aee67f;
+        color: black;
+        padding: 2px 10px;
+      }
+    }
+  }
+}
+
+.input-swap-fee {
+  @include theme() {
+    color: theme-get('neutral-9');
+  }
+
+  padding-top: 6px;
+  font-size: 14px;
+  font-weight: 400;
+}

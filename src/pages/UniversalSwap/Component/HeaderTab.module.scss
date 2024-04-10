@@ -255,7 +255,7 @@
 
         &.active {
           @include theme() {
-            background: theme-get('neutral-surface-bg-section-5');
+            background: theme-get('chart-neutral-surface-bg-section');
             color: theme-get('neutral-surface-bg-3');
           }
         }

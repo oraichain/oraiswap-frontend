@@ -5,13 +5,13 @@ import {
   CoinIcon,
   IBC_WASM_CONTRACT,
   NetworkChainId,
+  NetworkName,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   TokenItemType,
   getTokenOnOraichain,
-  getTokenOnSpecificChainId,
-  NetworkName
+  getTokenOnSpecificChainId
 } from '@oraichain/oraidex-common';
 import {
   isEvmNetworkNativeSwapSupported,
@@ -21,12 +21,12 @@ import {
   // swapToTokens
 } from '@oraichain/oraidex-universal-swap';
 import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
 import { networks } from 'helper';
 import { generateError } from 'libs/utils';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDate, formatTimeWithPeriod } from 'pages/CoHarvest/helpers';
-import { endOfMonth, endOfWeek } from 'pages/Pools/helpers';
 import { FILTER_TIME_CHART, PairToken } from 'reducer/type';
 
 export enum SwapDirection {
@@ -281,6 +281,16 @@ export const calculateFinalPriceChange = (
 
   if (currentPrice === 0) return 0;
   return (currentPrice / (1 + percentPriceChange) - currentPrice) / currentPrice;
+};
+
+export const getTokenIcon = (token: TokenItemType, theme: string) => {
+  let tokenIcon;
+  const tokenInfo = oraichainTokensWithIcon.find((e) => e.coinGeckoId === token?.coinGeckoId);
+
+  if (tokenInfo && Object.keys(tokenInfo.IconLight || tokenInfo.Icon || {}).length > 0) {
+    tokenIcon = theme === 'light' ? tokenInfo?.IconLight || tokenInfo?.Icon : tokenInfo?.Icon;
+  }
+  return tokenIcon;
 };
 
 // generate chain base on to token in universal-swap
