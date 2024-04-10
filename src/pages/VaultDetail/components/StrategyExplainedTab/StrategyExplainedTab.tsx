@@ -1,6 +1,6 @@
-import styles from './StrategyExplained.module.scss';
+import styles from './StrategyExplainedTab.module.scss';
 
-export const StrategyExplained = () => {
+export const StrategyExplainedTab = () => {
   return (
     <section className={styles.explain}>
       <div className={styles.explainContent}>

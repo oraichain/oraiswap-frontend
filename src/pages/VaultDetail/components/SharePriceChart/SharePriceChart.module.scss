@@ -1,0 +1,53 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.sharePriceChart {
+  border-radius: 8px;
+
+  @include theme() {
+    background-color: theme-get('neutral-surface-card');
+  }
+
+  .header {
+    padding: 16px;
+
+    .title {
+      @include theme() {
+        color: theme-get('neutral-text-text-token-name');
+      }
+
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 150%;
+    }
+  }
+
+  .chartContainer {
+    position: relative;
+    height: 150px;
+    width: 100%;
+
+    .chartRoot {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+
+      table>tr {
+        border-left: 1px solid;
+        border-color: transparent;
+
+        &:first-of-type {
+          @include theme {
+            border-color: theme-get('neutral-surface-bg-btn-disabled');
+          }
+        }
+      }
+    }
+  }
+
+}

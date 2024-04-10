@@ -1,6 +1,5 @@
 export const TIMER = {
   HAFT_MILLISECOND: 500,
-
   MILLISECOND: 1000,
   SECOND: 60,
   MINUTE: 60,

@@ -1,12 +1,11 @@
-import { CW20_DECIMALS, toAmount, toDisplay, CoinIcon, TokenInfo } from '@oraichain/oraidex-common';
+import { CW20_DECIMALS, TokenInfo, toAmount, toDisplay, CoinIcon } from '@oraichain/oraidex-common';
 import classNames from 'classnames/bind';
 import TokenBalance from 'components/TokenBalance';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { getUsd } from 'libs/utils';
-import React, { FC, ReactNode, memo, useState } from 'react';
+import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './InputWithOptionPercent.module.scss';
+import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 
 const cx = classNames.bind(styles);
 
@@ -17,33 +16,24 @@ export const InputWithOptionPercent: FC<{
   totalAmount: bigint;
   percentList?: number[];
   value: bigint | null;
-  TokenIcon?: CoinIcon;
   token?: TokenInfo;
-  apr?: number;
-  showIcon?: boolean;
   hasPath?: boolean;
   isFocus?: boolean;
   prefixText?: string;
-  amountInUsdt?: number;
-  slippage?: ReactNode;
+  TokenIcon?: CoinIcon;
 }> = ({
   setAmountFromPercent,
   onValueChange,
   onChange,
   value,
-  TokenIcon,
   token,
   totalAmount,
   percentList = [25, 50, 75, 100],
-  apr,
-  showIcon = false,
   hasPath = false,
   isFocus = true,
   prefixText = 'Balance: ',
-  amountInUsdt = 0,
-  slippage
+  TokenIcon
 }) => {
-  const { data: prices } = useCoinGeckoPrices();
   const [chosenOption, setChosenOption] = useState(-1);
   const [theme] = useConfigReducer('theme');
   const [inputValue, setInputValue] = useState<number | string>('');
@@ -70,6 +60,15 @@ export const InputWithOptionPercent: FC<{
       </div>
 
       <div className={cx('input')}>
+        <div className={styles.strategy}>
+          <div className={styles.strategyLogo}>
+            <UsdtIcon width={32} height={32} />
+          </div>
+          <div className={`${styles.strategyName} ${styles[theme]}`}>
+            <div className={styles.strategyNameTitle}>USDT</div>
+            <div className={styles.strategyNameValue}>Tether</div>
+          </div>
+        </div>
         <div className={cx('input-amount')}>
           <NumberFormat
             className={cx('amount', theme)}
@@ -91,20 +90,6 @@ export const InputWithOptionPercent: FC<{
               return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
             }}
           />
-          <div className={cx('amount-usd', theme)}>
-            <TokenBalance
-              balance={
-                amountInUsdt
-                  ? {
-                      amount: BigInt(Math.trunc(amountInUsdt)),
-                      decimals: CW20_DECIMALS
-                    }
-                  : getUsd(value, token, prices)
-              }
-              decimalScale={2}
-              prefix="~$"
-            />
-          </div>
         </div>
       </div>
       <div className={cx('options')}>
