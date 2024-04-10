@@ -56,12 +56,19 @@ import { getUsd, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
-import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { AddressManagementStep } from 'reducer/type';
+import { genCurrentChain, generateNewSymbol, generateNewSymbolV2 } from 'pages/UniversalSwap/helpers';
+import {
+  selectCurrentToChain,
+  selectCurrentToken,
+  setCurrentFromToken,
+  setCurrentToChain,
+  setCurrentToToken,
+  setCurrentToken
+} from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SlippageModal, TooltipIcon } from '../Modals';
@@ -123,6 +130,7 @@ const SwapComponent: React.FC<{
   const [filteredToTokens, setFilteredToTokens] = useState([] as TokenItemType[]);
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
+  const currentToChain = useSelector(selectCurrentToChain);
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [addressTransfer, setAddressTransfer] = useState('');
@@ -286,11 +294,29 @@ const SwapComponent: React.FC<{
     originalFromToken,
     originalToToken
   );
+
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    // const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
+
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
+
+  useEffect(() => {
+    const newCurrentToChain = genCurrentChain({ toToken: originalToToken, currentToChain });
+
+    if (toToken && originalToToken) {
+      dispatch(setCurrentToChain(newCurrentToChain));
+      dispatch(setCurrentToToken(originalToToken));
+    }
+  }, [originalToToken, toToken]);
+
+  useEffect(() => {
+    if (fromToken && originalFromToken) {
+      dispatch(setCurrentFromToken(originalFromToken));
+    }
+  }, [originalFromToken, fromToken]);
 
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
   const isAverageRatio = averageRatio && averageRatio.amount;
@@ -627,7 +653,18 @@ const SwapComponent: React.FC<{
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
               <img
                 src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
-                onClick={handleRotateSwapDirection}
+                onClick={() => {
+                  // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
+                  // because non-evm token cannot be swapped to evm token with no Oraichain pool
+                  if (
+                    isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) &&
+                    !isEvmNetworkNativeSwapSupported(toToken.chainId)
+                  )
+                    return;
+                  setSwapTokens([toTokenDenom, fromTokenDenom]);
+                  setSwapAmount([toAmountToken, fromAmountToken]);
+                  handleUpdateQueryURL([toTokenDenom, fromTokenDenom]);
+                }}
                 alt="ant"
               />
             </div>
