@@ -31,11 +31,11 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
     dispatch(setCurrentAddressBookStep(AddressManagementStep.INIT));
   });
 
-  const addressesWithCurrentNetwork = listAddresses.filter(
-    (a) => a.network.chainId === tokenTo?.chainId && (a.isUniversal || a.token.coinGeckoId === tokenTo?.coinGeckoId)
+  const addressesWithCurrentNetwork = listAddresses?.filter(
+    (a) => a.network.chainId === tokenTo?.chainId && (a.isUniversal || a.token?.coinGeckoId === tokenTo?.coinGeckoId)
   );
-  const otherAddressNetwork = listAddresses.filter(
-    (a) => a.network.chainName !== tokenTo?.chainId || (!a.isUniversal && a.token.coinGeckoId !== tokenTo?.coinGeckoId)
+  const otherAddressNetwork = listAddresses?.filter(
+    (a) => a.network.chainName !== tokenTo?.chainId || (!a.isUniversal && a.token?.coinGeckoId !== tokenTo?.coinGeckoId)
   );
 
   return (
@@ -89,7 +89,7 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
                   </div>
                 )}
 
-                {addressesWithCurrentNetwork.map((item, key) => {
+                {addressesWithCurrentNetwork?.map((item, key) => {
                   const IconToken = getTokenIcon(item.token, theme);
 
                   return (
