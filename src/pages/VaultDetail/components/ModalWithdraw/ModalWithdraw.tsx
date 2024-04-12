@@ -4,36 +4,20 @@ import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import Modal from 'components/Modal';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { handleErrorTransaction } from 'helper';
+import { EVM_DECIMALS } from 'helper/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useDepositWithdrawVault } from 'pages/VaultDetail/hooks/useDepositWithdrawVault';
+import { vaultInfos } from 'pages/Vaults/helpers/vault-query';
 import { FC, useState } from 'react';
 import { InputWithOptionPercent } from '../InputWithOptionPercent';
 import styles from './ModalWithdraw.module.scss';
 const cx = cn.bind(styles);
 
-export const ModalWithdraw: FC<any> = ({ isOpen, close, open, onLiquidityChange, lpPrice }) => {
+export const ModalWithdraw: FC<any> = ({ isOpen, close, open, totalShare }) => {
   const [theme] = useConfigReducer('theme');
-
-  const [actionLoading, setActionLoading] = useState(false);
-  const [depositAmount, setDepositAmount] = useState<bigint | null>(null);
-  const [unbondAmountInUsdt, setUnBondAmountInUsdt] = useState(0);
-
-  const totalTokenBalance = 1;
-
-  const onUnbonedSuccess = () => {};
-
-  const handleDeposit = async (parsedAmount: bigint) => {
-    setActionLoading(true);
-    displayToast(TToastType.TX_BROADCASTING);
-    try {
-    } catch (error) {
-      console.log('error in handleDeposit: ', error);
-      handleErrorTransaction(error);
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const [address] = useConfigReducer('address');
+  const [withdrawAmount, setWithdrawAmount] = useState<bigint | null>(null);
+  const { withdraw, loading } = useDepositWithdrawVault();
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
@@ -48,25 +32,36 @@ export const ModalWithdraw: FC<any> = ({ isOpen, close, open, onLiquidityChange,
         </div>
         <InputWithOptionPercent
           onValueChange={({ floatValue }) => {
-            if (floatValue === undefined) setDepositAmount(null);
-            else setDepositAmount(toAmount(floatValue, 6));
+            if (floatValue === undefined) setWithdrawAmount(null);
+            else setWithdrawAmount(toAmount(floatValue, EVM_DECIMALS));
           }}
-          value={depositAmount}
+          value={withdrawAmount}
           token={null}
-          setAmountFromPercent={setDepositAmount}
-          totalAmount={1n}
+          setAmountFromPercent={setWithdrawAmount}
+          totalAmount={totalShare}
           prefixText="Max Available to Withdraw: "
+          decimals={EVM_DECIMALS}
         />
         {(() => {
           let disableMsg: string;
-          if (depositAmount <= 0) disableMsg = 'Enter an amount';
-          if (depositAmount > totalTokenBalance) disableMsg = `Insufficient balance`;
-          const disabled = actionLoading || depositAmount <= 0 || depositAmount > totalTokenBalance;
+          if (withdrawAmount <= 0) disableMsg = 'Enter an amount';
+          if (withdrawAmount > totalShare) disableMsg = `Insufficient share`;
+          const disabled = loading || withdrawAmount <= 0 || withdrawAmount > totalShare;
 
           return (
             <div className={cx('btn-confirm')}>
-              <Button onClick={() => handleDeposit(depositAmount)} type="primary" disabled={disabled}>
-                {actionLoading && <Loader width={22} height={22} />}
+              <Button
+                onClick={() =>
+                  withdraw({
+                    amount: withdrawAmount,
+                    userAddr: address,
+                    vaultAddr: vaultInfos[0].vaultAddr
+                  })
+                }
+                type="primary"
+                disabled={disabled}
+              >
+                {loading && <Loader width={22} height={22} />}
                 {disableMsg || 'Withdraw'}
               </Button>
             </div>

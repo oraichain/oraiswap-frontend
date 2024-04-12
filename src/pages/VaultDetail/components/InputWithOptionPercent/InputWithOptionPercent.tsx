@@ -1,11 +1,11 @@
-import { CW20_DECIMALS, TokenInfo, toAmount, toDisplay, CoinIcon } from '@oraichain/oraidex-common';
+import { CoinIcon, TokenInfo, toAmount, toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import classNames from 'classnames/bind';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './InputWithOptionPercent.module.scss';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 
 const cx = classNames.bind(styles);
 
@@ -21,6 +21,7 @@ export const InputWithOptionPercent: FC<{
   isFocus?: boolean;
   prefixText?: string;
   TokenIcon?: CoinIcon;
+  decimals?: number;
 }> = ({
   setAmountFromPercent,
   onValueChange,
@@ -32,15 +33,16 @@ export const InputWithOptionPercent: FC<{
   hasPath = false,
   isFocus = true,
   prefixText = 'Balance: ',
-  TokenIcon
+  TokenIcon,
+  decimals = 6
 }) => {
   const [chosenOption, setChosenOption] = useState(-1);
   const [theme] = useConfigReducer('theme');
   const [inputValue, setInputValue] = useState<number | string>('');
 
   const onChangePercent = (percent: number) => {
-    const HUNDRED_PERCENT_IN_CW20_DECIMALS = 100000000;
-    setAmountFromPercent((toAmount(percent, CW20_DECIMALS) * totalAmount) / BigInt(HUNDRED_PERCENT_IN_CW20_DECIMALS));
+    const HUNDRED_PERCENT_IN_DECIMALS = 100 * Math.pow(10, decimals);
+    setAmountFromPercent((toAmount(percent, decimals) * totalAmount) / BigInt(HUNDRED_PERCENT_IN_DECIMALS));
   };
 
   return (
@@ -75,7 +77,7 @@ export const InputWithOptionPercent: FC<{
             thousandSeparator
             decimalScale={6}
             placeholder={'0'}
-            value={value === null ? '' : toDisplay(value, token?.decimals)}
+            value={value === null ? '' : toDisplay(value, decimals)}
             allowNegative={false}
             onChange={(e) => {
               onChange && onChange(e);
@@ -87,7 +89,7 @@ export const InputWithOptionPercent: FC<{
             isAllowed={(values) => {
               const { floatValue } = values;
               // allow !floatValue to let user can clear their input
-              return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+              return !floatValue || (floatValue >= 0 && floatValue <= 1e18);
             }}
           />
         </div>

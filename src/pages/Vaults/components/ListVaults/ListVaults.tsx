@@ -19,14 +19,14 @@ export const ListVaults = () => {
         <div className={styles.viewType}>
           <div
             title="View as list"
-            className={viewType === 'column' && styles.active}
+            className={viewType === 'column' ? styles.active : null}
             onClick={() => setViewType('column')}
           >
             <ViewAsColumn width={24} height={24} />
           </div>
           <div
             title="View as column"
-            className={viewType === 'list' && styles.active}
+            className={viewType === 'list' ? styles.active : null}
             onClick={() => setViewType('list')}
           >
             <ViewAsList width={24} height={24} />

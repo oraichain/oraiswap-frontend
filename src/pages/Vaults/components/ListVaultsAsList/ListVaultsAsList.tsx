@@ -8,6 +8,7 @@ import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as BoostIconDark } from 'assets/icons/ic_apr_boost_dark.svg';
 import { ReactComponent as BoostIconLight } from 'assets/icons/ic_apr_boost_light.svg';
 import { isMobile } from '@walletconnect/browser-utils';
+import { VaultInfo, useGetVaults } from 'pages/Vaults/hooks/useVaults';
 
 type ListPoolProps = {};
 
@@ -21,6 +22,7 @@ export type VaultItemData = {
 export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const navigate = useNavigate();
+  const { totalVaultInfos } = useGetVaults();
 
   const listVaults: VaultItemData[] = [
     {
@@ -67,7 +69,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
     }
   ];
 
-  const headers: TableHeaderProps<VaultItemData> = {
+  const headers: TableHeaderProps<VaultInfo> = {
     symbols: {
       name: 'Vault',
       accessor: (data) => (
@@ -77,7 +79,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
           </div>
           <div className={styles.strategyName}>
             <div className={styles.strategyNameTitle}>Strategy</div>
-            <div className={styles.strategyNameValue}>ORAI</div>
+            <div className={styles.strategyNameValue}>{data.symbols.join('/')}</div>
           </div>
         </div>
       ),
@@ -101,7 +103,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       name: 'TVL',
       width: '25%',
       align: 'left',
-      sortField: 'tvl',
+      sortField: 'tvlByUsd',
       accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvl)}</span>
     },
     claimable: {
@@ -124,7 +126,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
     <div className={styles.listVault}>
       <div className={styles.listVaultView}>
         {listVaults.length > 0 ? (
-          <Table headers={headers} data={listVaults} handleClickRow={handleClickRow} defaultSorted="tvl" />
+          <Table headers={headers} data={totalVaultInfos} handleClickRow={handleClickRow} defaultSorted="tvlByUsd" />
         ) : (
           <FallbackEmptyData />
         )}

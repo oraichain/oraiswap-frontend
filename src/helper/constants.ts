@@ -16,3 +16,5 @@ export const TIMER = {
   MINUTE: 60,
   HOUR: 24
 };
+
+export const EVM_DECIMALS = 18;

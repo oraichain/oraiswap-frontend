@@ -15,6 +15,9 @@ export const MySharePerformance = () => {
   const secondaryType = mobileMode ? 'secondary-sm' : 'secondary';
   const primaryType = mobileMode ? 'primary-sm' : 'primary';
 
+  const totalTokenBalance = 22000000n;
+  const totalShare = 2200000000000000000000000000n;
+
   return (
     <div className={styles.mySharePerformance}>
       <h3 className={styles.title}>
@@ -45,13 +48,19 @@ export const MySharePerformance = () => {
         </Button>
       </div>
       {modal === 'deposit' && (
-        <ModalDeposit isOpen={modal === 'deposit'} open={() => setModal('deposit')} close={() => setModal(undefined)} />
+        <ModalDeposit
+          isOpen={modal === 'deposit'}
+          open={() => setModal('deposit')}
+          close={() => setModal(undefined)}
+          totalTokenBalance={totalTokenBalance}
+        />
       )}
       {modal === 'withdraw' && (
         <ModalWithdraw
           isOpen={modal === 'withdraw'}
           open={() => setModal('withdraw')}
           close={() => setModal(undefined)}
+          totalShare={totalShare}
         />
       )}
     </div>
