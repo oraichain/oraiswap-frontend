@@ -23,14 +23,23 @@ const FutureCompetition = () => {
 
   return (
     <div className={`${styles.competition} ${active ? styles.active : ''}`}>
-      <img src={Banner} alt="" />
+      <img
+        src={Banner}
+        alt=""
+        style={{
+          cursor: 'pointer'
+        }}
+        onClick={() =>
+          window.open('https://daodao.zone/dao/orai1y7z3gw0al5lx9yygs800zfvnkr065xjrpld9wt6950y897grppxsrf4zcr/home')
+        }
+      />
       <div className={styles.content}>
         {/* <div className={styles.header}>Futures Trading Competition is live! 🎁</div> */}
         <div className={styles.header}>Our very first proposal is live! ⭐️</div>
         {/* <div className={styles.desc}>
           Join now and showcase your trading skills for a chance to win big from the $15,000 USD prize pool!
         </div> */}
-        <div className={styles.desc}>Your voice matters - Cast your vote now.</div>
+        <div className={styles.desc}>Your voice matters - Vote now 👆</div>
         <div className={styles.btnGroup}>
           <button
             onClick={() => {
