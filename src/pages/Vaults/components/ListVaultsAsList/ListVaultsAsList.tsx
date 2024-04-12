@@ -104,7 +104,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       width: '25%',
       align: 'left',
       sortField: 'tvlByUsd',
-      accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvl)}</span>
+      accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvlByUsd)}</span>
     },
     claimable: {
       name: 'My Share',
