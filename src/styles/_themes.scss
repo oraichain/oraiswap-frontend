@@ -146,7 +146,8 @@ $themes: (
     "primary-sufface-default-dark-4": #D7F5BF,
     "color-neutral-text-title": #EFEFEF,
     "color-neutrol-border-default": #494949,
-    "neutral-surface-card": #232521),
+    "neutral-surface-card": #232521,
+    "neutral-text-title-negative": #fff),
   light: ('text-color': #272b30,
     'bg-connect-wallet': #f7f7f7,
     'text-color-secondary': #a871df,
@@ -244,5 +245,6 @@ $themes: (
     "color-neutral-text-title": #232521,
     "color-neutrol-border-default": #EFEFEF,
     "neutral-surface-card": #FFF,
+    "neutral-text-title-negative": #232521,
   )
 );
