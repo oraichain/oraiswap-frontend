@@ -8,7 +8,8 @@ import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as BoostIconDark } from 'assets/icons/ic_apr_boost_dark.svg';
 import { ReactComponent as BoostIconLight } from 'assets/icons/ic_apr_boost_light.svg';
 import { isMobile } from '@walletconnect/browser-utils';
-import { VaultInfo, useGetVaults } from 'pages/Vaults/hooks/useVaults';
+import { useGetVaults } from 'pages/Vaults/hooks/useVaults';
+import { VaultInfo } from 'pages/Vaults/type';
 
 type ListPoolProps = {};
 
@@ -79,11 +80,13 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
           </div>
           <div className={styles.strategyName}>
             <div className={styles.strategyNameTitle}>Strategy</div>
-            <div className={styles.strategyNameValue}>{data.symbols.join('/')}</div>
+            <div className={styles.strategyNameValue}>
+              {data.token0.symbol}/{data.token1.symbol}
+            </div>
           </div>
         </div>
       ),
-      sortField: 'symbols',
+      sortField: null,
       width: '25%',
       align: 'left'
     },
@@ -103,16 +106,16 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       name: 'TVL',
       width: '25%',
       align: 'left',
-      sortField: 'tvlByUsd',
-      accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvlByUsd)}</span>
+      sortField: 'tvl',
+      accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvl)}</span>
     },
     claimable: {
       name: 'My Share',
       width: '25%',
       align: isMobile() ? 'right' : 'left',
-      sortField: 'myShare',
+      sortField: 'oraiBalance',
       accessor: (data) => {
-        return <span className={styles.tvl}>${data.myShare}</span>;
+        return <span className={styles.tvl}>${data.oraiBalance}</span>;
       }
     }
   };
@@ -126,7 +129,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
     <div className={styles.listVault}>
       <div className={styles.listVaultView}>
         {listVaults.length > 0 ? (
-          <Table headers={headers} data={totalVaultInfos} handleClickRow={handleClickRow} defaultSorted="tvlByUsd" />
+          <Table headers={headers} data={totalVaultInfos} handleClickRow={handleClickRow} defaultSorted="tvl" />
         ) : (
           <FallbackEmptyData />
         )}
