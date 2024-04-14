@@ -12,7 +12,7 @@ export const VaultItem = ({ info }: { info: VaultInfo }) => {
   const navigate = useNavigate();
 
   const goToDetail = () => {
-    navigate(`/vaults/${info.vaultAddr}`);
+    navigate(`/vaults/${encodeURIComponent(info.vaultAddr)}`);
   };
 
   if (!info) return null;
@@ -25,8 +25,8 @@ export const VaultItem = ({ info }: { info: VaultInfo }) => {
 
     return (
       <div className={styles.symbols}>
-        <BaseTokenIcon className={styles.symbols_logo_left} />
-        <QuoteTokenIcon className={styles.symbols_logo_right} />
+        <BaseTokenIcon width={30} height={30} className={styles.symbols_logo_left} />
+        <QuoteTokenIcon width={30} height={30} className={styles.symbols_logo_right} />
       </div>
     );
   };
@@ -52,7 +52,7 @@ export const VaultItem = ({ info }: { info: VaultInfo }) => {
               <div className={styles.infoTitle}>APR</div>
               <div className={`${styles.infoDetail} ${styles.infoApr}`}>
                 {theme === 'dark' ? <BoostIconDark /> : <BoostIconLight />}
-                {info.apr}%
+                {info.aprAllTime}%
               </div>
             </div>
             <div className={styles.infoTopSection}>

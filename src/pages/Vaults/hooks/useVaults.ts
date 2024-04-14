@@ -3,6 +3,7 @@ import { flattenTokensWithIcon } from 'config/chainInfos';
 import axios from 'rest/request';
 import { getVaultInfosFromContract } from '../helpers/vault-query';
 import { VaultInfo, VaultInfoBackend, VaultInfoContract } from '../type';
+import { useEffect, useState } from 'react';
 
 export const useGetVaults = () => {
   const { data: vaultsBackend, refetch: refetchVaults, isLoading } = useQuery(['vaults-backend'], getVaultsInfoFromBackend);
@@ -30,6 +31,7 @@ export const useGetVaults = () => {
         ...vaultInfoBackend,
         token0: JSON.parse(vaultInfoBackend.token0),
         token1: JSON.parse(vaultInfoBackend.token1),
+        lpToken: JSON.parse(vaultInfoBackend.lpToken),
         tokenInfo0: flattenTokensWithIcon.find(token => token.name === JSON.parse(vaultInfoBackend.token0).symbol),
         tokenInfo1: flattenTokensWithIcon.find(token => token.name === JSON.parse(vaultInfoBackend.token1).symbol),
       };
@@ -51,3 +53,25 @@ export const getVaultsInfoFromBackend = async (): Promise<VaultInfoBackend[]> =>
     return []
   }
 }
+
+
+/**
+ * Get vault detail from list vaults find by vaultAddr
+ * @param vaultUrl 
+ * @returns 
+ */
+export const useVaultDetail = (vaultUrl: string) => {
+  const { totalVaultInfos } = useGetVaults();
+  const [vaultDetail, setVaultDetail] = useState<VaultInfo>();
+
+  useEffect(() => {
+    if (!vaultUrl || !totalVaultInfos.length) return;
+
+    const vaultDetail = totalVaultInfos.find((vaultInfo) => vaultInfo.vaultAddr === vaultUrl);
+    setVaultDetail(vaultDetail);
+  }, [vaultUrl, totalVaultInfos.length]);
+
+  return { vaultDetail }
+
+}
+

@@ -1,34 +1,33 @@
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
+import { VaultInfo } from 'pages/Vaults/type';
 import styles from './VaultDetailOverview.module.scss';
 
-export const VaultDetailOverview = () => {
+export const VaultDetailOverview = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
+  const sharePrice = vaultDetail ? vaultDetail.totalSupply : '-';
   return (
     <section className={styles.vaultOverview}>
       <div className={styles.overviewContainer}>
         <div className={styles.info}>
           <h4>Share Price</h4>
           <div className={styles.infoValue}>
-            <span>1.047 USDT</span>
-            <UsdtIcon width={20} height={20} />
+            <span>${sharePrice}</span>
           </div>
         </div>
         <div className={styles.info}>
           <h4>TVL</h4>
           <div className={styles.infoValue}>
-            <span>1.047K USDT</span>
-            <UsdtIcon width={20} height={20} />
+            <span>{vaultDetail.tvl}</span>
           </div>
         </div>
         <div className={styles.info}>
           <h4>APR (All-time)</h4>
           <div className={styles.infoValue}>
-            <span>0.06%</span>
+            <span>{vaultDetail.aprAllTime}%</span>
           </div>
         </div>
         <div className={styles.info}>
           <h4>Daily APR</h4>
           <div className={styles.infoValue}>
-            <span>0.06%</span>
+            <span>{vaultDetail.aprDaily}%</span>
           </div>
         </div>
       </div>

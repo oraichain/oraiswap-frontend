@@ -15,16 +15,21 @@ export type VaultInfoContract = {
 
 export type VaultInfoBackend = {
     vaultAddr: string;
-    apr: number;
+    aprAllTime: number;
+    aprDaily: number;
     description: string;
     tvl: string;
     token0: string;
     token1: string;
+    lpToken: string;
+    strategyExplain: string;
+    howItWork: string;
 }
 
 export type VaultInfo = VaultInfoBackend & VaultInfoContract & {
     token0: TokenVault;
     token1: TokenVault;
+    lpToken: TokenVault;
     tokenInfo0: TokenItemType;
     tokenInfo1: TokenItemType;
 };

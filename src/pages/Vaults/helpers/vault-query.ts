@@ -79,7 +79,6 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
         oraiBalance: utils.formatEther(arrs[3]),
       };
     });
-    console.log({ decodedResults });
     return decodedResults;
   } catch (error) {
     console.error('Error getVaultInfosFromContract: ', error);

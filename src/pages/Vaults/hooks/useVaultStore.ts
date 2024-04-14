@@ -3,7 +3,6 @@ import { persist, } from 'zustand/middleware'
 
 export type ViewType = 'column' | 'list';
 export type VaultStore = {
-    age: string
     viewType: ViewType,
     setViewType: (viewType: ViewType) => void
 }
@@ -11,7 +10,6 @@ export type VaultStore = {
 export const useVaultStore = create<VaultStore, [["zustand/persist", any]]>(
     persist(
         (set, get) => ({
-            age: '123',
             viewType: 'column',
             setViewType: (viewType) => set(() => ({ viewType })),
         }),
