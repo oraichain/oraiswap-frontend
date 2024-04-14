@@ -54,6 +54,7 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
           open={() => setModal('deposit')}
           close={() => setModal(undefined)}
           totalTokenBalance={totalTokenBalance}
+          vaultDetail={vaultDetail}
         />
       )}
       {modal === 'withdraw' && (
@@ -62,6 +63,7 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
           open={() => setModal('withdraw')}
           close={() => setModal(undefined)}
           totalShare={totalShare}
+          vaultDetail={vaultDetail}
         />
       )}
     </div>

@@ -1,5 +1,4 @@
-import { CoinIcon, TokenInfo, toAmount, toDisplay } from '@oraichain/oraidex-common';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
+import { CoinIcon, TokenItemType, toAmount, toDisplay } from '@oraichain/oraidex-common';
 import classNames from 'classnames/bind';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -16,7 +15,7 @@ export const InputWithOptionPercent: FC<{
   totalAmount: bigint;
   percentList?: number[];
   value: bigint | null;
-  token?: TokenInfo;
+  token: TokenItemType;
   hasPath?: boolean;
   isFocus?: boolean;
   prefixText?: string;
@@ -46,13 +45,13 @@ export const InputWithOptionPercent: FC<{
   };
 
   return (
-    <div className={cx('supply', theme, { 'has-path': hasPath })} key={token?.denom}>
+    <div className={cx('supply', theme, { 'has-path': hasPath })}>
       <div className={cx('balance')}>
         <div className={cx('amount', theme)}>
           <TokenBalance
             balance={{
-              amount: totalAmount || BigInt(0),
-              denom: token?.symbol || token?.name || '',
+              amount: totalAmount,
+              denom: token?.name,
               decimals: token?.decimals
             }}
             prefix={prefixText}
@@ -63,12 +62,9 @@ export const InputWithOptionPercent: FC<{
 
       <div className={cx('input')}>
         <div className={styles.strategy}>
-          <div className={styles.strategyLogo}>
-            <UsdtIcon width={32} height={32} />
-          </div>
+          <div className={styles.strategyLogo}>{TokenIcon && <TokenIcon width={32} height={32} />}</div>
           <div className={`${styles.strategyName} ${styles[theme]}`}>
-            <div className={styles.strategyNameTitle}>USDT</div>
-            <div className={styles.strategyNameValue}>Tether</div>
+            <div className={styles.strategyNameTitle}>{token?.name}</div>
           </div>
         </div>
         <div className={cx('input-amount')}>
