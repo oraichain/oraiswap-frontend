@@ -15,8 +15,7 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
   const secondaryType = mobileMode ? 'secondary-sm' : 'secondary';
   const primaryType = mobileMode ? 'primary-sm' : 'primary';
 
-  const totalTokenBalance = 22000000n;
-  const totalShare = 2200000000000000000000000000n;
+  const totalShare = 2200000000000000000n;
 
   return (
     <div className={styles.mySharePerformance}>
@@ -53,7 +52,6 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
           isOpen={modal === 'deposit'}
           open={() => setModal('deposit')}
           close={() => setModal(undefined)}
-          totalTokenBalance={totalTokenBalance}
           vaultDetail={vaultDetail}
         />
       )}

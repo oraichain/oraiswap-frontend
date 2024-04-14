@@ -5,6 +5,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './InputWithOptionPercent.module.scss';
+import { TokenVault } from 'pages/Vaults/type';
 
 const cx = classNames.bind(styles);
 
@@ -15,7 +16,7 @@ export const InputWithOptionPercent: FC<{
   totalAmount: bigint;
   percentList?: number[];
   value: bigint | null;
-  token: TokenItemType;
+  token: TokenItemType | TokenVault;
   hasPath?: boolean;
   isFocus?: boolean;
   prefixText?: string;
@@ -51,7 +52,7 @@ export const InputWithOptionPercent: FC<{
           <TokenBalance
             balance={{
               amount: totalAmount,
-              denom: token?.name,
+              denom: 'name' in token ? token?.name : token?.symbol,
               decimals: token?.decimals
             }}
             prefix={prefixText}
@@ -61,12 +62,18 @@ export const InputWithOptionPercent: FC<{
       </div>
 
       <div className={cx('input')}>
-        <div className={styles.strategy}>
-          <div className={styles.strategyLogo}>{TokenIcon && <TokenIcon width={32} height={32} />}</div>
-          <div className={`${styles.strategyName} ${styles[theme]}`}>
-            <div className={styles.strategyNameTitle}>{token?.name}</div>
+        {/* TODO: meaning deposit token, otherwise withdraw LP vault */}
+        {'name' in token ? (
+          <div className={styles.strategy}>
+            <div className={styles.strategyLogo}>{TokenIcon && <TokenIcon width={32} height={32} />}</div>
+            <div className={`${styles.strategyName} ${styles[theme]}`}>
+              <div className={styles.strategyNameTitle}>{token?.name}</div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <></>
+        )}
+
         <div className={cx('input-amount')}>
           <NumberFormat
             className={cx('amount', theme)}

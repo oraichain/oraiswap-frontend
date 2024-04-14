@@ -20,7 +20,7 @@ import { RootState } from 'store/configure';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 const cx = cn.bind(styles);
 
-export const ModalDeposit: FC<any> = ({ isOpen, close, open, totalTokenBalance, vaultDetail }) => {
+export const ModalDeposit: FC<any> = ({ isOpen, close, open, vaultDetail }) => {
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -64,8 +64,8 @@ export const ModalDeposit: FC<any> = ({ isOpen, close, open, totalTokenBalance, 
         {(() => {
           let disableMsg: string;
           if (depositAmount <= 0) disableMsg = 'Enter an amount';
-          if (depositAmount > totalTokenBalance) disableMsg = `Insufficient balance`;
-          const disabled = loading || depositAmount <= 0 || depositAmount > totalTokenBalance;
+          if (depositAmount > tokenDepositBalance) disableMsg = `Insufficient balance`;
+          const disabled = loading || depositAmount <= 0 || depositAmount > tokenDepositBalance;
 
           return (
             <div className={cx('btn-confirm')}>
