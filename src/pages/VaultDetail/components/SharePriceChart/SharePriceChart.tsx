@@ -4,8 +4,9 @@ import { FILTER_DAY } from 'reducer/type';
 import styles from './SharePriceChart.module.scss';
 import useTheme from 'hooks/useTheme';
 import { TIMER } from 'helper/constants';
-import { formatDateChart, formatNumberKMB } from 'helper/format';
+import { formatDateChart, formatDisplayUsdt, formatNumberKMB } from 'helper/format';
 import { useSharePriceChart } from 'pages/VaultDetail/hooks/useSharePriceChart';
+import { formatUTCDateString } from 'pages/CoHarvest/helpers';
 
 export const SharePriceChart = ({
   filterDay,
@@ -139,7 +140,7 @@ export const SharePriceChart = ({
     // Create and style the tooltip html element
     const toolTip = document.createElement('div');
     // @ts-ignore
-    toolTip.style = `width: 106px; height: 100px; position: absolute; display: none; box-sizing: border-box; text-align: left; z-index: 1000; top: 12px; left: 12px; pointer-events: none;`;
+    toolTip.style = `width: 256px; height: 100px; position: absolute; display: none; box-sizing: border-box; text-align: left; z-index: 1000; top: 12px; left: 12px; pointer-events: none;`;
     toolTip.style.background = theme === 'light' ? '#FFF' : '#31332E';
     toolTip.style.fontWeight = '500';
     toolTip.style.borderRadius = '8px';
@@ -161,16 +162,15 @@ export const SharePriceChart = ({
       ) {
         toolTip.style.display = 'none';
       } else {
-        const dateStr = param.time;
         toolTip.style.display = 'block';
         const data = param.seriesData.get(serieRef.current);
-        const price = data.value !== undefined ? data.value : data.close;
+        const price = data.value !== undefined ? data.value : 0;
         toolTip.innerHTML = `
                   <div style="color: ${theme === 'light' ? '#686A66' : '#979995'}">
-                    ${formatDateChart(dateStr)}
+                    ${formatUTCDateString(param.time * 1000)}
                   </div>
                   <div style="font-size: 14px; margin: 4px 0px; color: ${'#5EA402'}">
-                    ${1.44}
+                    ${formatDisplayUsdt(price, undefined, '$')}
                   </div>
                   <div style="color: ${theme === 'light' ? '#686A66' : '#979995'}">
                     Share Price

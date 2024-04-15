@@ -30,9 +30,14 @@ export const dateFormatter = new Intl.DateTimeFormat('en-US', {
   day: '2-digit'
 });
 
-export function formatDateChart(date: Date | number) {
+export function formatDateChart(date: Date | number, hour = false, minute = false, second = false) {
   const obj = dateFormatter.formatToJson(date);
-  return `${obj.day} ${obj.month}`;
+
+  let dateStr = `${obj.day} ${obj.month}`;
+  if (hour) dateStr += `${obj.hour}`;
+  if (minute) dateStr += `${obj.minute}`;
+  if (second) dateStr += `${obj.second}`;
+  return dateStr;
 }
 
 export const formatNumberKMB = (num: number) => {
