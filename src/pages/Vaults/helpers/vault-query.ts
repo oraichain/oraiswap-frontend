@@ -85,3 +85,22 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
     return [];
   }
 };
+
+export const getShareBalance = async (vaultAddr: string, userAddr: string, oraiVaultShare: bigint) => {
+  try {
+    const shareOfSender = await VaultClients.getOraiGateway(userAddr).balance({
+      userAddress: userAddr,
+      vaultAddress: vaultAddr,
+    });
+    const totalSupply = await VaultClients.getOraiGateway(userAddr).totalSupply({
+      vaultAddress: vaultAddr,
+    });
+    const correspondingShare =
+      (BigInt(shareOfSender.amount) * oraiVaultShare) /
+      BigInt(totalSupply.total_supply); // corresponding share in lp token 
+    return utils.formatEther(correspondingShare);
+  } catch (error) {
+    console.error('Error getShareBalance: ', error);
+    return '0';
+  }
+}
