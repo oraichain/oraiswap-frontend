@@ -9,13 +9,20 @@ import { VaultClients } from 'pages/Vaults/helpers/vault-query';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
+// TODO: current hardcode channel id
 export const BSC_CHANNEL_ID = 'channel-29';
 export const NETWORK = 'bsc';
 
 interface DepositState {
   loading: boolean;
   setLoading: (loading: boolean) => void;
-  deposit: (payload: { userAddr: string; evmDenom: string; amount: bigint; vaultAddr: string }) => Promise<void>;
+  deposit: (payload: {
+    userAddr: string;
+    evmDenom: string;
+    amount: bigint;
+    vaultAddr: string;
+    networkDeposit: string;
+  }) => Promise<void>;
   withdraw: (payload: { userAddr: string; amount: bigint; vaultAddr: string }) => Promise<void>;
 }
 
@@ -24,10 +31,11 @@ export const useDepositWithdrawVault = create<DepositState>()(
     (set) => ({
       loading: false,
       setLoading: (loading) => set(() => ({ loading })),
-      deposit: async ({ userAddr, evmDenom, amount, vaultAddr }) => {
+      deposit: async ({ userAddr, evmDenom, amount, vaultAddr, networkDeposit }) => {
         if (!userAddr) throw new Error('Cannot get user address');
         if (!amount) throw new Error('Amount is invalid');
         if (!vaultAddr) throw new Error('Vault address is not defined');
+        if (!networkDeposit) throw new Error('network is not defined');
 
         set({ loading: true });
         displayToast(TToastType.TX_BROADCASTING);
@@ -38,7 +46,7 @@ export const useDepositWithdrawVault = create<DepositState>()(
             local_channel_id: BSC_CHANNEL_ID,
             vault_address: vaultAddr,
             oraib_address: toBech32(ORAI_BRIDGE_EVM_DENOM_PREFIX, fromBech32(userAddr).data),
-            network: NETWORK
+            network: networkDeposit
           };
 
           const cw20Client = new Cw20BaseClient(window.client, userAddr, USDT_CONTRACT);

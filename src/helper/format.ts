@@ -15,12 +15,13 @@ export const numberWithCommas = (
   return x.toLocaleString(locales, options);
 };
 
-// TODO: need to seperate format funcs to format module later.
-export const formatDisplayUsdt = (amount: number | string, dp = 2): string => {
+export const formatDisplayUsdt = (amount: number | string, dp = 2, prefix = ''): string => {
   const validatedAmount = validateNumber(amount);
-  if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), 4).toString()}`;
+  if (validatedAmount < 1) return `${prefix}${toFixedIfNecessary(amount.toString(), 4).toString()}`;
 
-  return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp), undefined, { maximumFractionDigits: 6 })}`;
+  return `${prefix}${numberWithCommas(toFixedIfNecessary(amount.toString(), dp), undefined, {
+    maximumFractionDigits: 6
+  })}`;
 };
 
 export const dateFormatter = new Intl.DateTimeFormat('en-US', {

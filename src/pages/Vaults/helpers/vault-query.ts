@@ -19,11 +19,19 @@ export class VaultClients {
   static vaultFactory: VaultLPFactory;
   static oraiGateway: OraiGatewayClient;
   static multicall: MultiCall;
+  static ethereumProvider: ethers.providers.JsonRpcProvider;
+
+  static getEthereumProvider() {
+    if (!this.ethereumProvider) {
+      const rpcProviderUrl = 'https://bsc-dataseed2.binance.org/';
+      this.ethereumProvider = new ethers.providers.JsonRpcProvider(rpcProviderUrl);
+    }
+    return this.ethereumProvider;
+  }
 
   static getVaultFactory() {
     if (!this.vaultFactory) {
-      const provider = new ethers.providers.Web3Provider(window.ethereumDapp, 'any');
-      this.vaultFactory = VaultLPFactory__factory.connect(VAULT_FACTORY_CONTRACT_ADDRESS, provider);
+      this.vaultFactory = VaultLPFactory__factory.connect(VAULT_FACTORY_CONTRACT_ADDRESS, this.getEthereumProvider());
     }
     return this.vaultFactory;
   }
@@ -37,8 +45,7 @@ export class VaultClients {
 
   static getMulticall() {
     if (!this.multicall) {
-      const provider = new ethers.providers.Web3Provider(window.ethereumDapp, 'any');
-      this.multicall = MultiCall__factory.connect(MULTICALL_CONTRACT_ADDRESS, provider);
+      this.multicall = MultiCall__factory.connect(MULTICALL_CONTRACT_ADDRESS, this.getEthereumProvider());
     }
     return this.multicall;
   }

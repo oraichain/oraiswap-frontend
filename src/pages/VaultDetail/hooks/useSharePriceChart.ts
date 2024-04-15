@@ -1,66 +1,36 @@
-import { useEffect, useState } from 'react';
-import { FILTER_DAY } from 'reducer/type';
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 import axios from 'rest/request';
 
-export const useSharePriceChart = (type: FILTER_DAY, pair?: string) => {
-  const [currentDataLiquidity, setCurrentDataLiquidity] = useState([]);
+export const useSharePriceChart = () => {
+  const { vaultUrl } = useParams();
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const onChangeRangeLiquidity = async (value = FILTER_DAY.DAY) => {
-    try {
-      setIsLoading(true);
-      let data = [];
-
-      if (pair) {
-        data = await getDataLiquidityHistoricalByPair(pair, value);
-      } else {
-        data = await getDataLiquidityHistoricalAll(value);
-      }
-
-      setCurrentDataLiquidity(data);
-      setIsLoading(false);
-    } catch (e) {
-      console.log('Liquidity ERROR: e', 'background: #FF0000; color:#FFFFFF', e);
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    onChangeRangeLiquidity(type);
-  }, [type]);
+  const {
+    data: sharePriceChartData,
+    refetch: refetchSharePriceChartData,
+    isLoading
+  } = useQuery<any[]>(['share-price-chart'], () => getSharePriceHistoricalChart(vaultUrl), {
+    enabled: !!vaultUrl,
+    placeholderData: []
+  });
 
   return {
-    currentDataLiquidity
+    sharePriceChartData,
+    refetchSharePriceChartData,
+    isLoading
   };
 };
-export const MINIMUM_YEAR_STATISTIC = 2000;
 
-export const getDataLiquidityHistoricalAll = async (type: FILTER_DAY = FILTER_DAY.DAY) => {
+export const getSharePriceHistoricalChart = async (vaultAddr: string) => {
   try {
-    const res = await axios.get('/v1/liquidity/historical/all-charts', {
+    const res = await axios.get('/v1/share-price/historical-chart', {
       params: {
-        type
+        vaultAddr
       }
     });
-    return (res.data || []).filter((item) => item?.time && new Date(item?.time).getFullYear() > MINIMUM_YEAR_STATISTIC);
+    return res.data || [];
   } catch (e) {
-    console.error('getDataLiquidityHistoricalAll', e);
-    return [];
-  }
-};
-
-export const getDataLiquidityHistoricalByPair = async (pair: string, type: FILTER_DAY = FILTER_DAY.DAY) => {
-  try {
-    const res = await axios.get('/v1/liquidity/historical/chart', {
-      params: {
-        type,
-        pair
-      }
-    });
-    return (res.data || []).filter((item) => item?.time && new Date(item?.time).getFullYear() > MINIMUM_YEAR_STATISTIC);
-  } catch (e) {
-    console.error(`getDataLiquidityHistoricalByPair - pair: ${pair}`, e);
+    console.error('getSharePriceHistoricalChart', e);
     return [];
   }
 };

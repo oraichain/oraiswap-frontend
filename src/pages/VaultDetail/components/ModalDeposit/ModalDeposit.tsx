@@ -76,7 +76,8 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({ isOpen, close, ope
                     amount: depositAmount,
                     userAddr: address,
                     evmDenom: ORAI_BRIDGE_EVM_DENOM_PREFIX + USDT_BSC_CONTRACT,
-                    vaultAddr: vaultDetail?.vaultAddr
+                    vaultAddr: vaultDetail?.vaultAddr,
+                    networkDeposit: vaultDetail?.network
                   })
                 }
                 type="primary"

@@ -28,6 +28,11 @@
       display: flex;
       gap: 10px;
 
+      .strategyLogo {
+        display: flex;
+        align-items: center;
+      }
+
       .symbols {
         .symbols_logo_left {
           position: relative;

@@ -1,5 +1,6 @@
 import { useTotalDeposit, useTotalSharePerformance } from 'pages/Vaults/hooks';
 import styles from './WhatIsVault.module.scss';
+import { formatDisplayUsdt } from 'helper/format';
 
 export const TotalSharePerf = () => {
   const { totalTvlUsd } = useTotalSharePerformance();
@@ -11,13 +12,13 @@ export const TotalSharePerf = () => {
         <div className={styles.amount}>
           <div className={styles.amountText}>Total Value Locked (TVL)</div>
           <div className={styles.value}>
-            <span>${totalTvlUsd}</span>
+            <span>{formatDisplayUsdt(totalTvlUsd, 2, '$')}</span>
           </div>
         </div>
         <div className={styles.amount}>
           <div className={styles.amountText}>Total Deposit</div>
           <div className={styles.value}>
-            <span>${totalDeposit}</span>
+            <span>{formatDisplayUsdt(totalDeposit, 2, '$')}</span>
           </div>
         </div>
       </div>

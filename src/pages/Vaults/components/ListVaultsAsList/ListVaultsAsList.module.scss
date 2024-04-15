@@ -9,6 +9,14 @@
       align-items: center;
       gap: 8px;
 
+      .strategyNameValue {
+        font-weight: 500;
+      }
+
+      .strategyNameTitle {
+        font-size: 12px;
+      }
+
       .symbols {
         .symbols_logo_left {
           position: relative;
@@ -19,10 +27,6 @@
       @include mobile {
         font-size: 12px;
         gap: 4px;
-
-        .strategyNameTitle {
-          font-size: 12px;
-        }
       }
     }
 

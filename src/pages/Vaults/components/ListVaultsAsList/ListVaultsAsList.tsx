@@ -6,11 +6,11 @@ import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { useGetVaults } from 'pages/Vaults/hooks/useVaults';
 import { VaultInfo } from 'pages/Vaults/type';
 import { useNavigate } from 'react-router-dom';
 import styles from './ListVaultsAsList.module.scss';
+import { formatDisplayUsdt } from 'helper/format';
 
 type ListPoolProps = {};
 
@@ -68,7 +68,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       width: '25%',
       align: 'left',
       sortField: 'tvl',
-      accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvl)}</span>
+      accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvl, undefined, '$')}</span>
     },
     claimable: {
       name: 'My Share',
@@ -76,7 +76,11 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       align: isMobile() ? 'right' : 'left',
       sortField: 'oraiBalance',
       accessor: (data) => {
-        return <span className={styles.tvl}>${data.oraiBalance}</span>;
+        return (
+          <span className={styles.tvl}>
+            {formatDisplayUsdt(data.oraiBalance)} {data.lpToken.symbol}
+          </span>
+        );
       }
     }
   };

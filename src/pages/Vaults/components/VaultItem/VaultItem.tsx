@@ -2,6 +2,7 @@ import { TokenItemType } from '@oraichain/oraidex-common';
 import { ReactComponent as BoostIconDark } from 'assets/icons/ic_apr_boost_dark.svg';
 import { ReactComponent as BoostIconLight } from 'assets/icons/ic_apr_boost_light.svg';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { formatDisplayUsdt } from 'helper/format';
 import useTheme from 'hooks/useTheme';
 import { VaultInfo } from 'pages/Vaults/type';
 import { useNavigate } from 'react-router-dom';
@@ -57,12 +58,14 @@ export const VaultItem = ({ info }: { info: VaultInfo }) => {
             </div>
             <div className={styles.infoTopSection}>
               <div className={styles.infoTitle}>My Share</div>
-              <div className={`${styles.infoDetail} ${styles.myShare}`}>{info.oraiBalance}</div>
+              <div className={`${styles.infoDetail} ${styles.myShare}`}>
+                {formatDisplayUsdt(info.oraiBalance)} {info.lpToken.symbol}
+              </div>
             </div>
           </div>
           <div className={styles.infoTopSection}>
             <div className={styles.infoTitle}>TVL</div>
-            <div className={`${styles.infoDetail} ${styles.myShare}`}>${info.tvl}</div>
+            <div className={`${styles.infoDetail} ${styles.myShare}`}>{formatDisplayUsdt(info.tvl, null, '$')}</div>
           </div>
         </div>
       </div>

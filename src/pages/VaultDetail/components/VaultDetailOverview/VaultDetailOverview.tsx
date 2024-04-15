@@ -1,21 +1,21 @@
 import { VaultInfo } from 'pages/Vaults/type';
 import styles from './VaultDetailOverview.module.scss';
+import { formatDisplayUsdt } from 'helper/format';
 
 export const VaultDetailOverview = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
-  const sharePrice = vaultDetail ? vaultDetail.totalSupply : '-';
   return (
     <section className={styles.vaultOverview}>
       <div className={styles.overviewContainer}>
         <div className={styles.info}>
           <h4>Share Price</h4>
           <div className={styles.infoValue}>
-            <span>${sharePrice}</span>
+            <span>{formatDisplayUsdt(vaultDetail.sharePrice, undefined, '$')}</span>
           </div>
         </div>
         <div className={styles.info}>
           <h4>TVL</h4>
           <div className={styles.infoValue}>
-            <span>{vaultDetail.tvl}</span>
+            <span>{formatDisplayUsdt(vaultDetail.tvl, 2, '$')}</span>
           </div>
         </div>
         <div className={styles.info}>

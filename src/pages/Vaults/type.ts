@@ -23,6 +23,7 @@ export type VaultInfoBackend = {
   lpToken: string;
   strategyExplain: string;
   howItWork: string;
+  network: string;
 };
 
 export type VaultInfo = VaultInfoBackend &

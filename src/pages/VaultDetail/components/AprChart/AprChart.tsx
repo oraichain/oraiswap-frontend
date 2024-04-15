@@ -26,7 +26,7 @@ export const AprChart = ({
   const resizeObserver = useRef(null);
   const theme = useTheme();
 
-  const { currentDataLiquidity: data } = useSharePriceChart(filterDay, pair);
+  const { sharePriceChartData } = useSharePriceChart();
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -235,7 +235,7 @@ export const AprChart = ({
       bottomColor: 'transparent'
     });
 
-    let newData = data?.map((val) => {
+    let newData = sharePriceChartData.map((val) => {
       return {
         ...val,
         time: Math.floor(new Date(val?.time).getTime() / 1000)
@@ -256,7 +256,7 @@ export const AprChart = ({
 
   // set data for chart
   useEffect(() => {
-    let newData = data?.map((val) => {
+    let newData = sharePriceChartData.map((val) => {
       return {
         ...val,
         time: Math.floor(new Date(val?.time).getTime() / 1000)
@@ -272,7 +272,7 @@ export const AprChart = ({
       })
     );
     chartRef?.current?.timeScale()?.fitContent();
-  }, [data]);
+  }, [sharePriceChartData]);
 
   return (
     <div className={styles.sharePriceChart}>
