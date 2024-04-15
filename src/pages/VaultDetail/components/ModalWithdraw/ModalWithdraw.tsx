@@ -37,15 +37,15 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({ isOpen, close, op
           value={withdrawAmount}
           token={vaultDetail.lpToken}
           setAmountFromPercent={setWithdrawAmount}
-          totalAmount={totalShare}
+          totalAmount={toAmount(totalShare, vaultDetail.lpToken.decimals)}
           prefixText="Max Available to Withdraw: "
           decimals={vaultDetail.lpToken.decimals}
         />
         {(() => {
           let disableMsg: string;
           if (withdrawAmount <= 0) disableMsg = 'Enter an amount';
-          if (withdrawAmount > totalShare) disableMsg = `Insufficient share`;
-          const disabled = loading || withdrawAmount <= 0 || withdrawAmount > totalShare;
+          if (withdrawAmount > +totalShare) disableMsg = `Insufficient share`;
+          const disabled = loading || withdrawAmount <= 0 || withdrawAmount > +totalShare;
 
           return (
             <div className={cx('btn-confirm')}>

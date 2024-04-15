@@ -42,5 +42,5 @@ export type ModalDepositWithdrawProps = {
   close: () => void;
   open: () => void;
   vaultDetail: VaultInfo;
-  totalShare?: bigint;
+  totalShare?: string;
 };
