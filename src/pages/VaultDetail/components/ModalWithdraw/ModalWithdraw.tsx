@@ -1,4 +1,4 @@
-import { toAmount, toDisplay } from '@oraichain/oraidex-common';
+import { toAmount } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -9,9 +9,10 @@ import { useDepositWithdrawVault } from 'pages/VaultDetail/hooks/useDepositWithd
 import { FC, useState } from 'react';
 import { InputWithOptionPercent } from '../InputWithOptionPercent';
 import styles from './ModalWithdraw.module.scss';
+import { ModalDepositWithdrawProps } from 'pages/Vaults/type';
 const cx = cn.bind(styles);
 
-export const ModalWithdraw: FC<any> = ({ isOpen, close, open, totalShare, vaultDetail }) => {
+export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({ isOpen, close, open, totalShare, vaultDetail }) => {
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const [withdrawAmount, setWithdrawAmount] = useState<bigint | null>(null);

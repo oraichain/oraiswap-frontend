@@ -35,3 +35,11 @@ export type VaultInfo = VaultInfoBackend &
     tokenInfo0: TokenItemType;
     tokenInfo1: TokenItemType;
   };
+
+export type ModalDepositWithdrawProps = {
+  isOpen: boolean;
+  close: () => void;
+  open: () => void;
+  vaultDetail: VaultInfo;
+  totalShare?: bigint;
+};

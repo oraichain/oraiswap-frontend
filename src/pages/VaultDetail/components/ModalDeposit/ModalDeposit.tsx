@@ -18,9 +18,10 @@ import styles from './ModalDeposit.module.scss';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
+import { ModalDepositWithdrawProps } from 'pages/Vaults/type';
 const cx = cn.bind(styles);
 
-export const ModalDeposit: FC<any> = ({ isOpen, close, open, vaultDetail }) => {
+export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({ isOpen, close, open, vaultDetail }) => {
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -32,7 +33,7 @@ export const ModalDeposit: FC<any> = ({ isOpen, close, open, vaultDetail }) => {
     if (!vaultDetail) return;
 
     const tokenDepositInOraichain = oraichainTokensWithIcon.find(
-      (t) => t.coinGeckoId === vaultDetail.tokenInfo1.coinGeckoId
+      (t) => t.coinGeckoId === vaultDetail.tokenInfo0.coinGeckoId
     );
     setDepositToken(tokenDepositInOraichain);
   }, [vaultDetail, amounts]);
