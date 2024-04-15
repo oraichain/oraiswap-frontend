@@ -1,12 +1,12 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as BackIcon } from 'assets/icons/ic_back.svg';
 import Content from 'layouts/Content';
-import { useVaultDetail } from 'pages/Vaults/hooks/useVaults';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './VaultDetail.module.scss';
 import { MySharePerformance } from './components/MySharePerformance';
 import { VaultDetailInfo } from './components/VaultDetailInfo';
+import { useVaultDetail } from './hooks/useVaultDetail';
 
 export const VaultDetail: React.FC = () => {
   const mobileMode = isMobile();

@@ -1,7 +1,8 @@
 import { BigDecimal } from '@oraichain/oraidex-common';
 import { useQuery } from '@tanstack/react-query';
 import { VaultClients } from '../helpers/vault-query';
-import { calculateSharePrice, useVaultDetail } from './useVaults';
+import { calculateSharePrice } from './useVaults';
+import { useVaultDetail } from 'pages/VaultDetail/hooks/useVaultDetail';
 
 export const useGetShareBalance = ({ vaultAddress, userAddress, oraiVaultShare }) => {
   const {
