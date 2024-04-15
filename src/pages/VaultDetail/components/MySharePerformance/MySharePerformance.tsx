@@ -6,17 +6,23 @@ import { useState } from 'react';
 import { ModalDeposit } from '../ModalDeposit';
 import { ModalWithdraw } from '../ModalWithdraw';
 import { VaultInfo } from 'pages/Vaults/type';
+import { useGetShareBalance } from 'pages/Vaults/hooks/useShareBalance';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 type ModalVault = 'deposit' | 'withdraw';
 export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
-  const [modal, setModal] = useState<ModalVault>();
   const mobileMode = isMobile();
+
+  const [modal, setModal] = useState<ModalVault>();
+  const [oraiAddress] = useConfigReducer('address');
+  const { shareBalance, shareBalanceInUsd } = useGetShareBalance({
+    vaultAddress: vaultDetail.vaultAddr,
+    userAddress: oraiAddress,
+    oraiVaultShare: vaultDetail.oraiBalance
+  });
 
   const secondaryType = mobileMode ? 'secondary-sm' : 'secondary';
   const primaryType = mobileMode ? 'primary-sm' : 'primary';
-
-  const totalShare = 2200000000000000000n;
-
   return (
     <div className={styles.mySharePerformance}>
       <h3 className={styles.title}>
@@ -27,15 +33,14 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
       <div className={styles.performInfo}>
         <div className={styles.key}>Max Available to Withdraw</div>
         <div className={styles.amount}>
-          <span>$102</span>
+          <span>${shareBalanceInUsd}</span>
         </div>
       </div>
       <div className={styles.performInfo}>
         <div className={styles.key}>Share Amount</div>
         <div className={styles.amount}>
           <span>
-            {/* TODO: need to calculate my share via oraibalance & total supply */}
-            {vaultDetail.oraiBalance} {vaultDetail.lpToken.symbol}{' '}
+            {shareBalance} {vaultDetail.lpToken.symbol}{' '}
           </span>
         </div>
       </div>
@@ -60,7 +65,7 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
           isOpen={modal === 'withdraw'}
           open={() => setModal('withdraw')}
           close={() => setModal(undefined)}
-          totalShare={totalShare}
+          totalShare={BigInt(shareBalance)}
           vaultDetail={vaultDetail}
         />
       )}

@@ -1,23 +1,23 @@
+import { useTotalDeposit, useTotalSharePerformance } from 'pages/Vaults/hooks';
 import styles from './WhatIsVault.module.scss';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 
-export const MyTotalSharePerf = () => {
+export const TotalSharePerf = () => {
+  const { totalTvlUsd } = useTotalSharePerformance();
+  const { totalDeposit } = useTotalDeposit();
   return (
     <div className={styles.myTotalShare}>
-      <h3>My Total Share Performance</h3>
+      <h3>Total Share Performance</h3>
       <div className={styles.amountPerf}>
         <div className={styles.amount}>
-          <div className={styles.amountText}>Max Available to Withdraw</div>
+          <div className={styles.amountText}>Total Value Locked (TVL)</div>
           <div className={styles.value}>
-            <span>140.6 USDT</span>
-            <UsdtIcon width={24} height={24} />
+            <span>${totalTvlUsd}</span>
           </div>
         </div>
         <div className={styles.amount}>
-          <div className={styles.amountText}>Total Share Amount</div>
+          <div className={styles.amountText}>Total Deposit</div>
           <div className={styles.value}>
-            <span>120 USDT</span>
-            <UsdtIcon width={24} height={24} />
+            <span>${totalDeposit}</span>
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@ export const WhatIsVault = () => {
             Simply deposit your USDT to start earning.
           </p>
         </div>
-        <MyTotalSharePerf />
+        <TotalSharePerf />
       </div>
       <div className={styles.shadow}></div>
     </div>
@@ -55,7 +55,7 @@ export const WhatIsVaultMobile = () => {
           </p>
         </div>
       </div>
-      <MyTotalSharePerf />
+      <TotalSharePerf />
     </div>
   );
 };

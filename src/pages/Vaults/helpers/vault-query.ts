@@ -65,18 +65,18 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
     if (!vaultAddrs.length) return null;
 
     const vaultLpInterface = new utils.Interface(VaultLP__factory.abi);
-    const dataCall = vaultAddrs.map((_vaultAddr) => vaultLpInterface.encodeFunctionData('getVaultInfo', [ORAI_VAULT_BSC_CONTRACT_ADDRESS]));
+    const dataCall = vaultAddrs.map((_vaultAddr) =>
+      vaultLpInterface.encodeFunctionData('getVaultInfo', [ORAI_VAULT_BSC_CONTRACT_ADDRESS])
+    );
     const amounts = await VaultClients.getMulticall().multiCall(vaultAddrs, dataCall);
     // decode TVL
     const decodedResults = amounts.map((result, index) => {
-      const arrs = Array.from(
-        vaultLpInterface.decodeFunctionResult("getVaultInfo", result)
-      );
+      const arrs = Array.from(vaultLpInterface.decodeFunctionResult('getVaultInfo', result));
       return {
         vaultAddress: arrs[0],
         tvlByToken1: utils.formatEther(arrs[1]),
         totalSupply: utils.formatEther(arrs[2]),
-        oraiBalance: utils.formatEther(arrs[3]),
+        oraiBalance: utils.formatEther(arrs[3])
       };
     });
     return decodedResults;

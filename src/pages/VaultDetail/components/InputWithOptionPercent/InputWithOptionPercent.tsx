@@ -49,21 +49,23 @@ export const InputWithOptionPercent: FC<{
     <div className={cx('supply', theme, { 'has-path': hasPath })}>
       <div className={cx('balance')}>
         <div className={cx('amount', theme)}>
-          <TokenBalance
-            balance={{
-              amount: totalAmount,
-              denom: 'name' in token ? token?.name : token?.symbol,
-              decimals: token?.decimals
-            }}
-            prefix={prefixText}
-            decimalScale={6}
-          />
+          {token && (
+            <TokenBalance
+              balance={{
+                amount: totalAmount,
+                denom: 'name' in token ? token?.name : token?.symbol,
+                decimals: token?.decimals
+              }}
+              prefix={prefixText}
+              decimalScale={6}
+            />
+          )}
         </div>
       </div>
 
       <div className={cx('input')}>
         {/* TODO: meaning deposit token, otherwise withdraw LP vault */}
-        {'name' in token ? (
+        {token && 'name' in token ? (
           <div className={styles.strategy}>
             <div className={styles.strategyLogo}>{TokenIcon && <TokenIcon width={32} height={32} />}</div>
             <div className={`${styles.strategyName} ${styles[theme]}`}>
