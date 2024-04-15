@@ -1,19 +1,17 @@
-import { toAmount } from '@oraichain/oraidex-common';
+import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import Modal from 'components/Modal';
-import { EVM_DECIMALS } from 'helper/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useDepositWithdrawVault } from 'pages/VaultDetail/hooks/useDepositWithdrawVault';
-import { vaultInfos } from 'pages/Vaults/helpers/vault-query';
 import { FC, useState } from 'react';
 import { InputWithOptionPercent } from '../InputWithOptionPercent';
 import styles from './ModalWithdraw.module.scss';
 const cx = cn.bind(styles);
 
-export const ModalWithdraw: FC<any> = ({ isOpen, close, open, totalShare }) => {
+export const ModalWithdraw: FC<any> = ({ isOpen, close, open, totalShare, vaultDetail }) => {
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const [withdrawAmount, setWithdrawAmount] = useState<bigint | null>(null);
@@ -33,14 +31,14 @@ export const ModalWithdraw: FC<any> = ({ isOpen, close, open, totalShare }) => {
         <InputWithOptionPercent
           onValueChange={({ floatValue }) => {
             if (floatValue === undefined) setWithdrawAmount(null);
-            else setWithdrawAmount(toAmount(floatValue, EVM_DECIMALS));
+            else setWithdrawAmount(toAmount(floatValue, vaultDetail.lpToken.decimals));
           }}
           value={withdrawAmount}
-          token={null}
+          token={vaultDetail.lpToken}
           setAmountFromPercent={setWithdrawAmount}
           totalAmount={totalShare}
           prefixText="Max Available to Withdraw: "
-          decimals={EVM_DECIMALS}
+          decimals={vaultDetail.lpToken.decimals}
         />
         {(() => {
           let disableMsg: string;
@@ -55,7 +53,7 @@ export const ModalWithdraw: FC<any> = ({ isOpen, close, open, totalShare }) => {
                   withdraw({
                     amount: withdrawAmount,
                     userAddr: address,
-                    vaultAddr: vaultInfos[0].vaultAddr
+                    vaultAddr: vaultDetail.vaultAddr
                   })
                 }
                 type="primary"

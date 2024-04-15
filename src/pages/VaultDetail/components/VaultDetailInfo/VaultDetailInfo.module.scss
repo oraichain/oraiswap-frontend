@@ -12,8 +12,14 @@
   .vaultName {
     .strategy {
       display: flex;
-      align-items: center;
       gap: 10px;
+
+      .symbols {
+        .symbols_logo_left {
+          position: relative;
+          left: 5px;
+        }
+      }
 
       .strategyName {
         @include theme() {

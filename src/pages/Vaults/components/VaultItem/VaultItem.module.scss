@@ -26,10 +26,18 @@
 
     .strategy {
       display: flex;
-      align-items: center;
       gap: 10px;
 
+      .symbols {
+        .symbols_logo_left {
+          position: relative;
+          left: 5px;
+        }
+      }
+
       .strategyName {
+
+
         .strategyNameTitle {
           color: $white-color;
           font-size: 14px;
@@ -81,6 +89,7 @@
         color: theme-get('neutral-text-body-on-section');
       }
 
+      max-width: 300px;
       font-size: 14px;
       font-weight: 400;
       line-height: 150%;

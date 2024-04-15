@@ -2,13 +2,14 @@ import { useState } from 'react';
 import styles from './VaultInfoTabs.module.scss';
 import { StrategyExplainedTab } from '../StrategyExplainedTab';
 import { PerformanceTab } from '../PerformanceTab';
+import { VaultInfo } from 'pages/Vaults/type';
 
 export type VaultInfoTab = 'performance' | 'strategy_explained';
-export const VaultInfoTabs = () => {
+export const VaultInfoTabs = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
   const [tab, setTab] = useState<VaultInfoTab>('performance');
 
   const generateTabContent = () => {
-    return tab === 'performance' ? <PerformanceTab /> : <StrategyExplainedTab />;
+    return tab === 'performance' ? <PerformanceTab /> : <StrategyExplainedTab vaultDetail={vaultDetail} />;
   };
 
   return (

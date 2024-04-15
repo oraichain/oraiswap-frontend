@@ -9,6 +9,13 @@
       align-items: center;
       gap: 8px;
 
+      .symbols {
+        .symbols_logo_left {
+          position: relative;
+          left: 5px;
+        }
+      }
+
       @include mobile {
         font-size: 12px;
         gap: 4px;

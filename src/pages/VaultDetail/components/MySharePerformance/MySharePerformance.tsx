@@ -1,22 +1,21 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import styles from './MySharePerformance.module.scss';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { ReactComponent as EyeIcon } from 'assets/icons/ic_eye_vault.svg';
 import { Button } from 'components/Button';
 import { useState } from 'react';
 import { ModalDeposit } from '../ModalDeposit';
 import { ModalWithdraw } from '../ModalWithdraw';
+import { VaultInfo } from 'pages/Vaults/type';
 
 type ModalVault = 'deposit' | 'withdraw';
-export const MySharePerformance = () => {
+export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
   const [modal, setModal] = useState<ModalVault>();
   const mobileMode = isMobile();
 
   const secondaryType = mobileMode ? 'secondary-sm' : 'secondary';
   const primaryType = mobileMode ? 'primary-sm' : 'primary';
 
-  const totalTokenBalance = 22000000n;
-  const totalShare = 2200000000000000000000000000n;
+  const totalShare = 2200000000000000000n;
 
   return (
     <div className={styles.mySharePerformance}>
@@ -28,15 +27,16 @@ export const MySharePerformance = () => {
       <div className={styles.performInfo}>
         <div className={styles.key}>Max Available to Withdraw</div>
         <div className={styles.amount}>
-          <span>102 USDT</span>
-          <UsdtIcon width={24} height={24} />
+          <span>$102</span>
         </div>
       </div>
       <div className={styles.performInfo}>
         <div className={styles.key}>Share Amount</div>
         <div className={styles.amount}>
-          <span>102 USDT</span>
-          <UsdtIcon width={24} height={24} />
+          <span>
+            {/* TODO: need to calculate my share via oraibalance & total supply */}
+            {vaultDetail.oraiBalance} {vaultDetail.lpToken.symbol}{' '}
+          </span>
         </div>
       </div>
       <div className={styles.cta}>
@@ -52,7 +52,7 @@ export const MySharePerformance = () => {
           isOpen={modal === 'deposit'}
           open={() => setModal('deposit')}
           close={() => setModal(undefined)}
-          totalTokenBalance={totalTokenBalance}
+          vaultDetail={vaultDetail}
         />
       )}
       {modal === 'withdraw' && (
@@ -61,6 +61,7 @@ export const MySharePerformance = () => {
           open={() => setModal('withdraw')}
           close={() => setModal(undefined)}
           totalShare={totalShare}
+          vaultDetail={vaultDetail}
         />
       )}
     </div>

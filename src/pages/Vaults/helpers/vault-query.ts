@@ -10,8 +10,10 @@ import {
 import {
   MULTICALL_CONTRACT_ADDRESS,
   ORAI_GATEWAY_CONTRACT_ADDRESS,
+  ORAI_VAULT_BSC_CONTRACT_ADDRESS,
   VAULT_FACTORY_CONTRACT_ADDRESS
 } from '../constants';
+import { VaultInfoContract } from '../type';
 
 export class VaultClients {
   static vaultFactory: VaultLPFactory;
@@ -42,22 +44,9 @@ export class VaultClients {
   }
 }
 
-export const getListVaultAddrs = async (): Promise<string[]> => {
-  try {
-    const vaultFactory = VaultClients.getVaultFactory();
-    const vaultAddrs = await vaultFactory.getAllVaultAddress();
-    console.log(vaultAddrs.length);
-    console.log({ vaultAddrs });
-    return Array.from(vaultAddrs);
-  } catch (error) {
-    console.error('Error getListVaultAddrs: ', error);
-    return [];
-  }
-};
-
 export const vaultInfos = [
   {
-    vaultAddr: '0xd939Ff4A1bF7Dd7AAeBdF0bcb20E2950f42A4dc1',
+    vaultAddr: '0xe7F9818426D6584f3abA93c203024C9AA8678eB2',
     firstDenom: 'USDT',
     firstCoingeckoId: 'tether',
     secondDenom: 'WBNB',
@@ -67,31 +56,32 @@ export const vaultInfos = [
 ];
 
 /**
- * Get vault infos
+ * Get vault infos from contract
  * @param vaultAddrs
  * @returns
  */
-export const getVaultInfos = async (vaultAddrs: string[]) => {
+export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<VaultInfoContract[]> => {
   try {
     if (!vaultAddrs.length) return null;
 
     const vaultLpInterface = new utils.Interface(VaultLP__factory.abi);
-    const dataCall = vaultAddrs.map((_vaultAddr) => vaultLpInterface.encodeFunctionData('getTVLInToken0'));
+    const dataCall = vaultAddrs.map((_vaultAddr) => vaultLpInterface.encodeFunctionData('getVaultInfo', [ORAI_VAULT_BSC_CONTRACT_ADDRESS]));
     const amounts = await VaultClients.getMulticall().multiCall(vaultAddrs, dataCall);
     // decode TVL
-    const result = amounts.map((amount, index) => {
-      // TODO: current hardcode list vault
-      const vaultInfo = vaultInfos.find((vault) => vault.vaultAddr === vaultAddrs[index]);
-      if (!vaultInfo) return null;
+    const decodedResults = amounts.map((result, index) => {
+      const arrs = Array.from(
+        vaultLpInterface.decodeFunctionResult("getVaultInfo", result)
+      );
       return {
-        ...vaultInfo,
-        tvlByToken0: Array.from(vaultLpInterface.decodeFunctionResult('getTVLInToken0', amount))[0].toString()
+        vaultAddress: arrs[0],
+        tvlByToken1: utils.formatEther(arrs[1]),
+        totalSupply: utils.formatEther(arrs[2]),
+        oraiBalance: utils.formatEther(arrs[3]),
       };
     });
-    console.log({ result });
-    return result;
+    return decodedResults;
   } catch (error) {
-    console.error('Error getVaultInfos: ', error);
+    console.error('Error getVaultInfosFromContract: ', error);
     return [];
   }
 };

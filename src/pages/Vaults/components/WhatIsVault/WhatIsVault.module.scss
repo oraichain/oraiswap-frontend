@@ -121,7 +121,7 @@
     .vaultLeft {
       .heading {
         @include theme() {
-          color: theme-get('neutral-text-text-btn-default');
+          color: theme-get('neutral-text-title-negative');
         }
 
         font-size: 24px;
@@ -132,7 +132,7 @@
 
       .description {
         @include theme() {
-          color: theme-get('neutral-text-text-btn-default');
+          color: theme-get('neutral-text-title-negative');
         }
 
         max-width: 500px;
