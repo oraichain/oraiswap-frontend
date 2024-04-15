@@ -60,7 +60,7 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({ isOpen, close, ope
           token={depositToken}
           setAmountFromPercent={setDepositAmount}
           totalAmount={tokenDepositBalance}
-          TokenIcon={vaultDetail.tokenInfo1.Icon}
+          TokenIcon={vaultDetail.tokenInfo0.Icon}
         />
         {(() => {
           let disableMsg: string;

@@ -2,7 +2,6 @@ import { BigDecimal, CoinGeckoId, TokenItemType } from '@oraichain/oraidex-commo
 import { useQuery } from '@tanstack/react-query';
 import { flattenTokensWithIcon } from 'config/chainInfos';
 import { CoinGeckoPrices, useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { useEffect, useState } from 'react';
 import axios from 'rest/request';
 import { getVaultInfosFromContract } from '../helpers/vault-query';
 import { VaultInfo, VaultInfoBackend, VaultInfoContract } from '../type';
