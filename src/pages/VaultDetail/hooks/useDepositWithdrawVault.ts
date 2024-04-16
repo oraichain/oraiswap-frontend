@@ -4,7 +4,9 @@ import { ORAI_BRIDGE_EVM_DENOM_PREFIX, USDT_CONTRACT } from '@oraichain/oraidex-
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { handleErrorTransaction } from 'helper';
+import { VaultLP__factory } from 'nestquant-vault-sdk';
 import { DepositOrderMsg } from 'nestquant-vault-sdk/dist/wasm-ts/OraiGateway.types';
+import { ORAI_VAULT_BSC_CONTRACT_ADDRESS } from 'pages/Vaults/constants';
 import { VaultClients } from 'pages/Vaults/helpers/vault-query';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
@@ -77,9 +79,14 @@ export const useDepositWithdrawVault = create<DepositState>()(
         displayToast(TToastType.TX_BROADCASTING);
         try {
           const gatewayClient = VaultClients.getOraiGateway(userAddr);
+          const vaultLP = VaultLP__factory.connect(vaultAddr, VaultClients.getEthereumProvider());
+          const oraiBalance = await vaultLP.balanceOf(ORAI_VAULT_BSC_CONTRACT_ADDRESS);
+          const totalSupply = await gatewayClient.totalSupply({ vaultAddress: vaultAddr });
 
+          const correspondingAmount = amount * BigInt(totalSupply.total_supply) / BigInt(oraiBalance);
+      
           const result = await gatewayClient.withdraw({
-            shareAmount: amount.toString(),
+            shareAmount: correspondingAmount.toString(),
             vaultAddress: vaultAddr
           });
 
