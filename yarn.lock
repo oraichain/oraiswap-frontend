@@ -12371,10 +12371,10 @@ neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-nestquant-vault-sdk@^0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/nestquant-vault-sdk/-/nestquant-vault-sdk-0.0.9.tgz#b2aa70b6c6038488a10a08129b0724039a7b6e89"
-  integrity sha512-imD9gw0iIZ6q5rV8MP5hw4NVTBaVpVE5OnX9Vyfbu1u5RhR7WjrXi0yN7g0YrAParyaWMy41vZSOz1QiKXA4ZQ==
+nestquant-vault-sdk@^0.0.11:
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/nestquant-vault-sdk/-/nestquant-vault-sdk-0.0.11.tgz#3ae0c73b56e36f1fcf928cd8cb65f7bc88c324fa"
+  integrity sha512-f64HyJO0mhQboDXOqHPGlu5zZwI5cF8FMVouc4WBtGJ8OBqHCgpRzx5BgKmrykPxLigPvux1D/ecTO/xnB9VuA==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
     "@cosmjs/faucet-client" "^0.32.3"

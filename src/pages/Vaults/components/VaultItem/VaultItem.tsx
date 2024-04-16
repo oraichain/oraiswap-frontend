@@ -65,7 +65,9 @@ export const VaultItem = ({ info }: { info: VaultInfo }) => {
           </div>
           <div className={styles.infoTopSection}>
             <div className={styles.infoTitle}>TVL</div>
-            <div className={`${styles.infoDetail} ${styles.myShare}`}>{formatDisplayUsdt(info.tvl, null, '$')}</div>
+            <div className={`${styles.infoDetail} ${styles.myShare}`}>
+              {formatDisplayUsdt(info.tvl, undefined, '$')}
+            </div>
           </div>
         </div>
       </div>

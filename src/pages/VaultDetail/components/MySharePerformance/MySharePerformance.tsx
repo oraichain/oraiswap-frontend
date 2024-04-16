@@ -8,6 +8,7 @@ import { ModalWithdraw } from '../ModalWithdraw';
 import { VaultInfo } from 'pages/Vaults/type';
 import { useGetShareBalance } from 'pages/Vaults/hooks/useShareBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { formatDisplayUsdt } from 'helper/format';
 
 type ModalVault = 'deposit' | 'withdraw';
 export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
@@ -33,7 +34,7 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
       <div className={styles.performInfo}>
         <div className={styles.key}>Max Available to Withdraw</div>
         <div className={styles.amount}>
-          <span>${shareBalanceInUsd}</span>
+          <span>{formatDisplayUsdt(shareBalanceInUsd, undefined, '$')}</span>
         </div>
       </div>
       <div className={styles.performInfo}>

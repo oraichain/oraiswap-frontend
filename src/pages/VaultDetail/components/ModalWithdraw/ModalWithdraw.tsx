@@ -44,8 +44,9 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({ isOpen, close, op
         {(() => {
           let disableMsg: string;
           if (withdrawAmount <= 0) disableMsg = 'Enter an amount';
-          if (withdrawAmount > +totalShare) disableMsg = `Insufficient share`;
-          const disabled = loading || withdrawAmount <= 0 || withdrawAmount > +totalShare;
+          if (withdrawAmount > toAmount(totalShare, vaultDetail.lpToken.decimals)) disableMsg = `Insufficient share`;
+          const disabled =
+            loading || withdrawAmount <= 0 || withdrawAmount > toAmount(totalShare, vaultDetail.lpToken.decimals);
 
           return (
             <div className={cx('btn-confirm')}>
