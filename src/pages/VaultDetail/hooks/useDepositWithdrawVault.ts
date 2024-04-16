@@ -79,12 +79,14 @@ export const useDepositWithdrawVault = create<DepositState>()(
         displayToast(TToastType.TX_BROADCASTING);
         try {
           const gatewayClient = VaultClients.getOraiGateway(userAddr);
-          const vaultLP = VaultLP__factory.connect(vaultAddr, VaultClients.getEthereumProvider());
-          const oraiBalance = await vaultLP.balanceOf(ORAI_VAULT_BSC_CONTRACT_ADDRESS);
           const totalSupply = await gatewayClient.totalSupply({ vaultAddress: vaultAddr });
 
-          const correspondingAmount = amount * BigInt(totalSupply.total_supply) / BigInt(oraiBalance);
-      
+          const vaultLP = VaultLP__factory.connect(vaultAddr, VaultClients.getEthereumProvider());
+          const oraiBalance = await vaultLP.balanceOf(ORAI_VAULT_BSC_CONTRACT_ADDRESS);
+
+          if (BigInt(oraiBalance) === 0n) throw new Error('Orai vault balance is zero!');
+
+          const correspondingAmount = (amount * BigInt(totalSupply.total_supply)) / BigInt(oraiBalance);
           const result = await gatewayClient.withdraw({
             shareAmount: correspondingAmount.toString(),
             vaultAddress: vaultAddr

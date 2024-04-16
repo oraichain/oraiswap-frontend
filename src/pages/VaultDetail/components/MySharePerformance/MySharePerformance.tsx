@@ -66,7 +66,6 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
           isOpen={modal === 'withdraw'}
           open={() => setModal('withdraw')}
           close={() => setModal(undefined)}
-          totalShare={shareBalance}
           vaultDetail={vaultDetail}
         />
       )}

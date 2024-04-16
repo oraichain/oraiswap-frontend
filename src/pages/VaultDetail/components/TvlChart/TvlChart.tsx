@@ -3,18 +3,18 @@ import { formatDateChart, formatDisplayUsdt, formatNumberKMB } from 'helper/form
 import useTheme from 'hooks/useTheme';
 import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
 import { formatUTCDateString } from 'pages/CoHarvest/helpers';
-import { useSharePriceChart } from 'pages/VaultDetail/hooks/useSharePriceChart';
+import { useTvlChart } from 'pages/VaultDetail/hooks/useTvlChart';
 import { useEffect, useRef } from 'react';
-import styles from './SharePriceChart.module.scss';
+import styles from './TvlChart.module.scss';
 
-export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
+export const TvlChart = ({ height = 150 }: { height?: number }) => {
   const chartRef = useRef(null);
   const containerRef = useRef(null);
   const serieRef = useRef(null);
   const resizeObserver = useRef(null);
   const theme = useTheme();
 
-  const { sharePriceChartData } = useSharePriceChart();
+  const { tvlChartData } = useTvlChart();
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -118,7 +118,7 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
       chartRef.current = createChart(containerRef.current, defaultOption);
       serieRef.current = chartRef.current.addAreaSeries({
         priceLineVisible: false,
-        lineColor: '#A6BE93',
+        lineColor: '#6E78EC',
         lineWidth: 3,
         topColor: 'transparent',
         bottomColor: 'transparent'
@@ -155,16 +155,16 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
       } else {
         toolTip.style.display = 'block';
         const data = param.seriesData.get(serieRef.current);
-        const price = data.value !== undefined ? data.value : 0;
+        const tvl = data.value !== undefined ? data.value : 0;
         toolTip.innerHTML = `
                   <div style="color: ${theme === 'light' ? '#686A66' : '#979995'}">
                     ${formatUTCDateString(param.time * 1000)}
                   </div>
-                  <div style="font-size: 14px; margin: 4px 0px; color: ${'#5EA402'}">
-                    ${formatDisplayUsdt(price, undefined, '$')}
+                  <div style="font-size: 14px; margin: 4px 0px; color: ${'#6E78EC'}">
+                    ${formatDisplayUsdt(tvl, undefined, '$')}
                   </div>
                   <div style="color: ${theme === 'light' ? '#686A66' : '#979995'}">
-                    Share Price
+                    TVL
                   </div>`;
 
         const y = param.point.y;
@@ -195,14 +195,14 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
 
     serieRef.current = chartRef.current.addAreaSeries({
       priceLineVisible: false,
-      lineColor: theme === 'light' ? '#A6BE93' : '#A6BE93',
+      lineColor: theme === 'light' ? '#6E78EC' : '#6E78EC',
       lineWidth: 3,
       topColor: 'transparent',
       bottomColor: 'transparent'
     });
 
     // update new theme series with current data
-    let newData = sharePriceChartData?.map((val) => {
+    let newData = tvlChartData?.map((val) => {
       return {
         ...val,
         time: Math.floor(new Date(val?.time).getTime() / 1000)
@@ -216,7 +216,7 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
 
   // set data from api to chart
   useEffect(() => {
-    let newData = sharePriceChartData?.map((val) => {
+    let newData = tvlChartData?.map((val) => {
       return {
         ...val,
         time: Math.floor(new Date(val?.time).getTime() / 1000)
@@ -224,12 +224,12 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
     });
     serieRef?.current?.setData(newData);
     chartRef?.current?.timeScale()?.fitContent();
-  }, [sharePriceChartData]);
+  }, [tvlChartData]);
 
   return (
     <div className={styles.sharePriceChart}>
       <div className={styles.header}>
-        <h3 className={styles.title}>Share Price</h3>
+        <h3 className={styles.title}>TVL</h3>
       </div>
       <div className={styles.chartContainer} style={{ height }}>
         <div className={styles.chartRoot} ref={containerRef} />

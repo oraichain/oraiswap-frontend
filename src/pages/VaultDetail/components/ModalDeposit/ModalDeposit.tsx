@@ -1,7 +1,7 @@
 import {
-  TokenItemType,
   CW20_DECIMALS,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  TokenItemType,
   USDT_BSC_CONTRACT,
   toAmount
 } from '@oraichain/oraidex-common';
@@ -10,25 +10,26 @@ import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import Modal from 'components/Modal';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import { useDepositWithdrawVault } from 'pages/VaultDetail/hooks/useDepositWithdrawVault';
+import { ModalDepositWithdrawProps } from 'pages/Vaults/type';
 import { FC, useEffect, useState } from 'react';
-import { InputWithOptionPercent } from '../InputWithOptionPercent';
-import styles from './ModalDeposit.module.scss';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { ModalDepositWithdrawProps } from 'pages/Vaults/type';
+import { InputWithOptionPercent } from '../InputWithOptionPercent';
+import styles from './ModalDeposit.module.scss';
 const cx = cn.bind(styles);
 
 export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({ isOpen, close, open, vaultDetail }) => {
+  const loadOraichainToken = useLoadOraichainTokens();
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [depositAmount, setDepositAmount] = useState<bigint | null>(null);
   const [depositToken, setDepositToken] = useState<TokenItemType | null>(null);
   const { deposit, loading } = useDepositWithdrawVault();
-
   useEffect(() => {
     if (!vaultDetail) return;
 
@@ -71,15 +72,16 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({ isOpen, close, ope
           return (
             <div className={cx('btn-confirm')}>
               <Button
-                onClick={() =>
-                  deposit({
+                onClick={async () => {
+                  await deposit({
                     amount: depositAmount,
                     userAddr: address,
                     evmDenom: ORAI_BRIDGE_EVM_DENOM_PREFIX + USDT_BSC_CONTRACT,
                     vaultAddr: vaultDetail?.vaultAddr,
                     networkDeposit: vaultDetail?.network
-                  })
-                }
+                  });
+                  loadOraichainToken(address, [depositToken?.contractAddress]);
+                }}
                 type="primary"
                 disabled={disabled}
               >
