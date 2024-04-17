@@ -9,6 +9,8 @@ import { VaultInfo } from 'pages/Vaults/type';
 import { useGetShareBalance } from 'pages/Vaults/hooks/useShareBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { formatDisplayUsdt } from 'helper/format';
+import { useVaultFee } from 'pages/VaultDetail/hooks/useVaultFee';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 
 type ModalVault = 'deposit' | 'withdraw';
 export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
@@ -21,6 +23,11 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
     userAddress: oraiAddress,
     oraiVaultShare: vaultDetail.oraiBalance
   });
+
+  const tokenDepositInOraichain = oraichainTokensWithIcon.find(
+    (t) => t.coinGeckoId === vaultDetail.tokenInfo0.coinGeckoId
+  );
+  const { bridgeFee, relayerFee } = useVaultFee(tokenDepositInOraichain, '0x38');
 
   const secondaryType = mobileMode ? 'secondary-sm' : 'secondary';
   const primaryType = mobileMode ? 'primary-sm' : 'primary';

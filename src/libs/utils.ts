@@ -14,7 +14,6 @@ import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-// import { queryClient } from 'index';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { VaultClients } from 'pages/Vaults/helpers/vault-query';
 
@@ -160,37 +159,40 @@ export const buildUnsubscribeMessage = () => {
 };
 
 // vault deposit msg
-// export const handleMsgDepositVault = async (events) => {
-//   try {
-//     const shareReceive = events['wasm.share_receive'];
-//     const vaultAddrs = events['wasm.vault_address'];
-//     const depositers = events['wasm.depositer'];
+export const handleMsgDepositVault = async (events) => {
+  try {
+    const shareReceive = events['wasm.share_receive'];
+    const vaultAddrs = events['wasm.vault_address'];
+    const depositers = events['wasm.depositer'];
 
-//     if (!shareReceive || !vaultAddrs || !depositers) return null;
+    if (!shareReceive || !vaultAddrs || !depositers) return null;
 
-//     const amount = shareReceive[0];
-//     const vaultAddr = vaultAddrs[0];
-//     const depositer = depositers[0];
+    const amount = shareReceive[0];
+    const vaultAddr = vaultAddrs[0];
+    const depositer = depositers[0];
 
-//     // refetch vault info
-//     await queryClient.refetchQueries({
-//       queryKey: ['vaults-contract', 1],
-//       type: 'active',
-//       exact: true
-//     });
-//     const vaultInfosContract = queryClient.getQueryData(['vaults-contract']);
-//     const gatewayClient = VaultClients.getOraiGateway(depositer);
-//     const totalSupply = await gatewayClient.totalSupply({ vaultAddress: vaultAddr });
+    // refetch vault info
 
-//     // @ts-ignore
-//     const vaultInfo = vaultInfosContract.find((v) => v.vaultAddress === vaultAddr);
-//     const { oraiBalance } = vaultInfo;
-//     const shareLpReceive = new BigDecimal(amount).div(totalSupply.total_supply).mul(oraiBalance).toString();
-//     return ` ${shareLpReceive} shares`;
-//   } catch (error) {
-//     console.error('Error handleMsgDepositVault: ', error);
-//   }
-// };
+    // @ts-ignore
+    await window.queryClient.refetchQueries({
+      queryKey: ['vaults-contract', 1],
+      type: 'active',
+      exact: true
+    });
+
+    // @ts-ignore
+    const vaultInfosContract = window.queryClient.getQueryData(['vaults-contract']);
+    const gatewayClient = VaultClients.getOraiGateway(depositer);
+    const totalSupply = await gatewayClient.totalSupply({ vaultAddress: vaultAddr });
+
+    const vaultInfo = vaultInfosContract.find((v) => v.vaultAddress === vaultAddr);
+    const { oraiBalance } = vaultInfo;
+    const shareLpReceive = new BigDecimal(amount).div(totalSupply.total_supply).mul(oraiBalance).toString();
+    return ` ${shareLpReceive} shares`;
+  } catch (error) {
+    console.error('Error handleMsgDepositVault: ', error);
+  }
+};
 
 export const processWsResponseMsg = async (message: any): Promise<string> => {
   try {
@@ -206,11 +208,11 @@ export const processWsResponseMsg = async (message: any): Promise<string> => {
       const events = result.events;
 
       // vault deposit msg
-      // const vaultAddrs = events['wasm.vault_address'];
-      // if (vaultAddrs) {
-      //   const msg = await handleMsgDepositVault(events);
-      //   return msg;
-      // }
+      const vaultAddrs = events['wasm.vault_address'];
+      if (vaultAddrs) {
+        const msg = await handleMsgDepositVault(events);
+        return msg;
+      }
 
       const packets = events['recv_packet.packet_data'];
       if (!packets) return null;
