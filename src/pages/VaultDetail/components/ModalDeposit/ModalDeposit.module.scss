@@ -49,6 +49,22 @@
       }
     }
 
+    .bridgeFee {
+      display: flex;
+      align-items: center;
+      font-weight: 400;
+      font-size: 14px;
+      margin: 8px 0;
+
+      @include theme() {
+        color: theme-get('text-color-third');
+      }
+
+      span {
+        color: $spanish-yellow;
+      }
+    }
+
     .title {
       font-style: normal;
       font-weight: 600;

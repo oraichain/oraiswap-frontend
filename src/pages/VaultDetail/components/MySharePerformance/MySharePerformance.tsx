@@ -1,16 +1,15 @@
 import { isMobile } from '@walletconnect/browser-utils';
-import styles from './MySharePerformance.module.scss';
 import { ReactComponent as EyeIcon } from 'assets/icons/ic_eye_vault.svg';
 import { Button } from 'components/Button';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
+import { formatDisplayUsdt } from 'helper/format';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { useGetShareBalance } from 'pages/Vaults/hooks/useShareBalance';
+import { VaultInfo } from 'pages/Vaults/type';
 import { useState } from 'react';
 import { ModalDeposit } from '../ModalDeposit';
 import { ModalWithdraw } from '../ModalWithdraw';
-import { VaultInfo } from 'pages/Vaults/type';
-import { useGetShareBalance } from 'pages/Vaults/hooks/useShareBalance';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { formatDisplayUsdt } from 'helper/format';
-import { useVaultFee } from 'pages/VaultDetail/hooks/useVaultFee';
-import { oraichainTokensWithIcon } from 'config/chainInfos';
+import styles from './MySharePerformance.module.scss';
 
 type ModalVault = 'deposit' | 'withdraw';
 export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
@@ -27,7 +26,6 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
   const tokenDepositInOraichain = oraichainTokensWithIcon.find(
     (t) => t.coinGeckoId === vaultDetail.tokenInfo0.coinGeckoId
   );
-  const { bridgeFee, relayerFee } = useVaultFee(tokenDepositInOraichain, '0x38');
 
   const secondaryType = mobileMode ? 'secondary-sm' : 'secondary';
   const primaryType = mobileMode ? 'primary-sm' : 'primary';
@@ -66,6 +64,7 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
           open={() => setModal('deposit')}
           close={() => setModal(undefined)}
           vaultDetail={vaultDetail}
+          tokenDepositInOraichain={tokenDepositInOraichain}
         />
       )}
       {modal === 'withdraw' && (
@@ -74,6 +73,7 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
           open={() => setModal('withdraw')}
           close={() => setModal(undefined)}
           vaultDetail={vaultDetail}
+          tokenDepositInOraichain={tokenDepositInOraichain}
         />
       )}
     </div>

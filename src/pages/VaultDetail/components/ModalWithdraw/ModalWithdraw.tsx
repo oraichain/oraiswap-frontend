@@ -1,4 +1,4 @@
-import { toAmount } from '@oraichain/oraidex-common';
+import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -6,14 +6,22 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useDepositWithdrawVault } from 'pages/VaultDetail/hooks/useDepositWithdrawVault';
+import { useVaultFee } from 'pages/VaultDetail/hooks/useVaultFee';
+import { VaultNetworkChainId } from 'pages/VaultDetail/type';
+import { useGetShareBalance } from 'pages/Vaults/hooks';
+import { ModalDepositWithdrawProps } from 'pages/Vaults/type';
 import { FC, useState } from 'react';
 import { InputWithOptionPercent } from '../InputWithOptionPercent';
 import styles from './ModalWithdraw.module.scss';
-import { ModalDepositWithdrawProps } from 'pages/Vaults/type';
-import { useGetShareBalance } from 'pages/Vaults/hooks';
 const cx = cn.bind(styles);
 
-export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({ isOpen, close, open, vaultDetail }) => {
+export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
+  isOpen,
+  close,
+  open,
+  vaultDetail,
+  tokenDepositInOraichain
+}) => {
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const [withdrawAmount, setWithdrawAmount] = useState<bigint | null>(null);
@@ -24,6 +32,29 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({ isOpen, close, op
     userAddress: address,
     oraiVaultShare: vaultDetail.oraiBalance
   });
+
+  const { bridgeFee, relayerFee } = useVaultFee(tokenDepositInOraichain, VaultNetworkChainId[vaultDetail.network]);
+
+  const withdrawAmountInUsdt = toDisplay(withdrawAmount, vaultDetail.lpToken.decimals) * vaultDetail.sharePrice;
+
+  const withdrawFee = withdrawAmountInUsdt * bridgeFee * 0.01 + relayerFee;
+  const receivedAmount = withdrawAmountInUsdt - withdrawFee;
+  const renderBridgeFee = () => {
+    return (
+      <div className={styles.bridgeFee}>
+        <div className={styles.relayerFee}>
+          Withdraw fee:&nbsp;
+          <span>
+            ~{withdrawFee.toFixed(6)} {tokenDepositInOraichain.name}{' '}
+          </span>
+        </div>
+        &nbsp;- Received amount:&nbsp;
+        <span>
+          ~{receivedAmount < 0 ? 0 : receivedAmount.toFixed(6)} {tokenDepositInOraichain.name}
+        </span>
+      </div>
+    );
+  };
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
@@ -48,6 +79,7 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({ isOpen, close, op
           prefixText="Max Available to Withdraw: "
           decimals={vaultDetail.lpToken.decimals}
         />
+        {renderBridgeFee()}
         {(() => {
           let disableMsg: string;
           if (withdrawAmount <= 0) disableMsg = 'Enter an amount';

@@ -43,4 +43,5 @@ export type ModalDepositWithdrawProps = {
   open: () => void;
   vaultDetail: VaultInfo;
   totalShare?: string;
+  tokenDepositInOraichain?: TokenItemType
 };
