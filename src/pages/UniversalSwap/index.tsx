@@ -25,6 +25,7 @@ const Swap: React.FC = () => {
   const mobileMode = isMobile();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
+
   let tab = searchParams.get('type');
   const dispatch = useDispatch();
   const initDuckdb = async () => {
@@ -49,42 +50,44 @@ const Swap: React.FC = () => {
   });
 
   return (
-    <Content nonBackground>
-      <div className={cx('swap-container')}>
-        <div className={cx('swap-col', 'w60')}>
-          <div>
-            {!mobileMode && (
-              <>
-                {!priceChange.isError && (
-                  <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />
-                )}
-                <div className={cx('tv-chart', hideChart || priceChange.isError ? 'hidden' : '')}>
-                  {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
-                  <TVChartContainer
-                    theme={theme}
-                    currentPair={currentPair}
-                    pairsChart={PAIRS_CHART}
-                    setChartTimeFrame={handleChangeChartTimeFrame}
-                    baseUrl={process.env.REACT_APP_BASE_API_URL}
-                  />
-                </div>
-              </>
-            )}
+    <>
+      <Content nonBackground>
+        <div className={cx('swap-container')}>
+          <div className={cx('swap-col', 'w60')}>
+            <div>
+              {!mobileMode && (
+                <>
+                  {!priceChange.isError && (
+                    <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />
+                  )}
+                  <div className={cx('tv-chart', hideChart || priceChange.isError ? 'hidden' : '')}>
+                    {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
+                    <TVChartContainer
+                      theme={theme}
+                      currentPair={currentPair}
+                      pairsChart={PAIRS_CHART}
+                      setChartTimeFrame={handleChangeChartTimeFrame}
+                      baseUrl={process.env.REACT_APP_BASE_API_URL}
+                    />
+                  </div>
+                </>
+              )}
 
-            {/* <RoutingSection /> */}
-            <TabsTxs setNetworkFilter={setNetworkFilter} networkFilter={networkFilter} />
-            {tab === TYPE_TAB_HISTORY.HISTORY ? (
-              <HistoryTab networkFilter={networkFilter.value} />
-            ) : (
-              <AssetsTab networkFilter={networkFilter.value} />
-            )}
+              {/* <RoutingSection /> */}
+              <TabsTxs setNetworkFilter={setNetworkFilter} networkFilter={networkFilter} />
+              {tab === TYPE_TAB_HISTORY.HISTORY ? (
+                <HistoryTab networkFilter={networkFilter.value} />
+              ) : (
+                <AssetsTab networkFilter={networkFilter.value} />
+              )}
+            </div>
+          </div>
+          <div className={cx('swap-col', 'w40')}>
+            <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
           </div>
         </div>
-        <div className={cx('swap-col', 'w40')}>
-          <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
-        </div>
-      </div>
-    </Content>
+      </Content>
+    </>
   );
 };
 
