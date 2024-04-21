@@ -89,7 +89,8 @@ export const useDepositWithdrawVault = create<DepositState>()(
           const correspondingAmount = (amount * BigInt(totalSupply.total_supply)) / BigInt(oraiBalance);
           const result = await gatewayClient.withdraw({
             shareAmount: correspondingAmount.toString(),
-            vaultAddress: vaultAddr
+            vaultAddress: vaultAddr,
+            network: 'bsc' // TODO: hardcode network
           });
 
           if (result) {
