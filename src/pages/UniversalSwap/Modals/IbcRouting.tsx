@@ -65,13 +65,11 @@ const IbcRouting: React.FC<{
   useEffect(() => {
     if (!routingData) return;
 
-    const routingDataLength = Object.entries(routingData).length;
+    const routingDataLength = routingData.length;
 
     setActiveStep(routingDataLength);
 
-    const pendingItems = Object.values(routingData).filter(
-      (item: DBStateInterface) => item.status === StateDBStatus.PENDING
-    );
+    const pendingItems = routingData.filter((item: any) => item.data.status === StateDBStatus.PENDING);
     if (pendingItems.length === 0 && routingDataLength != 0) {
       setRoutingFinished(true);
     }
@@ -102,16 +100,17 @@ const IbcRouting: React.FC<{
           <div className={styles.stepperWrapper}>
             <Stepper size="lg" colorScheme={borderColor} index={activeStep} orientation="vertical" gap="2">
               {routingData &&
-                Object.entries(routingData).map((item: any, index) => {
+                routingData.map((item: any, index) => {
+                  const data = [item.type, item.data] as any;
                   return (
                     <Step key={index} style={{ width: '597px', gap: '16px' }}>
                       <StepIndicator>
-                        <StepStatus complete={getIcons(item)} incomplete={getIcons(item)} active={getIcons(item)} />
+                        <StepStatus complete={getIcons(data)} incomplete={getIcons(data)} active={getIcons(data)} />
                       </StepIndicator>
 
                       <TimelineDetail
-                        type={getTimelineState(item[1])}
-                        data={item}
+                        type={getTimelineState(data[1])}
+                        data={data}
                         lastIndex={index + 1 == activeStep}
                       />
 
