@@ -66,13 +66,7 @@ export const getTransaction = async (data: SubmitTransactionProps) => {
   }
 };
 
-export type DBStateInterface =
-  | EvmStateInterface
-  | OraiBridgeStateInterface
-  | OraichainStateInterface
-  | CosmosStateInterface;
-
-export interface EvmStateInterface {
+export interface EvmState {
   txHash: string;
   height: number;
   prevState: string;
@@ -90,7 +84,7 @@ export interface EvmStateInterface {
   status: string;
 }
 
-export interface OraiBridgeStateInterface {
+export interface OraiBridgeState {
   txHash: string;
   height: number;
   prevState: string;
@@ -113,7 +107,7 @@ export interface OraiBridgeStateInterface {
   status: string;
 }
 
-export interface OraichainStateInterface {
+export interface OraichainState {
   txHash: string;
   height: number;
   prevState: string;
@@ -133,7 +127,7 @@ export interface OraichainStateInterface {
   status: string;
 }
 
-export interface CosmosStateInterface {
+export interface CosmosState {
   txHash: string;
   height: number;
   chainId: string;
@@ -152,3 +146,29 @@ export interface CosmosStateInterface {
   dstChannel: string;
   status: string;
 }
+export enum DatabaseEnum {
+  Evm = 'EvmState',
+  OraiBridge = 'OraiBridgeState',
+  Oraichain = 'OraichainState',
+  Cosmos = 'CosmosState'
+}
+
+export type DBStateType = EvmState | OraiBridgeState | OraichainState | CosmosState;
+
+export type RoutingQueryItem =
+  | {
+      type: DatabaseEnum.Evm;
+      data: EvmState;
+    }
+  | {
+      type: DatabaseEnum.Cosmos;
+      data: CosmosState;
+    }
+  | {
+      type: DatabaseEnum.OraiBridge;
+      data: OraiBridgeState;
+    }
+  | {
+      type: DatabaseEnum.Oraichain;
+      data: OraichainState;
+    };

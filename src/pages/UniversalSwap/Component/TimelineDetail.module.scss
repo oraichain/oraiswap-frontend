@@ -10,6 +10,12 @@
     border-radius: 99px;
     color: #232521;
 
+    .wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     .title {
       font-size: 14px;
       font-style: normal;
@@ -24,7 +30,7 @@
     margin-bottom: 24px;
     padding: 8px;
     border-radius: 8px;
-    background-color: rgba(151, 153, 149, 1);
+    background-color: rgba(35, 37, 33, 1);
 
     .text-wrapper {
       display: flex;
@@ -33,7 +39,7 @@
       font-style: normal;
       font-weight: 400;
       line-height: 1.5;
-      color: rgba(104, 106, 102, 1);
+      color: rgba(239, 239, 239, 1);
     }
   }
 }

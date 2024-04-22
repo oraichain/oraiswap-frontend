@@ -20,13 +20,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import TimelineDetail, { TimelineType } from '../Component/TimelineDetail';
 import { TransactionHistory } from 'libs/duckdb';
 import { useGetRoutingData } from '../hooks/useGetRoutingData';
-import {
-  CosmosStateInterface,
-  DBStateInterface,
-  EvmChainPrefix,
-  EvmStateInterface,
-  StateDBStatus
-} from '../ibc-routing';
+import { CosmosState, DatabaseEnum, EvmChainPrefix, EvmState, RoutingQueryItem, StateDBStatus } from '../ibc-routing';
 import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
@@ -75,9 +69,9 @@ const IbcRouting: React.FC<{
     }
   }, [routingData]);
 
-  const getTimelineState = (data: DBStateInterface): TimelineType => {
-    if (data.status === StateDBStatus.PENDING) return TimelineType.WAITING;
-    if (data.status === StateDBStatus.FINISHED) return TimelineType.CONFIRMED;
+  const getTimelineState = (data: RoutingQueryItem): TimelineType => {
+    if (data.data.status === StateDBStatus.PENDING) return TimelineType.WAITING;
+    if (data.data.status === StateDBStatus.FINISHED) return TimelineType.CONFIRMED;
     return TimelineType.INACTIVE;
   };
 
@@ -101,18 +95,13 @@ const IbcRouting: React.FC<{
             <Stepper size="lg" colorScheme={borderColor} index={activeStep} orientation="vertical" gap="2">
               {routingData &&
                 routingData.map((item: any, index) => {
-                  const data = [item.type, item.data] as any;
                   return (
                     <Step key={index} style={{ width: '597px', gap: '16px' }}>
                       <StepIndicator>
-                        <StepStatus complete={getIcons(data)} incomplete={getIcons(data)} active={getIcons(data)} />
+                        <StepStatus complete={getIcons(item)} incomplete={getIcons(item)} active={getIcons(item)} />
                       </StepIndicator>
 
-                      <TimelineDetail
-                        type={getTimelineState(data[1])}
-                        data={data}
-                        lastIndex={index + 1 == activeStep}
-                      />
+                      <TimelineDetail type={getTimelineState(item)} data={item} lastIndex={index + 1 == activeStep} />
 
                       <StepSeparator
                         style={{
@@ -137,9 +126,9 @@ const IbcRouting: React.FC<{
 
 export default IbcRouting;
 
-export const getIcons = (data: [string, DBStateInterface]): JSX.Element => {
-  if (data[0] === 'EvmState' || data[0] === 'EvmState_Next') {
-    const evmChainPrefix = (data[1] as EvmStateInterface).evmChainPrefix;
+export const getIcons = (data: RoutingQueryItem): JSX.Element => {
+  if (data.type === DatabaseEnum.Evm) {
+    const evmChainPrefix = (data.data as EvmState).evmChainPrefix;
     if (evmChainPrefix === EvmChainPrefix.BSC_MAINNET) {
       return <BnbIcon />;
     }
@@ -150,8 +139,8 @@ export const getIcons = (data: [string, DBStateInterface]): JSX.Element => {
       return <TronIcon />;
     }
   }
-  if (data[0] === 'CosmosState') {
-    const chainId = (data[1] as CosmosStateInterface).chainId;
+  if (data.type === DatabaseEnum.Cosmos) {
+    const chainId = (data.data as CosmosState).chainId;
     if (chainId === COSMOS_CHAIN_ID_COMMON.COSMOSHUB_CHAIN_ID) {
       return <AtomIcon />;
     }
@@ -162,7 +151,7 @@ export const getIcons = (data: [string, DBStateInterface]): JSX.Element => {
       return <OsmoIcon />;
     }
   }
-  if (data[0] === 'OraichainState') {
+  if (data.type === DatabaseEnum.Oraichain) {
     return <OraiIcon />;
   }
   return <OraiXIcon />;

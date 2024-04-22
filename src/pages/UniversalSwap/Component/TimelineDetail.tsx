@@ -2,15 +2,18 @@ import React from 'react';
 import styles from './TimelineDetail.module.scss';
 import classNames from 'classnames';
 import {
-  CosmosStateInterface,
-  DBStateInterface,
+  CosmosState,
+  DatabaseEnum,
   DbStateToChainName,
-  EvmStateInterface,
-  OraiBridgeStateInterface,
-  OraichainStateInterface
+  EvmChainPrefix,
+  EvmState,
+  OraiBridgeState,
+  OraichainState,
+  RoutingQueryItem
 } from '../ibc-routing';
 import { sortAddress } from 'pages/BitcoinDashboard/utils/bitcoin';
-import { ethers } from 'ethers';
+import { COSMOS_CHAIN_ID_COMMON } from '@oraichain/oraidex-common';
+import Loader from './Loader';
 
 export enum TimelineType {
   CONFIRMED = 'confirmed',
@@ -20,38 +23,38 @@ export enum TimelineType {
 
 const TimelineDetail: React.FC<{
   type: TimelineType;
-  data: [string, DBStateInterface];
+  data: RoutingQueryItem;
   lastIndex: boolean;
 }> = ({ type, data, lastIndex }) => {
   const getReceiver = (): string => {
     return (
-      (data[1] as EvmStateInterface)?.oraiReceiver ||
-      (data[1] as OraiBridgeStateInterface)?.receiver ||
-      (data[1] as OraichainStateInterface).nextReceiver
+      (data.data as EvmState)?.oraiReceiver ||
+      (data.data as OraiBridgeState)?.receiver ||
+      (data.data as OraichainState).nextReceiver
     );
   };
 
   const getAmount = (): string => {
     return (
-      (data[1] as EvmStateInterface)?.fromAmount ||
-      (data[1] as OraiBridgeStateInterface)?.amount ||
-      (data[1] as OraichainStateInterface).nextAmount
+      (data.data as EvmState)?.fromAmount ||
+      (data.data as OraiBridgeState)?.amount ||
+      (data.data as OraichainState).nextAmount
     );
   };
 
   const getDenom = (): string => {
-    let denom = (data[1] as EvmStateInterface)?.destinationDenom;
+    let denom = (data.data as EvmState)?.destinationDenom;
 
-    if ((data[1] as OraichainStateInterface)?.nextDestinationDenom) {
-      const lastDenom = (data[1] as OraichainStateInterface).nextDestinationDenom;
+    if ((data.data as OraichainState)?.nextDestinationDenom) {
+      const lastDenom = (data.data as OraichainState).nextDestinationDenom;
 
       const splitData = lastDenom.split('/');
 
       denom = splitData[splitData.length - 1];
     }
 
-    if ((data[1] as OraiBridgeStateInterface).denom) {
-      const lastDenom = (data[1] as OraiBridgeStateInterface).denom;
+    if ((data.data as OraiBridgeState).denom) {
+      const lastDenom = (data.data as OraiBridgeState).denom;
 
       const splitData = lastDenom.split('/');
 
@@ -64,21 +67,31 @@ const TimelineDetail: React.FC<{
   return (
     <div className={styles['timeline-detail-wrapper']}>
       <div className={classNames(styles['timeline-detail'], styles[type])}>
-        <p className={styles.title}>
-          {data[1].nextState !== ''
-            ? `Bridge from ${DbStateToChainName[data[0]]} to ${DbStateToChainName[data[1].nextState]}`
-            : `On ${DbStateToChainName[data[0]]}`}
-        </p>
+        <div className={styles.wrapper}>
+          <p className={styles.title}>
+            {data.data.nextState !== ''
+              ? `Bridge from ${DbStateToChainName[data.type]} to ${DbStateToChainName[data.data.nextState]}`
+              : `On ${DbStateToChainName[data.type]}`}
+          </p>
+          {type === TimelineType.WAITING && <Loader />}
+        </div>
       </div>
       {!lastIndex && (
         <div className={styles['timeline-info']}>
           <div className={styles['text-wrapper']}>
             <h3>Tx Hash:</h3>
-            <p>{sortAddress(data[1].txHash)}</p>
+            <p
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                window.open(getScanUrl(data), '_blank');
+              }}
+            >
+              {sortAddress(data.data.txHash)}
+            </p>
           </div>
           <div className={styles['text-wrapper']}>
             <h3>Height:</h3>
-            <p>{data[1].height}</p>
+            <p>{data.data.height}</p>
           </div>
           <div className={styles['text-wrapper']}>
             <h3>Receiver:</h3>
@@ -99,3 +112,34 @@ const TimelineDetail: React.FC<{
 };
 
 export default TimelineDetail;
+
+export const getScanUrl = (data: RoutingQueryItem): string => {
+  if (data.type === DatabaseEnum.Evm) {
+    const evmChainPrefix = (data.data as EvmState).evmChainPrefix;
+    if (evmChainPrefix === EvmChainPrefix.BSC_MAINNET) {
+      return `https://bscscan.com/tx/${data.data.txHash}`;
+    }
+    if (evmChainPrefix === EvmChainPrefix.ETH_MAINNET) {
+      return `https://etherscan.io/tx/${data.data.txHash}`;
+    }
+    if (evmChainPrefix === EvmChainPrefix.TRON_MAINNET) {
+      return `https://tronscan.org/#/transaction/${data.data.txHash}`;
+    }
+  }
+  if (data.type === DatabaseEnum.Cosmos) {
+    const chainId = (data.data as CosmosState).chainId;
+    if (chainId === COSMOS_CHAIN_ID_COMMON.COSMOSHUB_CHAIN_ID) {
+      return `https://www.mintscan.io/cosmos/tx/${data.data.txHash}`;
+    }
+    if (chainId === COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID) {
+      return `https://www.mintscan.io/injective/tx/${data.data.txHash}`;
+    }
+    if (chainId === COSMOS_CHAIN_ID_COMMON.OSMOSIS_CHAIN_ID) {
+      return `https://www.mintscan.io/osmosis/tx/${data.data.txHash}`;
+    }
+  }
+  if (data.type === DatabaseEnum.Oraichain) {
+    return `https://scan.bridge.orai.io/txs/${data.data.txHash}`;
+  }
+  return `https://scan.orai.io/txs/${data.data.txHash}`;
+};
