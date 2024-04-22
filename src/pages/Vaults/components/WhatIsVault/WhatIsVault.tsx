@@ -16,12 +16,12 @@ export const TotalSharePerf = () => {
             <span>{formatDisplayUsdt(totalTvlUsd, 2, '$')}</span>
           </div>
         </div>
-        <div className={styles.amount}>
+        {/* <div className={styles.amount}>
           <div className={styles.amountText}>Total Deposit</div>
           <div className={styles.value}>
             <span>{formatDisplayUsdt(totalDepositInUsd, 2, '$')}</span>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
