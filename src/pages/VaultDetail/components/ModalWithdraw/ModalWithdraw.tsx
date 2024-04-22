@@ -78,6 +78,7 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
           totalAmount={toAmount(shareBalance, vaultDetail.lpToken.decimals)}
           prefixText="Max Available to Withdraw: "
           decimals={vaultDetail.lpToken.decimals}
+          amountInUsdt={withdrawAmountInUsdt}
         />
         {renderBridgeFee()}
         {(() => {

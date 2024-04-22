@@ -106,6 +106,7 @@
     .amount {
       width: 100%;
       padding: 10px;
+      padding-bottom: 30px;
       flex-grow: 1;
       text-align: right;
       background: $raisin-black;
@@ -117,6 +118,25 @@
         background: $neutral-surface-search;
         color: $raisin-black;
       }
+    }
+
+    .amount-usd {
+      text-align: right;
+      color: $neutral-text-body-on-section;
+      padding: 5px 10px;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+
+      &.light {
+        color: $neutral-text-describe;
+      }
+
+      font-size: 13px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 150%;
+      letter-spacing: 0.013px;
     }
   }
 

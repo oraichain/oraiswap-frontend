@@ -12,7 +12,7 @@ export const useGetTotalDeposit = () => {
   );
 
   return {
-    totalDepositInUsd,
+    totalDepositInUsd: totalDepositInUsd < 0 ? 0 : totalDepositInUsd,
     refetchTotalDepositInUsd
   };
 };

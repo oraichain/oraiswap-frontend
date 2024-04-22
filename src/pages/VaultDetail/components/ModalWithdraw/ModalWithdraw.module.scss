@@ -60,6 +60,10 @@
         color: theme-get('text-color-third');
       }
 
+      @include mobile {
+        font-size: 11px;
+      }
+
       span {
         color: $spanish-yellow;
       }

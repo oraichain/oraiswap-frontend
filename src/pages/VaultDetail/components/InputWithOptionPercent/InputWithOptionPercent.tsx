@@ -2,10 +2,10 @@ import { CoinIcon, TokenItemType, toAmount, toDisplay } from '@oraichain/oraidex
 import classNames from 'classnames/bind';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { TokenVault } from 'pages/Vaults/type';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './InputWithOptionPercent.module.scss';
-import { TokenVault } from 'pages/Vaults/type';
 
 const cx = classNames.bind(styles);
 
@@ -22,6 +22,7 @@ export const InputWithOptionPercent: FC<{
   prefixText?: string;
   TokenIcon?: CoinIcon;
   decimals?: number;
+  amountInUsdt?: number;
 }> = ({
   setAmountFromPercent,
   onValueChange,
@@ -34,7 +35,8 @@ export const InputWithOptionPercent: FC<{
   isFocus = true,
   prefixText = 'Balance: ',
   TokenIcon,
-  decimals = 6
+  decimals = 6,
+  amountInUsdt = 0
 }) => {
   const [chosenOption, setChosenOption] = useState(-1);
   const [theme] = useConfigReducer('theme');
@@ -97,6 +99,10 @@ export const InputWithOptionPercent: FC<{
               return !floatValue || (floatValue >= 0 && floatValue <= 1e18);
             }}
           />
+
+          <div className={cx('amount-usd', theme)}>
+            <TokenBalance balance={amountInUsdt} decimalScale={2} prefix="~$" />
+          </div>
         </div>
       </div>
       <div className={cx('options')}>
