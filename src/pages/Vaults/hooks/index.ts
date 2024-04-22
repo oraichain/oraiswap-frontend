@@ -2,4 +2,4 @@ export * from './useVaultStore';
 export * from './useShareBalance';
 export * from './useTotalSharePerformance';
 export * from './useVaults';
-export * from './useTotalDeposit';
+export * from './useGetTotalDeposit';
