@@ -67,7 +67,7 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({
         </div>
         &nbsp;- Received amount:&nbsp;
         <span>
-          ~{receivedAmount.toFixed(6)} {tokenDepositInOraichain.name}
+          ~{receivedAmount < 0 ? 0 : receivedAmount.toFixed(6)} {tokenDepositInOraichain.name}
         </span>
       </div>
     );
