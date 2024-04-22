@@ -100,8 +100,8 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({
           let disableMsg: string;
           if (depositAmount <= 0) disableMsg = 'Enter an amount';
           if (depositAmount > tokenDepositBalance) disableMsg = `Insufficient balance`;
-          if (receivedAmount < 0) disableMsg = 'Not enought amount to pay fee';
-          const disabled = loading || depositAmount <= 0 || depositAmount > tokenDepositBalance;
+          if (receivedAmount < 0) disableMsg = 'Not enough amount to pay fee';
+          const disabled = loading || depositAmount <= 0 || depositAmount > tokenDepositBalance || receivedAmount < 0;
 
           return (
             <div className={cx('btn-confirm')}>
