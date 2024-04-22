@@ -94,7 +94,8 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
                   await withdraw({
                     amount: withdrawAmount,
                     userAddr: address,
-                    vaultAddr: vaultDetail.vaultAddr
+                    vaultAddr: vaultDetail.vaultAddr,
+                    networkWithdraw: vaultDetail.network
                   });
                   refetchShareBalance();
                 }}

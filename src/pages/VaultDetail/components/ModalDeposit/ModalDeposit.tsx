@@ -62,12 +62,12 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({
         <div className={styles.relayerFee}>
           Deposit fee:&nbsp;
           <span>
-            {depositFee.toFixed(6)} {tokenDepositInOraichain.name}{' '}
+            ~{depositFee.toFixed(6)} {tokenDepositInOraichain.name}{' '}
           </span>
         </div>
         &nbsp;- Received amount:&nbsp;
         <span>
-          {receivedAmount.toFixed(6)} {tokenDepositInOraichain.name}
+          ~{receivedAmount.toFixed(6)} {tokenDepositInOraichain.name}
         </span>
       </div>
     );

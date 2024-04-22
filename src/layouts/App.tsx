@@ -69,7 +69,7 @@ const App = () => {
 
         sendJsonMessage(
           buildWebsocketSendMessage(
-            `wasm._contract_address = '${ORAI_GATEWAY_CONTRACT_ADDRESS}' AND wasm.action = 'fulfill_deposit_order' AND wasm.depositer = '${address}'`
+            `wasm._contract_address = '${ORAI_GATEWAY_CONTRACT_ADDRESS}' AND wasm.action = 'fulfill_deposit_order' AND wasm.depositor = '${address}'`
           ),
           true
         );

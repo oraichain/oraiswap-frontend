@@ -25,7 +25,12 @@ interface DepositState {
     vaultAddr: string;
     networkDeposit: string;
   }) => Promise<void>;
-  withdraw: (payload: { userAddr: string; amount: bigint; vaultAddr: string }) => Promise<void>;
+  withdraw: (payload: {
+    userAddr: string;
+    amount: bigint;
+    vaultAddr: string;
+    networkWithdraw: string;
+  }) => Promise<void>;
 }
 
 export const useDepositWithdrawVault = create<DepositState>()(
@@ -70,7 +75,7 @@ export const useDepositWithdrawVault = create<DepositState>()(
           set({ loading: false });
         }
       },
-      withdraw: async ({ userAddr, amount, vaultAddr }) => {
+      withdraw: async ({ userAddr, amount, vaultAddr, networkWithdraw }) => {
         if (!userAddr) throw new Error('Cannot get user address');
         if (!amount) throw new Error('Amount is invalid');
         if (!vaultAddr) throw new Error('Vault address is not defined');
@@ -90,7 +95,7 @@ export const useDepositWithdrawVault = create<DepositState>()(
           const result = await gatewayClient.withdraw({
             shareAmount: correspondingAmount.toString(),
             vaultAddress: vaultAddr,
-            network: 'bsc' // TODO: hardcode network
+            network: networkWithdraw
           });
 
           if (result) {

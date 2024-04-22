@@ -5,7 +5,8 @@ import {
   getSubAmountDetails,
   toAmount,
   toDisplay,
-  BigDecimal
+  BigDecimal,
+  CW20_DECIMALS
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
@@ -13,6 +14,7 @@ import bech32 from 'bech32';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
+import { sleep } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { VaultClients } from 'pages/Vaults/helpers/vault-query';
@@ -163,7 +165,7 @@ export const handleMsgDepositVault = async (events) => {
   try {
     const shareReceive = events['wasm.share_receive'];
     const vaultAddrs = events['wasm.vault_address'];
-    const depositers = events['wasm.depositer'];
+    const depositers = events['wasm.depositor'];
 
     if (!shareReceive || !vaultAddrs || !depositers) return null;
 
@@ -171,8 +173,10 @@ export const handleMsgDepositVault = async (events) => {
     const vaultAddr = vaultAddrs[0];
     const depositer = depositers[0];
 
-    // refetch vault info
+    // sleep to wait contract update orai balance & total supply
+    await sleep(2000);
 
+    // refetch vault info
     // @ts-ignore
     await window.queryClient.refetchQueries({
       queryKey: ['vaults-contract', 1],
@@ -206,6 +210,7 @@ export const processWsResponseMsg = async (message: any): Promise<string> => {
     ) {
       if (!result.events) return null;
       const events = result.events;
+      console.log({ events });
 
       // vault deposit msg
       const vaultAddrs = events['wasm.vault_address'];
@@ -226,8 +231,12 @@ export const processWsResponseMsg = async (message: any): Promise<string> => {
         if (receivedToken.denom === 'usat') {
           return null;
         }
-        const displayAmount = toDisplay(packet?.amount, receivedToken?.decimals);
 
+        const amounts = events['wasm.amount'];
+        if (!amounts?.length) return null;
+
+        const displayAmount = toDisplay(amounts[amounts.length - 1], CW20_DECIMALS);
+        console.log({ amounts, receivedToken, denom: packet.denom, displayAmount });
         tokens = tokens.concat(`${displayAmount} ${receivedToken?.name}, `);
       }
       return tokens.substring(0, tokens.length - 2); // remove , due to concat
