@@ -15,6 +15,7 @@ const InputCommon: FC<{
   onChange: (value: string) => void;
   value?: string;
 
+  prefix?: ReactNode;
   suffix?: ReactNode;
 
   extraButton?: ReactNode;
@@ -23,16 +24,19 @@ const InputCommon: FC<{
   isOnViewPort?: boolean;
 
   error?: string;
+  hidePrefixOnActive?: boolean;
 }> = ({
   title,
   onChange,
   value,
+  prefix,
   suffix,
   extraButton,
   showPreviewOnBlur,
   isOnViewPort = true,
   error,
-  defaultValue = ''
+  defaultValue = '',
+  hidePrefixOnActive = true
 }) => {
   const [active, setActive] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -68,7 +72,10 @@ const InputCommon: FC<{
         }}
       >
         <div className={styles.prefix}>
-          <p>{title}</p>
+          <span className={styles.title}>
+            {((active && !hidePrefixOnActive) || !active) && prefix}
+            <p>{title}</p>
+          </span>
           <input
             className={`${styles.input} ${active ? styles.activeInput : ''} ${
               value === defaultValue ? styles.isDefault : ''

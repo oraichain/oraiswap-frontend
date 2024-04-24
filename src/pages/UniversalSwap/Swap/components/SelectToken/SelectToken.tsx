@@ -80,7 +80,7 @@ export default function SelectToken({
 
   return (
     <>
-      {isSelectToken && <div className={styles.selectTokenOverlay} onClick={() => setIsSelectToken(false)}></div>}
+      {/* {isSelectToken && <div className={styles.selectTokenOverlay} onClick={() => setIsSelectToken(false)}></div>} */}
       <div className={`${styles.selectToken} ${isSelectToken ? styles.active : ''}`}>
         <div className={styles.selectTokenHeader}>
           <div />

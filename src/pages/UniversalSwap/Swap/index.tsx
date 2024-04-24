@@ -7,11 +7,11 @@ import {
   TRON_DENOM,
   TokenItemType,
   calculateMinReceive,
+  checkValidateAddressWithNetwork,
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay,
-  checkValidateAddressWithNetwork
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
@@ -22,6 +22,9 @@ import {
 } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { isMobile } from '@walletconnect/browser-utils';
+import ArrowImg from 'assets/icons/arrow_new.svg';
+import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
+import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import { ReactComponent as IconTooltip } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
@@ -76,6 +79,7 @@ import { useFillToken } from './hooks/useFillToken';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
+import SwapDetail from './components/SwapDetail';
 
 const cx = cn.bind(styles);
 
@@ -87,6 +91,8 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
+  const [openDetail, setOpenDetail] = useState(false);
+
   const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
   const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
 
@@ -320,6 +326,8 @@ const SwapComponent: React.FC<{
   const expectOutputDisplay = isSimulateDataDisplay
     ? numberWithCommas(simulateData.displayAmount, undefined, { minimumFractionDigits: 6 })
     : 0;
+
+  const totalFeeEst = new BigDecimal(bridgeTokenFee || 0).add(relayerFee || 0).toNumber() || 0;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -588,10 +596,15 @@ const SwapComponent: React.FC<{
       <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
         <div className={cx('swap-box')}>
           <div className={cx('header')}>
-            <div className={cx('title')}>Universal Swap & Bridge</div>
-            <button className={cx('btn')} onClick={refreshBalances}>
-              <RefreshImg />
-            </button>
+            <div className={cx('title')}>From</div>
+            <div className={cx('actions')}>
+              <span className={cx('icon')} onClick={() => setOpenSetting(true)}>
+                <IconOirSettings onClick={() => setOpenSetting(true)} />
+              </span>
+              <button className={cx('btn')} onClick={refreshBalances}>
+                <RefreshImg />
+              </button>
+            </div>
           </div>
           <div className={cx('from')}>
             <div className={cx('input-wrapper')}>
@@ -623,13 +636,21 @@ const SwapComponent: React.FC<{
               )}
             </div>
           </div>
-          <div className={cx('swap-icon')}>
+          <div className={cx('swap-center')}>
+            <div className={cx('title')}>To</div>
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
               <img
                 src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
                 onClick={handleRotateSwapDirection}
                 alt="ant"
               />
+            </div>
+            <div className={cx('ratio')} onClick={() => setOpenDetail(true)}>
+              {`1 ${originalFromToken.name} ≈ ${
+                averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+              } ${originalToToken.name}`}
+
+              <img src={ArrowImg} alt="arrow" />
             </div>
           </div>
           <div className={cx('to')}>
@@ -650,23 +671,18 @@ const SwapComponent: React.FC<{
                 IconNetwork={ToIconNetwork}
                 usdPrice={usdPriceShow}
               />
-
-              <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
-                } ${originalToToken.name}`}
-              </div>
             </div>
           </div>
 
           <div className={cx('recipient')}>
             <InputCommon
               isOnViewPort={currentAddressManagementStep === AddressManagementStep.INIT}
-              title="Recipient address"
+              title="Recipient address:"
               value={addressTransfer}
               onChange={(val) => setAddressTransfer(val)}
               showPreviewOnBlur
               defaultValue={initAddressTransfer}
+              prefix={<SendIcon />}
               suffix={
                 <div
                   className={cx('paste')}
@@ -696,10 +712,11 @@ const SwapComponent: React.FC<{
               error={!validAddress?.isValid && 'Invalid address'}
             />
           </div>
-          <div className={cx('slippage')}>
+          <div className={cx('slippage')} onClick={() => setOpenDetail(true)}>
             <div className={cx('label')}>
-              <span>Slippage tolerance</span>
-
+              <FeeIcon />
+              Estimated Fee:
+              {/* 
               <TooltipIcon
                 placement="top-start"
                 visible={visible}
@@ -711,12 +728,13 @@ const SwapComponent: React.FC<{
                     successful.
                   </div>
                 }
-              />
+              /> */}
             </div>
             <div className={cx('info')}>
               <span className={cx('value')}>{userSlippage}%</span>
               <span className={cx('icon')} onClick={() => setOpenSetting(true)}>
-                <IconOirSettings onClick={() => setOpenSetting(true)} />
+                {/* <IconOirSettings onClick={() => setOpenSetting(true)} /> */}
+                <img src={ArrowImg} alt="arrow" />
               </span>
             </div>
           </div>
@@ -760,55 +778,9 @@ const SwapComponent: React.FC<{
               </button>
             );
           })()}
-
-          <div className={cx('detail')}>
-            <div className={cx('row')}>
-              <div className={cx('title')}>
-                <span> Expected Output</span>
-              </div>
-              <div className={cx('value')}>
-                ≈ {expectOutputDisplay} {originalToToken.name}
-              </div>
-            </div>
-            <div className={cx('row')}>
-              <div className={cx('title')}>
-                <span>Minimum Received after slippage ( {userSlippage}% )</span>
-              </div>
-              <div className={cx('value')}>
-                {numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 })}{' '}
-                {originalToToken.name}
-              </div>
-            </div>
-
-            {!userSlippage && (
-              <div className={cx('row')}>
-                <span className={cx('warning-slippage-0')}>
-                  That transaction may failed if configured slippage is 0%!
-                </span>
-              </div>
-            )}
-            {!!relayerFeeToken && (
-              <div className={cx('row')}>
-                <div className={cx('title')}>
-                  <span>Relayer Fee</span>
-                </div>
-                <div className={cx('value')}>
-                  ≈ {relayerFee} {originalToToken.name}
-                </div>
-              </div>
-            )}
-            {!fromTokenFee && !toTokenFee && fee && (
-              <div className={cx('row')}>
-                <div className={cx('title')}>
-                  <span>Swap Fees</span>
-                </div>
-                {/* <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span> */}
-                <span>{fee && floatToPercent(fee) + '%'}</span>
-              </div>
-            )}
-          </div>
         </div>
       </LoadingBox>
+
       <div ref={ref}>
         <SelectToken
           setIsSelectToken={setIsSelectTo}
@@ -883,6 +855,20 @@ const SwapComponent: React.FC<{
           isBotomSheet
         />
       </div>
+
+      <SwapDetail
+        simulatePrice={averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'}
+        expected={expectOutputDisplay}
+        minimumReceived={numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 })}
+        slippage={userSlippage}
+        relayerFee={relayerFee}
+        bridgeFee={bridgeTokenFee}
+        totalFee={totalFeeEst}
+        swapFee={fee}
+        isOpen={openDetail}
+        onClose={() => setOpenDetail(false)}
+        tokenName={originalToToken?.name}
+      />
     </div>
   );
 };

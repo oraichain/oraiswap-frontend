@@ -60,7 +60,7 @@ export default function InputSwapV4({
     <>
       <div className={cx('input-swap-balance', type === 'from' && 'is-enable-coeff')}>
         <div className={cx('select-chain')}>
-          <span>{type}</span>
+          {/* <span>{type}</span> */}
           <div className={cx('left')} onClick={() => setIsSelectChain(true)}>
             <div className={cx('icon')}>
               {IconNetwork && isLightMode ? (
@@ -147,11 +147,11 @@ export default function InputSwapV4({
           <div className={cx('usd')}>≈ ${amount ? Number(usdPrice) || 0 : 0}</div>
         </div>
       </div>
-      {!!tokenFee && (
+      {/* {!!tokenFee && (
         <div className={cx('input-swap-fee')}>
           <div>Fee: {tokenFee}%</div>
         </div>
-      )}
+      )} */}
     </>
   );
 }
