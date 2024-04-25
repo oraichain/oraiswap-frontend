@@ -586,6 +586,19 @@ const SwapComponent: React.FC<{
       handleUpdateQueryURL(isFrom ? [token.denom, toTokenDenomSwap] : [fromTokenDenomSwap, token.denom]);
     }
 
+    if (coe && isFrom) {
+      const subAmountFrom = toSubAmount(amounts, token);
+      const updateBalance = token ? BigInt(amounts[token.denom] ?? '0') + subAmountFrom : BigInt(0);
+
+      const finalAmount = calcMaxAmount({
+        maxAmount: toDisplay(updateBalance, token?.decimals),
+        token,
+        coeff: coe,
+        gas: GAS_ESTIMATION_SWAP_DEFAULT
+      });
+      onChangePercent(toAmount(finalAmount * coe, token?.decimals));
+    }
+
     setIsSelect(false);
   };
 
