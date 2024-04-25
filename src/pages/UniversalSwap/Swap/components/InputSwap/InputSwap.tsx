@@ -28,6 +28,7 @@ interface InputSwapProps {
   disable?: boolean;
   originalToken?: TokenInfo;
   setCoe?: React.Dispatch<React.SetStateAction<number>>;
+  coe?: number;
   usdPrice: string;
   type?: string;
   selectChain: string;
@@ -52,10 +53,12 @@ export default function InputSwapV4({
   type,
   selectChain,
   onChangePercentAmount,
-  theme
+  theme,
+  coe
 }: InputSwapProps) {
   const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
   const isLightMode = theme === 'light';
+
   return (
     <>
       <div className={cx('input-swap-balance', type === 'from' && 'is-enable-coeff')}>
@@ -101,10 +104,11 @@ export default function InputSwapV4({
               {AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP.map(([coeff, text]) => (
                 <button
                   key={coeff}
-                  className={cx('percent')}
+                  className={cx('percent', { activePercent: coe === coeff })}
                   onClick={(event) => {
                     event.stopPropagation();
                     onChangePercentAmount(coeff);
+                    setCoe(coeff);
                   }}
                 >
                   {text}

@@ -56,6 +56,10 @@
   padding: 12px 8px 12px 16px;
   border-radius: var(--Dimension-Corner-Radius-card-inner, 8px);
 
+  @include small-mobile {
+    align-items: flex-start;
+  }
+
   @include theme() {
     background-color: theme-get('colors-neutral-surface-bg-section');
     color: theme-get('colors-neutral-text-body-on-section');
@@ -92,6 +96,10 @@
       padding: 0;
       height: 0;
 
+      // @include small-mobile {
+      //   width: 70%;
+      // }
+
       &.activeInput {
         height: 100%;
         padding: 4px 0;
@@ -122,12 +130,18 @@
     align-items: center;
     gap: 8px;
 
+    @include small-mobile {
+      &.activeSuffix {
+        margin-top: 24px;
+      }
+    }
+
     .clear {
       cursor: pointer;
       display: flex;
-      height: 25px;
-      width: 25px;
-      padding: 8px;
+      height: 22px;
+      width: 22px;
+      padding: 6px;
       justify-content: center;
       align-items: center;
       gap: 10px;

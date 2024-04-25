@@ -11,7 +11,8 @@ import {
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay
+  toDisplay,
+  parseTokenInfoRawDenom
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
@@ -56,7 +57,7 @@ import useOnClickOutside from 'hooks/useOnClickOutside';
 import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Metamask from 'libs/metamask';
-import { getUsd, toSubAmount } from 'libs/utils';
+import { getUsd, reduceString, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
@@ -232,7 +233,26 @@ const SwapComponent: React.FC<{
 
   const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
     if (chainId) {
-      const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId); //&& flat.denom !== denom
+      const isFrom = type === 'from';
+
+      // check current token existed on another swap token chain
+      const checkExistedToken = isFrom
+        ? flattenTokens.find(
+            (flat) => flat?.coinGeckoId === originalFromToken?.coinGeckoId && flat?.chainId === selectChainTo
+          )
+        : flattenTokens.find(
+            (flat) => flat?.coinGeckoId === originalToToken?.coinGeckoId && flat?.chainId === selectChainFrom
+          );
+
+      // get default token of new chain
+      const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId);
+
+      // case new chain === another swap token chain
+      // if new tokenInfo(default token of new chain) === from/to Token => check is currentToken existed on new chain
+      // if one of all condition is false => handle swap normally
+      if (tokenInfo.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap) && checkExistedToken) {
+        return handleChangeToken(checkExistedToken, type);
+      }
 
       if (tokenInfo) {
         handleChangeToken(tokenInfo, type);
@@ -546,7 +566,7 @@ const SwapComponent: React.FC<{
     setCoe(coeff);
   };
 
-  const handleChangeToken = (token, type) => {
+  const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
     const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
     const setIsSelect = isFrom ? setIsSelectFrom : setIsSelectTo;
@@ -629,6 +649,7 @@ const SwapComponent: React.FC<{
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
                 setCoe={setCoe}
+                coe={coe}
                 usdPrice={usdPriceShow}
               />
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
@@ -699,18 +720,28 @@ const SwapComponent: React.FC<{
                 </div>
               }
               extraButton={
-                <div className={cx('extraBtn')}>
-                  <BookIcon
-                    onClick={() => {
-                      dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
-                    }}
-                  />
+                <div className={cx('extraBtnWrapper')}>
+                  <div className={cx('book')}>
+                    <BookIcon
+                      onClick={() => {
+                        dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                      }}
+                    />
+                    <span
+                      onClick={() => {
+                        dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                      }}
+                    >
+                      Address Book
+                    </span>
+                  </div>
                   <span
+                    className={cx('currentAddress')}
                     onClick={() => {
-                      dispatch(setCurrentAddressBookStep(AddressManagementStep.SELECT));
+                      setAddressTransfer(initAddressTransfer);
                     }}
                   >
-                    Address Book
+                    {reduceString(initAddressTransfer, 8, 8)}
                   </span>
                 </div>
               }
@@ -761,7 +792,7 @@ const SwapComponent: React.FC<{
                 onClick={handleSubmit}
                 disabled={disabledSwapBtn}
               >
-                {swapLoading && <Loader width={35} height={35} />}
+                {swapLoading && <Loader width={20} height={20} />}
                 {/* hardcode check minimum tron */}
                 {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
                   <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>

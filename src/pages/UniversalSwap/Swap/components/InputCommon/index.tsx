@@ -5,6 +5,7 @@ import { reduceString } from 'libs/utils';
 import { ReactComponent as ErrorIcon } from 'assets/icons/icon_error.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { isMobile } from '@walletconnect/browser-utils';
+import classNames from 'classnames';
 
 const REDUCE_STRING_ADDRESS = 8;
 const REDUCE_STRING_ADDRESS_MOBILE = 6;
@@ -49,6 +50,11 @@ const InputCommon: FC<{
     if ((!value || showPreviewOnBlur) && isOnViewPort) {
       setActive(false);
     }
+
+    if (!value && defaultValue) {
+      onChange(defaultValue);
+    }
+
     setShowError(true);
     inputRef.current?.blur();
   });
@@ -97,9 +103,9 @@ const InputCommon: FC<{
           </div>
         )}
         {suffix && (
-          <div className={styles.suffix}>
-            {value !== defaultValue && value && active && (
-              <div className={styles.clear} onClick={() => onChange(defaultValue)}>
+          <div className={classNames(styles.suffix, { [styles.activeSuffix]: active })}>
+            {value && active && (
+              <div className={styles.clear} onClick={() => onChange('')}>
                 <CloseIcon />
               </div>
             )}
