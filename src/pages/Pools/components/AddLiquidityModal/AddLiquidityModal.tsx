@@ -172,7 +172,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         slippage: (userSlippage / 100).toString()
       } as ProvideQuery);
 
-      const messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
+      const messages = buildMultipleExecuteMessages([msg], ...firstTokenConverts, ...secTokenConverts);
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,
@@ -242,7 +242,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         lpAddress: pairInfoData.liquidityAddr
       });
 
-      const messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
+      const messages = buildMultipleExecuteMessages([msg], ...firstTokenConverts, ...secTokenConverts);
 
       const result = await CosmJs.executeMultiple({
         msgs: [...messages, msgStake],
