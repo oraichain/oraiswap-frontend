@@ -18,6 +18,7 @@ import {
   // swapFromTokens,
   // swapToTokens
 } from '@oraichain/oraidex-universal-swap';
+import { isMobile } from '@walletconnect/browser-utils';
 import { swapFromTokens, swapToTokens, tokenMap } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
@@ -295,4 +296,49 @@ export const getFromToToken = (originalFromToken, originalToToken, fromTokenDeno
     : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
 
   return { fromToken, toToken };
+};
+
+export const getRemoteDenom = (originalToken) => {
+  return originalToken.contractAddress ? originalToken.prefix + originalToken.contractAddress : originalToken.denom;
+};
+
+export const getTokenBalance = (originalToken, amounts, subAmount) => {
+  return originalToken ? BigInt(amounts[originalToken.denom] ?? '0') + subAmount : BigInt(0);
+};
+
+export const getDisableSwap = ({
+  originalToToken,
+  walletByNetworks,
+  swapLoading,
+  fromAmountToken,
+  toAmountToken,
+  fromAmountTokenBalance,
+  fromTokenBalance,
+  addressTransfer,
+  validAddress,
+  simulateData
+}) => {
+  const mobileMode = isMobile();
+  const canSwapToCosmos = !mobileMode && originalToToken.cosmosBased && !walletByNetworks.cosmos;
+  const canSwapToEvm = !mobileMode && !originalToToken.cosmosBased && !walletByNetworks.evm;
+  const canSwapToTron = !mobileMode && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron;
+  const canSwapTo = canSwapToCosmos || canSwapToEvm || canSwapToTron;
+  const disabledSwapBtn =
+    swapLoading ||
+    !fromAmountToken ||
+    !toAmountToken ||
+    fromAmountTokenBalance > fromTokenBalance || // insufficent fund
+    !addressTransfer ||
+    !validAddress.isValid ||
+    canSwapTo;
+
+  let disableMsg: string;
+  if (!validAddress.isValid) disableMsg = `Recipient address not found`;
+  if (!addressTransfer) disableMsg = `Recipient address not found`;
+  if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
+  if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
+  if (canSwapToTron) disableMsg = `Please connect tron wallet`;
+  if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
+  if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
+  return { disabledSwapBtn, disableMsg };
 };
