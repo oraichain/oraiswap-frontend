@@ -340,8 +340,8 @@ const SwapComponent: React.FC<{
       }
 
       const smartRoutes = await UniversalSwapHelper.simulateSwapUsingSmartRoute({
-        fromInfo: originalFromToken,
-        toInfo: originalToToken,
+        fromInfo: getTokenOnOraichain(originalFromToken.coinGeckoId),
+        toInfo: getTokenOnOraichain(originalToToken.coinGeckoId),
         amount: toAmount(fromAmountToken, originalToToken.decimals).toString()
       });
 
