@@ -17,6 +17,7 @@ import {
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
   UniversalSwapHandler,
+  UniversalSwapHelper,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
@@ -61,7 +62,7 @@ import { getUsd, reduceString, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
+import { generateNewSymbol, getFromToToken, refreshBalances } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
@@ -82,6 +83,7 @@ import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import SwapDetail from './components/SwapDetail';
+import useFilteredTokens from './hooks/useFilteredTokens';
 
 const cx = cn.bind(styles);
 
@@ -126,8 +128,6 @@ const SwapComponent: React.FC<{
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
-  const [filteredToTokens, setFilteredToTokens] = useState([] as TokenItemType[]);
-  const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
@@ -136,29 +136,39 @@ const SwapComponent: React.FC<{
   const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
   const { handleReadClipboard } = useCopyClipboard();
 
-  useGetFeeConfig();
-
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
 
-  const refreshBalances = async () => {
-    try {
-      if (loadingRefresh) return;
-      setLoadingRefresh(true);
-      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
-    } catch (err) {
-      console.log({ err });
-    } finally {
-      setTimeout(() => {
-        setLoadingRefresh(false);
-      }, 2000);
-    }
-  };
+  const { fromToken, toToken } = getFromToToken(
+    originalFromToken,
+    originalToToken,
+    fromTokenDenomSwap,
+    toTokenDenomSwap
+  );
+
+  const remoteTokenDenomFrom = originalFromToken.contractAddress
+    ? originalFromToken.prefix + originalFromToken.contractAddress
+    : originalFromToken.denom;
+  const remoteTokenDenomTo = originalToToken.contractAddress
+    ? originalToToken.prefix + originalToToken.contractAddress
+    : originalToToken.denom;
+
+  const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
+  const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
+
+  const subAmountFrom = toSubAmount(amounts, originalFromToken);
+  const subAmountTo = toSubAmount(amounts, originalToToken);
+
+  const isFromBTC = originalFromToken.coinGeckoId === 'bitcoin';
+  const INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT = 0.00001;
+  let INIT_AMOUNT = 1;
+  if (isFromBTC) INIT_AMOUNT = INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT;
+
+  useGetFeeConfig();
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) {
       setCoe(0);
-      setSwapAmount([undefined, toAmountToken]);
-      return;
+      return setSwapAmount([undefined, toAmountToken]);
     }
     setSwapAmount([amount, toAmountToken]);
   };
@@ -168,68 +178,22 @@ const SwapComponent: React.FC<{
     setSwapAmount([displayAmount, toAmountToken]);
   };
 
-  const isEvmSwap = isEvmSwappable({
-    fromChainId: originalFromToken.chainId,
-    toChainId: originalToToken.chainId,
-    fromContractAddr: originalFromToken.contractAddress,
-    toContractAddr: originalToToken.contractAddress
-  });
-
-  // if evm swappable then no need to get token on oraichain because we can swap on evm. Otherwise, get token on oraichain. If cannot find => fallback to original token
-  const fromToken = isEvmSwap
-    ? tokenMap[fromTokenDenomSwap]
-    : getTokenOnOraichain(tokenMap[fromTokenDenomSwap].coinGeckoId) ?? tokenMap[fromTokenDenomSwap];
-  const toToken = isEvmSwap
-    ? tokenMap[toTokenDenomSwap]
-    : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
-
-  const remoteTokenDenomFrom = originalFromToken.contractAddress
-    ? originalFromToken.prefix + originalFromToken.contractAddress
-    : originalFromToken.denom;
-  const remoteTokenDenomTo = originalToToken.contractAddress
-    ? originalToToken.prefix + originalToToken.contractAddress
-    : originalToToken.denom;
-  const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
-  const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
-
   const {
     data: [fromTokenInfoData, toTokenInfoData]
   } = useQuery(['token-infos', fromToken, toToken], () => fetchTokenInfos([fromToken!, toToken!]), { initialData: [] });
 
-  const subAmountFrom = toSubAmount(amounts, originalFromToken);
-  const subAmountTo = toSubAmount(amounts, originalToToken);
   const fromTokenBalance = originalFromToken
     ? BigInt(amounts[originalFromToken.denom] ?? '0') + subAmountFrom
     : BigInt(0);
   const toTokenBalance = originalToToken ? BigInt(amounts[originalToToken.denom] ?? '0') + subAmountTo : BigInt(0);
 
-  // process filter from & to tokens
-  useEffect(() => {
-    const filteredToTokens = filterNonPoolEvmTokens(
-      originalFromToken.chainId,
-      originalFromToken.coinGeckoId,
-      originalFromToken.denom,
-      searchTokenName,
-      SwapDirection.To
-    );
-    setFilteredToTokens(filteredToTokens);
-
-    const filteredFromTokens = filterNonPoolEvmTokens(
-      originalToToken.chainId,
-      originalToToken.coinGeckoId,
-      originalToToken.denom,
-      searchTokenName,
-      SwapDirection.From
-    );
-    setFilteredFromTokens(filteredFromTokens);
-  }, [toTokenDenomSwap, fromTokenDenomSwap]);
-
-  useEffect(() => {
-    if (fromTokenDenom && toTokenDenom) {
-      setFromTokenDenom(fromTokenDenom);
-      setToTokenDenom(toTokenDenom);
-    }
-  }, []);
+  const { filteredToTokens, filteredFromTokens } = useFilteredTokens(
+    originalFromToken,
+    originalToToken,
+    searchTokenName,
+    fromTokenDenomSwap,
+    toTokenDenomSwap
+  );
 
   const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
     if (chainId) {
@@ -275,16 +239,6 @@ const SwapComponent: React.FC<{
     originalToToken,
     routerClient
   );
-
-  const isFromBTC = originalFromToken.coinGeckoId === 'bitcoin';
-
-  const INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT = 0.00001;
-
-  let INIT_AMOUNT = 1;
-
-  if (isFromBTC) {
-    INIT_AMOUNT = INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT;
-  }
 
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
@@ -626,7 +580,17 @@ const SwapComponent: React.FC<{
               <span className={cx('icon')} onClick={() => setOpenSetting(true)}>
                 <IconOirSettings onClick={() => setOpenSetting(true)} />
               </span>
-              <button className={cx('btn')} onClick={refreshBalances}>
+              <button
+                className={cx('btn')}
+                onClick={async () =>
+                  await refreshBalances(
+                    loadingRefresh,
+                    setLoadingRefresh,
+                    { metamaskAddress, tronAddress, oraiAddress },
+                    loadTokenAmounts
+                  )
+                }
+              >
                 <RefreshImg />
               </button>
             </div>
@@ -824,7 +788,7 @@ const SwapComponent: React.FC<{
           prices={prices}
           theme={theme}
           selectChain={selectChainFrom}
-          items={filteredToTokens}
+          items={filteredFromTokens}
           handleChangeToken={(token) => {
             handleChangeToken(token, 'from');
           }}

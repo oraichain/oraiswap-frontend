@@ -14,20 +14,15 @@ import {
   oraichainTokens
 } from '@oraichain/oraidex-common';
 import {
-  isEvmNetworkNativeSwapSupported,
-  isSupportedNoPoolSwapEvm,
-  swapEvmRoutes
+  UniversalSwapHelper
   // swapFromTokens,
   // swapToTokens
 } from '@oraichain/oraidex-universal-swap';
-import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { swapFromTokens, swapToTokens, tokenMap } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
 import { generateError } from 'libs/utils';
 import { PairToken } from 'reducer/type';
-
-import bech32 from 'bech32';
-import { ethers } from 'ethers';
 
 export enum SwapDirection {
   From,
@@ -86,8 +81,8 @@ export function filterNonPoolEvmTokens(
   let filteredToTokens = listTokens.filter((token) => token.name.toLowerCase().includes(searchTokenName.toLowerCase()));
 
   // special case for tokens not having a pool on Oraichain
-  if (isSupportedNoPoolSwapEvm(coingeckoId)) {
-    const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
+  if (UniversalSwapHelper.isSupportedNoPoolSwapEvm(coingeckoId)) {
+    const swappableTokens = Object.keys(UniversalSwapHelper.swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
     const filteredTokens = filteredToTokens.filter((token) => swappableTokens.includes(token.contractAddress));
 
     // tokens that dont have a pool on Oraichain like WETH or WBNB cannot be swapped from a token on Oraichain
@@ -96,10 +91,10 @@ export function filterNonPoolEvmTokens(
     filteredToTokens = filteredTokens;
   }
   // special case filter. Tokens on networks other than supported evm cannot swap to tokens, so we need to remove them
-  if (!isEvmNetworkNativeSwapSupported(chainId as NetworkChainId)) {
+  if (!UniversalSwapHelper.isEvmNetworkNativeSwapSupported(chainId as NetworkChainId)) {
     return filteredToTokens.filter((t) => {
       // one-directional swap. non-pool tokens of evm network can swap be swapped with tokens on Oraichain, but not vice versa
-      const isSupported = isSupportedNoPoolSwapEvm(t.coinGeckoId);
+      const isSupported = UniversalSwapHelper.isSupportedNoPoolSwapEvm(t.coinGeckoId);
 
       if (direction === SwapDirection.To) return !isSupported;
       if (isSupported) {
@@ -114,7 +109,7 @@ export function filterNonPoolEvmTokens(
 
   return filteredToTokens.filter((t) => {
     // filter out to tokens that are on a different network & with no pool because we are not ready to support them yet. TODO: support
-    if (isSupportedNoPoolSwapEvm(t.coinGeckoId)) return t.chainId === chainId;
+    if (UniversalSwapHelper.isSupportedNoPoolSwapEvm(t.coinGeckoId)) return t.chainId === chainId;
     return true;
   });
 }
@@ -264,4 +259,40 @@ export const getTokenIcon = (token: TokenItemType, theme: string) => {
     tokenIcon = theme === 'light' ? tokenInfo?.IconLight || tokenInfo?.Icon : tokenInfo?.Icon;
   }
   return tokenIcon;
+};
+
+export const refreshBalances = async (
+  loadingRefresh,
+  setLoadingRefresh,
+  { metamaskAddress, tronAddress, oraiAddress },
+  callback
+) => {
+  try {
+    if (loadingRefresh) return;
+    setLoadingRefresh(true);
+    await callback({ metamaskAddress, tronAddress, oraiAddress });
+  } catch (err) {
+    console.log({ err });
+  } finally {
+    setTimeout(() => {
+      setLoadingRefresh(false);
+    }, 2000);
+  }
+};
+
+export const getFromToToken = (originalFromToken, originalToToken, fromTokenDenomSwap, toTokenDenomSwap) => {
+  const isEvmSwap = UniversalSwapHelper.isEvmSwappable({
+    fromChainId: originalFromToken.chainId,
+    toChainId: originalToToken.chainId,
+    fromContractAddr: originalFromToken.contractAddress,
+    toContractAddr: originalToToken.contractAddress
+  });
+  const fromToken = isEvmSwap
+    ? tokenMap[fromTokenDenomSwap]
+    : getTokenOnOraichain(tokenMap[fromTokenDenomSwap].coinGeckoId) ?? tokenMap[fromTokenDenomSwap];
+  const toToken = isEvmSwap
+    ? tokenMap[toTokenDenomSwap]
+    : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
+
+  return { fromToken, toToken };
 };
