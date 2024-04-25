@@ -25,8 +25,9 @@ import { isMobile } from '@walletconnect/browser-utils';
 import ArrowImg from 'assets/icons/arrow_new.svg';
 import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
+import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
+import { ReactComponent as FeeDarkIcon } from 'assets/icons/fee_dark.svg';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
-import { ReactComponent as IconTooltip } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
@@ -110,8 +111,6 @@ const SwapComponent: React.FC<{
   const [isSelectTo, setIsSelectTo] = useState(false);
 
   const { data: prices } = useCoinGeckoPrices();
-
-  const [visible, setVisible] = useState(false);
 
   const [openSetting, setOpenSetting] = useState(false);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
@@ -241,7 +240,7 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const { fee } = useSwapFee({
+  const { fee, isDependOnNetwork } = useSwapFee({
     fromToken: originalFromToken,
     toToken: originalToToken
   });
@@ -327,7 +326,13 @@ const SwapComponent: React.FC<{
     ? numberWithCommas(simulateData.displayAmount, undefined, { minimumFractionDigits: 6 })
     : 0;
 
-  const totalFeeEst = new BigDecimal(bridgeTokenFee || 0).add(relayerFee || 0).toNumber() || 0;
+  const estSwapFee = new BigDecimal(simulateDisplayAmount || 0).mul(fee || 0).toNumber();
+
+  const totalFeeEst =
+    new BigDecimal(bridgeTokenFee || 0)
+      .add(relayerFee || 0)
+      .add(estSwapFee)
+      .toNumber() || 0;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -650,7 +655,7 @@ const SwapComponent: React.FC<{
                 averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
               } ${originalToToken.name}`}
 
-              <img src={ArrowImg} alt="arrow" />
+              {/* <img src={ArrowImg} alt="arrow" /> */}
             </div>
           </div>
           <div className={cx('to')}>
@@ -682,7 +687,7 @@ const SwapComponent: React.FC<{
               onChange={(val) => setAddressTransfer(val)}
               showPreviewOnBlur
               defaultValue={initAddressTransfer}
-              prefix={<SendIcon />}
+              prefix={theme === 'light' ? <SendIcon /> : <SendDarkIcon />}
               suffix={
                 <div
                   className={cx('paste')}
@@ -714,26 +719,14 @@ const SwapComponent: React.FC<{
           </div>
           <div className={cx('slippage')} onClick={() => setOpenDetail(true)}>
             <div className={cx('label')}>
-              <FeeIcon />
+              {theme === 'light' ? <FeeIcon /> : <FeeDarkIcon />}
               Estimated Fee:
-              {/* 
-              <TooltipIcon
-                placement="top-start"
-                visible={visible}
-                icon={<IconTooltip />}
-                setVisible={setVisible}
-                content={
-                  <div className={cx('tooltip', theme)}>
-                    Set your maximum price slippage. If the price changes beyond this, your transaction may not be
-                    successful.
-                  </div>
-                }
-              /> */}
             </div>
             <div className={cx('info')}>
-              <span className={cx('value')}>{userSlippage}%</span>
-              <span className={cx('icon')} onClick={() => setOpenSetting(true)}>
-                {/* <IconOirSettings onClick={() => setOpenSetting(true)} /> */}
+              <span className={cx('value')}>
+                ≈ {numberWithCommas(totalFeeEst, undefined, { maximumFractionDigits: 6 })} {originalToToken.name}
+              </span>
+              <span className={cx('icon')}>
                 <img src={ArrowImg} alt="arrow" />
               </span>
             </div>
@@ -839,14 +832,12 @@ const SwapComponent: React.FC<{
         tokenTo={originalToToken}
       />
 
-      {openSetting && (
-        <div
-          className={cx('overlay')}
-          onClick={() => {
-            setOpenSetting(false);
-          }}
-        ></div>
-      )}
+      <div
+        className={cx('overlay', openSetting ? 'activeOverlay' : '')}
+        onClick={() => {
+          setOpenSetting(false);
+        }}
+      ></div>
       <div className={cx('setting', openSetting ? 'activeSetting' : '')}>
         <SlippageModal
           setVisible={setOpenSetting}
@@ -862,12 +853,14 @@ const SwapComponent: React.FC<{
         minimumReceived={numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 })}
         slippage={userSlippage}
         relayerFee={relayerFee}
-        bridgeFee={bridgeTokenFee}
-        totalFee={totalFeeEst}
-        swapFee={fee}
+        bridgeFee={numberWithCommas(bridgeTokenFee, undefined, { maximumFractionDigits: 6 })}
+        totalFee={numberWithCommas(totalFeeEst, undefined, { maximumFractionDigits: 6 })}
+        swapFee={isDependOnNetwork ? 0 : numberWithCommas(estSwapFee, undefined, { maximumFractionDigits: 6 })}
         isOpen={openDetail}
         onClose={() => setOpenDetail(false)}
-        tokenName={originalToToken?.name}
+        toTokenName={originalToToken?.name}
+        fromTokenName={originalFromToken?.name}
+        openSlippage={() => setOpenSetting(true)}
       />
     </div>
   );

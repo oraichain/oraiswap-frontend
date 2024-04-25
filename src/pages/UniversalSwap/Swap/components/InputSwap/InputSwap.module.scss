@@ -89,6 +89,7 @@
 
       @include mobile {
         width: 100%;
+        font-size: 24px;
       }
     }
     .usd {
@@ -108,18 +109,30 @@
   align-items: center;
   // padding-bottom: 16px;
   padding-bottom: 10px;
+  font-size: 14px;
 
   @include theme() {
     color: theme-get('colors-neutral-text-body-on-section');
   }
-  font-size: 14px;
+
   @include mobile {
     font-size: 12px;
-    padding-bottom: 0;
   }
 
   &.is-enable-coeff {
     align-items: flex-start;
+
+    @include small-mobile {
+      flex-direction: column-reverse;
+
+      .show-balance {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding-left: 4px;
+        padding-bottom: 6px;
+      }
+    }
   }
 
   font-weight: 400;
@@ -200,15 +213,23 @@
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: flex-end;
+    font-size: 12px;
 
     @include theme {
       color: theme-get('colors-neutral-text-body-on-row');
     }
 
-    @include mobile {
-      flex-direction: column;
-    }
     gap: 8px;
+
+    .bal {
+      text-align: right;
+
+      .prefix {
+        @include theme {
+          color: theme-get('neutral-9');
+        }
+      }
+    }
 
     & > span {
       text-align: right;

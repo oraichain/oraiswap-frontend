@@ -1,7 +1,26 @@
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
 import styles from './index.module.scss';
 import classNames from 'classnames';
 import { floatToPercent } from 'helper';
+
+export type SwapDetailProps = {
+  simulatePrice: number | string;
+  expected: number | string;
+  minimumReceived: number | string;
+  slippage: number | string;
+
+  relayerFee: number | string;
+  bridgeFee: number | string;
+  totalFee: number | string;
+  swapFee: number | string;
+
+  isOpen: boolean;
+  onClose: () => void;
+  toTokenName: string;
+  fromTokenName: string;
+  openSlippage: () => void;
+};
 
 const SwapDetail = ({
   simulatePrice,
@@ -16,22 +35,10 @@ const SwapDetail = ({
 
   isOpen,
   onClose,
-  tokenName
-}: {
-  simulatePrice: number | string;
-  expected: number | string;
-  minimumReceived: number | string;
-  slippage: number | string;
-
-  relayerFee: number | string;
-  bridgeFee: number | string;
-  totalFee: number | string;
-  swapFee: number | string;
-
-  isOpen: boolean;
-  onClose: () => void;
-  tokenName: string;
-}) => {
+  toTokenName,
+  fromTokenName,
+  openSlippage
+}: SwapDetailProps) => {
   return (
     <div>
       {/* {isOpen && <div className={styles.overlay} onClick={onClose}></div>} */}
@@ -54,7 +61,7 @@ const SwapDetail = ({
                   <span>Exchange Rate:</span>
                 </div>
                 <div className={styles.value}>
-                  ≈ {simulatePrice} {tokenName}
+                  1 {fromTokenName} = {simulatePrice} {toTokenName}
                 </div>
               </div>
               <div className={styles.row}>
@@ -62,7 +69,7 @@ const SwapDetail = ({
                   <span>Expected Output:</span>
                 </div>
                 <div className={styles.value}>
-                  ≈ {expected} {tokenName}
+                  ≈ {expected} {toTokenName}
                 </div>
               </div>
               <div className={styles.row}>
@@ -70,7 +77,7 @@ const SwapDetail = ({
                   <span>Minimum Received:</span>
                 </div>
                 <div className={styles.value}>
-                  ≈ {minimumReceived} {tokenName}
+                  ≈ {minimumReceived} {toTokenName}
                 </div>
               </div>
               <div className={styles.row}>
@@ -78,7 +85,10 @@ const SwapDetail = ({
                   <span>Slippage Rate:</span>
                 </div>
                 <div className={styles.value}>
-                  ≈ {slippage} {tokenName}
+                  {slippage}%
+                  <span className={styles.icon} onClick={openSlippage}>
+                    <IconOirSettings onClick={openSlippage} />
+                  </span>
                 </div>
               </div>
             </div>
@@ -90,7 +100,7 @@ const SwapDetail = ({
                 <span>Relayer Fees:</span>
               </div>
               <div className={styles.value}>
-                ≈ {relayerFee} {tokenName}
+                ≈ {relayerFee} {toTokenName}
               </div>
             </div>
             <div className={styles.row}>
@@ -98,7 +108,7 @@ const SwapDetail = ({
                 <span>Bridge Fees:</span>
               </div>
               <div className={styles.value}>
-                ≈ {bridgeFee} {tokenName}
+                ≈ {bridgeFee} {toTokenName}
               </div>
             </div>
 
@@ -106,15 +116,15 @@ const SwapDetail = ({
               <div className={styles.title}>
                 <span>Swap Fees:</span>
               </div>
-              <span>{floatToPercent(Number(swapFee)) + '%'}</span>
+              <span>{!swapFee ? 'Depend on network' : `≈ ${swapFee} ${toTokenName}`}</span>
             </div>
-            <div className={styles.row}>
+            <div className={classNames(styles.row, styles.total)}>
               <div className={styles.title}>
                 <span>Total:</span>
               </div>
 
               <div className={styles.value}>
-                ≈ {totalFee} {tokenName}
+                ≈ {totalFee} {toTokenName}
               </div>
             </div>
           </div>

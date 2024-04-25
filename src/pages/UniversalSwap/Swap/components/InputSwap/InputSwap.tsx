@@ -85,14 +85,17 @@ export default function InputSwapV4({
           //   }
           // }}
         >
-          <TokenBalance
-            balance={{
-              amount: balance,
-              decimals: originalToken?.decimals,
-              denom: originalToken?.symbol || token?.name || ''
-            }}
-            decimalScale={6}
-          />
+          <div className={cx('bal')}>
+            <span className={cx('prefix')}>Balance:&nbsp;</span>
+            <TokenBalance
+              balance={{
+                amount: balance,
+                decimals: originalToken?.decimals,
+                denom: originalToken?.symbol || token?.name || ''
+              }}
+              decimalScale={6}
+            />
+          </div>
           {type === 'from' && (
             <div className={cx('coeff')}>
               {AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP.map(([coeff, text]) => (

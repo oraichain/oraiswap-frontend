@@ -59,7 +59,6 @@ $padding-default: 16px;
     font-size: 18px;
     font-weight: 600;
     line-height: 150%;
-    padding: 0 16px;
 
     .title {
       flex: 1;
@@ -140,19 +139,45 @@ $padding-default: 16px;
       font-weight: 400;
       line-height: 150%;
 
+      @include small-mobile {
+        font-size: 12px;
+      }
+
+      &.total {
+        font-weight: 500;
+      }
+
       &:not(:first-of-type) {
         border-top: 1px solid;
 
         @include theme {
-          border-color: theme-get('neutral-border-border-xbold');
+          border-color: theme-get('colors-neutral-surface-bg-section-3');
         }
       }
 
       @include theme() {
         color: theme-get('colors-neutral-text-body-on-row');
       }
-      .title {
-        font-weight: 500;
+
+      .icon {
+        margin-left: 4px;
+        cursor: pointer;
+
+        svg {
+          width: 17px;
+          height: 17px;
+          vertical-align: text-top;
+
+          path {
+            @include theme() {
+              stroke: theme-get('svg-fill-color');
+            }
+          }
+        }
+      }
+
+      .value {
+        text-align: right;
       }
     }
   }
