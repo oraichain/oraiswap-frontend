@@ -16,6 +16,7 @@ import {
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
   UniversalSwapHandler,
+  UniversalSwapHelper,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
@@ -338,6 +339,12 @@ const SwapComponent: React.FC<{
         simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
       }
 
+      const smartRoutes = await UniversalSwapHelper.simulateSwapUsingSmartRoute({
+        fromInfo: originalFromToken,
+        toInfo: originalToToken,
+        amount: toAmount(fromAmountToken, originalToToken.decimals).toString()
+      });
+
       const univeralSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -350,7 +357,8 @@ const SwapComponent: React.FC<{
           simulatePrice:
             // @ts-ignore
             averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-          relayerFee: relayerFeeUniversal
+          relayerFee: relayerFeeUniversal,
+          smartRoutes: smartRoutes.routes
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );

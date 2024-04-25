@@ -31,7 +31,8 @@ export const useSimulate = (
         originalFromInfo: originalFromTokenInfo,
         originalToInfo: originalToTokenInfo,
         originalAmount: fromAmountToken,
-        routerClient
+        routerClient,
+        useSmartRoute: true
       });
     },
     {
