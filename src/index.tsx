@@ -21,6 +21,8 @@ import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
 
 const queryClient = new QueryClient();
+// @ts-ignore
+window.queryClient = queryClient;
 
 if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
   Sentry.init({

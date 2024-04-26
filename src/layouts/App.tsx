@@ -7,8 +7,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { getListAddressCosmos, getNetworkGasPrice, interfaceRequestTron } from 'helper';
-import { leapWalletType } from 'helper/constants';
+import { getListAddressCosmos, interfaceRequestTron } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -24,6 +23,7 @@ import Menu from './Menu';
 import './index.scss';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
+import { ORAI_GATEWAY_CONTRACT_ADDRESS } from 'pages/Vaults/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
 
 const App = () => {
@@ -66,12 +66,13 @@ const App = () => {
           ),
           true
         );
-        // sendJsonMessage(buildWebsocketSendMessage(`coin_received.receiver = '${address}'`), true);
-        // subscribe to MsgSend and MsgTransfer event case
-        // sendJsonMessage(buildWebsocketSendMessage(`coin_spent.spender = '${address}'`, 2), true);
-        // subscribe to cw20 contract transfer & send case
-        // sendJsonMessage(buildWebsocketSendMessage(`wasm.to = '${address}'`, 3), true);
-        // sendJsonMessage(buildWebsocketSendMessage(`wasm.from = '${address}'`, 4), true);
+
+        sendJsonMessage(
+          buildWebsocketSendMessage(
+            `wasm._contract_address = '${ORAI_GATEWAY_CONTRACT_ADDRESS}' AND wasm.action = 'fulfill_deposit_order' AND wasm.depositor = '${address}'`
+          ),
+          true
+        );
       },
       onClose: () => {
         console.log('unsubscribe all clients');
@@ -92,14 +93,16 @@ const App = () => {
 
   // this is used for debugging only
   useEffect(() => {
-    const tokenDisplay = processWsResponseMsg(lastJsonMessage);
-    if (tokenDisplay) {
-      displayToast(TToastType.TX_INFO, {
-        message: `You have received ${tokenDisplay}`
-      });
-      // no metamaskAddress, only reload cosmos
-      loadTokenAmounts({ oraiAddress: address });
-    }
+    (async () => {
+      if (!lastJsonMessage) return;
+      const tokenDisplay = await processWsResponseMsg(lastJsonMessage);
+      if (tokenDisplay) {
+        displayToast(TToastType.TX_INFO, {
+          message: `You have received ${tokenDisplay}`
+        });
+        loadTokenAmounts({ oraiAddress: address });
+      }
+    })();
   }, [lastJsonMessage]);
 
   // clear persist storage when update version

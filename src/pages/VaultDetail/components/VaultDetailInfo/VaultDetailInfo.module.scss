@@ -1,0 +1,48 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.vaultDetailInfo {
+  width: 60%;
+
+  @include mobile {
+    width: 100%;
+  }
+
+  .vaultName {
+    .strategy {
+      display: flex;
+      gap: 10px;
+
+      .strategyLogo {
+        display: flex;
+        align-items: center;
+      }
+
+      .symbols {
+        .symbols_logo_left {
+          position: relative;
+          left: 5px;
+        }
+      }
+
+      .strategyName {
+        @include theme() {
+          color: theme-get('neutral-text-title');
+        }
+
+        .strategyNameTitle {
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 150%;
+        }
+
+        .strategyNameValue {
+          font-size: 24px;
+          font-weight: 600;
+          line-height: 150%;
+        }
+      }
+    }
+  }
+}
