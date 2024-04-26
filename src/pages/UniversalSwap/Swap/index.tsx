@@ -587,6 +587,17 @@ const SwapComponent: React.FC<{
     routes: []
   };
 
+  const isImpactPrice = fromAmountToken && simulateData?.amount && averageRatio?.amount;
+  let impactWarning = 0;
+  if (isImpactPrice) {
+    const caculateImpactPrice = new BigDecimal(simulateData.amount)
+      .div(toAmount(fromAmountToken, originalFromToken.decimals))
+      .div(averageRatio.displayAmount)
+      .mul(100)
+      .toNumber();
+    impactWarning = 100 - caculateImpactPrice;
+  }
+
   return (
     <div className={cx('swap-box-wrapper')}>
       <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
@@ -709,7 +720,7 @@ const SwapComponent: React.FC<{
                 <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
                 <div className={cx('smart-router-price-impact-warning')}>
                   <WarningIcon />
-                  <div> 1%</div>
+                  <div> ≈ {impactWarning.toFixed(2)}%</div>
                 </div>
                 {/* <div className={cx('smart-router-price-impact-time')}> ~ 5 mins</div> */}
               </div>
