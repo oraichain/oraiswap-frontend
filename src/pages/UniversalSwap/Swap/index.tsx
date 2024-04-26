@@ -57,7 +57,9 @@ import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import {
+  genCurrentChain,
   generateNewSymbol,
+  generateNewSymbolV2,
   getDisableSwap,
   getFromToToken,
   getRemoteDenom,
@@ -67,7 +69,14 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
-import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import {
+  selectCurrentToChain,
+  selectCurrentToken,
+  setCurrentFromToken,
+  setCurrentToChain,
+  setCurrentToToken,
+  setCurrentToken
+} from 'reducer/tradingSlice';
 import { AddressManagementStep } from 'reducer/type';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
@@ -130,6 +139,7 @@ const SwapComponent: React.FC<{
   const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
   const currentPair = useSelector(selectCurrentToken);
+  const currentToChain = useSelector(selectCurrentToChain);
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [addressTransfer, setAddressTransfer] = useState('');
@@ -260,10 +270,38 @@ const SwapComponent: React.FC<{
   );
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    // const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
+
+    console.log('newTVPair', newTVPair);
+
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
+
+  useEffect(() => {
+    const newCurrentToChain = genCurrentChain({ toToken: originalToToken, currentToChain });
+
+    if (toToken && originalToToken) {
+      dispatch(setCurrentToChain(newCurrentToChain));
+      dispatch(setCurrentToToken(originalToToken));
+    }
+  }, [originalToToken, toToken]);
+
+  useEffect(() => {
+    const newCurrentToChain = genCurrentChain({ toToken: originalToToken, currentToChain });
+
+    if (toToken && originalToToken) {
+      dispatch(setCurrentToChain(newCurrentToChain));
+      dispatch(setCurrentToToken(originalToToken));
+    }
+  }, [originalToToken, toToken]);
+
+  useEffect(() => {
+    if (fromToken && originalFromToken) {
+      dispatch(setCurrentFromToken(originalFromToken));
+    }
+  }, [originalFromToken, fromToken]);
 
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
   const isAverageRatio = averageRatio && averageRatio.amount;

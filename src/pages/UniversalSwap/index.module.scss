@@ -22,12 +22,13 @@
 
   .tv-chart {
     position: relative;
-    height: 600px;
+    height: 500px;
     padding-top: 10px;
     transition: all 1s ease;
 
     &.hidden {
       height: 0;
+      padding-top: 0px;
     }
   }
 
@@ -44,6 +45,85 @@
 
       @include medium-desktop {
         max-width: 400px;
+      }
+    }
+  }
+}
+
+.chartItem {
+  height: 100%;
+  display: none;
+  border-radius: 12px;
+  margin-top: 0px;
+  transition: height ease-in-out 1s;
+
+  overflow: unset;
+
+  &.hidden {
+    height: 0%;
+    overflow: hidden;
+  }
+
+  // @include theme {
+  //   background: theme-get('neutral-surface-bg-2');
+  // }
+
+  &.activeChart {
+    display: block;
+  }
+
+  .nodata-wrapper {
+    height: 100%;
+    border-radius: 12px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+
+    @include theme() {
+      border: 1px solid theme-get('neutral-border-border-default');
+    }
+
+    &.hidden {
+      padding: 0;
+      border: none;
+    }
+
+    svg {
+      @include theme {
+        path {
+          fill: theme-get('neutral-9');
+        }
+      }
+    }
+
+    .nodata-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%;
+
+      @include theme() {
+        color: theme-get('neutral-9');
+      }
+
+      .nodata-title {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 150%;
+
+        @include theme() {
+          color: theme-get('neutral-text-text-token-name');
+        }
       }
     }
   }

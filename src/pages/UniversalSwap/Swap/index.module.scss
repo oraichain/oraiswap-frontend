@@ -20,6 +20,14 @@
       height: 0;
     }
   }
+
+  .select-box {
+    padding-top: 10px;
+    transition: all 1s ease;
+    .hidden {
+      height: 0;
+    }
+  }
 }
 
 .swap-box {
@@ -489,7 +497,6 @@
   @include small-mobile() {
     font-size: 13px;
   }
-
   .label {
     display: flex;
     align-items: center;

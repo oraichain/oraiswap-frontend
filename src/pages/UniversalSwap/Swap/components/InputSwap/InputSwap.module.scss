@@ -141,7 +141,6 @@
     display: flex;
     align-items: center;
     gap: 10px;
-
     @include mobile {
       gap: 2px;
     }
@@ -202,12 +201,10 @@
         }
       }
     }
-
     span {
       text-transform: capitalize;
     }
   }
-
   .show-balance {
     display: flex;
     flex-direction: row;
@@ -245,7 +242,6 @@
     .coeff {
       display: flex;
       gap: 6px;
-
       .percent {
         border-radius: 99px;
         background: #aee67f;
