@@ -1,17 +1,13 @@
 import {
   BigDecimal,
   DEFAULT_SLIPPAGE,
-  GAS_ESTIMATION_SWAP_DEFAULT,
   NetworkChainId,
   TRON_DENOM,
-  TokenItemType,
   calculateMinReceive,
   network,
-  toAmount,
-  toDisplay
+  toAmount
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import { UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import ArrowImg from 'assets/icons/arrow_new.svg';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
@@ -26,7 +22,7 @@ import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
-import { flattenTokens, tokenMap } from 'config/bridgeTokens';
+import { tokenMap } from 'config/bridgeTokens';
 import { chainInfosWithIcon } from 'config/chainInfos';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -35,15 +31,13 @@ import useLoadTokens from 'hooks/useLoadTokens';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
 import useWalletReducer from 'hooks/useWalletReducer';
-import { reduceString, toSubAmount } from 'libs/utils';
-import { calcMaxAmount } from 'pages/Balance/helpers';
+import { reduceString } from 'libs/utils';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import {
   generateNewSymbol,
   getDisableSwap,
   getFromToToken,
   getRemoteDenom,
-  getTokenBalance,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
@@ -62,7 +56,6 @@ import SelectToken from './components/SelectToken/SelectToken';
 import SwapDetail from './components/SwapDetail';
 import { useSimulate } from './hooks';
 import useAddressTransfer from './hooks/useAddressTransfer';
-import { useFillToken } from './hooks/useFillToken';
 import useFilteredTokens from './hooks/useFilteredTokens';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import useHandleSwapAction from './hooks/useHandleSwapAction';

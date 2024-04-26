@@ -1,37 +1,30 @@
-import { mixpanel } from 'mixpanel-browser';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { ethers } from 'ethers';
-import { getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { checkEvmAddress, getFromToToken, getSwapType, getTokenBalance } from 'pages/UniversalSwap/helpers';
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from 'store/configure';
-import { flattenTokens, tokenMap } from 'config/bridgeTokens';
 import {
   BigDecimal,
   CosmosChainId,
-  DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
-  NetworkChainId,
-  TRON_DENOM,
   TokenItemType,
-  calculateMinReceive,
-  checkValidateAddressWithNetwork,
   getTokenOnOraichain,
-  network,
   toAmount,
-  toDisplay,
-  parseTokenInfoRawDenom
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { SimulateResponse, UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
-import Metamask from 'libs/metamask';
-import useLoadTokens from 'hooks/useLoadTokens';
-import { getUsd, toSubAmount } from 'libs/utils';
-import { useGetTransHistory } from './useGetTransHistory';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { flattenTokens } from 'config/bridgeTokens';
+import { ethers } from 'ethers';
+import { getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { useFillToken } from './useFillToken';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
+import Metamask from 'libs/metamask';
+import { getUsd, toSubAmount } from 'libs/utils';
+import { mixpanel } from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
+import { checkEvmAddress, getSwapType, getTokenBalance } from 'pages/UniversalSwap/helpers';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
+import { useFillToken } from './useFillToken';
+import { useGetTransHistory } from './useGetTransHistory';
 
 // TODO: hardcode decimal relayerFee
 export const RELAYER_DECIMAL = 6;
