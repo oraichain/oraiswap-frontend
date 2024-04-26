@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AssetsTab, HeaderTab, HistoryTab, TabsTxs } from './Component';
 import { TransactionProcess } from './Modals';
-import SwapComponent from './SwapV3';
+import SwapComponent from './Swap';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,10 +15,11 @@ import { DuckDb } from 'libs/duckdb';
 import useTheme from 'hooks/useTheme';
 import { PAIRS_CHART } from 'config/pools';
 import { useGetPriceChange } from 'pages/Pools/hooks';
+import { initPairSwap } from './Swap/hooks/useFillToken';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
-  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(['orai', 'usdt']);
+  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(initPairSwap);
   const [hideChart, setHideChart] = useState<boolean>(false);
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);

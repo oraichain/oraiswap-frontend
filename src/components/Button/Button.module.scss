@@ -72,7 +72,7 @@
 }
 
 .disable-sm {
-  background-color: #EFEFEF;
+  background-color: #efefef;
   color: #979995;
 
   @include theme() {
@@ -82,7 +82,7 @@
 }
 
 .disable-sm.dark {
-  background-color: #31332E;
+  background-color: #31332e;
 }
 
 .third {
@@ -110,4 +110,21 @@
   line-height: 150%;
 
   white-space: nowrap;
+}
+
+.error {
+  background-color: $error-bg-btn;
+  color: $white-color;
+  border: 1px;
+  padding: 14.5px 39px;
+  border-radius: 99px;
+}
+
+.error-sm {
+  background-color: $error-bg-btn;
+  font-weight: 400;
+  color: $white-color;
+  border: 1px;
+  padding: 4px 16px;
+  border-radius: 99px;
 }

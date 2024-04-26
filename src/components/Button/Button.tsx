@@ -4,7 +4,16 @@ import cn from 'classnames/bind';
 import useTheme from 'hooks/useTheme';
 
 const cx = cn.bind(styles);
-type ButtonType = 'primary' | 'secondary' | 'primary-sm' | 'secondary-sm' | 'disable-sm' | 'third' | 'third-sm';
+type ButtonType =
+  | 'primary'
+  | 'secondary'
+  | 'primary-sm'
+  | 'secondary-sm'
+  | 'disable-sm'
+  | 'third'
+  | 'third-sm'
+  | 'error'
+  | 'error-sm';
 interface Props {
   type: ButtonType;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;

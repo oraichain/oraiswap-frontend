@@ -1,0 +1,295 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.selectTokenWrap {
+  width: 100%;
+  height: 100%;
+
+  position: absolute;
+  bottom: 0;
+
+  transition: all 0.5s;
+  transform: translateY(100%);
+  &.active {
+    transform: translateY(0);
+  }
+}
+
+.selectTokenOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+  opacity: 0.25;
+  background: var(--Colors-Universal-Base-1000, #000);
+
+  width: 100%;
+  height: 100%;
+}
+
+.selectToken {
+  padding: 16px;
+
+  display: flex;
+  border-radius: 12px;
+
+  flex-direction: column;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  bottom: 0;
+
+  transition: all 0.5s;
+  transform: translateY(100%);
+  &.active {
+    transform: translateY(0);
+  }
+
+  gap: 24px;
+  @include theme() {
+    background-color: theme-get('colors-neutral-surface-bg');
+    color: theme-get('colors-neutral-text-text-token-name');
+    border: 1px solid theme-get('colors-neutral-border-border-bold');
+  }
+  @include theme() {
+    color: theme-get('colors-neutral-text-title');
+  }
+
+  .selectTokenHeader {
+    display: flex;
+    justify-content: space-between;
+
+    .selectTokenHeaderTitle {
+      text-align: center;
+      font-variant-numeric: lining-nums tabular-nums;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 150%;
+    }
+
+    .selectTokenHeaderClose {
+      cursor: pointer;
+    }
+  }
+
+  .selectTokenSearch {
+    .selectTokenSearchInput {
+      font-size: 14px;
+      font-weight: 400;
+      width: 100%;
+      padding: 4px 16px;
+      height: 36px;
+
+      @include theme() {
+        background: theme-get('colors-neutral-surface-bg-section');
+        border: 1px solid theme-get('colors-neutral-border-border-btn-default');
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
+
+      &::placeholder {
+        @include theme() {
+          color: theme-get('neutral-9');
+        }
+      }
+    }
+  }
+
+  .selectTokenNetwork {
+    .selectTokenNetworkTitle {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 150%;
+    }
+
+    .selectTokenNetworkList {
+      padding-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .selectTokenNetworkItem {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 8px;
+        height: 40px;
+        text-align: center;
+        @include theme() {
+          background-color: theme-get('colors-neutral-surface-bg-section-2');
+          color: theme-get('colors-neutral-text-text-token-name');
+        }
+        border-radius: 99px;
+        background: #31332e;
+        width: calc(100% / 7);
+        border: 1px solid inherit;
+        &.active {
+          @include theme() {
+            border: 1px solid theme-get('colors-neutral-border-border-btn-default');
+          }
+        }
+        &:hover {
+          @include theme() {
+            border: 1px solid theme-get('colors-neutral-border-border-btn-default');
+          }
+        }
+      }
+    }
+  }
+
+  .selectTokenAll {
+    .selectTokenList {
+      overflow-y: auto;
+      height: 390px;
+      padding-right: 4px;
+
+      .selectTokenTitle {
+        @include theme() {
+          color: theme-get('colors-neutral-text-title');
+        }
+        font-size: 14px;
+        line-height: 150%;
+      }
+
+      .selectTokenListNoResult {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      .selectTokenItem {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 8px 12px 12px;
+        cursor: pointer;
+
+        &:hover {
+          border-radius: 8px;
+          @include theme() {
+            background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
+          }
+        }
+
+        &.unsupported {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+
+        .selectTokenItemLeft {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+
+          .selectTokenItemLeftImg {
+            display: flex;
+            align-items: center;
+            position: relative;
+
+            svg {
+              width: 38px;
+              height: 38px;
+            }
+
+            .selectTokenItemLeftImgChain {
+              border-radius: 2px;
+              position: absolute;
+              top: 65%;
+              left: 25px;
+              z-index: 1;
+              border-radius: 50%;
+
+              svg {
+                width: 18px;
+                height: 18px;
+
+                @include theme() {
+                  background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
+                }
+                border-radius: 50%;
+              }
+            }
+          }
+
+          .selectTokenItemTokenName {
+            font-size: 18px;
+            font-weight: 500;
+
+            @include theme() {
+              color: theme-get('colors-neutral-text-text-token-name');
+            }
+
+            svg {
+              width: 17px;
+              height: 17px;
+              margin: 0px 0px -2px 4px;
+
+              path {
+                @include theme {
+                  stroke: theme-get('warning-text-default');
+                }
+              }
+            }
+          }
+
+          .selectTokenItemTokenOrg {
+            font-size: 12px;
+            font-weight: 500;
+
+            @include theme() {
+              color: theme-get('colors-neutral-text-body');
+            }
+          }
+        }
+        .selectTokenItemRight {
+          text-align: right;
+
+          .selectTokenItemTokenBalance {
+            font-size: 18px;
+            font-weight: 500;
+
+            @include theme() {
+              color: theme-get('colors-neutral-text-text-token-name');
+            }
+          }
+
+          .selectTokenItemTokenUsd {
+            font-size: 12px;
+            font-weight: 500;
+            @include theme() {
+              color: theme-get('colors-neutral-text-body');
+            }
+          }
+        }
+      }
+
+      .divider {
+        width: 100%;
+        border-bottom: 1px solid;
+        margin: auto;
+        margin-top: 12px;
+
+        @include theme {
+          border-color: theme-get('neutral-surface-bg-btn-disabled');
+        }
+      }
+
+      .warning {
+        margin: 12px 0;
+
+        @include theme {
+          color: theme-get('warning-text-default');
+        }
+
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 150%;
+        letter-spacing: 0.1px;
+      }
+    }
+  }
+}

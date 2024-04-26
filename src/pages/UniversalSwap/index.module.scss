@@ -3,11 +3,26 @@
 .swap-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 64px;
+  flex-wrap: nowrap;
+  width: 100%;
+
+  @include ultra_desktop_max {
+    gap: 40px;
+  }
+
+  @include medium-desktop {
+    gap: 20px;
+  }
+
+  @include mobile {
+    gap: 20px;
+  }
 
   .tv-chart {
     position: relative;
-    height: 500px;
+    height: 600px;
     padding-top: 10px;
     transition: all 1s ease;
 
@@ -18,11 +33,18 @@
 
   .swap-col {
     &.w60 {
-      width: 60%;
+      width: 100%;
+      max-width: 1000px;
+      min-width: 500px;
     }
 
     &.w40 {
-      width: 38%;
+      width: 100%;
+      max-width: 500px;
+
+      @include medium-desktop {
+        max-width: 400px;
+      }
     }
   }
 }
@@ -37,11 +59,13 @@
     .swap-col {
       &.w60 {
         width: 100%;
+        max-width: unset;
       }
 
       &.w40 {
         width: 100%;
         margin-top: 99px;
+        max-width: unset;
       }
     }
   }

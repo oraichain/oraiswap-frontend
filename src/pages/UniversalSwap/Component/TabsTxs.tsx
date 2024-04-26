@@ -11,7 +11,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from '../helpers';
 import styles from './TabsTxs.module.scss';
 import { chainIcons } from 'config/chainInfos';
-import { FROM_QUERY_KEY, TO_QUERY_KEY, TYPE_QUERY_TYPE } from '../SwapV3/hooks/useFillToken';
+import { FROM_QUERY_KEY, TO_QUERY_KEY, TYPE_QUERY_TYPE } from '../Swap/hooks/useFillToken';
 
 const cx = cn.bind(styles);
 const ItemNetwork: React.FC<{

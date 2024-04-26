@@ -50,12 +50,6 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
     const originalFromToken = tokenMap[fromDenom];
     const originalToToken = tokenMap[toDenom];
 
-    // TODO: check kwt or milky
-    if ([originalFromToken, originalToToken].find((e) => ['kawaii-islands', 'milky-token'].includes(e?.coinGeckoId))) {
-      navigate(pathname);
-      return;
-    }
-
     if (originalFromToken && originalToToken) {
       setSwapTokens([fromDenom, toDenom]);
     } else {
@@ -66,4 +60,15 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
   return {
     handleUpdateQueryURL
   };
+};
+
+export const initPairSwap = (): [string, string] => {
+  const queryString = window.location?.search;
+
+  const params = new URLSearchParams(queryString || '');
+
+  const currentFromDenom = params.get(FROM_QUERY_KEY);
+  const currentToDenom = params.get(TO_QUERY_KEY);
+
+  return [currentFromDenom || 'usdt', currentToDenom || 'orai'];
 };
