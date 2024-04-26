@@ -33,12 +33,12 @@
   padding: 16px;
 
   display: flex;
-  border-radius: 24px;
+  border-radius: 12px;
 
   flex-direction: column;
   position: absolute;
   width: 100%;
-  height: 600px;
+  height: 100%;
 
   bottom: 0;
 
@@ -77,10 +77,22 @@
 
   .selectTokenSearch {
     .selectTokenSearchInput {
+      font-size: 14px;
+      font-weight: 400;
       width: 100%;
+      padding: 4px 16px;
+      height: 36px;
+
       @include theme() {
         background: theme-get('colors-neutral-surface-bg-section');
+        border: 1px solid theme-get('colors-neutral-border-border-btn-default');
         color: theme-get('colors-neutral-text-text-token-name');
+      }
+
+      &::placeholder {
+        @include theme() {
+          color: theme-get('neutral-9');
+        }
       }
     }
   }
@@ -118,9 +130,6 @@
           }
         }
         &:hover {
-          //  border-radius: var(--Dimension-Corner-Radius-button, 99px);
-          // border: 1px solid var(--Colors-Neutral-Border-border-btn-default, #232521);
-          // background: var(--Colors-Neutral-Surface-bg-dropdown-hover, #EFEFEF);
           @include theme() {
             border: 1px solid theme-get('colors-neutral-border-border-btn-default');
           }
@@ -132,7 +141,8 @@
   .selectTokenAll {
     .selectTokenList {
       overflow-y: auto;
-      height: 420px;
+      height: 390px;
+      padding-right: 4px;
 
       .selectTokenTitle {
         @include theme() {
@@ -153,33 +163,48 @@
       .selectTokenItem {
         display: flex;
         justify-content: space-between;
-        padding: 12px;
+        padding: 12px 8px 12px 12px;
         cursor: pointer;
+
         &:hover {
           border-radius: 8px;
-          // border: 1px solid gray;
           @include theme() {
             background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
           }
         }
+
+        &.unsupported {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+
         .selectTokenItemLeft {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 16px;
+
           .selectTokenItemLeftImg {
             display: flex;
             align-items: center;
             position: relative;
+
+            svg {
+              width: 38px;
+              height: 38px;
+            }
+
             .selectTokenItemLeftImgChain {
               border-radius: 2px;
               position: absolute;
-              top: 60%;
-              left: 15px;
+              top: 65%;
+              left: 25px;
               z-index: 1;
-              width: 16.5px;
-              height: 16.5px;
               border-radius: 50%;
+
               svg {
+                width: 18px;
+                height: 18px;
+
                 @include theme() {
                   background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
                 }
@@ -189,14 +214,30 @@
           }
 
           .selectTokenItemTokenName {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 500;
+
             @include theme() {
               color: theme-get('colors-neutral-text-text-token-name');
+            }
+
+            svg {
+              width: 17px;
+              height: 17px;
+              margin: 0px 0px -2px 4px;
+
+              path {
+                @include theme {
+                  stroke: theme-get('warning-text-default');
+                }
+              }
             }
           }
 
           .selectTokenItemTokenOrg {
+            font-size: 12px;
+            font-weight: 500;
+
             @include theme() {
               color: theme-get('colors-neutral-text-body');
             }
@@ -204,18 +245,48 @@
         }
         .selectTokenItemRight {
           text-align: right;
+
           .selectTokenItemTokenBalance {
+            font-size: 18px;
             font-weight: 500;
+
             @include theme() {
               color: theme-get('colors-neutral-text-text-token-name');
             }
           }
+
           .selectTokenItemTokenUsd {
+            font-size: 12px;
+            font-weight: 500;
             @include theme() {
               color: theme-get('colors-neutral-text-body');
             }
           }
         }
+      }
+
+      .divider {
+        width: 100%;
+        border-bottom: 1px solid;
+        margin: auto;
+        margin-top: 12px;
+
+        @include theme {
+          border-color: theme-get('neutral-surface-bg-btn-disabled');
+        }
+      }
+
+      .warning {
+        margin: 12px 0;
+
+        @include theme {
+          color: theme-get('warning-text-default');
+        }
+
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 150%;
+        letter-spacing: 0.1px;
       }
     }
   }

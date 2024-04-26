@@ -1,4 +1,4 @@
-import { TokenItemType, CustomChainInfo , NetworkName } from '@oraichain/oraidex-common';
+import { TokenItemType, CustomChainInfo, NetworkName } from '@oraichain/oraidex-common';
 import { OrderDirection } from '@oraichain/oraidex-contracts-sdk/build/OraiswapLimitOrder.types';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
@@ -107,6 +107,12 @@ export type AddressBookType = {
   memo?: string;
   walletName: string;
 };
+
+export interface AddressBookManagementState {
+  currentStep: AddressManagementStep;
+  addresses: AddressBookType[];
+  currentEditedWallet?: AddressBookType | null;
+}
 
 export interface AddressBookManagementState {
   currentStep: AddressManagementStep;

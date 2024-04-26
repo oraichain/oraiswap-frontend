@@ -28,6 +28,7 @@ interface InputSwapProps {
   disable?: boolean;
   originalToken?: TokenInfo;
   setCoe?: React.Dispatch<React.SetStateAction<number>>;
+  coe?: number;
   usdPrice: string;
   type?: string;
   selectChain: string;
@@ -52,15 +53,17 @@ export default function InputSwapV4({
   type,
   selectChain,
   onChangePercentAmount,
-  theme
+  theme,
+  coe
 }: InputSwapProps) {
   const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
   const isLightMode = theme === 'light';
+
   return (
     <>
       <div className={cx('input-swap-balance', type === 'from' && 'is-enable-coeff')}>
         <div className={cx('select-chain')}>
-          <span>{type}</span>
+          {/* <span>{type}</span> */}
           <div className={cx('left')} onClick={() => setIsSelectChain(true)}>
             <div className={cx('icon')}>
               {IconNetwork && isLightMode ? (
@@ -85,23 +88,27 @@ export default function InputSwapV4({
           //   }
           // }}
         >
-          <TokenBalance
-            balance={{
-              amount: balance,
-              decimals: originalToken?.decimals,
-              denom: originalToken?.symbol || token?.name || ''
-            }}
-            decimalScale={6}
-          />
+          <div className={cx('bal')}>
+            <span className={cx('prefix')}>Balance:&nbsp;</span>
+            <TokenBalance
+              balance={{
+                amount: balance,
+                decimals: originalToken?.decimals,
+                denom: originalToken?.symbol || token?.name || ''
+              }}
+              decimalScale={6}
+            />
+          </div>
           {type === 'from' && (
             <div className={cx('coeff')}>
               {AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP.map(([coeff, text]) => (
                 <button
                   key={coeff}
-                  className={cx('percent')}
+                  className={cx('percent', { activePercent: coe === coeff })}
                   onClick={(event) => {
                     event.stopPropagation();
                     onChangePercentAmount(coeff);
+                    setCoe(coeff);
                   }}
                 >
                   {text}
@@ -147,11 +154,11 @@ export default function InputSwapV4({
           <div className={cx('usd')}>≈ ${amount ? Number(usdPrice) || 0 : 0}</div>
         </div>
       </div>
-      {!!tokenFee && (
+      {/* {!!tokenFee && (
         <div className={cx('input-swap-fee')}>
           <div>Fee: {tokenFee}%</div>
         </div>
-      )}
+      )} */}
     </>
   );
 }

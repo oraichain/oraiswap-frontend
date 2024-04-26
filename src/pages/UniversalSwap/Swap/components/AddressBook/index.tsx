@@ -40,7 +40,7 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
 
   return (
     <div>
-      {currentAddressManagementStep !== AddressManagementStep.INIT && (
+      {/* {currentAddressManagementStep !== AddressManagementStep.INIT && (
         <div
           className={styles.overlay}
           onClick={() =>
@@ -48,7 +48,7 @@ const AddressBook = ({ tokenTo, onSelected }: { tokenTo: TokenItemType; onSelect
             dispatch(setCurrentAddressBookStep(AddressManagementStep.INIT))
           }
         ></div>
-      )}
+      )} */}
       <div
         className={`${styles.addressBook} ${
           currentAddressManagementStep !== AddressManagementStep.INIT ? styles.active : ''

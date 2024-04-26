@@ -5,6 +5,7 @@ import { reduceString } from 'libs/utils';
 import { ReactComponent as ErrorIcon } from 'assets/icons/icon_error.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { isMobile } from '@walletconnect/browser-utils';
+import classNames from 'classnames';
 
 const REDUCE_STRING_ADDRESS = 8;
 const REDUCE_STRING_ADDRESS_MOBILE = 6;
@@ -15,6 +16,7 @@ const InputCommon: FC<{
   onChange: (value: string) => void;
   value?: string;
 
+  prefix?: ReactNode;
   suffix?: ReactNode;
 
   extraButton?: ReactNode;
@@ -23,16 +25,19 @@ const InputCommon: FC<{
   isOnViewPort?: boolean;
 
   error?: string;
+  hidePrefixOnActive?: boolean;
 }> = ({
   title,
   onChange,
   value,
+  prefix,
   suffix,
   extraButton,
   showPreviewOnBlur,
   isOnViewPort = true,
   error,
-  defaultValue = ''
+  defaultValue = '',
+  hidePrefixOnActive = true
 }) => {
   const [active, setActive] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -45,6 +50,11 @@ const InputCommon: FC<{
     if ((!value || showPreviewOnBlur) && isOnViewPort) {
       setActive(false);
     }
+
+    if (!value && defaultValue) {
+      onChange(defaultValue);
+    }
+
     setShowError(true);
     inputRef.current?.blur();
   });
@@ -57,10 +67,9 @@ const InputCommon: FC<{
   }, [value, showPreviewOnBlur]);
 
   return (
-    <div className={`${styles.inputCommonWrapper} ${showError && error ? styles.error : ''}`}>
+    <div ref={ref} className={`${styles.inputCommonWrapper} ${showError && error ? styles.error : ''}`}>
       <div
         className={`${styles.inputCommon}`}
-        ref={ref}
         onClick={() => {
           setActive(true);
           inputRef.current?.focus();
@@ -68,7 +77,10 @@ const InputCommon: FC<{
         }}
       >
         <div className={styles.prefix}>
-          <p>{title}</p>
+          <span className={styles.title}>
+            {((active && !hidePrefixOnActive) || !active) && prefix}
+            <p>{title}</p>
+          </span>
           <input
             className={`${styles.input} ${active ? styles.activeInput : ''} ${
               value === defaultValue ? styles.isDefault : ''
@@ -78,7 +90,6 @@ const InputCommon: FC<{
             value={value}
             onChange={(e) => onChange(e?.target?.value)}
           />
-          {extraButton && <div className={`${styles.extraBtn} ${active ? styles.activeExtra : ''}`}>{extraButton}</div>}
         </div>
         {!active && value && showPreviewOnBlur && (
           <div className={styles.prev}>
@@ -90,9 +101,13 @@ const InputCommon: FC<{
           </div>
         )}
         {suffix && (
-          <div className={styles.suffix}>
-            {value !== defaultValue && value && active && (
-              <div className={styles.clear} onClick={() => onChange(defaultValue)}>
+          <div
+            className={classNames(styles.suffix, {
+              [styles.activeSuffix]: active
+            })}
+          >
+            {value && active && (
+              <div className={styles.clear} onClick={() => onChange('')}>
                 <CloseIcon />
               </div>
             )}
@@ -100,6 +115,10 @@ const InputCommon: FC<{
           </div>
         )}
       </div>
+
+      {extraButton && active && (
+        <div className={`${styles.extraBtn} ${active ? styles.activeExtra : ''}`}>{extraButton}</div>
+      )}
 
       {showError && error && (
         <div className={styles.errorTxt}>

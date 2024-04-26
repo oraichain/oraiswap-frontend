@@ -47,7 +47,7 @@ export default function SelectChain({
   return (
     <>
       {/* <div className={cx('selectChainWrap', isSelectToken ? 'active' : '')}> */}
-      {isSelectToken && <div className={styles.selectChainOverlay} onClick={() => setIsSelectToken(false)}></div>}
+      {/* {isSelectToken && <div className={styles.selectChainOverlay} onClick={() => setIsSelectToken(false)}></div>} */}
       <div className={`${styles.selectChain} ${isSelectToken ? styles.active : ''}`}>
         <div className={styles.selectChainHeader}>
           <div />
@@ -56,17 +56,19 @@ export default function SelectChain({
             <IconoirCancel />
           </div>
         </div>
+
+        <div className={styles.selectChainItemAll}>
+          <div className={styles.selectChainItemLeft}>
+            <img className={styles.selectChainItemLogo} src={NetworkImg} alt="network" />
+            <div className={styles.selectChainItemTitle}>
+              <div>{'All networks'}</div>
+            </div>
+          </div>
+          <div className={styles.selectChainItemValue}>{formatDisplayUsdt(totalUsd)}</div>
+        </div>
+
         <div className={styles.selectChainList}>
           <div className={styles.selectChainItems}>
-            <div className={styles.selectChainItemAll}>
-              <div className={styles.selectChainItemLeft}>
-                <img className={styles.selectChainItemLogo} src={NetworkImg} alt="network" />
-                <div className={styles.selectChainItemTitle}>
-                  <div>{'All networks'}</div>
-                </div>
-              </div>
-              <div className={styles.selectChainItemValue}>{formatDisplayUsdt(totalUsd)}</div>
-            </div>
             {networks
               .filter((net) => !isAllowChainId(net.chainId))
               .map((item) => {
