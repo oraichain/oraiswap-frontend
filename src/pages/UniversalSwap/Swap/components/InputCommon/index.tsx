@@ -91,7 +91,10 @@ const InputCommon: FC<{
             value={value}
             onChange={(e) => onChange(e?.target?.value)}
           />
-          {extraButton && <div className={`${styles.extraBtn} ${active ? styles.activeExtra : ''}`}>{extraButton}</div>}
+
+          {extraButton && active && (
+            <div className={`${styles.extraBtn} ${active ? styles.activeExtra : ''}`}>{extraButton}</div>
+          )}
         </div>
         {!active && value && showPreviewOnBlur && (
           <div className={styles.prev}>
@@ -103,7 +106,11 @@ const InputCommon: FC<{
           </div>
         )}
         {suffix && (
-          <div className={classNames(styles.suffix, { [styles.activeSuffix]: active })}>
+          <div
+            className={classNames(styles.suffix, {
+              [styles.activeSuffix]: active
+            })}
+          >
             {value && active && (
               <div className={styles.clear} onClick={() => onChange('')}>
                 <CloseIcon />

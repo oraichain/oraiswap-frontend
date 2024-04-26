@@ -388,10 +388,10 @@
   }
 
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
 
-  @include mobile() {
-    font-size: 14px;
+  @include small-mobile() {
+    font-size: 13px;
   }
 
   .paste {
@@ -469,7 +469,7 @@
   }
 }
 
-.slippage {
+.estFee {
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -483,11 +483,12 @@
   }
 
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
 
-  @include mobile() {
-    font-size: 14px;
+  @include small-mobile() {
+    font-size: 13px;
   }
+
   .label {
     display: flex;
     align-items: center;
