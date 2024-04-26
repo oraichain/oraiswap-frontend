@@ -79,7 +79,7 @@ const SelectInput = <T extends object>({
         </div>
       )}
 
-      {active && <div className={`${styles.overlay}`} onClick={() => setActive(false)}></div>}
+      <div className={`${styles.overlay} ${active ? styles.activeOverlay : ''}`} onClick={() => setActive(false)}></div>
       {/* ref={ref} */}
       <div className={`${styles.listWrapper} ${active ? styles.active : ''}`}>
         <span className={styles.title}>{listTitle || title}</span>
