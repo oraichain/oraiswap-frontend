@@ -662,7 +662,7 @@ const SwapComponent: React.FC<{
             className={cx('smart', !openRoutes ? 'hidden' : '')}
             style={{
               // smart router item height is 40px
-              height: openRoutes ? routersSwapData?.routes.length * 40 + 40 : 0
+              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
             }}
           >
             <div className={cx('smart-router')}>
