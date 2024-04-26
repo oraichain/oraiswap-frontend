@@ -11,8 +11,7 @@ import {
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay,
-  parseTokenInfoRawDenom
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
@@ -24,6 +23,7 @@ import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
 import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
 import { ReactComponent as FeeDarkIcon } from 'assets/icons/fee_dark.svg';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
+import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
@@ -33,7 +33,7 @@ import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
-import { chainInfosWithIcon } from 'config/chainInfos';
+import { chainInfosWithIcon, flattenTokensWithIcon, tokensWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
   floatToPercent,
@@ -57,11 +57,14 @@ import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import {
+  PairAddress,
+  findKeyByValue,
   generateNewSymbol,
   getDisableSwap,
   getFromToToken,
   getRemoteDenom,
   getTokenBalance,
+  processPairInfo,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
@@ -71,8 +74,8 @@ import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { AddressManagementStep } from 'reducer/type';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
-import { SlippageModal, TooltipIcon } from '../Modals';
-import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, getSwapType } from '../helpers';
+import { SlippageModal } from '../Modals';
+import { checkEvmAddress, getSwapType } from '../helpers';
 import AddressBook from './components/AddressBook';
 import InputCommon from './components/InputCommon';
 import InputSwap from './components/InputSwap/InputSwap';
@@ -87,7 +90,6 @@ import SwapDetail from './components/SwapDetail';
 import useFilteredTokens from './hooks/useFilteredTokens';
 
 const cx = cn.bind(styles);
-
 // TODO: hardcode decimal relayerFee
 const RELAYER_DECIMAL = 6;
 
@@ -97,6 +99,7 @@ const SwapComponent: React.FC<{
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const [openDetail, setOpenDetail] = useState(false);
+  const [openRoutes, setOpenRoutes] = useState(false);
 
   const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
   const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
@@ -126,6 +129,7 @@ const SwapComponent: React.FC<{
   const [tronAddress] = useConfigReducer('tronAddress');
   const [oraiAddress] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
+  const isLightMode = theme === 'light';
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
@@ -206,6 +210,7 @@ const SwapComponent: React.FC<{
     routerClient,
     INIT_AMOUNT
   );
+  console.log({ averageRatio });
 
   let usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
   if (!Number(usdPriceShow)) {
@@ -443,12 +448,12 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
-  const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
+  const FromIcon = isLightMode ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
+  const ToIcon = isLightMode ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
   const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
   const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
-  const FromIconNetwork = theme === 'light' ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
-  const ToIconNetwork = theme === 'light' ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
+  const FromIconNetwork = isLightMode ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
+  const ToIconNetwork = isLightMode ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
 
   useEffect(() => {
     (async () => {
@@ -569,16 +574,18 @@ const SwapComponent: React.FC<{
     handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
   };
 
-  const validAddress = !(
-    walletByNetworks.cosmos ||
-    walletByNetworks.bitcoin ||
-    walletByNetworks.evm ||
-    walletByNetworks.tron
-  )
-    ? {
-        isValid: true
-      }
-    : checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+  const isValidAddress =
+    walletByNetworks.cosmos || walletByNetworks.bitcoin || walletByNetworks.evm || walletByNetworks.tron;
+
+  let validAddress = {
+    isValid: true
+  };
+  if (!isValidAddress) validAddress = checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+  const routersSwapData = (fromAmountToken ? simulateData : averageRatio) || {
+    amount: '0',
+    displayAmount: 0,
+    routes: []
+  };
 
   return (
     <div className={cx('swap-box-wrapper')}>
@@ -596,6 +603,7 @@ const SwapComponent: React.FC<{
                   await refreshBalances(
                     loadingRefresh,
                     setLoadingRefresh,
+                    // TODO: need add bitcoinAddress when universal swap support bitcoin
                     { metamaskAddress, tronAddress, oraiAddress },
                     loadTokenAmounts
                   )
@@ -639,20 +647,75 @@ const SwapComponent: React.FC<{
           <div className={cx('swap-center')}>
             <div className={cx('title')}>To</div>
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
-              <img
-                src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
-                onClick={handleRotateSwapDirection}
-                alt="ant"
-              />
+              <img src={isLightMode ? SwitchLightImg : SwitchDarkImg} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
-            <div className={cx('ratio')} onClick={() => setOpenDetail(true)}>
+            <div className={cx('ratio')} onClick={() => setOpenRoutes(!openRoutes)}>
               {`1 ${originalFromToken.name} ≈ ${
                 averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
               } ${originalToToken.name}`}
 
-              {/* <img src={ArrowImg} alt="arrow" /> */}
+              <img src={ArrowImg} alt="arrow" />
             </div>
           </div>
+
+          <div
+            className={cx('smart', !openRoutes ? 'hidden' : '')}
+            style={{
+              // smart router item height is 40px
+              height: openRoutes ? routersSwapData?.routes.length * 40 + 40 : 0
+            }}
+          >
+            <div className={cx('smart-router')}>
+              {routersSwapData.routes.map((route, ind) => {
+                let volumn = (+route.returnAmount / +routersSwapData.amount) * 100;
+                return (
+                  <div key={ind} className={cx('smart-router-item')}>
+                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                    {route.paths.map((path, i, acc) => {
+                      const { pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
+                        path,
+                        flattenTokens,
+                        flattenTokensWithIcon,
+                        isLightMode
+                      );
+                      return (
+                        <React.Fragment key={pairKey}>
+                          <div className={cx('smart-router-item-line')}>
+                            <div className={cx('smart-router-item-line-detail')} />
+                          </div>
+                          <div className={cx('smart-router-item-pool')}>
+                            <div className={cx('smart-router-item-pool-wrap')}>
+                              <div className={cx('smart-router-item-pool-wrap-img')}>
+                                <TokenInIcon />
+                              </div>
+                              <div className={cx('smart-router-item-pool-wrap-img')}>
+                                <TokenOutIcon />
+                              </div>
+                            </div>
+                          </div>
+                          {i === acc.length - 1 && (
+                            <div className={cx('smart-router-item-line')}>
+                              <div className={cx('smart-router-item-line-detail')} />
+                            </div>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                  </div>
+                );
+              })}
+              <div className={cx('smart-router-price-impact')}>
+                <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
+                <div className={cx('smart-router-price-impact-warning')}>
+                  <WarningIcon />
+                  <div> 1%</div>
+                </div>
+                {/* <div className={cx('smart-router-price-impact-time')}> ~ 5 mins</div> */}
+              </div>
+            </div>
+          </div>
+
           <div className={cx('to')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
@@ -682,7 +745,7 @@ const SwapComponent: React.FC<{
               onChange={(val) => setAddressTransfer(val)}
               showPreviewOnBlur
               defaultValue={initAddressTransfer}
-              prefix={theme === 'light' ? <SendIcon /> : <SendDarkIcon />}
+              prefix={isLightMode ? <SendIcon /> : <SendDarkIcon />}
               suffix={
                 <div
                   className={cx('paste')}
@@ -724,7 +787,7 @@ const SwapComponent: React.FC<{
           </div>
           <div className={cx('slippage')} onClick={() => setOpenDetail(true)}>
             <div className={cx('label')}>
-              {theme === 'light' ? <FeeIcon /> : <FeeDarkIcon />}
+              {isLightMode ? <FeeIcon /> : <FeeDarkIcon />}
               Estimated Fee:
             </div>
             <div className={cx('info')}>
