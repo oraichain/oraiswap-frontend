@@ -535,6 +535,8 @@ const Balance: React.FC<BalanceProps> = () => {
         if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
           return false;
         }
+        if (token.chainId === ('bitcoin' as any)) return false;
+        if (token.coinGeckoId === ('bitcoin' as any)) return false;
         if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
         return token.chainId === chainId;
       })
@@ -708,14 +710,14 @@ const Balance: React.FC<BalanceProps> = () => {
             setFilterNetworkUI(chainId);
           }}
         />
-        <DepositBtcModal
+        {/* <DepositBtcModal
           prices={prices}
           isOpen={isDepositBtcModal}
           addressRecovery={addressRecovery}
           handleRecoveryAddress={handleRecoveryAddress}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
-        />
+        /> */}
       </div>
     </Content>
   );
