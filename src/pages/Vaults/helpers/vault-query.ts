@@ -1,4 +1,4 @@
-import { ethers, utils } from 'ethers';
+import { ethers } from 'ethers-v6';
 import { OraiGatewayClient } from 'nestquant-vault-sdk';
 import {
   MultiCall,
@@ -19,12 +19,12 @@ export class VaultClients {
   static vaultFactory: VaultLPFactory;
   static oraiGateway: OraiGatewayClient;
   static multicall: MultiCall;
-  static ethereumProvider: ethers.providers.JsonRpcProvider;
+  static ethereumProvider: ethers.JsonRpcProvider;
 
   static getEthereumProvider() {
     if (!this.ethereumProvider) {
       const rpcProviderUrl = 'https://bsc-dataseed2.binance.org/';
-      this.ethereumProvider = new ethers.providers.JsonRpcProvider(rpcProviderUrl);
+      this.ethereumProvider = new ethers.JsonRpcProvider(rpcProviderUrl);
     }
     return this.ethereumProvider;
   }
@@ -71,19 +71,19 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
   try {
     if (!vaultAddrs.length) return null;
 
-    const vaultLpInterface = new utils.Interface(VaultLP__factory.abi);
+    const vaultLpInterface = new ethers.Interface(VaultLP__factory.abi);
     const dataCall = vaultAddrs.map((_vaultAddr) =>
       vaultLpInterface.encodeFunctionData('getVaultInfo', [ORAI_VAULT_BSC_CONTRACT_ADDRESS])
     );
-    const amounts = await VaultClients.getMulticall().multiCall(vaultAddrs, dataCall);
+    const amounts = await VaultClients.getMulticall().multiCall.staticCall(vaultAddrs, dataCall);
     // decode TVL
     const decodedResults = amounts.map((result, index) => {
       const arrs = Array.from(vaultLpInterface.decodeFunctionResult('getVaultInfo', result));
       return {
         vaultAddress: arrs[0],
-        tvlByToken1: utils.formatEther(arrs[1]),
-        totalSupply: utils.formatEther(arrs[2]),
-        oraiBalance: utils.formatEther(arrs[3])
+        tvlByToken1: ethers.formatEther(arrs[1] as any),
+        totalSupply: ethers.formatEther(arrs[2] as any),
+        oraiBalance: ethers.formatEther(arrs[3] as any)
       };
     });
     return decodedResults;
