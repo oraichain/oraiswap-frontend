@@ -55,7 +55,7 @@ import Metamask from 'libs/metamask';
 import { getUsd, reduceString, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
-import { numberWithCommas } from 'pages/Pools/helpers';
+import { numberWithCommas, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import {
   PairAddress,
   findKeyByValue,
@@ -88,6 +88,7 @@ import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import SwapDetail from './components/SwapDetail';
 import useFilteredTokens from './hooks/useFilteredTokens';
+import { useNavigate } from 'react-router-dom';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -98,6 +99,8 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
+  const navigate = useNavigate();
+
   const [openDetail, setOpenDetail] = useState(false);
   const [openRoutes, setOpenRoutes] = useState(false);
 
@@ -683,18 +686,30 @@ const SwapComponent: React.FC<{
                   <div key={ind} className={cx('smart-router-item')}>
                     <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
                     {route.paths.map((path, i, acc) => {
-                      const { pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
+                      const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
                         path,
                         flattenTokens,
                         flattenTokensWithIcon,
                         isLightMode
                       );
+
                       return (
                         <React.Fragment key={pairKey}>
                           <div className={cx('smart-router-item-line')}>
                             <div className={cx('smart-router-item-line-detail')} />
                           </div>
-                          <div className={cx('smart-router-item-pool')}>
+                          <div
+                            className={cx('smart-router-item-pool')}
+                            onClick={() => {
+                              infoPair?.tokenIn &&
+                                infoPair?.tokenOut &&
+                                navigate(
+                                  `/pools/${encodeURIComponent(infoPair.tokenIn)}_${encodeURIComponent(
+                                    infoPair.tokenOut
+                                  )}`
+                                );
+                            }}
+                          >
                             <div className={cx('smart-router-item-pool-wrap')}>
                               <div className={cx('smart-router-item-pool-wrap-img')}>
                                 <TokenInIcon />
