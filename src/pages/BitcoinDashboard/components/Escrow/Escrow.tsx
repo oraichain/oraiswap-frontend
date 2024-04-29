@@ -43,7 +43,7 @@ const Escrow = () => {
       const timeoutTimestampSeconds = calculateTimeoutTimestamp(IBC_TRANSFER_TIMEOUT);
       if (btcAddr && oraiBtcAddress) {
         const signer = await collectWallet(OraiBTCBridgeNetwork.chainId);
-        const client = await SigningStargateClient.connectWithSigner('https://btc.rpc.orai.io', signer);
+        const client = await SigningStargateClient.connectWithSigner(OraiBTCBridgeNetwork.rpc, signer);
 
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
 
