@@ -72,7 +72,6 @@ import { useFillToken } from './hooks/useFillToken';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { isMobile } from '@walletconnect/browser-utils';
 import { reduceString } from 'libs/utils';
-import { submitTransaction } from '../ibc-routing';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -359,10 +358,6 @@ const SwapComponent: React.FC<{
       if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
-        });
-        await submitTransaction({
-          txHash: transactionHash,
-          chainId: originalFromToken.chainId
         });
 
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
