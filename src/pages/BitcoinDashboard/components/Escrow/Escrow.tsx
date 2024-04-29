@@ -24,10 +24,13 @@ const Escrow = () => {
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const [loading, setLoading] = useState<boolean>(false);
-  const data = useGetEscrowBalance(address !== '' ? deriveNomicAddress(address) : undefined);
+  const data = useGetEscrowBalance(deriveNomicAddress(address));
   const nomic = useContext(NomicContext);
 
   function deriveNomicAddress(addr: string) {
+    if (!addr) {
+      return undefined;
+    }
     let address = fromBech32(addr);
     return toBech32(OraiBTCBridgeNetwork.bech32Config.bech32PrefixAccAddr, address.data);
   }
@@ -68,8 +71,8 @@ const Escrow = () => {
           } as StdFee,
           '',
           {
-            accountNumber: accountInfo?.account?.account_number,
-            chainId: OraiBTCBridgeNetwork.chainId,
+            accountNumber: 0,
+            chainId: 'oraibtc-mainnet-1',
             sequence: accountInfo?.account?.sequence
           }
         );
