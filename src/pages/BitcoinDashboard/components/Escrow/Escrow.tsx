@@ -72,7 +72,7 @@ const Escrow = () => {
           '',
           {
             accountNumber: 0,
-            chainId: 'oraibtc-mainnet-1',
+            chainId: OraiBTCBridgeNetwork.chainId,
             sequence: accountInfo?.account?.sequence
           }
         );
