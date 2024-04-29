@@ -15,7 +15,6 @@ import { useGetTransHistory } from '../SwapV3/hooks';
 import styles from './HistoryTab.module.scss';
 import { getExplorerScan } from '../helpers';
 import { useState } from 'react';
-import IbcRouting from '../Modals/IbcRouting';
 
 const cx = cn.bind(styles);
 const RowsComponent: React.FC<{
@@ -132,7 +131,6 @@ export const HistoryTab: React.FC<{
   networkFilter: string;
 }> = ({ networkFilter }) => {
   const { transHistory } = useGetTransHistory();
-  const [isOpenIbcRouting, setIsOpenIbcRouting] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
   const headers: TableHeaderProps<TransactionHistory> = {
@@ -167,7 +165,6 @@ export const HistoryTab: React.FC<{
               }}
               handleClickRow={(e, data) => {
                 setSelectedData(data);
-                setIsOpenIbcRouting(true);
               }}
             />
           ) : (
@@ -175,7 +172,6 @@ export const HistoryTab: React.FC<{
           )}
         </div>
       </div>
-      {isOpenIbcRouting && <IbcRouting data={selectedData} close={() => setIsOpenIbcRouting(false)} />}
     </>
   );
 };
