@@ -85,18 +85,28 @@ export const useDepositWithdrawVault = create<DepositState>()(
         try {
           const gatewayClient = VaultClients.getOraiGateway(userAddr);
           const totalSupply = await gatewayClient.totalSupply({ vaultAddress: vaultAddr });
+          const balanceOfUser = await gatewayClient.balance({ vaultAddress: vaultAddr, userAddress: userAddr });
 
-          const vaultLP = VaultLP__factory.connect(vaultAddr, VaultClients.getEthereumProvider());
-          const oraiBalance = await vaultLP.balanceOf(ORAI_VAULT_BSC_CONTRACT_ADDRESS);
-
-          if (BigInt(oraiBalance) === 0n) throw new Error('Orai vault balance is zero!');
-
-          const correspondingAmount = (amount * BigInt(totalSupply.total_supply)) / BigInt(oraiBalance);
-          const result = await gatewayClient.withdraw({
-            shareAmount: correspondingAmount.toString(),
-            vaultAddress: vaultAddr,
-            network: networkWithdraw
-          });
+          let result = null;
+          if (BigInt(balanceOfUser.amount) === BigInt(amount)) {
+            result = await gatewayClient.withdraw({
+              shareAmount: amount.toString(),
+              vaultAddress: vaultAddr,
+              network: networkWithdraw
+            });
+          } else {
+            const vaultLP = VaultLP__factory.connect(vaultAddr, VaultClients.getEthereumProvider());
+            const oraiBalance = await vaultLP.balanceOf(ORAI_VAULT_BSC_CONTRACT_ADDRESS);
+            
+            if (BigInt(oraiBalance) === 0n) throw new Error('Orai vault balance is zero!');
+            
+            const correspondingAmount = (amount * BigInt(totalSupply.total_supply)) / BigInt(oraiBalance);
+            result = await gatewayClient.withdraw({
+              shareAmount: correspondingAmount.toString(),
+              vaultAddress: vaultAddr,
+              network: networkWithdraw
+            });
+          }
 
           if (result) {
             displayToast(TToastType.TX_SUCCESSFUL, {
