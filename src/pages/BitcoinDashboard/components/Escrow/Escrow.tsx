@@ -10,15 +10,12 @@ import { useGetEscrowBalance } from 'pages/BitcoinDashboard/hooks';
 import { OraiBTCBridgeNetwork } from 'config/chainInfos';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { NomicContext } from 'context/nomic-context';
-import { makeStdTx } from '@cosmjs/amino';
-import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
-import { config } from 'libs/nomic/config';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { coin, StdFee } from '@cosmjs/amino';
-import Long from 'long';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { collectWallet } from 'libs/cosmjs';
 import { calculateTimeoutTimestamp, IBC_TRANSFER_TIMEOUT } from '@oraichain/oraidex-common';
+import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 
 const Escrow = () => {
   const [theme] = useConfigReducer('theme');
@@ -53,11 +50,11 @@ const Escrow = () => {
         const ibcTransferMsg = {
           typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
           value: {
-            sourcePort: 'transfer',
-            sourceChannel: 'channel-1',
+            sourcePort: OraiBtcSubnetChain.source.port,
+            sourceChannel: OraiBtcSubnetChain.source.channelId,
             sender: oraiBtcAddress,
             receiver: address,
-            token: coin((data?.escrow_balance || 0).toString(), 'usat'),
+            token: coin((data?.escrow_balance || 0).toString(), OraiBtcSubnetChain.source.nBtcIbcDenom),
             timeoutHeight: undefined,
             timeoutTimestamp: timeoutTimestampSeconds
           }
@@ -66,7 +63,7 @@ const Escrow = () => {
           oraiBtcAddress,
           [ibcTransferMsg],
           {
-            amount: [coin('0', 'uoraibtc')],
+            amount: [coin('0', OraiBTCBridgeNetwork.stakeCurrency.coinMinimalDenom)],
             gas: '20000000'
           } as StdFee,
           '',

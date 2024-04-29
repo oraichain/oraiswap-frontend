@@ -25,7 +25,7 @@ const LIST_FILTERS = [
   },
   {
     key: KeysFilter.escrow,
-    text: 'Escrow'
+    text: 'Your Stucked oBTC'
   }
 ];
 

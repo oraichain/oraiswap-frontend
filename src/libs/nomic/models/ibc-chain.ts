@@ -1,6 +1,8 @@
 import OraiBtc from 'assets/icons/btc-icon.svg';
 import { config } from '../config';
 import Orai from 'assets/icons/btc-icon.svg';
+import { network } from 'config/networks';
+import {BTC_CONTRACT} from '@oraichain/oraidex-common'
 
 export interface ChainInfo {
   name: string;
@@ -44,20 +46,20 @@ export const OraiBtcSubnetChain: IbcChain = {
 export const OraichainChain: IbcChain = {
   name: 'Oraichain Mainnet',
   logo: Orai,
-  chainId: 'Oraichain',
-  rpcEndpoint: 'https://rpc.orai.io',
+  chainId: network.chainId,
+  rpcEndpoint: network.rpc,
   source: {
-    channelId: 'channel-227',
-    port: 'wasm.orai195269awwnt5m6c843q6w7hp8rt0k7syfu9de4h0wz384slshuzps8y7ccm',
-    nBtcIbcDenom: 'usat'
+    channelId: OraiBtcSubnetChain.destination.channelId,
+    port: OraiBtcSubnetChain.destination.port,
+    nBtcIbcDenom: OraiBtcSubnetChain.source.nBtcIbcDenom
   },
   destination: {
-    channelId: 'channel-0',
-    port: 'transfer'
+    channelId: OraiBtcSubnetChain.source.channelId,
+    port: OraiBtcSubnetChain.source.port
   },
   locked: true
 };
 
-const OBTCContractAddressMainnet = 'orai10g6frpysmdgw5tdqke47als6f97aqmr8s3cljsvjce4n5enjftcqtamzsd';
+const OBTCContractAddressMainnet = BTC_CONTRACT;
 export const OBTCContractAddress = OBTCContractAddressMainnet;
 export const Chains: IbcChain[] = [OraiBtcSubnetChain, OraichainChain];
