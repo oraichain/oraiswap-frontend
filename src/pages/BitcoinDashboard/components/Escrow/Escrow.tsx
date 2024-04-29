@@ -13,15 +13,16 @@ import { NomicContext } from 'context/nomic-context';
 import { makeStdTx } from '@cosmjs/amino';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { config } from 'libs/nomic/config';
-import Long from 'long';
 import { SigningStargateClient } from '@cosmjs/stargate';
-import { Coin } from '@cosmjs/proto-signing';
+import { coin, StdFee } from '@cosmjs/amino';
+import Long from 'long';
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 const Escrow = () => {
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const [loading, setLoading] = useState<boolean>(false);
-  const data = useGetEscrowBalance(deriveNomicAddress(address));
+  const data = useGetEscrowBalance(address !== '' ? deriveNomicAddress(address) : undefined);
   const nomic = useContext(NomicContext);
 
   function deriveNomicAddress(addr: string) {
@@ -37,70 +38,51 @@ const Escrow = () => {
       if (!btcAddr) throw Error('Not found your bitcoin address!');
       // @ts-ignore-check
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBTCBridgeNetwork.chainId);
-      //   const timeoutTimestampSeconds = Math.floor((Date.now() + 60 * 60 * 1000) / 1000);
-      //   const timeoutTimestampNanoseconds = Long.fromNumber(timeoutTimestampSeconds).multiply(1000000000);
+      const timeoutTimestampSeconds = Math.floor((Date.now() + 60 * 60 * 1000) / 1000);
+      const timeoutTimestampNanoseconds = Long.fromNumber(timeoutTimestampSeconds).multiply(1000000000);
       if (btcAddr && oraiBtcAddress) {
         const client = await SigningStargateClient.connectWithSigner(
           'https://btc.rpc.orai.io',
           window.owallet.getOfflineSigner('oraibtc-mainnet-1')
         );
 
-        console.log(await client.getChainId());
+        const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
 
-        await client.sendIbcTokens(
+        const ibcTransferMsg = {
+          typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+          value: {
+            sourcePort: 'transfer',
+            sourceChannel: 'channel-1',
+            sender: deriveNomicAddress(address),
+            receiver: address,
+            token: coin((data?.escrow_balance || 0).toString(), 'usat'),
+            timeoutHeight: undefined,
+            timeoutTimestamp: timeoutTimestampNanoseconds
+          }
+        };
+        const txRaw = await client.sign(
           deriveNomicAddress(address),
-          address,
+          [ibcTransferMsg],
           {
-            denom: 'usat',
-            amount: (data?.escrow_balance || 0).toString()
-          },
-          'transfer',
-          'channel-1',
-          undefined,
-          3600,
-          {
-            amount: [{ amount: '0', denom: 'uoraibtc' }],
+            amount: [coin('0', 'uoraibtc')],
             gas: '0'
+          } as StdFee,
+          '',
+          {
+            accountNumber: accountInfo?.account?.account_number,
+            chainId: OraiBTCBridgeNetwork.chainId,
+            sequence: accountInfo?.account?.sequence
           }
         );
-        // const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
 
-        // const signDoc = {
-        //   account_number: accountInfo?.account?.account_number,
-        //   chain_id: OraiBTCBridgeNetwork.chainId,
-        //   fee: { amount: [{ amount: '0', denom: 'uoraibtc' }], gas: '10000' },
-        //   memo: '',
-        //   msgs: [
-        //     // {
-        //     //   type: 'nomic/MsgClaimIbcBitcoin',
-        //     //   value: {}
-        //     // }
-        //     {
-        //       type: 'nomic/MsgIbcTransferOut',
-        //       value: {
-        //         channel_id: 'channel-1',
-        //         port_id: 'transfer',
-        //         denom: 'usat',
-        //         amount: data?.escrow_balance || 0,
-        //         sender: deriveNomicAddress(address),
-        //         receiver: address,
-        //         timeout_timestamp: timeoutTimestampNanoseconds.toString(),
-        //         memo: ''
-        //       }
-        //     }
-        //   ],
-        //   sequence: accountInfo?.account?.sequence
-        // };
+        const txBytes = TxRaw.encode(txRaw).finish();
+        const result = await client.broadcastTx(txBytes);
 
-        // const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
-        // const tx = makeStdTx(signDoc, signature.signature);
-        // const tmClient = await Tendermint37Client.connect(config.rpcUrl);
-
-        // const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
-        //@ts-ignore
-        displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
-          message: 'result?.log'
-        });
+        if (result.code === 0) {
+          displayToast(TToastType.TX_SUCCESSFUL);
+        } else {
+          displayToast(TToastType.TX_FAILED);
+        }
       }
     } catch (error) {
       console.log('error in claim: ', error);
