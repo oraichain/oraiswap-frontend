@@ -17,6 +17,8 @@ import { SigningStargateClient } from '@cosmjs/stargate';
 import { coin, StdFee } from '@cosmjs/amino';
 import Long from 'long';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { collectWallet } from 'libs/cosmjs';
+import { calculateTimeoutTimestamp, IBC_TRANSFER_TIMEOUT } from '@oraichain/oraidex-common';
 
 const Escrow = () => {
   const [theme] = useConfigReducer('theme');
@@ -37,14 +39,11 @@ const Escrow = () => {
       const btcAddr = await window.Bitcoin.getAddress();
       if (!btcAddr) throw Error('Not found your bitcoin address!');
       // @ts-ignore-check
-      const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBTCBridgeNetwork.chainId);
-      const timeoutTimestampSeconds = Math.floor((Date.now() + 60 * 60 * 1000) / 1000);
-      const timeoutTimestampNanoseconds = Long.fromNumber(timeoutTimestampSeconds).multiply(1000000000);
+      const oraiBtcAddress = deriveNomicAddress(address);
+      const timeoutTimestampSeconds = calculateTimeoutTimestamp(IBC_TRANSFER_TIMEOUT);
       if (btcAddr && oraiBtcAddress) {
-        const client = await SigningStargateClient.connectWithSigner(
-          'https://btc.rpc.orai.io',
-          window.owallet.getOfflineSigner('oraibtc-mainnet-1')
-        );
+        const signer = await collectWallet(OraiBTCBridgeNetwork.chainId);
+        const client = await SigningStargateClient.connectWithSigner('https://btc.rpc.orai.io', signer);
 
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
 
@@ -53,19 +52,19 @@ const Escrow = () => {
           value: {
             sourcePort: 'transfer',
             sourceChannel: 'channel-1',
-            sender: deriveNomicAddress(address),
+            sender: oraiBtcAddress,
             receiver: address,
             token: coin((data?.escrow_balance || 0).toString(), 'usat'),
             timeoutHeight: undefined,
-            timeoutTimestamp: timeoutTimestampNanoseconds
+            timeoutTimestamp: timeoutTimestampSeconds
           }
         };
         const txRaw = await client.sign(
-          deriveNomicAddress(address),
+          oraiBtcAddress,
           [ibcTransferMsg],
           {
             amount: [coin('0', 'uoraibtc')],
-            gas: '0'
+            gas: '20000000'
           } as StdFee,
           '',
           {
