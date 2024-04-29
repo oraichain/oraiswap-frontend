@@ -2,7 +2,7 @@ import OraiBtc from 'assets/icons/btc-icon.svg';
 import { config } from '../config';
 import Orai from 'assets/icons/btc-icon.svg';
 import { network } from 'config/networks';
-import {BTC_CONTRACT} from '@oraichain/oraidex-common'
+import { BTC_CONTRACT } from '@oraichain/oraidex-common';
 
 export interface ChainInfo {
   name: string;
@@ -46,8 +46,8 @@ export const OraiBtcSubnetChain: IbcChain = {
 export const OraichainChain: IbcChain = {
   name: 'Oraichain Mainnet',
   logo: Orai,
-  chainId: network.chainId,
-  rpcEndpoint: network.rpc,
+  chainId: 'Oraichain',
+  rpcEndpoint: 'https://rpc.orai.io',
   source: {
     channelId: OraiBtcSubnetChain.destination.channelId,
     port: OraiBtcSubnetChain.destination.port,
