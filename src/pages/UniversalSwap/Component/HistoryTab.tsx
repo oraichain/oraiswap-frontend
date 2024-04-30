@@ -14,6 +14,7 @@ import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { useGetTransHistory } from '../SwapV3/hooks';
 import styles from './HistoryTab.module.scss';
 import { getExplorerScan } from '../helpers';
+import { useState } from 'react';
 
 const cx = cn.bind(styles);
 const RowsComponent: React.FC<{
@@ -111,7 +112,10 @@ const RowsComponent: React.FC<{
         </div>
         <div className={styles.txhash}>
           <div className={styles.type}>TxHash</div>
-          <div className={styles.link} onClick={() => window.open(`${getExplorerScan(rows.fromChainId)}/${rows.initialTxHash}`)}>
+          <div
+            className={styles.link}
+            onClick={() => window.open(`${getExplorerScan(rows.fromChainId)}/${rows.initialTxHash}`)}
+          >
             <span>{reduceString(rows.initialTxHash, 6, 4)}</span>
             <div className={styles.open_link}>
               <img src={OpenNewWindowImg} width={11} height={11} alt="filter" />
@@ -127,6 +131,7 @@ export const HistoryTab: React.FC<{
   networkFilter: string;
 }> = ({ networkFilter }) => {
   const { transHistory } = useGetTransHistory();
+  const [selectedData, setSelectedData] = useState(null);
 
   const headers: TableHeaderProps<TransactionHistory> = {
     assets: {
@@ -138,8 +143,9 @@ export const HistoryTab: React.FC<{
   };
 
   return (
-    <div className={cx('historyTab')}>
-      {/* <div className={cx('info')}>
+    <>
+      <div className={cx('historyTab')}>
+        {/* <div className={cx('info')}>
         <div className={cx('filter')}>
           <img src={FilterIcon} className={cx('filter-icon')} alt="filter" />
           <span className={cx('filter-title')}>Transaction</span>
@@ -148,20 +154,24 @@ export const HistoryTab: React.FC<{
           <SearchInput placeholder="Search by address, asset, type" onSearch={(tokenName) => {}} />
         </div>
       </div> */}
-      <div className={styles.historyData}>
-        <h2>Latest 20 transactions</h2>
-        {transHistory && transHistory.length > 0 ? (
-          <Table
-            headers={headers}
-            data={transHistory}
-            stylesColumn={{
-              padding: '16px 0'
-            }}
-          />
-        ) : (
-          <FallbackEmptyData />
-        )}
+        <div className={styles.historyData}>
+          <h2>Latest 20 transactions</h2>
+          {transHistory && transHistory.length > 0 ? (
+            <Table
+              headers={headers}
+              data={transHistory}
+              stylesColumn={{
+                padding: '16px 0'
+              }}
+              handleClickRow={(e, data) => {
+                setSelectedData(data);
+              }}
+            />
+          ) : (
+            <FallbackEmptyData />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
