@@ -103,7 +103,7 @@ module.exports = {
           project: 'oraidex',
           authToken: process.env.SENTRY_AUTH_TOKEN
         })
-      );
+      )
     }
 
     config.plugins.push(
