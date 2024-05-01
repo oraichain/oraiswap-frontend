@@ -61,6 +61,7 @@ module.exports = {
         }
       }
     ];
+    config.resolve.fallback = fallback;
     const isDevelopment = env === 'development';
 
     // do not check issues
@@ -108,8 +109,7 @@ module.exports = {
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest,
-        scope: 'src'
+        manifest
       })
     );
     return config;
