@@ -30,6 +30,7 @@ if (!fs.existsSync(vendorPath)) {
 const config = {
   mode: 'production',
   target: 'web',
+  cache: true,
   entry: {
     vendor: Object.keys(package.dependencies).filter((dep) => !ignores.includes(dep))
   },
@@ -50,10 +51,21 @@ const config = {
   output: {
     filename: `vendor.${vendorHash}.js`,
     path: vendorPath,
-    library: 'vendor_lib'
+    library: 'vendor_lib',
+    pathinfo: false
+  },
+  optimization: {
+    removeAvailableModules: false,
+    removeEmptyChunks: false,
+    checkWasmTypes: false,
+    chunkIds: 'total-size',
+    innerGraph: false,
+    emitOnErrors: false,
+    minimize: true,
+    removeAvailableModules: true,
+    removeEmptyChunks: true
   },
   plugins: [
-    new webpack.ProgressPlugin(),
     new webpack.ProvidePlugin({
       process: 'process/browser.js'
     }),
