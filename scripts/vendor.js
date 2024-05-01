@@ -78,7 +78,14 @@ const config = {
     new webpack.DllPlugin({
       name: 'vendor_lib',
       path: path.join(vendorPath, `manifest.${vendorHash}.json`)
-    })
+    }),
+    // fix error 'UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins'
+    new webpack.NormalModuleReplacementPlugin(
+      /node:crypto/,
+      (resource) => {
+        resource.request = resource.request.replace(/^node:/, '');
+      }
+    )
   ]
 };
 
