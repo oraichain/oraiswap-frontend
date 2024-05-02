@@ -1,11 +1,11 @@
 import { formatDisplayUsdt } from 'helper/format';
 import { useTotalSharePerformance } from 'pages/Vaults/hooks';
-import { useGetTotalDeposit } from 'pages/Vaults/hooks/useGetTotalDeposit';
+// import { useGetTotalDeposit } from 'pages/Vaults/hooks/useGetTotalDeposit';
 import styles from './WhatIsVault.module.scss';
 
 export const TotalSharePerf = () => {
   const { totalTvlUsd } = useTotalSharePerformance();
-  const { totalDepositInUsd } = useGetTotalDeposit();
+  // const { totalDepositInUsd } = useGetTotalDeposit();
   return (
     <div className={styles.myTotalShare}>
       <h3>Total Share Performance</h3>
