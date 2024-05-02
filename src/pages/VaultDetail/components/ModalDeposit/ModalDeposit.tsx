@@ -23,6 +23,7 @@ import { InputWithOptionPercent } from '../InputWithOptionPercent';
 import styles from './ModalDeposit.module.scss';
 import { useVaultFee } from 'pages/VaultDetail/hooks/useVaultFee';
 import { VaultNetworkChainId } from 'pages/VaultDetail/type';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 const cx = cn.bind(styles);
 
 export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({
@@ -39,7 +40,7 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({
   const [depositAmount, setDepositAmount] = useState<bigint | null>(null);
   const [depositToken, setDepositToken] = useState<TokenItemType | null>(null);
   const { deposit, loading } = useDepositWithdrawVault();
-
+  const { data: prices } = useCoinGeckoPrices();
   useEffect(() => {
     if (!vaultDetail) return;
 
@@ -73,6 +74,8 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({
     );
   };
 
+  const depositAmountInUsdt = toDisplay(depositAmount, depositToken?.decimals) * prices[depositToken?.coinGeckoId];
+
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('container', theme)}>
@@ -94,6 +97,7 @@ export const ModalDeposit: FC<ModalDepositWithdrawProps> = ({
           setAmountFromPercent={setDepositAmount}
           totalAmount={tokenDepositBalance}
           TokenIcon={vaultDetail.tokenInfo0.Icon}
+          amountInUsdt={depositAmountInUsdt}
         />
         {renderBridgeFee()}
         {(() => {
