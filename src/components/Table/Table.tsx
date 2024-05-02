@@ -45,10 +45,9 @@ const CoefficientBySort = {
 };
 
 export const sortDataSource = <T extends object>(data: T[], sort: Record<keyof T, SortType>) => {
-  let deepCopyData: T[] = JSON.parse(JSON.stringify(data));
   const [sortField, sortOrder] = Object.entries(sort)[0];
 
-  const sortedData = deepCopyData.sort((a, b) => {
+  const sortedData = data.sort((a, b) => {
     const typeCheck = typeof a[sortField];
 
     switch (typeCheck) {
