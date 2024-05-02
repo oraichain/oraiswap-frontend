@@ -1,7 +1,6 @@
 import { ethers, utils, providers } from 'ethers';
 import { OraiGatewayClient } from 'nestquant-vault-sdk';
 import {
-  MultiCall,
   MultiCall__factory,
   VaultLPFactory,
   VaultLPFactory__factory,

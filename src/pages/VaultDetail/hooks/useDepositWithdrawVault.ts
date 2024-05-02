@@ -84,6 +84,20 @@ export const useDepositWithdrawVault = create<DepositState>()(
         displayToast(TToastType.TX_BROADCASTING);
         try {
           const gatewayClient = VaultClients.getOraiGateway(userAddr);
+
+          const isWithdrawing = await gatewayClient.isWithdrawing({
+            vaultAddress: vaultAddr,
+            withdrawer: userAddr
+          });
+          if (isWithdrawing) {
+            displayToast(TToastType.TX_FAILED, {
+              message: 'You are withdrawing, please wait for the previous transaction to complete'
+            });
+            // TODO: update share balance of user immediately
+
+            return;
+          }
+
           const totalSupply = await gatewayClient.totalSupply({ vaultAddress: vaultAddr });
           const balanceOfUser = await gatewayClient.balance({ vaultAddress: vaultAddr, userAddress: userAddr });
 
