@@ -21,13 +21,13 @@ export const VaultDetailOverview = ({ vaultDetail }: { vaultDetail: VaultInfo })
         <div className={styles.info}>
           <h4>APR (All-time)</h4>
           <div className={styles.infoValue}>
-            <span>{vaultDetail.aprAllTime}%</span>
+            <span>{formatDisplayUsdt(vaultDetail.aprAllTime, 2)}%</span>
           </div>
         </div>
         <div className={styles.info}>
           <h4>Daily APR</h4>
           <div className={styles.infoValue}>
-            <span>{vaultDetail.aprDaily}%</span>
+            <span>{formatDisplayUsdt(vaultDetail.aprDaily, 2)}%</span>
           </div>
         </div>
       </div>

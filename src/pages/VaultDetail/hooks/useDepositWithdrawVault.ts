@@ -93,7 +93,6 @@ export const useDepositWithdrawVault = create<DepositState>()(
             displayToast(TToastType.TX_FAILED, {
               message: 'You are withdrawing, please wait for the previous transaction to complete'
             });
-            // TODO: update share balance of user immediately
 
             return;
           }
@@ -111,9 +110,9 @@ export const useDepositWithdrawVault = create<DepositState>()(
           } else {
             const vaultLP = VaultLP__factory.connect(vaultAddr, VaultClients.getEthereumProvider());
             const oraiBalance = await vaultLP.balanceOf(ORAI_VAULT_BSC_CONTRACT_ADDRESS);
-            
+
             if (BigInt(oraiBalance) === 0n) throw new Error('Orai vault balance is zero!');
-            
+
             const correspondingAmount = (amount * BigInt(totalSupply.total_supply)) / BigInt(oraiBalance);
             result = await gatewayClient.withdraw({
               shareAmount: correspondingAmount.toString(),
