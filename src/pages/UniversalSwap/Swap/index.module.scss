@@ -766,7 +766,7 @@
       padding-top: 6px;
       .smart-router-item-volumn {
         width: 30px;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 500;
         @include theme() {
           color: theme-get('colors-neutral-text-title');
@@ -782,6 +782,13 @@
         }
       }
       .smart-router-item-pool {
+        cursor: pointer;
+        &:hover {
+          border-radius: 99px;
+          @include theme() {
+            opacity: 0.8;
+          }
+        }
         .smart-router-item-pool-wrap {
           display: flex;
           align-items: center;
