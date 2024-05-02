@@ -150,6 +150,14 @@
       font-size: 24px;
     }
 
+    .ratio10 {
+      color: $warning-10-color;
+    }
+
+    .ratio5 {
+      color: $warning-5-color;
+    }
+
     .ratio {
       @include theme() {
         color: theme-get('colors-neutral-text-text-token-name');
@@ -355,9 +363,17 @@
 
 .from {
   .impact-warning {
+    display: flex;
+    gap: 2px;
+    font-weight: 500;
     .title {
       span {
-        color: $warning-color;
+        color: $warning-impact-color;
+      }
+    }
+    svg {
+      path {
+        color: $warning-impact-color;
       }
     }
   }
@@ -587,6 +603,12 @@
       opacity: 0.8;
     }
 
+    &-ten {
+      color: $warning-10-color !important;
+    }
+    &-five {
+      color: $warning-5-color !important;
+    }
     svg {
       vertical-align: middle;
     }
@@ -836,10 +858,21 @@
         display: flex;
         align-items: center;
         gap: 4px;
-        color: #c68e00;
-        svg {
-          path {
-            stroke: #c68e00;
+
+        &-ten {
+          color: $warning-10-color !important;
+          svg {
+            path {
+              stroke: $warning-10-color !important;
+            }
+          }
+        }
+        &-five {
+          color: $warning-5-color !important;
+          svg {
+            path {
+              stroke: $warning-5-color !important;
+            }
           }
         }
       }
