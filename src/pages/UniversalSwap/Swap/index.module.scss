@@ -150,6 +150,14 @@
       font-size: 24px;
     }
 
+    .ratio10 {
+      color: $warning-10-color;
+    }
+
+    .ratio5 {
+      color: $warning-5-color;
+    }
+
     .ratio {
       @include theme() {
         color: theme-get('colors-neutral-text-text-token-name');
@@ -355,9 +363,17 @@
 
 .from {
   .impact-warning {
+    display: flex;
+    gap: 2px;
+    font-weight: 500;
     .title {
       span {
-        color: $warning-color;
+        color: $warning-impact-color;
+      }
+    }
+    svg {
+      path {
+        color: $warning-impact-color;
       }
     }
   }
@@ -589,6 +605,12 @@
       opacity: 0.8;
     }
 
+    &-ten {
+      color: $warning-10-color !important;
+    }
+    &-five {
+      color: $warning-5-color !important;
+    }
     svg {
       vertical-align: middle;
     }
@@ -766,7 +788,7 @@
       padding-top: 6px;
       .smart-router-item-volumn {
         width: 30px;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 500;
         @include theme() {
           color: theme-get('colors-neutral-text-title');
@@ -775,13 +797,24 @@
       .smart-router-item-line {
         flex: 1;
         .smart-router-item-line-detail {
-          background: #78ca11;
-          // background: linear-gradient(90deg, #2f5711 0%, #78ca11 42.71%, #d0e54c 71.35%, #2f5711 100%);
+          // background: #78ca11;
+          background: linear-gradient(90deg, #2f5711 0%, #78ca11 42.71%, #d0e54c 71.35%, #2f5711 100%);
+          background-size: 200% 200%;
           height: 2px;
           border-radius: 99px;
+          -webkit-animation: Animation 3s ease infinite;
+          -moz-animation: Animation 3s ease infinite;
+          animation: Animation 3s ease infinite;
         }
       }
       .smart-router-item-pool {
+        cursor: pointer;
+        &:hover {
+          border-radius: 99px;
+          @include theme() {
+            opacity: 0.8;
+          }
+        }
         .smart-router-item-pool-wrap {
           display: flex;
           align-items: center;
@@ -827,10 +860,21 @@
         display: flex;
         align-items: center;
         gap: 4px;
-        color: #c68e00;
-        svg {
-          path {
-            stroke: #c68e00;
+
+        &-ten {
+          color: $warning-10-color !important;
+          svg {
+            path {
+              stroke: $warning-10-color !important;
+            }
+          }
+        }
+        &-five {
+          color: $warning-5-color !important;
+          svg {
+            path {
+              stroke: $warning-5-color !important;
+            }
           }
         }
       }
@@ -847,5 +891,39 @@
       //   padding: 0 2px;
       // }
     }
+  }
+}
+
+@-webkit-keyframes Animation {
+  0% {
+    background-position: 10% 0%;
+  }
+  50% {
+    background-position: 91% 100%;
+  }
+  100% {
+    background-position: 10% 0%;
+  }
+}
+@-moz-keyframes Animation {
+  0% {
+    background-position: 10% 0%;
+  }
+  50% {
+    background-position: 91% 100%;
+  }
+  100% {
+    background-position: 10% 0%;
+  }
+}
+@keyframes Animation {
+  0% {
+    background-position: 10% 0%;
+  }
+  50% {
+    background-position: 91% 100%;
+  }
+  100% {
+    background-position: 10% 0%;
   }
 }

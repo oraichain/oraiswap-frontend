@@ -354,7 +354,7 @@ export enum PairAddress {
   MILKY_USDT = 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
   SCORAI_ORAI = 'orai15aunrryk5yqsrgy0tvzpj7pupu62s0t2n09t0dscjgzaa27e44esefzgf8',
   USDC_ORAI = 'orai19ttg0j7w5kr83js32tmwnwxxdq9rkmw4m3d7mn2j2hkpugwwa4tszwsnkg',
-  TRX_ORAI = 'orai103ya8qkcf3vg4nksqquy0v5pvnugjtlt0uxpfh0fkuqge2a6k4aqwurg22',
+  WTRX_ORAI = 'orai103ya8qkcf3vg4nksqquy0v5pvnugjtlt0uxpfh0fkuqge2a6k4aqwurg22',
   SCATOM_ATOM = 'orai16ltg2c8u9styus3dgql64mpupvtclxt9xdzvz0slx3pnrycxpm3qw75c5x',
   INJ_ORAI = 'orai1le7w5dmd23ky8f6zgtgfnpdv269qs6ezgr839sm8kj24rwaqqnrs58wf4u',
   USDC_ORAIX = 'orai1n4edv5h86rawzrvhy8lmrmnnmmherxnhuwqnk3yuvt0wgclh75usyn3md6',
@@ -368,7 +368,9 @@ export enum PairAddress {
 export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
 
 export const findTokenInfo = (token, flattenTokens) => {
-  return flattenTokens.find((e) => e?.contractAddress === token || e.denom === token);
+  return flattenTokens.find(
+    (t) => t.contractAddress?.toUpperCase() === token?.toUpperCase() || t.denom.toUpperCase() === token?.toUpperCase()
+  );
 };
 
 export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) => {
@@ -379,10 +381,11 @@ export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) =
 export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLightMode) => {
   const pairKey = findKeyByValue(PairAddress, path.poolId);
   const [tokenInKey, tokenOutKey] = pairKey.split('_');
-  let infoPair: any = PAIRS_CHART.find(
-    (pair) => pair.symbols.includes(tokenInKey) && pair.symbols.includes(tokenOutKey)
-  );
-  const tokenIn = infoPair.assets.find((info) => info !== path.tokenOut);
+  let infoPair: any = PAIRS_CHART.find((pair) => {
+    let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
+    return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
+  });
+  const tokenIn = infoPair?.assets.find((info) => info.toUpperCase() !== path.tokenOut.toUpperCase());
   const tokenOut = path.tokenOut;
 
   infoPair = {
