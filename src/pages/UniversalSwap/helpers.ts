@@ -385,7 +385,7 @@ export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLi
     let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
     return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
   });
-  const tokenIn = infoPair?.assets.find((info) => info !== path.tokenOut);
+  const tokenIn = infoPair?.assets.find((info) => info.toUpperCase() !== path.tokenOut.toUpperCase());
   const tokenOut = path.tokenOut;
 
   infoPair = {

@@ -583,11 +583,19 @@ const SwapComponent: React.FC<{
     isValid: true
   };
   if (!isValidAddress) validAddress = checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
-  const routersSwapData = (fromAmountToken && simulateData) || {
+  const defaultRouterSwap = {
     amount: '0',
     displayAmount: 0,
     routes: []
   };
+  let routersSwapData = defaultRouterSwap;
+
+  if (fromAmountToken && simulateData) {
+    routersSwapData = {
+      ...simulateData,
+      routes: simulateData?.routes ?? []
+    };
+  }
   const isRoutersSwapData = +routersSwapData.amount;
 
   const isImpactPrice = fromAmountToken && simulateData?.amount && averageRatio?.amount;
@@ -665,7 +673,9 @@ const SwapComponent: React.FC<{
             </div>
             <div className={cx('ratio')} onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}>
               {`1 ${originalFromToken.name} ≈ ${
-                averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+                averageRatio
+                  ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, { maximumFractionDigits: 6 })
+                  : '0'
               } ${originalToToken.name}`}
 
               {!!isRoutersSwapData && <img src={ArrowImg} alt="arrow" />}
