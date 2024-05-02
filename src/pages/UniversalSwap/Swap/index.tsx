@@ -707,7 +707,7 @@ const SwapComponent: React.FC<{
                         flattenTokensWithIcon,
                         isLightMode
                       );
-
+                      const [tokenIn, tokenOut] = infoPair?.info.split('-');
                       return (
                         <React.Fragment key={pairKey}>
                           <div className={cx('smart-router-item-line')}>
@@ -716,13 +716,9 @@ const SwapComponent: React.FC<{
                           <div
                             className={cx('smart-router-item-pool')}
                             onClick={() => {
-                              infoPair?.tokenIn &&
-                                infoPair?.tokenOut &&
-                                navigate(
-                                  `/pools/${encodeURIComponent(infoPair.tokenIn)}_${encodeURIComponent(
-                                    infoPair.tokenOut
-                                  )}`
-                                );
+                              tokenIn &&
+                                tokenOut &&
+                                navigate(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
                             }}
                           >
                             <div className={cx('smart-router-item-pool-wrap')}>
