@@ -590,7 +590,12 @@ const SwapComponent: React.FC<{
   };
   let routersSwapData = defaultRouterSwap;
 
-  if (fromAmountToken && simulateData) {
+  if (
+    fromAmountToken &&
+    simulateData &&
+    originalFromToken.chainId === 'Oraichain' &&
+    originalToToken.chainId === 'Oraichain'
+  ) {
     routersSwapData = {
       ...simulateData,
       routes: simulateData?.routes ?? []
