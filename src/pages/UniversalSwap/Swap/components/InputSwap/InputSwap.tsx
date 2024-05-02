@@ -7,6 +7,7 @@ import { TokenInfo } from 'types/token';
 import styles from './InputSwap.module.scss';
 import { chainInfosWithIcon } from 'config/chainInfos';
 import { Themes } from 'context/theme-context';
+import { numberWithCommas } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 
@@ -151,7 +152,9 @@ export default function InputSwapV4({
               }}
             />
           </div>
-          <div className={cx('usd')}>≈ ${amount ? Number(usdPrice) || 0 : 0}</div>
+          <div className={cx('usd')}>
+            ≈ ${amount ? numberWithCommas(Number(usdPrice), undefined, { maximumFractionDigits: 6 }) || 0 : 0}
+          </div>
         </div>
       </div>
       {/* {!!tokenFee && (
