@@ -71,7 +71,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvl, undefined, '$')}</span>
     },
     claimable: {
-      name: 'My Share',
+      name: 'Total Supply',
       width: '25%',
       align: isMobile() ? 'right' : 'left',
       sortField: 'oraiBalance',
