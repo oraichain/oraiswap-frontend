@@ -17,6 +17,7 @@ export type SwapDetailProps = {
   totalFee: number | string;
   swapFee: number | string;
 
+  isOpenSetting: boolean;
   isOpen: boolean;
   onClose: () => void;
   toTokenName: string;
@@ -36,6 +37,7 @@ const SwapDetail = ({
   totalFee,
   swapFee,
 
+  isOpenSetting,
   isOpen,
   onClose,
   toTokenName,
@@ -46,8 +48,12 @@ const SwapDetail = ({
   const ref = useRef();
 
   useOnClickOutside(ref, () => {
-    onClose();
-    closeSlippage();
+    if (!isOpenSetting) {
+      onClose();
+      if (isOpen) {
+        closeSlippage();
+      }
+    }
   });
 
   return (
