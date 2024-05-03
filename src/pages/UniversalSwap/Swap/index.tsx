@@ -506,6 +506,12 @@ const SwapComponent: React.FC<{
     setIsSelectChainTo(false);
   });
 
+  const settingRef = useRef();
+
+  useOnClickOutside(settingRef, () => {
+    setOpenSetting(false);
+  });
+
   const onChangePercentAmount = (coeff) => {
     if (coeff === coe) {
       setCoe(0);
@@ -577,13 +583,15 @@ const SwapComponent: React.FC<{
     handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
   };
 
-  const isValidAddress =
+  const isConnectedWallet =
     walletByNetworks.cosmos || walletByNetworks.bitcoin || walletByNetworks.evm || walletByNetworks.tron;
 
   let validAddress = {
     isValid: true
   };
-  if (!isValidAddress) validAddress = checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+
+  if (isConnectedWallet) validAddress = checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+
   const defaultRouterSwap = {
     amount: '0',
     displayAmount: 0,
@@ -663,7 +671,7 @@ const SwapComponent: React.FC<{
                 <div className={cx('impact-warning')}>
                   <WarningIcon />
                   <div className={cx('title')}>
-                    <span>Current slippage exceed configuration!</span>
+                    <span>&nbsp;Current slippage exceed configuration!</span>
                   </div>
                 </div>
               )}
@@ -844,7 +852,7 @@ const SwapComponent: React.FC<{
                 ≈ {numberWithCommas(totalFeeEst, undefined, { maximumFractionDigits: 6 })} {originalToToken.name}
               </span>
               <span className={cx('icon')}>
-                <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
+                <img src={DownArrowIcon} alt="arrow" />
               </span>
             </div>
           </div>
@@ -944,7 +952,7 @@ const SwapComponent: React.FC<{
           setOpenSetting(false);
         }}
       />
-      <div className={cx('setting', openSetting ? 'activeSetting' : '')}>
+      <div className={cx('setting', openSetting ? 'activeSetting' : '')} ref={settingRef}>
         <SlippageModal
           setVisible={setOpenSetting}
           setUserSlippage={setUserSlippage}
@@ -967,6 +975,7 @@ const SwapComponent: React.FC<{
         toTokenName={originalToToken?.name}
         fromTokenName={originalFromToken?.name}
         openSlippage={() => setOpenSetting(true)}
+        closeSlippage={() => setOpenSetting(false)}
       />
     </div>
   );

@@ -371,9 +371,10 @@
         color: $error-color;
       }
     }
+
     svg {
       path {
-        color: $error-color;
+        stroke: $error-color;
       }
     }
   }
@@ -607,10 +608,23 @@
 
     &-ten {
       color: $warning-10-color !important;
+
+      svg {
+        path {
+          stroke: $warning-10-color;
+        }
+      }
     }
     &-five {
       color: $warning-5-color !important;
+
+      svg {
+        path {
+          stroke: $warning-5-color;
+        }
+      }
     }
+
     svg {
       vertical-align: middle;
     }
@@ -786,10 +800,12 @@
       align-items: center;
       gap: 6px;
       padding-top: 6px;
+
       .smart-router-item-volumn {
-        width: 30px;
+        width: max-content;
         font-size: 13px;
         font-weight: 500;
+
         @include theme() {
           color: theme-get('colors-neutral-text-title');
         }
@@ -856,10 +872,15 @@
       display: flex;
       gap: 8px;
       align-items: center;
+
       .smart-router-price-impact-warning {
         display: flex;
         align-items: center;
         gap: 4px;
+
+        @include theme() {
+          color: theme-get('colors-neutral-text-body-on-row');
+        }
 
         &-ten {
           color: $warning-10-color !important;
