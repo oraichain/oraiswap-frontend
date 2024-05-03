@@ -974,6 +974,7 @@ const SwapComponent: React.FC<{
         onClose={() => setOpenDetail(false)}
         toTokenName={originalToToken?.name}
         fromTokenName={originalFromToken?.name}
+        isOpenSetting={openSetting}
         openSlippage={() => setOpenSetting(true)}
         closeSlippage={() => setOpenSetting(false)}
       />
