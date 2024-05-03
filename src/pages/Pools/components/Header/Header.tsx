@@ -36,6 +36,7 @@ export const useGetOraiPrice = () => {
 
   useEffect(() => {
     if (pools.length === 0) return;
+
     const oraiUsdtPool = pools.find(
       (pool) =>
         pool.firstAssetInfo === JSON.stringify(ORAI_INFO) &&
@@ -47,9 +48,10 @@ export const useGetOraiPrice = () => {
           })
     );
     if (!oraiUsdtPool) return;
+
     const oraiPrice = toDecimal(BigInt(oraiUsdtPool.askPoolAmount), BigInt(oraiUsdtPool.offerPoolAmount));
     setOraiPrice(oraiPrice);
-  }, [pools]);
+  }, [pools.length]);
 
   return oraiPrice;
 };
@@ -144,7 +146,6 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
   return (
     <div className={styles.header}>
       <div className={styles.header_title}>
-        {/* <span className={styles.header_title_text}>POOLS</span> */}
         <div className={styles.header_title_text}>
           <div>
             <ORAI_INFO.Icon />
@@ -234,9 +235,7 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
           </div>
         </div>
         <div className={styles.header_claim_reward}>
-          <div className={styles.claim_reward_bg}>
-            {/* <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" /> */}
-          </div>
+          <div className={styles.claim_reward_bg}></div>
           <Button
             type="primary-sm"
             disabled={disabledClaimBtn}

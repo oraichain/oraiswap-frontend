@@ -45,7 +45,6 @@ const SwapDetail = ({
 
       <div className={classNames(styles.swapDetail, { [styles.active]: isOpen })}>
         <div className={styles.header}>
-          <div></div>
           <div className={styles.titleHeader}>Details</div>
           <div className={styles.close} onClick={onClose}>
             <CloseIcon />

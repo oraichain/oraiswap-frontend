@@ -49,7 +49,7 @@ $padding-default: 16px;
   .header {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 
     @include theme {
@@ -65,12 +65,22 @@ $padding-default: 16px;
       text-align: center;
     }
 
-    svg {
+    .close {
       cursor: pointer;
+      position: absolute;
+      top: 16px;
+      right: 10px;
+      padding: 0px 6px;
 
-      @include theme {
-        path {
-          fill: theme-get('neutral-text-title-2');
+      svg {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+
+        @include theme {
+          path {
+            fill: theme-get('neutral-text-title-2');
+          }
         }
       }
     }
@@ -84,18 +94,6 @@ $padding-default: 16px;
     flex-direction: column;
     gap: 16px;
     padding: $padding-default 0;
-
-    .close {
-      cursor: pointer;
-
-      svg {
-        cursor: pointer;
-
-        path {
-          fill: #efefef;
-        }
-      }
-    }
 
     .titleDetail {
       overflow: hidden;
