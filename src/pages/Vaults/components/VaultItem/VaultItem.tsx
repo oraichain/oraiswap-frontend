@@ -57,7 +57,7 @@ export const VaultItem = ({ info }: { info: VaultInfo }) => {
               </div>
             </div>
             <div className={styles.infoTopSection}>
-              <div className={styles.infoTitle}>My Share</div>
+              <div className={styles.infoTitle}>Total Supply</div>
               <div className={`${styles.infoDetail} ${styles.myShare}`}>
                 {formatDisplayUsdt(info.oraiBalance)} {info.lpToken.symbol}
               </div>

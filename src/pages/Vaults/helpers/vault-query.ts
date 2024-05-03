@@ -1,7 +1,6 @@
-import { ethers, utils } from 'ethers';
+import { ethers, utils, providers } from 'ethers';
 import { OraiGatewayClient } from 'nestquant-vault-sdk';
 import {
-  MultiCall,
   MultiCall__factory,
   VaultLPFactory,
   VaultLPFactory__factory,
@@ -18,13 +17,13 @@ import { VaultInfoContract } from '../type';
 export class VaultClients {
   static vaultFactory: VaultLPFactory;
   static oraiGateway: OraiGatewayClient;
-  static multicall: MultiCall;
-  static ethereumProvider: ethers.providers.JsonRpcProvider;
+  static multicall: any;
+  static ethereumProvider: providers.JsonRpcProvider;
 
   static getEthereumProvider() {
     if (!this.ethereumProvider) {
-      const rpcProviderUrl = 'https://bsc-dataseed2.binance.org/';
-      this.ethereumProvider = new ethers.providers.JsonRpcProvider(rpcProviderUrl);
+      const rpcProviderUrl = 'https://endpoints.omniatech.io/v1/bsc/mainnet/public';
+      this.ethereumProvider =  new providers.JsonRpcProvider(rpcProviderUrl);
     }
     return this.ethereumProvider;
   }
@@ -45,7 +44,7 @@ export class VaultClients {
 
   static getMulticall() {
     if (!this.multicall) {
-      this.multicall = MultiCall__factory.connect(MULTICALL_CONTRACT_ADDRESS, this.getEthereumProvider());
+      this.multicall = new ethers.Contract(MULTICALL_CONTRACT_ADDRESS, MultiCall__factory.abi, this.getEthereumProvider());
     }
     return this.multicall;
   }
@@ -53,11 +52,11 @@ export class VaultClients {
 
 export const vaultInfos = [
   {
-    vaultAddr: '0xe7F9818426D6584f3abA93c203024C9AA8678eB2',
+    vaultAddr: '0xba10c932b2920910E03CD5E33fa0874284c09A46',
     firstDenom: 'USDT',
     firstCoingeckoId: 'tether',
-    secondDenom: 'WBNB',
-    secondCoingeckoId: 'wbnb',
+    secondDenom: 'BTC',
+    secondCoingeckoId: 'bitcoin',
     decimals: 18
   }
 ];
@@ -75,15 +74,18 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
     const dataCall = vaultAddrs.map((_vaultAddr) =>
       vaultLpInterface.encodeFunctionData('getVaultInfo', [ORAI_VAULT_BSC_CONTRACT_ADDRESS])
     );
-    const amounts = await VaultClients.getMulticall().multiCall(vaultAddrs, dataCall);
+    const provider = new providers.JsonRpcProvider('https://endpoints.omniatech.io/v1/bsc/mainnet/public');
+    console.log({ provider });
+
+    const amounts = await VaultClients.getMulticall().callStatic.multiCall(vaultAddrs, dataCall);
     // decode TVL
     const decodedResults = amounts.map((result, index) => {
       const arrs = Array.from(vaultLpInterface.decodeFunctionResult('getVaultInfo', result));
       return {
         vaultAddress: arrs[0],
-        tvlByToken1: utils.formatEther(arrs[1]),
-        totalSupply: utils.formatEther(arrs[2]),
-        oraiBalance: utils.formatEther(arrs[3])
+        tvlByToken1: utils.formatEther(arrs[1] as any),
+        totalSupply: utils.formatEther(arrs[2] as any),
+        oraiBalance: utils.formatEther(arrs[3] as any)
       };
     });
     return decodedResults;

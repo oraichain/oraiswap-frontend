@@ -38,7 +38,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       name: 'Vault',
       accessor: (data) => (
         <div className={styles.strategy}>
-          {/* <div className={styles.strategyLogo}>{generateIcon(data.tokenInfo0, data.tokenInfo1)}</div> */}
+          {!isMobile() && <div className={styles.strategyLogo}>{generateIcon(data.tokenInfo0, data.tokenInfo1)}</div>}
           <div className={styles.strategyName}>
             <div className={styles.strategyNameTitle}>Strategy</div>
             <div className={styles.strategyNameValue}>
@@ -71,7 +71,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       accessor: (data) => <span className={styles.tvl}>{formatDisplayUsdt(data.tvl, undefined, '$')}</span>
     },
     claimable: {
-      name: 'My Share',
+      name: 'Total Supply',
       width: '25%',
       align: isMobile() ? 'right' : 'left',
       sortField: 'oraiBalance',

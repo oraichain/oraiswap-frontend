@@ -84,19 +84,42 @@ export const useDepositWithdrawVault = create<DepositState>()(
         displayToast(TToastType.TX_BROADCASTING);
         try {
           const gatewayClient = VaultClients.getOraiGateway(userAddr);
-          const totalSupply = await gatewayClient.totalSupply({ vaultAddress: vaultAddr });
 
-          const vaultLP = VaultLP__factory.connect(vaultAddr, VaultClients.getEthereumProvider());
-          const oraiBalance = await vaultLP.balanceOf(ORAI_VAULT_BSC_CONTRACT_ADDRESS);
-
-          if (BigInt(oraiBalance) === 0n) throw new Error('Orai vault balance is zero!');
-
-          const correspondingAmount = (amount * BigInt(totalSupply.total_supply)) / BigInt(oraiBalance);
-          const result = await gatewayClient.withdraw({
-            shareAmount: correspondingAmount.toString(),
+          const isWithdrawing = await gatewayClient.isWithdrawing({
             vaultAddress: vaultAddr,
-            network: networkWithdraw
+            withdrawer: userAddr
           });
+          if (isWithdrawing) {
+            displayToast(TToastType.TX_FAILED, {
+              message: 'You are withdrawing, please wait for the previous transaction to complete'
+            });
+
+            return;
+          }
+
+          const totalSupply = await gatewayClient.totalSupply({ vaultAddress: vaultAddr });
+          const balanceOfUser = await gatewayClient.balance({ vaultAddress: vaultAddr, userAddress: userAddr });
+
+          let result = null;
+          if (BigInt(balanceOfUser.amount) === BigInt(amount)) {
+            result = await gatewayClient.withdraw({
+              shareAmount: amount.toString(),
+              vaultAddress: vaultAddr,
+              network: networkWithdraw
+            });
+          } else {
+            const vaultLP = VaultLP__factory.connect(vaultAddr, VaultClients.getEthereumProvider());
+            const oraiBalance = await vaultLP.balanceOf(ORAI_VAULT_BSC_CONTRACT_ADDRESS);
+
+            if (BigInt(oraiBalance) === 0n) throw new Error('Orai vault balance is zero!');
+
+            const correspondingAmount = (amount * BigInt(totalSupply.total_supply)) / BigInt(oraiBalance);
+            result = await gatewayClient.withdraw({
+              shareAmount: correspondingAmount.toString(),
+              vaultAddress: vaultAddr,
+              network: networkWithdraw
+            });
+          }
 
           if (result) {
             displayToast(TToastType.TX_SUCCESSFUL, {
