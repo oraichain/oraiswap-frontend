@@ -67,10 +67,9 @@ const InputCommon: FC<{
   }, [value, showPreviewOnBlur]);
 
   return (
-    <div className={`${styles.inputCommonWrapper} ${showError && error ? styles.error : ''}`}>
+    <div ref={ref} className={`${styles.inputCommonWrapper} ${showError && error ? styles.error : ''}`}>
       <div
         className={`${styles.inputCommon}`}
-        ref={ref}
         onClick={() => {
           setActive(true);
           inputRef.current?.focus();
@@ -91,7 +90,6 @@ const InputCommon: FC<{
             value={value}
             onChange={(e) => onChange(e?.target?.value)}
           />
-          {extraButton && <div className={`${styles.extraBtn} ${active ? styles.activeExtra : ''}`}>{extraButton}</div>}
         </div>
         {!active && value && showPreviewOnBlur && (
           <div className={styles.prev}>
@@ -103,7 +101,11 @@ const InputCommon: FC<{
           </div>
         )}
         {suffix && (
-          <div className={classNames(styles.suffix, { [styles.activeSuffix]: active })}>
+          <div
+            className={classNames(styles.suffix, {
+              [styles.activeSuffix]: active
+            })}
+          >
             {value && active && (
               <div className={styles.clear} onClick={() => onChange('')}>
                 <CloseIcon />
@@ -113,6 +115,10 @@ const InputCommon: FC<{
           </div>
         )}
       </div>
+
+      {extraButton && active && (
+        <div className={`${styles.extraBtn} ${active ? styles.activeExtra : ''}`}>{extraButton}</div>
+      )}
 
       {showError && error && (
         <div className={styles.errorTxt}>

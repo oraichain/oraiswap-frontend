@@ -9,6 +9,7 @@ import {
   CheckpointQueueInterface,
   CheckpointStatus,
   DepositFeeInterface,
+  EscrowBalanceInterface,
   TotalValueLockedInterface,
   TransactionInput,
   TransactionOutput,
@@ -132,8 +133,6 @@ export const useGetDepositFee = (checkpointIndex?: number) => {
   return data;
 };
 
-
-
 export const useGetWithdrawalFee = (btcAddress: string, checkpointIndex?: number) => {
   const getWithdrawalFee = async (btcAddress: String, checkpointIndex?: number): Promise<WithdrawalFeeInterface> => {
     try {
@@ -150,7 +149,7 @@ export const useGetWithdrawalFee = (btcAddress: string, checkpointIndex?: number
       };
     }
   };
-  
+
   const { data } = useQuery(
     ['withdrawal_fees', btcAddress, checkpointIndex],
     () => getWithdrawalFee(btcAddress, checkpointIndex),
@@ -236,6 +235,31 @@ export const useGetCheckpointFeeInfo = () => {
   const { data } = useQuery(['checkpoint_fee_info'], getCheckpointFeeInfo, {
     refetchOnWindowFocus: true,
     staleTime: 30 * 1000
+  });
+  return data;
+};
+
+const getEscrowBalance = async (address: String): Promise<EscrowBalanceInterface> => {
+  try {
+    const res = await axios.get(`/bitcoin/escrow_address`, {
+      params: {
+        address
+      }
+    });
+    return res.data;
+  } catch (e) {
+    console.error('getEscrowBalance', e);
+    return {
+      escrow_balance: 0
+    };
+  }
+};
+
+export const useGetEscrowBalance = (address: String) => {
+  const { data } = useQuery(['get_escrow_balance'], () => getEscrowBalance(address), {
+    refetchOnWindowFocus: true,
+    staleTime: 30 * 1000,
+    enabled: address !== undefined && address !== null
   });
   return data;
 };

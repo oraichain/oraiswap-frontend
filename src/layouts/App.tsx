@@ -26,6 +26,7 @@ import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAddressBookList, setAddressBookList } from 'reducer/addressBook';
+import FutureCompetition from 'components/FutureCompetitionModal';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -203,6 +204,7 @@ const App = () => {
       <div className={`app ${theme}`}>
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
+        {/* <FutureCompetition /> */}
         <div className="main">
           <Sidebar />
           <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>

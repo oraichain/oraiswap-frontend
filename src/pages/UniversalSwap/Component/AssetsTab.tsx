@@ -133,7 +133,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         <div className={cx('balance', `${!data.balance && 'balance-low'}`)}>
           {toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6)}
           {/* {numberWithCommas(toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6))}{' '} */}
-          <span className={cx('balance-assets')}>{data.asset}</span>
+          <span className={cx('balance-assets')}>&nbsp;{data.asset}</span>
         </div>
       )
     },

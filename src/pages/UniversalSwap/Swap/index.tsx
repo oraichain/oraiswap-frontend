@@ -834,7 +834,7 @@ const SwapComponent: React.FC<{
               error={!validAddress?.isValid && 'Invalid address'}
             />
           </div>
-          <div className={cx('slippage')} onClick={() => setOpenDetail(true)}>
+          <div className={cx('estFee')} onClick={() => setOpenDetail(true)}>
             <div className={cx('label')}>
               {isLightMode ? <FeeIcon /> : <FeeDarkIcon />}
               Estimated Fee:

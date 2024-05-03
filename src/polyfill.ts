@@ -148,7 +148,7 @@ if (typeof BigInt === 'undefined') {
 
 // polyfill abort timeout for some old browser not support.
 if (!('timeout' in AbortSignal)) {
-  AbortSignal.prototype.timeout = function (delay: number) {
+  AbortSignal.timeout = function (delay: number) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), delay);
     // Allow Node.js processes to exit early if only the timeout is running
