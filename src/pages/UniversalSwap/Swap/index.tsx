@@ -17,7 +17,8 @@ import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { isMobile } from '@walletconnect/browser-utils';
-import ArrowImg from 'assets/icons/arrow_new.svg';
+import UpArrowIcon from 'assets/icons/up-arrow.svg';
+import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
 import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
@@ -505,6 +506,12 @@ const SwapComponent: React.FC<{
     setIsSelectChainTo(false);
   });
 
+  const settingRef = useRef();
+
+  useOnClickOutside(settingRef, () => {
+    setOpenSetting(false);
+  });
+
   const onChangePercentAmount = (coeff) => {
     if (coeff === coe) {
       setCoe(0);
@@ -576,13 +583,15 @@ const SwapComponent: React.FC<{
     handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
   };
 
-  const isValidAddress =
+  const isConnectedWallet =
     walletByNetworks.cosmos || walletByNetworks.bitcoin || walletByNetworks.evm || walletByNetworks.tron;
 
   let validAddress = {
     isValid: true
   };
-  if (!isValidAddress) validAddress = checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+
+  if (isConnectedWallet) validAddress = checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+
   const defaultRouterSwap = {
     amount: '0',
     displayAmount: 0,
@@ -590,7 +599,8 @@ const SwapComponent: React.FC<{
   };
   let routersSwapData = defaultRouterSwap;
 
-  if (fromAmountToken && simulateData) {
+  const fromTochainIdIsOraichain = originalFromToken.chainId === 'Oraichain' && originalToToken.chainId === 'Oraichain';
+  if (fromAmountToken && simulateData && fromTochainIdIsOraichain) {
     routersSwapData = {
       ...simulateData,
       routes: simulateData?.routes ?? []
@@ -600,7 +610,7 @@ const SwapComponent: React.FC<{
 
   const isImpactPrice = fromAmountToken && simulateData?.amount && averageRatio?.amount;
   let impactWarning = 0;
-  if (isImpactPrice) {
+  if (isImpactPrice && fromTochainIdIsOraichain) {
     const caculateImpactPrice = new BigDecimal(simulateData.amount)
       .div(toAmount(fromAmountToken, originalFromToken.decimals))
       .div(averageRatio.displayAmount)
@@ -659,8 +669,9 @@ const SwapComponent: React.FC<{
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
               {!fromTokenFee && !toTokenFee && isWarningSlippage && (
                 <div className={cx('impact-warning')}>
+                  <WarningIcon />
                   <div className={cx('title')}>
-                    <span>Current slippage exceed configuration!</span>
+                    <span>&nbsp;Current slippage exceed configuration!</span>
                   </div>
                 </div>
               )}
@@ -671,21 +682,27 @@ const SwapComponent: React.FC<{
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
               <img src={isLightMode ? SwitchLightImg : SwitchDarkImg} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
-            <div className={cx('ratio')} onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}>
+            <div
+              className={cx(
+                'ratio',
+                Number(impactWarning) > 10 ? 'ratio-ten' : Number(impactWarning) > 5 && 'ratio-five'
+              )}
+              onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
+            >
               {`1 ${originalFromToken.name} ≈ ${
                 averageRatio
                   ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, { maximumFractionDigits: 6 })
                   : '0'
               } ${originalToToken.name}`}
 
-              {!!isRoutersSwapData && <img src={ArrowImg} alt="arrow" />}
+              {!!isRoutersSwapData && <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />}
             </div>
           </div>
 
           <div
             className={cx('smart', !openRoutes ? 'hidden' : '')}
             style={{
-              // smart router item height is 40px
+              // TODO: smart router item height is 40px
               height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
             }}
           >
@@ -702,7 +719,7 @@ const SwapComponent: React.FC<{
                         flattenTokensWithIcon,
                         isLightMode
                       );
-
+                      const [tokenIn, tokenOut] = infoPair?.info.split('-');
                       return (
                         <React.Fragment key={pairKey}>
                           <div className={cx('smart-router-item-line')}>
@@ -711,13 +728,10 @@ const SwapComponent: React.FC<{
                           <div
                             className={cx('smart-router-item-pool')}
                             onClick={() => {
-                              infoPair?.tokenIn &&
-                                infoPair?.tokenOut &&
-                                navigate(
-                                  `/pools/${encodeURIComponent(infoPair.tokenIn)}_${encodeURIComponent(
-                                    infoPair.tokenOut
-                                  )}`
-                                );
+                              tokenIn &&
+                                tokenOut &&
+                                window.open(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
+                              // navigate(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
                             }}
                           >
                             <div className={cx('smart-router-item-pool-wrap')}>
@@ -743,9 +757,16 @@ const SwapComponent: React.FC<{
               })}
               <div className={cx('smart-router-price-impact')}>
                 <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
-                <div className={cx('smart-router-price-impact-warning')}>
-                  <WarningIcon />
-                  <div> ≈ {impactWarning.toFixed(2)}%</div>
+                <div
+                  className={cx(
+                    'smart-router-price-impact-warning',
+                    Number(impactWarning) > 10
+                      ? 'smart-router-price-impact-warning-ten'
+                      : Number(impactWarning) > 5 && 'smart-router-price-impact-warning-five'
+                  )}
+                >
+                  {Number(impactWarning) > 5 && <WarningIcon />}
+                  <div>≈ {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%</div>
                 </div>
                 {/* <div className={cx('smart-router-price-impact-time')}> ~ 5 mins</div> */}
               </div>
@@ -831,7 +852,7 @@ const SwapComponent: React.FC<{
                 ≈ {numberWithCommas(totalFeeEst, undefined, { maximumFractionDigits: 6 })} {originalToToken.name}
               </span>
               <span className={cx('icon')}>
-                <img src={ArrowImg} alt="arrow" />
+                <img src={DownArrowIcon} alt="arrow" />
               </span>
             </div>
           </div>
@@ -931,7 +952,7 @@ const SwapComponent: React.FC<{
           setOpenSetting(false);
         }}
       />
-      <div className={cx('setting', openSetting ? 'activeSetting' : '')}>
+      <div className={cx('setting', openSetting ? 'activeSetting' : '')} ref={settingRef}>
         <SlippageModal
           setVisible={setOpenSetting}
           setUserSlippage={setUserSlippage}
@@ -954,6 +975,7 @@ const SwapComponent: React.FC<{
         toTokenName={originalToToken?.name}
         fromTokenName={originalFromToken?.name}
         openSlippage={() => setOpenSetting(true)}
+        closeSlippage={() => setOpenSetting(false)}
       />
     </div>
   );
