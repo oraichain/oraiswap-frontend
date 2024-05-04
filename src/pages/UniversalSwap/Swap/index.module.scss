@@ -534,6 +534,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px;
+  gap: 4px;
 
   .title {
     flex: 1;
@@ -604,7 +605,7 @@
 
     font-size: 13px;
     font-weight: 500;
-    line-height: 100%;
+    line-height: 120%;
 
     &:hover {
       opacity: 0.8;
@@ -637,6 +638,11 @@
         vertical-align: text-top;
         margin-right: 4px;
       }
+    }
+
+    img {
+      width: 16px;
+      height: 16px;
     }
   }
 }
