@@ -377,7 +377,7 @@ const SwapComponent: React.FC<{
         simulateAmount,
         userSlippage,
         amounts: amountsBalance,
-        smartRoutes: simulateData?.routeSwapOps?.swapOps,
+        smartRoutes: simulateData?.routeSwapOps,
         simulatePrice:
           // @ts-ignore
           averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
