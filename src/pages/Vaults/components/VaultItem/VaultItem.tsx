@@ -53,7 +53,7 @@ export const VaultItem = ({ info }: { info: VaultInfo }) => {
               <div className={styles.infoTitle}>APR</div>
               <div className={`${styles.infoDetail} ${styles.infoApr}`}>
                 {theme === 'dark' ? <BoostIconDark /> : <BoostIconLight />}
-                {info.aprAllTime}%
+                {formatDisplayUsdt(info.aprAllTime)}%
               </div>
             </div>
             <div className={styles.infoTopSection}>
