@@ -57,7 +57,7 @@ export const ListVaultsAsList: React.FC<ListPoolProps> = ({}) => {
       accessor: (data) => (
         <div className={styles.infoApr}>
           {theme === 'dark' ? <BoostIconDark /> : <BoostIconLight />}
-          {data.aprAllTime}%
+          {formatDisplayUsdt(data.aprAllTime)}%
         </div>
       ),
       sortField: 'aprAllTime',
