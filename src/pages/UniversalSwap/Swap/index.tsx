@@ -377,6 +377,7 @@ const SwapComponent: React.FC<{
         simulateAmount,
         userSlippage,
         amounts: amountsBalance,
+        smartRoutes: simulateData?.routeSwapOps?.swapOps,
         simulatePrice:
           // @ts-ignore
           averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
@@ -689,12 +690,16 @@ const SwapComponent: React.FC<{
               )}
               onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
             >
-              {Number(impactWarning) > 5 && <WarningIcon />}
-              {`1 ${originalFromToken.name} ≈ ${
-                averageRatio
-                  ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, { maximumFractionDigits: 6 })
-                  : '0'
-              } ${originalToToken.name}`}
+              <span className={cx('text')}>
+                {Number(impactWarning) > 5 && <WarningIcon />}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio
+                    ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, {
+                        maximumFractionDigits: 6
+                      })
+                    : '0'
+                } ${originalToToken.name}`}
+              </span>
 
               {!!isRoutersSwapData && <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />}
             </div>
@@ -766,8 +771,10 @@ const SwapComponent: React.FC<{
                       : Number(impactWarning) > 5 && 'smart-router-price-impact-warning-five'
                   )}
                 >
-                  {Number(impactWarning) > 5 && <WarningIcon />}
-                  <div>≈ {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%</div>
+                  <span>
+                    {Number(impactWarning) > 5 && <WarningIcon />} ≈{' '}
+                    {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
+                  </span>
                 </div>
                 {/* <div className={cx('smart-router-price-impact-time')}> ~ 5 mins</div> */}
               </div>

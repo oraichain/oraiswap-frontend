@@ -599,7 +599,6 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 4px;
 
     cursor: pointer;
 
@@ -631,8 +630,13 @@
       }
     }
 
-    svg {
-      vertical-align: middle;
+    .text {
+      svg {
+        width: 16px;
+        height: 16px;
+        vertical-align: text-top;
+        margin-right: 4px;
+      }
     }
   }
 }
@@ -886,6 +890,12 @@
 
         @include theme() {
           color: theme-get('colors-neutral-text-body-on-row');
+        }
+
+        svg {
+          vertical-align: text-top;
+          width: 16px;
+          height: 16px;
         }
 
         &-ten {
