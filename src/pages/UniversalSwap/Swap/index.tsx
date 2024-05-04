@@ -689,6 +689,7 @@ const SwapComponent: React.FC<{
               )}
               onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
             >
+              {Number(impactWarning) > 5 && <WarningIcon />}
               {`1 ${originalFromToken.name} ≈ ${
                 averageRatio
                   ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, { maximumFractionDigits: 6 })

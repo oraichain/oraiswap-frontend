@@ -552,6 +552,10 @@
       color: theme-get('text-color');
     }
 
+    @include medium-desktop {
+      display: none;
+    }
+
     @include small-mobile {
       display: none;
     }
@@ -595,6 +599,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 4px;
 
     cursor: pointer;
 
@@ -615,6 +620,7 @@
         }
       }
     }
+
     &-five {
       color: $warning-5-color !important;
 
