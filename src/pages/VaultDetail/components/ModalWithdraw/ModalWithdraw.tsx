@@ -13,6 +13,8 @@ import { ModalDepositWithdrawProps } from 'pages/Vaults/type';
 import { FC, useState } from 'react';
 import { InputWithOptionPercent } from '../InputWithOptionPercent';
 import styles from './ModalWithdraw.module.scss';
+import { BigDecimal } from '@oraichain/oraidex-common';
+
 const cx = cn.bind(styles);
 
 export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
@@ -56,6 +58,12 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
     );
   };
 
+  const totalAmount = BigInt(
+    new BigDecimal(shareBalance, vaultDetail.lpToken.decimals)
+      .mul(Math.pow(10, vaultDetail.lpToken.decimals))
+      .toNumber()
+  );
+
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('container', theme)}>
@@ -75,7 +83,7 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
           value={withdrawAmount}
           token={vaultDetail.lpToken}
           setAmountFromPercent={setWithdrawAmount}
-          totalAmount={BigInt(+shareBalance * Math.pow(10, vaultDetail.lpToken.decimals))}
+          totalAmount={totalAmount}
           prefixText="Max Available to Withdraw: "
           decimals={vaultDetail.lpToken.decimals}
           amountInUsdt={withdrawAmountInUsdt}
@@ -84,8 +92,7 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
         {(() => {
           let disableMsg: string;
           if (withdrawAmount <= 0) disableMsg = 'Enter an amount';
-          if (withdrawAmount > BigInt(+shareBalance * Math.pow(10, vaultDetail.lpToken.decimals)))
-            disableMsg = `Insufficient share`;
+          if (withdrawAmount > totalAmount) disableMsg = `Insufficient share`;
 
           return (
             <div className={cx('btn-confirm')}>

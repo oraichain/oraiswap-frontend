@@ -41,7 +41,7 @@ export const InputWithOptionPercent: FC<{
   const [chosenOption, setChosenOption] = useState(-1);
   const [theme] = useConfigReducer('theme');
   const [inputValue, setInputValue] = useState<number | string>('');
-  console.log({ totalAmount });
+
   const onChangePercent = (percent: number) => {
     const HUNDRED_PERCENT_IN_DECIMALS = 100 * Math.pow(10, decimals);
     const amountFromPercent = (toAmount(percent, decimals) * totalAmount) / BigInt(HUNDRED_PERCENT_IN_DECIMALS);
