@@ -1,3 +1,4 @@
+import { TokenItemType, CustomChainInfo } from '@oraichain/oraidex-common';
 import { OrderDirection } from '@oraichain/oraidex-contracts-sdk/build/OraiswapLimitOrder.types';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
@@ -83,6 +84,29 @@ export interface TradingState {
 export interface PoolChartState {
   filterDay: FILTER_DAY;
   tabChart: TAB_CHART;
+}
+
+export enum AddressManagementStep {
+  INIT,
+  SELECT,
+  CREATE,
+  EDIT
+}
+
+export type AddressBookType = {
+  id: string | number;
+  address: string;
+  network: CustomChainInfo;
+  token: TokenItemType | null;
+  isUniversal?: boolean;
+  memo?: string;
+  walletName: string;
+};
+
+export interface AddressBookManagementState {
+  currentStep: AddressManagementStep;
+  addresses: AddressBookType[];
+  currentEditedWallet?: AddressBookType | null;
 }
 
 export interface TypeDecimal {

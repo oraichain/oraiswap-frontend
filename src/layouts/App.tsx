@@ -19,11 +19,13 @@ import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { persistor } from 'store/configure';
-import { PERSIST_VER } from 'store/constants';
+import { ADDRESS_BOOK_KEY_BACKUP, PERSIST_VER } from 'store/constants';
 import Menu from './Menu';
 import './index.scss';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectAddressBookList, setAddressBookList } from 'reducer/addressBook';
 import FutureCompetition from 'components/FutureCompetitionModal';
 
 const App = () => {
@@ -39,6 +41,10 @@ const App = () => {
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const mobileMode = isMobile();
   const ethOwallet = window.eth_owallet;
+
+  const currentAddressBook = useSelector(selectAddressBookList);
+  const dispatch = useDispatch();
+
   // useTronEventListener();
 
   // TODO: polyfill evm, tron, need refactor
@@ -105,6 +111,7 @@ const App = () => {
   // clear persist storage when update version
   useEffect(() => {
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
+
     const clearPersistStorage = () => {
       persistor.pause();
       persistor.flush().then(() => {
@@ -115,9 +122,14 @@ const App = () => {
 
     if (isClearPersistStorage) clearPersistStorage();
 
-    // if (window.keplr && !isMobile()) {
-    //   keplrGasPriceCheck();
-    // }
+    try {
+      const restoredAddressBookJSON = localStorage.getItem(ADDRESS_BOOK_KEY_BACKUP);
+      const restoredAddressBook = JSON.parse(restoredAddressBookJSON);
+
+      dispatch(setAddressBookList(restoredAddressBook));
+    } catch (error) {
+      console.log('error', error);
+    }
   }, []);
 
   useEffect(() => {
@@ -192,7 +204,7 @@ const App = () => {
       <div className={`app ${theme}`}>
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        <FutureCompetition />
+        {/* <FutureCompetition /> */}
         <div className="main">
           <Sidebar />
           <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
