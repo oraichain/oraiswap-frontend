@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { VaultClients } from '../helpers/vault-query';
 import { calculateSharePrice } from './useVaults';
 import { useVaultDetail } from 'pages/VaultDetail/hooks/useVaultDetail';
+import { EVM_DECIMALS } from 'helper/constants';
 
 export const useGetShareBalance = ({ vaultAddress, userAddress, oraiVaultShare }) => {
   const {
@@ -51,7 +52,7 @@ export const getShareBalance = async ({
 
     let correspondingShare = '0';
     if (new BigDecimal(totalSupply.total_supply).toNumber() !== 0) {
-      correspondingShare = new BigDecimal(shareOfUser.amount)
+      correspondingShare = new BigDecimal(shareOfUser.amount, EVM_DECIMALS)
         .mul(oraiVaultShare)
         .div(totalSupply.total_supply)
         .toString(); // corresponding share in lp token

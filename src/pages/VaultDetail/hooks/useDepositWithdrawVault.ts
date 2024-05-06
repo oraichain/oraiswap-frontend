@@ -102,8 +102,7 @@ export const useDepositWithdrawVault = create<DepositState>()(
 
           let result = null;
           if (BigInt(balanceOfUser.amount) === BigInt(amount)) {
-            result = await gatewayClient.withdraw({
-              shareAmount: amount.toString(),
+            result = await gatewayClient.withdrawAll({
               vaultAddress: vaultAddr,
               network: networkWithdraw
             });

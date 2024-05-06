@@ -46,7 +46,7 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
         <div className={styles.key}>Share Amount</div>
         <div className={styles.amount}>
           <span>
-            {shareBalance} {vaultDetail.lpToken.symbol}{' '}
+            {formatDisplayUsdt(shareBalance, 8)} {vaultDetail.lpToken.symbol}
           </span>
         </div>
       </div>

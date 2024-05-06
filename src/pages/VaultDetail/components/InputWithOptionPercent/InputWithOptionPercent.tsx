@@ -41,10 +41,11 @@ export const InputWithOptionPercent: FC<{
   const [chosenOption, setChosenOption] = useState(-1);
   const [theme] = useConfigReducer('theme');
   const [inputValue, setInputValue] = useState<number | string>('');
-
+  console.log({ totalAmount });
   const onChangePercent = (percent: number) => {
     const HUNDRED_PERCENT_IN_DECIMALS = 100 * Math.pow(10, decimals);
-    setAmountFromPercent((toAmount(percent, decimals) * totalAmount) / BigInt(HUNDRED_PERCENT_IN_DECIMALS));
+    const amountFromPercent = (toAmount(percent, decimals) * totalAmount) / BigInt(HUNDRED_PERCENT_IN_DECIMALS);
+    setAmountFromPercent(amountFromPercent);
   };
 
   return (
@@ -91,7 +92,7 @@ export const InputWithOptionPercent: FC<{
               setChosenOption(-1);
             }}
             onValueChange={(value) => {
-              onValueChange && onValueChange(value);
+              chosenOption === -1 && onValueChange && onValueChange(value);
             }}
             isAllowed={(values) => {
               const { floatValue } = values;
@@ -113,7 +114,8 @@ export const InputWithOptionPercent: FC<{
             })}
             key={idx}
             onClick={() => {
-              setAmountFromPercent((BigInt(option) * totalAmount) / BigInt(100));
+              const amount = (BigInt(option) * totalAmount) / BigInt(100);
+              setAmountFromPercent(amount);
               setChosenOption(idx);
               setInputValue('');
             }}
