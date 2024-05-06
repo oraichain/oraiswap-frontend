@@ -85,6 +85,7 @@ import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import SwapDetail from './components/SwapDetail';
 import useFilteredTokens from './hooks/useFilteredTokens';
+import { submitTransaction } from '../ibc-routing';
 
 const cx = cn.bind(styles);
 
@@ -392,6 +393,12 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
+
+        await submitTransaction({
+          txHash: transactionHash,
+          chainId: originalFromToken.chainId
+        });
+
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
 
