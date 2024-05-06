@@ -17,7 +17,7 @@ export const useVaultDetail = (vaultAddr: string) => {
     const vaultDetail = totalVaultInfos.find((vaultInfo) => vaultInfo.vaultAddr === vaultAddr);
     setVaultDetail(vaultDetail);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vaultAddr, totalVaultInfos.length]);
+  }, [vaultAddr, JSON.stringify(totalVaultInfos)]);
 
   return { vaultDetail };
 };

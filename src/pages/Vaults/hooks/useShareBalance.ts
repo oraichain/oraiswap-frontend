@@ -6,16 +6,22 @@ import { useVaultDetail } from 'pages/VaultDetail/hooks/useVaultDetail';
 import { EVM_DECIMALS } from 'helper/constants';
 
 export const useGetShareBalance = ({ vaultAddress, userAddress, oraiVaultShare }) => {
+  const { vaultDetail } = useVaultDetail(vaultAddress);
+
   const {
     data: shareBalance,
     refetch: refetchShareBalance,
     isLoading
-  } = useQuery<string>(['share-balance'], () => getShareBalance({ vaultAddress, userAddress, oraiVaultShare }), {
-    enabled: !!vaultAddress && !!userAddress && !!oraiVaultShare,
-    placeholderData: '0'
-  });
+  } = useQuery<string>(
+    ['share-balance', vaultDetail, vaultAddress],
+    () => getShareBalance({ vaultAddress, userAddress, oraiVaultShare }),
+    {
+      enabled: !!vaultAddress && !!userAddress && !!oraiVaultShare,
+      placeholderData: '0',
+      keepPreviousData: true
+    }
+  );
 
-  const { vaultDetail } = useVaultDetail(vaultAddress);
   const sharePrice = vaultDetail ? calculateSharePrice(vaultDetail.totalSupply, vaultDetail.tvl) : 0;
 
   return {

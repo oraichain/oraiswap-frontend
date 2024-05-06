@@ -79,6 +79,13 @@ const App = () => {
           ),
           true
         );
+
+        sendJsonMessage(
+          buildWebsocketSendMessage(
+            `wasm._contract_address = '${ORAI_GATEWAY_CONTRACT_ADDRESS}' AND wasm.action = 'fulfill_withdraw_order' AND wasm.withdrawer = '${address}'`
+          ),
+          true
+        );
       },
       onClose: () => {
         console.log('unsubscribe all clients');

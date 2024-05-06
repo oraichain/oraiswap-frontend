@@ -14,7 +14,6 @@ import bech32 from 'bech32';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
-import { sleep } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { VaultClients } from 'pages/Vaults/helpers/vault-query';
@@ -173,17 +172,6 @@ export const handleMsgDepositVault = async (events) => {
     const vaultAddr = vaultAddrs[0];
     const depositer = depositers[0];
 
-    // sleep to wait contract update orai balance & total supply
-    await sleep(2000);
-
-    // refetch vault info
-    // @ts-ignore
-    await window.queryClient.refetchQueries({
-      queryKey: ['vaults-contract', 1],
-      type: 'active',
-      exact: true
-    });
-
     // @ts-ignore
     const vaultInfosContract = window.queryClient.getQueryData(['vaults-contract']);
     const gatewayClient = VaultClients.getOraiGateway(depositer);
@@ -210,11 +198,16 @@ export const processWsResponseMsg = async (message: any): Promise<string> => {
     ) {
       if (!result.events) return null;
       const events = result.events;
-      console.log({ events });
 
       // vault deposit msg
       const vaultAddrs = events['wasm.vault_address'];
       if (vaultAddrs) {
+        // refetch info vault contract
+        // @ts-ignore
+        await window.queryClient.invalidateQueries({
+          queryKey: ['vaults-contract']
+        });
+
         const msg = await handleMsgDepositVault(events);
         return msg;
       }
