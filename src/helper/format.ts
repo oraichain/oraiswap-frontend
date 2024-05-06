@@ -17,7 +17,7 @@ export const numberWithCommas = (
 
 export const formatDisplayUsdt = (amount: number | string, dp = 2, prefix = ''): string => {
   const validatedAmount = validateNumber(amount);
-  if (validatedAmount < 1) return `${prefix}${toFixedIfNecessary(amount.toString(), 4).toString()}`;
+  if (validatedAmount < 1) return `${prefix}${toFixedIfNecessary(amount.toString(), dp).toString()}`;
 
   return `${prefix}${numberWithCommas(toFixedIfNecessary(amount.toString(), dp), undefined, {
     maximumFractionDigits: 6

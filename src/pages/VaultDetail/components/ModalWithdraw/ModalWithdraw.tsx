@@ -75,7 +75,7 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
           value={withdrawAmount}
           token={vaultDetail.lpToken}
           setAmountFromPercent={setWithdrawAmount}
-          totalAmount={toAmount(shareBalance, vaultDetail.lpToken.decimals)}
+          totalAmount={BigInt(+shareBalance * Math.pow(10, vaultDetail.lpToken.decimals))}
           prefixText="Max Available to Withdraw: "
           decimals={vaultDetail.lpToken.decimals}
           amountInUsdt={withdrawAmountInUsdt}
@@ -84,9 +84,8 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
         {(() => {
           let disableMsg: string;
           if (withdrawAmount <= 0) disableMsg = 'Enter an amount';
-          if (withdrawAmount > toAmount(shareBalance, vaultDetail.lpToken.decimals)) disableMsg = `Insufficient share`;
-          const disabled =
-            loading || withdrawAmount <= 0 || withdrawAmount > toAmount(shareBalance, vaultDetail.lpToken.decimals);
+          if (withdrawAmount > BigInt(+shareBalance * Math.pow(10, vaultDetail.lpToken.decimals)))
+            disableMsg = `Insufficient share`;
 
           return (
             <div className={cx('btn-confirm')}>
@@ -101,7 +100,7 @@ export const ModalWithdraw: FC<ModalDepositWithdrawProps> = ({
                   refetchShareBalance();
                 }}
                 type="primary"
-                disabled={disabled}
+                disabled={Boolean(disableMsg)}
               >
                 {loading && <Loader width={22} height={22} />}
                 {disableMsg || 'Withdraw'}

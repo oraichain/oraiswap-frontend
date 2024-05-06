@@ -23,7 +23,7 @@ export class VaultClients {
   static getEthereumProvider() {
     if (!this.ethereumProvider) {
       const rpcProviderUrl = 'https://endpoints.omniatech.io/v1/bsc/mainnet/public';
-      this.ethereumProvider =  new providers.JsonRpcProvider(rpcProviderUrl);
+      this.ethereumProvider = new providers.JsonRpcProvider(rpcProviderUrl);
     }
     return this.ethereumProvider;
   }
@@ -44,7 +44,11 @@ export class VaultClients {
 
   static getMulticall() {
     if (!this.multicall) {
-      this.multicall = new ethers.Contract(MULTICALL_CONTRACT_ADDRESS, MultiCall__factory.abi, this.getEthereumProvider());
+      this.multicall = new ethers.Contract(
+        MULTICALL_CONTRACT_ADDRESS,
+        MultiCall__factory.abi,
+        this.getEthereumProvider()
+      );
     }
     return this.multicall;
   }
@@ -74,8 +78,6 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
     const dataCall = vaultAddrs.map((_vaultAddr) =>
       vaultLpInterface.encodeFunctionData('getVaultInfo', [ORAI_VAULT_BSC_CONTRACT_ADDRESS])
     );
-    const provider = new providers.JsonRpcProvider('https://endpoints.omniatech.io/v1/bsc/mainnet/public');
-    console.log({ provider });
 
     const amounts = await VaultClients.getMulticall().callStatic.multiCall(vaultAddrs, dataCall);
     // decode TVL
