@@ -15,6 +15,8 @@ export const useSwapFee = ({ fromToken, toToken }) => {
 
   const SWAP_FEE_PER_ROUTE = 0.003;
 
+  const isDependOnNetwork = fromToken.chainId !== 'Oraichain' || toToken.chainId !== 'Oraichain';
+
   useEffect(() => {
     if (!fromToken || !toToken) return;
 
@@ -45,5 +47,5 @@ export const useSwapFee = ({ fromToken, toToken }) => {
     }
   }, [fromToken, toToken]);
 
-  return { fee };
+  return { fee, isDependOnNetwork };
 };

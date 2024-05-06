@@ -1,0 +1,156 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.addressBookForm {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+
+  overflow: hidden;
+
+  .back,
+  .close {
+    cursor: pointer;
+
+    svg {
+      cursor: pointer;
+
+      @include theme {
+        path {
+          fill: theme-get('neutral-text-title-2');
+        }
+      }
+    }
+  }
+
+  .form {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 16px;
+  }
+
+  .selectTokenIcon {
+    display: flex;
+    padding: 6px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+
+    border-radius: 20px;
+
+    @include theme {
+      background: theme-get('neutral-surface-bg-section-6');
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+
+      @include theme {
+        path {
+          stroke: theme-get('neutral-text-text-token-name-2');
+        }
+      }
+    }
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @include theme {
+      color: theme-get('neutral-text-title-2');
+    }
+
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 150%;
+    padding: 0 16px;
+
+    .title {
+      flex: 1;
+      text-align: center;
+    }
+
+    svg {
+      cursor: pointer;
+    }
+  }
+
+  .selectToken {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tokenIcon {
+    svg {
+      vertical-align: middle;
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  .label {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    svg {
+      width: 22px;
+      height: 22px;
+
+      vertical-align: middle;
+    }
+
+    @include theme {
+      color: theme-get('neutral-text-text-dropdown');
+    }
+
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%; /* 24px */
+  }
+
+  .checkbox {
+    @include theme {
+      color: theme-get('neutral-text-text-dropdown');
+    }
+  }
+
+  .desc {
+    @include theme {
+      color: theme-get('neutral-8');
+    }
+  }
+
+  .btn {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    padding: 0 16px;
+
+    button {
+      width: 100%;
+    }
+
+    @include mobile {
+      flex-direction: column-reverse;
+      gap: 8px;
+    }
+  }
+}
