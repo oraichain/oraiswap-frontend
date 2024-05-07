@@ -3,7 +3,7 @@
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import _BigInt from 'big-integer';
 import { chainInfos } from 'config/chainInfos';
-import { getWalletByNetworkFromStorage } from 'helper';
+import { getWalletByNetworkFromStorage, getWalletByNetworkCosmosFromStorage } from 'helper';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 
@@ -25,9 +25,13 @@ Tendermint37Client.prototype.status = function () {
 window.TronWeb = require('tronweb');
 window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
+// // enable Keplr
+// const walletType = getWalletByNetworkFromStorage();
+// window.Keplr = new Keplr(walletType?.cosmos);
+
 // enable Keplr
-const walletType = getWalletByNetworkFromStorage();
-window.Keplr = new Keplr(walletType?.cosmos);
+const walletType = getWalletByNetworkCosmosFromStorage();
+window.Keplr = new Keplr(walletType);
 
 window.ethereumDapp = window.ethereum;
 window.Bitcoin = new Bitcoin();
