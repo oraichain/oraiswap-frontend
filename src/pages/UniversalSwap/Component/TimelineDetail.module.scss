@@ -10,7 +10,11 @@
     border-radius: 99px;
     color: #232521;
 
+    display: flex;
+    align-items: center;
+
     .wrapper {
+      width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -20,7 +24,74 @@
       font-size: 14px;
       font-style: normal;
       font-weight: 600;
-      line-height: 1.5;
+      line-height: 1;
+
+      .stateTxt {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+    }
+  }
+
+  .tokenWrapper {
+    margin: 8px 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    color: #f7f7f7;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 100%; /* 21px */
+
+    .tokenDetail {
+      display: flex;
+      // height: 42px;
+      padding: 6px 12px;
+      gap: 8px;
+
+      border-radius: 99px;
+      background: #494949;
+
+      .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        .chain {
+          color: #979995;
+
+          font-size: 12px;
+          font-weight: 500;
+          line-height: 100%; /* 18px */
+        }
+      }
+    }
+  }
+
+  .showInfo {
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    color: #d7f5bf;
+
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+
+    svg {
+      path {
+        stroke: #d7f5bf;
+      }
     }
   }
 
@@ -30,16 +101,32 @@
     margin-bottom: 24px;
     padding: 8px;
     border-radius: 8px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     background-color: rgba(35, 37, 33, 1);
 
     .text-wrapper {
       display: flex;
       justify-content: space-between;
+
       font-size: 13px;
-      font-style: normal;
       font-weight: 400;
       line-height: 1.5;
+
       color: rgba(239, 239, 239, 1);
+
+      .hash {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
     }
   }
 }
@@ -54,4 +141,42 @@
 
 .inactive {
   background: rgba(223, 224, 222, 1);
+}
+
+.light {
+  .timeline-detail {
+    color: #232521;
+  }
+
+  .tokenWrapper {
+    color: #232521;
+
+    .tokenDetail {
+      background: #efefef;
+
+      .info {
+        .chain {
+          color: #686a66;
+        }
+      }
+    }
+  }
+
+  .showInfo {
+    color: #2f5711;
+
+    svg {
+      path {
+        stroke: #2f5711;
+      }
+    }
+  }
+
+  .timeline-info {
+    background-color: #f7f7f7;
+
+    .text-wrapper {
+      color: #232521;
+    }
+  }
 }

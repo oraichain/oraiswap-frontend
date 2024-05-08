@@ -1,12 +1,13 @@
 // @ts-nocheck
 import {
-  TokenItemType,
-  tokens,
-  chainInfos as customChainInfos,
-  OsmoToken,
   AtomToken,
+  COSMOS_CHAIN_ID_COMMON,
+  ChainIdEnum,
   InjectiveToken,
-  ChainIdEnum
+  OsmoToken,
+  TokenItemType,
+  chainInfos as customChainInfos,
+  tokens
 } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
@@ -16,28 +17,29 @@ import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 
+import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as BTCIcon } from 'assets/icons/btc-icon.svg';
+import { ReactComponent as NobleLightIcon } from 'assets/icons/ic_noble_light.svg';
+import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
+import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
+import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraixLightIcon } from 'assets/icons/oraix_light.svg';
-import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis_light.svg';
 import { ReactComponent as ScOraiIcon } from 'assets/icons/orchai.svg';
+import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
+import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis_light.svg';
+import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
+import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
-import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
-import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
-import { ReactComponent as NobleLightIcon } from 'assets/icons/ic_noble_light.svg';
-import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
-import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
-import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
-import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 
 import {
   AIRI_BSC_CONTRACT,
   AIRI_CONTRACT,
   ATOM_ORAICHAIN_DENOM,
+  BridgeAppCurrency, CustomChainInfo,
   INJECTIVE_CONTRACT,
   INJECTIVE_ORAICHAIN_DENOM,
   KWTBSC_ORAICHAIN_DENOM,
@@ -51,8 +53,12 @@ import {
   MILKY_DENOM,
   MILKY_ERC_CONTRACT,
   MILKY_SUB_NETWORK_DENOM,
+  NEUTARO_ORAICHAIN_DENOM,
+  OCH_CONTRACT,
+  OCH_ETH_CONTRACT,
   ORAIIBC_INJECTIVE_DENOM,
   ORAIX_CONTRACT,
+  ORAIX_ETH_CONTRACT,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
@@ -66,21 +72,18 @@ import {
   USDC_ETH_CONTRACT,
   USDT_BSC_CONTRACT,
   USDT_CONTRACT,
+  USDT_ETH_CONTRACT,
   USDT_TRON_CONTRACT,
+  WETH_CONTRACT,
   WRAP_BNB_CONTRACT,
   WRAP_ETH_CONTRACT,
   WRAP_TRON_TRX_CONTRACT,
-  WETH_CONTRACT,
-  USDT_ETH_CONTRACT,
-  NEUTARO_ORAICHAIN_DENOM,
-  OCH_CONTRACT,
-  OCH_ETH_CONTRACT,
-  ORAIX_ETH_CONTRACT
+  defaultBech32Config
 } from '@oraichain/oraidex-common';
-import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
-import { flatten } from 'lodash';
 import { bitcoinChainId } from 'helper/constants';
 import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
+import { flatten } from 'lodash';
+import { EvmChainPrefix } from './ibc-routing';
 
 const [otherChainTokens, oraichainTokens] = tokens;
 type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
@@ -308,6 +311,76 @@ export const chainIcons: ChainIcon[] = [
     IconLight: BitcoinIcon
   }
 ];
+
+export const ICON_WITH_NETWORK = {
+  [COSMOS_CHAIN_ID_COMMON.ORAICHAIN_CHAIN_ID]: {
+    chainId: 'Oraichain',
+    Icon: OraiIcon,
+    IconLight: OraiLightIcon
+  },
+
+  bitcoin: {
+    chainId: 'bitcoin',
+    Icon: BTCIcon,
+    IconLight: BTCIcon
+  },
+  'kawaii_6886-1': {
+    chainId: 'kawaii_6886-1',
+    Icon: KwtIcon,
+    IconLight: KwtIcon
+  },
+  [COSMOS_CHAIN_ID_COMMON.OSMOSIS_CHAIN_ID]: {
+    chainId: 'osmosis-1',
+    Icon: OsmoIcon,
+    IconLight: OsmoIcon
+  },
+  [COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID]: {
+    chainId: 'injective-1',
+    Icon: InjIcon,
+    IconLight: InjIcon
+  },
+  [COSMOS_CHAIN_ID_COMMON.COSMOSHUB_CHAIN_ID]: {
+    chainId: 'cosmoshub-4',
+    Icon: AtomIcon,
+    IconLight: AtomIcon
+  },
+  [EvmChainPrefix.ETH_MAINNET]: {
+    chainId: '0x01',
+    Icon: EthIcon,
+    IconLight: EthIcon
+  },
+  [EvmChainPrefix.TRON_MAINNET]: {
+    chainId: '0x2b6653dc',
+    Icon: TronIcon,
+    IconLight: TronIcon
+  },
+  [EvmChainPrefix.BSC_MAINNET]: {
+    chainId: '0x38',
+    Icon: BnbIcon,
+    IconLight: BnbIcon
+  },
+  '0x1ae6': {
+    chainId: '0x1ae6',
+    Icon: KwtIcon,
+    IconLight: KwtIcon
+  },
+  'noble-1': {
+    chainId: 'noble-1',
+    Icon: NobleIcon,
+    IconLight: NobleLightIcon
+  },
+  'Neutaro-1': {
+    chainId: 'Neutaro-1',
+    Icon: NeutaroIcon,
+    IconLight: NeutaroIcon
+  },
+  'oraibtc-mainnet-1': {
+    chainId: 'oraibtc-mainnet-1',
+    Icon: BitcoinIcon,
+    IconLight: BitcoinIcon
+  }
+};
+
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
   return list.map((item) => {
     let Icon = OraiIcon;
