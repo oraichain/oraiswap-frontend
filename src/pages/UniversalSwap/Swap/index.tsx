@@ -290,7 +290,10 @@ const SwapComponent: React.FC<{
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
   const bridgeTokenFee =
     simulateDisplayAmount && (fromTokenFee || toTokenFee)
-      ? (simulateDisplayAmount * fromTokenFee + simulateDisplayAmount * toTokenFee) / 100
+      ? new BigDecimal(new BigDecimal(simulateDisplayAmount).mul(fromTokenFee))
+          .add(new BigDecimal(simulateDisplayAmount).mul(toTokenFee))
+          .div(100)
+          .toNumber()
       : 0;
 
   const minimumReceiveDisplay = isSimulateDataDisplay
@@ -302,7 +305,6 @@ const SwapComponent: React.FC<{
   const expectOutputDisplay = isSimulateDataDisplay
     ? numberWithCommas(simulateData.displayAmount, undefined, { minimumFractionDigits: 6 })
     : 0;
-
   const estSwapFee = new BigDecimal(simulateDisplayAmount || 0).mul(fee || 0).toNumber();
 
   const totalFeeEst =
