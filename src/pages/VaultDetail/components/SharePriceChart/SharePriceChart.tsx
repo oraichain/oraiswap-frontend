@@ -1,5 +1,5 @@
 import { TIMER } from 'helper/constants';
-import { formatDateChart, formatDisplayUsdt, formatNumberKMB } from 'helper/format';
+import { formatDateChart, formatDisplayUsdt, formatNumberKMB, formatNumberKMBWithFixed } from 'helper/format';
 import useTheme from 'hooks/useTheme';
 import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
 import { formatUTCDateString } from 'pages/CoHarvest/helpers';
@@ -46,7 +46,7 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
       scaleMargins: {
         top: 0.1,
         bottom: 0.05
-      }
+      },
     },
     leftPriceScale: {
       visible: false,
@@ -63,7 +63,7 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
       locale: 'en-US',
       dateFormat: 'dd MMM, yyyy',
       priceFormatter: (price) => {
-        return formatNumberKMB(Number(price));
+        return formatNumberKMBWithFixed(Number(price),4);
       }
     },
     grid: {
@@ -123,6 +123,9 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
         topColor: 'transparent',
         bottomColor: 'transparent'
       });
+      serieRef.current.applyOptions({
+        priceFormat: { type: 'price', precision: 4, minMove: 0.0001 }
+      });
     }
 
     const toolTipWidth = 96;
@@ -161,7 +164,7 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
                     ${formatUTCDateString(param.time * 1000)}
                   </div>
                   <div style="font-size: 14px; margin: 4px 0px; color: ${'#5EA402'}">
-                    ${formatDisplayUsdt(price, undefined, '$')}
+                    ${formatDisplayUsdt(price, 6, '')}
                   </div>
                   <div style="color: ${theme === 'light' ? '#686A66' : '#979995'}">
                     Share Price
@@ -199,6 +202,9 @@ export const SharePriceChart = ({ height = 150 }: { height?: number }) => {
       lineWidth: 3,
       topColor: 'transparent',
       bottomColor: 'transparent'
+    });
+    serieRef.current.applyOptions({
+      priceFormat: { type: 'price', precision: 4, minMove: 0.0001 }
     });
 
     // update new theme series with current data

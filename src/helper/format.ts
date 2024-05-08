@@ -54,3 +54,18 @@ export const formatNumberKMB = (num: number) => {
   }
   return formatDisplayUsdt(num, 2);
 };
+
+export const formatNumberKMBWithFixed = (num: number, dp = 2) => {
+  if (num >= 1e9) {
+    return '$' + (num / 1e9).toFixed(dp) + 'B';
+  }
+
+  if (num >= 1e6) {
+    return '$' + (num / 1e6).toFixed(dp) + 'M';
+  }
+
+  if (num >= 1e3) {
+    return '$' + (num / 1e3).toFixed(dp) + 'K';
+  }
+  return formatDisplayUsdt(num, dp);
+};
