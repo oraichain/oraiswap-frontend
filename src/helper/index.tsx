@@ -286,6 +286,7 @@ export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): Walle
 
 export const getWalletByNetworkFromStorage = (key = 'persist:root'): any => {
   try {
+    if (isMobile()) return 'owallet';
     const result = localStorage.getItem(key);
     const parsedResult = JSON.parse(result);
     const wallet = JSON.parse(parsedResult.wallet);

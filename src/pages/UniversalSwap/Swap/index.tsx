@@ -11,7 +11,8 @@ import {
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay
+  toDisplay,
+  parseTokenInfoRawDenom
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
@@ -19,6 +20,7 @@ import { useQuery } from '@tanstack/react-query';
 import { isMobile } from '@walletconnect/browser-utils';
 import UpArrowIcon from 'assets/icons/up-arrow.svg';
 import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
+import ArrowImg from 'assets/icons/arrow_new.svg';
 import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
 import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
@@ -58,7 +60,6 @@ import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import {
-  PairAddress,
   findKeyByValue,
   generateNewSymbol,
   getDisableSwap,
@@ -75,8 +76,8 @@ import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { AddressManagementStep } from 'reducer/type';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
-import { SlippageModal } from '../Modals';
-import { checkEvmAddress, getSwapType } from '../helpers';
+import { SlippageModal, TooltipIcon } from '../Modals';
+import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, getSwapType } from '../helpers';
 import AddressBook from './components/AddressBook';
 import InputCommon from './components/InputCommon';
 import InputSwap from './components/InputSwap/InputSwap';
@@ -87,9 +88,9 @@ import { useFillToken } from './hooks/useFillToken';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
-import SwapDetail from './components/SwapDetail';
 import useFilteredTokens from './hooks/useFilteredTokens';
 import { useNavigate } from 'react-router-dom';
+import SwapDetail from './components/SwapDetail';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
