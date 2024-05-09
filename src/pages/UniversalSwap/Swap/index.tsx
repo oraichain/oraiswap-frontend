@@ -514,6 +514,8 @@ const SwapComponent: React.FC<{
     setCoe(coeff);
   };
 
+  const unSupportSimulateToken = ['bnb', 'bep20_wbnb', 'eth'];
+
   const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
     const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
@@ -522,7 +524,6 @@ const SwapComponent: React.FC<{
     if (token.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap)) {
       setFromTokenDenom(toTokenDenomSwap);
       setToTokenDenom(fromTokenDenomSwap);
-
       setSelectChainFrom(selectChainTo);
       setSelectChainTo(selectChainFrom);
 
@@ -795,6 +796,7 @@ const SwapComponent: React.FC<{
           isSelectToken={isSelectFrom}
         />
         <SelectChain
+          filterChainId={unSupportSimulateToken.includes(originalFromToken?.denom) ? ['Oraichain'] : []}
           setIsSelectToken={setIsSelectChainTo}
           amounts={amounts}
           theme={theme}
