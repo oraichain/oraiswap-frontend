@@ -79,6 +79,7 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
       vaultLpInterface.encodeFunctionData('getVaultInfo', [ORAI_VAULT_BSC_CONTRACT_ADDRESS])
     );
 
+    // TODO: add this info into multicall
     const sharePrices = await Promise.all(vaultAddrs.map(async (_vaultAddr) => {
       const vault = new ethers.Contract(_vaultAddr, VaultLP__factory.abi, VaultClients.getEthereumProvider());
       const decimals = await vault.decimals();
