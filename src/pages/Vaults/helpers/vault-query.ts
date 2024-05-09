@@ -79,6 +79,13 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
       vaultLpInterface.encodeFunctionData('getVaultInfo', [ORAI_VAULT_BSC_CONTRACT_ADDRESS])
     );
 
+    const sharePrices = await Promise.all(vaultAddrs.map(async (_vaultAddr) => {
+      const vault = new ethers.Contract(_vaultAddr, VaultLP__factory.abi, VaultClients.getEthereumProvider());
+      const decimals = await vault.decimals();
+      const sharePrice = await vault.callStatic.getPricePerFullShare();
+      return ethers.utils.formatUnits(sharePrice, decimals);
+    }));
+
     const amounts = await VaultClients.getMulticall().callStatic.multiCall(vaultAddrs, dataCall);
     // decode TVL
     const decodedResults = amounts.map((result, index) => {
@@ -87,9 +94,11 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
         vaultAddress: arrs[0],
         tvlByToken1: utils.formatEther(arrs[1] as any),
         totalSupply: utils.formatEther(arrs[2] as any),
-        oraiBalance: utils.formatEther(arrs[3] as any)
+        oraiBalance: utils.formatEther(arrs[3] as any),
+        sharePriceInToken1: sharePrices[index]
       };
     });
+    console.log({ decodedResults });
     return decodedResults;
   } catch (error) {
     console.error('Error getVaultInfosFromContract: ', error);

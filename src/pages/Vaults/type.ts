@@ -11,6 +11,7 @@ export type VaultInfoContract = {
   oraiBalance: string;
   totalSupply: string;
   tvlByToken1: string;
+  sharePriceInToken1: string;
 };
 
 export type VaultInfoBackend = {

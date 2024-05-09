@@ -9,7 +9,7 @@ export const VaultDetailOverview = ({ vaultDetail }: { vaultDetail: VaultInfo })
         <div className={styles.info}>
           <h4>Share Price</h4>
           <div className={styles.infoValue}>
-            <span>{formatDisplayUsdt(vaultDetail.sharePrice, undefined, '$')}</span>
+            <span>{formatDisplayUsdt(vaultDetail.sharePrice, undefined, '$')} ({formatDisplayUsdt(vaultDetail.sharePriceInToken1, undefined, '')} {vaultDetail.tokenInfo1.name})</span>
           </div>
         </div>
         <div className={styles.info}>
