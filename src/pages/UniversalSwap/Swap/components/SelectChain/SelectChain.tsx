@@ -24,6 +24,7 @@ interface InputSwapProps {
   amounts: AmountDetails;
   theme: Themes;
   prices: CoinGeckoPrices<string>;
+  filterChainId?: string[];
 }
 
 export default function SelectChain({
@@ -32,7 +33,8 @@ export default function SelectChain({
   setSelectChain,
   amounts,
   prices,
-  theme
+  theme,
+  filterChainId = []
 }: InputSwapProps) {
   // const isAllowChainId = (chainId) => ['kawaii_6886-1', 'bitcoin', 'noble-1', 'Neutaro-1'].includes(chainId);
   const isAllowChainId = (chainId) => ['kawaii_6886-1', 'bitcoin'].includes(chainId);
@@ -70,7 +72,9 @@ export default function SelectChain({
         <div className={styles.selectChainList}>
           <div className={styles.selectChainItems}>
             {networks
-              .filter((net) => !isAllowChainId(net.chainId))
+              .filter(
+                (net) => !isAllowChainId(net.chainId) && (!filterChainId.length || filterChainId.includes(net.chainId))
+              )
               .map((item) => {
                 const networkIcon = chainIcons.find((chainIcon) => chainIcon.chainId === item.chainId);
                 const key = item.chainId.toString();
