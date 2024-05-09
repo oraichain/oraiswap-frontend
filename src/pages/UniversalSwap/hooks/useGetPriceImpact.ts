@@ -8,7 +8,7 @@ const useGetPriceImpact = ({ data }: { data: TransactionHistory }) => {
 
   let impactWarning = 0;
 
-  if (isImpactPrice) {
+  if (isImpactPrice && Number(avgSimulate || 0) && Number(fromAmountToken || 0)) {
     const calculateImpactPrice = new BigDecimal(expectedOutput || toAmountToken)
       .div(fromAmountToken)
       .div(avgSimulate)
