@@ -110,3 +110,7 @@ export interface CheckpointFeeInfoInterface {
   fees_collected: number;
   miner_fee: number;
 }
+
+export interface EscrowBalanceInterface {
+  escrow_balance: number;
+}

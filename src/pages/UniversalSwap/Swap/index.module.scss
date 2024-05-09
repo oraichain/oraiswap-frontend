@@ -365,15 +365,16 @@
   .impact-warning {
     display: flex;
     gap: 2px;
-    font-weight: 500;
+    font-weight: 400;
     .title {
       span {
-        color: $warning-impact-color;
+        color: $error-color;
       }
     }
+
     svg {
       path {
-        color: $warning-impact-color;
+        stroke: $error-color;
       }
     }
   }
@@ -533,6 +534,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px;
+  gap: 4px;
 
   .title {
     flex: 1;
@@ -549,6 +551,10 @@
 
     @include theme() {
       color: theme-get('text-color');
+    }
+
+    @include medium-desktop {
+      display: none;
     }
 
     @include small-mobile {
@@ -599,7 +605,7 @@
 
     font-size: 13px;
     font-weight: 500;
-    line-height: 100%;
+    line-height: 120%;
 
     &:hover {
       opacity: 0.8;
@@ -607,12 +613,36 @@
 
     &-ten {
       color: $warning-10-color !important;
+
+      svg {
+        path {
+          stroke: $warning-10-color;
+        }
+      }
     }
+
     &-five {
       color: $warning-5-color !important;
+
+      svg {
+        path {
+          stroke: $warning-5-color;
+        }
+      }
     }
-    svg {
-      vertical-align: middle;
+
+    .text {
+      svg {
+        width: 16px;
+        height: 16px;
+        vertical-align: text-top;
+        margin-right: 4px;
+      }
+    }
+
+    img {
+      width: 16px;
+      height: 16px;
     }
   }
 }
@@ -786,10 +816,12 @@
       align-items: center;
       gap: 6px;
       padding-top: 6px;
+
       .smart-router-item-volumn {
-        width: 30px;
+        width: max-content;
         font-size: 13px;
         font-weight: 500;
+
         @include theme() {
           color: theme-get('colors-neutral-text-title');
         }
@@ -856,10 +888,21 @@
       display: flex;
       gap: 8px;
       align-items: center;
+
       .smart-router-price-impact-warning {
         display: flex;
         align-items: center;
         gap: 4px;
+
+        @include theme() {
+          color: theme-get('colors-neutral-text-body-on-row');
+        }
+
+        svg {
+          vertical-align: text-top;
+          width: 16px;
+          height: 16px;
+        }
 
         &-ten {
           color: $warning-10-color !important;
