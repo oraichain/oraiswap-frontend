@@ -91,6 +91,7 @@ import styles from './index.module.scss';
 import useFilteredTokens from './hooks/useFilteredTokens';
 import { useNavigate } from 'react-router-dom';
 import SwapDetail from './components/SwapDetail';
+import { submitTransactionIBC } from '../ibc-routing';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -150,9 +151,9 @@ const SwapComponent: React.FC<{
 
   const { fromToken, toToken } = getFromToToken(
     originalFromToken,
-    originalToToken,
-    fromTokenDenomSwap,
-    toTokenDenomSwap
+    originalToToken
+    // fromTokenDenomSwap,
+    // toTokenDenomSwap
   );
 
   const remoteTokenDenomFrom = getRemoteDenom(originalFromToken);
@@ -404,6 +405,12 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
+
+        await submitTransactionIBC({
+          txHash: transactionHash,
+          chainId: originalFromToken.chainId
+        });
+
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
 
@@ -421,13 +428,19 @@ const SwapComponent: React.FC<{
           fromChainId: originalFromToken.chainId,
           toChainId: originalToToken.chainId,
           fromAmount: fromAmountToken.toString(),
-          toAmount: toAmountToken.toString(),
+          toAmount: minimumReceiveDisplay.toFixed(6),
           fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
-          toAmountInUsdt: getUsd(toAmount(toAmountToken, originalToToken.decimals), originalToToken, prices).toString(),
+          toAmountInUsdt: getUsd(
+            toAmount(minimumReceiveDisplay, originalToToken.decimals),
+            originalToToken,
+            prices
+          ).toString(),
           status: 'success',
           type: swapType,
           timestamp: Date.now(),
-          userAddress: oraiAddress
+          userAddress: oraiAddress,
+          avgSimulate: String(averageRatio.displayAmount || 0),
+          expectedOutput: String(expectOutputDisplay || 0)
         });
         refetchTransHistory();
       }

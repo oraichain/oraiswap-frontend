@@ -20,10 +20,12 @@
       @include theme() {
         color: theme-get('text-color');
       }
+    }
 
+    tr {
+      padding: 0 !important;
     }
   }
-
 
   .info {
     display: flex;
@@ -74,16 +76,27 @@
   }
 }
 
+.historyContainer {
+  padding: 16px 0;
+}
+
 .history {
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   font-size: 13px;
   font-weight: 400;
 
   .status {
     margin-right: 7px;
+
+    @include medium_mobile {
+      svg {
+        width: 30px;
+        height: 30px;
+      }
+    }
   }
 
   .from,
@@ -114,8 +127,12 @@
         padding-left: 12px;
 
         .subBalance,
-        addBalance {
+        .addBalance {
           font-size: 14px;
+
+          @include mobile {
+            font-size: 12px;
+          }
 
           .denom {
             padding-left: 4px;
@@ -132,6 +149,9 @@
         }
 
         .timestamp {
+          @include mobile {
+            font-size: 12px;
+          }
           @include theme() {
             color: theme-get('neutral-text-body-on-section');
           }
@@ -156,6 +176,10 @@
       text-transform: capitalize;
       font-style: normal;
       font-weight: 500;
+
+      @include mobile {
+        font-size: 12px;
+      }
 
       @include theme() {
         color: theme-get('neutral-text-text-token-name');
@@ -201,7 +225,38 @@
   }
 }
 
+.action {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0 0 24px;
+  border-radius: 99px;
 
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 150%;
+
+  @include theme {
+    background: theme-get('neutral-border-border-bold');
+    color: theme-get('neutral-text-text-token-name');
+  }
+
+  .btn {
+    button {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1;
+
+      display: flex;
+      height: 30px;
+      padding: 5px 10px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+}
 
 .loadingTrans {
   display: inline-block;
@@ -226,7 +281,6 @@
   border-radius: 50%;
   animation: loadingTrans 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   border-color: $text-btn-default transparent transparent transparent;
-
 }
 
 .loadingTrans div:nth-child(1) {

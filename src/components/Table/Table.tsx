@@ -3,6 +3,7 @@ import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
 import { compareNumber } from 'helper';
 import { ReactNode, useState } from 'react';
 import styles from './Table.module.scss';
+import { keys } from 'lodash';
 
 export type HeaderDataType<T extends object> = {
   name: string;
@@ -20,6 +21,7 @@ export type TableProps<T extends object> = {
   data: T[];
   stylesColumn?: React.CSSProperties;
   handleClickRow?: (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, record: T) => void;
+  hideColumns?: (keyof T)[];
 };
 
 export enum SortType {
@@ -112,7 +114,8 @@ export const Table = <T extends object>({
   headers,
   data,
   handleClickRow,
-  stylesColumn
+  stylesColumn,
+  hideColumns = []
 }: TableProps<T>) => {
   const [sort, setSort] = useState<Record<keyof T, SortType>>({
     [defaultSorted]: SortType.DESC
@@ -138,11 +141,13 @@ export const Table = <T extends object>({
     sortDataSource(data, newSort);
   };
 
+  const formatList = Object.keys(headers).filter((key) => !hideColumns.includes(key as keyof T));
+
   return (
     <table className={styles.table}>
       <thead>
         <tr style={stylesColumn}>
-          {Object.keys(headers).map((key, index) => {
+          {formatList.map((key, index) => {
             const { sortField } = headers[key];
             const align = headers[key].align;
             const sortOrder = sort[headers[key].sortField];
@@ -168,7 +173,7 @@ export const Table = <T extends object>({
         {sortDataSource(data, sort).map((datum, index) => {
           return (
             <tr style={stylesColumn} key={index} onClick={(event) => handleClickRow && handleClickRow(event, datum)}>
-              {Object.keys(headers).map((key, index) => {
+              {formatList.map((key, index) => {
                 const customStyle = getCustomStyleByColumnKey(headers, key);
                 return (
                   <td key={index} style={customStyle}>

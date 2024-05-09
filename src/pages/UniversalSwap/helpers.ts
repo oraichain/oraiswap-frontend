@@ -23,9 +23,11 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { swapFromTokens, swapToTokens, tokenMap } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
+import { TransactionHistory } from 'libs/duckdb';
 import { generateError } from 'libs/utils';
 import { PairToken } from 'reducer/type';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { submitTransactionIBC } from './ibc-routing';
 
 export enum SwapDirection {
   From,
@@ -283,7 +285,7 @@ export const refreshBalances = async (
   }
 };
 
-export const getFromToToken = (originalFromToken, originalToToken, fromTokenDenomSwap, toTokenDenomSwap) => {
+export const getFromToToken = (originalFromToken, originalToToken) => {
   const isEvmSwap = UniversalSwapHelper.isEvmSwappable({
     fromChainId: originalFromToken.chainId,
     toChainId: originalToToken.chainId,
@@ -291,11 +293,9 @@ export const getFromToToken = (originalFromToken, originalToToken, fromTokenDeno
     toContractAddr: originalToToken.contractAddress
   });
   const fromToken = isEvmSwap
-    ? tokenMap[fromTokenDenomSwap]
-    : getTokenOnOraichain(tokenMap[fromTokenDenomSwap].coinGeckoId) ?? tokenMap[fromTokenDenomSwap];
-  const toToken = isEvmSwap
-    ? tokenMap[toTokenDenomSwap]
-    : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
+    ? originalFromToken
+    : getTokenOnOraichain(originalFromToken.coinGeckoId) ?? originalFromToken;
+  const toToken = isEvmSwap ? originalToToken : getTokenOnOraichain(originalToToken.coinGeckoId) ?? originalToToken;
 
   return { fromToken, toToken };
 };
@@ -387,4 +387,19 @@ export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLi
   );
 
   return { infoPair, TokenInIcon, TokenOutIcon, pairKey };
+};
+
+export const handleAddTxHistory = async (data: TransactionHistory) => {
+  console.log('handleAddTxHistory', data);
+  try {
+    await submitTransactionIBC({
+      txHash: data.initialTxHash,
+      chainId: data.fromChainId
+    });
+
+    await window.duckDb.initializeTableHistory(data.userAddress);
+    await window.duckDb.addTransHistory({ ...data });
+  } catch (error) {
+    console.log('add history error', error);
+  }
 };

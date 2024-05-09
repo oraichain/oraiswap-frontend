@@ -28,7 +28,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { reduceString } from 'libs/utils';
 import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
 import { calcMaxAmount, useDepositFeesBitcoin, useGetWithdrawlFeesBitcoin } from '../helpers';
@@ -40,6 +40,7 @@ interface TransferConvertProps {
   convertKwt?: any;
   onClickTransfer: any;
   subAmounts?: object;
+  setReceiveAmount?: any;
 }
 
 const TransferConvertToken: FC<TransferConvertProps> = ({
@@ -47,7 +48,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   amountDetail,
   convertKwt,
   onClickTransfer,
-  subAmounts
+  subAmounts,
+  setReceiveAmount
 }) => {
   const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
@@ -169,7 +171,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     toDisplayBTCFee = new BigDecimal(withdrawalFeeBtc.withdrawal_fees ?? 0).div(1e14).toNumber();
   }
 
-  let receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee - toDisplayBTCFee : 0;
+  const receivedAmount = useMemo(
+    () => (convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee - toDisplayBTCFee : 0),
+    [convertAmount, bridgeFee, relayerFeeTokenFee, toDisplayBTCFee]
+  );
+
+  useEffect(() => {
+    setReceiveAmount && setReceiveAmount(receivedAmount);
+  }, [receivedAmount]);
 
   const renderBridgeFee = () => {
     return (

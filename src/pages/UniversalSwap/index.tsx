@@ -16,6 +16,7 @@ import useTheme from 'hooks/useTheme';
 import { PAIRS_CHART } from 'config/pools';
 import { useGetPriceChange } from 'pages/Pools/hooks';
 import { initPairSwap } from './Swap/hooks/useFillToken';
+import useInitialDuckDb from 'hooks/useInitialDuckDb';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
@@ -29,13 +30,7 @@ const Swap: React.FC = () => {
 
   let tab = searchParams.get('type');
   const dispatch = useDispatch();
-  const initDuckdb = async () => {
-    window.duckDb = await DuckDb.create();
-  };
-
-  useEffect(() => {
-    if (!window.duckDb) initDuckdb();
-  }, [window.duckDb]);
+  useInitialDuckDb();
 
   const handleChangeChartTimeFrame = (resolution: number) => {
     dispatch(setChartTimeFrame(resolution));

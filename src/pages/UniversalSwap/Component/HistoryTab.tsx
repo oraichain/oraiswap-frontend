@@ -1,26 +1,41 @@
 import ArrowImg from 'assets/icons/arrow_right.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/ic_status_done.svg';
-import { ReactComponent as ErrorIcon } from 'assets/icons/ic_status_failed.svg';
 import OpenNewWindowImg from 'assets/icons/open_new_window.svg';
 import cn from 'classnames/bind';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
 import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
-import { network } from 'config/networks';
 import useTheme from 'hooks/useTheme';
 import { TransactionHistory } from 'libs/duckdb';
 import { reduceString, timeSince } from 'libs/utils';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
+import { useRef, useState } from 'react';
+import IbcRouting from '../Modals/IbcRouting';
 import { useGetTransHistory } from '../Swap/hooks';
-import styles from './HistoryTab.module.scss';
 import { getExplorerScan } from '../helpers';
-import { useState } from 'react';
+import styles from './HistoryTab.module.scss';
+
+import { Button } from 'components/Button';
+import { DbStateToChainName, StateDBStatus } from 'config/ibc-routing';
+import useOnClickOutside from 'hooks/useOnClickOutside';
+import { useGetAllRoutingData } from '../hooks/useGetRoutingData';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 const RowsComponent: React.FC<{
   rows: TransactionHistory;
-}> = ({ rows }) => {
+  onClick: () => void;
+  routingData: any[];
+}> = ({ rows, onClick, routingData }) => {
   const theme = useTheme();
+  const [showAction, setShowAction] = useState(false);
+  const ref = useRef();
+  const mobileMode = isMobile();
+
+  useOnClickOutside(ref, () => {
+    setShowAction(false);
+  });
+
   const [fromToken, toToken] = [
     flattenTokensWithIcon.find((token) => token.coinGeckoId === rows.fromCoingeckoId),
     flattenTokensWithIcon.find((token) => token.coinGeckoId === rows.toCoingeckoId)
@@ -33,9 +48,16 @@ const RowsComponent: React.FC<{
   ];
   if (!fromChain || !toChain) return <></>;
 
-  const generateTransactionStatus = (status: string) => {
-    if (status === 'error') return <ErrorIcon />;
-    if (status === 'success') return <SuccessIcon />;
+  // const { activeStep, routingData, routingFinished, currentRoute } = useCheckIbcDataStatus(rows);
+  const generateTransactionStatus = () => {
+    const pendingItems = !routingData
+      ? []
+      : routingData.filter((item: any) => item.data.status === StateDBStatus.PENDING);
+    const isLoading = pendingItems.length !== 0;
+
+    // if (status === 'error') return <ErrorIcon />;
+    // if (status === 'success') return <SuccessIcon />;
+    if (!isLoading) return <SuccessIcon />;
     return (
       <div className={styles.loadingTrans}>
         <div></div>
@@ -46,11 +68,12 @@ const RowsComponent: React.FC<{
     );
   };
 
+  const currentStep = routingData && routingData[routingData.length - 1];
+
   return (
-    <div>
+    <div className={styles.historyContainer} onClick={() => setShowAction(!showAction)} ref={ref}>
       <div className={styles.history}>
-        {/* TODO: show later */}
-        {/* <div className={styles.status}>{generateTransactionStatus(rows.status)}</div> */}
+        <div className={styles.status}>{generateTransactionStatus()}</div>
         <div className={styles.time}>
           <div className={styles.type}>{rows.type}</div>
           <div className={styles.timestamp}>{timeSince(Number(rows.timestamp))}</div>
@@ -74,7 +97,7 @@ const RowsComponent: React.FC<{
             <div className={styles.value}>
               <div className={styles.subBalance}>
                 {'-'}
-                {rows.fromAmount}
+                {numberWithCommas(Number(rows.fromAmount), undefined, { maximumFractionDigits: 6 })}
                 <span className={styles.denom}>{fromToken.name}</span>
               </div>
               <div className={styles.timestamp}>{formatDisplayUsdt(rows.fromAmountInUsdt)}</div>
@@ -103,7 +126,8 @@ const RowsComponent: React.FC<{
             <div className={styles.value}>
               <div className={styles.addBalance}>
                 {'+'}
-                {rows.toAmount}
+                {numberWithCommas(Number(rows.toAmount), undefined, { maximumFractionDigits: 6 })}
+
                 <span className={styles.denom}>{toToken.name}</span>
               </div>
               <div className={styles.timestamp}>{formatDisplayUsdt(rows.toAmountInUsdt)}</div>
@@ -123,6 +147,38 @@ const RowsComponent: React.FC<{
           </div>
         </div>
       </div>
+      {showAction &&
+        !mobileMode && ( // !!routingData?.length &&
+          <div className={styles.action}>
+            <div className={styles.progress}>
+              {currentStep && currentStep.data ? (
+                currentStep.data.nextState !== '' ? (
+                  <span className={styles.stateTxt}>
+                    Bridge &#x2022; From {DbStateToChainName[currentStep.type]} to{' '}
+                    {DbStateToChainName[currentStep.data.nextState]}
+                  </span>
+                ) : (
+                  `On ${DbStateToChainName[currentStep.type]}`
+                )
+              ) : toChain?.chainName ? (
+                `On ${toChain?.chainName}`
+              ) : (
+                ''
+              )}
+            </div>
+            <div className={styles.btn}>
+              <Button
+                type="primary-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick();
+                }}
+              >
+                View details
+              </Button>
+            </div>
+          </div>
+        )}
     </div>
   );
 };
@@ -131,12 +187,26 @@ export const HistoryTab: React.FC<{
   networkFilter: string;
 }> = ({ networkFilter }) => {
   const { transHistory } = useGetTransHistory();
+  const [isOpenIbcRouting, setIsOpenIbcRouting] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const mobileMode = isMobile();
+  const [txtSearch, setTxtSearch] = useState(null);
+
+  const allRoutingData = useGetAllRoutingData(transHistory);
 
   const headers: TableHeaderProps<TransactionHistory> = {
     assets: {
       name: '',
-      accessor: (data) => <RowsComponent rows={data} />,
+      accessor: (data) => (
+        <RowsComponent
+          rows={data}
+          onClick={() => {
+            setSelectedData(data);
+            setIsOpenIbcRouting(true);
+          }}
+          routingData={allRoutingData?.[data?.initialTxHash]}
+        />
+      ),
       width: '100%',
       align: 'left'
     }
@@ -146,14 +216,19 @@ export const HistoryTab: React.FC<{
     <>
       <div className={cx('historyTab')}>
         {/* <div className={cx('info')}>
-        <div className={cx('filter')}>
-          <img src={FilterIcon} className={cx('filter-icon')} alt="filter" />
-          <span className={cx('filter-title')}>Transaction</span>
-        </div>
-        <div className={cx('search')}>
-          <SearchInput placeholder="Search by address, asset, type" onSearch={(tokenName) => {}} />
-        </div>
-      </div> */}
+          <div className={cx('filter')}>
+            <img src={FilterIcon} className={cx('filter-icon')} alt="filter" />
+            <span className={cx('filter-title')}>Transaction</span>
+          </div>
+          <div className={cx('search')}>
+            <SearchInput
+              placeholder="Search by address, asset, type"
+              onSearch={(tokenName) => {
+                setTxtSearch(tokenName);
+              }}
+            />
+          </div>
+        </div> */}
         <div className={styles.historyData}>
           <h2>Latest 20 transactions</h2>
           {transHistory && transHistory.length > 0 ? (
@@ -165,6 +240,7 @@ export const HistoryTab: React.FC<{
               }}
               handleClickRow={(e, data) => {
                 setSelectedData(data);
+                mobileMode && setIsOpenIbcRouting(true);
               }}
             />
           ) : (
@@ -172,6 +248,7 @@ export const HistoryTab: React.FC<{
           )}
         </div>
       </div>
+      {isOpenIbcRouting && <IbcRouting data={selectedData} close={() => setIsOpenIbcRouting(false)} />}
     </>
   );
 };
