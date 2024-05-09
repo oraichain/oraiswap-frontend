@@ -19,6 +19,7 @@ import { Button } from 'components/Button';
 import { DbStateToChainName, StateDBStatus } from 'config/ibc-routing';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import { useGetAllRoutingData } from '../hooks/useGetRoutingData';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 const RowsComponent: React.FC<{
@@ -29,6 +30,7 @@ const RowsComponent: React.FC<{
   const theme = useTheme();
   const [showAction, setShowAction] = useState(false);
   const ref = useRef();
+  const mobileMode = isMobile();
 
   useOnClickOutside(ref, () => {
     setShowAction(false);
@@ -145,35 +147,38 @@ const RowsComponent: React.FC<{
           </div>
         </div>
       </div>
-      {/* {!!routingData?.length && showAction && (
-        <div className={styles.action}>
-          <div className={styles.progress}>
-            {currentStep && currentStep.data ? (
-              currentStep.data.nextState !== '' ? (
-                <span className={styles.stateTxt}>
-                  Bridge &#x2022; From {DbStateToChainName[currentStep.type]} to{' '}
-                  {DbStateToChainName[currentStep.data.nextState]}
-                </span>
+      {showAction &&
+        !mobileMode && ( // !!routingData?.length &&
+          <div className={styles.action}>
+            <div className={styles.progress}>
+              {currentStep && currentStep.data ? (
+                currentStep.data.nextState !== '' ? (
+                  <span className={styles.stateTxt}>
+                    Bridge &#x2022; From {DbStateToChainName[currentStep.type]} to{' '}
+                    {DbStateToChainName[currentStep.data.nextState]}
+                  </span>
+                ) : (
+                  `On ${DbStateToChainName[currentStep.type]}`
+                )
+              ) : toChain?.chainName ? (
+                `On ${toChain?.chainName}`
               ) : (
-                `On ${DbStateToChainName[currentStep.type]}`
-              )
-            ) : (
-              ''
-            )}
+                ''
+              )}
+            </div>
+            <div className={styles.btn}>
+              <Button
+                type="primary-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick();
+                }}
+              >
+                View details
+              </Button>
+            </div>
           </div>
-          <div className={styles.btn}>
-            <Button
-              type="primary-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick();
-              }}
-            >
-              View details
-            </Button>
-          </div>
-        </div>
-      )} */}
+        )}
     </div>
   );
 };
@@ -184,6 +189,7 @@ export const HistoryTab: React.FC<{
   const { transHistory } = useGetTransHistory();
   const [isOpenIbcRouting, setIsOpenIbcRouting] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const mobileMode = isMobile();
   const [txtSearch, setTxtSearch] = useState(null);
 
   const allRoutingData = useGetAllRoutingData(transHistory);
@@ -234,7 +240,7 @@ export const HistoryTab: React.FC<{
               }}
               handleClickRow={(e, data) => {
                 setSelectedData(data);
-                setIsOpenIbcRouting(true);
+                mobileMode && setIsOpenIbcRouting(true);
               }}
             />
           ) : (

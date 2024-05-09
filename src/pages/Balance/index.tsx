@@ -95,6 +95,7 @@ import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { isMobile } from '@walletconnect/browser-utils';
 import { handleAddTxHistory } from 'pages/UniversalSwap/helpers';
+import useInitialDuckDb from 'hooks/useInitialDuckDb';
 
 interface BalanceProps {}
 
@@ -123,6 +124,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
   const [receiveAmount, setReceiveAmount] = useState(0);
+
+  useInitialDuckDb();
 
   const ref = useRef(null);
   //@ts-ignore
@@ -427,7 +430,7 @@ const Balance: React.FC<BalanceProps> = () => {
         fromCoingeckoId: from.coinGeckoId,
         toCoingeckoId: to.coinGeckoId,
         fromChainId: from.chainId,
-        toChainId: to.chainId,
+        toChainId: toNetworkChainId || to.chainId,
         fromAmount: String(fromAmount),
         toAmount: displayedReceive,
         fromAmountInUsdt: getUsd(toAmount(fromAmount, from?.decimals), from, prices).toString(),
@@ -562,6 +565,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
       result = await universalSwapHandler.processUniversalSwap();
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
+      if (result?.transactionHash) {
+        handleAddTxHistory({ ...dataHistory, initialTxHash: result?.transactionHash });
+      }
     } catch (ex) {
       console.log('ex', ex);
       handleErrorTransaction(ex, {

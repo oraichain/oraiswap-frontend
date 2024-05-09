@@ -351,6 +351,7 @@ export const handleAddTxHistory = async (data: TransactionHistory) => {
       chainId: data.fromChainId
     });
 
+    await window.duckDb.initializeTableHistory(data.userAddress);
     await window.duckDb.addTransHistory({ ...data });
   } catch (error) {
     console.log('add history error', error);

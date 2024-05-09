@@ -27,7 +27,6 @@ export const toSql = (tableName: string, obj: Object) => {
     return `'${value}'`;
   });
 
-  console.log('22222', `insert into ${tableName} (${keys.join(', ')}) values (${values.join(', ')})`);
   return `insert into ${tableName} (${keys.join(', ')}) values (${values.join(', ')})`;
 };
 
@@ -144,4 +143,8 @@ export class DuckDb {
     );
     return histories.toArray();
   }
+
+  initializeTableHistory = async (userAddress: string) => {
+    await this.createTableTransHistory(userAddress);
+  };
 }
