@@ -1,5 +1,5 @@
 // import Banner from 'assets/images/ftc_deadline_extended.png';
-import Banner from 'assets/images/oraidex_proposal_f3.png';
+import Banner from 'assets/images/oraidex_proposal.png';
 
 // import BannerDark from 'assets/images/competiton-future-banner-dark.png';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -30,12 +30,14 @@ const FutureCompetition = () => {
           cursor: 'pointer'
         }}
         onClick={() =>
-          window.open('https://daodao.zone/dao/orai1y7z3gw0al5lx9yygs800zfvnkr065xjrpld9wt6950y897grppxsrf4zcr/home')
+          window.open(
+            'https://daodao.zone/dao/orai1y7z3gw0al5lx9yygs800zfvnkr065xjrpld9wt6950y897grppxsrf4zcr/proposals/A3'
+          )
         }
       />
       <div className={styles.content}>
         {/* <div className={styles.header}>Futures Trading Competition is live! 🎁</div> */}
-        <div className={styles.header}>Our very first proposal is live! ⭐️</div>
+        <div className={styles.header}>DAO Proposal A3 is live! ⭐️</div>
         {/* <div className={styles.desc}>
           Join now and showcase your trading skills for a chance to win big from the $15,000 USD prize pool!
         </div> */}
@@ -50,8 +52,7 @@ const FutureCompetition = () => {
           </button>
           <a
             className={styles.learnMore}
-            href="https://daodao.zone/dao/orai1y7z3gw0al5lx9yygs800zfvnkr065xjrpld9wt6950y897grppxsrf4zcr/home
-"
+            href="https://daodao.zone/dao/orai1y7z3gw0al5lx9yygs800zfvnkr065xjrpld9wt6950y897grppxsrf4zcr/proposals/A3"
             target="_blank"
             rel="noreferrer"
           >

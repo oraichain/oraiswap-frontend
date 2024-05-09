@@ -11,7 +11,7 @@ import useTheme from 'hooks/useTheme';
 import { TransactionHistory } from 'libs/duckdb';
 import { reduceString, timeSince } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import { useGetTransHistory } from '../SwapV3/hooks';
+import { useGetTransHistory } from '../Swap/hooks';
 import styles from './HistoryTab.module.scss';
 import { getExplorerScan } from '../helpers';
 import { useState } from 'react';

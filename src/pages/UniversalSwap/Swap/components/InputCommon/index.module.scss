@@ -1,0 +1,207 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.inputCommonWrapper {
+  width: 100%;
+  border-radius: 8px;
+
+  @include theme() {
+    background-color: theme-get('colors-neutral-surface-bg-section');
+  }
+
+  &.error {
+    border: 1px solid;
+    border-radius: 8px;
+
+    @include theme {
+      border-color: theme-get('warning-surface-1');
+      color: theme-get('warning-text-1');
+    }
+
+    .errorTxt {
+      width: 100%;
+      padding: 0 8px 12px 12px;
+      text-align: right;
+
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 150%; /* 19.5px */
+      letter-spacing: 0.013px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        margin-right: 4px;
+
+        path {
+          @include theme {
+            stroke: theme-get('warning-text-1');
+          }
+        }
+      }
+    }
+  }
+}
+
+.inputCommon {
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+
+  padding: 12px 8px 12px 16px;
+  border-radius: var(--Dimension-Corner-Radius-card-inner, 8px);
+
+  @include small-mobile {
+    align-items: flex-start;
+  }
+
+  @include theme() {
+    background-color: theme-get('colors-neutral-surface-bg-section');
+    color: theme-get('colors-neutral-text-body-on-section');
+  }
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+
+  @include small-mobile {
+    font-size: 13px;
+  }
+
+  .prefix {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    // gap: 8px;
+
+    .title {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input {
+      width: 100%;
+
+      @include theme {
+        color: theme-get('neutral-text-text-token-name');
+      }
+
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 150%; /* 21px */
+
+      padding: 0;
+      height: 0;
+
+      // @include small-mobile {
+      //   width: 70%;
+      // }
+
+      &.activeInput {
+        height: 100%;
+        padding: 4px 0;
+      }
+
+      &.isDefault {
+        @include theme() {
+          color: theme-get('colors-neutral-text-body-on-section');
+        }
+      }
+    }
+  }
+
+  .suffix {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    visibility: visible;
+
+    &.activeSuffix {
+      padding-bottom: 5px;
+    }
+
+    @include small-mobile {
+      &.activeSuffix {
+        margin-top: 20px;
+        padding-bottom: 0;
+      }
+
+      &.showPreviewOnBlur {
+        visibility: hidden;
+      }
+    }
+
+    .clear {
+      cursor: pointer;
+      display: flex;
+      height: 22px;
+      width: 22px;
+      padding: 6px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      border-radius: var(--Dimension-Corner-Radius-button, 99px);
+
+      @include theme() {
+        background-color: theme-get('colors-neutral-surface-bg-section-3');
+        color: theme-get('colors-neutral-text-body-on-row');
+      }
+
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%;
+
+      svg {
+        path {
+          @include theme {
+            fill: theme-get('colors-neutral-text-body-on-row');
+          }
+        }
+      }
+    }
+
+    .paste {
+      cursor: pointer;
+      display: flex;
+      height: 22px;
+      padding: 0 6px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      border-radius: var(--Dimension-Corner-Radius-button, 99px);
+
+      border: 1px solid;
+
+      @include theme() {
+        color: theme-get('colors-neutral-text-body-on-row');
+        background-color: theme-get('colors-neutral-surface-bg-section-3');
+        border-color: theme-get('neutral-border-border-xbold');
+      }
+
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%; /* 21px */
+    }
+  }
+}
+
+.extraBtn {
+  flex-wrap: wrap;
+  padding: 0 12px 12px 12px;
+
+  visibility: hidden;
+  overflow: hidden;
+
+  &.activeExtra {
+    padding-top: 8px;
+    visibility: visible;
+  }
+}

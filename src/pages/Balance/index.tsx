@@ -708,14 +708,14 @@ const Balance: React.FC<BalanceProps> = () => {
             setFilterNetworkUI(chainId);
           }}
         />
-        {/* <DepositBtcModal
+        <DepositBtcModal
           prices={prices}
           isOpen={isDepositBtcModal}
           addressRecovery={addressRecovery}
           handleRecoveryAddress={handleRecoveryAddress}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
-        /> */}
+        />
       </div>
     </Content>
   );
