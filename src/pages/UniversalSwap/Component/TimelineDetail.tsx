@@ -5,6 +5,7 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/success-v2.svg';
 import { ReactComponent as ArrowUp } from 'assets/icons/up-arrow-v3.svg';
 import classNames from 'classnames';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
+import ArrowImg from 'assets/icons/arrow_right.svg';
 import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import {
   CosmosState,
@@ -35,13 +36,19 @@ const TimelineDetail: React.FC<{
   data: RoutingQueryItem;
   lastIndex: boolean;
   historyData: TransactionHistory;
-}> = ({ type, data, lastIndex, historyData }) => {
+  isRouteFinished: boolean;
+  currentIndex: number;
+}> = ({ type, data, lastIndex, historyData, isRouteFinished, currentIndex }) => {
   const theme = useTheme();
   const [showInfo, setShowInfo] = useState(true);
 
   const [fromToken, toToken] = [
-    flattenTokensWithIcon.find((token) => token.coinGeckoId === historyData.fromCoingeckoId),
-    flattenTokensWithIcon.find((token) => token.coinGeckoId === historyData.toCoingeckoId)
+    flattenTokensWithIcon.find(
+      (token) => token.coinGeckoId === historyData.fromCoingeckoId && token.chainId === historyData.fromChainId
+    ),
+    flattenTokensWithIcon.find(
+      (token) => token.coinGeckoId === historyData.toCoingeckoId && token.chainId === historyData.toChainId
+    )
   ];
 
   const getReceiver = (): string => {
@@ -79,13 +86,44 @@ const TimelineDetail: React.FC<{
       denom = splitData[splitData.length - 1];
     }
 
-    const tokenByDenom = flattenTokensWithIcon.find((tk) => tk.contractAddress === denom || tk.denom === denom);
+    const tokenByDenom = lastIndex
+      ? toToken
+      : flattenTokensWithIcon.find((tk) => tk.contractAddress === denom || tk.denom === denom);
     const tokenChain = chainInfosWithIcon.find((chainInfo) => chainInfo.chainId === tokenByDenom?.chainId);
 
-    return { tokenWithIcon: tokenByDenom, tokenChain, denom };
+    return { tokenWithIcon: tokenByDenom, tokenChain, denom: lastIndex ? toToken.denom : denom };
   };
 
   const { tokenChain, tokenWithIcon: token, denom } = getToken();
+  const amount = numberWithCommas(toDisplay(getAmount(), token?.decimals), undefined, { maximumFractionDigits: 6 });
+
+  const additionalToken =
+    data.type !== DatabaseEnum.Evm
+      ? flattenTokensWithIcon.find((tk) => tk.coinGeckoId === toToken?.coinGeckoId && tk.chainId === fromToken?.chainId)
+      : flattenTokensWithIcon.find(
+          (tk) => tk.coinGeckoId === toToken?.coinGeckoId && tk.chainId === 'oraibridge-subnet-2'
+        );
+
+  const tokenArrayInFirstStep =
+    data.type === DatabaseEnum.Evm
+      ? [
+          { token: fromToken, amount: historyData.fromAmount },
+          {
+            token,
+            amount: historyData.expectedOutput
+          },
+          { token: additionalToken, amount }
+        ]
+      : [
+          { token: fromToken, amount: historyData.fromAmount },
+          { token: additionalToken, amount: historyData.expectedOutput },
+          {
+            token,
+            amount
+          }
+        ];
+
+  const supportChains = [DatabaseEnum.Evm, DatabaseEnum.Oraichain];
 
   return (
     <div className={classNames(styles['timeline-detail-wrapper'], styles[theme])}>
@@ -105,7 +143,7 @@ const TimelineDetail: React.FC<{
         </div>
       </div>
 
-      {!lastIndex && (
+      {((!lastIndex && currentIndex !== 1) || (!supportChains.includes(data.type) && currentIndex === 1)) && (
         <div className={styles.tokenWrapper}>
           <div className={styles.txt}>{!lastIndex ? 'Bridge' : 'Receive'}</div>
 
@@ -118,11 +156,32 @@ const TimelineDetail: React.FC<{
                 {numberWithCommas(toDisplay(getAmount(), token?.decimals), undefined, { maximumFractionDigits: 6 })}{' '}
                 <span>{token?.name}</span>
               </span>
-              <span className={styles.chain}>
-                {tokenChain?.chainName === 'OraiBridge' ? 'OBridge' : tokenChain?.chainName || ''}
-              </span>
+              <span className={styles.chain}>{token?.org === 'OraiBridge' ? 'OBridge' : token?.org || ''}</span>
             </div>
           </div>
+        </div>
+      )}
+      {!lastIndex && currentIndex === 1 && supportChains.includes(data.type) && (
+        <div className={classNames(styles.tokenWrapper, styles.list)}>
+          {tokenArrayInFirstStep?.map((data, key) => {
+            const { token: tk, amount } = data;
+            return (
+              <div className={styles.tokenItem} key={key}>
+                <div className={styles.tokenDetail}>
+                  <div className={styles.logo}>
+                    {theme === 'light' ? <tk.IconLight width={24} height={24} /> : <tk.Icon width={24} height={24} />}
+                  </div>
+                  <div className={styles.info}>
+                    <span className={styles.token}>
+                      {amount} <span>{tk?.name}</span>
+                    </span>
+                    <span className={styles.chain}>{tk?.org === 'OraiBridge' ? 'OBridge' : tk?.org || ''}</span>
+                  </div>
+                </div>
+                <img src={ArrowImg} alt="arrow" />
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -153,15 +212,15 @@ const TimelineDetail: React.FC<{
           {/* <div className={styles['text-wrapper']}>
             <h3>Height:</h3>
             <p>{data.data.height}</p>
-          </div> */}
-          {/* <div className={styles['text-wrapper']}>
+          </div>*/}
+          <div className={styles['text-wrapper']}>
             <h3>Amount:</h3>
             <p>{getAmount()}</p>
-          </div> */}
-          {/* <div className={styles['text-wrapper']}>
+          </div>
+          <div className={styles['text-wrapper']}>
             <h3>Denom:</h3>
             {denom}
-          </div> */}
+          </div>
         </div>
       )}
     </div>
@@ -196,7 +255,7 @@ export const getScanUrl = (data: RoutingQueryItem): string => {
     }
   }
   if (data.type === DatabaseEnum.Oraichain) {
-    return `https://scan.bridge.orai.io/txs/${data.data.txHash}`;
+    return `https://scan.orai.io/txs/${data.data.txHash}`;
   }
-  return `https://scan.orai.io/txs/${data.data.txHash}`;
+  return `https://scan.bridge.orai.io/txs/${data.data.txHash}`;
 };
