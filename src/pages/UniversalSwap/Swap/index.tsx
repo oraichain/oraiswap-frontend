@@ -12,6 +12,7 @@ import {
   network,
   toAmount,
   toDisplay,
+  CW20_DECIMALS,
   parseTokenInfoRawDenom
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
@@ -266,7 +267,9 @@ const SwapComponent: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
 
-  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
+  const fromAmountTokenBalance =
+    fromTokenInfoData &&
+    toAmount(fromAmountToken, originalFromToken?.decimals || fromTokenInfoData?.decimals || CW20_DECIMALS);
   const isAverageRatio = averageRatio && averageRatio.amount;
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
@@ -394,10 +397,12 @@ const SwapComponent: React.FC<{
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
 
-        await submitTransactionIBC({
-          txHash: transactionHash,
-          chainId: originalFromToken.chainId
-        });
+        if (minimumReceiveDisplay && minimumReceiveDisplay > 0) {
+          await submitTransactionIBC({
+            txHash: transactionHash,
+            chainId: originalFromToken.chainId
+          });
+        }
 
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
@@ -523,6 +528,7 @@ const SwapComponent: React.FC<{
       coeff,
       gas: GAS_ESTIMATION_SWAP_DEFAULT
     });
+
     onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
     setCoe(coeff);
   };

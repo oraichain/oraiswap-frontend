@@ -346,10 +346,12 @@ export const getDisableSwap = ({
 export const handleAddTxHistory = async (data: TransactionHistory) => {
   console.log('handleAddTxHistory', data);
   try {
-    await submitTransactionIBC({
-      txHash: data.initialTxHash,
-      chainId: data.fromChainId
-    });
+    if (data.toAmount && Number(data.toAmount) > 0) {
+      await submitTransactionIBC({
+        txHash: data.initialTxHash,
+        chainId: data.fromChainId
+      });
+    }
 
     await window.duckDb.initializeTableHistory(data.userAddress);
     await window.duckDb.addTransHistory({ ...data });

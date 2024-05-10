@@ -193,6 +193,8 @@ const IbcRouting: React.FC<{
                         data={item}
                         lastIndex={index + 1 === activeStep}
                         historyData={data}
+                        isRouteFinished={routingFinished}
+                        currentIndex={index + 1}
                       />
 
                       <StepSeparator className={classNames(styles.separator, { hasAnimation: !routingFinished })} />
