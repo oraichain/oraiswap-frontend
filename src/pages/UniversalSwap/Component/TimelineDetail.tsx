@@ -213,14 +213,14 @@ const TimelineDetail: React.FC<{
             <h3>Height:</h3>
             <p>{data.data.height}</p>
           </div>*/}
-          <div className={styles['text-wrapper']}>
+          {/* <div className={styles['text-wrapper']}>
             <h3>Amount:</h3>
             <p>{getAmount()}</p>
           </div>
           <div className={styles['text-wrapper']}>
             <h3>Denom:</h3>
             {denom}
-          </div>
+          </div> */}
         </div>
       )}
     </div>
