@@ -124,6 +124,7 @@ const TimelineDetail: React.FC<{
         ];
 
   const supportChains = [DatabaseEnum.Evm, DatabaseEnum.Oraichain];
+  const isBridge = fromToken?.coinGeckoId === toToken?.coinGeckoId;
 
   return (
     <div className={classNames(styles['timeline-detail-wrapper'], styles[theme])}>
@@ -143,7 +144,9 @@ const TimelineDetail: React.FC<{
         </div>
       </div>
 
-      {((!lastIndex && currentIndex !== 1) || (!supportChains.includes(data.type) && currentIndex === 1)) && (
+      {((!lastIndex && currentIndex !== 1) ||
+        !isBridge ||
+        (!supportChains.includes(data.type) && currentIndex === 1)) && (
         <div className={styles.tokenWrapper}>
           <div className={styles.txt}>{!lastIndex ? 'Bridge' : 'Receive'}</div>
 
@@ -161,7 +164,7 @@ const TimelineDetail: React.FC<{
           </div>
         </div>
       )}
-      {!lastIndex && currentIndex === 1 && supportChains.includes(data.type) && (
+      {!lastIndex && !isBridge && currentIndex === 1 && supportChains.includes(data.type) && (
         <div className={classNames(styles.tokenWrapper, styles.list)}>
           {tokenArrayInFirstStep?.map((data, key) => {
             const { token: tk, amount } = data;
