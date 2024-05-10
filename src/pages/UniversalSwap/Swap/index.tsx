@@ -31,6 +31,8 @@ import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
+import { ReactComponent as ObridgeDarkImg } from 'assets/icons/obridge_full_dark.svg';
+import { ReactComponent as ObridgeLightImg } from 'assets/icons/obridge_full_light.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
@@ -911,6 +913,10 @@ const SwapComponent: React.FC<{
               </button>
             );
           })()}
+          <div className={styles.powered}>
+            <div>Powered by</div>
+            {theme === 'light' ? <ObridgeDarkImg /> : <ObridgeLightImg />}
+          </div>
         </div>
       </LoadingBox>
 
