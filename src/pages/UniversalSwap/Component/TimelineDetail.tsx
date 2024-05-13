@@ -145,7 +145,7 @@ const TimelineDetail: React.FC<{
       </div>
 
       {((!lastIndex && currentIndex !== 1) ||
-        !isBridge ||
+        (currentIndex === 1 && isBridge) ||
         (!supportChains.includes(data.type) && currentIndex === 1)) && (
         <div className={styles.tokenWrapper}>
           <div className={styles.txt}>{!lastIndex ? 'Bridge' : 'Receive'}</div>
