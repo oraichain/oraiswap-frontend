@@ -389,10 +389,10 @@ export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLi
   return { infoPair, TokenInIcon, TokenOutIcon, pairKey };
 };
 
-export const handleAddTxHistory = async (data: TransactionHistory) => {
+export const handleAddTxHistory = async (data: TransactionHistory, enableIbc: boolean = true) => {
   console.log('handleAddTxHistory', data);
   try {
-    if (data.toAmount && Number(data.toAmount) > 0) {
+    if (enableIbc && data.toAmount && Number(data.toAmount) > 0) {
       await submitTransactionIBC({
         txHash: data.initialTxHash,
         chainId: data.fromChainId
