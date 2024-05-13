@@ -280,7 +280,19 @@ export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): Walle
     const wallet = JSON.parse(parsedResult.wallet);
     return wallet.walletsByNetwork.cosmos;
   } catch (error) {
-    console.log('error getWalletByNetworksFromStorage: ', error);
+    console.log('error getWalletByNetworkCosmosFromStorage: ', error);
+  }
+};
+
+export const getWalletByNetworkFromStorage = (key = 'persist:root'): any => {
+  try {
+    if (isMobile()) return 'owallet';
+    const result = localStorage.getItem(key);
+    const parsedResult = JSON.parse(result);
+    const wallet = JSON.parse(parsedResult.wallet);
+    return wallet.walletsByNetwork;
+  } catch (error) {
+    console.log('error getWalletByNetworkFromStorage: ', error);
   }
 };
 
@@ -366,8 +378,12 @@ export const getAddressTransfer = async (network: CustomChainInfo, walletByNetwo
         } else {
           address = window?.tronWebDapp?.defaultAddress?.base58;
         }
-      } else if ((walletByNetworks.evm || isMobile()) && window.Metamask.isWindowEthereum()) {
-        address = await window.Metamask.getEthAddress();
+      } else if (walletByNetworks.evm || isMobile()) {
+        if (walletByNetworks.evm === 'owallet') window.ethereumDapp = window.eth_owallet;
+        const check = window.Metamask.isWindowEthereum();
+        if (check) {
+          address = await window.Metamask.getEthAddress();
+        }
       }
     } else if (walletByNetworks.cosmos || isMobile()) {
       address = await window.Keplr.getKeplrAddr(network.chainId);

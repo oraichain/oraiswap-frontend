@@ -6,7 +6,9 @@ import {
   INJECTIVE_ORAICHAIN_DENOM,
   KWTBSC_ORAICHAIN_DENOM,
   MILKYBSC_ORAICHAIN_DENOM,
-  TokenItemType
+  TokenItemType,
+  KWT_BSC_CONTRACT,
+  MILKY_BSC_CONTRACT
 } from '@oraichain/oraidex-common';
 import { bitcoinChainId } from 'helper/constants';
 
@@ -109,11 +111,13 @@ const notAllowSwapFromChainIds = [
   'bitcoin'
 ];
 const notAllowDenom = Object.values(evmDenomsMap).flat();
+const notAllowBEP20Token = [KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT];
 export const swapFromTokens = flattenTokens.filter((token) => {
   return (
     !notAllowDenom.includes(token?.denom) &&
     !notAllowSwapCoingeckoIds.includes(token.coinGeckoId) &&
-    !notAllowSwapFromChainIds.includes(token.chainId)
+    !notAllowSwapFromChainIds.includes(token.chainId) &&
+    !notAllowBEP20Token.includes(token?.contractAddress)
   );
 });
 // universal swap. We dont support kwt & milky & injective for simplicity. We also skip OraiBridge tokens because users dont care about them
@@ -129,6 +133,7 @@ export const swapToTokens = flattenTokens.filter((token) => {
   return (
     !notAllowDenom.includes(token?.denom) &&
     !notAllowSwapCoingeckoIds.includes(token.coinGeckoId) &&
-    !notAllowSwapToChainIds.includes(token.chainId)
+    !notAllowSwapToChainIds.includes(token.chainId) &&
+    !notAllowBEP20Token.includes(token?.contractAddress)
   );
 });

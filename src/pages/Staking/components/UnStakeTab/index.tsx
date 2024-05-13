@@ -12,7 +12,7 @@ import { network } from 'config/networks';
 import { handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
+import useLoadTokens, { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import { getUsd } from 'libs/utils';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
@@ -28,7 +28,9 @@ const UnStakeTab = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
-  const loadTokenAmounts = useLoadTokens();
+  // const loadTokenAmounts = useLoadTokens();
+
+  const loadOraichainToken = useLoadOraichainTokens();
   const [amount, setAmount] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
@@ -72,7 +74,7 @@ const UnStakeTab = () => {
         refetchStakeInfo();
         refetchMyStakeRewardInfo();
         refetchLockInfo();
-        loadTokenAmounts({ oraiAddress: address });
+        loadOraichainToken(address, [ORAIX_TOKEN_INFO.contractAddress]);
         setOpen(false);
       }
     } catch (error) {
@@ -102,7 +104,7 @@ const UnStakeTab = () => {
         refetchStakeInfo();
         refetchMyStakeRewardInfo();
         refetchLockInfo();
-        loadTokenAmounts({ oraiAddress: address });
+        loadOraichainToken(address, [ORAIX_TOKEN_INFO.contractAddress]);
       }
     } catch (error) {
       console.log('error in withdraw: ', error);
@@ -130,7 +132,7 @@ const UnStakeTab = () => {
         refetchStakeInfo();
         refetchMyStakeRewardInfo();
         refetchLockInfo();
-        loadTokenAmounts({ oraiAddress: address });
+        loadOraichainToken(address, [ORAIX_TOKEN_INFO.contractAddress]);
       }
     } catch (error) {
       console.log('error in restake: ', error);

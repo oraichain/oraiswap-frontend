@@ -7,6 +7,22 @@
   flex-direction: column;
   gap: 8px;
   height: 350px;
+  align-items: center;
+  opacity: 0.7;
+
+  padding: 0 6px;
+
+  @include mobile {
+    padding: 0 5px;
+  }
+
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 100%;
+
+  @include theme {
+    color: theme-get('sea-stone-900');
+  }
 
   .volume {
     @include theme {
@@ -45,6 +61,24 @@
         background: theme-get('primary-highlight-section');
       }
       border-radius: 99px;
+    }
+  }
+
+  &:hover {
+    opacity: 1;
+    font-weight: 600;
+
+    .volume {
+      font-weight: 600;
+      @include theme {
+        color: theme-get('sea-stone-900');
+      }
+    }
+
+    .percentWrapper {
+      @include theme {
+        color: theme-get('sea-stone-900');
+      }
     }
   }
 }

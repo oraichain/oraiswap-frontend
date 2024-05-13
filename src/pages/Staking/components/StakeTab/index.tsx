@@ -6,7 +6,7 @@ import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
+import useLoadTokens, { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
@@ -30,6 +30,7 @@ const StakeTab = () => {
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const loadTokenAmounts = useLoadTokens();
+  const loadOraichainToken = useLoadOraichainTokens();
 
   const balance = amounts['oraix'];
   const [amount, setAmount] = useState<number>();
@@ -60,11 +61,11 @@ const StakeTab = () => {
   const handleBond = async () => {
     if (!amount) return displayToast(TToastType.TX_FAILED, { message: 'Stake Amount is required' });
 
-    const oraiAddress = await handleCheckAddress('Oraichain');
-
     setLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      const oraiAddress = await handleCheckAddress('Oraichain');
+
       // generate bonding msg
       const msg = generateMiningMsgs({
         type: Type.BOND_STAKING_CW20,
@@ -89,7 +90,7 @@ const StakeTab = () => {
         refetchMyStakeRewardInfo();
         refetchStakeInfo();
         // refetchAllStakerRewardInfo();
-        loadTokenAmounts({ oraiAddress: address });
+        loadOraichainToken(address, [ORAIX_TOKEN_INFO.contractAddress]);
       }
     } catch (error) {
       console.log('error in bond: ', error);

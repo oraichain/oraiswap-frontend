@@ -16,7 +16,7 @@ const path = require('path');
 const fs = require('fs');
 const package = require('../package.json');
 const { fallback } = require('../config-overrides');
-const ignores = ['@oraichain/oraidex-common-ui'];
+const ignores = [];
 const chalk = require('react-dev-utils/chalk');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 
@@ -30,6 +30,7 @@ if (!fs.existsSync(vendorPath)) {
 const config = {
   mode: 'production',
   target: 'web',
+  cache: true,
   entry: {
     vendor: Object.keys(package.dependencies).filter((dep) => !ignores.includes(dep))
   },
@@ -50,10 +51,21 @@ const config = {
   output: {
     filename: `vendor.${vendorHash}.js`,
     path: vendorPath,
-    library: 'vendor_lib'
+    library: 'vendor_lib',
+    pathinfo: false
+  },
+  optimization: {
+    removeAvailableModules: false,
+    removeEmptyChunks: false,
+    checkWasmTypes: false,
+    chunkIds: 'total-size',
+    innerGraph: false,
+    emitOnErrors: false,
+    minimize: true,
+    removeAvailableModules: true,
+    removeEmptyChunks: true
   },
   plugins: [
-    new webpack.ProgressPlugin(),
     new webpack.ProvidePlugin({
       process: 'process/browser.js'
     }),
@@ -66,7 +78,14 @@ const config = {
     new webpack.DllPlugin({
       name: 'vendor_lib',
       path: path.join(vendorPath, `manifest.${vendorHash}.json`)
-    })
+    }),
+    // fix error 'UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins'
+    new webpack.NormalModuleReplacementPlugin(
+      /node:crypto/,
+      (resource) => {
+        resource.request = resource.request.replace(/^node:/, '');
+      }
+    )
   ]
 };
 

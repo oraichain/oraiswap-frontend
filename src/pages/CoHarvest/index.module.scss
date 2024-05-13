@@ -36,16 +36,15 @@
     justify-content: space-between;
     flex: 1;
 
+    // flex-wrap: wrap;
+
     @include mobile {
       flex-direction: column-reverse;
     }
 
     .bid {
-      width: 34%;
-
-      @include medium-desktop {
-        width: 44%;
-      }
+      width: 35%;
+      min-width: 300px;
 
       @include mobile {
         width: 100%;
@@ -53,11 +52,8 @@
     }
 
     .info {
-      width: calc(66% - 40px);
-
-      @include medium-desktop {
-        width: 54%;
-      }
+      width: calc(65% - 40px);
+      min-width: 300px;
 
       @include mobile {
         width: 100%;

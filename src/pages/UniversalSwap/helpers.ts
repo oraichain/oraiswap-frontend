@@ -11,16 +11,17 @@ import {
   TokenItemType,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
-  NetworkName
+  NetworkName,
+  oraichainTokens
 } from '@oraichain/oraidex-common';
 import {
-  isEvmNetworkNativeSwapSupported,
-  isSupportedNoPoolSwapEvm,
-  swapEvmRoutes
+  UniversalSwapHelper
   // swapFromTokens,
   // swapToTokens
 } from '@oraichain/oraidex-universal-swap';
-import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { isMobile } from '@walletconnect/browser-utils';
+import { swapFromTokens, swapToTokens, tokenMap } from 'config/bridgeTokens';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
 import { networks } from 'helper';
 import { generateError } from 'libs/utils';
@@ -83,13 +84,11 @@ export function filterNonPoolEvmTokens(
 ) {
   // basic filter. Dont include itself & only collect tokens with searched letters
   let listTokens = direction === SwapDirection.From ? swapFromTokens : swapToTokens;
-  let filteredToTokens = listTokens.filter(
-    (token) => token.denom !== denom && token.name.toLowerCase().includes(searchTokenName.toLowerCase())
-  );
+  let filteredToTokens = listTokens.filter((token) => token.name.toLowerCase().includes(searchTokenName.toLowerCase()));
 
   // special case for tokens not having a pool on Oraichain
-  if (isSupportedNoPoolSwapEvm(coingeckoId)) {
-    const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
+  if (UniversalSwapHelper.isSupportedNoPoolSwapEvm(coingeckoId)) {
+    const swappableTokens = Object.keys(UniversalSwapHelper.swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
     const filteredTokens = filteredToTokens.filter((token) => swappableTokens.includes(token.contractAddress));
 
     // tokens that dont have a pool on Oraichain like WETH or WBNB cannot be swapped from a token on Oraichain
@@ -98,10 +97,11 @@ export function filterNonPoolEvmTokens(
     filteredToTokens = filteredTokens;
   }
   // special case filter. Tokens on networks other than supported evm cannot swap to tokens, so we need to remove them
-  if (!isEvmNetworkNativeSwapSupported(chainId as NetworkChainId))
+  if (!UniversalSwapHelper.isEvmNetworkNativeSwapSupported(chainId as NetworkChainId)) {
     return filteredToTokens.filter((t) => {
       // one-directional swap. non-pool tokens of evm network can swap be swapped with tokens on Oraichain, but not vice versa
-      const isSupported = isSupportedNoPoolSwapEvm(t.coinGeckoId);
+      const isSupported = UniversalSwapHelper.isSupportedNoPoolSwapEvm(t.coinGeckoId);
+
       if (direction === SwapDirection.To) return !isSupported;
       if (isSupported) {
         // if we cannot find any matched token then we dont include it in the list since it cannot be swapped
@@ -111,9 +111,11 @@ export function filterNonPoolEvmTokens(
       }
       return true;
     });
+  }
+
   return filteredToTokens.filter((t) => {
     // filter out to tokens that are on a different network & with no pool because we are not ready to support them yet. TODO: support
-    if (isSupportedNoPoolSwapEvm(t.coinGeckoId)) return t.chainId === chainId;
+    if (UniversalSwapHelper.isSupportedNoPoolSwapEvm(t.coinGeckoId)) return t.chainId === chainId;
     return true;
   });
 }
@@ -310,4 +312,95 @@ export const formatTimeDataChart = (
 
   const fmtTime = typeof time === 'string' ? new Date(time).getTime() : time * TIMER.MILLISECOND;
   return time === lastDate ? currentText : `${formatDate(fmtTime)} ${formatTimeWithPeriod(fmtTime)}`;
+};
+
+export const getTokenIcon = (token: TokenItemType, theme: string) => {
+  let tokenIcon;
+  const tokenInfo = oraichainTokensWithIcon.find((e) => e.coinGeckoId === token?.coinGeckoId);
+
+  if (tokenInfo && Object.keys(tokenInfo.IconLight || tokenInfo.Icon || {}).length > 0) {
+    tokenIcon = theme === 'light' ? tokenInfo?.IconLight || tokenInfo?.Icon : tokenInfo?.Icon;
+  }
+  return tokenIcon;
+};
+
+export const refreshBalances = async (
+  loadingRefresh,
+  setLoadingRefresh,
+  { metamaskAddress, tronAddress, oraiAddress },
+  callback
+) => {
+  try {
+    if (loadingRefresh) return;
+    setLoadingRefresh(true);
+    await callback({ metamaskAddress, tronAddress, oraiAddress });
+  } catch (err) {
+    console.log({ err });
+  } finally {
+    setTimeout(() => {
+      setLoadingRefresh(false);
+    }, 2000);
+  }
+};
+
+export const getFromToToken = (originalFromToken, originalToToken, fromTokenDenomSwap, toTokenDenomSwap) => {
+  const isEvmSwap = UniversalSwapHelper.isEvmSwappable({
+    fromChainId: originalFromToken.chainId,
+    toChainId: originalToToken.chainId,
+    fromContractAddr: originalFromToken.contractAddress,
+    toContractAddr: originalToToken.contractAddress
+  });
+  const fromToken = isEvmSwap
+    ? tokenMap[fromTokenDenomSwap]
+    : getTokenOnOraichain(tokenMap[fromTokenDenomSwap].coinGeckoId) ?? tokenMap[fromTokenDenomSwap];
+  const toToken = isEvmSwap
+    ? tokenMap[toTokenDenomSwap]
+    : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
+
+  return { fromToken, toToken };
+};
+
+export const getRemoteDenom = (originalToken) => {
+  return originalToken.contractAddress ? originalToken.prefix + originalToken.contractAddress : originalToken.denom;
+};
+
+export const getTokenBalance = (originalToken, amounts, subAmount) => {
+  return originalToken ? BigInt(amounts[originalToken.denom] ?? '0') + subAmount : BigInt(0);
+};
+
+export const getDisableSwap = ({
+  originalToToken,
+  walletByNetworks,
+  swapLoading,
+  fromAmountToken,
+  toAmountToken,
+  fromAmountTokenBalance,
+  fromTokenBalance,
+  addressTransfer,
+  validAddress,
+  simulateData
+}) => {
+  const mobileMode = isMobile();
+  const canSwapToCosmos = !mobileMode && originalToToken.cosmosBased && !walletByNetworks.cosmos;
+  const canSwapToEvm = !mobileMode && !originalToToken.cosmosBased && !walletByNetworks.evm;
+  const canSwapToTron = !mobileMode && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron;
+  const canSwapTo = canSwapToCosmos || canSwapToEvm || canSwapToTron;
+  const disabledSwapBtn =
+    swapLoading ||
+    !fromAmountToken ||
+    !toAmountToken ||
+    fromAmountTokenBalance > fromTokenBalance || // insufficent fund
+    !addressTransfer ||
+    !validAddress.isValid ||
+    canSwapTo;
+
+  let disableMsg: string;
+  if (!validAddress.isValid) disableMsg = `Recipient address not found`;
+  if (!addressTransfer) disableMsg = `Recipient address not found`;
+  if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
+  if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
+  if (canSwapToTron) disableMsg = `Please connect tron wallet`;
+  if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
+  if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
+  return { disabledSwapBtn, disableMsg };
 };

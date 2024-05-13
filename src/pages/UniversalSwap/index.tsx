@@ -22,8 +22,8 @@ import { TAB_CHART_SWAP } from 'reducer/type';
 import { AssetsTab, HeaderTab, HistoryTab, TabsTxs } from './Component';
 import ChartUsdPrice from './Component/ChartUsdPrice';
 import { TransactionProcess } from './Modals';
-import SwapComponent from './SwapV3';
-import { initPairSwap } from './SwapV3/hooks/useFillToken';
+import SwapComponent from './Swap';
+import { initPairSwap } from './Swap/hooks/useFillToken';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import { ChartTokenType } from './hooks/useChartUsdPrice';
 import styles from './index.module.scss';
@@ -37,6 +37,7 @@ const Swap: React.FC = () => {
   const mobileMode = isMobile();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
+
   let tab = searchParams.get('type');
   const dispatch = useDispatch();
   const initDuckdb = async () => {

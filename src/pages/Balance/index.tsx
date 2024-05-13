@@ -1,4 +1,4 @@
-import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
+import { DeliverTxResponse, isDeliverTxFailure, SigningStargateClient } from '@cosmjs/stargate';
 import {
   KWT_SCAN,
   NetworkChainId,
@@ -183,6 +183,7 @@ const Balance: React.FC<BalanceProps> = () => {
       if (!btcAddr) throw Error('Not found your bitcoin address!');
       // @ts-ignore-check
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
+
       if (btcAddr && addressRecovery !== btcAddr && oraiBtcAddress) {
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
         const signDoc = {
@@ -200,7 +201,6 @@ const Balance: React.FC<BalanceProps> = () => {
           ],
           sequence: accountInfo?.account?.sequence
         };
-
         const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
         const tx = makeStdTx(signDoc, signature.signature);
         const tmClient = await Tendermint37Client.connect(config.rpcUrl);
