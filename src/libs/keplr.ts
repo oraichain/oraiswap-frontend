@@ -30,7 +30,7 @@ export default class Keplr extends CosmosWallet {
   // priority with owallet
   private get keplr(): keplr {
     if (this.typeWallet === 'owallet') {
-      return window.owallet;
+      return window.owallet ?? window.keplr;
     } else if (this.typeWallet === 'keplr') {
       return window.keplr;
     }
