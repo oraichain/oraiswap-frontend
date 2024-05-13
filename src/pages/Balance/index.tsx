@@ -471,7 +471,7 @@ const Balance: React.FC<BalanceProps> = () => {
         });
 
         if (result?.rawTxHex || result?.transactionHash) {
-          handleAddTxHistory({ ...dataHistory, initialTxHash: result?.rawTxHex || result?.transactionHash });
+          handleAddTxHistory({ ...dataHistory, initialTxHash: result?.rawTxHex || result?.transactionHash }, false);
         }
         return;
       }
