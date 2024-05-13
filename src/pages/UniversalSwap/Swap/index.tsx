@@ -98,6 +98,7 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
+  const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
   const [openDetail, setOpenDetail] = useState(false);
 
   const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
@@ -107,8 +108,12 @@ const SwapComponent: React.FC<{
   const originalFromToken = tokenMap[fromTokenDenomSwap];
   const originalToToken = tokenMap[toTokenDenomSwap];
 
-  const [selectChainFrom, setSelectChainFrom] = useState(originalFromToken.chainId);
-  const [selectChainTo, setSelectChainTo] = useState(originalToToken.chainId);
+  const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(
+    originalFromToken?.chainId || ('OraiChain' as NetworkChainId)
+  );
+  const [selectChainTo, setSelectChainTo] = useState<NetworkChainId>(
+    originalToToken?.chainId || ('OraiChain' as NetworkChainId)
+  );
 
   const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
   const [isSelectChainTo, setIsSelectChainTo] = useState(false);
@@ -138,8 +143,6 @@ const SwapComponent: React.FC<{
   const [initAddressTransfer, setInitAddressTransfer] = useState('');
   const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
   const { handleReadClipboard } = useCopyClipboard();
-
-  const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
 
   const { fromToken, toToken } = getFromToToken(
     originalFromToken,
