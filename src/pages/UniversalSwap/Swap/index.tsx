@@ -572,16 +572,13 @@ const SwapComponent: React.FC<{
     handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
   };
 
-  const validAddress = !(
-    walletByNetworks.cosmos ||
-    walletByNetworks.bitcoin ||
-    walletByNetworks.evm ||
-    walletByNetworks.tron
-  )
-    ? {
-        isValid: true
-      }
-    : checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+  const validAddress =
+    !(walletByNetworks.cosmos || walletByNetworks.bitcoin || walletByNetworks.evm || walletByNetworks.tron) &&
+    !isMobile()
+      ? {
+          isValid: true
+        }
+      : checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
 
   return (
     <div className={cx('swap-box-wrapper')}>
