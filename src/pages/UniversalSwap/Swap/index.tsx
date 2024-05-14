@@ -29,6 +29,8 @@ import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
+import { ReactComponent as ObridgeDarkImg } from 'assets/icons/obridge_full_dark.svg';
+import { ReactComponent as ObridgeLightImg } from 'assets/icons/obridge_full_light.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
@@ -58,7 +60,9 @@ import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import {
+  genCurrentChain,
   generateNewSymbol,
+  generateNewSymbolV2,
   getDisableSwap,
   getFromToToken,
   getRemoteDenom,
@@ -68,7 +72,14 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
-import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import {
+  selectCurrentToChain,
+  selectCurrentToken,
+  setCurrentFromToken,
+  setCurrentToChain,
+  setCurrentToToken,
+  setCurrentToken
+} from 'reducer/tradingSlice';
 import { AddressManagementStep } from 'reducer/type';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
@@ -98,6 +109,7 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
+  const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
   const [openDetail, setOpenDetail] = useState(false);
 
   const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
@@ -107,8 +119,12 @@ const SwapComponent: React.FC<{
   const originalFromToken = tokenMap[fromTokenDenomSwap];
   const originalToToken = tokenMap[toTokenDenomSwap];
 
-  const [selectChainFrom, setSelectChainFrom] = useState(originalFromToken.chainId);
-  const [selectChainTo, setSelectChainTo] = useState(originalToToken.chainId);
+  const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(
+    originalFromToken?.chainId || ('OraiChain' as NetworkChainId)
+  );
+  const [selectChainTo, setSelectChainTo] = useState<NetworkChainId>(
+    originalToToken?.chainId || ('OraiChain' as NetworkChainId)
+  );
 
   const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
   const [isSelectChainTo, setIsSelectChainTo] = useState(false);
@@ -132,14 +148,13 @@ const SwapComponent: React.FC<{
   const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
   const currentPair = useSelector(selectCurrentToken);
+  const currentToChain = useSelector(selectCurrentToChain);
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [addressTransfer, setAddressTransfer] = useState('');
   const [initAddressTransfer, setInitAddressTransfer] = useState('');
   const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
   const { handleReadClipboard } = useCopyClipboard();
-
-  const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
 
   const { fromToken, toToken } = getFromToToken(
     originalFromToken,
@@ -262,10 +277,27 @@ const SwapComponent: React.FC<{
   );
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    // const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
+
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
+
+  useEffect(() => {
+    const newCurrentToChain = genCurrentChain({ toToken: originalToToken, currentToChain });
+
+    if (toToken && originalToToken) {
+      dispatch(setCurrentToChain(newCurrentToChain));
+      dispatch(setCurrentToToken(originalToToken));
+    }
+  }, [originalToToken, toToken]);
+
+  useEffect(() => {
+    if (fromToken && originalFromToken) {
+      dispatch(setCurrentFromToken(originalFromToken));
+    }
+  }, [originalFromToken, fromToken]);
 
   const fromAmountTokenBalance =
     fromTokenInfoData &&
@@ -589,16 +621,13 @@ const SwapComponent: React.FC<{
     handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
   };
 
-  const validAddress = !(
-    walletByNetworks.cosmos ||
-    walletByNetworks.bitcoin ||
-    walletByNetworks.evm ||
-    walletByNetworks.tron
-  )
-    ? {
-        isValid: true
-      }
-    : checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+  const validAddress =
+    !(walletByNetworks.cosmos || walletByNetworks.bitcoin || walletByNetworks.evm || walletByNetworks.tron) &&
+    !isMobile()
+      ? {
+          isValid: true
+        }
+      : checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
 
   return (
     <div className={cx('swap-box-wrapper')}>
@@ -786,6 +815,10 @@ const SwapComponent: React.FC<{
               </button>
             );
           })()}
+          <div className={styles.powered}>
+            <div>Powered by</div>
+            {theme === 'light' ? <ObridgeDarkImg /> : <ObridgeLightImg />}
+          </div>
         </div>
       </LoadingBox>
 

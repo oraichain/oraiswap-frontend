@@ -29,12 +29,17 @@ export default class Keplr extends CosmosWallet {
 
   // priority with owallet
   private get keplr(): keplr {
-    if (this.typeWallet === 'owallet') {
-      return window.owallet;
-    } else if (this.typeWallet === 'keplr') {
-      return window.keplr;
+    switch (this.typeWallet) {
+      case 'owallet':
+        return window.owallet ?? window.keplr;
+      case 'keplr':
+        return window.keplr;
+      case 'eip191':
+      case 'leapSnap':
+        return null;
+      default:
+        return window.keplr;
     }
-    return null;
   }
 
   async getChainInfosWithoutEndpoints(chainId): Promise<

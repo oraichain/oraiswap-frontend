@@ -7,7 +7,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { Button } from 'components/Button';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectCurrentFilterDay, selectCurrentTabChart, setFilterDay, setTabChart } from 'reducer/poolChartSlice';
+import { selectCurrentFilterDay, selectCurrentTabChart, setFilterDay, setTabChart } from 'reducer/chartSlice';
 import { TAB_CHART } from 'reducer/type';
 import { LIST_FILTER_DAY } from '../Header';
 
