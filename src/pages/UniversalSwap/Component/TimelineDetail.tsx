@@ -6,7 +6,7 @@ import { ReactComponent as ArrowUp } from 'assets/icons/up-arrow-v3.svg';
 import classNames from 'classnames';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
 import ArrowImg from 'assets/icons/arrow_right.svg';
-import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
+import { ICON_WITH_NETWORK, chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import {
   CosmosState,
   DatabaseEnum,
@@ -38,7 +38,8 @@ const TimelineDetail: React.FC<{
   historyData: TransactionHistory;
   isRouteFinished: boolean;
   currentIndex: number;
-}> = ({ type, data, lastIndex, historyData, isRouteFinished, currentIndex }) => {
+  nextData: RoutingQueryItem | null | undefined;
+}> = ({ type, data, lastIndex, historyData, isRouteFinished, currentIndex, nextData }) => {
   const theme = useTheme();
   const [showInfo, setShowInfo] = useState(true);
 
@@ -51,6 +52,21 @@ const TimelineDetail: React.FC<{
     )
   ];
 
+  const getNextChainId = (data: RoutingQueryItem | null | undefined) => {
+    if (!data) {
+      return;
+    }
+
+    const ChainIdObj = {
+      [DatabaseEnum.Evm]: ICON_WITH_NETWORK[(data.data as EvmState).evmChainPrefix]?.chainId,
+      [DatabaseEnum.Oraichain]: 'Oraichain',
+      [DatabaseEnum.OraiBridge]: 'oraibridge-subnet-2',
+      [DatabaseEnum.Cosmos]: (data.data as CosmosState)?.chainId
+    };
+
+    return ChainIdObj[data.type];
+  };
+
   const getReceiver = (): string => {
     return (
       (data.data as EvmState)?.oraiReceiver ||
@@ -60,30 +76,49 @@ const TimelineDetail: React.FC<{
   };
 
   const getAmount = (): string => {
-    return (
-      (data.data as EvmState)?.fromAmount ||
-      (data.data as OraiBridgeState)?.amount ||
-      (data.data as OraichainState).nextAmount
-    );
+    switch (data.type) {
+      case DatabaseEnum.Evm:
+        return (data.data as EvmState)?.amount;
+      case DatabaseEnum.Oraichain:
+        return (data.data as OraichainState)?.nextAmount || (data.data as OraichainState)?.amount;
+      case DatabaseEnum.OraiBridge:
+        return (data.data as OraiBridgeState)?.amount;
+
+      default:
+        return (data.data as CosmosState)?.amount;
+    }
   };
 
   const getToken = () => {
-    let denom = (data.data as EvmState)?.denom;
+    let denom = data.data?.['denom'];
 
-    if ((data.data as OraichainState)?.nextDestinationDenom) {
-      const lastDenom = (data.data as OraichainState).nextDestinationDenom;
+    switch (data.type) {
+      case DatabaseEnum.Evm:
+        denom = (data.data as EvmState).denom;
+        break;
+      case DatabaseEnum.Oraichain:
+        const lastDenom = (data.data as OraichainState).nextDestinationDenom;
+        const splitData = lastDenom.split('/');
 
-      const splitData = lastDenom.split('/');
+        denom = splitData[splitData.length - 1];
+        break;
 
-      denom = splitData[splitData.length - 1];
-    }
+      case DatabaseEnum.OraiBridge:
+        const lastDenomBridge = (data.data as OraiBridgeState).denom;
+        const splitDataBridge = lastDenomBridge.split('/');
 
-    if ((data.data as OraiBridgeState).denom) {
-      const lastDenom = (data.data as OraiBridgeState).denom;
+        denom = splitDataBridge[splitDataBridge.length - 1];
+        break;
 
-      const splitData = lastDenom.split('/');
+      case DatabaseEnum.Cosmos:
+        const lastDenomCosmos = (data.data as CosmosState).denom;
+        const cosmosDenomSplitter = lastDenomCosmos.split('/');
 
-      denom = splitData[splitData.length - 1];
+        denom = cosmosDenomSplitter[cosmosDenomSplitter.length - 1];
+        break;
+
+      default:
+        break;
     }
 
     const tokenByDenom = lastIndex
@@ -97,14 +132,16 @@ const TimelineDetail: React.FC<{
   const { tokenChain, tokenWithIcon: token, denom } = getToken();
   const amount = numberWithCommas(toDisplay(getAmount(), token?.decimals), undefined, { maximumFractionDigits: 6 });
 
+  // const nextChainId =
+  //   nextData?.type === DatabaseEnum.OraiBridge ? 'oraibridge-subnet-2' : (nextData?.data as CosmosState);
+
+  const nextChainId = getNextChainId(nextData);
   const additionalToken =
     data.type !== DatabaseEnum.Evm
       ? flattenTokensWithIcon.find((tk) => tk.coinGeckoId === toToken?.coinGeckoId && tk.chainId === fromToken?.chainId)
-      : flattenTokensWithIcon.find(
-          (tk) => tk.coinGeckoId === toToken?.coinGeckoId && tk.chainId === 'oraibridge-subnet-2'
-        );
+      : flattenTokensWithIcon.find((tk) => tk.coinGeckoId === toToken?.coinGeckoId && tk.chainId === nextChainId);
 
-  const tokenArrayInFirstStep =
+  const tokenArraySwap =
     data.type === DatabaseEnum.Evm
       ? [
           { token: fromToken, amount: historyData.fromAmount },
@@ -114,26 +151,32 @@ const TimelineDetail: React.FC<{
           },
           { token: additionalToken, amount }
         ]
-      : [
+      : data.type === DatabaseEnum.Oraichain
+      ? [
           { token: fromToken, amount: historyData.fromAmount },
           { token: additionalToken, amount: historyData.expectedOutput },
           {
             token,
             amount
           }
-        ];
+        ]
+      : [];
 
   const supportChains = [DatabaseEnum.Evm, DatabaseEnum.Oraichain];
   const isBridge = fromToken?.coinGeckoId === toToken?.coinGeckoId;
+  const isSwapEvmOnFirstStep =
+    data.type === DatabaseEnum.Evm &&
+    currentIndex === 1 &&
+    (fromToken.denom === denom || fromToken.contractAddress === denom);
 
   return (
     <div className={classNames(styles['timeline-detail-wrapper'], styles[theme])}>
       <div className={classNames(styles['timeline-detail'], styles[type])}>
         <div className={styles.wrapper}>
           <p className={styles.title}>
-            {data.data.nextState !== '' ? (
+            {nextData ? (
               <span className={styles.stateTxt}>
-                Bridge &#x2022; From {DbStateToChainName[data.type]} to {DbStateToChainName[data.data.nextState]}
+                Bridge &#x2022; From {DbStateToChainName[data.type]} to {DbStateToChainName[nextData.type]}
               </span>
             ) : (
               `On ${DbStateToChainName[data.type]}`
@@ -145,6 +188,7 @@ const TimelineDetail: React.FC<{
       </div>
 
       {((!lastIndex && currentIndex !== 1) ||
+        isSwapEvmOnFirstStep ||
         (currentIndex === 1 && isBridge) ||
         (!supportChains.includes(data.type) && currentIndex === 1)) && (
         <div className={styles.tokenWrapper}>
@@ -164,9 +208,10 @@ const TimelineDetail: React.FC<{
           </div>
         </div>
       )}
-      {!lastIndex && !isBridge && currentIndex === 1 && supportChains.includes(data.type) && (
+      {/*  && currentIndex === 1 */}
+      {!lastIndex && currentIndex === 1 && !isBridge && !isSwapEvmOnFirstStep && supportChains.includes(data.type) && (
         <div className={classNames(styles.tokenWrapper, styles.list)}>
-          {tokenArrayInFirstStep?.map((data, key) => {
+          {tokenArraySwap?.map((data, key) => {
             const { token: tk, amount } = data;
             return (
               <div className={styles.tokenItem} key={key}>

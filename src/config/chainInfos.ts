@@ -16,6 +16,8 @@ import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as ObridgeIcon } from 'assets/icons/obridge_icon.svg';
+import { ReactComponent as ObridgeIconLight } from 'assets/icons/obridge_icon_light.svg';
 
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as BTCIcon } from 'assets/icons/btc-icon.svg';
@@ -39,7 +41,8 @@ import {
   AIRI_BSC_CONTRACT,
   AIRI_CONTRACT,
   ATOM_ORAICHAIN_DENOM,
-  BridgeAppCurrency, CustomChainInfo,
+  BridgeAppCurrency,
+  CustomChainInfo,
   INJECTIVE_CONTRACT,
   INJECTIVE_ORAICHAIN_DENOM,
   KWTBSC_ORAICHAIN_DENOM,
@@ -378,6 +381,11 @@ export const ICON_WITH_NETWORK = {
     chainId: 'oraibtc-mainnet-1',
     Icon: BitcoinIcon,
     IconLight: BitcoinIcon
+  },
+  'oraibridge-subnet-2': {
+    chainId: 'oraibridge-subnet-2',
+    Icon: ObridgeIcon,
+    IconLight: ObridgeIconLight
   }
 };
 

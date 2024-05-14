@@ -6,6 +6,7 @@ export interface EvmState {
   nextState: string;
   destination: string;
   fromAmount: string;
+  amount: string;
   oraiBridgeChannelId: string;
   oraiReceiver: string;
   destinationDenom: string;
@@ -15,6 +16,8 @@ export interface EvmState {
   evmChainPrefix: string;
   status: string;
   denom: string;
+  nextAmount: string;
+  nextReceiver: string;
 }
 
 export interface OraiBridgeState {
@@ -50,6 +53,7 @@ export interface OraichainState {
   packetAck: string;
   sender: string;
   localReceiver: string;
+  amount: string;
   nextPacketSequence: number;
   nextMemo: string;
   nextAmount: string;
