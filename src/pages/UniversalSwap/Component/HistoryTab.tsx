@@ -147,38 +147,38 @@ const RowsComponent: React.FC<{
           </div>
         </div>
       </div>
-      {showAction &&
-        !mobileMode && ( // !!routingData?.length &&
-          <div className={styles.action}>
-            <div className={styles.progress}>
-              {currentStep && currentStep.data ? (
-                currentStep.data.nextState !== '' ? (
-                  <span className={styles.stateTxt}>
-                    Bridge &#x2022; From {DbStateToChainName[currentStep.type]} to{' '}
-                    {DbStateToChainName[currentStep.data.nextState]}
-                  </span>
-                ) : (
-                  `On ${DbStateToChainName[currentStep.type]}`
-                )
-              ) : toChain?.chainName ? (
-                `On ${toChain?.chainName}`
+      {showAction && (
+        // !mobileMode && ( // !!routingData?.length &&
+        <div className={styles.action}>
+          <div className={styles.progress}>
+            {currentStep && currentStep.data ? (
+              currentStep.data.nextState !== '' ? (
+                <span className={styles.stateTxt}>
+                  Bridge &#x2022; From {DbStateToChainName[currentStep.type]} to{' '}
+                  {DbStateToChainName[currentStep.data.nextState]}
+                </span>
               ) : (
-                ''
-              )}
-            </div>
-            <div className={styles.btn}>
-              <Button
-                type="primary-sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClick();
-                }}
-              >
-                View details
-              </Button>
-            </div>
+                `On ${DbStateToChainName[currentStep.type]}`
+              )
+            ) : toChain?.chainName ? (
+              `On ${toChain?.chainName}`
+            ) : (
+              ''
+            )}
           </div>
-        )}
+          <div className={styles.btn}>
+            <Button
+              type="primary-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick();
+              }}
+            >
+              View details
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -230,6 +230,29 @@ export const HistoryTab: React.FC<{
           </div>
         </div> */}
         <div className={styles.historyData}>
+          {/* <button
+            onClick={() => {
+              window.duckDb.addTransHistory({
+                initialTxHash: '0x552506118ee871e1535d070b1a9596de5cf4ba1c72c587efeca179740dfed9d5',
+                fromCoingeckoId: 'binancecoin',
+                toCoingeckoId: 'tether',
+                fromChainId: '0x38',
+                toChainId: 'Oraichain',
+                fromAmount: '0.005',
+                toAmount: '1.706667',
+                fromAmountInUsdt: '2.9371',
+                toAmountInUsdt: '1.705717093704',
+                status: 'success',
+                type: 'Universal Swap',
+                timestamp: 1715675028867,
+                userAddress: 'orai1hvr9d72r5um9lvt0rpkd4r75vrsqtw6yujhqs2',
+                avgSimulate: '586.393358',
+                expectedOutput: '2.932125'
+              });
+            }}
+          >
+            test add tx
+          </button> */}
           <h2>Latest 20 transactions</h2>
           {transHistory && transHistory.length > 0 ? (
             <Table
@@ -240,7 +263,7 @@ export const HistoryTab: React.FC<{
               }}
               handleClickRow={(e, data) => {
                 setSelectedData(data);
-                mobileMode && setIsOpenIbcRouting(true);
+                // mobileMode && setIsOpenIbcRouting(true);
               }}
             />
           ) : (

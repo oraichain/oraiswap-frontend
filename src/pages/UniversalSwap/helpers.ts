@@ -5,6 +5,7 @@ import {
   CoinIcon,
   IBC_WASM_CONTRACT,
   NetworkChainId,
+  NetworkName,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
@@ -20,13 +21,16 @@ import {
   // swapToTokens
 } from '@oraichain/oraidex-universal-swap';
 import { isMobile } from '@walletconnect/browser-utils';
-import { swapFromTokens, swapToTokens, tokenMap } from 'config/bridgeTokens';
+import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
+import { networks } from 'helper';
 import { TransactionHistory } from 'libs/duckdb';
 import { generateError } from 'libs/utils';
-import { PairToken } from 'reducer/type';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { TIMER } from 'pages/CoHarvest/constants';
+import { formatDate, formatTimeWithPeriod } from 'pages/CoHarvest/helpers';
+import { FILTER_TIME_CHART, PairToken } from 'reducer/type';
 import { submitTransactionIBC } from './ibc-routing';
 
 export enum SwapDirection {
@@ -193,6 +197,34 @@ export const getExplorerScan = (chainId: NetworkChainId) => {
 };
 
 // generate TradingView pair base on from & to token in universal-swap
+export const generateNewSymbolV2 = (
+  fromToken: TokenItemType,
+  toToken: TokenItemType,
+  currentPair: PairToken
+): PairToken | null => {
+  let newTVPair: PairToken = { ...currentPair };
+
+  const findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(toToken.name));
+
+  if (!findedPair) {
+    // this case when user click button reverse swap flow  of pair NOT in pool.
+    // return null to prevent re-call api of this pair.
+    if (currentPair.symbol.split('/').includes(fromToken.name) && currentPair.symbol.split('/').includes(toToken.name))
+      return null;
+    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
+    newTVPair.info = '';
+  } else {
+    // this case when user click button reverse swap flow of pair in pool.
+    // return null to prevent re-call api of this pair.
+    if (findedPair.symbol === currentPair.symbol) return null;
+    newTVPair.symbol = findedPair.symbol;
+    newTVPair.info = findedPair.info;
+  }
+
+  return newTVPair;
+};
+
+// generate TradingView pair base on from & to token in universal-swap
 export const generateNewSymbol = (
   fromToken: TokenItemType,
   toToken: TokenItemType,
@@ -254,6 +286,35 @@ export const calculateFinalPriceChange = (
 
   if (currentPrice === 0) return 0;
   return (currentPrice / (1 + percentPriceChange) - currentPrice) / currentPrice;
+};
+
+// generate chain base on to token in universal-swap
+export const genCurrentChain = ({
+  toToken,
+  currentToChain
+}: {
+  toToken: TokenItemType;
+  currentToChain: NetworkName | '';
+}): NetworkName | '' => {
+  let newCurrentToChain: NetworkName | '' = currentToChain;
+
+  newCurrentToChain = networks?.find((chain) => chain.chainId === toToken.chainId)?.chainName || '';
+
+  return newCurrentToChain;
+};
+
+export const formatTimeDataChart = (
+  time: number | string,
+  type: FILTER_TIME_CHART,
+  lastDate: number,
+  currentText: string = 'Now'
+) => {
+  if (!time) {
+    return currentText;
+  }
+
+  const fmtTime = typeof time === 'string' ? new Date(time).getTime() : time * TIMER.MILLISECOND;
+  return time === lastDate ? currentText : `${formatDate(fmtTime)} ${formatTimeWithPeriod(fmtTime)}`;
 };
 
 export const getTokenIcon = (token: TokenItemType, theme: string) => {

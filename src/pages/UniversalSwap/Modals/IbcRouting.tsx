@@ -184,13 +184,14 @@ const IbcRouting: React.FC<{
 
                   return (
                     <Step key={index} style={{ width: '100%', gap: '16px' }}>
-                      <StepIndicator>
+                      <StepIndicator className={styles.indicator}>
                         <StepStatus complete={<Icon />} incomplete={<Icon opacity={0.5} />} active={<Icon />} />
                       </StepIndicator>
 
                       <TimelineDetail
                         type={getTimelineState(item)}
                         data={item}
+                        nextData={routingData[index + 1]}
                         lastIndex={index + 1 === activeStep}
                         historyData={data}
                         isRouteFinished={routingFinished}
@@ -232,7 +233,7 @@ export const getIcons = (data: RoutingQueryItem, theme: 'light' | 'dark') => {
       break;
 
     default:
-      Icon = ICON_WITH_NETWORK[COSMOS_CHAIN_ID_COMMON.ORAICHAIN_CHAIN_ID];
+      Icon = ICON_WITH_NETWORK['oraibridge-subnet-2'];
       break;
   }
 

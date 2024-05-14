@@ -176,20 +176,26 @@ const App = () => {
       }
 
       if (walletByNetworks.evm === 'owallet' || mobileMode) {
-        if (mobileMode) await window.Metamask.switchNetwork(Networks.bsc);
-        metamaskAddress = await window.Metamask.getEthAddress();
-        if (metamaskAddress) setMetamaskAddress(metamaskAddress);
+        if (window.ethereumDapp) {
+          if (mobileMode) await window.Metamask.switchNetwork(Networks.bsc);
+          metamaskAddress = await window.Metamask.getEthAddress();
+          if (metamaskAddress) setMetamaskAddress(metamaskAddress);
+        }
       }
       if (walletByNetworks.bitcoin === 'owallet' || mobileMode) {
-        btcAddress = await window.Bitcoin.getAddress();
-        if (btcAddress) setBtcAddress(btcAddress);
+        if (window.Bitcoin) {
+          btcAddress = await window.Bitcoin.getAddress();
+          if (btcAddress) setBtcAddress(btcAddress);
+        }
       }
       if (walletByNetworks.tron === 'owallet' || mobileMode) {
-        const res: interfaceRequestTron = await window.tronLinkDapp.request({
-          method: 'tron_requestAccounts'
-        });
-        tronAddress = res?.base58;
-        if (tronAddress) setTronAddress(tronAddress);
+        if (window.tronWebDapp && window.tronLinkDapp) {
+          const res: interfaceRequestTron = await window.tronLinkDapp.request({
+            method: 'tron_requestAccounts'
+          });
+          tronAddress = res?.base58;
+          if (tronAddress) setTronAddress(tronAddress);
+        }
       }
 
       loadTokenAmounts({

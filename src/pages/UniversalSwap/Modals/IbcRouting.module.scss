@@ -199,6 +199,13 @@
       @include mobile {
         max-height: 50vh;
       }
+
+      .indicator {
+        svg {
+          width: 36px;
+          height: 36px;
+        }
+      }
     }
   }
 }
