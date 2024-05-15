@@ -318,72 +318,86 @@ export const chainIcons: ChainIcon[] = [
 export const ICON_WITH_NETWORK = {
   [COSMOS_CHAIN_ID_COMMON.ORAICHAIN_CHAIN_ID]: {
     chainId: 'Oraichain',
+    chainName: 'Oraichain',
     Icon: OraiIcon,
     IconLight: OraiLightIcon
   },
 
   bitcoin: {
     chainId: 'bitcoin',
+    chainName: 'Bitcoin',
     Icon: BTCIcon,
     IconLight: BTCIcon
   },
   'kawaii_6886-1': {
     chainId: 'kawaii_6886-1',
+    chainName: 'Kawaiiverse',
     Icon: KwtIcon,
     IconLight: KwtIcon
   },
   [COSMOS_CHAIN_ID_COMMON.OSMOSIS_CHAIN_ID]: {
     chainId: 'osmosis-1',
+    chainName: 'Osmosis',
     Icon: OsmoIcon,
     IconLight: OsmoIcon
   },
   [COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID]: {
     chainId: 'injective-1',
+    chainName: 'Injective',
     Icon: InjIcon,
     IconLight: InjIcon
   },
   [COSMOS_CHAIN_ID_COMMON.COSMOSHUB_CHAIN_ID]: {
     chainId: 'cosmoshub-4',
+    chainName: 'Cosmos',
     Icon: AtomIcon,
     IconLight: AtomIcon
   },
   [EvmChainPrefix.ETH_MAINNET]: {
     chainId: '0x01',
+    chainName: 'Ethereum',
     Icon: EthIcon,
     IconLight: EthIcon
   },
   [EvmChainPrefix.TRON_MAINNET]: {
     chainId: '0x2b6653dc',
+    chainName: 'Tron',
     Icon: TronIcon,
     IconLight: TronIcon
   },
   [EvmChainPrefix.BSC_MAINNET]: {
     chainId: '0x38',
+    chainName: 'BNB Chain',
     Icon: BnbIcon,
     IconLight: BnbIcon
   },
   '0x1ae6': {
     chainId: '0x1ae6',
+    chainName: 'Kawaiiverse EVM',
     Icon: KwtIcon,
     IconLight: KwtIcon
   },
   'noble-1': {
     chainId: 'noble-1',
+    chainName: 'Noble',
     Icon: NobleIcon,
     IconLight: NobleLightIcon
   },
   'Neutaro-1': {
     chainId: 'Neutaro-1',
+    chainName: 'Neutaro',
     Icon: NeutaroIcon,
     IconLight: NeutaroIcon
   },
   'oraibtc-mainnet-1': {
     chainId: 'oraibtc-mainnet-1',
+    chainName: 'OraiBTC',
     Icon: BitcoinIcon,
     IconLight: BitcoinIcon
   },
   'oraibridge-subnet-2': {
     chainId: 'oraibridge-subnet-2',
+    chainName: 'OBridge',
     Icon: ObridgeIcon,
     IconLight: ObridgeIconLight
   }

@@ -192,6 +192,7 @@ const IbcRouting: React.FC<{
                         type={getTimelineState(item)}
                         data={item}
                         nextData={routingData[index + 1]}
+                        prevData={routingData[index - 1]}
                         lastIndex={index + 1 === activeStep}
                         historyData={data}
                         isRouteFinished={routingFinished}

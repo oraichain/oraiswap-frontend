@@ -505,8 +505,30 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = isLightMode ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
-  const ToIcon = isLightMode ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
+  // console.log('---', {
+  //   initialTxHash: 'DE358265EE954E9EF3E4110DCA34CAB5348C19F5161D00FE6387035C3E67C9A3',
+  //   fromCoingeckoId: originalFromToken?.coinGeckoId,
+  //   toCoingeckoId: originalToToken?.coinGeckoId,
+  //   fromChainId: originalFromToken?.chainId,
+  //   toChainId: originalToToken?.chainId,
+  //   fromAmount: fromAmountToken?.toString(),
+  //   toAmount: minimumReceiveDisplay?.toFixed(6),
+  //   fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
+  //   toAmountInUsdt: getUsd(
+  //     toAmount(minimumReceiveDisplay, originalToToken?.decimals),
+  //     originalToToken,
+  //     prices
+  //   ).toString(),
+  //   status: 'success',
+  //   type: 'Universal Swap',
+  //   timestamp: Date.now(),
+  //   userAddress: oraiAddress,
+  //   avgSimulate: String(averageRatio?.displayAmount || 0),
+  //   expectedOutput: String(expectOutputDisplay || 0)
+  // });
+
+  const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
+  const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
   const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
   const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
   const FromIconNetwork = isLightMode ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;

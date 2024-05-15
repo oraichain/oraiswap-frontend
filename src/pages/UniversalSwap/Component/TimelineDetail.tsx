@@ -1,17 +1,15 @@
-import { COSMOS_CHAIN_ID_COMMON, toDisplay } from '@oraichain/oraidex-common';
+import { toDisplay } from '@oraichain/oraidex-common';
+import ArrowImg from 'assets/icons/arrow_right.svg';
 import { ReactComponent as ArrowDown } from 'assets/icons/down-arrow-v3.svg';
 import OpenNewWindowImg from 'assets/icons/open_new_window.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/success-v2.svg';
 import { ReactComponent as ArrowUp } from 'assets/icons/up-arrow-v3.svg';
 import classNames from 'classnames';
-import { flattenTokens, tokenMap } from 'config/bridgeTokens';
-import ArrowImg from 'assets/icons/arrow_right.svg';
-import { ICON_WITH_NETWORK, chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
+import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import {
   CosmosState,
   DatabaseEnum,
   DbStateToChainName,
-  EvmChainPrefix,
   EvmState,
   OraiBridgeState,
   OraichainState,
@@ -22,6 +20,14 @@ import { TransactionHistory } from 'libs/duckdb';
 import { reduceString } from 'libs/utils';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import React, { useState } from 'react';
+import {
+  genTokenOnCurrentStep,
+  getAmount,
+  getChainName,
+  getNextChainId,
+  getReceiver,
+  getScanUrl
+} from '../ibc-routing';
 import Loader from './Loader';
 import styles from './TimelineDetail.module.scss';
 
@@ -39,7 +45,8 @@ const TimelineDetail: React.FC<{
   isRouteFinished: boolean;
   currentIndex: number;
   nextData: RoutingQueryItem | null | undefined;
-}> = ({ type, data, lastIndex, historyData, isRouteFinished, currentIndex, nextData }) => {
+  prevData: RoutingQueryItem | null | undefined;
+}> = ({ type, data, lastIndex, historyData, isRouteFinished, currentIndex, nextData, prevData }) => {
   const theme = useTheme();
   const [showInfo, setShowInfo] = useState(true);
 
@@ -52,47 +59,10 @@ const TimelineDetail: React.FC<{
     )
   ];
 
-  const getNextChainId = (data: RoutingQueryItem | null | undefined) => {
-    if (!data) {
-      return;
-    }
+  const getToken = (data: RoutingQueryItem) => {
+    let denom = data?.data?.['denom'];
 
-    const ChainIdObj = {
-      [DatabaseEnum.Evm]: ICON_WITH_NETWORK[(data.data as EvmState).evmChainPrefix]?.chainId,
-      [DatabaseEnum.Oraichain]: 'Oraichain',
-      [DatabaseEnum.OraiBridge]: 'oraibridge-subnet-2',
-      [DatabaseEnum.Cosmos]: (data.data as CosmosState)?.chainId
-    };
-
-    return ChainIdObj[data.type];
-  };
-
-  const getReceiver = (): string => {
-    return (
-      (data.data as EvmState)?.oraiReceiver ||
-      (data.data as OraiBridgeState)?.receiver ||
-      (data.data as OraichainState).nextReceiver
-    );
-  };
-
-  const getAmount = (): string => {
-    switch (data.type) {
-      case DatabaseEnum.Evm:
-        return (data.data as EvmState)?.amount;
-      case DatabaseEnum.Oraichain:
-        return (data.data as OraichainState)?.nextAmount || (data.data as OraichainState)?.amount;
-      case DatabaseEnum.OraiBridge:
-        return (data.data as OraiBridgeState)?.amount;
-
-      default:
-        return (data.data as CosmosState)?.amount;
-    }
-  };
-
-  const getToken = () => {
-    let denom = data.data?.['denom'];
-
-    switch (data.type) {
+    switch (data?.type) {
       case DatabaseEnum.Evm:
         denom = (data.data as EvmState).denom;
         break;
@@ -129,22 +99,28 @@ const TimelineDetail: React.FC<{
     return { tokenWithIcon: tokenByDenom, tokenChain, denom: lastIndex ? toToken.denom : denom };
   };
 
-  const { tokenChain, tokenWithIcon: token, denom } = getToken();
-  const amount = numberWithCommas(toDisplay(getAmount(), token?.decimals), undefined, { maximumFractionDigits: 6 });
-
-  // const nextChainId =
-  //   nextData?.type === DatabaseEnum.OraiBridge ? 'oraibridge-subnet-2' : (nextData?.data as CosmosState);
+  const { tokenChain, tokenWithIcon: token, denom } = getToken(data);
+  const amount = numberWithCommas(toDisplay(getAmount(data), token?.decimals), undefined, { maximumFractionDigits: 6 });
 
   const nextChainId = getNextChainId(nextData);
+
+  const originalPrevToken = getToken(prevData).tokenWithIcon;
+  const prevToken = !prevData ? fromToken : genTokenOnCurrentStep(originalPrevToken);
+  const prevTokenAmount = !prevData
+    ? historyData.fromAmount
+    : numberWithCommas(toDisplay(getAmount(prevData), originalPrevToken?.decimals), undefined, {
+        maximumFractionDigits: 6
+      });
+
   const additionalToken =
     data.type !== DatabaseEnum.Evm
-      ? flattenTokensWithIcon.find((tk) => tk.coinGeckoId === toToken?.coinGeckoId && tk.chainId === fromToken?.chainId)
-      : flattenTokensWithIcon.find((tk) => tk.coinGeckoId === toToken?.coinGeckoId && tk.chainId === nextChainId);
+      ? flattenTokensWithIcon.find((tk) => tk.coinGeckoId === toToken?.coinGeckoId && tk.chainId === 'Oraichain')
+      : flattenTokensWithIcon.find((tk) => tk.coinGeckoId === token?.coinGeckoId && tk.chainId === nextChainId);
 
   const tokenArraySwap =
     data.type === DatabaseEnum.Evm
       ? [
-          { token: fromToken, amount: historyData.fromAmount },
+          { token: prevToken, amount: prevTokenAmount },
           {
             token,
             amount: historyData.expectedOutput
@@ -153,7 +129,7 @@ const TimelineDetail: React.FC<{
         ]
       : data.type === DatabaseEnum.Oraichain
       ? [
-          { token: fromToken, amount: historyData.fromAmount },
+          { token: prevToken, amount: prevTokenAmount },
           { token: additionalToken, amount: historyData.expectedOutput },
           {
             token,
@@ -162,35 +138,38 @@ const TimelineDetail: React.FC<{
         ]
       : [];
 
-  const supportChains = [DatabaseEnum.Evm, DatabaseEnum.Oraichain];
-  const isBridge = fromToken?.coinGeckoId === toToken?.coinGeckoId;
-  const isSwapEvmOnFirstStep =
-    data.type === DatabaseEnum.Evm &&
-    currentIndex === 1 &&
-    (fromToken.denom === denom || fromToken.contractAddress === denom);
+  const isSwapEvmStep = data.type === DatabaseEnum.Evm && prevToken?.coinGeckoId !== token?.coinGeckoId;
+
+  const isSwapOraichainStep = data.type === DatabaseEnum.Oraichain && prevToken?.coinGeckoId !== token?.coinGeckoId;
+
+  const isShowSwapRoute = isSwapEvmStep || isSwapOraichainStep;
+
+  const title = nextData ? (
+    <span className={styles.stateTxt}>
+      Bridge &#x2022; From {getChainName(data)} to {getChainName(nextData)}
+    </span>
+  ) : lastIndex && data.data?.nextState ? (
+    <span className={styles.stateTxt}>
+      Bridge &#x2022; From {DbStateToChainName[data.type]} to {DbStateToChainName[data.data?.nextState]}
+    </span>
+  ) : !isRouteFinished ? (
+    `On ${DbStateToChainName[data.type]}`
+  ) : (
+    `On ${token?.org}`
+  );
 
   return (
     <div className={classNames(styles['timeline-detail-wrapper'], styles[theme])}>
       <div className={classNames(styles['timeline-detail'], styles[type])}>
         <div className={styles.wrapper}>
-          <p className={styles.title}>
-            {nextData ? (
-              <span className={styles.stateTxt}>
-                Bridge &#x2022; From {DbStateToChainName[data.type]} to {DbStateToChainName[nextData.type]}
-              </span>
-            ) : (
-              `On ${DbStateToChainName[data.type]}`
-            )}
-          </p>
+          <p className={styles.title}>{title}</p>
           {type === TimelineType.WAITING && <Loader />}
           {type === TimelineType.CONFIRMED && <SuccessIcon />}
         </div>
       </div>
 
-      {((!lastIndex && currentIndex !== 1) ||
-        isSwapEvmOnFirstStep ||
-        (currentIndex === 1 && isBridge) ||
-        (!supportChains.includes(data.type) && currentIndex === 1)) && (
+      {/* Bridge */}
+      {!lastIndex && !isShowSwapRoute && (
         <div className={styles.tokenWrapper}>
           <div className={styles.txt}>{!lastIndex ? 'Bridge' : 'Receive'}</div>
 
@@ -200,7 +179,9 @@ const TimelineDetail: React.FC<{
             </div>
             <div className={styles.info}>
               <span className={styles.token}>
-                {numberWithCommas(toDisplay(getAmount(), token?.decimals), undefined, { maximumFractionDigits: 6 })}{' '}
+                {numberWithCommas(toDisplay(getAmount(data), token?.decimals), undefined, {
+                  maximumFractionDigits: 6
+                })}{' '}
                 <span>{token?.name}</span>
               </span>
               <span className={styles.chain}>{token?.org === 'OraiBridge' ? 'OBridge' : token?.org || ''}</span>
@@ -209,10 +190,16 @@ const TimelineDetail: React.FC<{
         </div>
       )}
       {/*  && currentIndex === 1 */}
-      {!lastIndex && currentIndex === 1 && !isBridge && !isSwapEvmOnFirstStep && supportChains.includes(data.type) && (
+      {/* {!lastIndex && !isBridge && !isBridgeEvmStep && supportChains.includes(data.type) && ( */}
+
+      {/* Swap */}
+      {!lastIndex && isShowSwapRoute && (
         <div className={classNames(styles.tokenWrapper, styles.list)}>
           {tokenArraySwap?.map((data, key) => {
             const { token: tk, amount } = data;
+
+            if (!tk) return null;
+
             return (
               <div className={styles.tokenItem} key={key}>
                 <div className={styles.tokenDetail}>
@@ -243,7 +230,7 @@ const TimelineDetail: React.FC<{
         <div className={styles['timeline-info']}>
           <div className={styles['text-wrapper']}>
             <h3>Receiver:</h3>
-            <p>{reduceString(getReceiver(), 8, 8)}</p>
+            <p>{reduceString(getReceiver(data), 8, 8)}</p>
           </div>
           <div className={styles['text-wrapper']}>
             <h3>Tx Hash:</h3>
@@ -276,34 +263,3 @@ const TimelineDetail: React.FC<{
 };
 
 export default TimelineDetail;
-
-export const getScanUrl = (data: RoutingQueryItem): string => {
-  if (data.type === DatabaseEnum.Evm) {
-    const evmChainPrefix = (data.data as EvmState).evmChainPrefix;
-    if (evmChainPrefix === EvmChainPrefix.BSC_MAINNET) {
-      return `https://bscscan.com/tx/${data.data.txHash}`;
-    }
-    if (evmChainPrefix === EvmChainPrefix.ETH_MAINNET) {
-      return `https://etherscan.io/tx/${data.data.txHash}`;
-    }
-    if (evmChainPrefix === EvmChainPrefix.TRON_MAINNET) {
-      return `https://tronscan.org/#/transaction/${data.data.txHash}`;
-    }
-  }
-  if (data.type === DatabaseEnum.Cosmos) {
-    const chainId = (data.data as CosmosState).chainId;
-    if (chainId === COSMOS_CHAIN_ID_COMMON.COSMOSHUB_CHAIN_ID) {
-      return `https://www.mintscan.io/cosmos/tx/${data.data.txHash}`;
-    }
-    if (chainId === COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID) {
-      return `https://www.mintscan.io/injective/tx/${data.data.txHash}`;
-    }
-    if (chainId === COSMOS_CHAIN_ID_COMMON.OSMOSIS_CHAIN_ID) {
-      return `https://www.mintscan.io/osmosis/tx/${data.data.txHash}`;
-    }
-  }
-  if (data.type === DatabaseEnum.Oraichain) {
-    return `https://scan.orai.io/txs/${data.data.txHash}`;
-  }
-  return `https://scan.bridge.orai.io/txs/${data.data.txHash}`;
-};
