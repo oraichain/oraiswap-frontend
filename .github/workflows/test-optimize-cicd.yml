@@ -1,11 +1,11 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Mainnet
+name: Test Optimize CI/CD
 
 # Controls when the action will run.
 on:
-  release:
-    types: [released]
+  push:
+    branches: [optimize/prod-cicd]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -51,12 +51,3 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           REACT_APP_SENTRY_ENVIRONMENT: production
           CI: false
-      - name: Deploy to firebase
-        run: yarn firebase deploy --only hosting:oraiswap --token ${{ secrets.FIREBASE_TOKEN }}
-      - name: Send discord message
-        uses: appleboy/discord-action@master
-        with:
-          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
-          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
-          username: 'GitBot [oraiswap-frontend]'
-          message: 'Repo oraiswap-frontend has just published by ${{ github.event.head_commit.author.name }}'

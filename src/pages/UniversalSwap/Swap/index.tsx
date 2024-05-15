@@ -61,7 +61,9 @@ import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import {
   findKeyByValue,
+  genCurrentChain,
   generateNewSymbol,
+  generateNewSymbolV2,
   getDisableSwap,
   getFromToToken,
   getRemoteDenom,
@@ -72,7 +74,14 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
-import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import {
+  selectCurrentToChain,
+  selectCurrentToken,
+  setCurrentFromToken,
+  setCurrentToChain,
+  setCurrentToToken,
+  setCurrentToken
+} from 'reducer/tradingSlice';
 import { AddressManagementStep } from 'reducer/type';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
@@ -91,6 +100,7 @@ import styles from './index.module.scss';
 import useFilteredTokens from './hooks/useFilteredTokens';
 import { useNavigate } from 'react-router-dom';
 import SwapDetail from './components/SwapDetail';
+import PowerByOBridge from 'components/PowerByOBridge';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -103,6 +113,7 @@ const SwapComponent: React.FC<{
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const navigate = useNavigate();
 
+  const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
   const [openDetail, setOpenDetail] = useState(false);
   const [openRoutes, setOpenRoutes] = useState(false);
 
@@ -113,8 +124,12 @@ const SwapComponent: React.FC<{
   const originalFromToken = tokenMap[fromTokenDenomSwap];
   const originalToToken = tokenMap[toTokenDenomSwap];
 
-  const [selectChainFrom, setSelectChainFrom] = useState(originalFromToken.chainId);
-  const [selectChainTo, setSelectChainTo] = useState(originalToToken.chainId);
+  const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(
+    originalFromToken?.chainId || ('OraiChain' as NetworkChainId)
+  );
+  const [selectChainTo, setSelectChainTo] = useState<NetworkChainId>(
+    originalToToken?.chainId || ('OraiChain' as NetworkChainId)
+  );
 
   const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
   const [isSelectChainTo, setIsSelectChainTo] = useState(false);
@@ -139,14 +154,13 @@ const SwapComponent: React.FC<{
   const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
   const currentPair = useSelector(selectCurrentToken);
+  const currentToChain = useSelector(selectCurrentToChain);
   const { refetchTransHistory } = useGetTransHistory();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [addressTransfer, setAddressTransfer] = useState('');
   const [initAddressTransfer, setInitAddressTransfer] = useState('');
   const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
   const { handleReadClipboard } = useCopyClipboard();
-
-  const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
 
   const { fromToken, toToken } = getFromToToken(
     originalFromToken,
@@ -269,11 +283,27 @@ const SwapComponent: React.FC<{
   );
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    // const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
+
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
 
+  useEffect(() => {
+    const newCurrentToChain = genCurrentChain({ toToken: originalToToken, currentToChain });
+
+    if (toToken && originalToToken) {
+      dispatch(setCurrentToChain(newCurrentToChain));
+      dispatch(setCurrentToToken(originalToToken));
+    }
+  }, [originalToToken, toToken]);
+
+  useEffect(() => {
+    if (fromToken && originalFromToken) {
+      dispatch(setCurrentFromToken(originalFromToken));
+    }
+  }, [originalFromToken, fromToken]);
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
   const isAverageRatio = averageRatio && averageRatio.amount;
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
@@ -532,6 +562,8 @@ const SwapComponent: React.FC<{
     setCoe(coeff);
   };
 
+  const unSupportSimulateToken = ['bnb', 'bep20_wbnb', 'eth'];
+
   const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
     const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
@@ -540,7 +572,6 @@ const SwapComponent: React.FC<{
     if (token.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap)) {
       setFromTokenDenom(toTokenDenomSwap);
       setToTokenDenom(fromTokenDenomSwap);
-
       setSelectChainFrom(selectChainTo);
       setSelectChainTo(selectChainFrom);
 
@@ -897,6 +928,7 @@ const SwapComponent: React.FC<{
               </button>
             );
           })()}
+          <PowerByOBridge theme={theme} />
         </div>
       </LoadingBox>
 
@@ -926,6 +958,7 @@ const SwapComponent: React.FC<{
           isSelectToken={isSelectFrom}
         />
         <SelectChain
+          filterChainId={unSupportSimulateToken.includes(originalFromToken?.denom) ? ['Oraichain'] : []}
           setIsSelectToken={setIsSelectChainTo}
           amounts={amounts}
           theme={theme}

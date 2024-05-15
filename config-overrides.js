@@ -26,7 +26,7 @@ const fixBabelRules = (config) => {
   let ruleInd = 0;
   let firstRule = true;
   const rules = config.module.rules[0].oneOf;
-  while (ruleInd < rules.length) {
+  while (rules && ruleInd < rules.length) {
     const rule = rules[ruleInd];
     if (rule.loader) {
       if (firstRule) {
@@ -61,6 +61,7 @@ module.exports = {
         }
       }
     ];
+    config.resolve.fallback = fallback;
     const isDevelopment = env === 'development';
 
     // do not check issues
@@ -102,14 +103,13 @@ module.exports = {
           project: 'oraidex',
           authToken: process.env.SENTRY_AUTH_TOKEN
         })
-      );
+      )
     }
 
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest,
-        scope: 'src'
+        manifest
       })
     );
     return config;

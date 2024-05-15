@@ -33,6 +33,7 @@ import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
 import { calcMaxAmount, useDepositFeesBitcoin, useGetWithdrawlFeesBitcoin } from '../helpers';
 import useWalletReducer from 'hooks/useWalletReducer';
+import PowerByOBridge from 'components/PowerByOBridge';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -386,6 +387,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           }
         })()}
       </div>
+
+      <PowerByOBridge theme={theme} />
     </div>
   );
 };
