@@ -233,25 +233,26 @@ export const HistoryTab: React.FC<{
           {/* <button
             onClick={() => {
               window.duckDb.addTransHistory({
-                initialTxHash: '0x552506118ee871e1535d070b1a9596de5cf4ba1c72c587efeca179740dfed9d5',
-                fromCoingeckoId: 'binancecoin',
+                initialTxHash: 'DE358265EE954E9EF3E4110DCA34CAB5348C19F5161D00FE6387035C3E67C9A3',
+                fromCoingeckoId: 'injective-protocol',
                 toCoingeckoId: 'tether',
-                fromChainId: '0x38',
-                toChainId: 'Oraichain',
-                fromAmount: '0.005',
-                toAmount: '1.706667',
-                fromAmountInUsdt: '2.9371',
-                toAmountInUsdt: '1.705717093704',
+                fromChainId: 'injective-1',
+                toChainId: '0x38',
+                fromAmount: '0.1',
+                toAmount: '0.953595',
+                fromAmountInUsdt: '2.161',
+                toAmountInUsdt: '0.9533289469949999',
                 status: 'success',
                 type: 'Universal Swap',
-                timestamp: 1715675028867,
+                timestamp: 1715757291333,
                 userAddress: 'orai1hvr9d72r5um9lvt0rpkd4r75vrsqtw6yujhqs2',
-                avgSimulate: '586.393358',
-                expectedOutput: '2.932125'
+                avgSimulate: '21.577212',
+                expectedOutput: '2.157987'
               });
             }}
+            style={{ background: 'white', color: 'black', cursor: 'pointer', padding: 4 }}
           >
-            test add tx
+            Add Test tx
           </button> */}
           <h2>Latest 20 transactions</h2>
           {transHistory && transHistory.length > 0 ? (
