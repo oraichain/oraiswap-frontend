@@ -32,7 +32,8 @@ export const useSimulate = (
         originalToInfo: originalToTokenInfo,
         originalAmount: fromAmountToken,
         routerClient,
-        useSmartRoute: true
+        useSmartRoute: true,
+        urlRouter: 'https://osor.oraidex.io'
       });
     },
     {
