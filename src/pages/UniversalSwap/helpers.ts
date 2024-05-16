@@ -5,14 +5,15 @@ import {
   CoinIcon,
   IBC_WASM_CONTRACT,
   NetworkChainId,
+  NetworkName,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   TokenItemType,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
-  NetworkName,
-  oraichainTokens
+  oraichainTokens,
+  PairAddress
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -20,15 +21,17 @@ import {
   // swapToTokens
 } from '@oraichain/oraidex-universal-swap';
 import { isMobile } from '@walletconnect/browser-utils';
-import { swapFromTokens, swapToTokens, tokenMap } from 'config/bridgeTokens';
+import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
 import { networks } from 'helper';
+import { TransactionHistory } from 'libs/duckdb';
 import { generateError } from 'libs/utils';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDate, formatTimeWithPeriod } from 'pages/CoHarvest/helpers';
-import { endOfMonth, endOfWeek } from 'pages/Pools/helpers';
 import { FILTER_TIME_CHART, PairToken } from 'reducer/type';
+import { submitTransactionIBC } from './ibc-routing';
 
 export enum SwapDirection {
   From,
@@ -343,7 +346,7 @@ export const refreshBalances = async (
   }
 };
 
-export const getFromToToken = (originalFromToken, originalToToken, fromTokenDenomSwap, toTokenDenomSwap) => {
+export const getFromToToken = (originalFromToken, originalToToken) => {
   const isEvmSwap = UniversalSwapHelper.isEvmSwappable({
     fromChainId: originalFromToken.chainId,
     toChainId: originalToToken.chainId,
@@ -351,11 +354,9 @@ export const getFromToToken = (originalFromToken, originalToToken, fromTokenDeno
     toContractAddr: originalToToken.contractAddress
   });
   const fromToken = isEvmSwap
-    ? tokenMap[fromTokenDenomSwap]
-    : getTokenOnOraichain(tokenMap[fromTokenDenomSwap].coinGeckoId) ?? tokenMap[fromTokenDenomSwap];
-  const toToken = isEvmSwap
-    ? tokenMap[toTokenDenomSwap]
-    : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
+    ? originalFromToken
+    : getTokenOnOraichain(originalFromToken.coinGeckoId) ?? originalFromToken;
+  const toToken = isEvmSwap ? originalToToken : getTokenOnOraichain(originalToToken.coinGeckoId) ?? originalToToken;
 
   return { fromToken, toToken };
 };
@@ -403,4 +404,65 @@ export const getDisableSwap = ({
   if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
   if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
   return { disabledSwapBtn, disableMsg };
+};
+
+// smart route swap
+export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
+
+export const findTokenInfo = (token, flattenTokens) => {
+  return flattenTokens.find(
+    (t) => t.contractAddress?.toUpperCase() === token?.toUpperCase() || t.denom.toUpperCase() === token?.toUpperCase()
+  );
+};
+
+export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) => {
+  const baseToken = flattenTokensWithIcon.find((token) => token.coinGeckoId === coinGeckoId);
+  return baseToken ? (isLightMode ? baseToken.IconLight : baseToken.Icon) : DefaultIcon;
+};
+
+export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLightMode) => {
+  const pairKey = findKeyByValue(PairAddress, path.poolId);
+  const [tokenInKey, tokenOutKey] = pairKey.split('_');
+  let infoPair: any = PAIRS_CHART.find((pair) => {
+    let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
+    return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
+  });
+  const tokenIn = infoPair?.assets.find((info) => info.toUpperCase() !== path.tokenOut.toUpperCase());
+  const tokenOut = path.tokenOut;
+
+  infoPair = {
+    ...infoPair,
+    tokenIn: tokenIn,
+    tokenOut: tokenOut
+  };
+
+  const TokenInIcon = findBaseToken(
+    findTokenInfo(tokenIn, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+  const TokenOutIcon = findBaseToken(
+    findTokenInfo(tokenOut, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+
+  return { infoPair, TokenInIcon, TokenOutIcon, pairKey };
+};
+
+export const handleAddTxHistory = async (data: TransactionHistory, enableIbc: boolean = true) => {
+  console.log('handleAddTxHistory', data);
+  try {
+    if (enableIbc && data.toAmount && Number(data.toAmount) > 0) {
+      await submitTransactionIBC({
+        txHash: data.initialTxHash,
+        chainId: data.fromChainId
+      });
+    }
+
+    await window.duckDb.initializeTableHistory(data.userAddress);
+    await window.duckDb.addTransHistory({ ...data });
+  } catch (error) {
+    console.log('add history error', error);
+  }
 };

@@ -16,6 +16,7 @@ import { ReactComponent as SupportIcon } from 'assets/icons/ic_support.svg';
 import { ReactComponent as TelegramIcon } from 'assets/icons/ic_telegram.svg';
 import { ReactComponent as TwitterIcon } from 'assets/icons/ic_twitter.svg';
 import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalswap.svg';
+import { ReactComponent as VaultIcon } from 'assets/icons/ic_vault_menu.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
@@ -121,6 +122,7 @@ const Menu: React.FC = () => {
       {renderLink('/pools', 'Pools', setLink, false, <PoolIcon />)}
       {renderLink('/staking', 'Staking', setLink, false, <StakingIcon />)}
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
+      {renderLink('/vaults', 'Vault', setLink, false, <VaultIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}
       {renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, true, <OraidexBetaIcon />)}
       <div className={styles.divider}></div>

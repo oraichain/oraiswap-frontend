@@ -1,0 +1,54 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.listVault {
+  .listVaultView {
+    .strategy {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .strategyNameValue {
+        font-weight: 500;
+      }
+
+      .strategyNameTitle {
+        font-size: 12px;
+      }
+
+      .symbols {
+        .symbols_logo_left {
+          position: relative;
+          left: 5px;
+        }
+      }
+
+      @include mobile {
+        font-size: 12px;
+        gap: 4px;
+      }
+    }
+
+    .infoApr {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      @include mobile {
+        font-size: 12px;
+        gap: 4px;
+      }
+
+      @include theme() {
+        color: theme-get('primary-sufface-default-dark-4');
+      }
+    }
+  }
+
+  .tvl {
+    @include mobile {
+      font-size: 12px;
+    }
+  }
+}

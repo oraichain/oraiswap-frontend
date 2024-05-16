@@ -5,6 +5,7 @@ import { ReactComponent as PoolIcon } from 'assets/icons/ic_pools.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_staking.svg';
 import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalswap.svg';
 import { ReactComponent as OraidexBetaIcon } from 'assets/icons/ic_beta.svg';
+import { ReactComponent as VaultIcon } from 'assets/icons/ic_vault_menu.svg';
 import { ReactComponent as LogoDownloadOwalletIcon } from 'assets/icons/logo_download.svg';
 import { ReactComponent as DownloadOwalletIcon } from 'assets/icons/logo_owallet_gateway.svg';
 import { ReactComponent as DownloadOwalletIconDark } from 'assets/icons/logo_owallet_gateway_dark.svg';
@@ -74,6 +75,7 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
             {renderLink('/pools', 'Pools', setLink, <PoolIcon />)}
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
+            {renderLink('/vaults', 'Vault', setLink, <VaultIcon />)}
             {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
             {renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, <OraidexBetaIcon />, true)}
           </div>

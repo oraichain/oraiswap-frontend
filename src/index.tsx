@@ -3,6 +3,7 @@ import { HttpClient, Tendermint37Client, WebsocketClient } from '@cosmjs/tenderm
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ChakraProvider } from '@chakra-ui/react';
 import { ToastContext, ToastProvider } from 'components/Toasts/context';
 import { network } from 'config/networks';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
@@ -21,6 +22,8 @@ import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
 
 const queryClient = new QueryClient();
+// @ts-ignore
+window.queryClient = queryClient;
 
 if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
   Sentry.init({

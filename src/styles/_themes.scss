@@ -12,6 +12,8 @@ $blue-color: #7e5cc5;
 $success-color: #00ad26;
 $error-color: #ff5947;
 $warning-color: #e01600;
+$warning-5-color: #c68e00;
+$warning-10-color: #ff5947;
 $primary-text-link: #78ca11;
 $yellow-brown-color: #ad9c00;
 $primary-surface-default-light: #e5f7d6;
@@ -45,6 +47,7 @@ $error-surface-default-subtle: #380016;
 $warning-surface-default-subtle: #383200;
 
 $primary-surface-default-subtle-2: #292f23;
+$primary-surface-default-subtle-3: #2f5711;
 $primary-border-highlight: #89a571;
 $primary-text-highlight: #d7f5bf;
 
@@ -154,6 +157,7 @@ $themes: (
     'primary-highlight-section': #aee67f,
     'primary-surface-default-dark-2': #2f5711,
     'primary-surface-default-dark-3': #aee67f,
+    'primary-surface-default-dark-4': #d7f5bf,
     'bg-section-05': #1b1c1a,
     'neutral-text-text-disabled': #494949,
     'neutral-surface-bg-modal': #232521,
@@ -163,6 +167,12 @@ $themes: (
     'bg-linear-section': linear-gradient(180deg, #232521 0%, #181a17 100%),
     'neutral-surface-btn-default': #152703,
     'neutral-text-btn-default': #152703,
+    'neutral-surface-bg-strong': #31332e,
+    'primary-sufface-default-dark-4': #d7f5bf,
+    'color-neutral-text-title': #efefef,
+    'color-neutrol-border-default': #494949,
+    'neutral-surface-card': #232521,
+    'neutral-text-title-negative': #fff,
     'neutral-surface-bg-3': #f7f7f7
   ),
   light: (
@@ -242,7 +252,7 @@ $themes: (
     'primary-surface-default': #2f5711,
     'neutral-surface-bg': #fff,
     'neutral-surface-bg-2': #fff,
-    'neutral-text-body-on-section': #686a,
+    'neutral-text-body-on-section': #686a66,
     'neutral-text-text-token-name': #232521,
     'neutral-text-text-token-name-2': #181a17,
     'neutral-text-text-btn-default': #232521,
@@ -269,6 +279,7 @@ $themes: (
     'primary-highlight-section': #5ea402,
     'primary-surface-default-dark-2': #000,
     'primary-surface-default-dark-3': #2f5711,
+    'primary-surface-default-dark-4': #2f5711,
     'bg-section-05': #f7f7f7,
     'neutral-text-text-disabled': #c7c8c6,
     'neutral-surface-bg-modal': #fff,
@@ -278,6 +289,12 @@ $themes: (
     'neutral-surface-btn-default': #eef9e5,
     'neutral-text-btn-default': #232521,
     'bg-overlay-section': rgba(255, 255, 255, 0.5),
+    'neutral-surface-bg-strong': #f2f4f0,
+    'primary-sufface-default-dark-4': #5ea402,
+    'color-neutral-text-title': #232521,
+    'color-neutrol-border-default': #efefef,
+    'neutral-surface-card': #fff,
+    'neutral-text-title-negative': #232521,
     'neutral-surface-bg-3': #181a17
   )
 );

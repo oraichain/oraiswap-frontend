@@ -104,7 +104,6 @@ export const formatDisplayUsdt = (amount: number | string, dp = 2, dpMin = 4): s
   if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), dpMin).toString()}`;
 
   return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp), undefined, { maximumFractionDigits: 6 })}`;
-  // return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp))}`;
 };
 
 export const formatDisplayClaimable = (amount: number | string, dp = 2): string => {

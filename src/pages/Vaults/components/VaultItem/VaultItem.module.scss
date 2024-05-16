@@ -1,0 +1,158 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.vaultItem {
+  border-radius: 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  &:hover {
+    @include theme() {
+      border-color: theme-get('neutral-border-border-bold');
+    }
+  }
+
+  .vaultHead {
+    padding: 24px;
+    background-image: url('../../../../assets/images/bg_vault_item.svg');
+    background-repeat: no-repeat;
+    border-radius: 16px 16px 0 0;
+    background-size: cover;
+
+    @include theme() {
+      background-color: theme-get('bg-section-05');
+    }
+
+    .strategy {
+      display: flex;
+      gap: 10px;
+
+      .strategyLogo {
+        display: flex;
+        align-items: center;
+      }
+
+      .symbols {
+        .symbols_logo_left {
+          position: relative;
+          left: 5px;
+        }
+      }
+
+      .strategyName {
+
+
+        .strategyNameTitle {
+          color: $white-color;
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 150%;
+        }
+
+        .strategyNameValue {
+          color: $white-color;
+          font-size: 24px;
+          font-weight: 600;
+          line-height: 150%;
+        }
+      }
+
+      @include mobile {
+        .strategyNameTitle {
+          font-size: 12px;
+        }
+
+        .strategyName {
+          .strategyNameValue {
+            font-size: 20px;
+          }
+        }
+      }
+    }
+  }
+
+  .vaultContent {
+    padding: 24px;
+
+    @include mobile {
+      padding: 16px;
+    }
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 25px;
+    border-radius: 0px 0px 16px 16px;
+
+    @include theme() {
+      background-color: theme-get('neutral-surface-bg-strong');
+    }
+
+    .vaultDescription {
+      @include theme() {
+        color: theme-get('neutral-text-body-on-section');
+      }
+
+      max-width: 300px;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%;
+    }
+
+    .vaultInfo {
+      width: 100%;
+
+      .infoTop {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .infoTopSection {
+        .infoTitle {
+          @include theme() {
+            color: theme-get('neutral-text-body-on-section');
+          }
+
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 150%;
+        }
+
+        .infoDetail {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 22px;
+
+          @include medium-desktop {
+            font-size: 16px;
+          }
+        }
+
+        .infoApr {
+          @include theme() {
+            color: theme-get('primary-sufface-default-dark-4');
+          }
+
+          font-weight: 500;
+          line-height: 150%;
+        }
+
+        .myShare {
+          @include theme() {
+            color: theme-get('neutral-text-title');
+          }
+
+          font-weight: 500;
+          line-height: 150%;
+        }
+      }
+
+      &>.infoTopSection {
+        margin-top: 16px;
+      }
+    }
+  }
+}

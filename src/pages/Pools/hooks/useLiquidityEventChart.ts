@@ -8,6 +8,7 @@ export const useLiquidityEventChart = (
   onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>,
   pair?: string
 ) => {
+  console.log({ pair });
   const [currentDataLiquidity, setCurrentDataLiquidity] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);

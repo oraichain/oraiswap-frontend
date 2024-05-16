@@ -12,18 +12,22 @@ import {
   network,
   toAmount,
   toDisplay,
+  CW20_DECIMALS,
   parseTokenInfoRawDenom
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { isMobile } from '@walletconnect/browser-utils';
+import UpArrowIcon from 'assets/icons/up-arrow.svg';
+import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
 import ArrowImg from 'assets/icons/arrow_new.svg';
 import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
 import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
 import { ReactComponent as FeeDarkIcon } from 'assets/icons/fee_dark.svg';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
+import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
@@ -33,7 +37,7 @@ import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
-import { chainInfosWithIcon } from 'config/chainInfos';
+import { chainInfosWithIcon, flattenTokensWithIcon, tokensWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
   floatToPercent,
@@ -55,8 +59,9 @@ import Metamask from 'libs/metamask';
 import { getUsd, reduceString, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
-import { numberWithCommas } from 'pages/Pools/helpers';
+import { numberWithCommas, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import {
+  findKeyByValue,
   genCurrentChain,
   generateNewSymbol,
   generateNewSymbolV2,
@@ -64,6 +69,7 @@ import {
   getFromToToken,
   getRemoteDenom,
   getTokenBalance,
+  processPairInfo,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
@@ -92,12 +98,13 @@ import { useFillToken } from './hooks/useFillToken';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
-import SwapDetail from './components/SwapDetail';
 import useFilteredTokens from './hooks/useFilteredTokens';
 import PowerByOBridge from 'components/PowerByOBridge';
+import { useNavigate } from 'react-router-dom';
+import SwapDetail from './components/SwapDetail';
+import { submitTransactionIBC } from '../ibc-routing';
 
 const cx = cn.bind(styles);
-
 // TODO: hardcode decimal relayerFee
 const RELAYER_DECIMAL = 6;
 
@@ -106,8 +113,11 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
+  const navigate = useNavigate();
+
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
   const [openDetail, setOpenDetail] = useState(false);
+  const [openRoutes, setOpenRoutes] = useState(false);
 
   const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
   const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
@@ -141,6 +151,7 @@ const SwapComponent: React.FC<{
   const [tronAddress] = useConfigReducer('tronAddress');
   const [oraiAddress] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
+  const isLightMode = theme === 'light';
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
@@ -155,9 +166,9 @@ const SwapComponent: React.FC<{
 
   const { fromToken, toToken } = getFromToToken(
     originalFromToken,
-    originalToToken,
-    fromTokenDenomSwap,
-    toTokenDenomSwap
+    originalToToken
+    // fromTokenDenomSwap,
+    // toTokenDenomSwap
   );
 
   const remoteTokenDenomFrom = getRemoteDenom(originalFromToken);
@@ -295,7 +306,10 @@ const SwapComponent: React.FC<{
       dispatch(setCurrentFromToken(originalFromToken));
     }
   }, [originalFromToken, fromToken]);
-  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
+
+  const fromAmountTokenBalance =
+    fromTokenInfoData &&
+    toAmount(fromAmountToken, originalFromToken?.decimals || fromTokenInfoData?.decimals || CW20_DECIMALS);
   const isAverageRatio = averageRatio && averageRatio.amount;
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
@@ -311,7 +325,10 @@ const SwapComponent: React.FC<{
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
   const bridgeTokenFee =
     simulateDisplayAmount && (fromTokenFee || toTokenFee)
-      ? (simulateDisplayAmount * fromTokenFee + simulateDisplayAmount * toTokenFee) / 100
+      ? new BigDecimal(new BigDecimal(simulateDisplayAmount).mul(fromTokenFee))
+          .add(new BigDecimal(simulateDisplayAmount).mul(toTokenFee))
+          .div(100)
+          .toNumber()
       : 0;
 
   const minimumReceiveDisplay = isSimulateDataDisplay
@@ -323,7 +340,6 @@ const SwapComponent: React.FC<{
   const expectOutputDisplay = isSimulateDataDisplay
     ? numberWithCommas(simulateData.displayAmount, undefined, { minimumFractionDigits: 6 })
     : 0;
-
   const estSwapFee = new BigDecimal(simulateDisplayAmount || 0).mul(fee || 0).toNumber();
 
   const totalFeeEst =
@@ -399,6 +415,7 @@ const SwapComponent: React.FC<{
         simulateAmount,
         userSlippage,
         amounts: amountsBalance,
+        smartRoutes: simulateData?.routeSwapOps,
         simulatePrice:
           // @ts-ignore
           averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
@@ -422,6 +439,14 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
+
+        if (minimumReceiveDisplay && minimumReceiveDisplay > 0) {
+          await submitTransactionIBC({
+            txHash: transactionHash,
+            chainId: originalFromToken.chainId
+          });
+        }
+
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
 
@@ -439,13 +464,19 @@ const SwapComponent: React.FC<{
           fromChainId: originalFromToken.chainId,
           toChainId: originalToToken.chainId,
           fromAmount: fromAmountToken.toString(),
-          toAmount: toAmountToken.toString(),
+          toAmount: minimumReceiveDisplay.toFixed(6),
           fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
-          toAmountInUsdt: getUsd(toAmount(toAmountToken, originalToToken.decimals), originalToToken, prices).toString(),
+          toAmountInUsdt: getUsd(
+            toAmount(minimumReceiveDisplay, originalToToken.decimals),
+            originalToToken,
+            prices
+          ).toString(),
           status: 'success',
           type: swapType,
           timestamp: Date.now(),
-          userAddress: oraiAddress
+          userAddress: oraiAddress,
+          avgSimulate: String(averageRatio.displayAmount || 0),
+          expectedOutput: String(expectOutputDisplay || 0)
         });
         refetchTransHistory();
       }
@@ -473,12 +504,34 @@ const SwapComponent: React.FC<{
     }
   };
 
+  // console.log('---', {
+  //   initialTxHash: 'DE358265EE954E9EF3E4110DCA34CAB5348C19F5161D00FE6387035C3E67C9A3',
+  //   fromCoingeckoId: originalFromToken?.coinGeckoId,
+  //   toCoingeckoId: originalToToken?.coinGeckoId,
+  //   fromChainId: originalFromToken?.chainId,
+  //   toChainId: originalToToken?.chainId,
+  //   fromAmount: fromAmountToken?.toString(),
+  //   toAmount: minimumReceiveDisplay?.toFixed(6),
+  //   fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
+  //   toAmountInUsdt: getUsd(
+  //     toAmount(minimumReceiveDisplay, originalToToken?.decimals),
+  //     originalToToken,
+  //     prices
+  //   ).toString(),
+  //   status: 'success',
+  //   type: 'Universal Swap',
+  //   timestamp: Date.now(),
+  //   userAddress: oraiAddress,
+  //   avgSimulate: String(averageRatio?.displayAmount || 0),
+  //   expectedOutput: String(expectOutputDisplay || 0)
+  // });
+
   const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
   const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
   const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
   const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
-  const FromIconNetwork = theme === 'light' ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
-  const ToIconNetwork = theme === 'light' ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
+  const FromIconNetwork = isLightMode ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
+  const ToIconNetwork = isLightMode ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
 
   useEffect(() => {
     (async () => {
@@ -528,6 +581,12 @@ const SwapComponent: React.FC<{
     setIsSelectChainTo(false);
   });
 
+  const settingRef = useRef();
+
+  useOnClickOutside(settingRef, () => {
+    setOpenSetting(false);
+  });
+
   const onChangePercentAmount = (coeff) => {
     if (coeff === coe) {
       setCoe(0);
@@ -540,6 +599,7 @@ const SwapComponent: React.FC<{
       coeff,
       gas: GAS_ESTIMATION_SWAP_DEFAULT
     });
+
     onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
     setCoe(coeff);
   };
@@ -600,13 +660,42 @@ const SwapComponent: React.FC<{
     handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
   };
 
-  const validAddress =
+  const isConnectedWallet =
     !(walletByNetworks.cosmos || walletByNetworks.bitcoin || walletByNetworks.evm || walletByNetworks.tron) &&
-    !isMobile()
-      ? {
-          isValid: true
-        }
-      : checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+    !isMobile();
+
+  let validAddress = {
+    isValid: true
+  };
+
+  if (isConnectedWallet) validAddress = checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
+
+  const defaultRouterSwap = {
+    amount: '0',
+    displayAmount: 0,
+    routes: []
+  };
+  let routersSwapData = defaultRouterSwap;
+
+  const fromTochainIdIsOraichain = originalFromToken.chainId === 'Oraichain' && originalToToken.chainId === 'Oraichain';
+  if (fromAmountToken && simulateData && fromTochainIdIsOraichain) {
+    routersSwapData = {
+      ...simulateData,
+      routes: simulateData?.routes ?? []
+    };
+  }
+  const isRoutersSwapData = +routersSwapData.amount;
+
+  const isImpactPrice = fromAmountToken && simulateData?.amount && averageRatio?.amount;
+  let impactWarning = 0;
+  if (isImpactPrice && fromTochainIdIsOraichain) {
+    const caculateImpactPrice = new BigDecimal(simulateData.amount)
+      .div(toAmount(fromAmountToken, originalFromToken.decimals))
+      .div(averageRatio.displayAmount)
+      .mul(100)
+      .toNumber();
+    impactWarning = 100 - caculateImpactPrice;
+  }
 
   return (
     <div className={cx('swap-box-wrapper')}>
@@ -624,6 +713,7 @@ const SwapComponent: React.FC<{
                   await refreshBalances(
                     loadingRefresh,
                     setLoadingRefresh,
+                    // TODO: need add bitcoinAddress when universal swap support bitcoin
                     { metamaskAddress, tronAddress, oraiAddress },
                     loadTokenAmounts
                   )
@@ -657,8 +747,9 @@ const SwapComponent: React.FC<{
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
               {!fromTokenFee && !toTokenFee && isWarningSlippage && (
                 <div className={cx('impact-warning')}>
+                  <WarningIcon />
                   <div className={cx('title')}>
-                    <span>Current slippage exceed configuration!</span>
+                    <span>&nbsp;Current slippage exceed configuration!</span>
                   </div>
                 </div>
               )}
@@ -667,20 +758,106 @@ const SwapComponent: React.FC<{
           <div className={cx('swap-center')}>
             <div className={cx('title')}>To</div>
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
-              <img
-                src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
-                onClick={handleRotateSwapDirection}
-                alt="ant"
-              />
+              <img src={isLightMode ? SwitchLightImg : SwitchDarkImg} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
-            <div className={cx('ratio')} onClick={() => setOpenDetail(true)}>
-              {`1 ${originalFromToken.name} ≈ ${
-                averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
-              } ${originalToToken.name}`}
+            <div
+              className={cx(
+                'ratio',
+                Number(impactWarning) > 10 ? 'ratio-ten' : Number(impactWarning) > 5 && 'ratio-five'
+              )}
+              onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
+            >
+              <span className={cx('text')}>
+                {Number(impactWarning) > 5 && <WarningIcon />}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio
+                    ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, {
+                        maximumFractionDigits: 6
+                      })
+                    : '0'
+                } ${originalToToken.name}`}
+              </span>
 
-              {/* <img src={ArrowImg} alt="arrow" /> */}
+              {!!isRoutersSwapData && <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />}
             </div>
           </div>
+
+          <div
+            className={cx('smart', !openRoutes ? 'hidden' : '')}
+            style={{
+              // TODO: smart router item height is 40px
+              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
+            }}
+          >
+            <div className={cx('smart-router')}>
+              {routersSwapData.routes.map((route, ind) => {
+                let volumn = (+route.returnAmount / +routersSwapData.amount) * 100;
+                return (
+                  <div key={ind} className={cx('smart-router-item')}>
+                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                    {route.paths.map((path, i, acc) => {
+                      const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
+                        path,
+                        flattenTokens,
+                        flattenTokensWithIcon,
+                        isLightMode
+                      );
+                      const [tokenIn, tokenOut] = infoPair?.info.split('-');
+                      return (
+                        <React.Fragment key={pairKey}>
+                          <div className={cx('smart-router-item-line')}>
+                            <div className={cx('smart-router-item-line-detail')} />
+                          </div>
+                          <div
+                            className={cx('smart-router-item-pool')}
+                            onClick={() => {
+                              tokenIn &&
+                                tokenOut &&
+                                window.open(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
+                              // navigate(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
+                            }}
+                          >
+                            <div className={cx('smart-router-item-pool-wrap')}>
+                              <div className={cx('smart-router-item-pool-wrap-img')}>
+                                <TokenInIcon />
+                              </div>
+                              <div className={cx('smart-router-item-pool-wrap-img')}>
+                                <TokenOutIcon />
+                              </div>
+                            </div>
+                          </div>
+                          {i === acc.length - 1 && (
+                            <div className={cx('smart-router-item-line')}>
+                              <div className={cx('smart-router-item-line-detail')} />
+                            </div>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                  </div>
+                );
+              })}
+              <div className={cx('smart-router-price-impact')}>
+                <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
+                <div
+                  className={cx(
+                    'smart-router-price-impact-warning',
+                    Number(impactWarning) > 10
+                      ? 'smart-router-price-impact-warning-ten'
+                      : Number(impactWarning) > 5 && 'smart-router-price-impact-warning-five'
+                  )}
+                >
+                  <span>
+                    {Number(impactWarning) > 5 && <WarningIcon />} ≈{' '}
+                    {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
+                  </span>
+                </div>
+                {/* <div className={cx('smart-router-price-impact-time')}> ~ 5 mins</div> */}
+              </div>
+            </div>
+          </div>
+
           <div className={cx('to')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
@@ -710,7 +887,7 @@ const SwapComponent: React.FC<{
               onChange={(val) => setAddressTransfer(val)}
               showPreviewOnBlur
               defaultValue={initAddressTransfer}
-              prefix={theme === 'light' ? <SendIcon /> : <SendDarkIcon />}
+              prefix={isLightMode ? <SendIcon /> : <SendDarkIcon />}
               suffix={
                 <div
                   className={cx('paste')}
@@ -752,7 +929,7 @@ const SwapComponent: React.FC<{
           </div>
           <div className={cx('estFee')} onClick={() => setOpenDetail(true)}>
             <div className={cx('label')}>
-              {theme === 'light' ? <FeeIcon /> : <FeeDarkIcon />}
+              {isLightMode ? <FeeIcon /> : <FeeDarkIcon />}
               Estimated Fee:
             </div>
             <div className={cx('info')}>
@@ -760,7 +937,7 @@ const SwapComponent: React.FC<{
                 ≈ {numberWithCommas(totalFeeEst, undefined, { maximumFractionDigits: 6 })} {originalToToken.name}
               </span>
               <span className={cx('icon')}>
-                <img src={ArrowImg} alt="arrow" />
+                <img src={DownArrowIcon} alt="arrow" />
               </span>
             </div>
           </div>
@@ -862,7 +1039,7 @@ const SwapComponent: React.FC<{
           setOpenSetting(false);
         }}
       />
-      <div className={cx('setting', openSetting ? 'activeSetting' : '')}>
+      <div className={cx('setting', openSetting ? 'activeSetting' : '')} ref={settingRef}>
         <SlippageModal
           setVisible={setOpenSetting}
           setUserSlippage={setUserSlippage}
@@ -884,7 +1061,9 @@ const SwapComponent: React.FC<{
         onClose={() => setOpenDetail(false)}
         toTokenName={originalToToken?.name}
         fromTokenName={originalFromToken?.name}
+        isOpenSetting={openSetting}
         openSlippage={() => setOpenSetting(true)}
+        closeSlippage={() => setOpenSetting(false)}
       />
     </div>
   );

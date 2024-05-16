@@ -24,6 +24,7 @@ import ChartUsdPrice from './Component/ChartUsdPrice';
 import { TransactionProcess } from './Modals';
 import SwapComponent from './Swap';
 import { initPairSwap } from './Swap/hooks/useFillToken';
+import useInitialDuckDb from 'hooks/useInitialDuckDb';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import { ChartTokenType } from './hooks/useChartUsdPrice';
 import styles from './index.module.scss';
@@ -40,9 +41,8 @@ const Swap: React.FC = () => {
 
   let tab = searchParams.get('type');
   const dispatch = useDispatch();
-  const initDuckdb = async () => {
-    window.duckDb = await DuckDb.create();
-  };
+
+  useInitialDuckDb();
 
   const tabChart = useSelector(selectCurrentSwapTabChart);
 
@@ -60,10 +60,6 @@ const Swap: React.FC = () => {
     quote_denom: currentPair.info.split('-')[1],
     tf
   });
-
-  useEffect(() => {
-    if (!window.duckDb) initDuckdb();
-  }, [window.duckDb]);
 
   const handleChangeChartTimeFrame = (resolution: number) => {
     dispatch(setChartTimeFrame(resolution));
