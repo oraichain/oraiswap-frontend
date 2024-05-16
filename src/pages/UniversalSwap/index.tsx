@@ -31,10 +31,10 @@ const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
   const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(initPairSwap);
-  const [hideChart, setHideChart] = useState<boolean>(false);
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
   const mobileMode = isMobile();
+  const [hideChart, setHideChart] = useState<boolean>(mobileMode);
   const theme = useTheme();
   const [searchParams] = useSearchParams();
 
@@ -69,6 +69,10 @@ const Swap: React.FC = () => {
     dispatch(setChartTimeFrame(resolution));
   };
 
+  useEffect(() => {
+    setHideChart(mobileMode);
+  }, [mobileMode]);
+
   return (
     <Content nonBackground>
       <div className={cx('swap-container')}>
@@ -76,7 +80,6 @@ const Swap: React.FC = () => {
           <div>
             {!mobileMode && (
               <>
-                {/* {!priceChange.isError && ( */}
                 <HeaderTab
                   chartTokenType={chartTokenType}
                   setChartTokenType={setChartTokenType}
@@ -87,7 +90,6 @@ const Swap: React.FC = () => {
                   priceChange={priceChange}
                   percentChangeUsd={percentChangeUsd}
                 />
-                {/* )} */}
                 <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
                   <div
@@ -139,6 +141,58 @@ const Swap: React.FC = () => {
           </div>
         </div>
         <div className={cx('swap-col', 'w40')}>
+          {mobileMode && (
+            <div>
+              <HeaderTab
+                chartTokenType={chartTokenType}
+                setChartTokenType={setChartTokenType}
+                setHideChart={setHideChart}
+                hideChart={hideChart}
+                toTokenDenom={toTokenDenom}
+                priceUsd={priceUsd}
+                priceChange={priceChange}
+                percentChangeUsd={percentChangeUsd}
+              />
+              <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
+                {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
+                <div
+                  className={cx(
+                    `chartItem`,
+                    hideChart ? 'hidden' : '',
+                    tabChart === TAB_CHART_SWAP.TOKEN ? 'activeChart' : ''
+                  )}
+                >
+                  <ChartUsdPrice
+                    activeAnimation={hideChart}
+                    filterDay={filterTimeChartUsd}
+                    onUpdateCurrentItem={setPriceUsd}
+                    onUpdatePricePercent={setPercentChangeUsd}
+                    chartTokenType={chartTokenType}
+                  />
+                </div>
+
+                <div className={cx(`chartItem`, tabChart === TAB_CHART_SWAP.POOL ? 'activeChart' : '')}>
+                  {!priceChange.isError && currentFromToken && currentToToken ? (
+                    <TVChartContainer
+                      theme={theme}
+                      currentPair={currentPair}
+                      pairsChart={PAIRS_CHART}
+                      setChartTimeFrame={handleChangeChartTimeFrame}
+                      baseUrl={process.env.REACT_APP_BASE_API_URL}
+                    />
+                  ) : (
+                    <div className={cx('nodata-wrapper', hideChart ? 'hidden' : '')}>
+                      <NoChartData />
+                      <div className={cx('nodata-content')}>
+                        <p className={cx('nodata-title')}>No data available</p>
+                        <p>Please try switching to Simple view</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
         </div>
       </div>
