@@ -125,12 +125,12 @@ const RowsComponent: React.FC<{
             </div>
             <div className={styles.value}>
               <div className={styles.addBalance}>
-                {'+'}
+                {'≈ +'}
                 {numberWithCommas(Number(rows.toAmount), undefined, { maximumFractionDigits: 6 })}
 
                 <span className={styles.denom}>{toToken.name}</span>
               </div>
-              <div className={styles.timestamp}>{formatDisplayUsdt(rows.toAmountInUsdt)}</div>
+              <div className={styles.timestamp}>≈ {formatDisplayUsdt(rows.toAmountInUsdt)}</div>
             </div>
           </div>
         </div>
