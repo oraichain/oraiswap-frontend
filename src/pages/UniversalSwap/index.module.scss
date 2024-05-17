@@ -20,18 +20,6 @@
     gap: 20px;
   }
 
-  .tv-chart {
-    position: relative;
-    height: 500px;
-    padding-top: 18px;
-    transition: all 1s ease;
-
-    &.hidden {
-      height: 0;
-      padding-top: 0px;
-    }
-  }
-
   .swap-col {
     &.w60 {
       width: 100%;
@@ -47,6 +35,24 @@
         max-width: 400px;
       }
     }
+  }
+}
+
+.tv-chart {
+  height: 100%;
+  position: relative;
+  padding-top: 18px;
+  transition: all 1s ease;
+
+  &.hidden {
+    height: 0;
+    padding-top: 0px;
+  }
+}
+
+.tv-chart-container {
+  &.activeChart {
+    height: 500px;
   }
 }
 
@@ -149,7 +155,7 @@
 
         display: flex;
         flex-direction: column;
-        gap: 24px;
+        gap: 12px;
       }
     }
   }

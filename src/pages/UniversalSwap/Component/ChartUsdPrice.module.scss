@@ -30,6 +30,10 @@
     width: 100%;
     transition: all ease-in-out 1s;
 
+    @include mobile {
+      height: 400px;
+    }
+
     .chartRoot {
       z-index: 1;
       position: absolute;
