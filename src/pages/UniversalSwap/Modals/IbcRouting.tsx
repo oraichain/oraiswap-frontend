@@ -150,7 +150,7 @@ const IbcRouting: React.FC<{
                   </div>
                   <div className={styles.value}>
                     <div className={styles.addBalance}>
-                      {'≈'}
+                      {'≈ +'}
                       {numberWithCommas(Number(data.toAmount), undefined, { maximumFractionDigits: 6 })}
 
                       <span className={styles.denom}>{toToken.name}</span>
