@@ -52,6 +52,9 @@
 
 .tv-chart-container {
   &.activeChart {
+    @include mobile {
+      height: 430px;
+    }
     height: 500px;
   }
 }
