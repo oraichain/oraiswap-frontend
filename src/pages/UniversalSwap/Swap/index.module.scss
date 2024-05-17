@@ -20,19 +20,6 @@
       height: 0;
     }
   }
-
-  .powered {
-    display: flex;
-    align-items: center;
-    padding-top: 18px;
-    gap: 10px;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    @include theme() {
-      color: theme-get('neutral-text-body-on-section');
-    }
-  }
 }
 
 .swap-box {

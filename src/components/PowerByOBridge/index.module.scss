@@ -1,0 +1,16 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.powered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 18px;
+  gap: 10px;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  @include theme() {
+    color: theme-get('neutral-text-body-on-section');
+  }
+}
