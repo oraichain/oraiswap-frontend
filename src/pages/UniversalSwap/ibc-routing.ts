@@ -109,12 +109,14 @@ export const getReceiver = (data: RoutingQueryItem): string => {
   );
 };
 
-export const getAmount = (data: RoutingQueryItem): string => {
+export const getAmount = (data: RoutingQueryItem, isBridgeOnly?: boolean): string => {
   switch (data.type) {
     case DatabaseEnum.Evm:
       return (data.data as EvmState)?.amount;
     case DatabaseEnum.Oraichain:
-      return (data.data as OraichainState)?.nextAmount || (data.data as OraichainState)?.amount;
+      return !isBridgeOnly
+        ? (data.data as OraichainState)?.nextAmount || (data.data as OraichainState)?.amount
+        : (data.data as OraichainState)?.amount;
     case DatabaseEnum.OraiBridge:
       return (data.data as OraiBridgeState)?.amount;
 

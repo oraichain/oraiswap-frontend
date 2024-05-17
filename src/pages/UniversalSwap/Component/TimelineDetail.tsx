@@ -59,6 +59,8 @@ const TimelineDetail: React.FC<{
     )
   ];
 
+  const isBridgeOnly = historyData.fromCoingeckoId === historyData.toCoingeckoId;
+
   const getToken = (data: RoutingQueryItem) => {
     let denom = data?.data?.['denom'];
 
@@ -67,10 +69,12 @@ const TimelineDetail: React.FC<{
         denom = (data.data as EvmState).denom;
         break;
       case DatabaseEnum.Oraichain:
-        const lastDenom = (data.data as OraichainState).nextDestinationDenom;
-        const splitData = lastDenom.split('/');
+        if (!isBridgeOnly) {
+          const lastDenom = (data.data as OraichainState).nextDestinationDenom;
+          const splitData = lastDenom.split('/');
 
-        denom = splitData[splitData.length - 1];
+          denom = splitData[splitData.length - 1];
+        }
         break;
 
       case DatabaseEnum.OraiBridge:
@@ -100,7 +104,9 @@ const TimelineDetail: React.FC<{
   };
 
   const { tokenChain, tokenWithIcon: token, denom } = getToken(data);
-  const amount = numberWithCommas(toDisplay(getAmount(data), token?.decimals), undefined, { maximumFractionDigits: 6 });
+  const amount = numberWithCommas(toDisplay(getAmount(data), token?.decimals), undefined, {
+    maximumFractionDigits: 6
+  });
 
   const nextChainId = getNextChainId(nextData);
 
@@ -179,7 +185,7 @@ const TimelineDetail: React.FC<{
             </div>
             <div className={styles.info}>
               <span className={styles.token}>
-                {numberWithCommas(toDisplay(getAmount(data), token?.decimals), undefined, {
+                {numberWithCommas(toDisplay(getAmount(data, isBridgeOnly), token?.decimals), undefined, {
                   maximumFractionDigits: 6
                 })}{' '}
                 <span>{token?.name}</span>
