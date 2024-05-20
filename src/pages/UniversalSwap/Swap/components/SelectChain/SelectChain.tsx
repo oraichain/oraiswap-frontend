@@ -91,12 +91,6 @@ export default function SelectChain({
                 const networkIcon = chainIcons.find((chainIcon) => chainIcon.chainId === item.chainId);
                 const key = item.chainId.toString();
                 const title = item.chainName;
-                // const subAmounts = Object.fromEntries(
-                //   Object.entries(amounts).filter(
-                //     ([denom]) => tokenMap[denom] && tokenMap[denom].chainId === item.chainId
-                //   )
-                // );
-                // const totalUsd = getTotalUsd(subAmounts, prices);
                 const balance = '$' + (item.totalUsd > 0 ? item.totalUsd.toFixed(2) : '0');
                 return (
                   <div
