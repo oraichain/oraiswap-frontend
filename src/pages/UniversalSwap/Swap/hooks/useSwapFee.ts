@@ -36,6 +36,12 @@ export const useSwapFee = ({ fromToken, toToken }) => {
       return;
     }
 
+    // bridge
+    if (fromChainId !== toChainId && toName === fromName) {
+      setFee(() => 0);
+      return;
+    }
+
     // swap to oraichain and bridge
     if (
       fromChainId !== toChainId &&
