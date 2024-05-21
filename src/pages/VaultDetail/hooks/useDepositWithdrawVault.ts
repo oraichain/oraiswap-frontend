@@ -3,7 +3,7 @@ import { Cw20BaseClient } from '@oraichain/common-contracts-sdk';
 import { ORAI_BRIDGE_EVM_DENOM_PREFIX, USDT_CONTRACT } from '@oraichain/oraidex-common';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
-import { handleErrorTransaction } from 'helper';
+import { handleErrorTransaction, sleep } from 'helper';
 import { VaultLP__factory } from 'nestquant-vault-sdk';
 import { DepositOrderMsg } from 'nestquant-vault-sdk/dist/wasm-ts/OraiGateway.types';
 import { ORAI_VAULT_BSC_CONTRACT_ADDRESS } from 'pages/Vaults/constants';
@@ -68,6 +68,14 @@ export const useDepositWithdrawVault = create<DepositState>()(
               customLink: `${network.explorer}/txs/${result.transactionHash}`
             });
           }
+
+          await sleep(2000);
+          // refetch deposit status
+          // @ts-ignore
+          await window.queryClient.invalidateQueries({
+            queryKey: ['deposit-status']
+          });
+
         } catch (error) {
           console.log('Error deposit vault: ', error);
           handleErrorTransaction(error);

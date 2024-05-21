@@ -99,7 +99,7 @@ export const getVaultInfosFromContract = async (vaultAddrs: string[]): Promise<V
         sharePriceInToken1: sharePrices[index]
       };
     });
-    console.log({ decodedResults });
+    // console.log({ decodedResults });
     return decodedResults;
   } catch (error) {
     console.error('Error getVaultInfosFromContract: ', error);

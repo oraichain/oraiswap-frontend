@@ -63,6 +63,7 @@ export const getShareBalance = async ({
         .div(totalSupply.total_supply)
         .toString(); // corresponding share in lp token
     }
+
     return correspondingShare;
   } catch (error) {
     console.error('Error getShareBalance: ', error);

@@ -25,7 +25,6 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 30px;
     font-size: 18px;
     font-weight: 600;
     line-height: 150%;
@@ -37,6 +36,16 @@
         }
       }
     }
+  }
+
+  .depositStatus {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    opacity: 0.8;
   }
 
   .performInfo {

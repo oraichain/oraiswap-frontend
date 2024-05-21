@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { ModalDeposit } from '../ModalDeposit';
 import { ModalWithdraw } from '../ModalWithdraw';
 import styles from './MySharePerformance.module.scss';
+import { useGetDepositStatus } from 'pages/Vaults/hooks/useDepositStatus';
 
 type ModalVault = 'deposit' | 'withdraw';
 export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) => {
@@ -17,6 +18,12 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
 
   const [modal, setModal] = useState<ModalVault>();
   const [oraiAddress] = useConfigReducer('address');
+
+  const { numberOfPendingDepositOrders } = useGetDepositStatus({
+    vaultAddress: vaultDetail.vaultAddr,
+    userAddress: oraiAddress
+  });
+  
   const { shareBalance, shareBalanceInUsd } = useGetShareBalance({
     vaultAddress: vaultDetail.vaultAddr,
     userAddress: oraiAddress,
@@ -35,7 +42,9 @@ export const MySharePerformance = ({ vaultDetail }: { vaultDetail: VaultInfo }) 
         My Share Performance
         <EyeIcon width={18} height={18} />
       </h3>
-
+      {numberOfPendingDepositOrders > 0 && (
+        <span className={styles.depositStatus}>You have {numberOfPendingDepositOrders} pending deposit orders...</span>
+      )}
       <div className={styles.performInfo}>
         <div className={styles.key}>Max Available to Withdraw</div>
         <div className={styles.amount}>
