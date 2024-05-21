@@ -73,7 +73,7 @@ export const useDepositWithdrawVault = create<DepositState>()(
           // refetch deposit status
           // @ts-ignore
           await window.queryClient.invalidateQueries({
-            queryKey: ['deposit-status']
+            queryKey: ['share-balance']
           });
 
         } catch (error) {

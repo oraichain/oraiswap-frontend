@@ -4,20 +4,21 @@ import { VaultClients } from '../helpers/vault-query';
 import { calculateSharePrice } from './useVaults';
 import { useVaultDetail } from 'pages/VaultDetail/hooks/useVaultDetail';
 import { EVM_DECIMALS } from 'helper/constants';
+import axios from 'rest/request';
 
 export const useGetShareBalance = ({ vaultAddress, userAddress, oraiVaultShare }) => {
   const { vaultDetail } = useVaultDetail(vaultAddress);
 
   const {
-    data: shareBalance,
+    data,
     refetch: refetchShareBalance,
     isLoading
-  } = useQuery<string>(
+  } = useQuery<{ correspondingShare: string, depositNumber: string }>(
     ['share-balance', vaultDetail, vaultAddress],
-    () => getShareBalance({ vaultAddress, userAddress, oraiVaultShare }),
+    () => getShareBalance({ vaultAddress, userAddress, oraiVaultShare, network: vaultDetail.network }),
     {
       enabled: !!vaultAddress && !!userAddress && !!oraiVaultShare,
-      placeholderData: '0',
+      placeholderData: { correspondingShare: '0', depositNumber: '0' },
       keepPreviousData: true
     }
   );
@@ -25,10 +26,11 @@ export const useGetShareBalance = ({ vaultAddress, userAddress, oraiVaultShare }
   const sharePrice = vaultDetail ? calculateSharePrice(vaultDetail.totalSupply, vaultDetail.tvl) : 0;
 
   return {
-    shareBalance,
+    shareBalance: data.correspondingShare,
+    depositNumber: data.depositNumber,
     refetchShareBalance,
     isLoading,
-    shareBalanceInUsd: new BigDecimal(sharePrice).mul(shareBalance).toString()
+    shareBalanceInUsd: new BigDecimal(sharePrice).mul(data.correspondingShare).toString()
   };
 };
 
@@ -42,12 +44,14 @@ export const useGetShareBalance = ({ vaultAddress, userAddress, oraiVaultShare }
 export const getShareBalance = async ({
   vaultAddress,
   userAddress,
-  oraiVaultShare
+  oraiVaultShare,
+  network
 }: {
   vaultAddress: string;
   userAddress: string;
   oraiVaultShare: string;
-}): Promise<string> => {
+  network: string;
+}): Promise<{ correspondingShare: string, depositNumber: string }> => {
   try {
     const shareOfUser = await VaultClients.getOraiGateway(userAddress).balance({
       userAddress,
@@ -64,9 +68,16 @@ export const getShareBalance = async ({
         .toString(); // corresponding share in lp token
     }
 
-    return correspondingShare;
+    const res = await axios.get(
+      `/deposit-order/deposit-status?vault=${vaultAddress}&depositor=${userAddress}&network=${network}`,
+      { baseURL: process.env.REACT_APP_WORKER_API_URL }
+    );
+
+    console.log({ depositNumber: res.data });
+
+    return { correspondingShare, depositNumber: res.data.length };
   } catch (error) {
     console.error('Error getShareBalance: ', error);
-    return '0';
+    return { correspondingShare: '0', depositNumber: '0' };
   }
 };

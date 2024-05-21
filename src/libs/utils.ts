@@ -207,6 +207,11 @@ export const processWsResponseMsg = async (message: any): Promise<string> => {
         await window.queryClient.invalidateQueries({
           queryKey: ['vaults-contract']
         });
+        // refetch info vault contract
+        // @ts-ignore
+        await window.queryClient.invalidateQueries({
+          queryKey: ['share-balance']
+        });
 
         const msg = await handleMsgDepositVault(events);
         return msg;
