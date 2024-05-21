@@ -73,8 +73,6 @@ export const getShareBalance = async ({
       { baseURL: process.env.REACT_APP_WORKER_API_URL }
     );
 
-    console.log({ depositNumber: res.data });
-
     return { correspondingShare, depositNumber: res.data.length };
   } catch (error) {
     console.error('Error getShareBalance: ', error);
