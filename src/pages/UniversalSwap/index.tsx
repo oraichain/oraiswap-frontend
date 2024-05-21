@@ -112,13 +112,7 @@ const Swap: React.FC = () => {
         </div>
       </div>
 
-      <ModalCustom
-        open={openModal}
-        onOpen={() => setOpenModal(false)}
-        onClose={() => setOpenModal(false)}
-        title="Chart"
-        showOnBottom
-      >
+      <ModalCustom open={openModal} onClose={() => setOpenModal(false)} title="Chart" showOnBottom>
         <Chart
           toTokenDenom={toTokenDenom}
           setPriceUsd={setPriceUsd}
