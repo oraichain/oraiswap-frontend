@@ -1,0 +1,103 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.btn {
+  cursor: pointer;
+  background: $aqua;
+
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 100;
+
+  animation: bounce ease-in-out 0.8s infinite;
+  -webkit-animation: bounce ease-in-out 0.8s infinite;
+
+  &:hover {
+    animation: unset;
+  }
+}
+
+.contentModal {
+  max-width: 768px !important;
+}
+
+.overlay {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+}
+
+.wheel {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 24px;
+
+  margin-bottom: 20px;
+}
+
+@-webkit-keyframes wiggle {
+  0% {
+    -webkit-transform: rotate(5deg);
+  }
+  25% {
+    -webkit-transform: rotate(-5deg);
+  }
+  50% {
+    -webkit-transform: rotate(10deg);
+  }
+  75% {
+    -webkit-transform: rotate(-5deg);
+  }
+  100% {
+    -webkit-transform: rotate(0deg);
+  }
+}
+
+@keyframes wiggle {
+  0% {
+    transform: rotate(5deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+// Bounce animation
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@-webkit-keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
