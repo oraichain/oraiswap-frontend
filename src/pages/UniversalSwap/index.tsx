@@ -28,6 +28,7 @@ import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import { ChartTokenType } from './hooks/useChartUsdPrice';
 import styles from './index.module.scss';
 import ModalCustom from 'components/ModalCustom';
+import LuckyDraw from 'components/LuckyDraw';
 
 const cx = cn.bind(styles);
 
@@ -98,6 +99,11 @@ const Swap: React.FC = () => {
           </div>
         </div>
         <div className={cx('swap-col', 'w40')}>
+          {mobileMode && (
+            <div className={styles.luckyDraw}>
+              <LuckyDraw />
+            </div>
+          )}
           {mobileMode && (
             <HeaderTop
               hideChart

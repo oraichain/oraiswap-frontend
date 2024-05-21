@@ -13,6 +13,7 @@ export type ModalCustomProps = {
   showOnBottom?: boolean;
   CloseIcon?: FunctionComponent;
   className?: string;
+  overlayClassName?: string;
 };
 
 const ModalCustom = ({
@@ -23,7 +24,8 @@ const ModalCustom = ({
   children,
   showOnBottom,
   CloseIcon,
-  className
+  className,
+  overlayClassName
 }: PropsWithChildren<ModalCustomProps>) => {
   const ref = useRef(null);
 
@@ -33,7 +35,10 @@ const ModalCustom = ({
 
   return (
     <>
-      <div className={classNames(styles.overlay, { [styles.openOverlay]: open })} onClick={onClose}></div>
+      <div
+        className={classNames(styles.overlay, { [styles.openOverlay]: open }, overlayClassName)}
+        onClick={onClose}
+      ></div>
       <div className={classNames(styles.modalCustom, { [styles.isBottomSheet]: showOnBottom, [styles.open]: open })}>
         <div
           ref={ref}
