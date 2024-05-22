@@ -82,6 +82,7 @@
     // background: $aqua;
 
     .spinMask {
+      z-index: 100;
       position: absolute;
       // background: rgba(7, 10, 19, 0.2);
       background: #d7f5bf;
@@ -153,6 +154,21 @@
       animation: wiggle ease-in-out 0.8s;
       -webkit-animation: wiggle ease-in-out 0.8s;
     }
+  }
+}
+
+.lottie {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+
+  // background: $aqua;
+
+  & > div {
+    height: 100%;
+    width: 100%;
   }
 }
 

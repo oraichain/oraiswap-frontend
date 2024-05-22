@@ -50,38 +50,58 @@ export const DATA_LUCKY_DRAW = {
       id: 0,
       title: '20 ORAI',
       background: '#92e54c',
-      fonts: [{ text: '20 ORAI ', top: '18%' }]
+      fonts: [
+        { text: '20', top: '18%', fontSize: '26px' },
+        { text: 'ORAI', top: '38%' }
+      ]
     },
     {
       id: 1,
       title: '5 ORAI',
       background: '#d7f5bf',
-      fonts: [{ text: '5 ORAI', top: '18%' }]
+      fonts: [
+        { text: '5', top: '18%', fontSize: '26px' },
+        { text: 'ORAI', top: '38%' }
+      ]
     },
 
     {
       id: 2,
       title: 'Try again',
       background: '#92e54c',
-      fonts: [{ text: 'Try Again', top: '18%' }]
+      fonts: [
+        { text: 'Try Again', top: '18%' }
+        // { text: 'Try', top: '18%' },
+        // { text: 'Again', top: '38%' }
+      ]
     },
     {
       id: 3,
       title: '1 ORAI',
       background: '#d7f5bf',
-      fonts: [{ text: '1 ORAI', top: '18%' }]
+      fonts: [
+        { text: '1', top: '18%', fontSize: '26px' },
+        { text: 'ORAI', top: '38%' }
+      ]
     },
     {
       id: 4,
       title: '0.1 ORAI',
       background: '#92e54c',
-      fonts: [{ text: '0.1 ORAI', top: '18%' }]
+      fonts: [
+        { text: '0.1', top: '18%', fontSize: '26px' },
+        { text: 'ORAI', top: '38%' }
+      ]
     },
     {
       id: 5,
       title: 'Try again',
       background: '#d7f5bf',
-      fonts: [{ text: 'Try Again', top: '18%' }]
+      fonts: [
+        { text: 'Try Again', top: '18%' }
+        // { text: 'Try', top: '18%' },
+        // { text: 'Again', top: '38%' }
+      ]
     }
   ],
   buttons: [
@@ -96,7 +116,7 @@ export const DATA_LUCKY_DRAW = {
   ],
   defaultStyle: {
     fontColor: '#2f5711',
-    fontSize: '14px',
+    fontSize: '18px',
     fontWeight: 700
   },
   defaultConfig: {

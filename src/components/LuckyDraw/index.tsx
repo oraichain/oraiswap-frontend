@@ -11,14 +11,24 @@ import useWindowSize from 'hooks/useWindowSize';
 import { FC, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { DATA_LUCKY_DRAW, LUCKY_DRAW_CONTRACT, LUCKY_DRAW_FEE, MSG_TITLE, REWARD_MAP, SPIN_ID_KEY } from './constants';
+import {
+  DATA_LUCKY_DRAW,
+  LUCKY_DRAW_CONTRACT,
+  LUCKY_DRAW_FEE,
+  MSG_TITLE,
+  REWARD_MAP,
+  REWARD_TITLE,
+  SPIN_ID_KEY
+} from './constants';
 import styles from './index.module.scss';
 import { getDataLogByKey, useGetSpinResult, useLuckyDrawConfig } from './useLuckyDraw';
 import { handleErrorTransaction } from 'helper';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
+import CongratulationLottie from 'assets/lottie/congratulation.json';
 import { network } from 'config/networks';
 import classNames from 'classnames';
 import Loader from 'components/Loader';
+import Lottie from 'lottie-react';
 
 const LuckyDraw: FC<{}> = () => {
   const [address] = useConfigReducer('address');
@@ -186,11 +196,11 @@ const LuckyDraw: FC<{}> = () => {
               >
                 <span className={styles.spinTxt}>
                   {loadingFee && <Loader width={16} height={16} />}
-                  Spin
+                  Start
                 </span>
-                <span className={styles.token}>
+                {/* <span className={styles.token}>
                   {toDisplay(fee)} <OraiXLightIcon />
-                </span>
+                </span> */}
               </button>
             </div>
           )}
@@ -205,6 +215,12 @@ const LuckyDraw: FC<{}> = () => {
             )}
           </span>
         </div>
+
+        {isSuccessSpin && item !== REWARD_TITLE.NOTHING && (
+          <div className={styles.lottie}>
+            <Lottie animationData={CongratulationLottie} autoPlay={isSuccessSpin} loop={false} />
+          </div>
+        )}
       </ModalCustom>
     </>
   );
