@@ -68,8 +68,6 @@ export const useGetSpinResult = ({ id }: { id: number }) => {
     const luckyDrawClient = new LuckyWheelContractQueryClient(window.client, LUCKY_DRAW_CONTRACT);
     const data = await luckyDrawClient.spin({ id });
 
-    console.log('data', data);
-
     return data;
   };
 

@@ -6,7 +6,6 @@ import ModalCustom from 'components/ModalCustom';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useWindowSize from 'hooks/useWindowSize';
 import { FC, useEffect, useRef, useState } from 'react';
-// import { LuckyWheel } from 'react-luck-draw';
 import { LuckyWheel } from '@lucky-canvas/react';
 import { DATA_LUCKY_DRAW, LUCKY_DRAW_CONTRACT, REWARD_MAP, SPIN_ID_KEY } from './constants';
 import styles from './index.module.scss';
@@ -53,25 +52,53 @@ const LuckyDraw: FC<{}> = () => {
     if (spinId && spinResult?.result_time && myLuckyRef?.current) {
       const indexPrize = REWARD_MAP[spinResult?.reward];
       const randomItemIndex = (Math.random() * 2) >> 0;
-
-      // console.log('indexPrize', {
-      //   indexPrize,
-      //   reward: spinResult?.reward as REWARD_ENUM,
-      //   rew: indexPrize[randomItemIndex] ?? indexPrize[0]
-      // });
-
-      // console.log('randomItemIndex', randomItemIndex);
       myLuckyRef.current.stop(indexPrize?.[randomItemIndex] ?? indexPrize?.[0]);
     }
   }, [spinResult, spinId]);
+  const onStart = async () => {
+    setIsStart(false);
+    setItem('');
+    setSpinId(0);
 
-  // useEffect(() => {
-  //   if (isLoading) {
-  //     setLoaded(false);
-  //   }
+    if (!myLuckyRef) return;
+    // setTimeout(() => {
+    // let indexPrize = (Math.random() * 14) >> 0;
+    // while (indexPrize === 0 || indexPrize === 3 || indexPrize === 4) {
+    //   indexPrize = (Math.random() * 14) >> 0;
+    // }
+    // }, timeDuration);
 
-  //   setLoaded(true);
-  // }, [isLoading]);
+    try {
+      const { feeDenom, feeToken, fee } = spinConfig;
+
+      const sendResult = await window.client.execute(
+        address,
+        feeDenom,
+        {
+          send: {
+            contract: LUCKY_DRAW_CONTRACT,
+            amount: fee,
+            msg: toBinary({
+              spin: {}
+            })
+          }
+        },
+        'auto'
+      );
+
+      myLuckyRef?.current?.play();
+
+      const { logs = [] } = sendResult;
+
+      const { value: spinId } = getDataLogByKey(logs, SPIN_ID_KEY);
+
+      if (spinId) {
+        setSpinId(Number(spinId));
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
 
   return (
     <>
@@ -94,64 +121,27 @@ const LuckyDraw: FC<{}> = () => {
             {!isStart ? 'Let Spin...' : !item ? `Opps! You Loose... Try Again!` : `Congratulation! You Won: ${item}`}
           </h2>
           {loaded && (
-            <LuckyWheel
-              ref={myLuckyRef}
-              width={wheelSize}
-              height={wheelSize}
-              blocks={dataSource.blocks}
-              prizes={dataSource.prizes}
-              buttons={dataSource.buttons}
-              defaultStyle={dataSource.defaultStyle}
-              onStart={async () => {
-                setIsStart(false);
-                setItem('');
-                setSpinId(0);
-
-                if (!myLuckyRef) return;
-                // setTimeout(() => {
-                // let indexPrize = (Math.random() * 14) >> 0;
-                // while (indexPrize === 0 || indexPrize === 3 || indexPrize === 4) {
-                //   indexPrize = (Math.random() * 14) >> 0;
-                // }
-                // }, timeDuration);
-
-                try {
-                  const { feeDenom, feeToken, fee } = spinConfig;
-
-                  const sendResult = await window.client.execute(
-                    address,
-                    feeDenom,
-                    {
-                      send: {
-                        contract: LUCKY_DRAW_CONTRACT,
-                        amount: fee,
-                        msg: toBinary({
-                          spin: {}
-                        })
-                      }
-                    },
-                    'auto'
-                  );
-
-                  myLuckyRef?.current?.play();
-
-                  const { logs = [] } = sendResult;
-
-                  const { value: spinId } = getDataLogByKey(logs, SPIN_ID_KEY);
-
-                  if (spinId) {
-                    setSpinId(Number(spinId));
-                  }
-                } catch (error) {
-                  console.log('error', error);
-                }
-              }}
-              onEnd={(prize) => {
-                console.log(prize);
-                setIsStart(true);
-                setItem(prize.title as string);
-              }}
-            />
+            <div className={styles.spin}>
+              <LuckyWheel
+                ref={myLuckyRef}
+                width={wheelSize}
+                height={wheelSize}
+                blocks={dataSource.blocks}
+                prizes={dataSource.prizes}
+                buttons={dataSource.buttons}
+                defaultStyle={dataSource.defaultStyle}
+                onStart={() => {
+                  // onStart
+                  console.log('Spin...');
+                }}
+                onEnd={(prize) => {
+                  console.log(prize);
+                  setIsStart(true);
+                  setItem(prize.title as string);
+                }}
+              />
+              <div className={styles.spinMask} onClick={onStart} title="Spin to get rewards"></div>
+            </div>
           )}
         </div>
       </ModalCustom>
