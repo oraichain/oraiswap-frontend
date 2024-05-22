@@ -92,7 +92,7 @@ export const useGetSpinResult = ({ id }: { id: number }) => {
     }
   });
 
-  console.log('spinResult ==>', spinResult);
+  // console.log('spinResult ==>', spinResult);
   return {
     spinResult,
     isLoading,

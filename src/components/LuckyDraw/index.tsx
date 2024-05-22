@@ -1,30 +1,48 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
+import { LuckyWheel } from '@lucky-canvas/react';
+import { ORAIX_CONTRACT, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import LuckyDrawImg from 'assets/images/OraiDEX 2-YEAR-side.png';
 import LuckyDrawImgMobile from 'assets/images/OraiDEX 2-YEAR.png';
 import ModalCustom from 'components/ModalCustom';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useWindowSize from 'hooks/useWindowSize';
 import { FC, useEffect, useRef, useState } from 'react';
-import { LuckyWheel } from '@lucky-canvas/react';
-import { DATA_LUCKY_DRAW, LUCKY_DRAW_CONTRACT, REWARD_MAP, SPIN_ID_KEY } from './constants';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
+import { DATA_LUCKY_DRAW, LUCKY_DRAW_CONTRACT, LUCKY_DRAW_FEE, MSG_TITLE, REWARD_MAP, SPIN_ID_KEY } from './constants';
 import styles from './index.module.scss';
 import { getDataLogByKey, useGetSpinResult, useLuckyDrawConfig } from './useLuckyDraw';
+import { handleErrorTransaction } from 'helper';
+import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
+import { network } from 'config/networks';
+import classNames from 'classnames';
+import Loader from 'components/Loader';
 
 const LuckyDraw: FC<{}> = () => {
   const [address] = useConfigReducer('address');
   const [isOpen, setIsOpen] = useState(false);
+  const [loadingFee, setLoadingFee] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
   const [spinId, setSpinId] = useState(0);
   const myLuckyRef = useRef(null);
   const [item, setItem] = useState('');
-  const [isStart, setIsStart] = useState(false);
+  const [isSuccessSpin, setIsSuccessSpin] = useState(false);
   const [wheelSize, setWheelSize] = useState('500px');
   const [loaded, setLoaded] = useState(false);
   const mobileMode = isMobile();
   const { isSmallMobileView, windowSize } = useWindowSize();
   const [dataSource, setDataSource] = useState<any>(DATA_LUCKY_DRAW);
 
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const loadOraichainToken = useLoadOraichainTokens();
+  const balance = amounts['oraix'];
+
   const { spinConfig } = useLuckyDrawConfig();
+  const { fee = LUCKY_DRAW_FEE, feeDenom = ORAIX_CONTRACT, feeToken } = spinConfig || {};
+
+  const insufficientFund = fee && Number(fee) > Number(balance);
 
   useEffect(() => {
     const { width = 500 } = windowSize || {};
@@ -46,8 +64,6 @@ const LuckyDraw: FC<{}> = () => {
 
   const { spinResult } = useGetSpinResult({ id: spinId });
 
-  console.log('spinId', spinId);
-
   useEffect(() => {
     if (spinId && spinResult?.result_time && myLuckyRef?.current) {
       const indexPrize = REWARD_MAP[spinResult?.reward];
@@ -55,10 +71,13 @@ const LuckyDraw: FC<{}> = () => {
       myLuckyRef.current.stop(indexPrize?.[randomItemIndex] ?? indexPrize?.[0]);
     }
   }, [spinResult, spinId]);
+
   const onStart = async () => {
-    setIsStart(false);
+    setIsSuccessSpin(false);
     setItem('');
     setSpinId(0);
+    setLoadingFee(true);
+    setIsSpinning(true);
 
     if (!myLuckyRef) return;
     // setTimeout(() => {
@@ -97,6 +116,13 @@ const LuckyDraw: FC<{}> = () => {
       }
     } catch (error) {
       console.log('error', error);
+      handleErrorTransaction(error, {
+        tokenName: 'ORAIX',
+        chainName: network.chainId
+      });
+      setIsSpinning(false);
+    } finally {
+      setLoadingFee(false);
     }
   };
 
@@ -111,15 +137,24 @@ const LuckyDraw: FC<{}> = () => {
         onClose={() => {
           setIsOpen(false);
           setItem('');
-          setIsStart(false);
+          setIsSuccessSpin(false);
         }}
         className={styles.contentModal}
         overlayClassName={styles.overlay}
       >
         <div className={styles.wheel}>
-          <h2>
-            {!isStart ? 'Let Spin...' : !item ? `Opps! You Loose... Try Again!` : `Congratulation! You Won: ${item}`}
-          </h2>
+          <div className={styles.info}>
+            <span className={styles.detail}>
+              Each spin only costs <strong>{toDisplay(fee || LUCKY_DRAW_FEE)}</strong> ORAIX
+            </span>
+            <span>
+              Balance:{' '}
+              <span className={styles.balance}>
+                {toDisplay(balance)} {feeToken?.name || 'ORAIX'}
+              </span>
+            </span>
+          </div>
+
           {loaded && (
             <div className={styles.spin}>
               <LuckyWheel
@@ -136,13 +171,39 @@ const LuckyDraw: FC<{}> = () => {
                 }}
                 onEnd={(prize) => {
                   console.log(prize);
-                  setIsStart(true);
+                  setIsSuccessSpin(true);
+                  setIsSpinning(false);
                   setItem(prize.title as string);
+                  loadOraichainToken(address, [feeDenom || ORAIX_CONTRACT]);
                 }}
               />
-              <div className={styles.spinMask} onClick={onStart} title="Spin to get rewards"></div>
+              <button
+                disabled={insufficientFund || loadingFee || isSpinning}
+                // disabled
+                className={styles.spinMask}
+                onClick={onStart}
+                title={insufficientFund ? 'Insufficient Fee!' : 'Spin the wheel to win!'}
+              >
+                <span className={styles.spinTxt}>
+                  {loadingFee && <Loader width={16} height={16} />}
+                  Spin
+                </span>
+                <span className={styles.token}>
+                  {toDisplay(fee)} <OraiXLightIcon />
+                </span>
+              </button>
             </div>
           )}
+          <span className={classNames(styles.result, { [styles.done]: isSuccessSpin })}>
+            {!isSuccessSpin ? (
+              'Ready to test your luck? Spin the wheel to win!'
+            ) : (
+              <span>
+                <strong>{item}: &nbsp;</strong>
+                {MSG_TITLE[item]}
+              </span>
+            )}
+          </span>
         </div>
       </ModalCustom>
     </>

@@ -27,6 +27,22 @@ export const REWARD_MAP = {
   [REWARD_ENUM.NOTHING]: [2, 5]
 };
 
+export enum REWARD_TITLE {
+  DIAMOND = '20 ORAI',
+  GOLD = '5 ORAI',
+  SILVER = '1 ORAI',
+  BRONZE = '0.1 ORAI',
+  NOTHING = 'Try again'
+}
+
+export const MSG_TITLE = {
+  [REWARD_TITLE.DIAMOND]: '✨ NO WAY! You just scored the BIGGEST prize - 20 ORAI!',
+  [REWARD_TITLE.GOLD]: "Winner, Winner! You've just won 5 ORAI",
+  [REWARD_TITLE.SILVER]: 'Holy Moly! You just snagged 1 ORAI!',
+  [REWARD_TITLE.BRONZE]: 'Cha-ching! 0.1 ORAI just landed in your wallet - lucky you!',
+  [REWARD_TITLE.NOTHING]: "This spin wasn't a win, but who knows what's next?"
+};
+
 export const DATA_LUCKY_DRAW = {
   blocks: [{ padding: '13px', background: '#2f5711' }],
   prizes: [
@@ -45,7 +61,7 @@ export const DATA_LUCKY_DRAW = {
 
     {
       id: 2,
-      title: '',
+      title: 'Try again',
       background: '#92e54c',
       fonts: [{ text: 'Try Again', top: '18%' }]
     },
@@ -63,7 +79,7 @@ export const DATA_LUCKY_DRAW = {
     },
     {
       id: 5,
-      title: '',
+      title: 'Try again',
       background: '#d7f5bf',
       fonts: [{ text: 'Try Again', top: '18%' }]
     }
@@ -80,6 +96,10 @@ export const DATA_LUCKY_DRAW = {
   ],
   defaultStyle: {
     fontColor: '#2f5711',
-    fontSize: '14px'
+    fontSize: '14px',
+    fontWeight: 700
+  },
+  defaultConfig: {
+    speed: 10
   }
 };
