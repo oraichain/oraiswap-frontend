@@ -18,14 +18,14 @@ import {
   selectCurrentToken,
   setChartTimeFrame
 } from 'reducer/tradingSlice';
-import { TAB_CHART_SWAP } from 'reducer/type';
+import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
 import { AssetsTab, HeaderTab, HeaderTop, HistoryTab, TabsTxs } from './Component';
 import ChartUsdPrice from './Component/ChartUsdPrice';
 import { TransactionProcess } from './Modals';
 import SwapComponent from './Swap';
 import { initPairSwap } from './Swap/hooks/useFillToken';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
-import { ChartTokenType } from './hooks/useChartUsdPrice';
+import { ChartTokenType, useChartUsdPrice } from './hooks/useChartUsdPrice';
 import styles from './index.module.scss';
 import ModalCustom from 'components/ModalCustom';
 
@@ -45,7 +45,17 @@ const Swap: React.FC = () => {
   const [initPriceUsd, setInitPriceUsd] = useState(0);
   const [initPercentChangeUsd, setInitPercentChangeUsd] = useState<string | number>(0);
   const currentPair = useSelector(selectCurrentToken);
+  const tokenTo = useSelector(selectCurrentToToken);
   const tf = useSelector(selectChartTimeFrame);
+
+  // get data for mobile
+  useChartUsdPrice(
+    FILTER_TIME_CHART.DAY,
+    tokenTo?.coinGeckoId,
+    ChartTokenType.Price,
+    setInitPriceUsd,
+    setInitPercentChangeUsd
+  );
 
   const { priceChange } = useGetPriceChange({
     base_denom: currentPair.info.split('-')[0],
@@ -60,18 +70,6 @@ const Swap: React.FC = () => {
   useEffect(() => {
     if (!window.duckDb) initDuckdb();
   }, [window.duckDb]);
-
-  useEffect(() => {
-    if (!initPriceUsd) {
-      setInitPriceUsd(priceUsd);
-    }
-  }, [priceUsd]);
-
-  useEffect(() => {
-    if (!initPercentChangeUsd) {
-      setInitPercentChangeUsd(percentChangeUsd);
-    }
-  }, [percentChangeUsd]);
 
   return (
     <Content nonBackground>
