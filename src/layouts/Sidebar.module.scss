@@ -13,6 +13,8 @@
   top: $menu-height;
   bottom: 0;
 
+  overflow-y: auto;
+
   @include mobile {
     margin-left: calc(-1 * $sidebar-width);
     padding-top: 75px;
