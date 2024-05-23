@@ -1,9 +1,10 @@
+import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import {
   AXIOS_THROTTLE_THRESHOLD,
   AXIOS_TIMEOUT,
+  COSMOS_CHAIN_ID_COMMON,
   CW20_DECIMALS,
-  TokenItemType,
-  COSMOS_CHAIN_ID_COMMON
+  TokenItemType
 } from '@oraichain/oraidex-common';
 import Axios from 'axios';
 import { retryAdapterEnhancer, throttleAdapterEnhancer } from 'axios-extensions';
@@ -101,9 +102,19 @@ export const getChainName = (data: RoutingQueryItem | null | undefined) => {
   return ChainNameObj[data.type];
 };
 
+export const deriveAddressOBridge = (addr: string, walletPrefix = 'oraib') => {
+  if (!addr) {
+    return '';
+  }
+
+  const address = fromBech32(addr);
+
+  return toBech32(walletPrefix, address.data);
+};
+
 export const getReceiver = (data: RoutingQueryItem): string => {
   return (
-    (data.data as EvmState)?.oraiReceiver ||
+    deriveAddressOBridge((data.data as EvmState)?.oraiReceiver) ||
     (data.data as OraiBridgeState)?.receiver ||
     (data.data as OraichainState).nextReceiver
   );

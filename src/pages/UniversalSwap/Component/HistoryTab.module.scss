@@ -87,21 +87,27 @@
   align-items: center;
   font-size: 13px;
   font-weight: 400;
+  gap: 8px;
 
   .status {
-    margin-right: 7px;
+    // margin-right: 7px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
 
     @include medium_mobile {
       svg {
-        width: 30px;
-        height: 30px;
+        width: 24px;
+        height: 24px;
       }
     }
   }
 
   .from,
   .to {
-    width: 25%;
+    width: 26%;
 
     .list {
       display: flex;
@@ -129,6 +135,7 @@
         .subBalance,
         .addBalance {
           font-size: 14px;
+          white-space: nowrap;
 
           @include mobile {
             font-size: 12px;
@@ -161,14 +168,14 @@
   }
 
   .icon {
-    width: 6%;
+    width: 5%;
     display: flex;
     align-items: center;
   }
 
   .time,
   .txhash {
-    width: 20%;
+    width: 18%;
     z-index: 1;
 
     .type {

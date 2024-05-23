@@ -121,7 +121,7 @@ const IbcRouting: React.FC<{
                   <div className={styles.value}>
                     <div className={styles.subBalance}>
                       {'-'}
-                      {numberWithCommas(Number(data.fromAmount), undefined, { maximumFractionDigits: 6 })}
+                      {numberWithCommas(Number(data.fromAmount), undefined, { maximumFractionDigits: 4 })}
 
                       <span className={styles.denom}>{fromToken.name}</span>
                     </div>
@@ -155,7 +155,7 @@ const IbcRouting: React.FC<{
 
                       <span className={styles.denom}>{toToken.name}</span>
                     </div>
-                    <div className={styles.timestamp}>≈{formatDisplayUsdt(data.toAmountInUsdt)}</div>
+                    <div className={styles.timestamp}>≈ {formatDisplayUsdt(data.toAmountInUsdt)}</div>
                   </div>
                 </div>
               </div>
@@ -170,7 +170,7 @@ const IbcRouting: React.FC<{
                   })}
                 >
                   {Number(impactWarning) > 5 && <WarningIcon />} ≈{' '}
-                  {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
+                  {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 4 })}%
                 </span>
               </div>
             </div>
