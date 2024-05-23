@@ -3,7 +3,7 @@
 @import 'src/styles/themes';
 
 .overlay {
-  z-index: 30;
+  z-index: 1000;
   position: absolute;
   inset: 0;
 
@@ -15,9 +15,9 @@
   opacity: 0;
   transition: visibility 0s linear 300ms, opacity 300ms;
 
-  &.open {
+  &.openOverlay {
     visibility: visible;
-    opacity: 0.4;
+    opacity: 1;
     transition: visibility 0s linear 0s, opacity 300ms;
   }
 }
@@ -30,7 +30,7 @@
   position: fixed;
   inset: 0;
 
-  z-index: 30;
+  z-index: 1000;
 
   transition: all 0.5s;
   transform: translateY(100%);

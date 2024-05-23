@@ -1,0 +1,235 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.btn {
+  margin-bottom: 10px;
+  cursor: pointer;
+  // background: $aqua;
+
+  // position: fixed;
+  // bottom: 10px;
+  // right: 10px;
+  // z-index: 100;
+
+  // animation: bounce ease-in-out 0.8s infinite;
+  // -webkit-animation: bounce ease-in-out 0.8s infinite;
+
+  // &:hover {
+  //   animation: unset;
+  // }
+
+  img {
+    width: 100%;
+  }
+}
+
+.contentModal {
+  max-width: 600px !important;
+}
+
+.overlay {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+}
+
+.wheel {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 24px;
+
+  margin-bottom: 20px;
+
+  .info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    // justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    strong {
+      @include theme {
+        color: theme-get('text-color');
+      }
+    }
+
+    @include theme {
+      color: theme-get('neutral-9');
+    }
+
+    @include small-mobile {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .balance {
+      @include theme {
+        color: theme-get('text-color');
+      }
+    }
+  }
+
+  .spin {
+    position: relative;
+    // border-radius: 50%;
+    // background: $aqua;
+
+    .spinMask {
+      z-index: 100;
+      position: absolute;
+      // background: rgba(7, 10, 19, 0.2);
+      background: #d7f5bf;
+      border-radius: 50%;
+      width: 72px;
+      height: 72px;
+      top: 50%;
+      left: 50%;
+      transform: translate(calc(-50% - 0.5px), calc(-50% - 0.5px));
+
+      transition: all ease-in-out 0.2s;
+
+      &:hover {
+        opacity: 1;
+        background: #bdd2ab;
+      }
+
+      &:disabled {
+        opacity: 1;
+        cursor: not-allowed;
+        background: #a5b795;
+      }
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      color: #2f5711;
+
+      .spinTxt {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+
+        img {
+          // filter: grayscale(100%);
+          filter: saturate(3);
+        }
+      }
+
+      .token {
+        font-size: 12px;
+        font-weight: 700;
+
+        svg {
+          width: 18px;
+          height: 18px;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
+  .result {
+    @include theme {
+      color: theme-get('text-color');
+    }
+    font-size: 16px;
+    font-weight: 400;
+    text-align: center;
+
+    &.done {
+      animation-iteration-count: 4; // infinite
+      animation: wiggle ease-in-out 0.8s;
+      -webkit-animation: wiggle ease-in-out 0.8s;
+    }
+  }
+}
+
+.lottie {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+
+  // background: $aqua;
+
+  & > div {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+@-webkit-keyframes wiggle {
+  0% {
+    -webkit-transform: rotate(2deg);
+  }
+  25% {
+    -webkit-transform: rotate(-2deg);
+  }
+  50% {
+    -webkit-transform: rotate(4deg);
+  }
+  75% {
+    -webkit-transform: rotate(-2deg);
+  }
+  100% {
+    -webkit-transform: rotate(2deg);
+  }
+}
+
+@keyframes wiggle {
+  0% {
+    transform: rotate(2deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+  75% {
+    transform: rotate(-2deg);
+  }
+  100% {
+    transform: rotate(2deg);
+  }
+}
+
+// Bounce animation
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@-webkit-keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}

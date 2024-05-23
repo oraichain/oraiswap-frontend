@@ -96,6 +96,7 @@ import styles from './index.module.scss';
 import SwapDetail from './components/SwapDetail';
 import useFilteredTokens from './hooks/useFilteredTokens';
 import PowerByOBridge from 'components/PowerByOBridge';
+import LuckyDraw from 'components/LuckyDraw';
 
 const cx = cn.bind(styles);
 
@@ -802,6 +803,10 @@ const SwapComponent: React.FC<{
           <PowerByOBridge theme={theme} />
         </div>
       </LoadingBox>
+
+      {/* <div className={styles.luckyDraw}>
+        <LuckyDraw />
+      </div> */}
 
       <div ref={ref}>
         <SelectToken
