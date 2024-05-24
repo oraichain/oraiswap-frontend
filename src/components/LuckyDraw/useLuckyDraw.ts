@@ -46,8 +46,6 @@ export const sendMultiple = async ({
     };
   });
 
-  console.log('msgs', msgs);
-
   const result = await window.client.executeMultiple(senderAddress, msgs, 'auto');
 
   return {
@@ -180,7 +178,7 @@ export const useGetListSpinResult = ({ spinIdList }: { spinIdList: number[] }) =
     data: spinResult,
     isLoading,
     refetch: refetchResult
-  } = useQuery(['getSpinConfig', spinIdList], () => getListSpinResults(), {
+  } = useQuery(['getSpinConfigList', spinIdList], () => getListSpinResults(), {
     refetchOnWindowFocus: true,
     refetchInterval: (data) => {
       const checkStop = data?.length && data?.every((d) => d.result_time && d.result_time > 0);

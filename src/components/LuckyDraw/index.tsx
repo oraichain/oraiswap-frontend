@@ -111,8 +111,6 @@ const LuckyDraw: FC<{}> = () => {
         return acc;
       }, 0);
 
-      console.log('first', { bestRes, totalRew });
-
       setBestReward(bestRes);
       setNumberOfReward(listReward.length);
       setTotalReward(totalRew);
