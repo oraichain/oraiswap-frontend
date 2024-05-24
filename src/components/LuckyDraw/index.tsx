@@ -214,7 +214,7 @@ const LuckyDraw: FC<{}> = () => {
                 Each spin only costs <strong>{toDisplay(fee || LUCKY_DRAW_FEE)}</strong> ORAIX
               </span> */}
               <div className={styles.rangeWrapper}>
-                <span>Spin: </span>
+                <span className={styles.title}>Select Spin: </span>
                 <InputRange
                   max={MAX_SPIN_TIME_PER_SEND}
                   min={1}
@@ -285,16 +285,18 @@ const LuckyDraw: FC<{}> = () => {
               'Ready to test your luck? Spin the wheel to win!'
             ) : ticketNum >= 1 && numberOfReward > 0 ? (
               <div className={styles.multiple}>
-                You have win <strong>{numberOfReward}</strong> times. <br />
-                Total reward is{' '}
+                You've racked up <strong>{numberOfReward}</strong> wins! Keep it going!
+                <br />
+                <br />
+                You earned{' '}
                 <strong>
                   {numberWithCommas(toDisplay(String(totalReward)), undefined, { maximumFractionDigits: 6 })}
                 </strong>{' '}
-                ORAI and Best Reward is{' '}
+                $ORAI in total rewards, with your best single win at{' '}
                 <strong>
                   {numberWithCommas(toDisplay(bestReward?.reward || '0'), undefined, { maximumFractionDigits: 6 })}
                 </strong>{' '}
-                ORAI
+                $ORAI
               </div>
             ) : (
               <span>

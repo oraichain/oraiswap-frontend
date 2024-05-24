@@ -162,6 +162,12 @@
 .rangeWrapper {
   display: flex;
   align-items: center;
+  width: 100%;
+
+  .title {
+    white-space: nowrap;
+    margin-right: 4px;
+  }
 
   .range {
     width: 100%;
