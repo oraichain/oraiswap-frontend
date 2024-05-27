@@ -395,7 +395,7 @@ const SwapComponent: React.FC<{
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
 
-      const initSwapData = {
+      let initSwapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
         originalFromToken,
         originalToToken,
@@ -417,6 +417,7 @@ const SwapComponent: React.FC<{
           }
         : initSwapData;
 
+      // @ts-ignore
       const univeralSwapHandler = new UniversalSwapHandler(compileSwapData, {
         cosmosWallet: window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
