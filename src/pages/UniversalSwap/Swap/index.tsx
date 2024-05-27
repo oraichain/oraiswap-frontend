@@ -70,6 +70,7 @@ import {
   getFromToToken,
   getRemoteDenom,
   getTokenBalance,
+  isAllowAlphaSmartRouter,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
@@ -212,7 +213,7 @@ const SwapComponent: React.FC<{
     contractAddress: originalFromToken.contractAddress,
     cachePrices: prices
   });
-  const useAlphaSmartRouter = !!originalFromToken.cosmosBased && !!originalToToken.cosmosBased;
+  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
@@ -234,7 +235,10 @@ const SwapComponent: React.FC<{
     originalFromToken,
     originalToToken,
     routerClient,
-    INIT_AMOUNT
+    INIT_AMOUNT,
+    {
+      useAlphaSmartRoute: useAlphaSmartRouter
+    }
   );
 
   let usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
@@ -747,19 +751,17 @@ const SwapComponent: React.FC<{
           </div>
 
           <div
-            // className={cx('smart', !openRoutes ? 'hidden' : '')}
-            className={cx('smart')}
-            // style={{
-            //   // TODO: smart router item height is 40px
-            //   height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
-            // }}
+            className={cx('smart', !openRoutes ? 'hidden' : '')}
+            style={{
+              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
+            }}
           >
             <div className={cx('smart-router')}>
               {routersSwapData.routes.map((route, ind) => {
                 let volumn = (+route.returnAmount / +routersSwapData.amount) * 100;
                 return (
                   <div key={ind} className={cx('smart-router-item')}>
-                    <div className={cx('smart-router-item-volumn')}>{}%</div>
+                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
                     {route.paths.map((path, i, acc) => {
                       let [NetworkFromIcon, NetworkToIcon] = [DefaultIcon, DefaultIcon];
                       if (path.chainId) {
