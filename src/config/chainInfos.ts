@@ -33,6 +33,7 @@ import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
 import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
 import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
+import { ReactComponent as CelestiaIcon } from 'assets/icons/celestia.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -81,6 +82,7 @@ import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraich
 import { flatten } from 'lodash';
 import { bitcoinChainId } from 'helper/constants';
 import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
+import { listOsmosisToken } from './alphaNetwwork';
 
 const [otherChainTokens, oraichainTokens] = tokens;
 type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
@@ -238,6 +240,11 @@ export const tokensIcon: TokenIcon[] = [
     coinGeckoId: 'bitcoin',
     Icon: BitcoinIcon,
     IconLight: BitcoinIcon
+  },
+  {
+    coinGeckoId: 'celestia',
+    Icon: CelestiaIcon,
+    IconLight: CelestiaIcon
   }
 ];
 
@@ -883,7 +890,8 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         Icon: OsmoIcon,
         IconLight: OsmoIcon
-      }
+      },
+      ...listOsmosisToken
     ]
   },
   {

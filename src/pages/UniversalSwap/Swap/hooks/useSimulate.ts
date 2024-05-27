@@ -20,7 +20,11 @@ export const useSimulate = (
   originalFromTokenInfo: TokenItemType,
   originalToTokenInfo: TokenItemType,
   routerClient: OraiswapRouterReadOnlyInterface,
-  initAmount?: number
+  initAmount?: number,
+  simulateOption?: {
+    useAlphaSmartRoute?: boolean;
+    useSmartRoute?: boolean;
+  }
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
 
@@ -31,7 +35,15 @@ export const useSimulate = (
         originalFromInfo: originalFromTokenInfo,
         originalToInfo: originalToTokenInfo,
         originalAmount: fromAmountToken,
-        routerClient
+        routerClient,
+        routerOption: {
+          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute,
+          useSmartRoute: simulateOption?.useSmartRoute
+        },
+        urlRouter: {
+          url: 'https://router.oraidex.io',
+          path: '/smart-router/alpha-router'
+        }
       });
     },
     {

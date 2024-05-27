@@ -41,7 +41,7 @@ describe('pool', () => {
       expect(msg.funds).toEqual([{ amount: '100', denom: ORAI }]);
       expect(msg).toHaveProperty('msg');
 
-      const messages = buildMultipleExecuteMessages(msg);
+      const messages = buildMultipleExecuteMessages([msg]);
       // check if the contract address, sent_funds and sender are correct
       expect(messages[0].contractAddress).toEqual(testPairContractAddr);
       expect(messages[0]).toHaveProperty('funds');
