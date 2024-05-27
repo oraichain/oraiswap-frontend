@@ -345,10 +345,10 @@ export const refreshBalances = async (
 
 export const getFromToToken = (originalFromToken, originalToToken, fromTokenDenomSwap, toTokenDenomSwap) => {
   const isEvmSwap = UniversalSwapHelper.isEvmSwappable({
-    fromChainId: originalFromToken.chainId,
-    toChainId: originalToToken.chainId,
-    fromContractAddr: originalFromToken.contractAddress,
-    toContractAddr: originalToToken.contractAddress
+    fromChainId: originalFromToken?.chainId,
+    toChainId: originalToToken?.chainId,
+    fromContractAddr: originalFromToken?.contractAddress,
+    toContractAddr: originalToToken?.contractAddress
   });
   const fromToken = isEvmSwap
     ? tokenMap[fromTokenDenomSwap]

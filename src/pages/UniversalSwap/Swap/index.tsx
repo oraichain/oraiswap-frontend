@@ -12,7 +12,8 @@ import {
   network,
   toAmount,
   toDisplay,
-  parseTokenInfoRawDenom
+  parseTokenInfoRawDenom,
+  CW20_DECIMALS
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
@@ -95,6 +96,7 @@ import styles from './index.module.scss';
 import SwapDetail from './components/SwapDetail';
 import useFilteredTokens from './hooks/useFilteredTokens';
 import PowerByOBridge from 'components/PowerByOBridge';
+import LuckyDraw from 'components/LuckyDraw';
 
 const cx = cn.bind(styles);
 
@@ -299,7 +301,11 @@ const SwapComponent: React.FC<{
       dispatch(setCurrentFromToken(originalFromToken));
     }
   }, [originalFromToken, fromToken]);
-  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
+
+  const fromAmountTokenBalance =
+    fromTokenInfoData &&
+    toAmount(fromAmountToken, originalFromToken?.decimals || fromTokenInfoData?.decimals || CW20_DECIMALS);
+
   const isAverageRatio = averageRatio && averageRatio.amount;
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
@@ -795,6 +801,10 @@ const SwapComponent: React.FC<{
           <PowerByOBridge theme={theme} />
         </div>
       </LoadingBox>
+
+      {/* <div className={styles.luckyDraw}>
+        <LuckyDraw />
+      </div> */}
 
       <div ref={ref}>
         <SelectToken

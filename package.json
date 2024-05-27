@@ -13,6 +13,7 @@
     "@duckdb/duckdb-wasm": "1.28.0",
     "@injectivelabs/sdk-ts": "1.12.1",
     "@leapwallet/cosmos-snap-provider": "0.1.25",
+    "@lucky-canvas/react": "^0.1.13",
     "@oraichain/common-contracts-sdk": "^1.0.31",
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",
