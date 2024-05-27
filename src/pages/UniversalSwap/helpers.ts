@@ -13,7 +13,10 @@ import {
   getTokenOnSpecificChainId,
   oraichainTokens,
   PairAddress,
-  NetworkName
+  NetworkName,
+  ATOM_ORAICHAIN_DENOM,
+  OSMOSIS_ORAICHAIN_DENOM,
+  USDC_CONTRACT
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -405,4 +408,19 @@ export const getDisableSwap = ({
   if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
   if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
   return { disabledSwapBtn, disableMsg };
+};
+
+// smart router osmosis
+export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
+  const isAllowChainId = ['osmosis-1', 'cosmoshub-4', 'noble-1'];
+  const isAllowTokenInOraichain = ['orai', ATOM_ORAICHAIN_DENOM, OSMOSIS_ORAICHAIN_DENOM, USDC_CONTRACT];
+
+  if (
+    isAllowChainId.includes(fromToken.chainId) &&
+    (isAllowTokenInOraichain.includes(toToken.denom) || isAllowTokenInOraichain.includes(toToken.contractAddress))
+  )
+    return true;
+
+  if (fromToken.cosmosBased && toToken.cosmosBased) return true;
+  return false;
 };
