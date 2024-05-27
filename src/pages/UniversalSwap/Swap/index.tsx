@@ -200,7 +200,7 @@ const SwapComponent: React.FC<{
     contractAddress: originalFromToken.contractAddress,
     cachePrices: prices
   });
-
+  const useAlphaSmartRouter = !!originalFromToken.cosmosBased && !!originalToToken.cosmosBased;
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
@@ -208,7 +208,11 @@ const SwapComponent: React.FC<{
     toTokenInfoData,
     originalFromToken,
     originalToToken,
-    routerClient
+    routerClient,
+    null,
+    {
+      useAlphaSmartRoute: useAlphaSmartRouter
+    }
   );
 
   const { simulateData: averageRatio } = useSimulate(
@@ -402,7 +406,8 @@ const SwapComponent: React.FC<{
         simulatePrice:
           // @ts-ignore
           averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-        relayerFee: relayerFeeUniversal
+        relayerFee: relayerFeeUniversal,
+        alphaSmartRoutes: simulateData
       };
 
       const compileSwapData = isCustomRecipient
@@ -414,7 +419,10 @@ const SwapComponent: React.FC<{
 
       const univeralSwapHandler = new UniversalSwapHandler(compileSwapData, {
         cosmosWallet: window.Keplr,
-        evmWallet: new Metamask(window.tronWebDapp)
+        evmWallet: new Metamask(window.tronWebDapp),
+        swapOptions: {
+          isAlphaSmartRouter: useAlphaSmartRouter
+        }
       });
 
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
@@ -472,13 +480,6 @@ const SwapComponent: React.FC<{
       }
     }
   };
-
-  const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
-  const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
-  const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
-  const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
-  const FromIconNetwork = theme === 'light' ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
-  const ToIconNetwork = theme === 'light' ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
 
   useEffect(() => {
     (async () => {
@@ -639,14 +640,12 @@ const SwapComponent: React.FC<{
                 type={'from'}
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
-                Icon={FromIcon}
                 theme={theme}
                 onChangePercentAmount={onChangePercentAmount}
                 setIsSelectChain={setIsSelectChainFrom}
                 setIsSelectToken={setIsSelectFrom}
                 selectChain={selectChainFrom}
                 token={originalFromToken}
-                IconNetwork={FromIconNetwork}
                 amount={fromAmountToken}
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
@@ -689,14 +688,12 @@ const SwapComponent: React.FC<{
                 theme={theme}
                 originalToken={originalToToken}
                 disable={true}
-                Icon={ToIcon}
                 selectChain={selectChainTo}
                 setIsSelectChain={setIsSelectChainTo}
                 setIsSelectToken={setIsSelectTo}
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
-                IconNetwork={ToIconNetwork}
                 usdPrice={usdPriceShow}
               />
             </div>
