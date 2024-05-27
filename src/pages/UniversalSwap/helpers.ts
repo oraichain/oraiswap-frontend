@@ -11,8 +11,9 @@ import {
   TokenItemType,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
-  NetworkName,
-  oraichainTokens
+  oraichainTokens,
+  PairAddress,
+  NetworkName
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -25,6 +26,7 @@ import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
 import { networks } from 'helper';
 import { generateError } from 'libs/utils';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDate, formatTimeWithPeriod } from 'pages/CoHarvest/helpers';
 import { endOfMonth, endOfWeek } from 'pages/Pools/helpers';

@@ -27,6 +27,7 @@ export const PAIRS_CHART = PAIRS.map((pair) => {
   return {
     ...pair,
     symbol,
-    info: `${assets[0]}-${assets[1]}`
+    info: `${assets[0]}-${assets[1]}`,
+    assets
   };
 });
