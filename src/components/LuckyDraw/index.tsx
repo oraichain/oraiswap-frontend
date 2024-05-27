@@ -1,6 +1,6 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { LuckyWheel } from '@lucky-canvas/react';
-import { ORAIX_CONTRACT, toDisplay } from '@oraichain/oraidex-common';
+import { ORAIX_CONTRACT, toDisplay, BigDecimal } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import LuckyDrawImg from 'assets/images/OraiDEX 2-YEAR-side.png';
 import LuckyDrawImgMobile from 'assets/images/OraiDEX 2-YEAR.png';
@@ -15,13 +15,20 @@ import {
   DATA_LUCKY_DRAW,
   LUCKY_DRAW_CONTRACT,
   LUCKY_DRAW_FEE,
+  MAX_SPIN_TIME_PER_SEND,
   MSG_TITLE,
   REWARD_MAP,
   REWARD_TITLE,
   SPIN_ID_KEY
 } from './constants';
 import styles from './index.module.scss';
-import { getDataLogByKey, useGetSpinResult, useLuckyDrawConfig } from './useLuckyDraw';
+import {
+  getDataLogByKey,
+  sendMultiple,
+  useGetListSpinResult,
+  useGetSpinResult,
+  useLuckyDrawConfig
+} from './useLuckyDraw';
 import { handleErrorTransaction } from 'helper';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import CongratulationLottie from 'assets/lottie/congratulation.json';
@@ -29,16 +36,33 @@ import { network } from 'config/networks';
 import classNames from 'classnames';
 import Loader from 'components/Loader';
 import Lottie from 'lottie-react';
+import InputRange from 'pages/CoHarvest/components/InputRange';
+import { numberWithCommas } from 'pages/Pools/helpers';
+import { Spin } from './luckyDrawClient/LuckyWheelContract.types';
 
 const LuckyDraw: FC<{}> = () => {
   const [address] = useConfigReducer('address');
   const [isOpen, setIsOpen] = useState(false);
   const [loadingFee, setLoadingFee] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [spinId, setSpinId] = useState(0);
+  const [ticketNum, setTicketNum] = useState(1);
+  const [spinIdList, setSpinIdList] = useState([]);
   const myLuckyRef = useRef(null);
   const [item, setItem] = useState('');
   const [isSuccessSpin, setIsSuccessSpin] = useState(false);
+  const [bestReward, setBestReward] = useState<
+    | Spin
+    | {
+        spinId: number;
+        participant: string;
+        random_number: string;
+        reward: string;
+        spin_time: number;
+        result_time: number;
+      }
+  >();
+  const [numberOfReward, setNumberOfReward] = useState(0);
+  const [totalReward, setTotalReward] = useState(0);
   const [wheelSize, setWheelSize] = useState('500px');
   const [loaded, setLoaded] = useState(false);
   const mobileMode = isMobile();
@@ -52,7 +76,7 @@ const LuckyDraw: FC<{}> = () => {
   const { spinConfig } = useLuckyDrawConfig();
   const { fee = LUCKY_DRAW_FEE, feeDenom = ORAIX_CONTRACT, feeToken } = spinConfig || {};
 
-  const insufficientFund = fee && Number(fee) > Number(balance);
+  const insufficientFund = fee && Number(fee) * ticketNum > Number(balance);
 
   useEffect(() => {
     const { width = 500 } = windowSize || {};
@@ -72,57 +96,81 @@ const LuckyDraw: FC<{}> = () => {
     return () => setLoaded(false);
   }, [windowSize, isSmallMobileView]);
 
-  const { spinResult } = useGetSpinResult({ id: spinId });
+  // const { spinResult } = useGetSpinResult({ id: spinId });
+  const { spinResult, isDone } = useGetListSpinResult({ spinIdList });
 
   useEffect(() => {
-    if (spinId && spinResult?.result_time && myLuckyRef?.current) {
-      const indexPrize = REWARD_MAP[spinResult?.reward];
+    if (spinIdList?.length && isDone && myLuckyRef?.current) {
+      const fmtRes = [...(spinResult || [])].sort((a, b) => Number(b.reward) - Number(a.reward));
+      const bestRes = fmtRes[0];
+
+      const listReward = fmtRes.filter((e) => e.reward && Number(e.reward) > 0);
+      const totalRew = listReward.reduce((acc, cur) => {
+        acc = new BigDecimal(cur.reward).add(acc).toNumber();
+
+        return acc;
+      }, 0);
+
+      setBestReward(bestRes);
+      setNumberOfReward(listReward.length);
+      setTotalReward(totalRew);
+
+      const indexPrize = REWARD_MAP[bestRes?.reward];
       const randomItemIndex = (Math.random() * 2) >> 0;
+
       myLuckyRef.current.stop(indexPrize?.[randomItemIndex] ?? indexPrize?.[0]);
     }
-  }, [spinResult, spinId]);
+  }, [spinResult, spinIdList, isDone]);
 
   const onStart = async () => {
     setIsSuccessSpin(false);
     setItem('');
-    setSpinId(0);
+    setSpinIdList([]);
     setLoadingFee(true);
     setIsSpinning(true);
 
     if (!myLuckyRef) return;
-    // setTimeout(() => {
-    // let indexPrize = (Math.random() * 14) >> 0;
-    // while (indexPrize === 0 || indexPrize === 3 || indexPrize === 4) {
-    //   indexPrize = (Math.random() * 14) >> 0;
-    // }
-    // }, timeDuration);
 
     try {
       const { feeDenom, feeToken, fee } = spinConfig;
 
-      const sendResult = await window.client.execute(
-        address,
-        feeDenom,
-        {
-          send: {
-            contract: LUCKY_DRAW_CONTRACT,
-            amount: fee,
-            msg: toBinary({
-              spin: {}
-            })
-          }
-        },
-        'auto'
-      );
+      // const sendResult = await window.client.execute(
+      //   address,
+      //   feeDenom,
+      //   {
+      //     send: {
+      //       contract: LUCKY_DRAW_CONTRACT,
+      //       amount: fee,
+      //       msg: toBinary({
+      //         spin: {}
+      //       })
+      //     }
+      //   },
+      //   'auto'
+      // );
+      const sendResult = await sendMultiple({
+        fee,
+        timeToSpin: ticketNum,
+        tokenAddress: feeDenom,
+        senderAddress: address
+      });
 
       myLuckyRef?.current?.play();
 
       const { logs = [] } = sendResult;
 
-      const { value: spinId } = getDataLogByKey(logs, SPIN_ID_KEY);
+      const idList = [];
+      logs.map((log) => {
+        const { value: spinId } = getDataLogByKey(log, SPIN_ID_KEY);
 
-      if (spinId) {
-        setSpinId(Number(spinId));
+        if (spinId && !isNaN(spinId)) {
+          idList.push(Number(spinId));
+        }
+        return log;
+      });
+
+      if (idList?.length) {
+        setSpinIdList(idList);
       }
     } catch (error) {
       console.log('error', error);
@@ -136,6 +184,8 @@ const LuckyDraw: FC<{}> = () => {
     }
   };
 
+  const tokenValueByTicket = ticketNum * toDisplay(fee || LUCKY_DRAW_FEE);
+
   return (
     <>
       <div className={styles.btn} onClick={() => setIsOpen(true)}>
@@ -148,15 +198,41 @@ const LuckyDraw: FC<{}> = () => {
           setIsOpen(false);
           setItem('');
           setIsSuccessSpin(false);
+
+          setTicketNum(1);
+          setBestReward(null);
+          setTotalReward(0);
+          setNumberOfReward(0);
         }}
         className={styles.contentModal}
         overlayClassName={styles.overlay}
       >
         <div className={styles.wheel}>
           <div className={styles.info}>
-            <span className={styles.detail}>
-              Each spin only costs <strong>{toDisplay(fee || LUCKY_DRAW_FEE)}</strong> ORAIX
-            </span>
+            <div className={styles.detail}>
+              {/* <span className={styles.detail}>
+                Each spin only costs <strong>{toDisplay(fee || LUCKY_DRAW_FEE)}</strong> ORAIX
+              </span> */}
+              <div className={styles.rangeWrapper}>
+                <span className={styles.title}>Select Spin: </span>
+                <InputRange
+                  max={MAX_SPIN_TIME_PER_SEND}
+                  min={1}
+                  value={ticketNum}
+                  onChange={(val) => setTicketNum(+val)}
+                  className={styles.range}
+                  showValue={false}
+                  suffix={
+                    <div className={styles.value}>
+                      <span>{ticketNum} times </span>
+                      <span>
+                        ( = {numberWithCommas(tokenValueByTicket)} {feeToken?.name || 'ORAIX'})
+                      </span>
+                    </div>
+                  }
+                />
+              </div>
+            </div>
             <span>
               Balance:{' '}
               <span className={styles.balance}>
@@ -207,6 +283,21 @@ const LuckyDraw: FC<{}> = () => {
           <span className={classNames(styles.result, { [styles.done]: isSuccessSpin })}>
             {!isSuccessSpin ? (
               'Ready to test your luck? Spin the wheel to win!'
+            ) : ticketNum >= 1 && numberOfReward > 0 ? (
+              <div className={styles.multiple}>
+                You've racked up <strong>{numberOfReward}</strong> wins! Keep it going!
+                <br />
+                <br />
+                You earned{' '}
+                <strong>
+                  {numberWithCommas(toDisplay(String(totalReward)), undefined, { maximumFractionDigits: 6 })}
+                </strong>{' '}
+                $ORAI in total rewards, with your best single win at{' '}
+                <strong>
+                  {numberWithCommas(toDisplay(bestReward?.reward || '0'), undefined, { maximumFractionDigits: 6 })}
+                </strong>{' '}
+                $ORAI
+              </div>
             ) : (
               <span>
                 <strong>{item}: &nbsp;</strong>
