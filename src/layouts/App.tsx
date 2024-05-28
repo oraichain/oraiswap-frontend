@@ -39,6 +39,7 @@ const App = () => {
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  const [bannerTime] = useConfigReducer('bannerTime');
   const mobileMode = isMobile();
   const ethOwallet = window.eth_owallet;
 
@@ -210,7 +211,7 @@ const App = () => {
       <div className={`app ${theme}`}>
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        {/* <FutureCompetition /> */}
+        {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />}
         <div className="main">
           <Sidebar />
           <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>

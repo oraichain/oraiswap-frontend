@@ -1,7 +1,9 @@
 export const LUCKY_DRAW_CONTRACT = 'orai1w2586wstjpls49k0c4evqcnmg36c4vuvs398grxnx6238f5zygfsh0g9u5';
+// export const LUCKY_DRAW_CONTRACT = 'orai1xlsjarys4p4jkq9ca0dayqxmcya5pac6v9ys5rhrs2wfcfy6t2hq9lah7w';
 export const LUCKY_DRAW_INTERVAL = 30 * 60 * 60;
 export const FETCH_RESULT_INTERVAL = 500;
 export const LUCKY_DRAW_FEE = '33000000';
+export const MAX_SPIN_TIME_PER_SEND = 30;
 export const SPIN_ID_KEY = 'spin_id';
 
 export enum REWARD_ENUM {
@@ -10,6 +12,12 @@ export enum REWARD_ENUM {
   SILVER = '1000000',
   BRONZE = '100000',
   NOTHING = '0'
+
+  // DIAMOND = '200',
+  // GOLD = '50',
+  // SILVER = '10',
+  // BRONZE = '1',
+  // NOTHING = '0'
 }
 
 export const REWARD_MAP = {
