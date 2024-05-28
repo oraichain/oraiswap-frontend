@@ -228,18 +228,29 @@ const SwapComponent: React.FC<{
     }
   );
 
-  const { simulateData: averageRatio } = useSimulate(
-    'simulate-average-data',
-    fromTokenInfoData,
-    toTokenInfoData,
-    originalFromToken,
-    originalToToken,
-    routerClient,
-    INIT_AMOUNT,
-    {
-      useAlphaSmartRoute: useAlphaSmartRouter
-    }
-  );
+  console.log({ fromAmountToken, simulateData });
+
+  let averageRatio = undefined;
+  if (simulateData) {
+    const displayAmount = new BigDecimal(simulateData.displayAmount).div(fromAmountToken).toNumber();
+    averageRatio = {
+      amount: toAmount(displayAmount, originalFromToken.decimals),
+      displayAmount: displayAmount
+    };
+  }
+
+  // const { simulateData: averageRatio } = useSimulate(
+  //   'simulate-average-data',
+  //   fromTokenInfoData,
+  //   toTokenInfoData,
+  //   originalFromToken,
+  //   originalToToken,
+  //   routerClient,
+  //   INIT_AMOUNT,
+  //   {
+  //     useAlphaSmartRoute: useAlphaSmartRouter
+  //   }
+  // );
 
   let usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
   if (!Number(usdPriceShow)) {
@@ -735,18 +746,22 @@ const SwapComponent: React.FC<{
               )}
               onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
             >
-              <span className={cx('text')}>
-                {Number(impactWarning) > 5 && <WarningIcon />}
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio
-                    ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, {
-                        maximumFractionDigits: 6
-                      })
-                    : '0'
-                } ${originalToToken.name}`}
-              </span>
+              {isAverageRatio && (
+                <span className={cx('text')}>
+                  {Number(impactWarning) > 5 && <WarningIcon />}
+                  {`1 ${originalFromToken.name} ≈ ${
+                    averageRatio
+                      ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, {
+                          maximumFractionDigits: 6
+                        })
+                      : '0'
+                  } ${originalToToken.name}`}
+                </span>
+              )}
 
-              {!!isRoutersSwapData && <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />}
+              {!!isRoutersSwapData && useAlphaSmartRouter && (
+                <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
+              )}
             </div>
           </div>
 
@@ -773,7 +788,6 @@ const SwapComponent: React.FC<{
                         const chainTo = chainIcons.find((cosmos) => cosmos.chainId === path.tokenOutChainId);
                         NetworkToIcon = chainTo.Icon;
                       }
-
                       return (
                         <React.Fragment key={i}>
                           <div className={cx('smart-router-item-line')}>
