@@ -97,11 +97,11 @@ const Swap: React.FC = () => {
           </div>
         </div>
         <div className={cx('swap-col', 'w40')}>
-          {mobileMode && (
+          {/* {mobileMode && (
             <div className={styles.luckyDraw}>
               <LuckyDraw />
             </div>
-          )}
+          )} */}
           {mobileMode && (
             <HeaderTop
               hideChart
