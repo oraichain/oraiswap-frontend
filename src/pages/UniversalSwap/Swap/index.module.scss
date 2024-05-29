@@ -852,7 +852,6 @@
       .smart-router-item-pool {
         cursor: pointer;
         position: relative;
-        z-index: 999999;
         &:hover {
           .smart-router-item-pool-tooltip {
             visibility: visible;
@@ -864,6 +863,7 @@
         .smart-router-item-pool-tooltip {
           position: absolute;
           visibility: hidden;
+          padding: 10px;
           top: 100%;
           left: 50%;
           transform: translateX(-50%);

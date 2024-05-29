@@ -797,21 +797,21 @@ const SwapComponent: React.FC<{
                                   <div key={index}>
                                     {action.type === 'Swap' &&
                                       action.swapInfo.map((actionSwap) => {
-                                        const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
-                                          actionSwap,
-                                          flattenTokens,
-                                          flattenTokensWithIcon,
-                                          isLightMode
-                                        );
+                                        // const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
+                                        //   actionSwap,
+                                        //   flattenTokens,
+                                        //   flattenTokensWithIcon,
+                                        //   isLightMode
+                                        // );
                                         return (
                                           <div key={actionSwap.tokenOut} className={cx('smart-router-item-pool')}>
-                                            {action.type}:
+                                            <div>{action.type}</div>
                                             <div className={cx('smart-router-item-pool-wrap')}>
                                               <div className={cx('smart-router-item-pool-wrap-img')}>
-                                                <TokenInIcon />
+                                                {/* <TokenInIcon /> */}
                                               </div>
                                               <div className={cx('smart-router-item-pool-wrap-img')}>
-                                                <TokenOutIcon />
+                                                {/* <TokenOutIcon /> */}
                                               </div>
                                             </div>
                                           </div>
