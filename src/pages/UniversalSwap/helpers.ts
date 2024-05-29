@@ -424,3 +424,46 @@ export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
   if (fromToken.cosmosBased && toToken.cosmosBased) return true;
   return false;
 };
+
+export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
+
+export const findTokenInfo = (token, flattenTokens) => {
+  return flattenTokens.find(
+    (t) => t.contractAddress?.toUpperCase() === token?.toUpperCase() || t.denom.toUpperCase() === token?.toUpperCase()
+  );
+};
+
+export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) => {
+  const baseToken = flattenTokensWithIcon.find((token) => token.coinGeckoId === coinGeckoId);
+  return baseToken ? (isLightMode ? baseToken.IconLight : baseToken.Icon) : DefaultIcon;
+};
+
+export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLightMode) => {
+  const pairKey = findKeyByValue(PairAddress, path.poolId);
+  const [tokenInKey, tokenOutKey] = pairKey.split('_');
+  let infoPair: any = PAIRS_CHART.find((pair) => {
+    let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
+    return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
+  });
+  const tokenIn = infoPair?.assets.find((info) => info.toUpperCase() !== path.tokenOut.toUpperCase());
+  const tokenOut = path.tokenOut;
+
+  infoPair = {
+    ...infoPair,
+    tokenIn: tokenIn,
+    tokenOut: tokenOut
+  };
+
+  const TokenInIcon = findBaseToken(
+    findTokenInfo(tokenIn, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+  const TokenOutIcon = findBaseToken(
+    findTokenInfo(tokenOut, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+
+  return { infoPair, TokenInIcon, TokenOutIcon, pairKey };
+};
