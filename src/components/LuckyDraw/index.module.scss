@@ -46,10 +46,12 @@
   margin-bottom: 20px;
 
   .info {
+    z-index: 10;
     width: 100%;
     display: flex;
-    justify-content: space-between;
-    // justify-content: center;
+    flex-direction: column-reverse;
+    // justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
     gap: 12px;
 
@@ -153,6 +155,79 @@
       animation-iteration-count: 4; // infinite
       animation: wiggle ease-in-out 0.8s;
       -webkit-animation: wiggle ease-in-out 0.8s;
+    }
+  }
+}
+
+.rangeWrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .title {
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+
+  .range {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+
+    input {
+      flex: 1;
+      height: 100px;
+
+      input[type='range' i]::-webkit-slider-container {
+        height: 20px;
+      }
+      &[type='range'] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 12px;
+        cursor: pointer;
+        outline: none;
+        border-radius: 99px;
+
+        height: 6px;
+        @include theme {
+          background: theme-get('neutral-surface-bg-section-2');
+        }
+      }
+
+      &[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 24px;
+        width: 24px;
+        border-radius: 50%;
+        border: 2px solid;
+        @include theme {
+          background-color: $primary-text-link;
+          border-color: theme-get('neutral-white');
+          // background-color: theme-get('primary-text-text-link');
+          // border-color: theme-get('neutral-white');
+        }
+
+        transition: 0.2s ease-in-out;
+      }
+
+      /* Thumb: Firefox */
+      &[type='range']::-moz-range-thumb {
+        height: 15px;
+        width: 15px;
+        border-radius: 50%;
+        border: 4px solid;
+        @include theme {
+          background-color: theme-get('primary-text-text-link');
+          border-color: theme-get('neutral-white');
+        }
+
+        transition: 0.2s ease-in-out;
+      }
     }
   }
 }

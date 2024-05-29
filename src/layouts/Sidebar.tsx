@@ -81,9 +81,9 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
         </div>
 
         <div className={styles.footerWrapper}>
-          <div className={styles.luckyDraw}>
+          {/* <div className={styles.luckyDraw}>
             <LuckyDraw />
-          </div>
+          </div> */}
           <div className={styles.menu_footer} onClick={() => setIsOpenQrCodeOwallet(true)}>
             {theme === 'light' ? <DownloadOwalletIcon /> : <DownloadOwalletIconDark />}
             <div className={styles.download}>
