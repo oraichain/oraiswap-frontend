@@ -851,12 +851,29 @@
       }
       .smart-router-item-pool {
         cursor: pointer;
+        position: relative;
+        z-index: 999999;
         &:hover {
-          border-radius: 99px;
+          .smart-router-item-pool-tooltip {
+            visibility: visible;
+          }
           @include theme() {
-            opacity: 0.8;
+            // opacity: 0.8;
           }
         }
+        .smart-router-item-pool-tooltip {
+          position: absolute;
+          visibility: hidden;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 200px;
+          height: 100px;
+          background-color: #232521;
+          border-radius: 8px;
+          border: 1px solid gray;
+        }
+
         .smart-router-item-pool-wrap {
           display: flex;
           align-items: center;
