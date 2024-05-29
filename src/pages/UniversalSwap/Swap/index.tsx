@@ -71,6 +71,7 @@ import {
   getRemoteDenom,
   getTokenBalance,
   isAllowAlphaSmartRouter,
+  processPairInfo,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
@@ -228,8 +229,6 @@ const SwapComponent: React.FC<{
     }
   );
 
-  console.log({ fromAmountToken, simulateData });
-
   let averageRatio = undefined;
   if (simulateData) {
     const displayAmount = new BigDecimal(simulateData.displayAmount).div(fromAmountToken).toNumber();
@@ -268,19 +267,15 @@ const SwapComponent: React.FC<{
   const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
     if (chainId) {
       const isFrom = type === 'from';
-
       // check current token existed on another swap token chain
-      const checkExistedToken = isFrom
-        ? flattenTokens.find(
-            (flat) => flat?.coinGeckoId === originalFromToken?.coinGeckoId && flat?.chainId === selectChainTo
-          )
-        : flattenTokens.find(
-            (flat) => flat?.coinGeckoId === originalToToken?.coinGeckoId && flat?.chainId === selectChainFrom
-          );
+      const targetToken = isFrom ? originalFromToken : originalToToken;
+      const targetChain = isFrom ? selectChainTo : selectChainFrom;
 
+      const checkExistedToken = flattenTokens.find(
+        (flat) => flat?.coinGeckoId === targetToken?.coinGeckoId && flat?.chainId === targetChain
+      );
       // get default token of new chain
       const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId);
-
       // case new chain === another swap token chain
       // if new tokenInfo(default token of new chain) === from/to Token => check is currentToken existed on new chain
       // if one of all condition is false => handle swap normally
@@ -427,6 +422,7 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
+      const alphaSmartRoutes = simulateData && simulateData?.routes && simulateData;
 
       let initSwapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -441,7 +437,7 @@ const SwapComponent: React.FC<{
           // @ts-ignore
           averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
         relayerFee: relayerFeeUniversal,
-        alphaSmartRoutes: simulateData
+        alphaSmartRoutes
       };
 
       const compileSwapData = isCustomRecipient
@@ -788,12 +784,43 @@ const SwapComponent: React.FC<{
                         const chainTo = chainIcons.find((cosmos) => cosmos.chainId === path.tokenOutChainId);
                         NetworkToIcon = chainTo.Icon;
                       }
+
                       return (
                         <React.Fragment key={i}>
                           <div className={cx('smart-router-item-line')}>
                             <div className={cx('smart-router-item-line-detail')} />
                           </div>
                           <div className={cx('smart-router-item-pool')}>
+                            <div className={cx('smart-router-item-pool-tooltip')}>
+                              {path.actions?.map((action, index) => {
+                                return (
+                                  <div key={index}>
+                                    {action.type === 'Swap' &&
+                                      action.swapInfo.map((actionSwap) => {
+                                        // const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
+                                        //   actionSwap,
+                                        //   flattenTokens,
+                                        //   flattenTokensWithIcon,
+                                        //   isLightMode
+                                        // );
+                                        return (
+                                          <div key={actionSwap.tokenOut} className={cx('smart-router-item-pool')}>
+                                            <div>{action.type}</div>
+                                            <div className={cx('smart-router-item-pool-wrap')}>
+                                              <div className={cx('smart-router-item-pool-wrap-img')}>
+                                                {/* <TokenInIcon /> */}
+                                              </div>
+                                              <div className={cx('smart-router-item-pool-wrap-img')}>
+                                                {/* <TokenOutIcon /> */}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                  </div>
+                                );
+                              })}
+                            </div>
                             <div className={cx('smart-router-item-pool-wrap')}>
                               <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkFromIcon />}</div>
                               <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
