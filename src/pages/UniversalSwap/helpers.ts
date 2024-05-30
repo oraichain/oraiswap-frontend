@@ -438,32 +438,45 @@ export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) =
   return baseToken ? (isLightMode ? baseToken.IconLight : baseToken.Icon) : DefaultIcon;
 };
 
-export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLightMode) => {
-  const pairKey = findKeyByValue(PairAddress, path.poolId);
-  const [tokenInKey, tokenOutKey] = pairKey.split('_');
-  let infoPair: any = PAIRS_CHART.find((pair) => {
-    let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
-    return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
+export const transformSwapInfo = (data) => {
+  const transformedData = JSON.parse(JSON.stringify(data));
+  transformedData.swapInfo = transformedData.swapInfo.map((swap, index) => {
+    if (index === 0) {
+      swap.tokenIn = data.tokenIn;
+    } else {
+      swap.tokenIn = transformedData.swapInfo[index - 1].tokenOut;
+    }
+    return swap;
   });
-  const tokenIn = infoPair?.assets.find((info) => info.toUpperCase() !== path.tokenOut.toUpperCase());
-  const tokenOut = path.tokenOut;
 
-  infoPair = {
+  return transformedData;
+};
+
+export const processPairInfo = (actionSwap, flattenTokens, flattenTokensWithIcon, isLightMode) => {
+  let info;
+  let [TokenInIcon, TokenOutIcon]: any = [DefaultIcon, DefaultIcon];
+  const infoPair = PAIRS_CHART.find(
+    (pair) => pair.assets.includes(actionSwap.tokenIn) && pair.assets.includes(actionSwap.tokenOut)
+  );
+  const findIndexIn = infoPair.assets.findIndex((fdex) => fdex === actionSwap.tokenOut);
+  const TokenInIconPair = findBaseToken(
+    findTokenInfo(actionSwap.tokenIn, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+  const TokenOutIconPair = findBaseToken(
+    findTokenInfo(actionSwap.tokenOut, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+
+  TokenInIcon = TokenInIconPair;
+  TokenOutIcon = TokenOutIconPair;
+
+  info = {
     ...infoPair,
-    tokenIn: tokenIn,
-    tokenOut: tokenOut
+    tokenIn: infoPair.symbols[findIndexIn],
+    tokenOut: infoPair.symbols[findIndexIn ? 0 : 1]
   };
-
-  const TokenInIcon = findBaseToken(
-    findTokenInfo(tokenIn, flattenTokens)?.coinGeckoId,
-    flattenTokensWithIcon,
-    isLightMode
-  );
-  const TokenOutIcon = findBaseToken(
-    findTokenInfo(tokenOut, flattenTokens)?.coinGeckoId,
-    flattenTokensWithIcon,
-    isLightMode
-  );
-
-  return { infoPair, TokenInIcon, TokenOutIcon, pairKey };
+  return { info, TokenInIcon, TokenOutIcon };
 };
