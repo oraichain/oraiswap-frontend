@@ -856,23 +856,54 @@
           .smart-router-item-pool-tooltip {
             visibility: visible;
           }
-          @include theme() {
-            // opacity: 0.8;
-          }
         }
         .smart-router-item-pool-tooltip {
           position: absolute;
           visibility: hidden;
-          padding: 10px;
-          top: 100%;
+          padding: 10px 10px 0 10px;
+          top: 115%;
           left: 50%;
+          font-size: 14px;
           transform: translateX(-50%);
-          width: 200px;
-          height: 100px;
-          background-color: #232521;
+          width: 220px;
+          @include theme() {
+            background-color: theme-get('neutral-surface-bg-tooltip');
+            border: 1px solid theme-get('neutral-border-border-bold');
+            color: theme-get('colors-neutral-text-body-on-row');
+          }
           border-radius: 8px;
-          border: 1px solid gray;
           z-index: 9999;
+
+          .smart-router-item-pool-tooltip-bridge-swap {
+            .smart-router-item-pool-tooltip-swap {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding-bottom: 10px;
+              .smart-router-item-pool-tooltip-swap-left {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                .smart-router-item-pool-tooltip-swap-imgs {
+                  display: flex;
+                  align-items: center;
+                  .smart-router-item-pool-tooltip-swap-img {
+                    display: flex;
+                    align-items: center;
+                    width: 24px;
+                    height: 24px;
+                  }
+                  .smart-router-item-pool-tooltip-swap-img:last-child {
+                    margin-left: -10px;
+                  }
+                }
+              }
+              .smart-router-item-pool-tooltip-swap-right {
+                text-transform: uppercase;
+                font-weight: 500;
+              }
+            }
+          }
         }
 
         .smart-router-item-pool-wrap {

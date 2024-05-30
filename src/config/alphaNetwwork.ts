@@ -1,4 +1,10 @@
 import { BridgeAppCurrency } from '@oraichain/oraidex-common';
+import { ReactComponent as CelestiaIcon } from 'assets/icons/celestia.svg';
+import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
+import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
+import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 
 export const AtomOsmosisToken: BridgeAppCurrency = {
   coinDenom: 'ATOM',
@@ -10,7 +16,9 @@ export const AtomOsmosisToken: BridgeAppCurrency = {
     low: 0,
     average: 0.025,
     high: 0.04
-  }
+  },
+  Icon: AtomIcon,
+  IconLight: AtomIcon
 };
 
 export const UsdcOsmosisToken: BridgeAppCurrency = {
@@ -23,7 +31,9 @@ export const UsdcOsmosisToken: BridgeAppCurrency = {
     low: 0,
     average: 0.025,
     high: 0.04
-  }
+  },
+  Icon: UsdcIcon,
+  IconLight: UsdcIcon
 };
 
 export const OraiOsmosisToken: BridgeAppCurrency = {
@@ -36,7 +46,9 @@ export const OraiOsmosisToken: BridgeAppCurrency = {
     low: 0,
     average: 0.025,
     high: 0.04
-  }
+  },
+  Icon: OraiIcon,
+  IconLight: OraiLightIcon
 };
 
 export const TiaOsmosisToken: BridgeAppCurrency = {
@@ -49,7 +61,9 @@ export const TiaOsmosisToken: BridgeAppCurrency = {
     low: 0,
     average: 0.025,
     high: 0.04
-  }
+  },
+  Icon: CelestiaIcon,
+  IconLight: CelestiaIcon
 };
 
 export const InjOsmosisToken: BridgeAppCurrency = {
@@ -62,7 +76,9 @@ export const InjOsmosisToken: BridgeAppCurrency = {
     low: 0,
     average: 0.025,
     high: 0.04
-  }
+  },
+  Icon: InjIcon,
+  IconLight: InjIcon
 };
 
 export const listOsmosisToken = [AtomOsmosisToken, OraiOsmosisToken, TiaOsmosisToken, InjOsmosisToken];

@@ -72,7 +72,8 @@ import {
   getTokenBalance,
   isAllowAlphaSmartRouter,
   processPairInfo,
-  refreshBalances
+  refreshBalances,
+  transformSwapInfo
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -106,6 +107,7 @@ import SwapDetail from './components/SwapDetail';
 import PowerByOBridge from 'components/PowerByOBridge';
 import LuckyDraw from 'components/LuckyDraw';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { assets } from 'chain-registry';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -779,7 +781,6 @@ const SwapComponent: React.FC<{
                         const chainFrom = chainIcons.find((cosmos) => cosmos.chainId === path.chainId);
                         NetworkFromIcon = chainFrom.Icon;
                       }
-
                       if (path.tokenOutChainId) {
                         const chainTo = chainIcons.find((cosmos) => cosmos.chainId === path.tokenOutChainId);
                         NetworkToIcon = chainTo.Icon;
@@ -793,30 +794,129 @@ const SwapComponent: React.FC<{
                           <div className={cx('smart-router-item-pool')}>
                             <div className={cx('smart-router-item-pool-tooltip')}>
                               {path.actions?.map((action, index) => {
+                                const pathChainId = path.chainId.split('-')[0].toLowerCase();
+                                const pathTokenOut = path.tokenOutChainId.split('-')[0].toLowerCase();
+
+                                const getAssetsByChainName = (chainName) =>
+                                  assets.find(({ chain_name }) => chain_name === chainName)?.assets || [];
+
+                                const assetList = {
+                                  assets: [...getAssetsByChainName(pathChainId), ...getAssetsByChainName(pathTokenOut)]
+                                };
+
                                 return (
-                                  <div key={index}>
+                                  <div key={index} className={cx('smart-router-item-pool-tooltip-bridge-swap')}>
                                     {action.type === 'Swap' &&
-                                      action.swapInfo.map((actionSwap) => {
-                                        // const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
-                                        //   actionSwap,
-                                        //   flattenTokens,
-                                        //   flattenTokensWithIcon,
-                                        //   isLightMode
-                                        // );
+                                      transformSwapInfo(action).swapInfo.map((actionSwap) => {
+                                        let info;
+                                        let [TokenInIcon, TokenOutIcon]: any = [DefaultIcon, DefaultIcon];
+                                        const poolIsOrai = actionSwap.poolId.slice(0, 4) === 'orai';
+
+                                        const findTokenInfo = (tokenBase, assets) => {
+                                          return assets?.assets.find((asset) => asset.base === tokenBase) ?? {};
+                                        };
+
+                                        if (poolIsOrai) {
+                                          const {
+                                            info: infoPair,
+                                            TokenInIcon: TokenInIconPair,
+                                            TokenOutIcon: TokenOutIconPair
+                                          } = processPairInfo(
+                                            actionSwap,
+                                            flattenTokens,
+                                            flattenTokensWithIcon,
+                                            isLightMode
+                                          );
+
+                                          info = infoPair;
+                                          TokenInIcon = TokenInIconPair;
+                                          TokenOutIcon = TokenOutIconPair;
+                                        } else {
+                                          const tokenInInfo = findTokenInfo(actionSwap.tokenIn, assetList);
+                                          const tokenOutInfo = findTokenInfo(actionSwap.tokenOut, assetList);
+
+                                          info = {
+                                            logoIn: tokenInInfo.logo_URIs,
+                                            logoOut: tokenOutInfo.logo_URIs,
+                                            tokenIn: tokenInInfo.symbol,
+                                            tokenOut: tokenOutInfo.symbol
+                                          };
+                                        }
+
                                         return (
-                                          <div key={actionSwap.tokenOut} className={cx('smart-router-item-pool')}>
-                                            <div>{action.type}</div>
-                                            <div className={cx('smart-router-item-pool-wrap')}>
-                                              <div className={cx('smart-router-item-pool-wrap-img')}>
-                                                {/* <TokenInIcon /> */}
+                                          <div
+                                            className={cx('smart-router-item-pool-tooltip-swap')}
+                                            key={actionSwap.tokenOut}
+                                          >
+                                            <div className={cx('smart-router-item-pool-tooltip-swap-left')}>
+                                              <div className={cx('smart-router-item-pool-tooltip-swap-imgs')}>
+                                                <div className={cx('smart-router-item-pool-tooltip-swap-img')}>
+                                                  {poolIsOrai ? (
+                                                    <TokenInIcon />
+                                                  ) : (
+                                                    <img width={24} height={24} src={info?.logoIn?.png} />
+                                                  )}
+                                                </div>
+                                                <div className={cx('smart-router-item-pool-tooltip-swap-img')}>
+                                                  {poolIsOrai ? (
+                                                    <TokenOutIcon />
+                                                  ) : (
+                                                    <img width={24} height={24} src={info?.logoOut?.png} />
+                                                  )}
+                                                </div>
                                               </div>
-                                              <div className={cx('smart-router-item-pool-wrap-img')}>
-                                                {/* <TokenOutIcon /> */}
+                                              <div className={cx('smart-router-item-pool-tooltip-swap-type')}>
+                                                {action.type}
                                               </div>
+                                            </div>
+                                            <div className={cx('smart-router-item-pool-tooltip-swap-right')}>
+                                              {info?.tokenIn}/{info?.tokenOut}
                                             </div>
                                           </div>
                                         );
                                       })}
+
+                                    {(() => {
+                                      if (action.type === 'Bridge') {
+                                        let tokenInfo: any = flattenTokens?.find(
+                                          (flat) =>
+                                            flat.denom === action.tokenOut || flat?.contractAddress === action.tokenOut
+                                        );
+                                        if (!tokenInfo) {
+                                          tokenInfo = assetList?.assets.find((asset) => asset.base === action.tokenOut);
+                                        }
+
+                                        return (
+                                          <div className={cx('smart-router-item-pool-tooltip-swap')}>
+                                            <div className={cx('smart-router-item-pool-tooltip-swap-left')}>
+                                              <div className={cx('smart-router-item-pool-tooltip-swap-imgs')}>
+                                                <div className={cx('smart-router-item-pool-tooltip-swap-img')}>
+                                                  {tokenInfo?.name ? (
+                                                    <tokenInfo.Icon />
+                                                  ) : (
+                                                    <img width={24} height={24} src={tokenInfo?.logo_URIs.svg}></img>
+                                                  )}
+                                                </div>
+                                                <div className={cx('smart-router-item-pool-tooltip-swap-img')}>
+                                                  {tokenInfo?.name ? (
+                                                    <tokenInfo.Icon />
+                                                  ) : (
+                                                    <img width={24} height={24} src={tokenInfo?.logo_URIs.svg}></img>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              <div className={cx('smart-router-item-pool-tooltip-swap-type')}>
+                                                {action.type}
+                                              </div>
+                                            </div>
+                                            <div className={cx('smart-router-item-pool-tooltip-swap-right')}>
+                                              {tokenInfo?.name ?? tokenInfo?.symbol}/{' '}
+                                              {tokenInfo?.name ?? tokenInfo?.symbol}
+                                            </div>
+                                          </div>
+                                        );
+                                      }
+                                    })()}
                                   </div>
                                 );
                               })}
