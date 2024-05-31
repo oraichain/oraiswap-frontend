@@ -3,6 +3,7 @@ import { HttpClient, Tendermint37Client, WebsocketClient } from '@cosmjs/tenderm
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ChakraProvider } from '@chakra-ui/react';
 import { ToastContext, ToastProvider } from 'components/Toasts/context';
 import { network } from 'config/networks';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';

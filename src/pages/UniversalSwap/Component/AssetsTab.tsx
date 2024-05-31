@@ -187,6 +187,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
           stylesColumn={{
             padding: '16px 0'
           }}
+          // hideColumns={['price', 'value']}
         />
       </div>
     </div>

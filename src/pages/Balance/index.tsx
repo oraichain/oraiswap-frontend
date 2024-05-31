@@ -94,6 +94,8 @@ import ModalConfirm from '../../components/ConfirmModal';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { isMobile } from '@walletconnect/browser-utils';
+import { handleAddTxHistory } from 'pages/UniversalSwap/helpers';
+import useInitialDuckDb from 'hooks/useInitialDuckDb';
 
 interface BalanceProps {}
 
@@ -121,6 +123,9 @@ const Balance: React.FC<BalanceProps> = () => {
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
+  const [receiveAmount, setReceiveAmount] = useState(0);
+
+  useInitialDuckDb();
 
   const ref = useRef(null);
   //@ts-ignore
@@ -250,6 +255,8 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, transferAddress);
     processTxResult(fromToken.rpc, result);
+
+    return result;
   };
 
   const handleTransferBTCToOraichain = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
@@ -312,7 +319,7 @@ const Balance: React.FC<BalanceProps> = () => {
         setTimeout(async () => {
           await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress: btcAddr });
         }, 5000);
-        return;
+        return rs;
       }
       displayToast(TToastType.TX_FAILED, {
         message: 'Transaction failed'
@@ -362,6 +369,8 @@ const Balance: React.FC<BalanceProps> = () => {
         result,
         '/bitcoin-dashboard?tab=pending_withdraws'
       );
+
+      return result;
     } catch (ex) {
       handleErrorTransaction(ex, {
         tokenName: from.name,
@@ -415,6 +424,24 @@ const Balance: React.FC<BalanceProps> = () => {
     displayToast(TToastType.TX_BROADCASTING);
     try {
       let result: DeliverTxResponse | string | any;
+      const displayedReceive = Number(receiveAmount).toFixed(6);
+      const dataHistory = {
+        initialTxHash: result?.transactionHash,
+        fromCoingeckoId: from.coinGeckoId,
+        toCoingeckoId: to.coinGeckoId,
+        fromChainId: from.chainId,
+        toChainId: toNetworkChainId || to.chainId,
+        fromAmount: String(fromAmount),
+        toAmount: displayedReceive,
+        fromAmountInUsdt: getUsd(toAmount(fromAmount, from?.decimals), from, prices).toString(),
+        toAmountInUsdt: getUsd(toAmount(displayedReceive, to.decimals), to, prices).toString(),
+        status: 'success',
+        type: 'Bridge' as const,
+        timestamp: Date.now(),
+        userAddress: oraiAddress,
+        avgSimulate: '1',
+        expectedOutput: String(fromAmount)
+      };
 
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
@@ -422,6 +449,13 @@ const Balance: React.FC<BalanceProps> = () => {
         if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
         else result = await transferIBCKwt(from, to, fromAmount, amounts);
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
+
+        if (result?.transactionHash) {
+          handleAddTxHistory({
+            ...dataHistory,
+            initialTxHash: result?.transactionHash
+          });
+        }
         return;
       }
 
@@ -429,13 +463,18 @@ const Balance: React.FC<BalanceProps> = () => {
       // [BTC Native] <==> ORAICHAIN
       const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
       const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
-      if (isBTCtoOraichain || isOraichainToBTC)
-        return handleTransferBTC({
+      if (isBTCtoOraichain || isOraichainToBTC) {
+        result = await handleTransferBTC({
           isBTCToOraichain: isBTCtoOraichain,
           fromToken: from,
           transferAmount: fromAmount
         });
 
+        if (result?.rawTxHex || result?.transactionHash) {
+          handleAddTxHistory({ ...dataHistory, initialTxHash: result?.rawTxHex || result?.transactionHash }, false);
+        }
+        return;
+      }
       let newToToken = to;
       if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
@@ -455,7 +494,14 @@ const Balance: React.FC<BalanceProps> = () => {
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
       // TODO: hardcode case Neutaro-1 & Noble-1
-      if (from.chainId === 'Neutaro-1') return await handleTransferIBC(from, newToToken, fromAmount);
+      //
+      if (from.chainId === 'Neutaro-1') {
+        result = await handleTransferIBC(from, newToToken, fromAmount);
+        if (result?.transactionHash) {
+          handleAddTxHistory({ ...dataHistory, initialTxHash: result?.transactionHash });
+        }
+        return;
+      }
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
@@ -519,7 +565,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
       result = await universalSwapHandler.processUniversalSwap();
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
+      if (result?.transactionHash) {
+        handleAddTxHistory({ ...dataHistory, initialTxHash: result?.transactionHash });
+      }
     } catch (ex) {
+      console.log('ex', ex);
       handleErrorTransaction(ex, {
         tokenName: from.name,
         chainName: toNetworkChainId
@@ -688,6 +738,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           });
                         }
                       }}
+                      setReceiveAmount={setReceiveAmount}
                     />
                   </div>
                 );

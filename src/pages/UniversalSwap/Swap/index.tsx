@@ -108,6 +108,7 @@ import PowerByOBridge from 'components/PowerByOBridge';
 import LuckyDraw from 'components/LuckyDraw';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { assets } from 'chain-registry';
+import { submitTransactionIBC } from '../ibc-routing';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -171,9 +172,9 @@ const SwapComponent: React.FC<{
 
   const { fromToken, toToken } = getFromToToken(
     originalFromToken,
-    originalToToken,
-    fromTokenDenomSwap,
-    toTokenDenomSwap
+    originalToToken
+    // fromTokenDenomSwap,
+    // toTokenDenomSwap
   );
 
   const remoteTokenDenomFrom = getRemoteDenom(originalFromToken);
@@ -463,6 +464,14 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
+
+        if (minimumReceiveDisplay && minimumReceiveDisplay > 0) {
+          await submitTransactionIBC({
+            txHash: transactionHash,
+            chainId: originalFromToken.chainId
+          });
+        }
+
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
 
@@ -480,13 +489,19 @@ const SwapComponent: React.FC<{
           fromChainId: originalFromToken.chainId,
           toChainId: originalToToken.chainId,
           fromAmount: fromAmountToken.toString(),
-          toAmount: toAmountToken.toString(),
+          toAmount: minimumReceiveDisplay.toFixed(6),
           fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
-          toAmountInUsdt: getUsd(toAmount(toAmountToken, originalToToken.decimals), originalToToken, prices).toString(),
+          toAmountInUsdt: getUsd(
+            toAmount(minimumReceiveDisplay, originalToToken.decimals),
+            originalToToken,
+            prices
+          ).toString(),
           status: 'success',
           type: swapType,
           timestamp: Date.now(),
-          userAddress: oraiAddress
+          userAddress: oraiAddress,
+          avgSimulate: String(averageRatio.displayAmount || 0),
+          expectedOutput: String(expectOutputDisplay || 0)
         });
         refetchTransHistory();
       }
@@ -513,6 +528,35 @@ const SwapComponent: React.FC<{
       }
     }
   };
+
+  // console.log('---', {
+  //   initialTxHash: 'DE358265EE954E9EF3E4110DCA34CAB5348C19F5161D00FE6387035C3E67C9A3',
+  //   fromCoingeckoId: originalFromToken?.coinGeckoId,
+  //   toCoingeckoId: originalToToken?.coinGeckoId,
+  //   fromChainId: originalFromToken?.chainId,
+  //   toChainId: originalToToken?.chainId,
+  //   fromAmount: fromAmountToken?.toString(),
+  //   toAmount: minimumReceiveDisplay?.toFixed(6),
+  //   fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
+  //   toAmountInUsdt: getUsd(
+  //     toAmount(minimumReceiveDisplay, originalToToken?.decimals),
+  //     originalToToken,
+  //     prices
+  //   ).toString(),
+  //   status: 'success',
+  //   type: 'Universal Swap',
+  //   timestamp: Date.now(),
+  //   userAddress: oraiAddress,
+  //   avgSimulate: String(averageRatio?.displayAmount || 0),
+  //   expectedOutput: String(expectOutputDisplay || 0)
+  // });
+
+  const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
+  const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
+  const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
+  const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
+  const FromIconNetwork = theme === 'light' ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
+  const ToIconNetwork = theme === 'light' ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
 
   useEffect(() => {
     (async () => {
@@ -580,6 +624,7 @@ const SwapComponent: React.FC<{
       coeff,
       gas: GAS_ESTIMATION_SWAP_DEFAULT
     });
+
     onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
     setCoe(coeff);
   };

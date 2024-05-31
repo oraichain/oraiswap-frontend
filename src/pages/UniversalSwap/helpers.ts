@@ -5,6 +5,7 @@ import {
   CoinIcon,
   IBC_WASM_CONTRACT,
   NetworkChainId,
+  NetworkName,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
@@ -13,7 +14,6 @@ import {
   getTokenOnSpecificChainId,
   oraichainTokens,
   PairAddress,
-  NetworkName,
   ATOM_ORAICHAIN_DENOM,
   OSMOSIS_ORAICHAIN_DENOM,
   USDC_CONTRACT
@@ -24,16 +24,17 @@ import {
   // swapToTokens
 } from '@oraichain/oraidex-universal-swap';
 import { isMobile } from '@walletconnect/browser-utils';
-import { swapFromTokens, swapToTokens, tokenMap } from 'config/bridgeTokens';
+import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
 import { networks } from 'helper';
+import { TransactionHistory } from 'libs/duckdb';
 import { generateError } from 'libs/utils';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDate, formatTimeWithPeriod } from 'pages/CoHarvest/helpers';
-import { endOfMonth, endOfWeek } from 'pages/Pools/helpers';
 import { FILTER_TIME_CHART, PairToken } from 'reducer/type';
+import { submitTransactionIBC } from './ibc-routing';
 
 export enum SwapDirection {
   From,
@@ -348,7 +349,7 @@ export const refreshBalances = async (
   }
 };
 
-export const getFromToToken = (originalFromToken, originalToToken, fromTokenDenomSwap, toTokenDenomSwap) => {
+export const getFromToToken = (originalFromToken, originalToToken) => {
   const isEvmSwap = UniversalSwapHelper.isEvmSwappable({
     fromChainId: originalFromToken?.chainId,
     toChainId: originalToToken?.chainId,
@@ -356,11 +357,9 @@ export const getFromToToken = (originalFromToken, originalToToken, fromTokenDeno
     toContractAddr: originalToToken?.contractAddress
   });
   const fromToken = isEvmSwap
-    ? tokenMap[fromTokenDenomSwap]
-    : getTokenOnOraichain(tokenMap[fromTokenDenomSwap].coinGeckoId) ?? tokenMap[fromTokenDenomSwap];
-  const toToken = isEvmSwap
-    ? tokenMap[toTokenDenomSwap]
-    : getTokenOnOraichain(tokenMap[toTokenDenomSwap].coinGeckoId) ?? tokenMap[toTokenDenomSwap];
+    ? originalFromToken
+    : getTokenOnOraichain(originalFromToken.coinGeckoId) ?? originalFromToken;
+  const toToken = isEvmSwap ? originalToToken : getTokenOnOraichain(originalToToken.coinGeckoId) ?? originalToToken;
 
   return { fromToken, toToken };
 };
@@ -479,4 +478,21 @@ export const processPairInfo = (actionSwap, flattenTokens, flattenTokensWithIcon
     tokenOut: infoPair.symbols[findIndexIn ? 0 : 1]
   };
   return { info, TokenInIcon, TokenOutIcon };
+};
+
+export const handleAddTxHistory = async (data: TransactionHistory, enableIbc: boolean = true) => {
+  console.log('handleAddTxHistory', data);
+  try {
+    if (enableIbc && data.toAmount && Number(data.toAmount) > 0) {
+      await submitTransactionIBC({
+        txHash: data.initialTxHash,
+        chainId: data.fromChainId
+      });
+    }
+
+    await window.duckDb.initializeTableHistory(data.userAddress);
+    await window.duckDb.addTransHistory({ ...data });
+  } catch (error) {
+    console.log('add history error', error);
+  }
 };
