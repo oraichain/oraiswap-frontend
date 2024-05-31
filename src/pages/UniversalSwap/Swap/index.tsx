@@ -811,7 +811,7 @@ const SwapComponent: React.FC<{
           <div
             className={cx('smart', !openRoutes ? 'hidden' : '')}
             style={{
-              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
+              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 60 : 0
             }}
           >
             <div className={cx('smart-router')}>
@@ -931,20 +931,22 @@ const SwapComponent: React.FC<{
                                           tokenInfo = assetList?.assets.find((asset) => asset.base === action.tokenOut);
                                         }
 
+                                        const Icon = tokenInfo?.Icon ?? DefaultIcon;
+
                                         return (
                                           <div className={cx('smart-router-item-pool-tooltip-swap')}>
                                             <div className={cx('smart-router-item-pool-tooltip-swap-left')}>
                                               <div className={cx('smart-router-item-pool-tooltip-swap-imgs')}>
                                                 <div className={cx('smart-router-item-pool-tooltip-swap-img')}>
                                                   {tokenInfo?.name ? (
-                                                    <tokenInfo.Icon />
+                                                    <Icon />
                                                   ) : (
                                                     <img width={24} height={24} src={tokenInfo?.logo_URIs.svg}></img>
                                                   )}
                                                 </div>
                                                 <div className={cx('smart-router-item-pool-tooltip-swap-img')}>
                                                   {tokenInfo?.name ? (
-                                                    <tokenInfo.Icon />
+                                                    <Icon />
                                                   ) : (
                                                     <img width={24} height={24} src={tokenInfo?.logo_URIs.svg}></img>
                                                   )}

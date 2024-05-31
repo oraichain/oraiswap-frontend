@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getAllTransactionIBC, getTransactionIBC } from '../ibc-routing';
 import { TransactionHistory } from 'libs/duckdb';
 import { StateDBStatus } from 'config/ibc-routing';
+import useLoadTokens from 'hooks/useLoadTokens';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 export const useGetRoutingData = ({ txHash, chainId }: { txHash: string; chainId: string }) => {
   const { data } = useQuery(['routing_data', txHash, chainId], () => getTransactionIBC({ txHash, chainId }), {
@@ -19,6 +21,12 @@ export const useGetRoutingData = ({ txHash, chainId }: { txHash: string; chainId
 };
 
 export const useGetAllRoutingData = (transHistory: TransactionHistory[]) => {
+  const loadTokenAmounts = useLoadTokens();
+  const [oraiAddress] = useConfigReducer('address');
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress] = useConfigReducer('tronAddress');
+  const [btcAddress] = useConfigReducer('btcAddress');
+
   const params = transHistory?.map((tx) => {
     return {
       txHash: tx.initialTxHash,
@@ -42,6 +50,10 @@ export const useGetAllRoutingData = (transHistory: TransactionHistory[]) => {
           isFinished = false;
           break;
         }
+      }
+
+      if (isFinished) {
+        loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress });
       }
 
       return isFinished ? false : 3000;
