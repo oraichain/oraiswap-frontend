@@ -2,6 +2,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect } from 'react';
 import useLoadTokens from './useLoadTokens';
+import { getWalletByNetworkFromStorage } from 'helper';
 
 export function useTronEventListener() {
   const [, setTronAddress] = useConfigReducer('tronAddress');
@@ -9,12 +10,10 @@ export function useTronEventListener() {
   const mobileMode = isMobile();
 
   useEffect(() => {
-    // not auto connect Tron in browser
-    if (!mobileMode) return;
+    if (mobileMode) return;
     window.dispatchEvent(new Event('tronLink#initialized'));
-    // Example
     // Suggested reception method
-    if (window.tronLinkDapp) {
+    if (window.tronLink) {
       handleTronLink();
     } else {
       window.addEventListener('tronLink#initialized', handleTronLink, {
@@ -28,46 +27,31 @@ export function useTronEventListener() {
   }, [mobileMode]);
 
   async function handleTronLink() {
-    const { tronLinkDapp, tronWebDapp } = window;
-    if (tronLinkDapp && tronWebDapp) {
-      // @ts-ignore
-      const addressTronMobile = await tronLinkDapp.request({
-        method: 'tron_requestAccounts'
-      });
-      // TODO: Check owallet mobile
-      if (!tronWebDapp?.defaultAddress?.base58 || isMobile()) {
-        //@ts-ignore
-        const tronAddress = addressTronMobile?.base58;
-        loadTokenAmounts({ tronAddress });
-        setTronAddress(tronAddress);
-        return;
-      }
+    window.addEventListener('message', async function (e) {
+      const walletByNetworks = await getWalletByNetworkFromStorage();
+      if (walletByNetworks?.tron === 'tronLink') {
+        window.tronLinkDapp = window.tronLink;
+        window.tronWebDapp = window.tronWeb;
+        if (e?.data?.message && e.data.message.action === 'setAccount') {
+          if (this.window.tronLink) {
+            await window.tronLink.request({ method: 'tron_requestAccounts' });
+          }
 
-      console.log('tronLink & tronWeb successfully detected!');
-      if (tronWebDapp.defaultAddress?.base58) {
-        const tronAddress = tronWebDapp.defaultAddress.base58;
-        console.log('tronAddress', tronAddress);
-        loadTokenAmounts({ tronAddress });
-        setTronAddress(tronAddress);
-      }
-
-      window.addEventListener('message', function (e) {
-        if (e?.data?.message && e.data.message.action == 'setAccount') {
-          const tronAddress = e.data.message?.data?.address;
-          console.log('tronAddress', tronAddress);
-          loadTokenAmounts({ tronAddress });
-          setTronAddress(tronAddress);
+          if (!this.window.tronWeb) return;
+          const { hex, base58 } = window.tronWeb.defaultAddress;
+          console.log({ hex, base58 });
+          if (base58) {
+            setTronAddress(base58);
+            loadTokenAmounts({ tronAddress: base58 });
+          }
         }
 
         // Tronlink chrome v3.22.1 & Tronlink APP v4.3.4 started to support
-        if (e?.data?.message && e.data.message.action == 'disconnect') {
+        if (e?.data?.message && e.data.message.action === 'disconnect') {
           console.log('disconnect event', e.data.message.isTronLink);
           setTronAddress(undefined);
         }
-      });
-      // Access the decentralized web!
-    } else {
-      console.log('Please install TronLink-Extension!');
-    }
+      }
+    });
   }
 }
