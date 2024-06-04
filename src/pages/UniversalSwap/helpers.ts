@@ -480,3 +480,95 @@ export const processPairInfo = (actionSwap, flattenTokens, flattenTokensWithIcon
   };
   return { info, TokenInIcon, TokenOutIcon };
 };
+
+export const getTokenInfo = (action, path, flattenTokens, assetList) => {
+  let info;
+  let [TokenInIcon, TokenOutIcon] = [DefaultIcon, DefaultIcon];
+
+  const tokenInAction = action.tokenIn;
+  const tokenOutAction = action.tokenOut;
+
+  const tokenInChainId = path.chainId;
+  const tokenOutChainId = path.tokenOutChainId;
+
+  const findToken = (token, tokens) => tokens.find((flat) => flat.denom === token || flat.contractAddress === token);
+  const findTokenInfo = (tokenBase, assets) => assets?.assets.find((asset) => asset.base === tokenBase) ?? {};
+
+  if (action.type === 'Swap') {
+    let tokenInInfo, tokenOutInfo;
+
+    if (tokenInChainId === 'Oraichain') {
+      tokenInInfo = findToken(tokenInAction, flattenTokens);
+      tokenOutInfo = findToken(tokenOutAction, flattenTokens);
+
+      TokenInIcon = tokenInInfo.Icon;
+      TokenOutIcon = tokenOutInfo.Icon;
+      info = {
+        tokenIn: tokenInInfo.name,
+        tokenOut: tokenOutInfo.name
+      };
+    } else {
+      tokenInInfo = findTokenInfo(tokenInAction, assetList);
+      tokenOutInfo = findTokenInfo(tokenOutAction, assetList);
+
+      info = {
+        tokenInInfo,
+        tokenOutInfo,
+        tokenIn: tokenInInfo.symbol,
+        tokenOut: tokenOutInfo.symbol
+      };
+    }
+  }
+
+  if (action.type === 'Bridge') {
+    const getTokenInfoBridge = (token, tokens, chainId) => {
+      if (chainId === 'Oraichain') return findToken(token, tokens);
+      return findTokenInfo(token, assetList);
+    };
+
+    const tokenInInfo = getTokenInfoBridge(tokenInAction, flattenTokens, tokenInChainId);
+    const tokenOutInfo = getTokenInfoBridge(tokenOutAction, flattenTokens, tokenOutChainId);
+
+    info = {
+      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo.name : tokenInInfo.symbol,
+      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo.name : tokenOutInfo.symbol,
+      tokenInInfo,
+      tokenOutInfo
+    };
+
+    if (tokenInChainId === 'Oraichain') {
+      TokenInIcon = tokenInInfo.Icon;
+    }
+
+    if (tokenOutChainId === 'Oraichain') {
+      TokenOutIcon = tokenOutInfo.Icon;
+    }
+  }
+
+  return { info, TokenInIcon, TokenOutIcon };
+};
+
+export const getPathInfo = (path, chainIcons, assets) => {
+  let [NetworkFromIcon, NetworkToIcon] = [DefaultIcon, DefaultIcon];
+
+  const pathChainId = path.chainId.split('-')[0].toLowerCase();
+  const pathTokenOut = path.tokenOutChainId.split('-')[0].toLowerCase();
+
+  if (path.chainId) {
+    const chainFrom = chainIcons.find((cosmos) => cosmos.chainId === path.chainId);
+    NetworkFromIcon = chainFrom ? chainFrom.Icon : DefaultIcon;
+  }
+
+  if (path.tokenOutChainId) {
+    const chainTo = chainIcons.find((cosmos) => cosmos.chainId === path.tokenOutChainId);
+    NetworkToIcon = chainTo ? chainTo.Icon : DefaultIcon;
+  }
+
+  const getAssetsByChainName = (chainName) => assets.find(({ chain_name }) => chain_name === chainName)?.assets || [];
+
+  const assetList = {
+    assets: [...getAssetsByChainName(pathChainId), ...getAssetsByChainName(pathTokenOut)]
+  };
+
+  return { NetworkFromIcon, NetworkToIcon, assetList, pathChainId };
+};

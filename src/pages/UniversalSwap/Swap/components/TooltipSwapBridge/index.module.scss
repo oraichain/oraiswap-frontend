@@ -1,0 +1,43 @@
+.tooltipUniversalSwap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #232521;
+  padding: 10px;
+  border-radius: 8px;
+  .tooltipUniversalSwapType {
+    text-align: center;
+    text-transform: capitalize;
+  }
+  .tooltipUniversalSwapRoutes {
+    display: flex;
+    gap: 6px;
+    .tooltipUniversalSwapRoute {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      .tooltipUniversalSwapRouteImg {
+        position: relative;
+        svg {
+          width: 30px;
+          height: 30px;
+        }
+        .tooltipUniversalSwapRouteImgAbs {
+          position: absolute;
+          top: 40%;
+          left: 13px;
+          z-index: 1;
+          border-radius: 50%;
+          svg {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            // border: 2px solid white;
+          }
+        }
+      }
+    }
+  }
+}

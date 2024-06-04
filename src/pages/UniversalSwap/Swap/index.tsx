@@ -68,8 +68,10 @@ import {
   generateNewSymbolV2,
   getDisableSwap,
   getFromToToken,
+  getPathInfo,
   getRemoteDenom,
   getTokenBalance,
+  getTokenInfo,
   isAllowAlphaSmartRouter,
   processPairInfo,
   refreshBalances,
@@ -105,9 +107,8 @@ import useFilteredTokens from './hooks/useFilteredTokens';
 import { useNavigate } from 'react-router-dom';
 import SwapDetail from './components/SwapDetail';
 import PowerByOBridge from 'components/PowerByOBridge';
-import LuckyDraw from 'components/LuckyDraw';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { assets } from 'chain-registry';
+import { TooltipSwapBridge } from './components/TooltipSwapBridge';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -776,26 +777,12 @@ const SwapComponent: React.FC<{
                   <div key={ind} className={cx('smart-router-item')}>
                     <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
                     {route.paths.map((path, i, acc) => {
-                      let [NetworkFromIcon, NetworkToIcon] = [DefaultIcon, DefaultIcon];
-                      const pathChainId = path.chainId.split('-')[0].toLowerCase();
-                      const pathTokenOut = path.tokenOutChainId.split('-')[0].toLowerCase();
-                      if (path.chainId) {
-                        const chainFrom = chainIcons.find((cosmos) => cosmos.chainId === path.chainId);
-                        NetworkFromIcon = chainFrom.Icon;
-                      }
-                      if (path.tokenOutChainId) {
-                        const chainTo = chainIcons.find((cosmos) => cosmos.chainId === path.tokenOutChainId);
-                        NetworkToIcon = chainTo.Icon;
-                      }
-                      const getAssetsByChainName = (chainName) =>
-                        assets.find(({ chain_name }) => chain_name === chainName)?.assets || [];
-                      const assetList = {
-                        assets: [...getAssetsByChainName(pathChainId), ...getAssetsByChainName(pathTokenOut)]
-                      };
+                      const { NetworkFromIcon, NetworkToIcon, assetList, pathChainId } = getPathInfo(
+                        path,
+                        chainIcons,
+                        assets
+                      );
 
-                      const findTokenInfo = (tokenBase, assets) => {
-                        return assets?.assets.find((asset) => asset.base === tokenBase) ?? {};
-                      };
                       return (
                         <React.Fragment key={i}>
                           <div className={cx('smart-router-item-line')}>
@@ -804,183 +791,46 @@ const SwapComponent: React.FC<{
                           <div className={cx('smart-router-item-pool')}>
                             <div className={cx('smart-router-item-pool-tooltip')}>
                               {path.actions?.map((action, index, actions) => {
-                                let info;
-                                let [TokenInIcon, TokenOutIcon] = [DefaultIcon, DefaultIcon];
-
-                                const tokenInAction = action.tokenIn;
-                                const tokenOutAction = action.tokenOut;
-
+                                const pathChainId = path.chainId.split('-')[0].toLowerCase();
                                 const tokenInChainId = path.chainId;
                                 const tokenOutChainId = path.tokenOutChainId;
-                                const getTokenInfo = (token, tokens) =>
-                                  tokens.find((flat) => flat.denom === token || flat.contractAddress === token);
 
-                                if (action.type === 'Swap') {
-                                  let tokenInInfo, tokenOutInfo;
-
-                                  if (tokenInChainId === 'Oraichain') {
-                                    tokenInInfo = getTokenInfo(tokenInAction, flattenTokens);
-                                    tokenOutInfo = getTokenInfo(tokenOutAction, flattenTokens);
-
-                                    TokenInIcon = tokenInInfo.Icon;
-                                    TokenOutIcon = tokenOutInfo.Icon;
-                                    info = {
-                                      tokenIn: tokenInInfo.name,
-                                      tokenOut: tokenOutInfo.name
-                                    };
-                                  } else {
-                                    tokenInInfo = findTokenInfo(tokenInAction, assetList);
-                                    tokenOutInfo = findTokenInfo(tokenOutAction, assetList);
-
-                                    info = {
-                                      tokenInInfo,
-                                      tokenOutInfo,
-                                      tokenIn: tokenInInfo.symbol,
-                                      tokenOut: tokenOutInfo.symbol
-                                    };
-                                  }
-                                }
-
-                                if (action.type === 'Bridge') {
-                                  const getTokenInfoBridge = (token, tokens, chainId) => {
-                                    if (chainId === 'Oraichain') return getTokenInfo(token, tokens);
-                                    return findTokenInfo(token, assetList);
-                                  };
-
-                                  const tokenInInfo = getTokenInfoBridge(tokenInAction, flattenTokens, tokenInChainId);
-                                  const tokenOutInfo = getTokenInfoBridge(
-                                    tokenOutAction,
-                                    flattenTokens,
-                                    tokenOutChainId
-                                  );
-
-                                  info = {
-                                    tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo.name : tokenInInfo.symbol,
-                                    tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo.name : tokenOutInfo.symbol,
-                                    tokenInInfo,
-                                    tokenOutInfo
-                                  };
-
-                                  if (tokenInChainId === 'Oraichain') TokenInIcon = tokenInInfo.Icon;
-                                }
+                                const { info, TokenInIcon, TokenOutIcon } = getTokenInfo(
+                                  action,
+                                  path,
+                                  flattenTokens,
+                                  assetList
+                                );
 
                                 return (
                                   <React.Fragment key={index}>
                                     <div key={index} className={cx('smart-router-item-pool-tooltip-bridge-swap')}>
                                       {action.type === 'Swap' && (
-                                        <div className={cx('smart-router-item-pool-tooltip-swap')}>
-                                          <div className={cx('smart-router-item-pool-tooltip-swap-type')}>
-                                            {pathChainId}
-                                          </div>
-
-                                          <div className={cx('smart-router-item-pool-tooltip-swap-routes')}>
-                                            <div className={cx('smart-router-item-pool-tooltip-swap-route')}>
-                                              <div className={cx('smart-router-item-pool-tooltip-swap-route-img')}>
-                                                {tokenInChainId === 'Oraichain' ? (
-                                                  <TokenInIcon />
-                                                ) : (
-                                                  <img
-                                                    src={info?.tokenInInfo?.logo_URIs?.png}
-                                                    width={26}
-                                                    height={26}
-                                                    alt="arrow"
-                                                  />
-                                                )}
-                                                <div
-                                                  className={cx('smart-router-item-pool-tooltip-swap-route-img-abs')}
-                                                >
-                                                  <div>
-                                                    <NetworkFromIcon />
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              <div>{info?.tokenIn}</div>
-                                            </div>
-                                            <div>
-                                              <img src={ArrowImg} width={26} height={26} alt="arrow" />
-                                            </div>
-                                            <div className={cx('smart-router-item-pool-tooltip-swap-route')}>
-                                              <div className={cx('smart-router-item-pool-tooltip-swap-route-img')}>
-                                                {tokenInChainId === 'Oraichain' ? (
-                                                  <TokenOutIcon />
-                                                ) : (
-                                                  <img
-                                                    src={info?.tokenOutInfo?.logo_URIs?.png}
-                                                    width={26}
-                                                    height={26}
-                                                    alt="arrow"
-                                                  />
-                                                )}
-                                                <div
-                                                  className={cx('smart-router-item-pool-tooltip-swap-route-img-abs')}
-                                                >
-                                                  <div>
-                                                    <NetworkFromIcon />
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              <div>{info?.tokenOut}</div>
-                                            </div>
-                                          </div>
-                                        </div>
+                                        <TooltipSwapBridge
+                                          type="Swap"
+                                          pathChainId={pathChainId}
+                                          tokenInChainId={tokenInChainId}
+                                          tokenOutChainId={tokenOutChainId}
+                                          TokenInIcon={TokenInIcon}
+                                          TokenOutIcon={TokenOutIcon}
+                                          NetworkFromIcon={NetworkFromIcon}
+                                          NetworkToIcon={NetworkToIcon}
+                                          info={info}
+                                        />
                                       )}
 
                                       {action.type === 'Bridge' && (
-                                        <div className={cx('smart-router-item-pool-tooltip-swap')}>
-                                          <div className={cx('smart-router-item-pool-tooltip-swap-type')}>
-                                            IBC Transfer
-                                          </div>
-
-                                          <div className={cx('smart-router-item-pool-tooltip-swap-routes')}>
-                                            <div className={cx('smart-router-item-pool-tooltip-swap-route')}>
-                                              <div className={cx('smart-router-item-pool-tooltip-swap-route-img')}>
-                                                {tokenInChainId === 'Oraichain' ? (
-                                                  <TokenInIcon />
-                                                ) : (
-                                                  <img
-                                                    src={info?.tokenInInfo?.logo_URIs?.png}
-                                                    width={26}
-                                                    height={26}
-                                                    alt="arrow"
-                                                  />
-                                                )}
-                                                <div
-                                                  className={cx('smart-router-item-pool-tooltip-swap-route-img-abs')}
-                                                >
-                                                  <div>
-                                                    <NetworkFromIcon />
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              <div>{info?.tokenOut}</div>
-                                            </div>
-                                            <div>
-                                              <img src={ArrowImg} width={26} height={26} alt="arrow" />
-                                            </div>
-                                            <div className={cx('smart-router-item-pool-tooltip-swap-route')}>
-                                              <div className={cx('smart-router-item-pool-tooltip-swap-route-img')}>
-                                                {tokenOutChainId === 'Oraichain' ? (
-                                                  <TokenOutIcon />
-                                                ) : (
-                                                  <img
-                                                    src={info?.tokenOutInfo?.logo_URIs?.png}
-                                                    width={26}
-                                                    height={26}
-                                                    alt="arrow"
-                                                  />
-                                                )}
-                                                <div
-                                                  className={cx('smart-router-item-pool-tooltip-swap-route-img-abs')}
-                                                >
-                                                  <div>
-                                                    <NetworkToIcon />
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              <div>{info?.tokenOut}</div>
-                                            </div>
-                                          </div>
-                                        </div>
+                                        <TooltipSwapBridge
+                                          type="Bridge"
+                                          pathChainId={pathChainId}
+                                          tokenInChainId={tokenInChainId}
+                                          tokenOutChainId={tokenOutChainId}
+                                          TokenInIcon={TokenInIcon}
+                                          TokenOutIcon={TokenOutIcon}
+                                          NetworkFromIcon={NetworkFromIcon}
+                                          NetworkToIcon={NetworkToIcon}
+                                          info={info}
+                                        />
                                       )}
                                     </div>
                                     {index === 0 && actions.length > 1 && (
