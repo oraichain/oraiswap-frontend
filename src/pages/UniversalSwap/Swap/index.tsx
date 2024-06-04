@@ -833,13 +833,13 @@ const SwapComponent: React.FC<{
                                         />
                                       )}
                                     </div>
-                                    {index === 0 && actions.length > 1 && (
+                                    {/* {index === 0 && actions.length > 1 && (
                                       <div className={cx('smart-router-item-pool-tooltip-swap')}>
                                         <div>
                                           <img src={ArrowImg} width={26} height={26} alt="arrow" />
                                         </div>
                                       </div>
-                                    )}
+                                    )} */}
                                   </React.Fragment>
                                 );
                               })}
