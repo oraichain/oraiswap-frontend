@@ -318,15 +318,16 @@ const SwapComponent: React.FC<{
 
   const isAverageRatio = averageRatio && averageRatio.amount;
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
-  const minimumReceive = isAverageRatio
-    ? calculateMinReceive(
-        // @ts-ignore
-        new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
-    : '0';
+  const minimumReceive =
+    isAverageRatio && fromAmountTokenBalance
+      ? calculateMinReceive(
+          // @ts-ignore
+          new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
+          fromAmountTokenBalance.toString(),
+          userSlippage,
+          originalFromToken.decimals
+        )
+      : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
   const bridgeTokenFee =

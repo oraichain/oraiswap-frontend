@@ -825,6 +825,7 @@
       align-items: center;
       gap: 6px;
       padding-top: 6px;
+      position: relative;
 
       .smart-router-item-volumn {
         width: max-content;
@@ -849,10 +850,14 @@
       }
       .smart-router-item-pool {
         cursor: pointer;
-        position: relative;
         &:hover {
           .smart-router-item-pool-tooltip {
             visibility: visible;
+          }
+          .smart-router-item-pool-wrap {
+            @include theme() {
+              border-color: white !important;
+            }
           }
         }
         .smart-router-item-pool-tooltip {
