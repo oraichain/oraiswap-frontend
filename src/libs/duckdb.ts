@@ -16,6 +16,8 @@ export type TransactionHistory = {
   type: 'Swap' | 'Bridge' | 'Universal Swap';
   timestamp: number;
   userAddress: string;
+  avgSimulate: string;
+  expectedOutput: string;
 };
 
 export const toSql = (tableName: string, obj: Object) => {
@@ -24,6 +26,7 @@ export const toSql = (tableName: string, obj: Object) => {
     if (typeof value === 'number') return value;
     return `'${value}'`;
   });
+
   return `insert into ${tableName} (${keys.join(', ')}) values (${values.join(', ')})`;
 };
 
@@ -75,6 +78,9 @@ export class DuckDb {
       await this.conn.send(
         `create table trans_history_${userAddress} as select * from 'trans_history_${userAddress}.parquet'`
       );
+
+      await this.addColumnAvgSimulateToHistoryTable(userAddress);
+      await this.addColumnExpectedOutputToHistoryTable(userAddress);
     } else {
       await this.conn.send(`create table trans_history_${userAddress}
       (
@@ -90,11 +96,25 @@ export class DuckDb {
         status varchar,
         type varchar,
         timestamp ubigint,
-        userAddress varchar
+        userAddress varchar,
+        avgSimulate varchar DEFAULT 0,
+        expectedOutput varchar DEFAULT 0
       )
       `);
     }
     return Boolean(buf);
+  }
+
+  async addColumnAvgSimulateToHistoryTable(userAddress: string) {
+    await this.conn.send(
+      `ALTER TABLE trans_history_${userAddress} ADD COLUMN IF NOT EXISTS avgSimulate varchar DEFAULT 0`
+    );
+  }
+
+  async addColumnExpectedOutputToHistoryTable(userAddress: string) {
+    await this.conn.send(
+      `ALTER TABLE trans_history_${userAddress} ADD COLUMN IF NOT EXISTS expectedOutput varchar DEFAULT 0`
+    );
   }
 
   async save(userAddress: string) {
@@ -113,6 +133,7 @@ export class DuckDb {
     if (!userAddress) return [];
 
     const isTableExistOrHasData = await this.createTableTransHistory(userAddress);
+
     if (!isTableExistOrHasData) return [];
 
     // TODO: need to update limit later for pagination
@@ -122,4 +143,8 @@ export class DuckDb {
     );
     return histories.toArray();
   }
+
+  initializeTableHistory = async (userAddress: string) => {
+    await this.createTableTransHistory(userAddress);
+  };
 }
