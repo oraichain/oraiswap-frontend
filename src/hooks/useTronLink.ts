@@ -30,16 +30,15 @@ export function useTronEventListener() {
     window.addEventListener('message', async function (e) {
       const walletByNetworks = await getWalletByNetworkFromStorage();
       if (walletByNetworks?.tron === 'tronLink') {
-        window.tronLinkDapp = window.tronLink;
-        window.tronWebDapp = window.tronWeb;
         if (e?.data?.message && e.data.message.action === 'setAccount') {
-          if (this.window.tronLink) {
+          if (window.tronLink) {
+            window.tronLinkDapp = window.tronLink;
             await window.tronLink.request({ method: 'tron_requestAccounts' });
           }
 
-          if (!this.window.tronWeb) return;
-          const { hex, base58 } = window.tronWeb.defaultAddress;
-          console.log({ hex, base58 });
+          if (!window.tronWeb) return;
+          window.tronWebDapp = window.tronWeb;
+          const { base58 } = window.tronWeb.defaultAddress;
           if (base58) {
             setTronAddress(base58);
             loadTokenAmounts({ tronAddress: base58 });
