@@ -58,7 +58,7 @@ export const useSimulate = (
   useEffect(() => {
     // initAmount used for simulate averate ratio
     const fromAmount = initAmount ?? fromAmountToken;
-    setSwapAmount([fromAmount, Number(simulateData?.displayAmount)]);
+    setSwapAmount([fromAmount ?? null, !!fromAmount ? Number(simulateData?.displayAmount) : 0]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
   return { simulateData, fromAmountToken, toAmountToken, setSwapAmount };

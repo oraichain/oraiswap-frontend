@@ -233,26 +233,13 @@ const SwapComponent: React.FC<{
   );
 
   let averageRatio = undefined;
-  if (simulateData) {
+  if (simulateData && fromAmountToken) {
     const displayAmount = new BigDecimal(simulateData.displayAmount).div(fromAmountToken).toNumber();
     averageRatio = {
       amount: toAmount(displayAmount, originalFromToken.decimals),
       displayAmount: displayAmount
     };
   }
-
-  // const { simulateData: averageRatio } = useSimulate(
-  //   'simulate-average-data',
-  //   fromTokenInfoData,
-  //   toTokenInfoData,
-  //   originalFromToken,
-  //   originalToToken,
-  //   routerClient,
-  //   INIT_AMOUNT,
-  //   {
-  //     useAlphaSmartRoute: useAlphaSmartRouter
-  //   }
-  // );
 
   let usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
   if (!Number(usdPriceShow)) {
