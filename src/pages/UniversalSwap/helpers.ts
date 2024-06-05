@@ -1,5 +1,5 @@
 import { CwIcs20LatestQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
-import { Ratio } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+import { AssetInfo, Ratio } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import {
   CoinGeckoId,
   CoinIcon,
@@ -423,8 +423,21 @@ export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) =
 
 export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLightMode) => {
   const pairKey = findKeyByValue(PairAddress, path.poolId);
-  const [tokenInKey, tokenOutKey] = pairKey.split('_');
-  let infoPair: any = PAIRS_CHART.find((pair) => {
+  let [tokenInKey, tokenOutKey] = pairKey.split('_');
+
+  // TODO hardcode case token is TRX
+  if (tokenInKey === 'TRX') tokenInKey = 'WTRX';
+  if (tokenOutKey === 'TRX') tokenOutKey = 'WTRX';
+
+  let infoPair: {
+    asset_infos: AssetInfo[];
+    assets: string[];
+    symbol: string;
+    symbols: string[];
+    info: string;
+    tokenIn?: string;
+    tokenOut?: string;
+  } = PAIRS_CHART.find((pair) => {
     let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
     return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
   });

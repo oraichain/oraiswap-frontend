@@ -780,7 +780,6 @@ const SwapComponent: React.FC<{
                               tokenIn &&
                                 tokenOut &&
                                 window.open(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
-                              // navigate(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
                             }}
                           >
                             <div className={cx('smart-router-item-pool-wrap')}>

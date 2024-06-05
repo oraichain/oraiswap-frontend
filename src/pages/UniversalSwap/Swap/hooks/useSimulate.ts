@@ -4,7 +4,7 @@ import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
-
+import { useDebounce } from 'hooks/useDebounce';
 /**
  * Simulate ratio between fromToken & toToken
  * @param queryKey
@@ -23,21 +23,23 @@ export const useSimulate = (
   initAmount?: number
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
-
+  const debouncedFromAmount = useDebounce(fromAmountToken, 500);
   const { data: simulateData } = useQuery(
-    [queryKey, fromTokenInfoData, toTokenInfoData, fromAmountToken],
+    [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount],
     () => {
       return handleSimulateSwap({
         originalFromInfo: originalFromTokenInfo,
         originalToInfo: originalToTokenInfo,
-        originalAmount: fromAmountToken,
+        originalAmount: debouncedFromAmount,
         routerClient,
         useSmartRoute: true,
         urlRouter: 'https://osor.oraidex.io'
       });
     },
     {
-      enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0
+      refetchInterval: 300000,
+      staleTime: 1000,
+      enabled: !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0
     }
   );
 
