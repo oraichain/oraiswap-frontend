@@ -37,6 +37,7 @@ import { flattenTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfosWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
+  convertExponentNumberToDecimal,
   floatToPercent,
   getAddressTransfer,
   getSpecialCoingecko,
@@ -322,7 +323,9 @@ const SwapComponent: React.FC<{
 
   const minimumReceiveDisplay = isSimulateDataDisplay
     ? new BigDecimal(
-        simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+        convertExponentNumberToDecimal(
+          simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+        )
       ).toNumber()
     : 0;
 
@@ -333,7 +336,7 @@ const SwapComponent: React.FC<{
   const estSwapFee = new BigDecimal(simulateDisplayAmount || 0).mul(fee || 0).toNumber();
 
   const totalFeeEst =
-    new BigDecimal(bridgeTokenFee || 0)
+    new BigDecimal(convertExponentNumberToDecimal(bridgeTokenFee || 0))
       .add(relayerFee || 0)
       .add(estSwapFee)
       .toNumber() || 0;
