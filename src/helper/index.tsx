@@ -546,12 +546,12 @@ export const getAddressByEIP191 = async (isSwitchWallet?: boolean) => {
 };
 
 export const convertExponentNumberToDecimal = (num: number | string) => {
-  var sign = +num < 0 ? '-' : '',
+  const sign = +num < 0 ? '-' : '',
     toStr = num.toString();
   if (!/e/i.test(toStr)) {
     return num;
   }
-  var [lead, decimal, pow] = num
+  const [lead, decimal, pow] = num
     .toString()
     .replace(/^-/, '')
     .replace(/^([0-9]+)(e.*)/, '$1.$2')
