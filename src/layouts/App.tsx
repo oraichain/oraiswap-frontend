@@ -27,6 +27,7 @@ import Sidebar from './Sidebar';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAddressBookList, setAddressBookList } from 'reducer/addressBook';
 import FutureCompetition from 'components/FutureCompetitionModal';
+import { useTronEventListener } from 'hooks/useTronLink';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -46,7 +47,7 @@ const App = () => {
   const currentAddressBook = useSelector(selectAddressBookList);
   const dispatch = useDispatch();
 
-  // useTronEventListener();
+  useTronEventListener();
 
   // TODO: polyfill evm, tron, need refactor
   useEffect(() => {
