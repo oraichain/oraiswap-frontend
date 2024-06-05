@@ -212,7 +212,7 @@ const App = () => {
       <div className={`app ${theme}`}>
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />}
+        {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
         <div className="main">
           <Sidebar />
           <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
