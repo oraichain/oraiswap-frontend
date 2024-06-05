@@ -323,7 +323,9 @@ const SwapComponent: React.FC<{
 
   const minimumReceiveDisplay = isSimulateDataDisplay
     ? new BigDecimal(
-        simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+        convertExponentNumberToDecimal(
+          simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+        )
       ).toNumber()
     : 0;
 
