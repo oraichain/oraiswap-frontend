@@ -24,6 +24,7 @@ export default function useWindowSize() {
   }, []);
 
   const isMobileView = windowSize ? windowSize.width < 768 : false;
+  const isSmallMobileView = windowSize ? windowSize.width < 576 : false;
 
-  return { windowSize, isMobileView } as const;
+  return { windowSize, isMobileView, isSmallMobileView } as const;
 }

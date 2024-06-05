@@ -8,261 +8,333 @@
   width: 100%;
   gap: 12px;
 
-  .headerTop {
+  @include mobile {
+    flex-direction: column-reverse;
+  }
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .tokenWrapper {
+    flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    gap: 12px;
 
-    .tokenInfo {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
+    flex-wrap: wrap;
 
-      font-size: 20px;
-      font-weight: 500;
-      line-height: 150%;
-
-      @include theme {
-        color: theme-get('neutral-text-text-token-name');
+    .priceUsd {
+      margin-top: 8px;
+      @include mobile {
+        text-align: right;
       }
-
-      svg {
-        width: 30px;
-        height: 30px;
-        vertical-align: middle;
-      }
-
-      .tokenName {
-        color: $neutron-text-body-light;
-      }
-
-      .icons {
+      .bottom {
         display: flex;
-        position: relative;
-
-        .fromIcon {
-          position: relative;
-          z-index: 1;
-        }
-
-        .toIcon {
-          margin-left: -10px;
-          position: relative;
-          z-index: 0;
-        }
-      }
-    }
-
-    .tabEyes {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 150%;
-
-      .tabWrapper {
-        display: flex;
-        height: 36px;
-        padding: 4px;
-        align-items: center;
         gap: 4px;
-        border-radius: 99px;
-        color: $neutron-text-body-light;
+        align-items: flex-end;
+        flex-wrap: wrap;
 
-        @include mobile() {
-          width: 100%;
-          justify-content: space-between;
-        }
-
-        @include theme() {
-          background: theme-get('neutral-border-border-default');
-        }
-
-        .tab {
-          display: flex;
-          padding: 0px 24px;
-
-          height: 28px;
-          justify-content: center;
-          align-items: center;
-          gap: 10px;
-          border-radius: 99px;
-
-          width: 100%;
-
-          white-space: nowrap;
-
-          &.active {
-            background: $white-color;
-
-            @include theme() {
-              color: theme-get('neutral-text-text-btn-default');
-            }
+        .balance {
+          @include mobile {
+            font-size: 14px;
+            line-height: 100%;
           }
-        }
-      }
-
-      .eyesWrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        height: 36px;
-        width: 36px;
-        padding: 8px 16px;
-
-        cursor: pointer;
-        border-radius: 99px;
-
-        @include theme {
-          background: theme-get('neutral-border-border-default');
         }
       }
     }
   }
 
-  .headerBottom {
+  .tokenInfo {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 6px;
+
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 150%;
+
+    @include mobile {
+      font-size: 14px;
+      line-height: 150%;
+    }
+
+    @include theme {
+      color: theme-get('neutral-text-text-token-name');
+    }
+
+    svg {
+      width: 30px;
+      height: 30px;
+      vertical-align: middle;
+    }
+
+    .tokenName {
+      color: $neutron-text-body-light;
+    }
+
+    .icons {
+      display: flex;
+      position: relative;
+
+      .fromIcon {
+        position: relative;
+        z-index: 1;
+      }
+
+      .toIcon {
+        margin-left: -10px;
+        position: relative;
+        z-index: 0;
+      }
+    }
+  }
+
+  .tabEyes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
     font-size: 16px;
-    font-weight: 600;
-    line-height: 100%;
+    font-weight: 500;
+    line-height: 150%;
 
-    .priceUsd {
+    .eyesWrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      height: 36px;
+      width: 36px;
+      padding: 8px 16px;
+
+      cursor: pointer;
+      border-radius: 99px;
+
+      @include theme {
+        background: theme-get('neutral-border-border-default');
+      }
+    }
+  }
+}
+
+.tabWrapper {
+  display: flex;
+  height: 36px;
+  padding: 4px;
+  align-items: center;
+  gap: 4px;
+  border-radius: 99px;
+  color: $neutron-text-body-light;
+
+  @include mobile() {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+
+  @include theme() {
+    background: theme-get('neutral-border-border-default');
+  }
+
+  .tab {
+    display: flex;
+    padding: 0px 24px;
+
+    height: 28px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 99px;
+
+    width: 100%;
+
+    white-space: nowrap;
+
+    &.active {
+      background: $white-color;
+
+      @include theme() {
+        color: theme-get('neutral-text-text-btn-default');
+      }
+    }
+  }
+}
+
+.priceUsd {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 100%;
+  white-space: nowrap;
+
+  flex: 1;
+
+  @include mobile {
+    font-size: 14px;
+    line-height: 100%;
+  }
+
+  @include theme {
+    // color: $neutron-text-body-light;
+    color: theme-get('neutral-1');
+  }
+
+  .percent {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 100%;
+    padding-left: 6px;
+
+    &.increment {
+      @include theme() {
+        color: theme-get('success-surface-default');
+      }
+    }
+
+    &.decrement {
+      color: $red;
+    }
+
+    &.hidePercent {
+      display: none;
+    }
+
+    @include mobile {
+      font-size: 12px;
+      line-height: 100%;
+    }
+  }
+}
+
+.headerBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 100%;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .bottom {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+
+    @include theme() {
+      color: theme-get('neutral-1');
+    }
+
+    .balance {
       font-size: 20px;
       font-weight: 500;
       line-height: 100%;
 
-      @include theme {
-        // color: $neutron-text-body-light;
-        color: theme-get('neutral-1');
-      }
-
-      .percent {
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 100%;
-        padding-left: 6px;
-
-        &.increment {
-          @include theme() {
-            color: theme-get('success-surface-default');
-          }
-        }
-
-        &.decrement {
-          color: $red;
-        }
-
-        &.hidePercent {
-          display: none;
-        }
+      @include mobile {
+        font-size: 16px;
       }
     }
 
-    .bottom {
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-
-      @include theme() {
-        color: theme-get('neutral-1');
-      }
-
-      .balance {
-        font-size: 20px;
-        font-weight: 500;
-        line-height: 100%;
-      }
-
-      .icon {
-        width: 18px;
-        height: 18px;
-      }
-
-      .denom {
-        text-transform: uppercase;
-      }
-
-      .percent {
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 100%;
-        padding-left: 6px;
-
-        &.increment {
-          @include theme() {
-            color: theme-get('success-surface-default');
-          }
-        }
-
-        &.decrement {
-          color: $red;
-        }
-      }
+    .icon {
+      width: 18px;
+      height: 18px;
     }
 
-    .filter_wrapper {
+    .denom {
+      text-transform: uppercase;
+    }
+
+    .percent {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 100%;
+      padding-left: 6px;
+
+      &.increment {
+        @include theme() {
+          color: theme-get('success-surface-default');
+        }
+      }
+
+      &.decrement {
+        color: $red;
+      }
+    }
+  }
+
+  .filter_wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+    flex: 3.2;
+
+    @include mobile {
+      width: 100%;
+    }
+  }
+
+  .filter_day_wrapper {
+    display: flex;
+    height: 36px;
+    padding: 4px;
+    align-items: center;
+    gap: 4px;
+    border-radius: 99px;
+
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    /* 24px */
+
+    color: $neutron-text-body-light;
+
+    @include mobile() {
+      flex: 1;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    @include theme() {
+      border: 1px solid theme-get('neutral-border-border-default');
+    }
+
+    .filter_day {
       display: flex;
-      justify-content: flex-end;
+      padding: 0px 16px;
+      height: 28px;
+      justify-content: center;
       align-items: center;
-
-      gap: 8px;
-
-      flex-wrap: wrap;
-    }
-
-    .filter_day_wrapper {
-      display: flex;
-      height: 36px;
-      padding: 4px;
-      align-items: center;
-      gap: 4px;
+      gap: 10px;
       border-radius: 99px;
 
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 150%;
-      /* 24px */
+      width: 100%;
 
-      color: $neutron-text-body-light;
-
-      @include mobile() {
-        width: 100%;
-        justify-content: space-between;
+      &.active {
+        @include theme() {
+          background: theme-get('neutral-surface-bg-section-5');
+          color: theme-get('neutral-surface-bg-3');
+        }
       }
 
-      @include theme() {
-        border: 1px solid theme-get('neutral-border-border-default');
+      @include medium-desktop {
+        padding: 0 12px;
       }
 
-      .filter_day {
-        display: flex;
-        padding: 0px 16px;
-        height: 28px;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        border-radius: 99px;
-
-        width: 100%;
-
-        &.active {
-          @include theme() {
-            background: theme-get('neutral-surface-bg-section-5');
-            color: theme-get('neutral-surface-bg-3');
-          }
-        }
-
-        @include medium-desktop {
-          padding: 0 12px;
-        }
+      @include mobile {
+        padding: 0 8px;
       }
     }
   }

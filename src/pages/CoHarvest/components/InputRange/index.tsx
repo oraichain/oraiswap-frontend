@@ -1,13 +1,24 @@
+import { ReactNode } from 'react';
+
 export type InputRangeType = {
   max?: number;
   min?: number;
   className: string;
   value: number;
   onChange: (val) => void;
-  suffix?: string;
+  suffix?: ReactNode;
+  showValue?: boolean;
 };
 
-const InputRange = ({ max = 25, min = 1, className, value, onChange, suffix = '%' }: InputRangeType) => {
+const InputRange = ({
+  showValue = true,
+  max = 25,
+  min = 1,
+  className,
+  value,
+  onChange,
+  suffix = '%'
+}: InputRangeType) => {
   const progress = (100 * value) / 25;
   return (
     <div className={className}>
@@ -25,10 +36,14 @@ const InputRange = ({ max = 25, min = 1, className, value, onChange, suffix = '%
           background: `linear-gradient(to right, #AEE67F ${progress}%, #EFEFEF ${progress}%)`
         }}
       ></input>
-      <div>
-        {value}
-        {suffix}
-      </div>
+      {showValue ? (
+        <div>
+          {value}
+          {suffix}
+        </div>
+      ) : (
+        <div>{suffix}</div>
+      )}
     </div>
   );
 };

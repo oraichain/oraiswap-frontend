@@ -132,6 +132,8 @@
   }
 
   .selectChainList {
+    height: calc(100% - 115px);
+
     .selectChainTitle {
       @include theme() {
         color: theme-get('colors-neutral-text-title');
@@ -143,7 +145,7 @@
       font-size: 18px;
       font-weight: 500;
       overflow-y: auto;
-      height: 400px;
+      height: 100%;
       padding-right: 4px;
 
       .selectChainItemAll {

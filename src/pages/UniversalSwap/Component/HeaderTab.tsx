@@ -4,6 +4,7 @@ import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import cn from 'classnames/bind';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
+import useWindowSize from 'hooks/useWindowSize';
 import { numberWithCommas, reverseSymbolArr } from 'pages/Pools/helpers';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -22,6 +23,7 @@ import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
 import { calculateFinalPriceChange } from '../helpers';
 import { ChartTokenType } from '../hooks/useChartUsdPrice';
 import styles from './HeaderTab.module.scss';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 
@@ -39,6 +41,7 @@ export type HeaderTabPropsType = {
 
   chartTokenType: ChartTokenType;
   setChartTokenType: React.Dispatch<React.SetStateAction<ChartTokenType>>;
+  showTokenInfo?: boolean;
 };
 
 export const HeaderTab: React.FC<HeaderTabPropsType> = ({
@@ -48,133 +51,39 @@ export const HeaderTab: React.FC<HeaderTabPropsType> = ({
   priceChange,
   percentChangeUsd,
   chartTokenType,
-  setChartTokenType
+  setChartTokenType,
+  showTokenInfo = true
 }) => {
-  const theme = useTheme();
-
+  const { isSmallMobileView } = useWindowSize();
   const filterTime = useSelector(selectCurrentSwapFilterTime);
   const tab = useSelector(selectCurrentSwapTabChart);
-  const currentToChain = useSelector(selectCurrentToChain);
-  const currentToToken = useSelector(selectCurrentToToken);
-  const currentFromToken = useSelector(selectCurrentFromToken);
   const dispatch = useDispatch();
-
-  const { data: prices } = useCoinGeckoPrices();
-  const currentPair = useSelector(selectCurrentToken);
-
-  const [baseContractAddr, quoteContractAddr] = currentPair.info.split('-');
-  const isPairReverseSymbol = reverseSymbolArr.find(
-    (pair) => pair.filter((item) => item.denom === baseContractAddr || item.denom === quoteContractAddr).length === 2
-  );
-  const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
-
-  const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
-  const isIncrementUsd = percentChangeUsd && Number(percentChangeUsd) > 0;
-
-  const percentPriceChange = calculateFinalPriceChange(
-    !!isPairReverseSymbol,
-    priceChange.price,
-    priceChange.price_change
-  );
-
-  const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
-  const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
-
-  let [ToTokenIcon, FromTokenIcon] = [DefaultIcon, DefaultIcon];
-  if (currentToToken && Object.keys(currentToToken.IconLight || currentToToken.Icon).length > 0) {
-    ToTokenIcon = theme === 'light' ? currentToToken.IconLight || currentToToken.Icon : currentToToken.Icon;
-  }
-  if (currentFromToken && Object.keys(currentFromToken.IconLight || currentFromToken.Icon).length > 0) {
-    FromTokenIcon = theme === 'light' ? currentFromToken.IconLight || currentFromToken.Icon : currentFromToken.Icon;
-  }
+  const mobileMode = isMobile();
 
   return (
     <div className={cx('headerTab')}>
-      <div className={cx('headerTop')}>
-        <div>
-          {tab === TAB_CHART_SWAP.TOKEN
-            ? currentToToken &&
-              currentToChain && (
-                <div className={cx('tokenInfo')}>
-                  <div>
-                    <ToTokenIcon />
-                  </div>
-                  <span>{currentToToken?.name || currentToToken?.denom}</span>
-                  <span className={cx('tokenName')}>{currentToChain}</span>
-                </div>
-              )
-            : currentToToken &&
-              currentFromToken && (
-                <div className={cx('tokenInfo')}>
-                  <div className={cx('icons')}>
-                    <div className={cx('formIcon')}>
-                      <FromTokenIcon />
-                    </div>
-                    <div className={cx('toIcon')}>
-                      <ToTokenIcon />
-                    </div>
-                  </div>
-                  <span>
-                    {currentFromToken?.name || currentFromToken?.denom}/{currentToToken?.name || currentToToken?.denom}
-                  </span>
-                </div>
-              )}
-        </div>
-        <div className={cx('tabEyes')}>
-          {!hideChart && (
-            <div className={cx('tabWrapper')}>
-              <button
-                className={cx('tab', tab === TAB_CHART_SWAP.TOKEN ? 'active' : '')}
-                onClick={() => {
-                  dispatch(setTabChartSwap(TAB_CHART_SWAP.TOKEN));
-                }}
-              >
-                {TAB_CHART_SWAP.TOKEN}
-              </button>
-              <button
-                className={cx('tab', tab === TAB_CHART_SWAP.POOL ? 'active' : '')}
-                onClick={() => {
-                  dispatch(setTabChartSwap(TAB_CHART_SWAP.POOL));
-                }}
-              >
-                {TAB_CHART_SWAP.POOL}
-              </button>
-            </div>
-          )}
-          <div className={cx('eyesWrapper')} onClick={() => setHideChart(!hideChart)}>
-            <img className={cx('eyes')} src={hideChart ? ChartImg : HideImg} alt="eyes" />
-          </div>
-        </div>
-      </div>
+      <HeaderTop
+        showHideChart={!mobileMode}
+        hideChart={hideChart}
+        onClickAction={() => setHideChart(!hideChart)}
+        priceUsd={priceUsd}
+        priceChange={priceChange}
+        percentChangeUsd={percentChangeUsd}
+        chartTokenType={chartTokenType}
+        showTokenInfo={showTokenInfo}
+      />
 
       <div className={cx('headerBottom')}>
-        <div className={cx('priceUsd')}>
-          {tab === TAB_CHART_SWAP.TOKEN ? (
-            <div>
-              <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
-              <span
-                className={cx('percent', isIncrementUsd ? 'increment' : 'decrement', {
-                  hidePercent: chartTokenType === ChartTokenType.Volume
-                })}
-              >
-                {(isIncrementUsd ? '+' : '') + Number(percentChangeUsd).toFixed(2)}%
-              </span>
-            </div>
-          ) : (
-            !priceChange.isError && (
-              <div className={cx('bottom')}>
-                <div className={cx('balance')}>
-                  {`1 ${baseDenom} ≈ ${
-                    isPairReverseSymbol ? (1 / currentPrice || 0).toFixed(6) : currentPrice.toFixed(6)
-                  } ${quoteDenom}`}
-                </div>
-                <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
-                  {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%
-                </div>
-              </div>
-            )
-          )}
-        </div>
+        {!mobileMode && (
+          <UsdPrice
+            priceUsd={priceUsd}
+            priceChange={priceChange}
+            percentChangeUsd={percentChangeUsd}
+            chartTokenType={chartTokenType}
+          />
+        )}
+
+        {!hideChart && mobileMode && <TypeChartRender />}
         {tab === TAB_CHART_SWAP.TOKEN && !hideChart && (
           <div className={cx('filter_wrapper')}>
             <div className={cx('filter_day_wrapper')}>
@@ -207,6 +116,182 @@ export const HeaderTab: React.FC<HeaderTabPropsType> = ({
                 );
               })}
             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const TypeChartRender = () => {
+  const dispatch = useDispatch();
+  const tab = useSelector(selectCurrentSwapTabChart);
+
+  return (
+    <div className={cx('tabWrapper')}>
+      <button
+        className={cx('tab', tab === TAB_CHART_SWAP.TOKEN ? 'active' : '')}
+        onClick={() => {
+          dispatch(setTabChartSwap(TAB_CHART_SWAP.TOKEN));
+        }}
+      >
+        {TAB_CHART_SWAP.TOKEN}
+      </button>
+      <button
+        className={cx('tab', tab === TAB_CHART_SWAP.POOL ? 'active' : '')}
+        onClick={() => {
+          dispatch(setTabChartSwap(TAB_CHART_SWAP.POOL));
+        }}
+      >
+        {TAB_CHART_SWAP.POOL}
+      </button>
+    </div>
+  );
+};
+
+export const UsdPrice = ({
+  priceChange,
+  percentChangeUsd,
+  priceUsd,
+  chartTokenType
+}: Pick<HeaderTabPropsType, 'priceChange' | 'percentChangeUsd' | 'priceUsd' | 'chartTokenType'>) => {
+  const tab = useSelector(selectCurrentSwapTabChart);
+
+  const { data: prices } = useCoinGeckoPrices();
+  const currentPair = useSelector(selectCurrentToken);
+
+  const [baseContractAddr, quoteContractAddr] = currentPair.info.split('-');
+  const isPairReverseSymbol = reverseSymbolArr.find(
+    (pair) => pair.filter((item) => item.denom === baseContractAddr || item.denom === quoteContractAddr).length === 2
+  );
+  const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
+
+  const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
+  const isIncrementUsd = percentChangeUsd && Number(percentChangeUsd) > 0;
+
+  const percentPriceChange = calculateFinalPriceChange(
+    !!isPairReverseSymbol,
+    priceChange.price,
+    priceChange.price_change
+  );
+
+  const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
+  const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
+
+  return (
+    <div className={cx('priceUsd')}>
+      {tab === TAB_CHART_SWAP.TOKEN ? (
+        <div>
+          <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+          <span
+            className={cx('percent', isIncrementUsd ? 'increment' : 'decrement', {
+              hidePercent: chartTokenType === ChartTokenType.Volume
+            })}
+          >
+            {(isIncrementUsd ? '+' : '') + Number(percentChangeUsd).toFixed(2)}%
+          </span>
+        </div>
+      ) : (
+        !priceChange.isError && (
+          <div className={cx('bottom')}>
+            <div className={cx('balance')}>
+              {`1 ${baseDenom} ≈ ${
+                isPairReverseSymbol ? (1 / currentPrice || 0).toFixed(6) : currentPrice.toFixed(6)
+              } ${quoteDenom}`}
+            </div>
+            <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
+              {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  );
+};
+
+export const HeaderTop = ({
+  showHideChart = true,
+  hideChart,
+  onClickAction,
+  priceUsd,
+  priceChange,
+  percentChangeUsd,
+  chartTokenType,
+  showTokenInfo = true
+}: Pick<HeaderTabPropsType, 'priceChange' | 'percentChangeUsd' | 'priceUsd' | 'chartTokenType'> & {
+  showHideChart?: boolean;
+  hideChart?: boolean;
+  onClickAction: () => void;
+  showTokenInfo?: boolean;
+}) => {
+  const theme = useTheme();
+  const tab = useSelector(selectCurrentSwapTabChart);
+  const currentFromToken = useSelector(selectCurrentFromToken);
+  const currentToChain = useSelector(selectCurrentToChain);
+  const currentToToken = useSelector(selectCurrentToToken);
+
+  const { isSmallMobileView } = useWindowSize();
+
+  const mobileMode = isMobile();
+  let [ToTokenIcon, FromTokenIcon] = [DefaultIcon, DefaultIcon];
+  if (currentToToken && Object.keys(currentToToken.IconLight || currentToToken.Icon).length > 0) {
+    ToTokenIcon = theme === 'light' ? currentToToken.IconLight || currentToToken.Icon : currentToToken.Icon;
+  }
+  if (currentFromToken && Object.keys(currentFromToken.IconLight || currentFromToken.Icon).length > 0) {
+    FromTokenIcon = theme === 'light' ? currentFromToken.IconLight || currentFromToken.Icon : currentFromToken.Icon;
+  }
+
+  return (
+    <div className={cx('headerTop')}>
+      <div className={cx('tokenWrapper')}>
+        {showTokenInfo && (
+          <div>
+            {tab === TAB_CHART_SWAP.TOKEN
+              ? currentToToken &&
+                currentToChain && (
+                  <div className={cx('tokenInfo')}>
+                    <div>
+                      <ToTokenIcon />
+                    </div>
+                    <span>{currentToToken?.name || currentToToken?.denom}</span>
+                    <span className={cx('tokenName')}>{currentToChain}</span>
+                  </div>
+                )
+              : currentToToken &&
+                currentFromToken && (
+                  <div className={cx('tokenInfo')}>
+                    <div className={cx('icons')}>
+                      <div className={cx('formIcon')}>
+                        <FromTokenIcon />
+                      </div>
+                      <div className={cx('toIcon')}>
+                        <ToTokenIcon />
+                      </div>
+                    </div>
+                    <span>
+                      {currentFromToken?.name || currentFromToken?.denom}/
+                      {currentToToken?.name || currentToToken?.denom}
+                    </span>
+                  </div>
+                )}
+          </div>
+        )}
+        {mobileMode && (
+          <UsdPrice
+            priceUsd={priceUsd}
+            priceChange={priceChange}
+            percentChangeUsd={percentChangeUsd}
+            chartTokenType={chartTokenType}
+          />
+        )}
+      </div>
+
+      <div className={cx('tabEyes')}>
+        {!hideChart && !mobileMode && <TypeChartRender />}
+
+        {showHideChart && (
+          <div className={cx('eyesWrapper')} onClick={() => onClickAction()}>
+            <img className={cx('eyes')} src={hideChart ? ChartImg : HideImg} alt="eyes" />
           </div>
         )}
       </div>

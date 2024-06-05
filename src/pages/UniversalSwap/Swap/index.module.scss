@@ -970,3 +970,13 @@
     background-position: 10% 0%;
   }
 }
+
+.luckyDraw {
+  z-index: 999;
+  margin-top: 12px;
+  transition: all ease-in-out 0.5s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

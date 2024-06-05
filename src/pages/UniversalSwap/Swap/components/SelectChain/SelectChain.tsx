@@ -71,21 +71,27 @@ export default function SelectChain({
 
         <div className={styles.selectChainList}>
           <div className={styles.selectChainItems}>
-            {networks
+            {[...networks]
               .filter(
                 (net) => !isAllowChainId(net.chainId) && (!filterChainId.length || filterChainId.includes(net.chainId))
               )
+              .map((n) => {
+                const subAmounts = Object.fromEntries(
+                  Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === n.chainId)
+                );
+                const totalUsd = getTotalUsd(subAmounts, prices);
+
+                return {
+                  ...n,
+                  totalUsd
+                };
+              })
+              .sort((a, b) => Number(b.totalUsd || 0) - Number(a.totalUsd || 0))
               .map((item) => {
                 const networkIcon = chainIcons.find((chainIcon) => chainIcon.chainId === item.chainId);
                 const key = item.chainId.toString();
                 const title = item.chainName;
-                const subAmounts = Object.fromEntries(
-                  Object.entries(amounts).filter(
-                    ([denom]) => tokenMap[denom] && tokenMap[denom].chainId === item.chainId
-                  )
-                );
-                const totalUsd = getTotalUsd(subAmounts, prices);
-                const balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
+                const balance = '$' + (item.totalUsd > 0 ? item.totalUsd.toFixed(2) : '0');
                 return (
                   <div
                     key={key}
