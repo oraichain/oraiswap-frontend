@@ -12,8 +12,8 @@ import {
   network,
   toAmount,
   toDisplay,
-  parseTokenInfoRawDenom,
-  CW20_DECIMALS
+  CW20_DECIMALS,
+  parseTokenInfoRawDenom
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
@@ -100,6 +100,7 @@ import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import useFilteredTokens from './hooks/useFilteredTokens';
+import { submitTransactionIBC } from '../ibc-routing';
 import { useNavigate } from 'react-router-dom';
 import SwapDetail from './components/SwapDetail';
 import PowerByOBridge from 'components/PowerByOBridge';
@@ -167,9 +168,9 @@ const SwapComponent: React.FC<{
 
   const { fromToken, toToken } = getFromToToken(
     originalFromToken,
-    originalToToken,
-    fromTokenDenomSwap,
-    toTokenDenomSwap
+    originalToToken
+    // fromTokenDenomSwap,
+    // toTokenDenomSwap
   );
 
   const remoteTokenDenomFrom = getRemoteDenom(originalFromToken);
@@ -443,6 +444,14 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
+
+        if (minimumReceiveDisplay && minimumReceiveDisplay > 0) {
+          await submitTransactionIBC({
+            txHash: transactionHash,
+            chainId: originalFromToken.chainId
+          });
+        }
+
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
 
@@ -460,13 +469,19 @@ const SwapComponent: React.FC<{
           fromChainId: originalFromToken.chainId,
           toChainId: originalToToken.chainId,
           fromAmount: fromAmountToken.toString(),
-          toAmount: toAmountToken.toString(),
+          toAmount: minimumReceiveDisplay.toFixed(6),
           fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
-          toAmountInUsdt: getUsd(toAmount(toAmountToken, originalToToken.decimals), originalToToken, prices).toString(),
+          toAmountInUsdt: getUsd(
+            toAmount(minimumReceiveDisplay, originalToToken.decimals),
+            originalToToken,
+            prices
+          ).toString(),
           status: 'success',
           type: swapType,
           timestamp: Date.now(),
-          userAddress: oraiAddress
+          userAddress: oraiAddress,
+          avgSimulate: String(averageRatio.displayAmount || 0),
+          expectedOutput: String(expectOutputDisplay || 0)
         });
         refetchTransHistory();
       }
@@ -567,6 +582,7 @@ const SwapComponent: React.FC<{
       coeff,
       gas: GAS_ESTIMATION_SWAP_DEFAULT
     });
+
     onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
     setCoe(coeff);
   };
