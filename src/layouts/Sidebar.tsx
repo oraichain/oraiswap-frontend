@@ -14,6 +14,7 @@ import useTheme from 'hooks/useTheme';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.scss';
+import LuckyDraw from 'components/LuckyDraw';
 
 const Sidebar: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
@@ -79,11 +80,16 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
           </div>
         </div>
 
-        <div className={styles.menu_footer} onClick={() => setIsOpenQrCodeOwallet(true)}>
-          {theme === 'light' ? <DownloadOwalletIcon /> : <DownloadOwalletIconDark />}
-          <div className={styles.download}>
-            <span>Download</span>
-            <LogoDownloadOwalletIcon />
+        <div className={styles.footerWrapper}>
+          {/* <div className={styles.luckyDraw}>
+            <LuckyDraw />
+          </div> */}
+          <div className={styles.menu_footer} onClick={() => setIsOpenQrCodeOwallet(true)}>
+            {theme === 'light' ? <DownloadOwalletIcon /> : <DownloadOwalletIconDark />}
+            <div className={styles.download}>
+              <span>Download</span>
+              <LogoDownloadOwalletIcon />
+            </div>
           </div>
         </div>
       </div>

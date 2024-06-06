@@ -180,7 +180,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
           <label htmlFor="small-balances">Hide small balances!</label>
         </div>
       </div>
-      <div>
+      <div className={cx('tableWrapper')}>
         <Table
           headers={headers}
           data={data}

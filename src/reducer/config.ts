@@ -43,11 +43,13 @@ export interface ConfigState {
   rewardPools: RewardPoolType[];
   filterDefaultPool: KeyFilterPool;
   persistVersion: number;
+  bannerTime?: number;
 }
 
 const initialState: ConfigState = {
   address: '',
   metamaskAddress: '',
+  bannerTime: 0,
   btcAddress: '',
   tronAddress: '',
   walletTypeStore: 'owallet',

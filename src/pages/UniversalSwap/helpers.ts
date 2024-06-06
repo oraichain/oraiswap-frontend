@@ -1,5 +1,5 @@
 import { CwIcs20LatestQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
-import { Ratio } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+import { AssetInfo, Ratio } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import {
   CoinGeckoId,
   CoinIcon,
@@ -11,7 +11,9 @@ import {
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   TokenItemType,
   getTokenOnOraichain,
-  getTokenOnSpecificChainId
+  getTokenOnSpecificChainId,
+  oraichainTokens,
+  PairAddress
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -25,6 +27,7 @@ import { PAIRS_CHART } from 'config/pools';
 import { networks } from 'helper';
 import { TransactionHistory } from 'libs/duckdb';
 import { generateError } from 'libs/utils';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDate, formatTimeWithPeriod } from 'pages/CoHarvest/helpers';
 import { FILTER_TIME_CHART, PairToken } from 'reducer/type';
@@ -345,10 +348,10 @@ export const refreshBalances = async (
 
 export const getFromToToken = (originalFromToken, originalToToken) => {
   const isEvmSwap = UniversalSwapHelper.isEvmSwappable({
-    fromChainId: originalFromToken.chainId,
-    toChainId: originalToToken.chainId,
-    fromContractAddr: originalFromToken.contractAddress,
-    toContractAddr: originalToToken.contractAddress
+    fromChainId: originalFromToken?.chainId,
+    toChainId: originalToToken?.chainId,
+    fromContractAddr: originalFromToken?.contractAddress,
+    toContractAddr: originalToToken?.contractAddress
   });
   const fromToken = isEvmSwap
     ? originalFromToken
@@ -418,4 +421,61 @@ export const handleAddTxHistory = async (data: TransactionHistory, enableIbc: bo
   } catch (error) {
     console.log('add history error', error);
   }
+};
+
+// smart route swap
+export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
+
+export const findTokenInfo = (token, flattenTokens) => {
+  return flattenTokens.find(
+    (t) => t.contractAddress?.toUpperCase() === token?.toUpperCase() || t.denom.toUpperCase() === token?.toUpperCase()
+  );
+};
+
+export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) => {
+  const baseToken = flattenTokensWithIcon.find((token) => token.coinGeckoId === coinGeckoId);
+  return baseToken ? (isLightMode ? baseToken.IconLight : baseToken.Icon) : DefaultIcon;
+};
+
+export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLightMode) => {
+  const pairKey = findKeyByValue(PairAddress, path.poolId);
+  let [tokenInKey, tokenOutKey] = pairKey.split('_');
+
+  // TODO hardcode case token is TRX
+  if (tokenInKey === 'TRX') tokenInKey = 'WTRX';
+  if (tokenOutKey === 'TRX') tokenOutKey = 'WTRX';
+
+  let infoPair: {
+    asset_infos: AssetInfo[];
+    assets: string[];
+    symbol: string;
+    symbols: string[];
+    info: string;
+    tokenIn?: string;
+    tokenOut?: string;
+  } = PAIRS_CHART.find((pair) => {
+    let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
+    return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
+  });
+  const tokenIn = infoPair?.assets.find((info) => info.toUpperCase() !== path.tokenOut.toUpperCase());
+  const tokenOut = path.tokenOut;
+
+  infoPair = {
+    ...infoPair,
+    tokenIn: tokenIn,
+    tokenOut: tokenOut
+  };
+
+  const TokenInIcon = findBaseToken(
+    findTokenInfo(tokenIn, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+  const TokenOutIcon = findBaseToken(
+    findTokenInfo(tokenOut, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+
+  return { infoPair, TokenInIcon, TokenOutIcon, pairKey };
 };

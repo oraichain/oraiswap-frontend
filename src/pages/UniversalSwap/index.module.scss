@@ -20,18 +20,6 @@
     gap: 20px;
   }
 
-  .tv-chart {
-    position: relative;
-    height: 500px;
-    padding-top: 18px;
-    transition: all 1s ease;
-
-    &.hidden {
-      height: 0;
-      padding-top: 0px;
-    }
-  }
-
   .swap-col {
     &.w60 {
       width: 100%;
@@ -47,6 +35,31 @@
         max-width: 400px;
       }
     }
+  }
+}
+
+.luckyDraw {
+  width: 100%;
+}
+
+.tv-chart {
+  height: 100%;
+  position: relative;
+  padding-top: 18px;
+  transition: all 1s ease;
+
+  &.hidden {
+    height: 0;
+    padding-top: 0px;
+  }
+}
+
+.tv-chart-container {
+  &.activeChart {
+    @include mobile {
+      height: 430px;
+    }
+    height: 500px;
   }
 }
 
@@ -82,7 +95,6 @@
     align-items: center;
     gap: 16px;
 
-
     @include theme() {
       border: 1px solid theme-get('neutral-border-border-default');
     }
@@ -111,7 +123,6 @@
       font-size: 14px;
       font-weight: 400;
       line-height: 150%;
-
 
       @include theme() {
         color: theme-get('neutral-9');
@@ -146,8 +157,12 @@
 
       &.w40 {
         width: 100%;
-        margin-top: 99px;
+        margin-top: 68px;
         max-width: unset;
+
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
     }
   }

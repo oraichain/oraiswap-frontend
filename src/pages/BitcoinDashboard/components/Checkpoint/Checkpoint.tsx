@@ -12,7 +12,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { toDisplay } from '@oraichain/oraidex-common';
 import Search from 'components/SearchInput';
 import useTheme from 'hooks/useTheme';
-import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
+import { useDebounce } from 'hooks/useDebounce';
 import { TransactionInput, TransactionOutput } from './Transactions';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { isMobile } from '@walletconnect/browser-utils';

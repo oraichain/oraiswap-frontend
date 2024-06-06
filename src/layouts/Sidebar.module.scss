@@ -2,6 +2,7 @@
 @import 'src/styles/themes';
 
 .sidebar {
+  z-index: 999;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -11,6 +12,8 @@
   position: fixed;
   top: $menu-height;
   bottom: 0;
+
+  overflow-y: auto;
 
   @include mobile {
     margin-left: calc(-1 * $sidebar-width);
@@ -26,6 +29,9 @@
 
   @include theme() {
     background-color: theme-get('neutral-surface-bg-section');
+  }
+
+  .luckyDraw {
   }
 }
 
