@@ -654,14 +654,14 @@ const SwapComponent: React.FC<{
 
   const isImpactPrice = !!fromAmountToken && !!simulateData?.amount && !!averageRatio?.amount;
   let impactWarning = 0;
-  if (isImpactPrice && fromTochainIdIsOraichain) {
-    const caculateImpactPrice = new BigDecimal(simulateData.amount)
+  if (isImpactPrice && simulateData.amount && averageRatio.displayAmount && fromTochainIdIsOraichain) {
+    const calculateImpactPrice = new BigDecimal(simulateData.amount)
       .div(toAmount(fromAmountToken, originalFromToken.decimals))
       .div(averageRatio.displayAmount)
       .mul(100)
       .toNumber();
 
-    if (caculateImpactPrice) impactWarning = 100 - caculateImpactPrice;
+    if (calculateImpactPrice) impactWarning = 100 - calculateImpactPrice;
   }
 
   return (
@@ -758,10 +758,16 @@ const SwapComponent: React.FC<{
           >
             <div className={cx('smart-router')}>
               {routersSwapData.routes.map((route, ind) => {
-                let volumn = (+route.returnAmount / +routersSwapData.amount) * 100 || 100;
+                let amount = parseFloat(routersSwapData.amount);
+                let returnAmount = parseFloat(route.returnAmount);
+                let volume = 100;
+
+                if (amount !== 0 && !isNaN(amount) && !isNaN(returnAmount)) {
+                  volume = (returnAmount / amount) * 100;
+                }
                 return (
                   <div key={ind} className={cx('smart-router-item')}>
-                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                    <div className={cx('smart-router-item-volumn')}>{volume.toFixed(0)}%</div>
                     {route.paths.map((path, i, acc) => {
                       const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
                         path,
@@ -800,7 +806,7 @@ const SwapComponent: React.FC<{
                         </React.Fragment>
                       );
                     })}
-                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                    <div className={cx('smart-router-item-volumn')}>{volume.toFixed(0)}%</div>
                   </div>
                 );
               })}
