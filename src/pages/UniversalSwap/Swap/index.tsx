@@ -668,7 +668,7 @@ const SwapComponent: React.FC<{
   }
   const isRoutersSwapData = +routersSwapData.amount;
 
-  const isImpactPrice = fromAmountToken && simulateData?.amount && averageRatio?.amount;
+  const isImpactPrice = !!fromAmountToken && !!simulateData?.amount && !!averageRatio?.amount;
   let impactWarning = 0;
   if (isImpactPrice && fromTochainIdIsOraichain) {
     const caculateImpactPrice = new BigDecimal(simulateData.amount)
@@ -676,7 +676,8 @@ const SwapComponent: React.FC<{
       .div(averageRatio.displayAmount)
       .mul(100)
       .toNumber();
-    impactWarning = 100 - caculateImpactPrice;
+
+    if (caculateImpactPrice) impactWarning = 100 - caculateImpactPrice;
   }
 
   return (
@@ -773,7 +774,7 @@ const SwapComponent: React.FC<{
           >
             <div className={cx('smart-router')}>
               {routersSwapData.routes.map((route, ind) => {
-                let volumn = (+route.returnAmount / +routersSwapData.amount) * 100;
+                let volumn = (+route.returnAmount / +routersSwapData.amount) * 100 || 100;
                 return (
                   <div key={ind} className={cx('smart-router-item')}>
                     <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
