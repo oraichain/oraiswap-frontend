@@ -1,5 +1,6 @@
 import {
   BigDecimal,
+  CW20_DECIMALS,
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
@@ -11,37 +12,34 @@ import {
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay,
-  parseTokenInfoRawDenom,
-  CW20_DECIMALS
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { isMobile } from '@walletconnect/browser-utils';
-import UpArrowIcon from 'assets/icons/up-arrow.svg';
-import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
-import ArrowImg from 'assets/icons/arrow_new.svg';
-import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
-import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
-import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
-import { ReactComponent as FeeDarkIcon } from 'assets/icons/fee_dark.svg';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
-import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
+import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
+import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
+import { ReactComponent as FeeDarkIcon } from 'assets/icons/fee_dark.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
+import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
+import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
+import UpArrowIcon from 'assets/icons/up-arrow.svg';
+import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
+import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
-import { chainInfosWithIcon, flattenTokensWithIcon, tokensWithIcon } from 'config/chainInfos';
+import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
   convertExponentNumberToDecimal,
-  floatToPercent,
   getAddressTransfer,
   getSpecialCoingecko,
   getTransactionUrl,
@@ -60,11 +58,9 @@ import Metamask from 'libs/metamask';
 import { getUsd, reduceString, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
-import { numberWithCommas, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import { numberWithCommas } from 'pages/Pools/helpers';
 import {
-  findKeyByValue,
   genCurrentChain,
-  generateNewSymbol,
   generateNewSymbolV2,
   getDisableSwap,
   getFromToToken,
@@ -75,6 +71,7 @@ import {
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
 import {
   selectCurrentToChain,
@@ -87,23 +84,20 @@ import {
 import { AddressManagementStep } from 'reducer/type';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
-import { SlippageModal, TooltipIcon } from '../Modals';
-import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, getSwapType } from '../helpers';
+import { SlippageModal } from '../Modals';
+import { checkEvmAddress, getSwapType } from '../helpers';
 import AddressBook from './components/AddressBook';
 import InputCommon from './components/InputCommon';
 import InputSwap from './components/InputSwap/InputSwap';
 import SelectChain from './components/SelectChain/SelectChain';
 import SelectToken from './components/SelectToken/SelectToken';
+import SwapDetail from './components/SwapDetail';
 import { useGetTransHistory, useSimulate } from './hooks';
 import { useFillToken } from './hooks/useFillToken';
+import useFilteredTokens from './hooks/useFilteredTokens';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
-import useFilteredTokens from './hooks/useFilteredTokens';
-import { useNavigate } from 'react-router-dom';
-import SwapDetail from './components/SwapDetail';
-import PowerByOBridge from 'components/PowerByOBridge';
-import LuckyDraw from 'components/LuckyDraw';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -750,66 +744,69 @@ const SwapComponent: React.FC<{
           </div>
 
           <div
-            className={cx('smart', !openRoutes ? 'hidden' : '')}
+            className={cx('smart', !openRoutes && !isRoutersSwapData ? 'hidden' : '')}
             style={{
-              // TODO: smart router item height is 40px
-              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
+              height:
+                openRoutes && routersSwapData?.routes.length && !!isRoutersSwapData
+                  ? routersSwapData?.routes.length * 40 + 40
+                  : 0
             }}
           >
             <div className={cx('smart-router')}>
-              {routersSwapData.routes.map((route, ind) => {
-                let amount = parseFloat(routersSwapData.amount);
-                let returnAmount = parseFloat(route.returnAmount);
-                let volume = 100;
+              {!!isRoutersSwapData &&
+                routersSwapData.routes.map((route, ind) => {
+                  let amount = parseFloat(routersSwapData.amount);
+                  let returnAmount = parseFloat(route.returnAmount);
+                  let volume = 100;
 
-                if (amount !== 0 && !isNaN(amount) && !isNaN(returnAmount)) {
-                  volume = (returnAmount / amount) * 100;
-                }
-                return (
-                  <div key={ind} className={cx('smart-router-item')}>
-                    <div className={cx('smart-router-item-volumn')}>{volume.toFixed(0)}%</div>
-                    {route.paths.map((path, i, acc) => {
-                      const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
-                        path,
-                        flattenTokens,
-                        flattenTokensWithIcon,
-                        isLightMode
-                      );
-                      const [tokenIn, tokenOut] = infoPair?.info.split('-');
-                      return (
-                        <React.Fragment key={pairKey}>
-                          <div className={cx('smart-router-item-line')}>
-                            <div className={cx('smart-router-item-line-detail')} />
-                          </div>
-                          <div
-                            className={cx('smart-router-item-pool')}
-                            onClick={() => {
-                              tokenIn &&
-                                tokenOut &&
-                                window.open(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
-                            }}
-                          >
-                            <div className={cx('smart-router-item-pool-wrap')}>
-                              <div className={cx('smart-router-item-pool-wrap-img')}>
-                                <TokenInIcon />
-                              </div>
-                              <div className={cx('smart-router-item-pool-wrap-img')}>
-                                <TokenOutIcon />
-                              </div>
-                            </div>
-                          </div>
-                          {i === acc.length - 1 && (
+                  if (amount !== 0 && !isNaN(amount) && !isNaN(returnAmount)) {
+                    volume = (returnAmount / amount) * 100;
+                  }
+                  return (
+                    <div key={ind} className={cx('smart-router-item')}>
+                      <div className={cx('smart-router-item-volumn')}>{volume.toFixed(0)}%</div>
+                      {route.paths.map((path, i, acc) => {
+                        const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
+                          path,
+                          flattenTokens,
+                          flattenTokensWithIcon,
+                          isLightMode
+                        );
+                        const [tokenIn, tokenOut] = infoPair?.info.split('-');
+                        return (
+                          <React.Fragment key={pairKey}>
                             <div className={cx('smart-router-item-line')}>
                               <div className={cx('smart-router-item-line-detail')} />
                             </div>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                    <div className={cx('smart-router-item-volumn')}>{volume.toFixed(0)}%</div>
-                  </div>
-                );
-              })}
+                            <div
+                              className={cx('smart-router-item-pool')}
+                              onClick={() => {
+                                tokenIn &&
+                                  tokenOut &&
+                                  window.open(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
+                              }}
+                            >
+                              <div className={cx('smart-router-item-pool-wrap')}>
+                                <div className={cx('smart-router-item-pool-wrap-img')}>
+                                  <TokenInIcon />
+                                </div>
+                                <div className={cx('smart-router-item-pool-wrap-img')}>
+                                  <TokenOutIcon />
+                                </div>
+                              </div>
+                            </div>
+                            {i === acc.length - 1 && (
+                              <div className={cx('smart-router-item-line')}>
+                                <div className={cx('smart-router-item-line-detail')} />
+                              </div>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                      <div className={cx('smart-router-item-volumn')}>{volume.toFixed(0)}%</div>
+                    </div>
+                  );
+                })}
               <div className={cx('smart-router-price-impact')}>
                 <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
                 <div
@@ -825,7 +822,6 @@ const SwapComponent: React.FC<{
                     {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
                   </span>
                 </div>
-                {/* <div className={cx('smart-router-price-impact-time')}> ~ 5 mins</div> */}
               </div>
             </div>
           </div>

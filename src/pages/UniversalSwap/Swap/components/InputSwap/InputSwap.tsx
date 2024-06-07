@@ -153,7 +153,7 @@ export default function InputSwapV4({
             />
           </div>
           <div className={cx('usd')}>
-            ≈ ${amount ? numberWithCommas(Number(usdPrice), undefined, { maximumFractionDigits: 6 }) || 0 : 0}
+            ≈ ${amount ? numberWithCommas(Number(usdPrice) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
           </div>
         </div>
       </div>
