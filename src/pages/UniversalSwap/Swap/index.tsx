@@ -317,16 +317,19 @@ const SwapComponent: React.FC<{
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
   const bridgeTokenFee =
     simulateDisplayAmount && (fromTokenFee || toTokenFee)
-      ? (simulateDisplayAmount * fromTokenFee + simulateDisplayAmount * toTokenFee) / 100
+      ? new BigDecimal(simulateDisplayAmount)
+          .mul(fromTokenFee)
+          .add(new BigDecimal(simulateDisplayAmount).mul(toTokenFee).toString())
+          .div(100)
+          .toNumber()
       : 0;
 
   const minimumReceiveDisplay = isSimulateDataDisplay
-    ? new BigDecimal(
-        simulateDisplayAmount -
-          +((simulateDisplayAmount * userSlippage) / 100).toFixed(10) -
-          relayerFee -
-          bridgeTokenFee
-      ).toNumber()
+    ? new BigDecimal(simulateDisplayAmount)
+        .sub(new BigDecimal(simulateDisplayAmount).mul(userSlippage).div(100).toString())
+        .sub(relayerFee)
+        .sub(bridgeTokenFee)
+        .toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -334,12 +337,7 @@ const SwapComponent: React.FC<{
     : 0;
 
   const estSwapFee = new BigDecimal(simulateDisplayAmount || 0).mul(fee || 0).toNumber();
-
-  const totalFeeEst =
-    new BigDecimal(bridgeTokenFee.toFixed(10) || 0)
-      .add(relayerFee || 0)
-      .add(estSwapFee)
-      .toNumber() || 0;
+  const totalFeeEst = new BigDecimal(bridgeTokenFee).add(relayerFee).add(estSwapFee).toNumber() || 0;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
