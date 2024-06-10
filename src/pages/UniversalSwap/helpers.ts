@@ -407,40 +407,60 @@ export const getDisableSwap = ({
   return { disabledSwapBtn, disableMsg };
 };
 
-// smart route swap
-export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
+// TODO: smart route swap in Oraichain
+const findKeyByValue = (obj: { [key: string]: string }, value: string): string =>
+  Object.keys(obj).find((key) => obj[key] === value);
 
-export const findTokenInfo = (token, flattenTokens) => {
-  return flattenTokens.find(
+const findTokenInfo = (token: string, flattenTokens: TokenItemType[]): TokenItemType =>
+  flattenTokens.find(
     (t) => t.contractAddress?.toUpperCase() === token?.toUpperCase() || t.denom.toUpperCase() === token?.toUpperCase()
   );
-};
 
-export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) => {
+const findBaseToken = (coinGeckoId: string, flattenTokensWithIcon: TokenItemType[], isLightMode: boolean): string => {
   const baseToken = flattenTokensWithIcon.find((token) => token.coinGeckoId === coinGeckoId);
   return baseToken ? (isLightMode ? baseToken.IconLight : baseToken.Icon) : DefaultIcon;
 };
 
-export const processPairInfo = (path, flattenTokens, flattenTokensWithIcon, isLightMode) => {
-  const pairKey = findKeyByValue(PairAddress, path.poolId);
+interface Pair {
+  asset_infos: AssetInfo[];
+  assets: string[];
+  symbol: string;
+  symbols: string[];
+  info: string;
+  tokenIn?: string;
+  tokenOut?: string;
+}
+
+export const processPairInfo = (
+  path: {
+    poolId: string;
+    tokenOut: string;
+  },
+  flattenTokens: TokenItemType[],
+  flattenTokensWithIcon: TokenItemType[],
+  isLightMode: boolean
+): {
+  infoPair: Pair;
+  TokenInIcon: CoinIcon;
+  TokenOutIcon: CoinIcon;
+  pairKey: string;
+} => {
+  const pairKey: string = findKeyByValue(PairAddress, path.poolId);
+  if (!pairKey) return { infoPair: undefined, TokenInIcon: DefaultIcon, TokenOutIcon: DefaultIcon, pairKey: undefined };
+
   let [tokenInKey, tokenOutKey] = pairKey.split('_');
 
-  // TODO hardcode case token is TRX
+  // TODO: hardcode case token is TRX
   if (tokenInKey === 'TRX') tokenInKey = 'WTRX';
   if (tokenOutKey === 'TRX') tokenOutKey = 'WTRX';
 
-  let infoPair: {
-    asset_infos: AssetInfo[];
-    assets: string[];
-    symbol: string;
-    symbols: string[];
-    info: string;
-    tokenIn?: string;
-    tokenOut?: string;
-  } = PAIRS_CHART.find((pair) => {
+  let infoPair: Pair = PAIRS_CHART.find((pair) => {
     let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
     return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
   });
+
+  if (!infoPair) return { infoPair: undefined, TokenInIcon: DefaultIcon, TokenOutIcon: DefaultIcon, pairKey };
+
   const tokenIn = infoPair?.assets.find((info) => info.toUpperCase() !== path.tokenOut.toUpperCase());
   const tokenOut = path.tokenOut;
 
