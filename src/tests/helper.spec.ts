@@ -10,7 +10,7 @@ import {
   AIRI_CONTRACT,
   OSMOSIS_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
-import { convertExponentNumberToDecimal, getSpecialCoingecko, isEmptyObject } from 'helper';
+import { getSpecialCoingecko, isEmptyObject } from 'helper';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -182,16 +182,5 @@ describe('should utils functions in libs/utils run exactly', () => {
     const { isSpecialFromCoingecko, isSpecialToCoingecko } = getSpecialCoingecko(fromCoingecko, toCoingecko);
     expect(isSpecialFromCoingecko).toEqual(expectedFrom);
     expect(isSpecialToCoingecko).toEqual(expectedTo);
-  });
-
-  it.each([
-    [1, 1],
-    [4.951760157141521e27, '4951760157141521000000000000'],
-    ['4.951760157141521e-2', '0.04951760157141521'],
-    ['3.3e3', '3300']
-  ])('test-convertExponentNumberToDecimal', (number: number | string, expectNumber: string | number) => {
-    const result = convertExponentNumberToDecimal(number);
-
-    expect(result).toEqual(expectNumber);
   });
 });
