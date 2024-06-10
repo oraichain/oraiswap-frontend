@@ -208,7 +208,7 @@ const SwapComponent: React.FC<{
   });
 
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
+  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount } = useSimulate(
     'simulate-data',
     fromTokenInfoData,
     toTokenInfoData,
@@ -638,7 +638,7 @@ const SwapComponent: React.FC<{
   let routersSwapData = defaultRouterSwap;
 
   const fromTochainIdIsOraichain = originalFromToken.chainId === 'Oraichain' && originalToToken.chainId === 'Oraichain';
-  if (fromAmountToken && simulateData && fromTochainIdIsOraichain) {
+  if (debouncedFromAmount && simulateData && fromTochainIdIsOraichain) {
     routersSwapData = {
       ...simulateData,
       routes: simulateData?.routes ?? []
@@ -646,11 +646,11 @@ const SwapComponent: React.FC<{
   }
   const isRoutersSwapData = +routersSwapData.amount;
 
-  const isImpactPrice = !!fromAmountToken && !!simulateData?.amount && !!averageRatio?.amount;
+  const isImpactPrice = !!debouncedFromAmount && !!simulateData?.amount && !!averageRatio?.amount;
   let impactWarning = 0;
   if (isImpactPrice && simulateData.amount && averageRatio.displayAmount && fromTochainIdIsOraichain) {
     const calculateImpactPrice = new BigDecimal(simulateData.amount)
-      .div(toAmount(fromAmountToken, originalFromToken.decimals))
+      .div(toAmount(debouncedFromAmount, originalFromToken.decimals))
       .div(averageRatio.displayAmount)
       .mul(100)
       .toNumber();

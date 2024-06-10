@@ -49,5 +49,5 @@ export const useSimulate = (
     setSwapAmount([fromAmount, Number(simulateData?.displayAmount)]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
-  return { simulateData, fromAmountToken, toAmountToken, setSwapAmount };
+  return { simulateData, fromAmountToken, toAmountToken, setSwapAmount, debouncedFromAmount };
 };
