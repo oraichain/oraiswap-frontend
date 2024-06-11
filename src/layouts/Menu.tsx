@@ -225,17 +225,6 @@ const Menu: React.FC = () => {
               )}
             </div>
 
-            {openBuy && (
-              <BuyOraiModal
-                open={openBuy}
-                close={() => {
-                  setOpenBuy(false);
-                  setIsLoadedIframe(false);
-                }}
-                onAfterLoad={() => setIsLoadedIframe(true)}
-                isLoadedIframe={isLoadedIframe}
-              />
-            )}
             <div className={styles.divider}></div>
             <div className={classNames(styles.connect_wallet_wrapper)}>
               <span>
@@ -244,6 +233,18 @@ const Menu: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {openBuy && (
+        <BuyOraiModal
+          open={openBuy}
+          close={() => {
+            setOpenBuy(false);
+            setIsLoadedIframe(false);
+          }}
+          onAfterLoad={() => setIsLoadedIframe(true)}
+          isLoadedIframe={isLoadedIframe}
+        />
       )}
     </>
   );
