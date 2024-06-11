@@ -38,7 +38,6 @@ export const useSimulate = (
     },
     {
       refetchInterval: 300000,
-      staleTime: 1000,
       enabled: !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0
     }
   );
