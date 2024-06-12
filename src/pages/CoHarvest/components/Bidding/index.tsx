@@ -14,7 +14,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { INIT_AMOUNT_SIMULATE, TF_PRICE_CHANGE, TIMER } from 'pages/CoHarvest/constants';
-import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
+import { useDebounce } from 'hooks/useDebounce';
 import {
   useGetAllBidPoolInRound,
   useGetBidding,

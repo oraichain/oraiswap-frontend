@@ -3,6 +3,8 @@ import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings
 import styles from './index.module.scss';
 import classNames from 'classnames';
 import { floatToPercent } from 'helper';
+import { useRef } from 'react';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 
 export type SwapDetailProps = {
   simulatePrice: number | string;
@@ -15,11 +17,13 @@ export type SwapDetailProps = {
   totalFee: number | string;
   swapFee: number | string;
 
+  isOpenSetting: boolean;
   isOpen: boolean;
   onClose: () => void;
   toTokenName: string;
   fromTokenName: string;
   openSlippage: () => void;
+  closeSlippage: () => void;
 };
 
 const SwapDetail = ({
@@ -33,14 +37,27 @@ const SwapDetail = ({
   totalFee,
   swapFee,
 
+  isOpenSetting,
   isOpen,
   onClose,
   toTokenName,
   fromTokenName,
-  openSlippage
+  openSlippage,
+  closeSlippage
 }: SwapDetailProps) => {
+  const ref = useRef();
+
+  useOnClickOutside(ref, () => {
+    if (!isOpenSetting) {
+      onClose();
+      if (isOpen) {
+        closeSlippage();
+      }
+    }
+  });
+
   return (
-    <div>
+    <div ref={ref}>
       {/* {isOpen && <div className={styles.overlay} onClick={onClose}></div>} */}
 
       <div className={classNames(styles.swapDetail, { [styles.active]: isOpen })}>

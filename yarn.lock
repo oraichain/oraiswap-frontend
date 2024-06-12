@@ -3095,9 +3095,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.78":
-  version "1.0.83"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.83.tgz#2e525f8210904ff709e9c9d364322a85c55ae17a"
-  integrity sha512-nVPlhhOvAvo5Cz/Z45K5l1CBEspfljD1BlUFe9pqld+Uc5spCF5trJcYhN7/512+B/3Kaathy3n7AB+nk6/TBQ==
+  version "1.0.86"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.86.tgz#41ff557609a02f9c61503f92af04b1490908ad2f"
+  integrity sha512-YzNy3RAXqIuDg4Lw/7yjc9vQJSwtUhqAdO714TgkLETsRD/AakWGyYOPxyV+MZGg6m3s6ujna+1ves0HexPUhg==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"
@@ -3109,6 +3109,8 @@
     "@injectivelabs/sdk-ts" "1.12.1"
     "@keplr-wallet/types" "^0.11.38"
     "@oraichain/oraidex-contracts-sdk" latest
+    axios "0.26.1"
+    axios-extensions "3.1.3"
     bignumber.js "^9.1.2"
     cosmjs-types "0.8.0"
     ethers "^5.0.15"
@@ -3134,9 +3136,9 @@
   integrity sha512-fMY/QOzO/afPlAVkLGH1bcpJTs6V/URrJju2r4UoE9f5HUWC/6OC6+H5dWuIgq26frp8wjH23mNCQAlmHzji8g==
 
 "@oraichain/oraidex-universal-swap@^1.0.49":
-  version "1.0.70"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.70.tgz#93d40495484c66ab00d0b47494b29b19e479c8fa"
-  integrity sha512-H5nQDShw3+1Tka/yFeLRrioyLRFjiewndsKePQvI1ilXkayxOv9sugzbZYx/WdiVapGrOeYD6+yX/O60jzBVng==
+  version "1.0.80"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.80.tgz#21465a81201ea2b505f12aa0a373e7044fb37760"
+  integrity sha512-DTTkt6/p2XYGYUy172dg5UnwutQ1RgO2gCKL8ZKjgR17i48A0ELaxQkh4esdecxgXrT/UzpchMOymC0nMCtQXQ==
   dependencies:
     "@oraichain/oraidex-common" "^1.0.78"
     "@oraichain/oraidex-contracts-sdk" "^1.0.43"
@@ -4083,6 +4085,11 @@
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.2.tgz#b74129719fc8d11c01868010082d483b7545591a"
   integrity sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==
+
+"@types/lru-cache@^4.1.1":
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-4.1.3.tgz#ec5eb6dd818b7a06336cfb7368723164b195f818"
+  integrity sha512-QjCOmf5kYwekcsfEKhcEHMK8/SvgnneuSDXFERBuC/DPca2KJIO/gpChTsVb35BoWLBpEAJWz1GFVEArSdtKtw==
 
 "@types/markdown-it@^12.2.3":
   version "12.2.3"
@@ -5432,6 +5439,16 @@ axe-core@=4.7.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.0.tgz#34ba5a48a8b564f67e103f0aa5768d76e15bbbbf"
   integrity sha512-M0JtH+hlOL5pLQwHOLNYZaXuhqmvS8oExsqB1SBYgA4Dk7u/xx+YdGHXaK5pyUfed5mYXdlYiphWq3G8cRi5JQ==
 
+axios-extensions@3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/axios-extensions/-/axios-extensions-3.1.3.tgz#cd745bb7dc899743f85a2b5a291c7f36d9f41e12"
+  integrity sha512-/OB9OcJLNOIx9pdW4m4/hFRvNo12wlX5BaprIzqpMaLR02I88Mr98/wW4QN9rhx0/yg9rM7i6Af/RpV4MyxXjA==
+  dependencies:
+    "@types/lru-cache" "^4.1.1"
+    lru-cache "^5.1.1"
+    tslib "^1.9.0"
+    util "^0.11.1"
+
 axios-extensions@^3.1.3:
   version "3.1.6"
   resolved "https://registry.yarnpkg.com/axios-extensions/-/axios-extensions-3.1.6.tgz#bfa72f65f44f0a3efa55a030cdaaa6451c246b1e"
@@ -5441,19 +5458,19 @@ axios-extensions@^3.1.3:
     tslib "^2.1.0"
     util "^0.12.3"
 
+axios@0.26.1, axios@^0.26.1:
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.1.tgz#1ede41c51fcf51bbbd6fd43669caaa4f0495aaa9"
+  integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
+  dependencies:
+    follow-redirects "^1.14.8"
+
 axios@^0.21.0, axios@^0.21.1, axios@^0.21.2:
   version "0.21.4"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
   integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
   dependencies:
     follow-redirects "^1.14.0"
-
-axios@^0.26.1:
-  version "0.26.1"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.1.tgz#1ede41c51fcf51bbbd6fd43669caaa4f0495aaa9"
-  integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
-  dependencies:
-    follow-redirects "^1.14.8"
 
 axios@^0.27.2:
   version "0.27.2"
@@ -16219,7 +16236,7 @@ tsconfig-paths@^3.15.0:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
-tslib@1.14.1, tslib@^1.8.1:
+tslib@1.14.1, tslib@^1.8.1, tslib@^1.9.0:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
@@ -16633,6 +16650,13 @@ util.promisify@~1.0.0:
     es-abstract "^1.17.2"
     has-symbols "^1.0.1"
     object.getownpropertydescriptors "^2.1.0"
+
+util@^0.11.1:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/util/-/util-0.11.1.tgz#3236733720ec64bb27f6e26f421aaa2e1b588d61"
+  integrity sha512-HShAsny+zS2TZfaXxD9tYj4HQGlBezXZMZuM/S5PKLLoZkShZiGk9o5CzukI1LVHZvjdvZ2Sj1aW/Ndn2NB/HQ==
+  dependencies:
+    inherits "2.0.3"
 
 util@^0.12.3, util@^0.12.5:
   version "0.12.5"
