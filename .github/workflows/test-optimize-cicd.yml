@@ -34,14 +34,11 @@ jobs:
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Configure AWS credentials and bucket region
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-east-2
       - uses: everpcpc/actions-cache@v2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-2'
         with:
           bucket: ${{ secrets.AWS_BUCKET_NAME }} # required
           path: |
