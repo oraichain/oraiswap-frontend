@@ -40,7 +40,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ github.AWS_SECRET_ACCESS_KEY }}
         with:
           bucket: ${{ secrets.AWS_BUCKET_NAME }} # required
-          aws-region: us-east-2
+          aws-region: root
           path: |
             node_modules
             .cache
