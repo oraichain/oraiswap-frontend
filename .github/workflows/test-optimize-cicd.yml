@@ -40,7 +40,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         with:
           bucket: ${{ secrets.AWS_BUCKET_NAME }} # required
-          aws-region: root
           path: |
             node_modules
             .cache
