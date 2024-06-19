@@ -6,13 +6,14 @@ import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as ConfirmIcon } from 'assets/images/restake.svg';
 import { ReactComponent as ConfirmIconLight } from 'assets/images/restaking-light.svg';
 import { Button } from 'components/Button';
+import ModalConfirm from 'components/ConfirmModal';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens, { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import { getUsd } from 'libs/utils';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
@@ -22,14 +23,11 @@ import { useGetLockInfo, useGetMyStakeRewardInfo, useGetStakeInfo } from 'pages/
 import { useState } from 'react';
 import InputBalance from '../InputBalance';
 import styles from './index.module.scss';
-import ModalConfirm from '../../../../components/ConfirmModal';
 
 const UnStakeTab = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
-  // const loadTokenAmounts = useLoadTokens();
-
   const loadOraichainToken = useLoadOraichainTokens();
   const [amount, setAmount] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
