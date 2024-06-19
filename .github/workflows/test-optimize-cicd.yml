@@ -47,15 +47,15 @@ jobs:
           key: ${{ runner.os }}/yarn/${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}/yarn/
-      # - name: Install Dependencies
-      #   if: steps.yarn-cache.outputs.cache-hit != 'true'
-      #   # run: yarn install --ignore-scripts
-      #   run: yarn
-      # - name: Copy env
-      #   run: cp .env.example .env
-      # - name: Build Production
-      #   run: yarn build
-      #   env:
-      #     SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      #     REACT_APP_SENTRY_ENVIRONMENT: production
-      #     CI: false
+      - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        # run: yarn install --ignore-scripts
+        run: yarn
+      - name: Copy env
+        run: cp .env.example .env
+      - name: Build Production
+        run: yarn build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          REACT_APP_SENTRY_ENVIRONMENT: production
+          CI: false
