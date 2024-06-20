@@ -5,7 +5,7 @@ name: Test Optimize CI/CD
 # Controls when the action will run.
 on:
   push:
-    branches: [optimize/prod-cicd]
+    branches: [feat/cicd-cache]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    runs-on: ubuntu-latest
+    runs-on: orai-swarm
     strategy:
       matrix:
         node-version: [18]
