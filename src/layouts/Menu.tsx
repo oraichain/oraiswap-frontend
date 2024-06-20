@@ -20,7 +20,6 @@ import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import classNames from 'classnames';
-import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
 import { WalletManagement } from 'components/WalletManagement/WalletManagement';
 import { ThemeContext } from 'context/theme-context';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -28,6 +27,7 @@ import React, { ReactNode, useContext, useEffect, useRef, useState } from 'react
 import { Link, useLocation } from 'react-router-dom';
 import BuyOraiModal from './BuyOraiModal';
 import styles from './Menu.module.scss';
+import TooltipContainer from 'components/WalletManagement/TooltipContainer';
 
 const Menu: React.FC = () => {
   const location = useLocation();

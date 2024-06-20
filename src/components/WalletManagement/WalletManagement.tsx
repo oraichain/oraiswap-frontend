@@ -1,8 +1,6 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
-import type { Wallet as WalletResetType } from 'components/ConnectWallet/useResetBalance';
-import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 import { keplrCheck } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -15,6 +13,8 @@ import { ModalChooseWallet } from './ModalChooseWallet';
 import { MyWallet } from './MyWallet';
 import { MyWalletMobile } from './MyWalletMobile';
 import styles from './WalletManagement.module.scss';
+import type { Wallet as WalletResetType } from './useResetBalance';
+import { useResetBalance } from './useResetBalance';
 import { WalletProvider, walletProvider } from './walletConfig';
 const cx = cn.bind(styles);
 
