@@ -11,10 +11,10 @@ import { useEffect } from 'react';
 // };
 
 export const useDispatchEvent = (eventType: string, eventData: any) => {
-  console.log('eventData', eventData);
+  //   console.log('eventData', eventData);
 
   useEffect(() => {
     const event = new CustomEvent(eventType, { detail: eventData });
-    window.document.dispatchEvent(event);
+    window.dispatchEvent(event);
   }, [eventData]); // eventData, eventType
 };
