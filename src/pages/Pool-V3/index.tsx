@@ -1,21 +1,38 @@
-import React, { IframeHTMLAttributes, useEffect, useRef } from 'react';
+import React, { IframeHTMLAttributes, useEffect, useRef, useState } from 'react';
 import styles from './index.module.scss';
 import { useDispatchEvent } from './hooks/useAddCustomEvent';
 
+const IF_URL = '/v3';
+// const IF_URL = 'localhost:3001';
 const PoolV3 = () => {
-  const ref = useRef<any>();
-  // useDispatchEvent('connectWallet', window.Keplr);
+  const [iframeSrc, setIframeSrc] = useState(IF_URL);
 
   // useEffect(() => {
-  //   console.log('ref.current', ref.current);
-  //   if (ref?.current) {
-  //     ref.current.postMessage('Hello, window-2! i am window-1', '*');
-  //   }
-  // }, [ref.current]);
+  //   const fetchHTMLContent = async () => {
+  //     try {
+  //       // const response = await fetch(IF_URL);
+  //       // const htmlContent = await response.text();
+
+  //       // console.log('htmlContent', htmlContent);
+
+  //       const blob = await fetch(IF_URL).then((r) => r.blob());
+  //       // const blob = new Blob([htmlContent], { type: 'text/html' });
+  //       const blobURL = URL.createObjectURL(blob);
+
+  //       setIframeSrc(blobURL);
+  //     } catch (error) {
+  //       console.error('Error fetching HTML content:', error);
+  //     }
+  //   };
+
+  //   fetchHTMLContent();
+  // }, []);
+
+  console.log('first', iframeSrc);
 
   return (
     <div className={styles.poolV3}>
-      <iframe ref={ref} src="http://localhost:3001/pool" title="pool-v3" frameBorder={0} />
+      <iframe src={iframeSrc} title="pool-v3" frameBorder={0} />
     </div>
   );
 };
