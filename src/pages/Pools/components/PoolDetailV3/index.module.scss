@@ -1,0 +1,193 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.poolDetailV3 {
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .back {
+      margin-right: 8px;
+
+      svg {
+        vertical-align: sub;
+      }
+    }
+
+    .icon {
+      svg {
+        vertical-align: sub;
+
+        &:last-of-type {
+          margin-left: -10px;
+        }
+      }
+    }
+
+    .name {
+      color: var(--Colors-Neutral-Text-title, #232521);
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 120%; /* 28.8px */
+    }
+
+    .statistic {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .item {
+        display: flex;
+        padding: 4px 12px;
+        align-items: center;
+        gap: 10px;
+        border-radius: 8px;
+        background: var(--Colors-Neutral-Surface-bg-token-dropdown, #efefef);
+
+        color: var(--Colors-Neutral-Text-title, #232521);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 150%; /* 21px */
+        letter-spacing: 0.1px;
+      }
+    }
+  }
+
+  .content {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+
+    .info {
+      flex: 1;
+      max-width: 450px;
+
+      display: flex;
+      padding: var(--Dimensions-32, 32px) 24px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: var(--Dimensions-32, 32px);
+      align-self: stretch;
+
+      border-radius: var(--Dimension-Corner-Radius-section, 12px);
+      border: 1px solid var(--Colors-Neutral-Border-border-default, #efefef);
+
+      @include mobile {
+        max-width: unset;
+      }
+
+      .itemInfo {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        h4 {
+          color: var(--Colors-Neutral-Text-body, #979995);
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 100%; /* 21px */
+        }
+
+        .value {
+          color: var(--Colors-Neutral-Text-title, #232521);
+          font-size: 24px;
+          font-weight: 500;
+          line-height: 100%; /* 28.8px */
+        }
+
+        .desc {
+          color: var(--Colors-Neutral-Text-body, #979995);
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 100%; /* 24px */
+        }
+      }
+
+      .divider {
+        width: 100%;
+        border-bottom: 1px solid #efefef;
+      }
+
+      .alloc {
+        width: 100%;
+
+        h4 {
+          color: var(--Colors-Neutral-Text-body, #979995);
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 100%; /* 21px */
+        }
+
+        .percent {
+          margin: 16px 0 12px 0;
+          display: flex;
+          width: 100%;
+          gap: 4px;
+          justify-content: space-between;
+          border-radius: 4px;
+
+          .basePercent {
+            width: 40%;
+            height: var(--Dimensions-8, 8px);
+            background: #000;
+            border-radius: 4px 0 0 4px;
+          }
+
+          .quotePercent {
+            width: 60%;
+            height: var(--Dimensions-8, 8px);
+            background: #53ae94;
+            border-radius: 0 4px 4px 0;
+          }
+        }
+
+        .pair {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+
+          .token {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+
+            color: var(--Colors-Neutral-Text-body, #979995);
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 100%; /* 24px */
+
+            .tokenName {
+              color: var(--Colors-Neutral-Text-title, #232521);
+              font-size: 16px;
+              font-weight: 500;
+              line-height: 100%; /* 24px */
+            }
+
+            &:last-of-type {
+              justify-content: flex-end;
+            }
+          }
+        }
+      }
+
+      .btnGroup {
+        width: 100%;
+        display: flex;
+        gap: 16px;
+
+        button {
+          flex: 1;
+        }
+      }
+    }
+
+    .chart {
+      flex: 1;
+    }
+  }
+}

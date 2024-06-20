@@ -7,6 +7,7 @@ import { Route, Routes } from 'react-router-dom';
 import Balance from 'pages/Balance';
 import Pools from 'pages/Pools';
 import PoolDetail from 'pages/Pools/PoolDetail';
+import V3PoolDetailPage from 'pages/Pools/V3PoolDetail';
 import UniversalSwap from 'pages/UniversalSwap/index';
 import CoHarvest from 'pages/CoHarvest';
 import BitcoinDashboard from 'pages/BitcoinDashboard';
@@ -39,6 +40,7 @@ export default () => (
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/download-owallet" element={<DownloadApp />} />
       <Route path="/pools/:poolUrl" element={<PoolDetail />} />
+      <Route path="/pools/v3/:poolId" element={<V3PoolDetailPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Suspense>
