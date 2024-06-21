@@ -33,7 +33,12 @@ const PoolV3 = () => {
 
   const callFunctionInIframe = () => {
     const walletType = getWalletByNetworkFromStorage();
-    postMessagePoolV3('connect', isMobile() ? 'owallet' : walletType?.cosmos, address);
+
+    postMessagePoolV3(
+      !walletType?.cosmos ? 'disconnect' : 'connect',
+      isMobile() ? 'owallet' : walletType?.cosmos,
+      address
+    );
   };
 
   return (
@@ -43,7 +48,7 @@ const PoolV3 = () => {
         // key={address}
         id={'iframe-v3'}
         src="https://oraidex-amm-v3-staging.web.app"
-        // src="http://localhost:3001"
+        // src="http://localhost:3001/pool"
         // src="https://0726-222-252-31-239.ngrok-free.app"
         title="pool-v3"
         frameBorder={0}
