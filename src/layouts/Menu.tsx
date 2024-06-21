@@ -88,7 +88,11 @@ const Menu: React.FC = () => {
         }}
         className={classNames(
           styles.menu_item,
-          { [styles.active]: !otherActive && (link.includes(to) || (link === '/' && to === '/universalswap')) },
+          {
+            [styles.active]:
+              !otherActive &&
+              ((link && link.includes(to) && link?.length === to?.length) || (link === '/' && to === '/universalswap'))
+          },
           styles[theme],
           styles.spin
         )}

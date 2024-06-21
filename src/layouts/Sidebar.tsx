@@ -53,7 +53,10 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
         }}
         className={classNames(
           styles.menu_item,
-          { [styles.active]: link.includes(to) || (link === '/' && to === '/universalswap') },
+          {
+            [styles.active]:
+              (link && link.includes(to) && link?.length === to?.length) || (link === '/' && to === '/universalswap')
+          },
           styles[theme]
         )}
       >
