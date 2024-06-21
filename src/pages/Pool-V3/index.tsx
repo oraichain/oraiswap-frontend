@@ -1,38 +1,40 @@
-import React, { IframeHTMLAttributes, useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from './index.module.scss';
-import { useDispatchEvent } from './hooks/useAddCustomEvent';
+import { getWalletByNetworkFromStorage } from 'helper';
+import useConfigReducer from 'hooks/useConfigReducer';
 
-const IF_URL = '/v3';
-// const IF_URL = 'localhost:3001';
 const PoolV3 = () => {
-  const [iframeSrc, setIframeSrc] = useState(IF_URL);
+  const iframeRef = useRef(null);
+  const [address] = useConfigReducer('address');
 
-  // useEffect(() => {
-  //   const fetchHTMLContent = async () => {
-  //     try {
-  //       // const response = await fetch(IF_URL);
-  //       // const htmlContent = await response.text();
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    const handleLoad = () => {
+      callFunctionInIframe();
+    };
 
-  //       // console.log('htmlContent', htmlContent);
+    if (iframe) iframe.addEventListener('load', handleLoad);
+    return () => {
+      if (iframe) iframe.removeEventListener('load', handleLoad);
+    };
+  }, [address]);
 
-  //       const blob = await fetch(IF_URL).then((r) => r.blob());
-  //       // const blob = new Blob([htmlContent], { type: 'text/html' });
-  //       const blobURL = URL.createObjectURL(blob);
-
-  //       setIframeSrc(blobURL);
-  //     } catch (error) {
-  //       console.error('Error fetching HTML content:', error);
-  //     }
-  //   };
-
-  //   fetchHTMLContent();
-  // }, []);
-
-  console.log('first', iframeSrc);
+  const callFunctionInIframe = () => {
+    const iframe = document.getElementById('iframe-v3');
+    const walletType = getWalletByNetworkFromStorage();
+    iframe.contentWindow.postMessage({ walletType: walletType?.cosmos, address }, '*');
+  };
 
   return (
     <div className={styles.poolV3}>
-      <iframe src={iframeSrc} title="pool-v3" frameBorder={0} />
+      <iframe
+        ref={iframeRef}
+        // key={address}
+        id={'iframe-v3'}
+        src="http://localhost:3001/pool"
+        title="pool-v3"
+        frameBorder={0}
+      />
     </div>
   );
 };
