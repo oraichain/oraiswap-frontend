@@ -88,7 +88,11 @@ const Menu: React.FC = () => {
         }}
         className={classNames(
           styles.menu_item,
-          { [styles.active]: !otherActive && (link.includes(to) || (link === '/' && to === '/universalswap')) },
+          {
+            [styles.active]:
+              !otherActive &&
+              ((link && link.includes(to) && link?.length === to?.length) || (link === '/' && to === '/universalswap'))
+          },
           styles[theme],
           styles.spin
         )}
@@ -119,6 +123,7 @@ const Menu: React.FC = () => {
       {renderLink('/universalswap', 'Swap', setLink, false, <UniversalSwapIcon />)}
       {renderLink('/bridge', 'Bridge', setLink, false, <BridgeIcon />)}
       {renderLink('/pools', 'Pools', setLink, false, <PoolIcon />)}
+      {renderLink('/pools-v3', 'Pools V3', setLink, false, <PoolIcon />)}
       {renderLink('/staking', 'Staking', setLink, false, <StakingIcon />)}
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}
