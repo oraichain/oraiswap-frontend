@@ -22,6 +22,7 @@ const PoolV3 = () => {
   const callFunctionInIframe = () => {
     const iframe = document.getElementById('iframe-v3');
     const walletType = getWalletByNetworkFromStorage();
+    //@ts-ignore
     iframe.contentWindow.postMessage({ walletType: walletType?.cosmos, address }, '*');
   };
 
