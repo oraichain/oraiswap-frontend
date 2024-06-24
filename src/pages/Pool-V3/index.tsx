@@ -45,10 +45,9 @@ const PoolV3 = () => {
     <div className={styles.poolV3}>
       <iframe
         ref={iframeRef}
-        // key={address}
         id={'iframe-v3'}
         // src="https://oraidex-amm-v3-staging.web.app"
-        src="http://10.10.10.247:3001"
+        src={'/v3'}
         title="pool-v3"
         frameBorder={0}
       />
