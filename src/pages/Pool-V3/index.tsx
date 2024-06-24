@@ -19,17 +19,6 @@ const PoolV3 = () => {
   const iframeRef = useRef(null);
   const [address] = useConfigReducer('address');
 
-  const mobileMode = isMobile();
-
-  useEffect(() => {
-    if (mobileMode && window.top !== window.self) {
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://static.orai.io/injected-provider-merge.bundle.js';
-      document.body.appendChild(script);
-    }
-  }, [mobileMode]);
-
   useEffect(() => {
     const iframe = iframeRef.current;
     const handleLoad = () => {
@@ -58,9 +47,8 @@ const PoolV3 = () => {
         ref={iframeRef}
         // key={address}
         id={'iframe-v3'}
-        src="https://oraidex-amm-v3-staging.web.app"
-        // src="http://localhost:3001/pool"
-        // src="https://0726-222-252-31-239.ngrok-free.app"
+        // src="https://oraidex-amm-v3-staging.web.app"
+        src="http://10.10.10.247:3001"
         title="pool-v3"
         frameBorder={0}
       />
