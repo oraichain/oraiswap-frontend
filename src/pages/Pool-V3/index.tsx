@@ -19,6 +19,17 @@ const PoolV3 = () => {
   const iframeRef = useRef(null);
   const [address] = useConfigReducer('address');
 
+  const mobileMode = isMobile();
+
+  useEffect(() => {
+    if (mobileMode && window.top !== window.self) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://static.orai.io/injected-provider-merge.bundle.js';
+      document.body.appendChild(script);
+    }
+  }, [mobileMode]);
+
   useEffect(() => {
     const iframe = iframeRef.current;
     const handleLoad = () => {
