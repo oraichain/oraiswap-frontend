@@ -13,8 +13,20 @@ export default function useOnClickOutside(ref, handler) {
 
     document.addEventListener('mousedown', listener);
 
+    // check event when click inside iframe
+    function windowBlurred(e) {
+      const el = document.activeElement;
+      if (el.tagName.toLowerCase() === 'iframe') {
+        // iframeClickedLast = true;
+        // onFocus();
+        handler(e);
+      }
+    }
+    window.addEventListener('blur', windowBlurred, true);
+
     return () => {
       document.removeEventListener('mousedown', listener);
+      window.removeEventListener('blur', windowBlurred, true);
     };
   }, [ref, handler]);
 }
