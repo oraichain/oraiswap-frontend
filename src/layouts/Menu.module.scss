@@ -275,7 +275,6 @@
       line-height: 100%;
       justify-items: center;
       font-weight: 500;
-
       @include theme() {
         color: theme-get('neutral-text-title');
       }

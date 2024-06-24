@@ -75,7 +75,6 @@
     font-size: 14px;
     line-height: 100%;
     margin-left: 16px;
-
     @include theme() {
       color: theme-get('neutral-text-title');
     }
