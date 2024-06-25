@@ -48,6 +48,7 @@
   margin-bottom: 10px;
   cursor: pointer;
   border-radius: 99px;
+  height: 48px;
   background-color: transparent;
 
   @include theme() {
@@ -71,12 +72,31 @@
   }
 
   &_text {
+    display: flex;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: space-between;
     font-weight: 500;
     font-size: 14px;
     line-height: 100%;
     margin-left: 16px;
     @include theme() {
       color: theme-get('neutral-text-title');
+    }
+
+    .suffix {
+      height: 100%;
+      width: 100%;
+
+      & > div {
+        height: 40px;
+        width: 40px;
+      }
+      svg {
+        path {
+          stroke: unset !important;
+        }
+      }
     }
   }
 }
