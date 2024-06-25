@@ -11,9 +11,9 @@ export const postMessagePoolV3 = (
   address?: string,
   allowUrl?: string
 ) => {
-  const iframe = document.getElementById('iframe-v3');
+  // const iframe = document.getElementById('iframe-v3');
   //@ts-ignore
-  iframe.contentWindow.postMessage({ walletType, address, statusWallet: statusWallet }, allowUrl ?? '*');
+  // iframe.contentWindow.postMessage({ walletType, address, statusWallet: statusWallet }, allowUrl ?? '*');
 };
 
 const PoolV3 = () => {
