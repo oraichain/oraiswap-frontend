@@ -164,7 +164,8 @@ export const addNumber = (number1: number, number2: number) => {
 
 export const handleCheckWallet = async () => {
   const walletType = getWalletByNetworkCosmosFromStorage();
-  const keplr = await window.Keplr.getKeplr();
+  const keplr = window.keplr;
+  // const keplr = await window.Keplr.getKeplr();
   if (!keplr && walletType !== 'eip191') {
     return displayInstallWallet();
   }

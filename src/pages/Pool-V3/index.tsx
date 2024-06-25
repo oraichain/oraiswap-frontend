@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState, useRef } from 'react';
 import styles from './index.module.scss';
 import { getWalletByNetworkFromStorage } from 'helper';
@@ -21,39 +22,29 @@ const PoolV3 = () => {
 
   useEffect(() => {
     const iframe = iframeRef.current;
-    const handleLoad = () => {
-      callFunctionInIframe();
-    };
+    // @ts-ignore
+    if (window.RenderV3) window.RenderV3(iframe);
+    // const handleLoad = () => {
+    //   callFunctionInIframe();
+    // };
 
-    if (iframe) iframe.addEventListener('load', handleLoad);
-    return () => {
-      if (iframe) iframe.removeEventListener('load', handleLoad);
-    };
-  }, [address]);
+    // if (iframe) iframe.addEventListener('load', handleLoad);
+    // return () => {
+    //   if (iframe) iframe.removeEventListener('load', handleLoad);
+    // };
+  }, [window.RenderV3]);
 
-  const callFunctionInIframe = () => {
-    const walletType = getWalletByNetworkFromStorage();
+  // const callFunctionInIframe = () => {
+  //   const walletType = getWalletByNetworkFromStorage();
 
-    postMessagePoolV3(
-      !walletType?.cosmos ? 'disconnect' : 'connect',
-      isMobile() ? 'owallet' : walletType?.cosmos,
-      address
-    );
-  };
+  //   postMessagePoolV3(
+  //     !walletType?.cosmos ? 'disconnect' : 'connect',
+  //     isMobile() ? 'owallet' : walletType?.cosmos,
+  //     address
+  //   );
+  // };
 
-  return (
-    <div className={styles.poolV3}>
-      <iframe
-        ref={iframeRef}
-        // key={address}
-        id={'iframe-v3'}
-        // src="https://oraidex-amm-v3-staging.web.app"
-        src="http://10.10.10.247:3001"
-        title="pool-v3"
-        frameBorder={0}
-      />
-    </div>
-  );
+  return <div className={styles.poolV3} ref={iframeRef}></div>;
 };
 
 export default PoolV3;

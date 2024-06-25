@@ -9,6 +9,10 @@ import Metamask from 'libs/metamask';
 
 import Bitcoin from 'libs/bitcoin';
 
+// enable Keplr
+const walletType = getWalletByNetworkFromStorage();
+window.Keplr = new Keplr(walletType?.cosmos);
+
 // polyfill
 Tendermint37Client.detectVersion = () => {};
 Tendermint37Client.prototype.status = function () {
@@ -24,10 +28,6 @@ Tendermint37Client.prototype.status = function () {
 // inject global
 window.TronWeb = require('tronweb');
 window.Networks = require('@oraichain/ethereum-multicall').Networks;
-
-// enable Keplr
-const walletType = getWalletByNetworkFromStorage();
-window.Keplr = new Keplr(walletType?.cosmos);
 
 window.ethereumDapp = window.ethereum;
 window.Bitcoin = new Bitcoin();

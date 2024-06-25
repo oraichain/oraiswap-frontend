@@ -130,6 +130,7 @@ async function loadTokens(
 }
 
 async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddress: string) {
+  if (!window.Keplr) return;
   if (!kwtAddress && !oraiAddress) return;
   await handleCheckWallet();
   const cosmosInfos = chainInfos.filter(
