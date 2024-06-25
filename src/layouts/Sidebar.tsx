@@ -2,6 +2,7 @@ import { ReactComponent as BridgeIcon } from 'assets/icons/ic_bridge.svg';
 import { ReactComponent as CohavestIcon } from 'assets/icons/ic_cohavest.svg';
 import { ReactComponent as BtcDashboardIcon } from 'assets/icons/ic_btc_dashboard.svg';
 import { ReactComponent as PoolIcon } from 'assets/icons/ic_pools.svg';
+import { ReactComponent as PoolV3Icon } from 'assets/icons/pool-v3.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_staking.svg';
 import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalswap.svg';
 import { ReactComponent as OraidexBetaIcon } from 'assets/icons/ic_beta.svg';
@@ -15,6 +16,8 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.scss';
 import LuckyDraw from 'components/LuckyDraw';
+import PoolV3Lottie from 'assets/lottie/poolv3.json';
+import Lottie from 'lottie-react';
 
 const Sidebar: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
@@ -63,6 +66,13 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
         {icon}
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
+          {/* {to === '/pools-v3' && (
+            <span>
+              <div>
+                <Lottie animationData={PoolV3Lottie} autoPlay={open} loop />
+              </div>
+            </span>
+          )} */}
         </span>
       </Link>
     );
@@ -76,7 +86,7 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
             {renderLink('/universalswap', 'Swap', setLink, <UniversalSwapIcon />)}
             {renderLink('/bridge', 'Bridge', setLink, <BridgeIcon />)}
             {renderLink('/pools', 'Pools', setLink, <PoolIcon />)}
-            {renderLink('/pools-v3', 'Pools V3', setLink, <PoolIcon />)}
+            {renderLink('/pools-v3', 'Pools V3', setLink, <PoolV3Icon />)}
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
             {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
