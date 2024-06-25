@@ -28,6 +28,8 @@ import { Link, useLocation } from 'react-router-dom';
 import BuyOraiModal from './BuyOraiModal';
 import styles from './Menu.module.scss';
 import TooltipContainer from 'components/WalletManagement/TooltipContainer';
+import PoolV3Lottie from 'assets/lottie/poolv3.json';
+import Lottie from 'lottie-react';
 
 const Menu: React.FC = () => {
   const location = useLocation();
@@ -100,6 +102,11 @@ const Menu: React.FC = () => {
         {Icon}
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
+          {to === '/pools-v3' && (
+            <span className={classNames(styles.suffix)}>
+              <Lottie animationData={PoolV3Lottie} autoPlay={open} loop />
+            </span>
+          )}
         </span>
       </Link>
     );
