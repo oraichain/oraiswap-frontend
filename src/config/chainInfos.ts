@@ -947,7 +947,7 @@ export const chainInfos: CustomChainInfo[] = [
     ]
   },
   {
-    rpc: 'https://rpc.mainnet.noble.strange.love/',
+    rpc: 'https://noble-rpc.polkachu.com/',
     rest: 'https://noble-api.polkachu.com',
     chainId: 'noble-1',
     chainName: 'Noble',
