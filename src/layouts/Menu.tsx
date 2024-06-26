@@ -28,7 +28,7 @@ import { Link, useLocation } from 'react-router-dom';
 import BuyOraiModal from './BuyOraiModal';
 import styles from './Menu.module.scss';
 import TooltipContainer from 'components/WalletManagement/TooltipContainer';
-import PoolV3Lottie from 'assets/lottie/poolv3.json';
+import PoolV3Lottie from 'assets/lottie/poolv3-beta.json';
 import Lottie from 'lottie-react';
 
 const Menu: React.FC = () => {
