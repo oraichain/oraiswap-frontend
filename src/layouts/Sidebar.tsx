@@ -16,7 +16,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.scss';
 import LuckyDraw from 'components/LuckyDraw';
-import PoolV3Lottie from 'assets/lottie/poolv3.json';
+import PoolV3Lottie from 'assets/lottie/poolv3-beta.json';
 import Lottie from 'lottie-react';
 
 const Sidebar: React.FC<{}> = React.memo((props) => {
@@ -84,7 +84,7 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
             {renderLink('/universalswap', 'Swap', setLink, <UniversalSwapIcon />)}
             {renderLink('/bridge', 'Bridge', setLink, <BridgeIcon />)}
             {renderLink('/pools', 'Pools', setLink, <PoolIcon />)}
-            {renderLink('/pools-v3', 'Pools', setLink, <PoolV3Icon />)}
+            {renderLink('/pools-v3', 'Pools V3', setLink, <PoolV3Icon />)}
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
             {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
