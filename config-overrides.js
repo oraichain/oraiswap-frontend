@@ -128,7 +128,7 @@ module.exports = {
       config.proxy = [
         {
           context: ['/v3'],
-          target: 'http://localhost:3001',
+          // target: 'http://localhost:3001',
           changeOrigin: true
         }
       ];
