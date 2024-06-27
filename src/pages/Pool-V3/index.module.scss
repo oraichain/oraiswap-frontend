@@ -8,19 +8,28 @@
 
   iframe {
     width: 100%;
-    height: calc(100vh - 76px);
+    height: calc(100vh - 76px - 70px);
     padding: 10px;
 
+    &.inactiveMargin {
+      height: calc(100vh - 76px);
+    }
+
     @include mobile {
-      margin-top: 68px;
+      margin-top: 0;
 
       &.inactiveMargin {
-        margin-top: 0;
+        margin-top: 68px;
       }
     }
   }
 
   .banner {
+    // position: fixed;
+    // top: 68px;
+    // left: 218px;
+    // width: calc(100% - 218px);
+
     font-size: 16px;
     font-weight: 400;
 
