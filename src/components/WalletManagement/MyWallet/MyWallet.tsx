@@ -57,6 +57,10 @@ export const MyWallet: React.FC<{
   const totalUsd = getTotalUsd(amounts, prices);
   const { isCopied, copiedValue, handleCopy } = useCopyClipboard();
 
+  useEffect(() => {
+    document.getElementById('iframe-v3').style.filter = `invert(${theme === 'dark' ? 0 : 100}%)`;
+  }, [theme]);
+
   const myWalletRef = useRef(null);
   useOnClickOutside(myWalletRef, () => {
     // just close when no modal is open
