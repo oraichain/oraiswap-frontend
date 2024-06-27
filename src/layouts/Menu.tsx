@@ -28,6 +28,8 @@ import { Link, useLocation } from 'react-router-dom';
 import BuyOraiModal from './BuyOraiModal';
 import styles from './Menu.module.scss';
 import TooltipContainer from 'components/WalletManagement/TooltipContainer';
+import PoolV3Lottie from 'assets/lottie/poolv3-beta.json';
+import Lottie from 'lottie-react';
 
 const Menu: React.FC = () => {
   const location = useLocation();
@@ -88,7 +90,11 @@ const Menu: React.FC = () => {
         }}
         className={classNames(
           styles.menu_item,
-          { [styles.active]: !otherActive && (link.includes(to) || (link === '/' && to === '/universalswap')) },
+          {
+            [styles.active]:
+              !otherActive &&
+              ((link && link.includes(to) && link?.length === to?.length) || (link === '/' && to === '/universalswap'))
+          },
           styles[theme],
           styles.spin
         )}
@@ -96,6 +102,11 @@ const Menu: React.FC = () => {
         {Icon}
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
+          {to === '/pools-v3' && (
+            <span className={classNames(styles.suffix)}>
+              <Lottie animationData={PoolV3Lottie} autoPlay={open} loop />
+            </span>
+          )}
         </span>
       </Link>
     );
@@ -119,6 +130,7 @@ const Menu: React.FC = () => {
       {renderLink('/universalswap', 'Swap', setLink, false, <UniversalSwapIcon />)}
       {renderLink('/bridge', 'Bridge', setLink, false, <BridgeIcon />)}
       {renderLink('/pools', 'Pools', setLink, false, <PoolIcon />)}
+      {renderLink('/pools-v3', 'Pools V3', setLink, false, <PoolIcon />)}
       {renderLink('/staking', 'Staking', setLink, false, <StakingIcon />)}
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}
