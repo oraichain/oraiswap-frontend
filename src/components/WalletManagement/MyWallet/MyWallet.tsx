@@ -33,6 +33,7 @@ import type { RootState } from 'store/configure';
 import { ModalDisconnect } from '../ModalDisconnect';
 import styles from './MyWallet.module.scss';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { DisconnectButton } from '../DiconnectButton';
 
 export const MyWallet: React.FC<{
   setIsShowMyWallet: (isShow: boolean) => void;
@@ -112,18 +113,10 @@ export const MyWallet: React.FC<{
                 </div>
               </div>
               {index === 0 && (
-                <div className={styles.right}>
-                  <div
-                    className={styles.disconnectBtn}
-                    onClick={() => {
-                      setIsShowDisconnect(true);
-                      setCurrentDisconnectingNetwork(network.networkType);
-                    }}
-                    title="Disconnect"
-                  >
-                    <DisconnectIcon width={25} height={25} />
-                  </div>
-                </div>
+                <DisconnectButton
+                  setIsShowDisconnect={setIsShowDisconnect}
+                  onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork(network.networkType)}
+                />
               )}
             </div>
           );
@@ -173,18 +166,10 @@ export const MyWallet: React.FC<{
                 </div>
               </div>
               {index === 0 && (
-                <div className={styles.right}>
-                  <div
-                    className={styles.disconnectBtn}
-                    onClick={() => {
-                      setIsShowDisconnect(true);
-                      setCurrentDisconnectingNetwork(network.networkType);
-                    }}
-                    title="Disconnect"
-                  >
-                    <DisconnectIcon width={25} height={25} />
-                  </div>
-                </div>
+                <DisconnectButton
+                  setIsShowDisconnect={setIsShowDisconnect}
+                  onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork(network.networkType)}
+                />
               )}
             </div>
           );
@@ -230,18 +215,10 @@ export const MyWallet: React.FC<{
                   </div>
                 </div>
               </div>
-              <div className={styles.right}>
-                <div
-                  className={styles.disconnectBtn}
-                  onClick={() => {
-                    setIsShowDisconnect(true);
-                    setCurrentDisconnectingNetwork('tron');
-                  }}
-                  title="Disconnect"
-                >
-                  <DisconnectIcon width={25} height={25} />
-                </div>
-              </div>
+              <DisconnectButton
+                setIsShowDisconnect={setIsShowDisconnect}
+                onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork('tron')}
+              />
             </div>
           );
         })}
@@ -284,18 +261,10 @@ export const MyWallet: React.FC<{
                   </div>
                 </div>
               </div>
-              <div className={styles.right}>
-                <div
-                  className={styles.disconnectBtn}
-                  onClick={() => {
-                    setIsShowDisconnect(true);
-                    setCurrentDisconnectingNetwork('bitcoin');
-                  }}
-                  title="Disconnect"
-                >
-                  <DisconnectIcon width={25} height={25} />
-                </div>
-              </div>
+              <DisconnectButton
+                setIsShowDisconnect={setIsShowDisconnect}
+                onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork('bitcoin')}
+              />
             </div>
           );
         })}
