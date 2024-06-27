@@ -69,7 +69,7 @@ const PoolV3 = () => {
         </div>
       )}
       <iframe
-        className={classNames({ [styles.inactiveMargin]: openBanner })}
+        className={classNames({ [styles.inactiveMargin]: !openBanner })}
         ref={iframeRef}
         key={address}
         id={'iframe-v3'}
