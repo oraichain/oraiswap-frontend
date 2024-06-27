@@ -11,7 +11,8 @@ import {
   tronWallets,
   evmWallets,
   btcWallets,
-  type NetworkType
+  type NetworkType,
+  WalletNetwork
 } from 'components/WalletManagement/walletConfig';
 import {
   tronNetworksWithIcon,
@@ -74,15 +75,15 @@ export const MyWallet: React.FC<{
     })();
   }, []);
 
-  const renderCosmosAddresses = () => {
-    if (!oraiAddress) return <></>;
-    const cosmosWalletConnected = cosmosWallets.find((item) => item.nameRegistry === walletByNetworks.cosmos);
-    if (!cosmosWalletConnected) return <></>;
-
+  const renderWalletAddress = (
+    networkWithIcons: any[],
+    walletNetwork: WalletNetwork,
+    getChainAddress: (network: any) => string
+  ) => {
     return (
       <div className={styles.addressByNetworkItem}>
-        {cosmosNetworksWithIcon.map((network, index) => {
-          const chainAddress = cosmosAddresses && cosmosAddresses[network.chainId];
+        {networkWithIcons.map((network, index) => {
+          const chainAddress = getChainAddress(network);
           let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
           if (!NetworkIcon) NetworkIcon = DefaultIcon;
 
@@ -95,7 +96,7 @@ export const MyWallet: React.FC<{
                   </div>
 
                   <div className={styles.iconWalletByChain}>
-                    <cosmosWalletConnected.icon width={18} height={18} />
+                    <walletNetwork.icon width={18} height={18} />
                   </div>
                 </div>
                 <div className={styles.info}>
@@ -122,6 +123,18 @@ export const MyWallet: React.FC<{
           );
         })}
       </div>
+    );
+  };
+
+  const renderCosmosAddresses = () => {
+    if (!oraiAddress || !cosmosAddresses) return <></>;
+    const cosmosWalletConnected = cosmosWallets.find((item) => item.nameRegistry === walletByNetworks.cosmos);
+    if (!cosmosWalletConnected) return <></>;
+
+    return renderWalletAddress(
+      cosmosNetworksWithIcon,
+      cosmosWalletConnected,
+      (network) => cosmosAddresses && cosmosAddresses[network.chainId]
     );
   };
 
@@ -131,51 +144,7 @@ export const MyWallet: React.FC<{
     const evmWalletConnected = evmWallets.find((item) => item.nameRegistry === walletByNetworks.evm);
     if (!evmWalletConnected) return <></>;
 
-    return (
-      <div className={styles.addressByNetworkItem}>
-        {evmNetworksIconWithoutTron.map((network, index) => {
-          const chainAddress = metamaskAddress;
-          return (
-            <div className={styles.addressByChainInNetwork} key={network.chainId}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    {theme === 'light' ? (
-                      <network.IconLight width={30} height={30} />
-                    ) : (
-                      <network.Icon width={30} height={30} />
-                    )}
-                  </div>
-
-                  <div className={styles.iconWalletByChain}>
-                    <evmWalletConnected.icon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>{network.chainName}</div>
-                  <div className={styles.chainAddress}>
-                    <span>{reduceString(chainAddress, 6, 6)}</span>
-                    <div className={styles.copyBtn} onClick={(e) => handleCopy(chainAddress)}>
-                      {isCopied && copiedValue === chainAddress ? (
-                        <SuccessIcon width={15} height={15} />
-                      ) : (
-                        <CopyIcon width={15} height={15} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {index === 0 && (
-                <DisconnectButton
-                  setIsShowDisconnect={setIsShowDisconnect}
-                  onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork(network.networkType)}
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
+    return renderWalletAddress(evmNetworksIconWithoutTron, evmWalletConnected, (_network) => metamaskAddress);
   };
 
   const renderTronAddresses = () => {
@@ -184,92 +153,15 @@ export const MyWallet: React.FC<{
     const tronWalletConnected = tronWallets.find((item) => item.nameRegistry === walletByNetworks.tron);
     if (!tronWalletConnected) return <></>;
 
-    return (
-      <div className={styles.addressByNetworkItem}>
-        {tronNetworksWithIcon.map((network) => {
-          let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
-          if (!NetworkIcon) NetworkIcon = DefaultIcon;
-          return (
-            <div key={network.chainId} className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <NetworkIcon width={30} height={30} />
-                  </div>
-
-                  <div className={styles.iconWalletByChain}>
-                    <tronWalletConnected.icon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>{network.chainName}</div>
-                  <div className={styles.chainAddress}>
-                    <span>{reduceString(tronAddress, 6, 6)}</span>
-                    <div className={styles.copyBtn} onClick={(e) => handleCopy(tronAddress)}>
-                      {isCopied && copiedValue === tronAddress ? (
-                        <SuccessIcon width={15} height={15} />
-                      ) : (
-                        <CopyIcon width={15} height={15} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <DisconnectButton
-                setIsShowDisconnect={setIsShowDisconnect}
-                onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork('tron')}
-              />
-            </div>
-          );
-        })}
-      </div>
-    );
+    return renderWalletAddress(tronNetworksWithIcon, tronWalletConnected, (_network) => tronAddress);
   };
+
   const renderBtcAddresses = () => {
     if (!btcAddress) return null;
     const btcWalletConnected = btcWallets.find((item) => item.nameRegistry === walletByNetworks.bitcoin);
     if (!btcWalletConnected) return <></>;
 
-    return (
-      <div className={styles.addressByNetworkItem}>
-        {btcNetworksWithIcon.map((network) => {
-          let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
-          if (!NetworkIcon) NetworkIcon = DefaultIcon;
-          return (
-            <div key={network.chainId} className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <NetworkIcon width={30} height={30} />
-                  </div>
-
-                  <div className={styles.iconWalletByChain}>
-                    <btcWalletConnected.icon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>{network.chainName}</div>
-                  <div className={styles.chainAddress}>
-                    <span>{reduceString(btcAddress, 6, 6)}</span>
-                    <div className={styles.copyBtn} onClick={(e) => handleCopy(btcAddress)}>
-                      {isCopied && copiedValue === btcAddress ? (
-                        <SuccessIcon width={15} height={15} />
-                      ) : (
-                        <CopyIcon width={15} height={15} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <DisconnectButton
-                setIsShowDisconnect={setIsShowDisconnect}
-                onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork('bitcoin')}
-              />
-            </div>
-          );
-        })}
-      </div>
-    );
+    return renderWalletAddress(btcNetworksWithIcon, btcWalletConnected, (_network) => btcAddress);
   };
 
   return (
