@@ -3,6 +3,12 @@ import styles from './index.module.scss';
 import { getWalletByNetworkFromStorage } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { isMobile } from '@walletconnect/browser-utils';
+import { ReactComponent as CloseBannerIcon } from 'assets/icons/close.svg';
+import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
+import Lottie from 'lottie-react';
+import PoolV3Lottie from 'assets/lottie/poolv3-beta.json';
+import classNames from 'classnames';
+import LoadingBox from 'components/LoadingBox';
 
 export const postMessagePoolV3 = (
   statusWallet: 'connect' | 'disconnect',
@@ -17,7 +23,9 @@ export const postMessagePoolV3 = (
 
 const PoolV3 = () => {
   const iframeRef = useRef(null);
+  const [loading, setLoading] = useState(true);
   const [address] = useConfigReducer('address');
+  const [openBanner, setOpenBanner] = useState(true);
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -33,26 +41,47 @@ const PoolV3 = () => {
 
   const callFunctionInIframe = () => {
     const walletType = getWalletByNetworkFromStorage();
-
     postMessagePoolV3(
       !walletType?.cosmos ? 'disconnect' : 'connect',
       isMobile() ? 'owallet' : walletType?.cosmos,
       address
     );
+    setLoading(false);
   };
 
   return (
-    <div className={styles.poolV3}>
-      <iframe
-        ref={iframeRef}
-        key={address}
-        id={'iframe-v3'}
-        // src="https://oraidex-amm-v3-staging.web.app"
-        src={'/v3'}
-        title="pool-v3"
-        frameBorder={0}
-      />
-    </div>
+    <LoadingBox loading={loading}>
+      <div className={classNames(styles.poolV3)}>
+        {openBanner && (
+          <div className={styles.banner}>
+            <div className={styles.text}>
+              {/* <WarningIcon />{' '} */}
+
+              <span className={styles.lottie}>
+                <Lottie animationData={PoolV3Lottie} autoPlay={true} loop />
+              </span>
+              <span>
+                {' '}
+                <strong>This version is flagged as community open beta.</strong> Please be mindful with issues &
+                feedback to us.
+              </span>
+            </div>
+            <div className={styles.closeBanner} onClick={() => setOpenBanner(false)}>
+              <CloseBannerIcon />
+            </div>
+          </div>
+        )}
+        <iframe
+          className={classNames({ [styles.inactiveMargin]: !openBanner })}
+          ref={iframeRef}
+          key={address}
+          id={'iframe-v3'}
+          src={'/v3'}
+          title="pool-v3"
+          frameBorder={0}
+        />
+      </div>
+    </LoadingBox>
   );
 };
 
