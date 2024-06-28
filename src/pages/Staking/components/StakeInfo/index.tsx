@@ -1,24 +1,27 @@
-import { toDisplay } from '@oraichain/oraidex-common';
+import { CW20_STAKING_CONTRACT, ORAI, calculateMinReceive, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 
 import useConfigReducer from 'hooks/useConfigReducer';
 
-import { Cw20StakingClient } from '@oraichain/oraidex-contracts-sdk';
+import { Cw20StakingClient, OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { Type, handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { ORAIX_TOKEN_INFO, USDC_TOKEN_INFO } from 'pages/Staking/constants';
 import { useGetLockInfo, useGetMyStakeRewardInfo } from 'pages/Staking/hooks';
 import { useState } from 'react';
+import { generateContractMessages, generateMiningMsgs } from 'rest/api';
 import styles from './index.module.scss';
-import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 
 const StakeInfo = () => {
   const [theme] = useConfigReducer('theme');
@@ -39,6 +42,7 @@ const StakeInfo = () => {
   const rewardUsd = getUsd(reward, USDC_TOKEN_INFO, prices);
   const lockUsd = getUsd(lockAmount, ORAIX_TOKEN_INFO, prices);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingCompound, setLoadingCompound] = useState<boolean>(false);
 
   const handleClaim = async () => {
     // if (!amount) return displayToast(TToastType.TX_FAILED, { message: 'Stake Amount is required' });
@@ -68,6 +72,72 @@ const StakeInfo = () => {
     }
   };
 
+  const handleCompoundStaking = async () => {
+    setLoadingCompound(true);
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      const msgClaim = {
+        contractAddress: CW20_STAKING_CONTRACT,
+        msg: {
+          withdraw: {
+            staking_token: ORAIX_TOKEN_INFO.contractAddress
+          }
+        }
+      };
+      const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+
+      const simulateData = await handleSimulateSwap({
+        originalFromInfo: USDC_TOKEN_INFO,
+        originalToInfo: ORAIX_TOKEN_INFO,
+        originalAmount: toDisplay(reward),
+        routerClient
+        // useSmartRoute: true,
+        // urlRouter: 'https://osor.oraidex.io'
+      });
+
+      const minReceive = calculateMinReceive(simulateData?.amount, reward, 1, USDC_TOKEN_INFO.decimals);
+
+      const msgSwap = generateContractMessages({
+        type: Type.SWAP,
+        fromInfo: USDC_TOKEN_INFO,
+        toInfo: ORAIX_TOKEN_INFO,
+        amount: reward,
+        sender: address,
+        minimumReceive: minReceive
+      });
+
+      const msgStake = generateMiningMsgs({
+        type: Type.BOND_STAKING_CW20,
+        sender: address,
+        amount: simulateData.amount,
+        lpAddress: ORAIX_TOKEN_INFO.contractAddress
+      });
+
+      const result = await CosmJs.executeMultiple({
+        msgs: [msgClaim, msgSwap, msgStake],
+        walletAddr: address,
+        gasAmount: { denom: ORAI, amount: '0' }
+      });
+      console.log('result tx hash: ', result);
+
+      if (result) {
+        console.log('in correct result');
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+
+        loadOraichainToken(address, [USDC_TOKEN_INFO.contractAddress, ORAIX_TOKEN_INFO.contractAddress]);
+        refetchMyStakeRewardInfo();
+        refetchLockInfo();
+      }
+    } catch (error) {
+      console.log('error in com: ', error);
+      handleErrorTransaction(error);
+    } finally {
+      setLoadingCompound(false);
+    }
+  };
+
   return (
     <div className={styles.stakeInfo}>
       <div className={styles.info}>
@@ -82,17 +152,6 @@ const StakeInfo = () => {
           </div>
         </div>
 
-        {/* <div className={styles.item}>
-        <div className={styles.title}>Unstaking</div>
-
-        <div className={styles.usd}>{formatDisplayUsdt(lockUsd)}</div>
-
-        <div className={styles.value}>
-          {theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}
-          <span>{numberWithCommas(toDisplay(lockAmount))} ORAIX</span>
-        </div>
-      </div> */}
-
         <div className={styles.item}>
           <div className={styles.title}>Claimable Rewards</div>
 
@@ -106,10 +165,18 @@ const StakeInfo = () => {
       </div>
 
       <div className={styles.itemBtn}>
-        <Button type="primary" onClick={() => handleClaim()} disabled={loading || toDisplay(reward) <= 0}>
-          {loading && <Loader width={22} height={22} />}&nbsp;
-          <span>Claim Rewards</span>
+        <Button
+          type="primary"
+          onClick={() => handleCompoundStaking()}
+          disabled={loadingCompound || toDisplay(reward) <= 0}
+        >
+          {loadingCompound && <Loader width={22} height={22} />}&nbsp;
+          <span>Compound</span>
         </Button>
+        <button className={styles.claim} onClick={() => handleClaim()} disabled={loading || toDisplay(reward) <= 0}>
+          {loading && <Loader width={22} height={22} />}
+          <span>Claim Rewards</span>
+        </button>
       </div>
     </div>
   );
