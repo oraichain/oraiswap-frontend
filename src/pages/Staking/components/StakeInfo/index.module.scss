@@ -95,12 +95,40 @@
   }
 
   .itemBtn {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
     @include medium-desktop {
       width: 100%;
     }
 
     @include small-mobile {
       width: 100%;
+    }
+
+    .claim {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+
+      padding: 8px;
+      background-color: transparent;
+      border: none;
+      text-decoration: underline;
+      line-height: 150%;
+
+      svg {
+      }
+
+      @include medium-desktop {
+        padding-bottom: 0;
+      }
+
+      @include small-mobile {
+        padding-bottom: 0;
+      }
     }
 
     button {
