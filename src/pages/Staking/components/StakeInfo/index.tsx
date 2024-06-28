@@ -103,14 +103,22 @@ const StakeInfo = () => {
         }
       };
 
-      const simulateData = await handleSimulateSwap({
-        originalFromInfo: USDC_TOKEN_INFO,
-        originalToInfo: ORAIX_TOKEN_INFO,
-        originalAmount: toDisplay(reward),
-        routerClient
-      });
+      const [simulateData, averageRatioData] = await Promise.all([
+        handleSimulateSwap({
+          originalFromInfo: USDC_TOKEN_INFO,
+          originalToInfo: ORAIX_TOKEN_INFO,
+          originalAmount: toDisplay(reward),
+          routerClient
+        }),
+        handleSimulateSwap({
+          originalFromInfo: USDC_TOKEN_INFO,
+          originalToInfo: ORAIX_TOKEN_INFO,
+          originalAmount: 1,
+          routerClient
+        })
+      ]);
 
-      const minReceive = calculateMinReceive(simulateData?.amount, reward, 1, USDC_TOKEN_INFO.decimals);
+      const minimumReceive = calculateMinReceive(averageRatioData.amount, reward, 1, USDC_TOKEN_INFO.decimals);
 
       const msgSwap = generateContractMessages({
         type: Type.SWAP,
@@ -118,7 +126,7 @@ const StakeInfo = () => {
         toInfo: ORAIX_TOKEN_INFO,
         amount: reward,
         sender: address,
-        minimumReceive: minReceive
+        minimumReceive
       });
 
       const msgStake = generateMiningMsgs({
