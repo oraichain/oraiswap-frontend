@@ -46,32 +46,3 @@
     }
   }
 }
-
-.tooltip {
-  color: #efefef;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 150%;
-  text-align: left;
-  width: 100%;
-  max-width: 400px;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid;
-  border-color: #494949;
-  background: #121511;
-  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
-
-  &.light {
-    color: #494949;
-    border-color: #dfe0de;
-    background: #fff;
-    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
-  }
-
-  @include mobile {
-    font-size: 12px;
-    padding: 8px;
-    width: calc(100% - 20px);
-  }
-}

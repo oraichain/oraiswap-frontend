@@ -119,6 +119,10 @@
       text-decoration: underline;
       line-height: 150%;
 
+      @include theme {
+        color: theme-get('neutral-text-title-2');
+      }
+
       svg {
       }
 

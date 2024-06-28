@@ -128,7 +128,10 @@
           padding: 16px;
 
           border-radius: var(--Dimension-Corner-Radius-menu, 12px);
-          background: var(--Colors-Neutral-Surface-bg-swap-pair, #232521);
+
+          @include theme {
+            background: theme-get('neutral-6');
+          }
 
           @include small-mobile {
             width: 100%;
@@ -137,15 +140,17 @@
           }
 
           .label {
-            color: var(--Colors-Neutral-Text-body-on-section, #979995);
             font-size: 14px;
             font-weight: 400;
             line-height: 150%; /* 21px */
             letter-spacing: 0.1px;
+
+            @include theme {
+              color: theme-get('neutral-9');
+            }
           }
 
           .value {
-            color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
             font-size: 18px;
             font-weight: 500;
             line-height: 150%; /* 27px */
@@ -153,6 +158,10 @@
             display: flex;
             align-items: center;
             gap: 6px;
+
+            @include theme {
+              color: theme-get('colors-neutral-text-text-token-name');
+            }
 
             svg {
               width: 18px;
@@ -171,10 +180,13 @@
         width: 100%;
         text-align: left;
 
-        color: var(--Colors-Neutral-Text-title, #efefef);
         font-size: 14px;
         font-weight: 400;
         line-height: 150%; /* 21px */
+
+        @include theme {
+          color: theme-get('neutral-text-title-2');
+        }
       }
     }
 
@@ -192,5 +204,34 @@
         width: 100%;
       }
     }
+  }
+}
+
+.tooltip {
+  color: #efefef;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+  text-align: left;
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  border-color: #494949;
+  background: #121511;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+
+  &.light {
+    color: #494949;
+    border-color: #dfe0de;
+    background: #fff;
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+  }
+
+  @include mobile {
+    font-size: 12px;
+    padding: 8px;
+    width: calc(100% - 20px);
   }
 }
