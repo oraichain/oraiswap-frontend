@@ -19,9 +19,10 @@ import { getUsd } from 'libs/utils';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { ORAIX_TOKEN_INFO, USDC_TOKEN_INFO } from 'pages/Staking/constants';
 import { useGetLockInfo, useGetMyStakeRewardInfo } from 'pages/Staking/hooks';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { generateContractMessages, generateMiningMsgs } from 'rest/api';
 import styles from './index.module.scss';
+import CompoundModal from '../CompoundModal';
 
 const StakeInfo = () => {
   const [theme] = useConfigReducer('theme');
@@ -41,8 +42,25 @@ const StakeInfo = () => {
   const stakeAmountUsd = getUsd(stakedAmount, ORAIX_TOKEN_INFO, prices);
   const rewardUsd = getUsd(reward, USDC_TOKEN_INFO, prices);
   const lockUsd = getUsd(lockAmount, ORAIX_TOKEN_INFO, prices);
+  const [openCompound, setOpenCompound] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingCompound, setLoadingCompound] = useState<boolean>(false);
+  const [estOraixSwap, setEstOraixSwap] = useState<number>(0);
+
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+
+  useEffect(() => {
+    (async () => {
+      const simulateData = await handleSimulateSwap({
+        originalFromInfo: USDC_TOKEN_INFO,
+        originalToInfo: ORAIX_TOKEN_INFO,
+        originalAmount: toDisplay(reward),
+        routerClient
+      });
+
+      setEstOraixSwap(simulateData?.displayAmount || 0);
+    })();
+  }, [openCompound]);
 
   const handleClaim = async () => {
     // if (!amount) return displayToast(TToastType.TX_FAILED, { message: 'Stake Amount is required' });
@@ -84,15 +102,12 @@ const StakeInfo = () => {
           }
         }
       };
-      const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
 
       const simulateData = await handleSimulateSwap({
         originalFromInfo: USDC_TOKEN_INFO,
         originalToInfo: ORAIX_TOKEN_INFO,
         originalAmount: toDisplay(reward),
         routerClient
-        // useSmartRoute: true,
-        // urlRouter: 'https://osor.oraidex.io'
       });
 
       const minReceive = calculateMinReceive(simulateData?.amount, reward, 1, USDC_TOKEN_INFO.decimals);
@@ -129,6 +144,7 @@ const StakeInfo = () => {
         loadOraichainToken(address, [USDC_TOKEN_INFO.contractAddress, ORAIX_TOKEN_INFO.contractAddress]);
         refetchMyStakeRewardInfo();
         refetchLockInfo();
+        setOpenCompound(false);
       }
     } catch (error) {
       console.log('error in com: ', error);
@@ -167,17 +183,27 @@ const StakeInfo = () => {
       <div className={styles.itemBtn}>
         <Button
           type="primary"
-          onClick={() => handleCompoundStaking()}
+          // onClick={() => handleCompoundStaking()}
+          onClick={() => setOpenCompound(true)}
           disabled={loadingCompound || toDisplay(reward) <= 0}
         >
           {loadingCompound && <Loader width={22} height={22} />}&nbsp;
           <span>Compound</span>
         </Button>
         <button className={styles.claim} onClick={() => handleClaim()} disabled={loading || toDisplay(reward) <= 0}>
-          {loading && <Loader width={22} height={22} />}
+          {/* {loading && <Loader width={22} height={22} />} */}
           <span>Claim Rewards</span>
         </button>
       </div>
+
+      <CompoundModal
+        loading={loadingCompound}
+        onClose={() => setOpenCompound(false)}
+        open={openCompound}
+        onConfirm={() => handleCompoundStaking()}
+        reward={numberWithCommas(toDisplay(String(reward)), undefined, { maximumFractionDigits: 6 })}
+        oraixAmount={numberWithCommas(estOraixSwap, undefined, { maximumFractionDigits: 6 })}
+      />
     </div>
   );
 };
