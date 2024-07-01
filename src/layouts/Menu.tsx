@@ -202,7 +202,7 @@ const Menu: React.FC = () => {
           <div className={styles.menuLeft}>
             <div className={styles.logoWrapper}>
               <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-                <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
+                <img src={imgLogo} alt="logo" />
               </Link>
               <div className={styles.divider}></div>
             </div>
