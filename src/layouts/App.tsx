@@ -7,7 +7,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { getListAddressCosmos, getNetworkGasPrice, interfaceRequestTron } from 'helper';
+import { getListAddressCosmos, getNetworkGasPrice, interfaceRequestTron, keplrCheck } from 'helper';
 import { leapWalletType } from 'helper/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -28,17 +28,43 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAddressBookList, setAddressBookList } from 'reducer/addressBook';
 import FutureCompetition from 'components/FutureCompetitionModal';
 import { useTronEventListener } from 'hooks/useTronLink';
+import { NetworkType, WalletType } from 'components/WalletManagement/walletConfig';
+
+const checkInstalledWallet = (currentWalletType: WalletType) => {
+  // @ts-ignore
+  const isCheckOwallet = window.owallet?.isOwallet;
+  const version = window?.keplr?.version;
+  const isCheckKeplr = !!version && keplrCheck('keplr');
+  const isMetamask = window?.ethereum?.isMetaMask;
+  //@ts-ignore
+  const isTronLink = window?.tronWeb?.isTronLink;
+
+  switch (currentWalletType) {
+    case 'keplr':
+      return isCheckKeplr;
+    case 'owallet':
+      return isCheckOwallet;
+    case 'metamask':
+      return isMetamask;
+    case 'tronLink':
+      return isTronLink;
+    case 'eip191':
+      return isMetamask;
+    case 'bitcoin':
+      return isCheckOwallet;
+  }
+};
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
-  const [, setTronAddress] = useConfigReducer('tronAddress');
-  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  const [, setBtcAddress] = useConfigReducer('btcAddress');
+  const [tronAddr, setTronAddress] = useConfigReducer('tronAddress');
+  const [metamaskAddr, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [btcAddr, setBtcAddress] = useConfigReducer('btcAddress');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
-  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
+  const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [bannerTime] = useConfigReducer('bannerTime');
   const mobileMode = isMobile();
@@ -46,6 +72,34 @@ const App = () => {
 
   const currentAddressBook = useSelector(selectAddressBookList);
   const dispatch = useDispatch();
+
+  const handleDisconnect = (currentDisconnectingNetwork: NetworkType) => {
+    setWalletByNetworks({
+      ...walletByNetworks,
+      [currentDisconnectingNetwork]: null
+    });
+
+    switch (currentDisconnectingNetwork) {
+      case 'cosmos':
+        setOraiAddress(undefined);
+        // TODO: need to refactor later
+        if (walletByNetworks.cosmos === 'eip191') {
+          localStorage.removeItem('eip191-account');
+        }
+        break;
+      case 'evm':
+        setMetamaskAddress(undefined);
+        break;
+      case 'bitcoin':
+        setBtcAddress(undefined);
+        break;
+      case 'tron':
+        setTronAddress(undefined);
+        break;
+      default:
+        break;
+    }
+  };
 
   useTronEventListener();
 
@@ -135,9 +189,67 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    const checkHasAddressOnStorage = address || tronAddr || metamaskAddr || btcAddr;
+
     // just auto connect keplr in mobile mode
-    mobileMode && keplrHandler();
+    (mobileMode || checkHasAddressOnStorage) && keplrHandler();
+
+    if (!mobileMode && checkHasAddressOnStorage) {
+      checkAndDisconnectNetworkByWallet();
+    }
+
+    // // just auto connect keplr in mobile mode
+    // mobileMode && keplrHandler();
   }, [mobileMode]);
+
+  const checkAndDisconnectNetworkByWallet = () => {
+    const hasOwallet = checkInstalledWallet('owallet');
+    const hasKeplr = checkInstalledWallet('keplr');
+    const hasMetamask = checkInstalledWallet('metamask');
+    const hasTronlink = checkInstalledWallet('tronLink');
+
+    // check owallet
+    if (!hasOwallet) {
+      if (address && walletByNetworks.cosmos === 'owallet') {
+        handleDisconnect('cosmos');
+      }
+      if (tronAddr && walletByNetworks.tron === 'owallet') {
+        handleDisconnect('tron');
+      }
+      if (metamaskAddr && walletByNetworks.evm === 'owallet') {
+        handleDisconnect('tron');
+      }
+      if (btcAddr && walletByNetworks.bitcoin === 'owallet') {
+        handleDisconnect('tron');
+      }
+
+      // check Keplr
+      if (address && walletByNetworks.cosmos === 'keplr') {
+        handleDisconnect('cosmos');
+      }
+    }
+
+    if (!hasKeplr) {
+      if (address && walletByNetworks.cosmos === 'keplr') {
+        handleDisconnect('cosmos');
+      }
+    }
+
+    if (!hasMetamask) {
+      if (address && walletByNetworks.cosmos === 'eip191') {
+        handleDisconnect('cosmos');
+      }
+      if (address && walletByNetworks.evm === 'metamask') {
+        handleDisconnect('evm');
+      }
+    }
+
+    if (!hasTronlink) {
+      if (address && walletByNetworks.tron === 'tronLink') {
+        handleDisconnect('tron');
+      }
+    }
+  };
 
   useEffect(() => {
     window.addEventListener('keplr_keystorechange', keplrHandler);
