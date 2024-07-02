@@ -20,11 +20,20 @@ export const useSimulate = (
   originalFromTokenInfo: TokenItemType,
   originalToTokenInfo: TokenItemType,
   routerClient: OraiswapRouterReadOnlyInterface,
-  initAmount?: number
+  initAmount?: number,
+  simulateOption?: {
+    useAlphaSmartRoute?: boolean;
+    useSmartRoute?: boolean;
+  }
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
   const debouncedFromAmount = useDebounce(fromAmountToken, 500);
-  const { data: simulateData } = useQuery(
+
+  const {
+    data: simulateData,
+    isFetching,
+    isLoading
+  } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount],
     () => {
       return handleSimulateSwap({
@@ -32,12 +41,20 @@ export const useSimulate = (
         originalToInfo: originalToTokenInfo,
         originalAmount: debouncedFromAmount,
         routerClient,
-        useSmartRoute: true,
-        urlRouter: 'https://osor.oraidex.io'
+        routerOption: {
+          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute,
+          useSmartRoute: simulateOption?.useSmartRoute
+        },
+        urlRouter: {
+          url: 'https://router.oraidex.io',
+          path: '/smart-router/alpha-router'
+        }
       });
     },
     {
+      keepPreviousData: true,
       refetchInterval: 300000,
+      staleTime: 1000,
       enabled: !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0
     }
   );
@@ -45,7 +62,7 @@ export const useSimulate = (
   useEffect(() => {
     // initAmount used for simulate averate ratio
     const fromAmount = initAmount ?? fromAmountToken;
-    setSwapAmount([fromAmount, Number(simulateData?.displayAmount)]);
+    setSwapAmount([fromAmount ?? null, !!fromAmount ? Number(simulateData?.displayAmount) : 0]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
   return { simulateData, fromAmountToken, toAmountToken, setSwapAmount, debouncedFromAmount };

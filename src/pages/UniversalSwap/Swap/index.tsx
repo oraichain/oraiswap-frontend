@@ -20,10 +20,11 @@ import { useQuery } from '@tanstack/react-query';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
+import ArrowImg from 'assets/icons/arrow_right.svg';
+import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
 import { ReactComponent as FeeDarkIcon } from 'assets/icons/fee_dark.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
-import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
@@ -36,9 +37,11 @@ import LoadingBox from 'components/LoadingBox';
 import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
-import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
+import { chainIcons, chainInfosWithIcon, flattenTokensWithIcon, tokensWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
+  btcNetworksWithIcon,
+  cosmosNetworksWithIcon,
   floatToPercent,
   getAddressTransfer,
   getSpecialCoingecko,
@@ -64,10 +67,14 @@ import {
   generateNewSymbolV2,
   getDisableSwap,
   getFromToToken,
+  getPathInfo,
   getRemoteDenom,
   getTokenBalance,
+  getTokenInfo,
+  isAllowAlphaSmartRouter,
   processPairInfo,
-  refreshBalances
+  refreshBalances,
+  transformSwapInfo
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -98,6 +105,8 @@ import useFilteredTokens from './hooks/useFilteredTokens';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
+import { assets } from 'chain-registry';
+import { TooltipSwapBridge } from './components/TooltipSwapBridge';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -206,7 +215,7 @@ const SwapComponent: React.FC<{
     contractAddress: originalFromToken.contractAddress,
     cachePrices: prices
   });
-
+  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount } = useSimulate(
     'simulate-data',
@@ -214,18 +223,21 @@ const SwapComponent: React.FC<{
     toTokenInfoData,
     originalFromToken,
     originalToToken,
-    routerClient
+    routerClient,
+    null,
+    {
+      useAlphaSmartRoute: useAlphaSmartRouter
+    }
   );
 
-  const { simulateData: averageRatio } = useSimulate(
-    'simulate-average-data',
-    fromTokenInfoData,
-    toTokenInfoData,
-    originalFromToken,
-    originalToToken,
-    routerClient,
-    INIT_AMOUNT
-  );
+  let averageRatio = undefined;
+  if (simulateData && fromAmountToken) {
+    const displayAmount = new BigDecimal(simulateData.displayAmount).div(fromAmountToken).toNumber();
+    averageRatio = {
+      amount: toAmount(displayAmount, originalFromToken.decimals),
+      displayAmount: displayAmount
+    };
+  }
 
   let usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
   if (!Number(usdPriceShow)) {
@@ -243,19 +255,15 @@ const SwapComponent: React.FC<{
   const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
     if (chainId) {
       const isFrom = type === 'from';
-
       // check current token existed on another swap token chain
-      const checkExistedToken = isFrom
-        ? flattenTokens.find(
-            (flat) => flat?.coinGeckoId === originalFromToken?.coinGeckoId && flat?.chainId === selectChainTo
-          )
-        : flattenTokens.find(
-            (flat) => flat?.coinGeckoId === originalToToken?.coinGeckoId && flat?.chainId === selectChainFrom
-          );
+      const targetToken = isFrom ? originalFromToken : originalToToken;
+      const targetChain = isFrom ? selectChainTo : selectChainFrom;
 
+      const checkExistedToken = flattenTokens.find(
+        (flat) => flat?.coinGeckoId === targetToken?.coinGeckoId && flat?.chainId === targetChain
+      );
       // get default token of new chain
       const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId);
-
       // case new chain === another swap token chain
       // if new tokenInfo(default token of new chain) === from/to Token => check is currentToken existed on new chain
       // if one of all condition is false => handle swap normally
@@ -308,15 +316,16 @@ const SwapComponent: React.FC<{
 
   const isAverageRatio = averageRatio && averageRatio.amount;
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
-  const minimumReceive = isAverageRatio
-    ? calculateMinReceive(
-        // @ts-ignore
-        new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
-    : '0';
+  const minimumReceive =
+    isAverageRatio && fromAmountTokenBalance
+      ? calculateMinReceive(
+          // @ts-ignore
+          new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
+          fromAmountTokenBalance.toString(),
+          userSlippage,
+          originalFromToken.decimals
+        )
+      : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
   const bridgeTokenFee =
@@ -400,8 +409,9 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
+      const alphaSmartRoutes = simulateData && simulateData?.routes && simulateData;
 
-      const initSwapData = {
+      let initSwapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
         originalFromToken,
         originalToToken,
@@ -413,7 +423,8 @@ const SwapComponent: React.FC<{
         simulatePrice:
           // @ts-ignore
           averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-        relayerFee: relayerFeeUniversal
+        relayerFee: relayerFeeUniversal,
+        alphaSmartRoutes
       };
 
       const compileSwapData = isCustomRecipient
@@ -423,9 +434,13 @@ const SwapComponent: React.FC<{
           }
         : initSwapData;
 
+      // @ts-ignore
       const univeralSwapHandler = new UniversalSwapHandler(compileSwapData, {
         cosmosWallet: window.Keplr,
-        evmWallet: new Metamask(window.tronWebDapp)
+        evmWallet: new Metamask(window.tronWebDapp),
+        swapOptions: {
+          isAlphaSmartRouter: useAlphaSmartRouter
+        }
       });
 
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
@@ -483,13 +498,6 @@ const SwapComponent: React.FC<{
       }
     }
   };
-
-  const FromIcon = isLightMode ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
-  const ToIcon = isLightMode ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
-  const fromNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalFromToken.chainId);
-  const toNetwork = chainInfosWithIcon.find((chain) => chain.chainId === originalToToken.chainId);
-  const FromIconNetwork = isLightMode ? fromNetwork.IconLight || fromNetwork.Icon : fromNetwork.Icon;
-  const ToIconNetwork = isLightMode ? toNetwork.IconLight || toNetwork.Icon : toNetwork.Icon;
 
   useEffect(() => {
     (async () => {
@@ -634,7 +642,7 @@ const SwapComponent: React.FC<{
   let routersSwapData = defaultRouterSwap;
 
   const fromTochainIdIsOraichain = originalFromToken.chainId === 'Oraichain' && originalToToken.chainId === 'Oraichain';
-  if (debouncedFromAmount && simulateData && fromTochainIdIsOraichain) {
+  if (fromAmountToken && simulateData) {
     routersSwapData = {
       ...simulateData,
       routes: simulateData?.routes ?? []
@@ -686,14 +694,12 @@ const SwapComponent: React.FC<{
                 type={'from'}
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
-                Icon={FromIcon}
                 theme={theme}
                 onChangePercentAmount={onChangePercentAmount}
                 setIsSelectChain={setIsSelectChainFrom}
                 setIsSelectToken={setIsSelectFrom}
                 selectChain={selectChainFrom}
                 token={originalFromToken}
-                IconNetwork={FromIconNetwork}
                 amount={fromAmountToken}
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
@@ -724,85 +730,122 @@ const SwapComponent: React.FC<{
               )}
               onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
             >
-              <span className={cx('text')}>
-                {Number(impactWarning) > 5 && <WarningIcon />}
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio
-                    ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, {
-                        maximumFractionDigits: 6
-                      })
-                    : '0'
-                } ${originalToToken.name}`}
-              </span>
+              {isAverageRatio && (
+                <span className={cx('text')}>
+                  {Number(impactWarning) > 5 && <WarningIcon />}
+                  {`1 ${originalFromToken.name} ≈ ${
+                    averageRatio
+                      ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, {
+                          maximumFractionDigits: 6
+                        })
+                      : '0'
+                  } ${originalToToken.name}`}
+                </span>
+              )}
 
-              {!!isRoutersSwapData && <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />}
+              {!!isRoutersSwapData && useAlphaSmartRouter && (
+                <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
+              )}
             </div>
           </div>
 
           <div
-            className={cx('smart', !openRoutes && !isRoutersSwapData ? 'hidden' : '')}
+            className={cx('smart', !openRoutes ? 'hidden' : '')}
             style={{
-              height:
-                openRoutes && routersSwapData?.routes.length && !!isRoutersSwapData
-                  ? routersSwapData?.routes.length * 40 + 40
-                  : 0
+              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
             }}
           >
             <div className={cx('smart-router')}>
-              {!!isRoutersSwapData &&
-                routersSwapData.routes.map((route, ind) => {
-                  let amount = parseFloat(routersSwapData.amount);
-                  let returnAmount = parseFloat(route.returnAmount);
-                  let volume = 100;
+              {routersSwapData.routes.map((route, ind) => {
+                let volumn = (+route.returnAmount / +routersSwapData.amount) * 100;
+                return (
+                  <div key={ind} className={cx('smart-router-item')}>
+                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                    {route.paths.map((path, i, acc) => {
+                      const { NetworkFromIcon, NetworkToIcon, assetList, pathChainId } = getPathInfo(
+                        path,
+                        chainIcons,
+                        assets
+                      );
 
-                  if (amount !== 0 && !isNaN(amount) && !isNaN(returnAmount)) {
-                    volume = (returnAmount / amount) * 100;
-                  }
-                  return (
-                    <div key={ind} className={cx('smart-router-item')}>
-                      <div className={cx('smart-router-item-volumn')}>{volume.toFixed(0)}%</div>
-                      {route.paths.map((path, i, acc) => {
-                        const { infoPair, pairKey, TokenInIcon, TokenOutIcon } = processPairInfo(
-                          path,
-                          flattenTokens,
-                          flattenTokensWithIcon,
-                          isLightMode
-                        );
-                        const [tokenIn, tokenOut] = infoPair?.info.split('-');
-                        return (
-                          <React.Fragment key={pairKey}>
+                      return (
+                        <React.Fragment key={i}>
+                          <div className={cx('smart-router-item-line')}>
+                            <div className={cx('smart-router-item-line-detail')} />
+                          </div>
+                          <div className={cx('smart-router-item-pool')}>
+                            <div className={cx('smart-router-item-pool-tooltip')}>
+                              {path.actions?.map((action, index, actions) => {
+                                const pathChainId = path.chainId.split('-')[0].toLowerCase();
+                                const tokenInChainId = path.chainId;
+                                const tokenOutChainId = path.tokenOutChainId;
+
+                                const { info, TokenInIcon, TokenOutIcon } = getTokenInfo(
+                                  action,
+                                  path,
+                                  flattenTokens,
+                                  assetList
+                                );
+
+                                return (
+                                  <React.Fragment key={index}>
+                                    <div key={index} className={cx('smart-router-item-pool-tooltip-bridge-swap')}>
+                                      {action.type === 'Swap' && (
+                                        <TooltipSwapBridge
+                                          type="Swap"
+                                          pathChainId={pathChainId}
+                                          tokenInChainId={tokenInChainId}
+                                          tokenOutChainId={tokenOutChainId}
+                                          TokenInIcon={TokenInIcon}
+                                          TokenOutIcon={TokenOutIcon}
+                                          NetworkFromIcon={NetworkFromIcon}
+                                          NetworkToIcon={NetworkToIcon}
+                                          info={info}
+                                        />
+                                      )}
+
+                                      {action.type === 'Bridge' && (
+                                        <TooltipSwapBridge
+                                          type="Bridge"
+                                          pathChainId={pathChainId}
+                                          tokenInChainId={tokenInChainId}
+                                          tokenOutChainId={tokenOutChainId}
+                                          TokenInIcon={TokenInIcon}
+                                          TokenOutIcon={TokenOutIcon}
+                                          NetworkFromIcon={NetworkFromIcon}
+                                          NetworkToIcon={NetworkToIcon}
+                                          info={info}
+                                        />
+                                      )}
+                                    </div>
+                                    {/* {index === 0 && actions.length > 1 && (
+                                      <div className={cx('smart-router-item-pool-tooltip-swap')}>
+                                        <div>
+                                          <img src={ArrowImg} width={26} height={26} alt="arrow" />
+                                        </div>
+                                      </div>
+                                    )} */}
+                                  </React.Fragment>
+                                );
+                              })}
+                            </div>
+                            <div className={cx('smart-router-item-pool-wrap')}>
+                              <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkFromIcon />}</div>
+                              <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
+                            </div>
+                          </div>
+                          {i === acc.length - 1 && (
                             <div className={cx('smart-router-item-line')}>
                               <div className={cx('smart-router-item-line-detail')} />
                             </div>
-                            <div
-                              className={cx('smart-router-item-pool')}
-                              onClick={() => {
-                                tokenIn &&
-                                  tokenOut &&
-                                  window.open(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
-                              }}
-                            >
-                              <div className={cx('smart-router-item-pool-wrap')}>
-                                <div className={cx('smart-router-item-pool-wrap-img')}>
-                                  <TokenInIcon />
-                                </div>
-                                <div className={cx('smart-router-item-pool-wrap-img')}>
-                                  <TokenOutIcon />
-                                </div>
-                              </div>
-                            </div>
-                            {i === acc.length - 1 && (
-                              <div className={cx('smart-router-item-line')}>
-                                <div className={cx('smart-router-item-line-detail')} />
-                              </div>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                      <div className={cx('smart-router-item-volumn')}>{volume.toFixed(0)}%</div>
-                    </div>
-                  );
-                })}
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                  </div>
+                );
+              })}
               <div className={cx('smart-router-price-impact')}>
                 <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
                 <div
@@ -830,14 +873,12 @@ const SwapComponent: React.FC<{
                 theme={theme}
                 originalToken={originalToToken}
                 disable={true}
-                Icon={ToIcon}
                 selectChain={selectChainTo}
                 setIsSelectChain={setIsSelectChainTo}
                 setIsSelectToken={setIsSelectTo}
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
-                IconNetwork={ToIconNetwork}
                 usdPrice={usdPriceShow}
               />
             </div>

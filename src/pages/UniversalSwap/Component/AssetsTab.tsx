@@ -64,7 +64,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const data = flattenTokens
     .reduce((result, token) => {
       // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
-      if (token.bridgeTo || token.contractAddress) {
+      if (token.bridgeTo || token.contractAddress || (token.denom && token.chainId !== 'oraibridge-subnet-2')) {
         const isValidNetwork = !networkFilter || token.chainId === networkFilter;
         if (isValidNetwork) {
           const amount = BigInt(amounts[token.denom] ?? 0);
