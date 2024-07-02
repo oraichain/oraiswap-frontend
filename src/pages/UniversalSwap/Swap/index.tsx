@@ -1,5 +1,6 @@
 import {
   BigDecimal,
+  CW20_DECIMALS,
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
@@ -11,30 +12,29 @@ import {
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay,
-  parseTokenInfoRawDenom,
-  CW20_DECIMALS
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { isMobile } from '@walletconnect/browser-utils';
-import UpArrowIcon from 'assets/icons/up-arrow.svg';
+import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
 import ArrowImg from 'assets/icons/arrow_right.svg';
 import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
-import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
 import { ReactComponent as FeeDarkIcon } from 'assets/icons/fee_dark.svg';
-import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
-import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
+import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
+import UpArrowIcon from 'assets/icons/up-arrow.svg';
+import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
+import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
 import { chainIcons, chainInfosWithIcon, flattenTokensWithIcon, tokensWithIcon } from 'config/chainInfos';
@@ -61,10 +61,9 @@ import Metamask from 'libs/metamask';
 import { getUsd, reduceString, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
-import { numberWithCommas, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import { numberWithCommas } from 'pages/Pools/helpers';
 import {
   genCurrentChain,
-  generateNewSymbol,
   generateNewSymbolV2,
   getDisableSwap,
   getFromToToken,
@@ -79,6 +78,7 @@ import {
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
 import {
   selectCurrentToChain,
@@ -91,22 +91,20 @@ import {
 import { AddressManagementStep } from 'reducer/type';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
-import { SlippageModal, TooltipIcon } from '../Modals';
-import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, getSwapType } from '../helpers';
+import { SlippageModal } from '../Modals';
+import { checkEvmAddress, getSwapType } from '../helpers';
 import AddressBook from './components/AddressBook';
 import InputCommon from './components/InputCommon';
 import InputSwap from './components/InputSwap/InputSwap';
 import SelectChain from './components/SelectChain/SelectChain';
 import SelectToken from './components/SelectToken/SelectToken';
+import SwapDetail from './components/SwapDetail';
 import { useGetTransHistory, useSimulate } from './hooks';
 import { useFillToken } from './hooks/useFillToken';
+import useFilteredTokens from './hooks/useFilteredTokens';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
-import useFilteredTokens from './hooks/useFilteredTokens';
-import { useNavigate } from 'react-router-dom';
-import SwapDetail from './components/SwapDetail';
-import PowerByOBridge from 'components/PowerByOBridge';
 import { assets } from 'chain-registry';
 import { TooltipSwapBridge } from './components/TooltipSwapBridge';
 
@@ -219,7 +217,7 @@ const SwapComponent: React.FC<{
   });
   const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
+  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount } = useSimulate(
     'simulate-data',
     fromTokenInfoData,
     toTokenInfoData,
@@ -332,28 +330,26 @@ const SwapComponent: React.FC<{
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
   const bridgeTokenFee =
     simulateDisplayAmount && (fromTokenFee || toTokenFee)
-      ? new BigDecimal(new BigDecimal(simulateDisplayAmount).mul(fromTokenFee))
-          .add(new BigDecimal(simulateDisplayAmount).mul(toTokenFee))
+      ? new BigDecimal(simulateDisplayAmount)
+          .mul(fromTokenFee)
+          .add(new BigDecimal(simulateDisplayAmount).mul(toTokenFee).toString())
           .div(100)
           .toNumber()
       : 0;
 
   const minimumReceiveDisplay = isSimulateDataDisplay
-    ? new BigDecimal(
-        simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
-      ).toNumber()
+    ? new BigDecimal(simulateDisplayAmount)
+        .sub(new BigDecimal(simulateDisplayAmount).mul(userSlippage).div(100).toString())
+        .sub(relayerFee)
+        .sub(bridgeTokenFee)
+        .toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
     ? numberWithCommas(simulateData.displayAmount, undefined, { minimumFractionDigits: 6 })
     : 0;
   const estSwapFee = new BigDecimal(simulateDisplayAmount || 0).mul(fee || 0).toNumber();
-
-  const totalFeeEst =
-    new BigDecimal(bridgeTokenFee || 0)
-      .add(relayerFee || 0)
-      .add(estSwapFee)
-      .toNumber() || 0;
+  const totalFeeEst = new BigDecimal(bridgeTokenFee).add(relayerFee).add(estSwapFee).toNumber() || 0;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -654,15 +650,16 @@ const SwapComponent: React.FC<{
   }
   const isRoutersSwapData = +routersSwapData.amount;
 
-  const isImpactPrice = fromAmountToken && simulateData?.amount && averageRatio?.amount;
+  const isImpactPrice = !!debouncedFromAmount && !!simulateData?.amount && !!averageRatio?.amount;
   let impactWarning = 0;
-  if (isImpactPrice && fromTochainIdIsOraichain) {
-    const caculateImpactPrice = new BigDecimal(simulateData.amount)
-      .div(toAmount(fromAmountToken, originalFromToken.decimals))
+  if (isImpactPrice && simulateData.amount && averageRatio.displayAmount && fromTochainIdIsOraichain) {
+    const calculateImpactPrice = new BigDecimal(simulateData.amount)
+      .div(toAmount(debouncedFromAmount, originalFromToken.decimals))
       .div(averageRatio.displayAmount)
       .mul(100)
       .toNumber();
-    impactWarning = 100 - caculateImpactPrice;
+
+    if (calculateImpactPrice) impactWarning = 100 - calculateImpactPrice;
   }
 
   return (
@@ -753,9 +750,9 @@ const SwapComponent: React.FC<{
           </div>
 
           <div
-            className={cx('smart', !openRoutes ? 'hidden' : '')}
+            className={cx('smart', !openRoutes && !isRoutersSwapData ? 'hidden' : '')}
             style={{
-              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
+              height: !openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
             }}
           >
             <div className={cx('smart-router')}>
@@ -837,6 +834,27 @@ const SwapComponent: React.FC<{
                               <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
                             </div>
                           </div>
+                          {/* {i === acc.length - 1 && (
+                            <div className={cx('smart-router-item-line')}>
+                              <div className={cx('smart-router-item-line-detail')} />
+                            </div>
+                            <div
+                              className={cx('smart-router-item-pool')}
+                              onClick={() => {
+                                tokenIn &&
+                                  tokenOut &&
+                                  window.open(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
+                              }}
+                            >
+                              <div className={cx('smart-router-item-pool-wrap')}>
+                                <div className={cx('smart-router-item-pool-wrap-img')}>
+                                  <TokenInIcon />
+                                </div>
+                                <div className={cx('smart-router-item-pool-wrap-img')}>
+                                  <TokenOutIcon />
+                                </div>
+                              </div>
+                            </div> */}
                           {i === acc.length - 1 && (
                             <div className={cx('smart-router-item-line')}>
                               <div className={cx('smart-router-item-line-detail')} />
@@ -864,7 +882,6 @@ const SwapComponent: React.FC<{
                     {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
                   </span>
                 </div>
-                {/* <div className={cx('smart-router-price-impact-time')}> ~ 5 mins</div> */}
               </div>
             </div>
           </div>

@@ -1,99 +1,82 @@
-import { DeliverTxResponse, isDeliverTxFailure, SigningStargateClient } from '@cosmjs/stargate';
+import { makeStdTx } from '@cosmjs/amino';
+import { toBinary } from '@cosmjs/cosmwasm-stargate';
+import { Decimal } from '@cosmjs/math';
+import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
+import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import {
+  CosmosChainId,
+  flattenTokens,
+  getTokenOnOraichain,
   KWT_SCAN,
   NetworkChainId,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
-  TokenItemType,
-  findToTokenOnOraiBridge,
   toAmount,
-  tronToEthAddress,
-  CosmosChainId,
-  INJECTIVE_ORAICHAIN_DENOM,
-  INJECTIVE_CONTRACT,
-  flattenTokens,
-  getTokenOnOraichain,
-  toDisplay
+  TokenItemType,
+  tronToEthAddress
 } from '@oraichain/oraidex-common';
-import {
-  UniversalSwapHandler,
-  isSupportedNoPoolSwapEvm,
-  addOraiBridgeRoute,
-  handleSimulateSwap
-} from '@oraichain/oraidex-universal-swap';
+import { isSupportedNoPoolSwapEvm, UniversalSwapHandler } from '@oraichain/oraidex-universal-swap';
+import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
+import { BitcoinUnit } from 'bitcoin-units';
 import classNames from 'classnames';
 import CheckBox from 'components/CheckBox';
 import LoadingBox from 'components/LoadingBox';
+import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import SearchInput from 'components/SearchInput';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, tokens } from 'config/bridgeTokens';
+import { tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { makeStdTx } from '@cosmjs/amino';
+import { NomicContext } from 'context/nomic-context';
 import {
+  EVM_CHAIN_ID,
+  getSpecialCoingecko,
   getTransactionUrl,
-  handleErrorMsg,
+  handleCheckAddress,
   handleCheckWallet,
   handleErrorTransaction,
-  networks,
-  EVM_CHAIN_ID,
-  handleCheckAddress,
-  subNumber,
-  handleCheckChainEvmWallet,
-  getSpecialCoingecko
+  networks
 } from 'helper';
-import { network as OraiNetwork } from 'config/networks';
+import { bitcoinChainId } from 'helper/constants';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
+import useOnClickOutside from 'hooks/useOnClickOutside';
+import { useGetFeeConfig } from 'hooks/useTokenFee';
+import useWalletReducer from 'hooks/useWalletReducer';
 import Content from 'layouts/Content';
 import Metamask from 'libs/metamask';
+import { config } from 'libs/nomic/config';
+import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
 import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate, useNavigation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
+import DepositBtcModal from './DepositBtcModal';
+import {
+  calculatorTotalFeeBtc,
+  convertKwt,
+  convertTransferIBCErc20Kwt,
+  findDefaultToToken,
+  getFeeRate,
+  getUtxos,
+  mapUtxos,
+  moveOraibToOraichain,
+  transferIbcCustom,
+  transferIBCKwt
+} from './helpers';
 import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
-import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
-import {
-  convertKwt,
-  convertTransferIBCErc20Kwt,
-  findDefaultToToken,
-  getUtxos,
-  moveOraibToOraichain,
-  mapUtxos,
-  transferIBCKwt,
-  transferIbcCustom,
-  getFeeRate,
-  calculatorTotalFeeBtc,
-  BTC_SCAN
-} from './helpers';
-import { useGetFeeConfig, useUsdtToBtc } from 'hooks/useTokenFee';
-import useOnClickOutside from 'hooks/useOnClickOutside';
-import * as Sentry from '@sentry/react';
-import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
-import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
-import { NomicContext } from 'context/nomic-context';
-import { Decimal } from '@cosmjs/math';
-import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
-import { BitcoinUnit } from 'bitcoin-units';
-import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
-import DepositBtcModal from './DepositBtcModal';
-import { bitcoinChainId } from 'helper/constants';
-import { config } from 'libs/nomic/config';
-import ModalConfirm from '../../components/ConfirmModal';
-import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
-import useWalletReducer from 'hooks/useWalletReducer';
-import { isMobile } from '@walletconnect/browser-utils';
 
 interface BalanceProps {}
 

@@ -4,8 +4,7 @@ import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
-import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
-
+import { useDebounce } from 'hooks/useDebounce';
 /**
  * Simulate ratio between fromToken & toToken
  * @param queryKey
@@ -66,5 +65,5 @@ export const useSimulate = (
     setSwapAmount([fromAmount ?? null, !!fromAmount ? Number(simulateData?.displayAmount) : 0]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
-  return { simulateData, fromAmountToken, toAmountToken, setSwapAmount, isFetching, isLoading };
+  return { simulateData, fromAmountToken, toAmountToken, setSwapAmount, debouncedFromAmount };
 };

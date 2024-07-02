@@ -1,5 +1,5 @@
 import { CwIcs20LatestQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
-import { Ratio } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+import { AssetInfo, Ratio } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import {
   CoinGeckoId,
   CoinIcon,
@@ -427,13 +427,12 @@ export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
 
 export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
 
-export const findTokenInfo = (token, flattenTokens) => {
-  return flattenTokens.find(
+const findTokenInfo = (token: string, flattenTokens: TokenItemType[]): TokenItemType =>
+  flattenTokens.find(
     (t) => t.contractAddress?.toUpperCase() === token?.toUpperCase() || t.denom.toUpperCase() === token?.toUpperCase()
   );
-};
 
-export const findBaseToken = (coinGeckoId, flattenTokensWithIcon, isLightMode) => {
+const findBaseToken = (coinGeckoId: string, flattenTokensWithIcon: TokenItemType[], isLightMode: boolean): string => {
   const baseToken = flattenTokensWithIcon.find((token) => token.coinGeckoId === coinGeckoId);
   return baseToken ? (isLightMode ? baseToken.IconLight : baseToken.Icon) : DefaultIcon;
 };

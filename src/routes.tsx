@@ -6,6 +6,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import Balance from 'pages/Balance';
 import Pools from 'pages/Pools';
+import PoolsV3 from 'pages/Pool-V3';
 import PoolDetail from 'pages/Pools/PoolDetail';
 import UniversalSwap from 'pages/UniversalSwap/index';
 import CoHarvest from 'pages/CoHarvest';
@@ -35,6 +36,7 @@ export default () => (
       <Route path="/bitcoin-dashboard" element={<BitcoinDashboard />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
+      <Route path="/pools-v3" element={<PoolsV3 />} />
       <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/download-owallet" element={<DownloadApp />} />

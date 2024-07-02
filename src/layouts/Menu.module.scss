@@ -271,13 +271,30 @@
     }
 
     &_text {
+      display: flex;
+      white-space: nowrap;
+      align-items: center;
+      justify-content: space-between;
       font-size: 14px;
       line-height: 100%;
       justify-items: center;
       font-weight: 500;
-
       @include theme() {
         color: theme-get('neutral-text-title');
+      }
+      .suffix {
+        height: 100%;
+        width: 100%;
+
+        & > div {
+          height: 40px;
+          width: 40px;
+        }
+        svg {
+          path {
+            stroke: unset !important;
+          }
+        }
       }
     }
 
