@@ -750,9 +750,9 @@ const SwapComponent: React.FC<{
           </div>
 
           <div
-            className={cx('smart', !openRoutes && !isRoutersSwapData ? 'hidden' : '')}
+            className={cx('smart', !openRoutes ? 'hidden' : '')}
             style={{
-              height: !openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
+              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
             }}
           >
             <div className={cx('smart-router')}>
@@ -834,27 +834,6 @@ const SwapComponent: React.FC<{
                               <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
                             </div>
                           </div>
-                          {/* {i === acc.length - 1 && (
-                            <div className={cx('smart-router-item-line')}>
-                              <div className={cx('smart-router-item-line-detail')} />
-                            </div>
-                            <div
-                              className={cx('smart-router-item-pool')}
-                              onClick={() => {
-                                tokenIn &&
-                                  tokenOut &&
-                                  window.open(`/pools/${encodeURIComponent(tokenIn)}_${encodeURIComponent(tokenOut)}`);
-                              }}
-                            >
-                              <div className={cx('smart-router-item-pool-wrap')}>
-                                <div className={cx('smart-router-item-pool-wrap-img')}>
-                                  <TokenInIcon />
-                                </div>
-                                <div className={cx('smart-router-item-pool-wrap-img')}>
-                                  <TokenOutIcon />
-                                </div>
-                              </div>
-                            </div> */}
                           {i === acc.length - 1 && (
                             <div className={cx('smart-router-item-line')}>
                               <div className={cx('smart-router-item-line-detail')} />
