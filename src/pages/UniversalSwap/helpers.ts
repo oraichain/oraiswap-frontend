@@ -420,7 +420,7 @@ export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
     (isAllowTokenInOraichain.includes(toToken.denom) || isAllowTokenInOraichain.includes(toToken.contractAddress))
   )
     return true;
-  if (fromToken.chainId === 'injective-1' || toToken.chainId === 'injective-1') return false;
+  // if (fromToken.chainId === 'injective-1' || toToken.chainId === 'injective-1') return false;
   if (fromToken.cosmosBased && toToken.cosmosBased) return true;
   return false;
 };
