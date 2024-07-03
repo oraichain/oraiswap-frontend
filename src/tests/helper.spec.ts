@@ -3,7 +3,7 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
 import { getTotalUsd, reduceString } from './../libs/utils';
 import { PairToken } from 'reducer/type';
-import { calculateFinalPriceChange, generateNewSymbol } from 'pages/UniversalSwap/helpers';
+import { calculateFinalPriceChange } from 'pages/UniversalSwap/helpers';
 import {
   MILKYBSC_ORAICHAIN_DENOM,
   USDT_CONTRACT,
@@ -66,66 +66,6 @@ describe('should utils functions in libs/utils run exactly', () => {
       expect(reduceString(null, 5, 6)).toEqual('-');
     });
   });
-
-  it.each<[string, string, string, PairToken, PairToken | null]>([
-    [
-      'from-&-to-are-NOT-pair-in-pool',
-      'OSMO',
-      'AIRI',
-      {
-        symbol: 'OSMO/AIRI',
-        info: ''
-      },
-      {
-        symbol: 'ORAI/OSMO',
-        info: `orai-${OSMOSIS_ORAICHAIN_DENOM}`
-      }
-    ],
-    [
-      'from-&-to-are-NOT-pair-in-pool',
-      'AIRI',
-      'OSMO',
-      {
-        symbol: 'AIRI/OSMO',
-        info: ''
-      },
-      {
-        symbol: 'AIRI/ORAI',
-        info: `${AIRI_CONTRACT}-orai`
-      }
-    ],
-    [
-      'from-&-to-are-pair-in-pool-and-are-NOT-reversed',
-      'ORAI',
-      'USDT',
-      {
-        symbol: 'FOO/BAR',
-        info: 'foo-bar'
-      },
-      {
-        symbol: 'ORAI/USDT',
-        info: `orai-${USDT_CONTRACT}`
-      }
-    ],
-    [
-      'from-&-to-are-pair-in-pool-and-are-reversed',
-      'USDT',
-      'ORAI',
-      {
-        symbol: 'ORAI/USDT',
-        info: `orai-${USDT_CONTRACT}`
-      },
-      null
-    ]
-  ])(
-    'test-generateNewSymbol-with-%s-should-return-correctly-new-pair',
-    (_caseName, from, to, currentPair, expectedResult) => {
-      const fromToken = oraichainTokens.find((t) => t.name === from);
-      const toToken = oraichainTokens.find((t) => t.name === to);
-      const result = generateNewSymbol(fromToken, toToken, currentPair);
-      expect(result).toEqual(expectedResult);
-    }
-  );
 
   describe('timeSince', () => {
     it.each<[number, string]>([

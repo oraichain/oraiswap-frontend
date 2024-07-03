@@ -20,29 +20,26 @@ import { useQuery } from '@tanstack/react-query';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
-import ArrowImg from 'assets/icons/arrow_right.svg';
-import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
 import { ReactComponent as FeeDarkIcon } from 'assets/icons/fee_dark.svg';
 import { ReactComponent as IconOirSettings } from 'assets/icons/iconoir_settings.svg';
+import { ReactComponent as SendIcon } from 'assets/icons/send.svg';
 import { ReactComponent as SendDarkIcon } from 'assets/icons/send_dark.svg';
 import SwitchLightImg from 'assets/icons/switch-new-light.svg';
 import SwitchDarkImg from 'assets/icons/switch-new.svg';
 import UpArrowIcon from 'assets/icons/up-arrow.svg';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
+import { assets } from 'chain-registry';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens, tokenMap } from 'config/bridgeTokens';
-import { chainIcons, chainInfosWithIcon, flattenTokensWithIcon, tokensWithIcon } from 'config/chainInfos';
+import { chainIcons } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
-  btcNetworksWithIcon,
-  cosmosNetworksWithIcon,
-  floatToPercent,
   getAddressTransfer,
   getSpecialCoingecko,
   getTransactionUrl,
@@ -72,13 +69,10 @@ import {
   getTokenBalance,
   getTokenInfo,
   isAllowAlphaSmartRouter,
-  processPairInfo,
-  refreshBalances,
-  transformSwapInfo
+  refreshBalances
 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
 import {
   selectCurrentToChain,
@@ -99,14 +93,13 @@ import InputSwap from './components/InputSwap/InputSwap';
 import SelectChain from './components/SelectChain/SelectChain';
 import SelectToken from './components/SelectToken/SelectToken';
 import SwapDetail from './components/SwapDetail';
+import { TooltipSwapBridge } from './components/TooltipSwapBridge';
 import { useGetTransHistory, useSimulate } from './hooks';
 import { useFillToken } from './hooks/useFillToken';
 import useFilteredTokens from './hooks/useFilteredTokens';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
-import { assets } from 'chain-registry';
-import { TooltipSwapBridge } from './components/TooltipSwapBridge';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -117,8 +110,6 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
-  const navigate = useNavigate();
-
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
   const [openDetail, setOpenDetail] = useState(false);
   const [openRoutes, setOpenRoutes] = useState(false);
@@ -130,6 +121,8 @@ const SwapComponent: React.FC<{
   const originalFromToken = tokenMap[fromTokenDenomSwap];
   const originalToToken = tokenMap[toTokenDenomSwap];
 
+  const { data: prices } = useCoinGeckoPrices();
+
   const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(
     originalFromToken?.chainId || ('OraiChain' as NetworkChainId)
   );
@@ -139,17 +132,15 @@ const SwapComponent: React.FC<{
 
   const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
   const [isSelectChainTo, setIsSelectChainTo] = useState(false);
-
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
-
-  const { data: prices } = useCoinGeckoPrices();
-
   const [openSetting, setOpenSetting] = useState(false);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [coe, setCoe] = useState(0);
+  const [searchTokenName] = useState('');
   const [swapLoading, setSwapLoading] = useState(false);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
+
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
@@ -158,7 +149,6 @@ const SwapComponent: React.FC<{
   const isLightMode = theme === 'light';
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch();
-  const [searchTokenName, setSearchTokenName] = useState('');
   const currentPair = useSelector(selectCurrentToken);
   const currentToChain = useSelector(selectCurrentToChain);
   const { refetchTransHistory } = useGetTransHistory();
@@ -215,6 +205,7 @@ const SwapComponent: React.FC<{
     contractAddress: originalFromToken.contractAddress,
     cachePrices: prices
   });
+
   const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount } = useSimulate(
@@ -288,7 +279,6 @@ const SwapComponent: React.FC<{
   );
 
   useEffect(() => {
-    // const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
 
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
@@ -409,7 +399,7 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = simulateData && simulateData?.routes && simulateData;
+      const alphaSmartRoutes = useAlphaSmartRouter && simulateData && simulateData?.routes;
 
       let initSwapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -979,10 +969,6 @@ const SwapComponent: React.FC<{
           <PowerByOBridge theme={theme} />
         </div>
       </LoadingBox>
-
-      {/* <div className={styles.luckyDraw}>
-        <LuckyDraw />
-      </div> */}
 
       <div ref={ref}>
         <SelectToken

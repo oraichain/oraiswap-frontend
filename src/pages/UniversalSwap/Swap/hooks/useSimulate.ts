@@ -29,11 +29,7 @@ export const useSimulate = (
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
   const debouncedFromAmount = useDebounce(fromAmountToken, 500);
 
-  const {
-    data: simulateData,
-    isFetching,
-    isLoading
-  } = useQuery(
+  const { data: simulateData } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount],
     () => {
       return handleSimulateSwap({
