@@ -330,7 +330,8 @@ export const getDisableSwap = ({
   fromTokenBalance,
   addressTransfer,
   validAddress,
-  simulateData
+  simulateData,
+  isLoadingSimulate
 }) => {
   const mobileMode = isMobile();
   const canSwapToCosmos = !mobileMode && originalToToken.cosmosBased && !walletByNetworks.cosmos;
@@ -344,6 +345,7 @@ export const getDisableSwap = ({
     fromAmountTokenBalance > fromTokenBalance || // insufficent fund
     !addressTransfer ||
     !validAddress.isValid ||
+    isLoadingSimulate ||
     canSwapTo;
 
   let disableMsg: string;
@@ -354,6 +356,7 @@ export const getDisableSwap = ({
   if (canSwapToTron) disableMsg = `Please connect tron wallet`;
   if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
   if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
+  if (isLoadingSimulate) disableMsg = `Swap`;
   return { disabledSwapBtn, disableMsg };
 };
 

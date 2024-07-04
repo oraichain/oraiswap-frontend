@@ -29,7 +29,7 @@ export const useSimulate = (
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
   const debouncedFromAmount = useDebounce(fromAmountToken, 500);
 
-  const { data: simulateData } = useQuery(
+  const { data: simulateData, isPreviousData: isPreviousSimulate } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount],
     () => {
       return handleSimulateSwap({
@@ -49,7 +49,7 @@ export const useSimulate = (
     },
     {
       keepPreviousData: true,
-      refetchInterval: 300000,
+      refetchInterval: 10000,
       staleTime: 1000,
       enabled: !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0
     }
@@ -61,5 +61,12 @@ export const useSimulate = (
     setSwapAmount([fromAmount ?? null, !!fromAmount ? Number(simulateData?.displayAmount) : 0]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
-  return { simulateData, fromAmountToken, toAmountToken, setSwapAmount, debouncedFromAmount };
+  return {
+    simulateData,
+    fromAmountToken,
+    toAmountToken,
+    setSwapAmount,
+    debouncedFromAmount,
+    isPreviousSimulate
+  };
 };

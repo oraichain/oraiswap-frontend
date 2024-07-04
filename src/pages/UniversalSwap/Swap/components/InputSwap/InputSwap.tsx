@@ -33,6 +33,7 @@ interface InputSwapProps {
   selectChain: string;
   onChangePercentAmount?: (coff: number) => void;
   theme: Themes;
+  loadingSimulate?: boolean;
 }
 
 export default function InputSwapV4({
@@ -51,7 +52,8 @@ export default function InputSwapV4({
   selectChain,
   onChangePercentAmount,
   theme,
-  coe
+  coe,
+  loadingSimulate
 }: InputSwapProps) {
   const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
   const tokenInfo = flattenTokensWithIcon.find((flattenToken) => flattenToken.coinGeckoId === token.coinGeckoId);
@@ -61,7 +63,6 @@ export default function InputSwapV4({
     <>
       <div className={cx('input-swap-balance', type === 'from' && 'is-enable-coeff')}>
         <div className={cx('select-chain')}>
-          {/* <span>{type}</span> */}
           <div className={cx('left')} onClick={() => setIsSelectChain(true)}>
             <div className={cx('icon')}>
               {isLightMode ? <chainInfo.IconLight className={cx('logo')} /> : <chainInfo.Icon className={cx('logo')} />}
@@ -132,7 +133,10 @@ export default function InputSwapV4({
               thousandSeparator
               className={cx('amount')}
               decimalScale={6}
-              disabled={disable}
+              style={{
+                opacity: loadingSimulate ? '0.4' : '1'
+              }}
+              disabled={loadingSimulate || disable}
               type="text"
               value={amount}
               onChange={() => {

@@ -208,18 +208,19 @@ const SwapComponent: React.FC<{
 
   const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount } = useSimulate(
-    'simulate-data',
-    fromTokenInfoData,
-    toTokenInfoData,
-    originalFromToken,
-    originalToToken,
-    routerClient,
-    null,
-    {
-      useAlphaSmartRoute: useAlphaSmartRouter
-    }
-  );
+  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount, isPreviousSimulate } =
+    useSimulate(
+      'simulate-data',
+      fromTokenInfoData,
+      toTokenInfoData,
+      originalFromToken,
+      originalToToken,
+      routerClient,
+      null,
+      {
+        useAlphaSmartRoute: useAlphaSmartRouter
+      }
+    );
 
   let averageRatio = undefined;
   if (simulateData && fromAmountToken) {
@@ -870,6 +871,7 @@ const SwapComponent: React.FC<{
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
                 usdPrice={usdPriceShow}
+                loadingSimulate={isPreviousSimulate}
               />
             </div>
           </div>
@@ -948,7 +950,8 @@ const SwapComponent: React.FC<{
               fromTokenBalance,
               addressTransfer,
               validAddress,
-              simulateData
+              simulateData,
+              isLoadingSimulate: isPreviousSimulate
             });
             return (
               <button
