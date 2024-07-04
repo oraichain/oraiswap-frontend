@@ -100,6 +100,7 @@ import useFilteredTokens from './hooks/useFilteredTokens';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
+import AIRouteSwitch from './components/AIRouteSwitch/AIRouteSwitch';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -206,7 +207,8 @@ const SwapComponent: React.FC<{
     cachePrices: prices
   });
 
-  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
+  const [isAIRoute] = useConfigReducer('AIRoute');
+  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount, isPreviousSimulate } =
     useSimulate(
@@ -219,8 +221,25 @@ const SwapComponent: React.FC<{
       null,
       {
         useAlphaSmartRoute: useAlphaSmartRouter
-      }
+      },
+      isAIRoute
     );
+
+  const { simulateData: averageSimulateData } = useSimulate(
+    'average-simulate-data',
+    fromTokenInfoData,
+    toTokenInfoData,
+    originalFromToken,
+    originalToToken,
+    routerClient,
+    INIT_AMOUNT,
+    {
+      useAlphaSmartRoute: useAlphaSmartRouter
+    },
+    isAIRoute
+  );
+
+  console.log({ averageSimulateData, INIT_AMOUNT });
 
   let averageRatio = undefined;
   if (simulateData && fromAmountToken) {
@@ -710,18 +729,19 @@ const SwapComponent: React.FC<{
             </div>
           </div>
           <div className={cx('swap-center')}>
-            <div className={cx('title')}>To</div>
+            {/* <div className={cx('title')}>To</div> */}
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
               <img src={isLightMode ? SwitchLightImg : SwitchDarkImg} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
-            <div
-              className={cx(
-                'ratio',
-                Number(impactWarning) > 10 ? 'ratio-ten' : Number(impactWarning) > 5 && 'ratio-five'
-              )}
-              onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
-            >
-              {isAverageRatio && (
+            <div className={cx('swap-ai-dot')}>
+              <AIRouteSwitch />
+              <div
+                className={cx(
+                  'ratio',
+                  Number(impactWarning) > 10 ? 'ratio-ten' : Number(impactWarning) > 5 && 'ratio-five'
+                )}
+                onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
+              >
                 <span className={cx('text')}>
                   {Number(impactWarning) > 5 && <WarningIcon />}
                   {`1 ${originalFromToken.name} ≈ ${
@@ -729,14 +749,19 @@ const SwapComponent: React.FC<{
                       ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, {
                           maximumFractionDigits: 6
                         })
+                      : averageSimulateData
+                      ? numberWithCommas(averageSimulateData?.displayAmount / INIT_AMOUNT, undefined, {
+                          maximumFractionDigits: 6
+                        })
                       : '0'
-                  } ${originalToToken.name}`}
+                  }
+                  ${originalToToken.name}`}
                 </span>
-              )}
 
-              {!!isRoutersSwapData && useAlphaSmartRouter && (
-                <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
-              )}
+                {!!isRoutersSwapData && useAlphaSmartRouter && (
+                  <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
+                )}
+              </div>
             </div>
           </div>
 

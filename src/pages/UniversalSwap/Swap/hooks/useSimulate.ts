@@ -24,13 +24,14 @@ export const useSimulate = (
   simulateOption?: {
     useAlphaSmartRoute?: boolean;
     useSmartRoute?: boolean;
-  }
+  },
+  isAIRoute?: boolean
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
   const debouncedFromAmount = useDebounce(fromAmountToken, 500);
 
   const { data: simulateData, isPreviousData: isPreviousSimulate } = useQuery(
-    [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount],
+    [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount, isAIRoute],
     () => {
       return handleSimulateSwap({
         originalFromInfo: originalFromTokenInfo,
