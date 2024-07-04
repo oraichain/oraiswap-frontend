@@ -52,8 +52,7 @@ $primary-text-highlight: #d7f5bf;
 
 // for dark-light mode
 $themes: (
-  dark: (
-    'colors-neutral-text-text-token-name': #f7f7f7,
+  dark: ('colors-neutral-text-text-token-name': #f7f7f7,
     'colors-neutral-text-body-on-section': #979995,
     'colors-primary-surface-default': #aee67f,
     'colors-neutral-text-text-btn-default': #292f23,
@@ -166,10 +165,9 @@ $themes: (
     'bg-linear-section': linear-gradient(180deg, #232521 0%, #181a17 100%),
     'neutral-surface-btn-default': #152703,
     'neutral-text-btn-default': #152703,
-    'neutral-surface-bg-3': #f7f7f7
-  ),
-  light: (
-    'colors-neutral-text-text-token-name': #181a17,
+    'neutral-surface-bg-3': #f7f7f7,
+    'neutral-surface-bg-swap-pair': #6D835D),
+  light: ('colors-neutral-text-text-token-name': #181a17,
     'colors-neutral-text-body-on-section': #686a66,
     'colors-primary-surface-default': #aee67f,
     'colors-neutral-text-text-btn-default': #292f23,
@@ -282,6 +280,6 @@ $themes: (
     'neutral-surface-btn-default': #eef9e5,
     'neutral-text-btn-default': #232521,
     'bg-overlay-section': rgba(255, 255, 255, 0.5),
-    'neutral-surface-bg-3': #181a17
-  )
+    'neutral-surface-bg-3': #181a17,
+    'neutral-surface-bg-swap-pair': #F2F4F0)
 );
