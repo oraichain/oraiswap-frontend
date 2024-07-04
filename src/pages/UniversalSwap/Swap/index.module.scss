@@ -741,6 +741,21 @@
   &.activeSetting {
     transform: translateY(0);
   }
+
+  .smartRouter {
+    display: flex;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #232521;
+    .smartRouterAction {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #232521;
+      margin: 10px;
+      border-radius: 8px;
+    }
+  }
 }
 
 .overlay {
@@ -839,13 +854,20 @@
       .smart-router-item-line {
         flex: 1;
         .smart-router-item-line-detail {
-          background: linear-gradient(90deg, #2f5711 0%, #78ca11 42.71%, #d0e54c 71.35%, #2f5711 100%);
+          // background: linear-gradient(90deg, #2f5711 0%, #78ca11 42.71%, #d0e54c 71.35%, #2f5711 100%);
+          background: linear-gradient(
+            90deg,
+            rgb(115 255 11) 0%,
+            rgb(54, 93, 3) 42.71%,
+            rgb(204 255 0) 71.35%,
+            rgb(24, 43, 10) 100%
+          );
           background-size: 200% 200%;
-          height: 2px;
+          height: 3px;
           border-radius: 99px;
-          -webkit-animation: Animation 3s ease infinite;
-          -moz-animation: Animation 3s ease infinite;
-          animation: Animation 3s ease infinite;
+          -webkit-animation: Animation 2.4s linear;
+          -moz-animation: Animation 2.4s linear infinite;
+          animation: Animation 2.4s linear infinite;
         }
       }
       .smart-router-item-pool {

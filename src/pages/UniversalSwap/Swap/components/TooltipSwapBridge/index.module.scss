@@ -2,16 +2,16 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background-color: #232521;
+  // background-color: #232521;
   padding: 10px;
-  border-radius: 8px;
+  // border-radius: 8px;
   .tooltipUniversalSwapType {
     text-align: center;
     text-transform: capitalize;
   }
   .tooltipUniversalSwapRoutes {
     display: flex;
-    gap: 6px;
+    gap: 10px;
     .tooltipUniversalSwapRoute {
       display: flex;
       flex-direction: column;

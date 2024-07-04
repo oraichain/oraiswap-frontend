@@ -100,6 +100,7 @@ import useFilteredTokens from './hooks/useFilteredTokens';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
+import { SmartRouteModal } from '../Modals/SmartRouteModal';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -135,6 +136,10 @@ const SwapComponent: React.FC<{
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
+
+  const [openSmartRoute, setOpenSmartRoute] = useState(false);
+  const [indSmartRoute, setIndSmartRoute] = useState([0, 0]);
+
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [coe, setCoe] = useState(0);
   const [searchTokenName] = useState('');
@@ -538,9 +543,15 @@ const SwapComponent: React.FC<{
   });
 
   const settingRef = useRef();
+  const smartRouteRef = useRef();
 
   useOnClickOutside(settingRef, () => {
     setOpenSetting(false);
+  });
+
+  useOnClickOutside(smartRouteRef, () => {
+    setOpenSmartRoute(false);
+    setIndSmartRoute([0, 0]);
   });
 
   const onChangePercentAmount = (coeff) => {
@@ -763,63 +774,14 @@ const SwapComponent: React.FC<{
                           <div className={cx('smart-router-item-line')}>
                             <div className={cx('smart-router-item-line-detail')} />
                           </div>
-                          <div className={cx('smart-router-item-pool')}>
-                            <div className={cx('smart-router-item-pool-tooltip')}>
-                              {path.actions?.map((action, index, actions) => {
-                                const pathChainId = path.chainId.split('-')[0].toLowerCase();
-                                const tokenInChainId = path.chainId;
-                                const tokenOutChainId = path.tokenOutChainId;
-
-                                const { info, TokenInIcon, TokenOutIcon } = getTokenInfo(
-                                  action,
-                                  path,
-                                  flattenTokens,
-                                  assetList
-                                );
-
-                                return (
-                                  <React.Fragment key={index}>
-                                    <div key={index} className={cx('smart-router-item-pool-tooltip-bridge-swap')}>
-                                      {action.type === 'Swap' && (
-                                        <TooltipSwapBridge
-                                          type="Swap"
-                                          pathChainId={pathChainId}
-                                          tokenInChainId={tokenInChainId}
-                                          tokenOutChainId={tokenOutChainId}
-                                          TokenInIcon={TokenInIcon}
-                                          TokenOutIcon={TokenOutIcon}
-                                          NetworkFromIcon={NetworkFromIcon}
-                                          NetworkToIcon={NetworkToIcon}
-                                          info={info}
-                                        />
-                                      )}
-
-                                      {action.type === 'Bridge' && (
-                                        <TooltipSwapBridge
-                                          type="Bridge"
-                                          pathChainId={pathChainId}
-                                          tokenInChainId={tokenInChainId}
-                                          tokenOutChainId={tokenOutChainId}
-                                          TokenInIcon={TokenInIcon}
-                                          TokenOutIcon={TokenOutIcon}
-                                          NetworkFromIcon={NetworkFromIcon}
-                                          NetworkToIcon={NetworkToIcon}
-                                          info={info}
-                                        />
-                                      )}
-                                    </div>
-                                    {/* {index === 0 && actions.length > 1 && (
-                                      <div className={cx('smart-router-item-pool-tooltip-swap')}>
-                                        <div>
-                                          <img src={ArrowImg} width={26} height={26} alt="arrow" />
-                                        </div>
-                                      </div>
-                                    )} */}
-                                  </React.Fragment>
-                                );
-                              })}
-                            </div>
-                            <div className={cx('smart-router-item-pool-wrap')}>
+                          <div
+                            className={cx('smart-router-item-pool')}
+                            onClick={() => setOpenSmartRoute(!openSmartRoute)}
+                          >
+                            <div
+                              className={cx('smart-router-item-pool-wrap')}
+                              onClick={() => setIndSmartRoute([ind, i])}
+                            >
                               <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkFromIcon />}</div>
                               <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
                             </div>
@@ -1029,7 +991,7 @@ const SwapComponent: React.FC<{
         tokenTo={originalToToken}
       />
       <div
-        className={cx('overlay', openSetting ? 'activeOverlay' : '')}
+        className={cx('overlay', openSetting || openSmartRoute ? 'activeOverlay' : '')}
         onClick={() => {
           setOpenSetting(false);
         }}
@@ -1041,6 +1003,50 @@ const SwapComponent: React.FC<{
           userSlippage={userSlippage}
           isBotomSheet
         />
+      </div>
+      <div className={cx('setting', openSmartRoute ? 'activeSetting' : '')} ref={smartRouteRef}>
+        <SmartRouteModal setIndSmartRoute={setIndSmartRoute} setVisible={setOpenSmartRoute} isBotomSheet>
+          <div className={styles.smartRouter}>
+            {openSmartRoute &&
+              [routersSwapData?.routes[indSmartRoute[0]]?.paths[indSmartRoute[1]]].map((path) => {
+                if (!path) return;
+                const { NetworkFromIcon, NetworkToIcon, assetList, pathChainId } = getPathInfo(
+                  path,
+                  chainIcons,
+                  assets
+                );
+                return path.actions?.map((action, index, actions) => {
+                  const { info, TokenInIcon, TokenOutIcon } = getTokenInfo(action, path, flattenTokens, assetList);
+                  const tokenInChainId = path.chainId;
+                  const tokenOutChainId = path.tokenOutChainId;
+                  const hasTypeConvert = actions.find((act) => act.type === 'Convert');
+                  const width = hasTypeConvert ? actions.length - 1 : actions.length;
+                  if (action.type === 'Convert') return;
+                  return (
+                    <div
+                      key={index}
+                      className={styles.smartRouterAction}
+                      style={{
+                        width: `${100 / width}%`
+                      }}
+                    >
+                      <TooltipSwapBridge
+                        type={action.type}
+                        pathChainId={pathChainId}
+                        tokenInChainId={tokenInChainId}
+                        tokenOutChainId={tokenOutChainId}
+                        TokenInIcon={TokenInIcon}
+                        TokenOutIcon={TokenOutIcon}
+                        NetworkFromIcon={NetworkFromIcon}
+                        NetworkToIcon={NetworkToIcon}
+                        info={info}
+                      />
+                    </div>
+                  );
+                });
+              })}
+          </div>
+        </SmartRouteModal>
       </div>
 
       <SwapDetail
