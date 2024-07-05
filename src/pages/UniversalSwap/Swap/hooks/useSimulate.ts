@@ -39,8 +39,7 @@ export const useSimulate = (
         originalAmount: debouncedFromAmount,
         routerClient,
         routerOption: {
-          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute,
-          useSmartRoute: simulateOption?.useSmartRoute
+          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute
         },
         urlRouter: {
           url: 'https://router.oraidex.io',

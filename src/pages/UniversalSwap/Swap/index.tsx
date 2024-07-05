@@ -434,7 +434,6 @@ const SwapComponent: React.FC<{
         simulateAmount,
         userSlippage,
         amounts: amountsBalance,
-        smartRoutes: simulateData?.routeSwapOps,
         simulatePrice:
           // @ts-ignore
           averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
@@ -666,7 +665,8 @@ const SwapComponent: React.FC<{
   if (fromAmountToken && simulateData) {
     routersSwapData = {
       ...simulateData,
-      routes: simulateData?.routes ?? []
+      //@ts-ignore
+      routes: simulateData?.routes?.routes ?? []
     };
   }
   const isRoutersSwapData = +routersSwapData.amount;
@@ -783,7 +783,7 @@ const SwapComponent: React.FC<{
             }}
           >
             <div className={cx('smart-router')}>
-              {routersSwapData.routes.map((route, ind) => {
+              {routersSwapData?.routes.map((route, ind) => {
                 let volumn = (+route.returnAmount / +routersSwapData.amount) * 100;
                 return (
                   <div key={ind} className={cx('smart-router-item')}>
