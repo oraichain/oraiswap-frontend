@@ -57,40 +57,6 @@
     }
   }
 
-  .ai-smart-route {
-    .ai-label {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-
-      .label {
-        display: flex;
-        align-items: center;
-
-        @include theme() {
-          color: theme-get('neutral-text-title');
-        }
-      }
-    }
-
-    .ai-description {
-      @include theme() {
-        color: theme-get('neutral-text-title');
-      }
-
-      line-height: 150%;
-    }
-
-    @include theme() {
-      border-color: theme-get('neutral-text-body-on-section');
-    }
-
-    border-bottom: 1px solid;
-    padding-bottom: 16px;
-    margin-bottom: 15px;
-  }
-
   .subtitle {
     display: flex;
     align-items: center;

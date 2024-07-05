@@ -14,7 +14,7 @@ interface ToggleSwitchInterface {
   disabled?: boolean;
 }
 
-const ToggleSwitch = ({ id, name, checked, onChange, optionLabels, small, disabled }: ToggleSwitchInterface) => {
+const ToggleSwitch = ({ id, name, checked, onChange, small, disabled }: ToggleSwitchInterface) => {
   const theme = useTheme();
 
   function handleKeyPress(e) {
