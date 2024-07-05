@@ -31,7 +31,8 @@ import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './AddLiquidityModal.module.scss';
 import InputWithOptionPercent from '../InputWithOptionPercent';
-import { SlippageModal, TooltipIcon } from 'pages/UniversalSwap/Modals';
+import { TooltipIcon } from 'pages/UniversalSwap/Modals';
+import { SlippageModal } from '../SlippageModal/SlippageModal';
 
 const cx = cn.bind(styles);
 
