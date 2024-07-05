@@ -178,11 +178,7 @@ const SwapComponent: React.FC<{
 
   const subAmountFrom = toSubAmount(amounts, originalFromToken);
   const subAmountTo = toSubAmount(amounts, originalToToken);
-
-  const isFromBTC = originalFromToken.coinGeckoId === 'bitcoin';
-  const INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT = 0.00001;
-  let INIT_AMOUNT = 1;
-  if (isFromBTC) INIT_AMOUNT = INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT;
+  const INIT_AMOUNT = 1;
 
   useGetFeeConfig();
 
@@ -243,8 +239,6 @@ const SwapComponent: React.FC<{
     },
     isAIRoute
   );
-
-  console.log({ averageSimulateData, INIT_AMOUNT });
 
   let averageRatio = undefined;
   if (simulateData && fromAmountToken) {
