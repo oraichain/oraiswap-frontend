@@ -19,6 +19,10 @@ import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalsw
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
+
+import LogoFullImgDarkBeta from 'assets/images/OraiDEX_logo_dark.svg';
+import LogoFullImgLightBeta from 'assets/images/OraiDEX_logo_light.svg';
+
 import classNames from 'classnames';
 import { WalletManagement } from 'components/WalletManagement/WalletManagement';
 import { ThemeContext } from 'context/theme-context';
@@ -116,6 +120,11 @@ const Menu: React.FC = () => {
   const ToggleIcon = open ? CloseIcon : MenuIcon;
   const darkTheme = theme === 'dark';
 
+  const isBeta = window.location.host === 'beta.oraidex.io';
+  const imgLogoLight = isBeta ? LogoFullImgLightBeta : LogoFullImgLight;
+  const imgLogoDark = isBeta ? LogoFullImgDarkBeta : LogoFullImgDark;
+  const imgLogo = darkTheme ? imgLogoLight : imgLogoDark;
+
   const menuList = (
     <div className={classNames(styles.menu_list)}>
       <div className={classNames(styles.menu_list_left)}>
@@ -134,7 +143,7 @@ const Menu: React.FC = () => {
       {renderLink('/staking', 'Staking', setLink, false, <StakingIcon />)}
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}
-      {renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, true, <OraidexBetaIcon />)}
+      {!isBeta && renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, true, <OraidexBetaIcon />)}
       <div className={styles.divider}></div>
       {renderLink('https://orderbook.oraidex.io', 'Order Book', () => {}, true, <OrderbookIcon />)}
       {renderLink('https://futures.oraidex.io', 'Futures Trading', () => {}, true, <FuturesIcon />)}
@@ -178,7 +187,7 @@ const Menu: React.FC = () => {
             <div className={styles.logo}>
               <ToggleIcon onClick={handleToggle} />
               <Link to={'/'} onClick={() => setLink('/')}>
-                <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
+                <img src={imgLogo} alt="logo" />
               </Link>
             </div>
             <WalletManagement />
@@ -193,7 +202,7 @@ const Menu: React.FC = () => {
           <div className={styles.menuLeft}>
             <div className={styles.logoWrapper}>
               <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-                <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
+                <img src={imgLogo} alt="logo" />
               </Link>
               <div className={styles.divider}></div>
             </div>

@@ -76,6 +76,8 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
     );
   };
 
+  const isBeta = window.location.host === 'beta.oraidex.io';
+
   return (
     <>
       <div className={classNames(styles.sidebar, { [styles.open]: open })}>
@@ -88,7 +90,7 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
             {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
-            {renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, <OraidexBetaIcon />, true)}
+            {!isBeta && renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, <OraidexBetaIcon />, true)}
           </div>
         </div>
 
