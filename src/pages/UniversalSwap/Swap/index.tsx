@@ -667,10 +667,16 @@ const SwapComponent: React.FC<{
 
   const isImpactPrice = !!debouncedFromAmount && !!simulateData?.amount && !!averageRatio?.amount;
   let impactWarning = 0;
-  if (isImpactPrice && simulateData.amount && averageRatio.displayAmount && fromTochainIdIsOraichain) {
+  if (
+    isImpactPrice &&
+    simulateData.amount &&
+    averageRatio.displayAmount &&
+    fromTochainIdIsOraichain &&
+    averageSimulateData
+  ) {
     const calculateImpactPrice = new BigDecimal(simulateData.amount)
       .div(toAmount(debouncedFromAmount, originalFromToken.decimals))
-      .div(averageRatio.displayAmount)
+      .div(averageSimulateData.displayAmount)
       .mul(100)
       .toNumber();
 

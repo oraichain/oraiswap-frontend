@@ -322,9 +322,7 @@
     /* identical to box height, or 24px */
 
     text-align: center;
-    font-feature-settings: 'tnum' on,
-    'lnum' on,
-    'zero' on;
+    font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
 
     .token {
       cursor: pointer;
@@ -662,8 +660,6 @@
   }
 }
 
-
-
 .swap-btn {
   width: 100%;
   gap: 5px;
@@ -763,13 +759,19 @@
     display: flex;
     width: 100%;
     border-radius: 8px;
-    border: 1px solid #232521;
+    @include theme() {
+      background-color: theme-get('neutral-surface-bg-tooltip');
+      border: 1px solid theme-get('neutral-border-border-bold');
+      color: theme-get('colors-neutral-text-body-on-row');
+    }
 
     .smartRouterAction {
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #232521;
+      @include theme() {
+        border: 1px solid theme-get('neutral-border-border-bold');
+      }
       margin: 10px;
       border-radius: 8px;
     }
@@ -877,11 +879,13 @@
 
         .smart-router-item-line-detail {
           // background: linear-gradient(90deg, #2f5711 0%, #78ca11 42.71%, #d0e54c 71.35%, #2f5711 100%);
-          background: linear-gradient(90deg,
-              rgb(115 255 11) 0%,
-              rgb(54, 93, 3) 42.71%,
-              rgb(204 255 0) 71.35%,
-              rgb(24, 43, 10) 100%);
+          background: linear-gradient(
+            90deg,
+            rgb(115 255 11) 0%,
+            rgb(54, 93, 3) 42.71%,
+            rgb(204 255 0) 71.35%,
+            rgb(24, 43, 10) 100%
+          );
           background-size: 200% 200%;
           height: 3px;
           border-radius: 99px;
@@ -1079,46 +1083,38 @@
   }
 }
 
-
-
 @-webkit-keyframes pulse {
   0% {
     background: rgba(255, 255, 255, 0.3);
-    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5),
-      0px 0px 5px 2px rgba(0, 255, 135, 0.3);
+    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5), 0px 0px 5px 2px rgba(0, 255, 135, 0.3);
   }
 
   100% {
     background: rgba(255, 255, 255, 1);
-    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5),
-      0px 0px 15px 2px rgba(0, 255, 135, 1);
+    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5), 0px 0px 15px 2px rgba(0, 255, 135, 1);
   }
 }
 
 @-moz-keyframes pulse {
   0% {
     background: rgba(255, 255, 255, 0.3);
-    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5),
-      0px 0px 5px 2px rgba(0, 255, 135, 0.3);
+    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5), 0px 0px 5px 2px rgba(0, 255, 135, 0.3);
   }
 
   100% {
     background: rgba(255, 255, 255, 1);
-    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5),
-      0px 0px 15px 2px rgba(0, 255, 135, 1);
+    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5), 0px 0px 15px 2px rgba(0, 255, 135, 1);
   }
 }
 
 @keyframes pulse {
   0% {
     background: rgba(255, 255, 255, 0.3);
-    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5),
-      0px 0px 5px 2px rgba(0, 255, 135, 0.3);
+    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5), 0px 0px 5px 2px rgba(0, 255, 135, 0.3);
   }
 
   100% {
     background: rgba(255, 255, 255, 1);
-    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5),
-      0px 0px 15px 2px rgba(0, 255, 135, 1);
+    box-shadow: inset 0px 0px 10px 2px rgba(0, 255, 182, 0.5), 0px 0px 15px 2px rgba(0, 255, 135, 1);
   }
 }
