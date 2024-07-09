@@ -624,6 +624,12 @@
       opacity: 0.8;
     }
 
+    svg {
+      path {
+        stroke: $white;
+      }
+    }
+
     &-ten {
       color: $warning-10-color !important;
 

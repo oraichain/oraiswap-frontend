@@ -730,7 +730,6 @@ const SwapComponent: React.FC<{
             </div>
           </div>
           <div className={cx('swap-center')}>
-            {/* <div className={cx('title')}>To</div> */}
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
               <img src={isLightMode ? SwitchLightImg : SwitchDarkImg} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
@@ -739,7 +738,11 @@ const SwapComponent: React.FC<{
               <div
                 className={cx(
                   'ratio',
-                  Number(impactWarning) > 10 ? 'ratio-ten' : Number(impactWarning) > 5 && 'ratio-five'
+                  isPreviousSimulate
+                    ? ''
+                    : Number(impactWarning) > 10
+                    ? 'ratio-ten'
+                    : Number(impactWarning) > 5 && 'ratio-five'
                 )}
                 onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
               >
@@ -759,71 +762,73 @@ const SwapComponent: React.FC<{
                   ${originalToToken.name}`}
                 </span>
 
-                {!!isRoutersSwapData && useAlphaSmartRouter && (
+                {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
                   <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
                 )}
               </div>
             </div>
           </div>
 
-          <div className={cx('smart', !openRoutes ? 'hidden' : '')}>
-            <div className={cx('smart-router')}>
-              {routersSwapData?.routes.map((route, ind) => {
-                const volumn = Math.round(
-                  new BigDecimal(route.returnAmount).div(routersSwapData.amount).mul(100).toNumber()
-                );
-                return (
-                  <div key={ind} className={cx('smart-router-item')}>
-                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
-                    {route.paths.map((path, i, acc) => {
-                      const { NetworkFromIcon, NetworkToIcon } = getPathInfo(path, chainIcons, assets);
-                      return (
-                        <React.Fragment key={i}>
-                          <div className={cx('smart-router-item-line')}>
-                            <div className={cx('smart-router-item-line-detail')} />
-                          </div>
-                          <div
-                            className={cx('smart-router-item-pool')}
-                            onClick={() => setOpenSmartRoute(!openSmartRoute)}
-                          >
-                            <div
-                              className={cx('smart-router-item-pool-wrap')}
-                              onClick={() => setIndSmartRoute([ind, i])}
-                            >
-                              <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkFromIcon />}</div>
-                              <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
-                            </div>
-                          </div>
-                          {i === acc.length - 1 && (
+          {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
+            <div className={cx('smart', !openRoutes ? 'hidden' : '')}>
+              <div className={cx('smart-router')}>
+                {routersSwapData?.routes.map((route, ind) => {
+                  const volumn = Math.round(
+                    new BigDecimal(route.returnAmount).div(routersSwapData.amount).mul(100).toNumber()
+                  );
+                  return (
+                    <div key={ind} className={cx('smart-router-item')}>
+                      <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                      {route.paths.map((path, i, acc) => {
+                        const { NetworkFromIcon, NetworkToIcon } = getPathInfo(path, chainIcons, assets);
+                        return (
+                          <React.Fragment key={i}>
                             <div className={cx('smart-router-item-line')}>
                               <div className={cx('smart-router-item-line-detail')} />
                             </div>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                    <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                            <div
+                              className={cx('smart-router-item-pool')}
+                              onClick={() => setOpenSmartRoute(!openSmartRoute)}
+                            >
+                              <div
+                                className={cx('smart-router-item-pool-wrap')}
+                                onClick={() => setIndSmartRoute([ind, i])}
+                              >
+                                <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkFromIcon />}</div>
+                                <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
+                              </div>
+                            </div>
+                            {i === acc.length - 1 && (
+                              <div className={cx('smart-router-item-line')}>
+                                <div className={cx('smart-router-item-line-detail')} />
+                              </div>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                      <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                    </div>
+                  );
+                })}
+                <div className={cx('smart-router-price-impact')}>
+                  <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
+                  <div
+                    className={cx(
+                      'smart-router-price-impact-warning',
+                      Number(impactWarning) > 10
+                        ? 'smart-router-price-impact-warning-ten'
+                        : Number(impactWarning) > 5 && 'smart-router-price-impact-warning-five'
+                    )}
+                  >
+                    <span>
+                      {Number(impactWarning) > 5 && <WarningIcon />} ≈{' '}
+                      {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
+                    </span>
                   </div>
-                );
-              })}
-              <div className={cx('smart-router-price-impact')}>
-                <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
-                <div
-                  className={cx(
-                    'smart-router-price-impact-warning',
-                    Number(impactWarning) > 10
-                      ? 'smart-router-price-impact-warning-ten'
-                      : Number(impactWarning) > 5 && 'smart-router-price-impact-warning-five'
-                  )}
-                >
-                  <span>
-                    {Number(impactWarning) > 5 && <WarningIcon />} ≈{' '}
-                    {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
-                  </span>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className={cx('to')}>
             <div className={cx('input-wrapper')}>
