@@ -1,6 +1,6 @@
 import { TokenItemType } from '@oraichain/oraidex-common';
 import { OraiswapRouterReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
-import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
+import { UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
@@ -28,12 +28,12 @@ export const useSimulate = (
   isAIRoute?: boolean
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
-  const debouncedFromAmount = useDebounce(fromAmountToken, 500);
+  const debouncedFromAmount = useDebounce(fromAmountToken, 800);
 
   const { data: simulateData, isPreviousData: isPreviousSimulate } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount, isAIRoute],
     () => {
-      return handleSimulateSwap({
+      return UniversalSwapHelper.handleSimulateSwap({
         originalFromInfo: originalFromTokenInfo,
         originalToInfo: originalToTokenInfo,
         originalAmount: debouncedFromAmount,
@@ -49,7 +49,7 @@ export const useSimulate = (
     },
     {
       keepPreviousData: true,
-      refetchInterval: 10000,
+      refetchInterval: 15000,
       staleTime: 1000,
       enabled: !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0
     }

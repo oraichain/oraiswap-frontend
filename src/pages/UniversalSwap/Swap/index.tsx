@@ -97,7 +97,6 @@ import { TooltipSwapBridge } from './components/TooltipSwapBridge';
 import { useGetTransHistory, useSimulate } from './hooks';
 import { useFillToken } from './hooks/useFillToken';
 import useFilteredTokens from './hooks/useFilteredTokens';
-import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import { SmartRouteModal } from '../Modals/SmartRouteModal';
@@ -202,12 +201,6 @@ const SwapComponent: React.FC<{
   const fromTokenBalance = getTokenBalance(originalFromToken, amounts, subAmountFrom);
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
-  const { price } = useGetPriceByUSD({
-    denom: originalFromToken.denom,
-    contractAddress: originalFromToken.contractAddress,
-    cachePrices: prices
-  });
-
   const [isAIRoute] = useConfigReducer('AIRoute');
   const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
@@ -244,15 +237,13 @@ const SwapComponent: React.FC<{
   if (simulateData && fromAmountToken) {
     const displayAmount = new BigDecimal(simulateData.displayAmount).div(fromAmountToken).toNumber();
     averageRatio = {
-      amount: toAmount(displayAmount, originalFromToken.decimals),
-      displayAmount: displayAmount
+      amount: toAmount(displayAmount ? displayAmount : averageSimulateData?.displayAmount, originalFromToken.decimals),
+      displayAmount: displayAmount ? displayAmount : averageSimulateData?.displayAmount ?? 0
     };
   }
 
-  let usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
-  if (!Number(usdPriceShow)) {
-    usdPriceShow = (prices?.[originalToToken?.coinGeckoId] * simulateData?.displayAmount).toFixed(6);
-  }
+  const usdPriceShow = (prices?.[originalFromToken?.coinGeckoId] * fromAmountToken).toFixed(6);
+  const usdPriceShowTo = (prices?.[originalToToken?.coinGeckoId] * simulateData?.displayAmount).toFixed(6);
 
   const { filteredToTokens, filteredFromTokens } = useFilteredTokens(
     originalFromToken,
@@ -655,7 +646,6 @@ const SwapComponent: React.FC<{
   };
   let routersSwapData = defaultRouterSwap;
 
-  const fromTochainIdIsOraichain = originalFromToken.chainId === 'Oraichain' && originalToToken.chainId === 'Oraichain';
   if (fromAmountToken && simulateData) {
     routersSwapData = {
       ...simulateData,
@@ -665,17 +655,17 @@ const SwapComponent: React.FC<{
   }
   const isRoutersSwapData = +routersSwapData.amount;
 
-  const isImpactPrice = !!debouncedFromAmount && !!simulateData?.amount && !!averageRatio?.amount;
+  const isImpactPrice = !!debouncedFromAmount && !!simulateData?.displayAmount && !!averageRatio?.amount;
   let impactWarning = 0;
   if (
     isImpactPrice &&
-    simulateData.amount &&
-    averageRatio.displayAmount &&
-    fromTochainIdIsOraichain &&
+    simulateData?.displayAmount &&
+    averageRatio?.displayAmount &&
+    useAlphaSmartRouter &&
     averageSimulateData
   ) {
-    const calculateImpactPrice = new BigDecimal(simulateData.amount)
-      .div(toAmount(debouncedFromAmount, originalFromToken.decimals))
+    const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
+      .div(debouncedFromAmount)
       .div(averageSimulateData.displayAmount)
       .mul(100)
       .toNumber();
@@ -776,25 +766,17 @@ const SwapComponent: React.FC<{
             </div>
           </div>
 
-          <div
-            className={cx('smart', !openRoutes ? 'hidden' : '')}
-            style={{
-              height: openRoutes && routersSwapData?.routes.length ? routersSwapData?.routes.length * 40 + 40 : 0
-            }}
-          >
+          <div className={cx('smart', !openRoutes ? 'hidden' : '')}>
             <div className={cx('smart-router')}>
               {routersSwapData?.routes.map((route, ind) => {
-                let volumn = (+route.returnAmount / +routersSwapData.amount) * 100;
+                const volumn = Math.round(
+                  new BigDecimal(route.returnAmount).div(routersSwapData.amount).mul(100).toNumber()
+                );
                 return (
                   <div key={ind} className={cx('smart-router-item')}>
                     <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
                     {route.paths.map((path, i, acc) => {
-                      const { NetworkFromIcon, NetworkToIcon, assetList, pathChainId } = getPathInfo(
-                        path,
-                        chainIcons,
-                        assets
-                      );
-
+                      const { NetworkFromIcon, NetworkToIcon } = getPathInfo(path, chainIcons, assets);
                       return (
                         <React.Fragment key={i}>
                           <div className={cx('smart-router-item-line')}>
@@ -857,7 +839,7 @@ const SwapComponent: React.FC<{
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
-                usdPrice={usdPriceShow}
+                usdPrice={usdPriceShowTo}
                 loadingSimulate={isPreviousSimulate}
               />
             </div>
