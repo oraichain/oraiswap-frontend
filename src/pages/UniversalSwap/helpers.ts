@@ -192,7 +192,8 @@ export const getExplorerScan = (chainId: NetworkChainId) => {
       return 'https://explorer.injective.network/transaction';
     case 'kawaii_6886-1':
       return 'https://scan.kawaii.global/tx';
-    // case: 'noble-1':
+    case 'noble-1':
+      return 'https://www.mintscan.io/noble/tx';
     default:
       return 'https://scan.orai.io/txs';
   }
@@ -362,6 +363,9 @@ export const getDisableSwap = ({
 
 // smart router osmosis
 export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
+  const notAllowChainId = ['Neutaro-1'];
+  if (notAllowChainId.includes(fromToken.chainId) || notAllowChainId.includes(toToken.chainId)) return false;
+
   if (fromToken.cosmosBased && toToken.cosmosBased) return true;
   return false;
 };
@@ -431,7 +435,11 @@ export const getTokenInfo = (action, path, flattenTokens, assetList) => {
   const tokenInChainId = path.chainId;
   const tokenOutChainId = path.tokenOutChainId;
 
-  const findToken = (token, tokens) => tokens.find((flat) => flat.denom === token || flat.contractAddress === token);
+  const findToken = (token, tokens) =>
+    tokens.find(
+      (flat) =>
+        flat.denom?.toLowerCase() === token.toLowerCase() || flat.contractAddress?.toLowerCase() === token.toLowerCase()
+    );
   const findTokenInfo = (tokenBase, assets) => assets?.assets.find((asset) => asset.base === tokenBase) ?? {};
 
   if (action.type === 'Swap') {
@@ -444,8 +452,8 @@ export const getTokenInfo = (action, path, flattenTokens, assetList) => {
       TokenInIcon = tokenInInfo.Icon;
       TokenOutIcon = tokenOutInfo.Icon;
       info = {
-        tokenIn: tokenInInfo.name,
-        tokenOut: tokenOutInfo.name
+        tokenIn: tokenInInfo?.name,
+        tokenOut: tokenOutInfo?.name
       };
     } else {
       tokenInInfo = findTokenInfo(tokenInAction, assetList);
@@ -468,10 +476,11 @@ export const getTokenInfo = (action, path, flattenTokens, assetList) => {
 
     const tokenInInfo = getTokenInfoBridge(tokenInAction, flattenTokens, tokenInChainId);
     const tokenOutInfo = getTokenInfoBridge(tokenOutAction, flattenTokens, tokenOutChainId);
+    console.log({ tokenInAction, tokenInChainId, tokenInInfo, tokenOutInfo });
 
     info = {
-      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo.name : tokenInInfo.symbol,
-      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo.name : tokenOutInfo.symbol,
+      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo?.name : tokenInInfo.symbol,
+      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo?.name : tokenOutInfo.symbol,
       tokenInInfo,
       tokenOutInfo
     };
