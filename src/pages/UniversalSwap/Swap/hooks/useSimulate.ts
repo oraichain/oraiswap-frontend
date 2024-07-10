@@ -42,8 +42,8 @@ export const useSimulate = (
           useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute
         },
         urlRouter: {
-          url: 'https://router.oraidex.io',
-          path: '/smart-router/alpha-router'
+          url: 'https://osor.oraidex.io',
+          path: '/smart-router'
         }
       });
     },
