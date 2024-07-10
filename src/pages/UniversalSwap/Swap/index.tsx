@@ -491,7 +491,8 @@ const SwapComponent: React.FC<{
           toToken: `${originalToToken.name} - ${originalToToken.chainId}`,
           toAmount: `${toAmountToken}`,
           fromNetwork: originalFromToken.chainId,
-          toNetwork: originalToToken.chainId
+          toNetwork: originalToToken.chainId,
+          useAlphaSmartRouter
         };
         mixpanel.track('Universal Swap Oraidex', logEvent);
       }
