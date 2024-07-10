@@ -1,0 +1,63 @@
+.tooltipUniversalSwap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  // background-color: #232521;
+  padding: 10px;
+
+  // border-radius: 8px;
+  .tooltipUniversalSwapType {
+    text-align: center;
+    text-transform: capitalize;
+  }
+
+  .tooltipUniversalSwapRoutes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .tooltipUniversalSwapRoute {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+
+      .tooltipUniversalSwapRouteImg {
+        position: relative;
+
+        &>img,
+        &>svg {
+          padding: 1px;
+          background-color: #181A17;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2px;
+        }
+
+        svg {
+          width: 30px;
+          height: 30px;
+        }
+
+        .tooltipUniversalSwapRouteImgAbs {
+          position: absolute;
+          top: 50%;
+          left: 20px;
+          z-index: 1;
+          border-radius: 50%;
+
+          svg {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #efefef;
+            padding: 1px;
+            background-color: #181A17;
+          }
+        }
+      }
+    }
+  }
+}

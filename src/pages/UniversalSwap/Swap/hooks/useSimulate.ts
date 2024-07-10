@@ -1,6 +1,6 @@
 import { TokenItemType } from '@oraichain/oraidex-common';
 import { OraiswapRouterReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
-import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
+import { UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
@@ -20,24 +20,37 @@ export const useSimulate = (
   originalFromTokenInfo: TokenItemType,
   originalToTokenInfo: TokenItemType,
   routerClient: OraiswapRouterReadOnlyInterface,
-  initAmount?: number
+  initAmount?: number,
+  simulateOption?: {
+    useAlphaSmartRoute?: boolean;
+    useSmartRoute?: boolean;
+  },
+  isAIRoute?: boolean
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
-  const debouncedFromAmount = useDebounce(fromAmountToken, 500);
-  const { data: simulateData } = useQuery(
-    [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount],
+  const debouncedFromAmount = useDebounce(fromAmountToken, 800);
+
+  const { data: simulateData, isPreviousData: isPreviousSimulate } = useQuery(
+    [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount, isAIRoute],
     () => {
-      return handleSimulateSwap({
+      return UniversalSwapHelper.handleSimulateSwap({
         originalFromInfo: originalFromTokenInfo,
         originalToInfo: originalToTokenInfo,
         originalAmount: debouncedFromAmount,
         routerClient,
-        useSmartRoute: true,
-        urlRouter: 'https://osor.oraidex.io'
+        routerOption: {
+          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute
+        },
+        urlRouter: {
+          url: 'https://osor.oraidex.io',
+          path: '/smart-router'
+        }
       });
     },
     {
-      refetchInterval: 300000,
+      keepPreviousData: true,
+      refetchInterval: 15000,
+      staleTime: 1000,
       enabled: !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0
     }
   );
@@ -45,8 +58,15 @@ export const useSimulate = (
   useEffect(() => {
     // initAmount used for simulate averate ratio
     const fromAmount = initAmount ?? fromAmountToken;
-    setSwapAmount([fromAmount, Number(simulateData?.displayAmount)]);
+    setSwapAmount([fromAmount ?? null, !!fromAmount ? Number(simulateData?.displayAmount) : 0]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
-  return { simulateData, fromAmountToken, toAmountToken, setSwapAmount, debouncedFromAmount };
+  return {
+    simulateData,
+    fromAmountToken,
+    toAmountToken,
+    setSwapAmount,
+    debouncedFromAmount,
+    isPreviousSimulate
+  };
 };

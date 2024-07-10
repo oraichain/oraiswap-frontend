@@ -44,6 +44,7 @@ export interface ConfigState {
   filterDefaultPool: KeyFilterPool;
   persistVersion: number;
   bannerTime?: number;
+  AIRoute?: boolean;
 }
 
 const initialState: ConfigState = {
@@ -68,7 +69,8 @@ const initialState: ConfigState = {
   apr: {},
   rewardPools: [],
   filterDefaultPool: KeyFilterPool.all_pool,
-  persistVersion: PERSIST_VER
+  persistVersion: PERSIST_VER,
+  AIRoute: false
 };
 
 export const configSlice = createSlice({

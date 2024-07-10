@@ -5,7 +5,7 @@ import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { TokenInfo } from 'types/token';
 import styles from './InputSwap.module.scss';
-import { chainInfosWithIcon } from 'config/chainInfos';
+import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import { Themes } from 'context/theme-context';
 import { numberWithCommas } from 'pages/Pools/helpers';
 
@@ -17,8 +17,6 @@ export const AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP: [number, string, string][] =
 ];
 
 interface InputSwapProps {
-  Icon: CoinIcon;
-  IconNetwork: CoinIcon;
   setIsSelectToken: (value: boolean) => void;
   setIsSelectChain: (value: boolean) => void;
   token: TokenItemType;
@@ -35,11 +33,10 @@ interface InputSwapProps {
   selectChain: string;
   onChangePercentAmount?: (coff: number) => void;
   theme: Themes;
+  loadingSimulate?: boolean;
 }
 
 export default function InputSwapV4({
-  Icon,
-  IconNetwork,
   setIsSelectToken,
   setIsSelectChain,
   token,
@@ -55,23 +52,20 @@ export default function InputSwapV4({
   selectChain,
   onChangePercentAmount,
   theme,
-  coe
+  coe,
+  loadingSimulate
 }: InputSwapProps) {
   const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
+  const tokenInfo = flattenTokensWithIcon.find((flattenToken) => flattenToken.coinGeckoId === token.coinGeckoId);
   const isLightMode = theme === 'light';
 
   return (
     <>
       <div className={cx('input-swap-balance', type === 'from' && 'is-enable-coeff')}>
         <div className={cx('select-chain')}>
-          {/* <span>{type}</span> */}
           <div className={cx('left')} onClick={() => setIsSelectChain(true)}>
             <div className={cx('icon')}>
-              {IconNetwork && isLightMode ? (
-                <chainInfo.IconLight className={cx('logo')} />
-              ) : (
-                <chainInfo.Icon className={cx('logo')} />
-              )}
+              {isLightMode ? <chainInfo.IconLight className={cx('logo')} /> : <chainInfo.Icon className={cx('logo')} />}
             </div>
             <div className={cx('section')}>
               <div className={cx('name')}>{chainInfo.chainName}</div>
@@ -122,7 +116,10 @@ export default function InputSwapV4({
       <div className={cx('input-swap-box')}>
         <div className={cx('box-select')} onClick={() => setIsSelectToken(true)}>
           <div className={cx('left')}>
-            <div className={cx('icon')}>{Icon && <Icon className={cx('logo')} />}</div>
+            <div className={cx('icon')}>
+              {isLightMode ? <tokenInfo.IconLight className={cx('logo')} /> : <tokenInfo.Icon className={cx('logo')} />}
+            </div>
+
             <div className={cx('section')}>
               <div className={cx('name')}>{token?.name}</div>
             </div>
@@ -136,7 +133,10 @@ export default function InputSwapV4({
               thousandSeparator
               className={cx('amount')}
               decimalScale={6}
-              disabled={disable}
+              style={{
+                opacity: loadingSimulate ? '0.4' : '1'
+              }}
+              disabled={loadingSimulate || disable}
               type="text"
               value={amount}
               onChange={() => {
