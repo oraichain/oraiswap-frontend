@@ -734,7 +734,7 @@ const SwapComponent: React.FC<{
               <img src={isLightMode ? SwitchLightImg : SwitchDarkImg} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
-              <AIRouteSwitch />
+              <AIRouteSwitch isLoading={isPreviousSimulate} />
               <div
                 className={cx(
                   'ratio',

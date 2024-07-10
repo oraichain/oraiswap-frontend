@@ -9,7 +9,11 @@ import Loader from 'components/Loader';
 
 const cx = cn.bind(styles);
 
-export default function AIRouteSwitch() {
+type Props = {
+  isLoading: boolean;
+};
+
+export default function AIRouteSwitch({ isLoading }: Props) {
   const [isAIRoute, setIsAIRoute] = useConfigReducer('AIRoute');
   const [loadingTurnOnAiRoute, setLoadingTurnOnAiRoute] = useState(false);
 
@@ -36,7 +40,7 @@ export default function AIRouteSwitch() {
           <div className={cx('dot')}></div>
         )}
       </div>
-      {loadingTurnOnAiRoute && <Loader width={15} height={15} />}
+      {(loadingTurnOnAiRoute || isLoading) && <Loader width={15} height={15} />}
     </>
   );
 }
