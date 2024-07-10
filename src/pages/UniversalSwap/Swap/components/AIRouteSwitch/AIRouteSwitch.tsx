@@ -40,7 +40,7 @@ export default function AIRouteSwitch({ isLoading }: Props) {
           <div className={cx('dot')}></div>
         )}
       </div>
-      {(loadingTurnOnAiRoute || isLoading) && <Loader width={15} height={15} />}
+      {(loadingTurnOnAiRoute || (isLoading && isAIRoute)) && <Loader width={15} height={15} />}
     </>
   );
 }
