@@ -43,7 +43,7 @@ export const useSimulate = (
         },
         urlRouter: {
           url: 'https://osor.oraidex.io',
-          path: '/smart-router'
+          path: '/smart-router/alpha-router'
         }
       });
     },
