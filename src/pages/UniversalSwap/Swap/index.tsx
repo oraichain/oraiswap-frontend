@@ -242,7 +242,7 @@ const SwapComponent: React.FC<{
     };
   }
 
-  const usdPriceShow = (prices?.[originalFromToken?.coinGeckoId] * fromAmountToken).toFixed(6);
+  const usdPriceShowFrom = (prices?.[originalFromToken?.coinGeckoId] * fromAmountToken).toFixed(6);
   const usdPriceShowTo = (prices?.[originalToToken?.coinGeckoId] * simulateData?.displayAmount).toFixed(6);
 
   const { filteredToTokens, filteredFromTokens } = useFilteredTokens(
@@ -492,7 +492,9 @@ const SwapComponent: React.FC<{
           toAmount: `${toAmountToken}`,
           fromNetwork: originalFromToken.chainId,
           toNetwork: originalToToken.chainId,
-          useAlphaSmartRouter
+          useAlphaSmartRouter,
+          priceOfFromTokenInUsd: usdPriceShowFrom,
+          priceOfToTokenInUsd: usdPriceShowTo
         };
         mixpanel.track('Universal Swap Oraidex', logEvent);
       }
@@ -717,7 +719,7 @@ const SwapComponent: React.FC<{
                 tokenFee={fromTokenFee}
                 setCoe={setCoe}
                 coe={coe}
-                usdPrice={usdPriceShow}
+                usdPrice={usdPriceShowFrom}
               />
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
               {!fromTokenFee && !toTokenFee && isWarningSlippage && (
