@@ -62,6 +62,7 @@ import { numberWithCommas } from 'pages/Pools/helpers';
 import {
   genCurrentChain,
   generateNewSymbolV2,
+  getAverageRatio,
   getDisableSwap,
   getFromToToken,
   getPathInfo,
@@ -101,6 +102,7 @@ import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import { SmartRouteModal } from '../Modals/SmartRouteModal';
 import AIRouteSwitch from './components/AIRouteSwitch/AIRouteSwitch';
+import TokenAndChainSelectors from './components/TokenAndChainSelectors';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -233,14 +235,7 @@ const SwapComponent: React.FC<{
     isAIRoute
   );
 
-  let averageRatio = undefined;
-  if (simulateData && fromAmountToken) {
-    const displayAmount = new BigDecimal(simulateData.displayAmount).div(fromAmountToken).toNumber();
-    averageRatio = {
-      amount: toAmount(displayAmount ? displayAmount : averageSimulateData?.displayAmount, originalFromToken.decimals),
-      displayAmount: displayAmount ? displayAmount : averageSimulateData?.displayAmount ?? 0
-    };
-  }
+  const { averageRatio } = getAverageRatio(simulateData, averageSimulateData, fromAmountToken, originalFromToken);
 
   const usdPriceShowFrom = (prices?.[originalFromToken?.coinGeckoId] * fromAmountToken).toFixed(6);
   const usdPriceShowTo = (prices?.[originalToToken?.coinGeckoId] * simulateData?.displayAmount).toFixed(6);
@@ -952,57 +947,29 @@ const SwapComponent: React.FC<{
         </div>
       </LoadingBox>
 
-      <div ref={ref}>
-        <SelectToken
-          setIsSelectToken={setIsSelectTo}
-          amounts={amounts}
-          prices={prices}
-          handleChangeToken={(token) => {
-            handleChangeToken(token, 'to');
-          }}
-          items={filteredToTokens}
-          theme={theme}
-          selectChain={selectChainTo}
-          isSelectToken={isSelectTo}
-        />
-        <SelectToken
-          setIsSelectToken={setIsSelectFrom}
-          amounts={amounts}
-          prices={prices}
-          theme={theme}
-          selectChain={selectChainFrom}
-          items={filteredFromTokens}
-          handleChangeToken={(token) => {
-            handleChangeToken(token, 'from');
-          }}
-          isSelectToken={isSelectFrom}
-        />
-        <SelectChain
-          filterChainId={unSupportSimulateToken.includes(originalFromToken?.denom) ? ['Oraichain'] : []}
-          setIsSelectToken={setIsSelectChainTo}
-          amounts={amounts}
-          theme={theme}
-          selectChain={selectChainTo}
-          setSelectChain={(chain: NetworkChainId) => {
-            setSelectChainTo(chain);
-            setTokenDenomFromChain(chain, 'to');
-          }}
-          prices={prices}
-          isSelectToken={isSelectChainTo}
-        />
-        <SelectChain
-          setIsSelectToken={setIsSelectChainFrom}
-          amounts={amounts}
-          theme={theme}
-          prices={prices}
-          selectChain={selectChainFrom}
-          setSelectChain={(chain: NetworkChainId) => {
-            setSelectChainFrom(chain);
-            setTokenDenomFromChain(chain, 'from');
-          }}
-          isSelectToken={isSelectChainFrom}
-        />
-      </div>
+      <TokenAndChainSelectors
+        setIsSelectTokenTo={setIsSelectTo}
+        setIsSelectTokenFrom={setIsSelectFrom}
+        setIsSelectChainTo={setIsSelectChainTo}
+        setIsSelectChainFrom={setIsSelectChainFrom}
+        amounts={amounts}
+        prices={prices}
+        handleChangeToken={handleChangeToken}
+        filteredToTokens={filteredToTokens}
+        filteredFromTokens={filteredFromTokens}
+        theme={theme}
+        selectChainTo={selectChainTo}
+        selectChainFrom={selectChainFrom}
+        isSelectTo={isSelectTo}
+        isSelectFrom={isSelectFrom}
+        isSelectChainTo={isSelectChainTo}
+        isSelectChainFrom={isSelectChainFrom}
+        setSelectChainTo={setSelectChainTo}
+        setSelectChainFrom={setSelectChainFrom}
+        setTokenDenomFromChain={setTokenDenomFromChain}
+        originalFromToken={originalFromToken}
+        unSupportSimulateToken={unSupportSimulateToken}
+      />
 
       <AddressBook
         onSelected={(addr: string) => {
