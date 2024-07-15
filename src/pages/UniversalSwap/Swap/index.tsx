@@ -1,23 +1,16 @@
 import {
   BigDecimal,
-  CW20_DECIMALS,
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
   NetworkChainId,
   TRON_DENOM,
   TokenItemType,
-  calculateMinReceive,
-  checkValidateAddressWithNetwork,
   getTokenOnOraichain,
-  network,
   toAmount,
   toDisplay
 } from '@oraichain/oraidex-common';
-import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
-import { useQuery } from '@tanstack/react-query';
-import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
 import DownArrowIcon from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as FeeIcon } from 'assets/icons/fee.svg';
@@ -36,23 +29,16 @@ import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { flattenTokens, tokenMap } from 'config/bridgeTokens';
+import { flattenTokens } from 'config/bridgeTokens';
 import { chainIcons } from 'config/chainInfos';
 import { ethers } from 'ethers';
-import {
-  getAddressTransfer,
-  getSpecialCoingecko,
-  getTransactionUrl,
-  handleCheckAddress,
-  handleErrorTransaction,
-  networks
-} from 'helper';
+import { getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
+import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Metamask from 'libs/metamask';
 import { getUsd, reduceString, toSubAmount } from 'libs/utils';
@@ -60,49 +46,33 @@ import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import {
-  genCurrentChain,
-  generateNewSymbolV2,
-  getAverageRatio,
   getDisableSwap,
-  getFromToToken,
   getPathInfo,
-  getRemoteDenom,
   getTokenBalance,
   getTokenInfo,
   isAllowAlphaSmartRouter,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
-import {
-  selectCurrentToChain,
-  selectCurrentToken,
-  setCurrentFromToken,
-  setCurrentToChain,
-  setCurrentToToken,
-  setCurrentToken
-} from 'reducer/tradingSlice';
 import { AddressManagementStep } from 'reducer/type';
-import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SlippageModal } from '../Modals';
+import { SmartRouteModal } from '../Modals/SmartRouteModal';
 import { checkEvmAddress, getSwapType } from '../helpers';
+import AIRouteSwitch from './components/AIRouteSwitch/AIRouteSwitch';
 import AddressBook from './components/AddressBook';
 import InputCommon from './components/InputCommon';
 import InputSwap from './components/InputSwap/InputSwap';
-import SelectChain from './components/SelectChain/SelectChain';
-import SelectToken from './components/SelectToken/SelectToken';
 import SwapDetail from './components/SwapDetail';
-import { TooltipSwapBridge } from './components/TooltipSwapBridge';
-import { useGetTransHistory, useSimulate } from './hooks';
-import { useFillToken } from './hooks/useFillToken';
-import useFilteredTokens from './hooks/useFilteredTokens';
-import { useSwapFee } from './hooks/useSwapFee';
-import styles from './index.module.scss';
-import { SmartRouteModal } from '../Modals/SmartRouteModal';
-import AIRouteSwitch from './components/AIRouteSwitch/AIRouteSwitch';
 import TokenAndChainSelectors from './components/TokenAndChainSelectors';
+import { TooltipSwapBridge } from './components/TooltipSwapBridge';
+import { useGetTransHistory } from './hooks';
+import useCalculateDataSwap, { SIMULATE_INIT_AMOUNT } from './hooks/useCalculateDataSwap';
+import { useFillToken } from './hooks/useFillToken';
+import useHandleEffectTokenChange from './hooks/useHandleEffectTokenChange';
+import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -113,18 +83,57 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
+  // store value
+  const [isAIRoute] = useConfigReducer('AIRoute');
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress] = useConfigReducer('tronAddress');
+  const [oraiAddress] = useConfigReducer('address');
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
+  const [theme] = useConfigReducer('theme');
+  const isLightMode = theme === 'light';
+  const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const dispatch = useDispatch();
+
+  const loadTokenAmounts = useLoadTokens();
+  const { refetchTransHistory } = useGetTransHistory();
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
+  const { handleReadClipboard } = useCopyClipboard();
+
+  // info token state
   const [openDetail, setOpenDetail] = useState(false);
   const [openRoutes, setOpenRoutes] = useState(false);
-
   const [fromTokenDenomSwap, setFromTokenDenom] = useState(fromTokenDenom);
   const [toTokenDenomSwap, setToTokenDenom] = useState(toTokenDenom);
 
-  // get token on oraichain to simulate swap amount.
-  const originalFromToken = tokenMap[fromTokenDenomSwap];
-  const originalToToken = tokenMap[toTokenDenomSwap];
+  // modal state
+  const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
+  const [isSelectChainTo, setIsSelectChainTo] = useState(false);
+  const [isSelectTokenFrom, setIsSelectTokenFrom] = useState(false);
+  const [isSelectTokenTo, setIsSelectTokenTo] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
+  const [openSmartRoute, setOpenSmartRoute] = useState(false);
+  const [indSmartRoute, setIndSmartRoute] = useState([0, 0]);
+  const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
 
-  const { data: prices } = useCoinGeckoPrices();
+  // value state
+  const [coe, setCoe] = useState(0);
+
+  // loading state
+  const [swapLoading, setSwapLoading] = useState(false);
+  const [loadingRefresh, setLoadingRefresh] = useState(false);
+
+  const {
+    originalFromToken,
+    originalToToken,
+    filteredToTokens,
+    filteredFromTokens,
+    fromToken,
+    toToken,
+    addressInfo,
+    validAddress
+  } = useHandleEffectTokenChange({ fromTokenDenomSwap, toTokenDenomSwap });
+  const { addressTransfer, initAddressTransfer, setAddressTransfer } = addressInfo;
 
   const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(
     originalFromToken?.chainId || ('OraiChain' as NetworkChainId)
@@ -133,55 +142,52 @@ const SwapComponent: React.FC<{
     originalToToken?.chainId || ('OraiChain' as NetworkChainId)
   );
 
-  const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
-  const [isSelectChainTo, setIsSelectChainTo] = useState(false);
-  const [isSelectTokenFrom, setIsSelectTokenFrom] = useState(false);
-  const [isSelectTokenTo, setIsSelectTokenTo] = useState(false);
-  const [openSetting, setOpenSetting] = useState(false);
-
-  const [openSmartRoute, setOpenSmartRoute] = useState(false);
-  const [indSmartRoute, setIndSmartRoute] = useState([0, 0]);
-
-  const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
-  const [coe, setCoe] = useState(0);
-  const [searchTokenName] = useState('');
-  const [swapLoading, setSwapLoading] = useState(false);
-  const [loadingRefresh, setLoadingRefresh] = useState(false);
-
-  const amounts = useSelector((state: RootState) => state.token.amounts);
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
-  const [tronAddress] = useConfigReducer('tronAddress');
-  const [oraiAddress] = useConfigReducer('address');
-  const [theme] = useConfigReducer('theme');
-  const isLightMode = theme === 'light';
-  const loadTokenAmounts = useLoadTokens();
-  const dispatch = useDispatch();
-  const currentPair = useSelector(selectCurrentToken);
-  const currentToChain = useSelector(selectCurrentToChain);
-  const { refetchTransHistory } = useGetTransHistory();
-  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
-  const [addressTransfer, setAddressTransfer] = useState('');
-  const [initAddressTransfer, setInitAddressTransfer] = useState('');
-  const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
-  const { handleReadClipboard } = useCopyClipboard();
-
-  const { fromToken, toToken } = getFromToToken(
+  // hooks
+  useGetFeeConfig();
+  const { data: prices } = useCoinGeckoPrices();
+  const { fees, outputs, tokenInfos, simulateDatas, averageSimulateDatas } = useCalculateDataSwap({
     originalFromToken,
     originalToToken,
-    fromTokenDenomSwap,
-    toTokenDenomSwap
-  );
+    fromToken,
+    toToken,
+    userSlippage
+  });
 
-  const remoteTokenDenomFrom = getRemoteDenom(originalFromToken);
-  const remoteTokenDenomTo = getRemoteDenom(originalToToken);
-  const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
-  const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
+  const {
+    estSwapFee,
+    isDependOnNetwork,
+    totalFeeEst,
+    bridgeTokenFee,
+    relayerFeeToken,
+    relayerFee,
+    fromTokenFee,
+    toTokenFee
+  } = fees;
+  const { expectOutputDisplay, minimumReceiveDisplay, isWarningSlippage } = outputs;
+  const { fromAmountTokenBalance, usdPriceShowFrom, usdPriceShowTo } = tokenInfos;
+  const { averageRatio, averageSimulateData } = averageSimulateDatas;
+  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount, isPreviousSimulate } =
+    simulateDatas;
 
   const subAmountFrom = toSubAmount(amounts, originalFromToken);
   const subAmountTo = toSubAmount(amounts, originalToToken);
-  const INIT_AMOUNT = 1;
 
-  useGetFeeConfig();
+  const fromTokenBalance = getTokenBalance(originalFromToken, amounts, subAmountFrom);
+  const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
+
+  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
+
+  const settingRef = useRef();
+  const smartRouteRef = useRef();
+
+  useOnClickOutside(settingRef, () => {
+    setOpenSetting(false);
+  });
+
+  useOnClickOutside(smartRouteRef, () => {
+    setOpenSmartRoute(false);
+    setIndSmartRoute([0, 0]);
+  });
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) {
@@ -195,58 +201,6 @@ const SwapComponent: React.FC<{
     const displayAmount = toDisplay(amount, originalFromToken.decimals);
     setSwapAmount([displayAmount, toAmountToken]);
   };
-
-  const {
-    data: [fromTokenInfoData, toTokenInfoData]
-  } = useQuery(['token-infos', fromToken, toToken], () => fetchTokenInfos([fromToken!, toToken!]), { initialData: [] });
-
-  const fromTokenBalance = getTokenBalance(originalFromToken, amounts, subAmountFrom);
-  const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
-
-  const [isAIRoute] = useConfigReducer('AIRoute');
-  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
-  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken, debouncedFromAmount, isPreviousSimulate } =
-    useSimulate(
-      'simulate-data',
-      fromTokenInfoData,
-      toTokenInfoData,
-      originalFromToken,
-      originalToToken,
-      routerClient,
-      null,
-      {
-        useAlphaSmartRoute: useAlphaSmartRouter
-      },
-      isAIRoute
-    );
-
-  const { simulateData: averageSimulateData } = useSimulate(
-    'average-simulate-data',
-    fromTokenInfoData,
-    toTokenInfoData,
-    originalFromToken,
-    originalToToken,
-    routerClient,
-    INIT_AMOUNT,
-    {
-      useAlphaSmartRoute: useAlphaSmartRouter
-    },
-    isAIRoute
-  );
-
-  const { averageRatio } = getAverageRatio(simulateData, averageSimulateData, fromAmountToken, originalFromToken);
-
-  const usdPriceShowFrom = (prices?.[originalFromToken?.coinGeckoId] * fromAmountToken).toFixed(6);
-  const usdPriceShowTo = (prices?.[originalToToken?.coinGeckoId] * simulateData?.displayAmount).toFixed(6);
-
-  const { filteredToTokens, filteredFromTokens } = useFilteredTokens(
-    originalFromToken,
-    originalToToken,
-    searchTokenName,
-    fromTokenDenomSwap,
-    toTokenDenomSwap
-  );
 
   const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
     if (chainId) {
@@ -272,79 +226,6 @@ const SwapComponent: React.FC<{
       }
     }
   };
-
-  const { fee, isDependOnNetwork } = useSwapFee({
-    fromToken: originalFromToken,
-    toToken: originalToToken
-  });
-
-  const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
-    originalFromToken,
-    originalToToken
-  );
-
-  useEffect(() => {
-    const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
-
-    if (newTVPair) dispatch(setCurrentToken(newTVPair));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken]);
-
-  useEffect(() => {
-    const newCurrentToChain = genCurrentChain({ toToken: originalToToken, currentToChain });
-
-    if (toToken && originalToToken) {
-      dispatch(setCurrentToChain(newCurrentToChain));
-      dispatch(setCurrentToToken(originalToToken));
-    }
-  }, [originalToToken, toToken]);
-
-  useEffect(() => {
-    if (fromToken && originalFromToken) {
-      dispatch(setCurrentFromToken(originalFromToken));
-    }
-  }, [originalFromToken, fromToken]);
-
-  const fromAmountTokenBalance =
-    fromTokenInfoData &&
-    toAmount(fromAmountToken, originalFromToken?.decimals || fromTokenInfoData?.decimals || CW20_DECIMALS);
-
-  const isAverageRatio = averageRatio && averageRatio.amount;
-  const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
-  const minimumReceive =
-    isAverageRatio && fromAmountTokenBalance
-      ? calculateMinReceive(
-          // @ts-ignore
-          new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
-          fromAmountTokenBalance.toString(),
-          userSlippage,
-          originalFromToken.decimals
-        )
-      : '0';
-  const isWarningSlippage = +minimumReceive > +simulateData?.amount;
-  const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
-  const bridgeTokenFee =
-    simulateDisplayAmount && (fromTokenFee || toTokenFee)
-      ? new BigDecimal(simulateDisplayAmount)
-          .mul(fromTokenFee)
-          .add(new BigDecimal(simulateDisplayAmount).mul(toTokenFee).toString())
-          .div(100)
-          .toNumber()
-      : 0;
-
-  const minimumReceiveDisplay = isSimulateDataDisplay
-    ? new BigDecimal(simulateDisplayAmount)
-        .sub(new BigDecimal(simulateDisplayAmount).mul(userSlippage).div(100).toString())
-        .sub(relayerFee)
-        .sub(bridgeTokenFee)
-        .toNumber()
-    : 0;
-
-  const expectOutputDisplay = isSimulateDataDisplay
-    ? numberWithCommas(simulateData.displayAmount, undefined, { minimumFractionDigits: 6 })
-    : 0;
-  const estSwapFee = new BigDecimal(simulateDisplayAmount || 0).mul(fee || 0).toNumber();
-  const totalFeeEst = new BigDecimal(bridgeTokenFee).add(relayerFee).add(estSwapFee).toNumber() || 0;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -416,7 +297,7 @@ const SwapComponent: React.FC<{
         amounts: amountsBalance,
         simulatePrice:
           // @ts-ignore
-          averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
+          averageRatio?.amount && new BigDecimal(averageRatio.amount).div(SIMULATE_INIT_AMOUNT).toString(),
         relayerFee: relayerFeeUniversal,
         alphaSmartRoutes
       };
@@ -496,58 +377,6 @@ const SwapComponent: React.FC<{
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      if (!isMobile()) {
-        if (!walletByNetworks.evm && !walletByNetworks.cosmos && !walletByNetworks.tron) {
-          return setAddressTransfer('');
-        }
-
-        if (originalToToken.cosmosBased && !walletByNetworks.cosmos) {
-          return setAddressTransfer('');
-        }
-
-        if (!originalToToken.cosmosBased && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron) {
-          return setAddressTransfer('');
-        }
-
-        if (!originalToToken.cosmosBased && !walletByNetworks.evm) {
-          return setAddressTransfer('');
-        }
-      }
-
-      if (originalToToken.chainId) {
-        const findNetwork = networks.find((net) => net.chainId === originalToToken.chainId);
-        const address = await getAddressTransfer(findNetwork, walletByNetworks);
-
-        setAddressTransfer(address);
-        setInitAddressTransfer(address);
-      }
-    })();
-  }, [
-    originalToToken,
-    oraiAddress,
-    metamaskAddress,
-    tronAddress,
-    walletByNetworks.evm,
-    walletByNetworks.cosmos,
-    walletByNetworks.tron,
-    window?.ethereumDapp,
-    window?.tronWebDapp
-  ]);
-
-  const settingRef = useRef();
-  const smartRouteRef = useRef();
-
-  useOnClickOutside(settingRef, () => {
-    setOpenSetting(false);
-  });
-
-  useOnClickOutside(smartRouteRef, () => {
-    setOpenSmartRoute(false);
-    setIndSmartRoute([0, 0]);
-  });
-
   const onChangePercentAmount = (coeff) => {
     if (coeff === coe) {
       setCoe(0);
@@ -619,15 +448,6 @@ const SwapComponent: React.FC<{
     setSwapAmount([toAmountToken, fromAmountToken]);
     handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
   };
-
-  const isConnectedWallet =
-    walletByNetworks.cosmos || walletByNetworks.bitcoin || walletByNetworks.evm || walletByNetworks.tron;
-
-  let validAddress = {
-    isValid: true
-  };
-
-  if (isConnectedWallet) validAddress = checkValidateAddressWithNetwork(addressTransfer, originalToToken?.chainId);
 
   const defaultRouterSwap = {
     amount: '0',
@@ -742,11 +562,11 @@ const SwapComponent: React.FC<{
                   {Number(impactWarning) > 5 && <WarningIcon />}
                   {`1 ${originalFromToken.name} ≈ ${
                     averageRatio
-                      ? numberWithCommas(averageRatio.displayAmount / INIT_AMOUNT, undefined, {
+                      ? numberWithCommas(averageRatio.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
                           maximumFractionDigits: 6
                         })
                       : averageSimulateData
-                      ? numberWithCommas(averageSimulateData?.displayAmount / INIT_AMOUNT, undefined, {
+                      ? numberWithCommas(averageSimulateData?.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
                           maximumFractionDigits: 6
                         })
                       : '0'
@@ -988,7 +808,7 @@ const SwapComponent: React.FC<{
           <div className={styles.smartRouter}>
             {openSmartRoute &&
               [routersSwapData?.routes[indSmartRoute[0]]?.paths[indSmartRoute[1]]].map((path) => {
-                if (!path) return;
+                if (!path) return null;
                 const { NetworkFromIcon, NetworkToIcon, assetList, pathChainId } = getPathInfo(
                   path,
                   chainIcons,
@@ -1000,7 +820,7 @@ const SwapComponent: React.FC<{
                   const tokenOutChainId = path.tokenOutChainId;
                   const hasTypeConvert = actions.find((act) => act.type === 'Convert');
                   const width = hasTypeConvert ? actions.length - 1 : actions.length;
-                  if (action.type === 'Convert') return;
+                  if (action.type === 'Convert') return null;
                   return (
                     <div
                       key={index}
@@ -1029,7 +849,7 @@ const SwapComponent: React.FC<{
       </div>
 
       <SwapDetail
-        simulatePrice={averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'}
+        simulatePrice={averageRatio ? Number((averageRatio.displayAmount / SIMULATE_INIT_AMOUNT).toFixed(6)) : '0'}
         expected={expectOutputDisplay}
         minimumReceived={numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 })}
         slippage={userSlippage}
