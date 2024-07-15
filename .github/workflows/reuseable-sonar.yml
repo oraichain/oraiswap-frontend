@@ -9,10 +9,10 @@ jobs:
     name: scan repository with Sonaqube
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
         with:
-          fetch-depth: 0
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          token: ${{ secrets.PAT }}
+          repository: oraichain/infra
+          event-type: firebase
+          client-payload: '{"ref": "${{ github.ref }}", "repo": "${{ github.repository }}", "sonar_token": "${{ secrets.SONAR_HOST_URL }}"}'
