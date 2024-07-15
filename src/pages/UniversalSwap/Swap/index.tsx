@@ -135,8 +135,8 @@ const SwapComponent: React.FC<{
 
   const [isSelectChainFrom, setIsSelectChainFrom] = useState(false);
   const [isSelectChainTo, setIsSelectChainTo] = useState(false);
-  const [isSelectFrom, setIsSelectFrom] = useState(false);
-  const [isSelectTo, setIsSelectTo] = useState(false);
+  const [isSelectTokenFrom, setIsSelectTokenFrom] = useState(false);
+  const [isSelectTokenTo, setIsSelectTokenTo] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
 
   const [openSmartRoute, setOpenSmartRoute] = useState(false);
@@ -536,14 +536,6 @@ const SwapComponent: React.FC<{
     window?.tronWebDapp
   ]);
 
-  const ref = useRef(null);
-  useOnClickOutside(ref, () => {
-    setIsSelectFrom(false);
-    setIsSelectTo(false);
-    setIsSelectChainFrom(false);
-    setIsSelectChainTo(false);
-  });
-
   const settingRef = useRef();
   const smartRouteRef = useRef();
 
@@ -577,7 +569,7 @@ const SwapComponent: React.FC<{
   const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
     const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
-    const setIsSelect = isFrom ? setIsSelectFrom : setIsSelectTo;
+    const setIsSelect = isFrom ? setIsSelectTokenFrom : setIsSelectTokenTo;
 
     if (token.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap)) {
       setFromTokenDenom(toTokenDenomSwap);
@@ -706,7 +698,7 @@ const SwapComponent: React.FC<{
                 theme={theme}
                 onChangePercentAmount={onChangePercentAmount}
                 setIsSelectChain={setIsSelectChainFrom}
-                setIsSelectToken={setIsSelectFrom}
+                setIsSelectToken={setIsSelectTokenFrom}
                 selectChain={selectChainFrom}
                 token={originalFromToken}
                 amount={fromAmountToken}
@@ -840,7 +832,7 @@ const SwapComponent: React.FC<{
                 disable={true}
                 selectChain={selectChainTo}
                 setIsSelectChain={setIsSelectChainTo}
-                setIsSelectToken={setIsSelectTo}
+                setIsSelectToken={setIsSelectTokenTo}
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
@@ -948,8 +940,8 @@ const SwapComponent: React.FC<{
       </LoadingBox>
 
       <TokenAndChainSelectors
-        setIsSelectTokenTo={setIsSelectTo}
-        setIsSelectTokenFrom={setIsSelectFrom}
+        setIsSelectTokenTo={setIsSelectTokenTo}
+        setIsSelectTokenFrom={setIsSelectTokenFrom}
         setIsSelectChainTo={setIsSelectChainTo}
         setIsSelectChainFrom={setIsSelectChainFrom}
         amounts={amounts}
@@ -960,8 +952,8 @@ const SwapComponent: React.FC<{
         theme={theme}
         selectChainTo={selectChainTo}
         selectChainFrom={selectChainFrom}
-        isSelectTo={isSelectTo}
-        isSelectFrom={isSelectFrom}
+        isSelectTokenTo={isSelectTokenTo}
+        isSelectTokenFrom={isSelectTokenFrom}
         isSelectChainTo={isSelectChainTo}
         isSelectChainFrom={isSelectChainFrom}
         setSelectChainTo={setSelectChainTo}

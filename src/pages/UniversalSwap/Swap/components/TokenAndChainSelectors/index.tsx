@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import SelectToken from '../SelectToken/SelectToken';
 import SelectChain from '../SelectChain/SelectChain';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 
 const TokenAndChainSelectors = ({
   setIsSelectTokenTo,
@@ -15,8 +16,8 @@ const TokenAndChainSelectors = ({
   theme,
   selectChainTo,
   selectChainFrom,
-  isSelectTo,
-  isSelectFrom,
+  isSelectTokenTo,
+  isSelectTokenFrom,
   isSelectChainTo,
   isSelectChainFrom,
   setSelectChainTo,
@@ -26,6 +27,13 @@ const TokenAndChainSelectors = ({
   unSupportSimulateToken
 }) => {
   const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    setIsSelectTokenFrom(false);
+    setIsSelectTokenTo(false);
+    setIsSelectChainFrom(false);
+    setIsSelectChainTo(false);
+  });
+
   return (
     <div ref={ref}>
       <SelectToken
@@ -36,7 +44,7 @@ const TokenAndChainSelectors = ({
         items={filteredToTokens}
         theme={theme}
         selectChain={selectChainTo}
-        isSelectToken={isSelectTo}
+        isSelectToken={isSelectTokenTo}
       />
       <SelectToken
         setIsSelectToken={setIsSelectTokenFrom}
@@ -46,7 +54,7 @@ const TokenAndChainSelectors = ({
         selectChain={selectChainFrom}
         items={filteredFromTokens}
         handleChangeToken={(token) => handleChangeToken(token, 'from')}
-        isSelectToken={isSelectFrom}
+        isSelectToken={isSelectTokenFrom}
       />
       <SelectChain
         filterChainId={unSupportSimulateToken.includes(originalFromToken?.denom) ? ['Oraichain'] : []}
