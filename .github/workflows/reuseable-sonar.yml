@@ -14,5 +14,5 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           repository: oraichain/infra
-          event-type: firebase
+          event-type: sonarcloud
           client-payload: '{"ref": "${{ github.ref }}", "repo": "${{ github.repository }}", "sonar_token": "${{ secrets.SONAR_HOST_URL }}"}'
