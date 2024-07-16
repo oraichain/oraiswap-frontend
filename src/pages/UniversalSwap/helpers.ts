@@ -13,7 +13,10 @@ import {
   getTokenOnSpecificChainId,
   oraichainTokens,
   PairAddress,
-  NetworkName
+  NetworkName,
+  ATOM_ORAICHAIN_DENOM,
+  OSMOSIS_ORAICHAIN_DENOM,
+  USDC_CONTRACT
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -189,7 +192,8 @@ export const getExplorerScan = (chainId: NetworkChainId) => {
       return 'https://explorer.injective.network/transaction';
     case 'kawaii_6886-1':
       return 'https://scan.kawaii.global/tx';
-    // case: 'noble-1':
+    case 'noble-1':
+      return 'https://www.mintscan.io/noble/tx';
     default:
       return 'https://scan.orai.io/txs';
   }
@@ -220,59 +224,6 @@ export const generateNewSymbolV2 = (
     newTVPair.info = findedPair.info;
   }
 
-  return newTVPair;
-};
-
-// generate TradingView pair base on from & to token in universal-swap
-export const generateNewSymbol = (
-  fromToken: TokenItemType,
-  toToken: TokenItemType,
-  currentPair: PairToken
-): PairToken | null => {
-  let newTVPair: PairToken = { ...currentPair };
-  // example: ORAI/ORAI
-  let findedPair;
-  const isFromTokenEqualToToken = fromToken.name === toToken.name;
-  const fromTokenIsOrai = fromToken.name === 'ORAI';
-  if (isFromTokenEqualToToken) {
-    const symbol = fromTokenIsOrai ? 'USDT' : 'ORAI';
-    findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(symbol));
-    if (!findedPair)
-      return {
-        ...newTVPair,
-        symbol: `${fromToken.name}/${toToken.name}`,
-        info: ''
-      };
-
-    newTVPair.symbol = findedPair.symbol;
-    newTVPair.info = findedPair.info;
-    return newTVPair;
-  }
-
-  findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(toToken.name));
-  // this case when pair NOT in pool
-  if (!findedPair) {
-    findedPair = PAIRS_CHART.find((p) => p.symbols.includes(fromToken.name));
-  }
-
-  if (!findedPair) {
-    findedPair = PAIRS_CHART.find((p) => p.symbols.includes(toToken.name));
-  }
-
-  if (!findedPair) {
-    // this case when user click button reverse swap flow  of pair NOT in pool.
-    // return null to prevent re-call api of this pair.
-    if (currentPair.symbol.split('/').includes(fromToken.name) && currentPair.symbol.split('/').includes(toToken.name))
-      return null;
-    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
-    newTVPair.info = '';
-  } else {
-    // this case when user click button reverse swap flow of pair in pool.
-    // return null to prevent re-call api of this pair.
-    if (findedPair.symbol === currentPair.symbol) return null;
-    newTVPair.symbol = findedPair.symbol;
-    newTVPair.info = findedPair.info;
-  }
   return newTVPair;
 };
 
@@ -380,7 +331,8 @@ export const getDisableSwap = ({
   fromTokenBalance,
   addressTransfer,
   validAddress,
-  simulateData
+  simulateData,
+  isLoadingSimulate
 }) => {
   const mobileMode = isMobile();
   const canSwapToCosmos = !mobileMode && originalToToken.cosmosBased && !walletByNetworks.cosmos;
@@ -394,6 +346,7 @@ export const getDisableSwap = ({
     fromAmountTokenBalance > fromTokenBalance || // insufficent fund
     !addressTransfer ||
     !validAddress.isValid ||
+    isLoadingSimulate ||
     canSwapTo;
 
   let disableMsg: string;
@@ -404,12 +357,20 @@ export const getDisableSwap = ({
   if (canSwapToTron) disableMsg = `Please connect tron wallet`;
   if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
   if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
+  if (isLoadingSimulate) disableMsg = `Swap`;
   return { disabledSwapBtn, disableMsg };
 };
 
-// TODO: smart route swap in Oraichain
-const findKeyByValue = (obj: { [key: string]: string }, value: string): string =>
-  Object.keys(obj).find((key) => obj[key] === value);
+// smart router osmosis
+export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
+  const notAllowChainId = ['Neutaro-1'];
+  if (notAllowChainId.includes(fromToken.chainId) || notAllowChainId.includes(toToken.chainId)) return false;
+
+  if (fromToken.cosmosBased && toToken.cosmosBased) return true;
+  return false;
+};
+
+export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
 
 const findTokenInfo = (token: string, flattenTokens: TokenItemType[]): TokenItemType =>
   flattenTokens.find(
@@ -421,65 +382,142 @@ const findBaseToken = (coinGeckoId: string, flattenTokensWithIcon: TokenItemType
   return baseToken ? (isLightMode ? baseToken.IconLight : baseToken.Icon) : DefaultIcon;
 };
 
-interface Pair {
-  asset_infos: AssetInfo[];
-  assets: string[];
-  symbol: string;
-  symbols: string[];
-  info: string;
-  tokenIn?: string;
-  tokenOut?: string;
-}
-
-export const processPairInfo = (
-  path: {
-    poolId: string;
-    tokenOut: string;
-  },
-  flattenTokens: TokenItemType[],
-  flattenTokensWithIcon: TokenItemType[],
-  isLightMode: boolean
-): {
-  infoPair: Pair;
-  TokenInIcon: CoinIcon;
-  TokenOutIcon: CoinIcon;
-  pairKey: string;
-} => {
-  const pairKey: string = findKeyByValue(PairAddress, path.poolId);
-  if (!pairKey) return { infoPair: undefined, TokenInIcon: DefaultIcon, TokenOutIcon: DefaultIcon, pairKey: undefined };
-
-  let [tokenInKey, tokenOutKey] = pairKey.split('_');
-
-  // TODO: hardcode case token is TRX
-  if (tokenInKey === 'TRX') tokenInKey = 'WTRX';
-  if (tokenOutKey === 'TRX') tokenOutKey = 'WTRX';
-
-  let infoPair: Pair = PAIRS_CHART.find((pair) => {
-    let convertedArraySymbols = pair.symbols.map((symbol) => symbol.toUpperCase());
-    return convertedArraySymbols.includes(tokenInKey) && convertedArraySymbols.includes(tokenOutKey);
+export const transformSwapInfo = (data) => {
+  const transformedData = JSON.parse(JSON.stringify(data));
+  transformedData.swapInfo = transformedData.swapInfo.map((swap, index) => {
+    if (index === 0) {
+      swap.tokenIn = data.tokenIn;
+    } else {
+      swap.tokenIn = transformedData.swapInfo[index - 1].tokenOut;
+    }
+    return swap;
   });
 
-  if (!infoPair) return { infoPair: undefined, TokenInIcon: DefaultIcon, TokenOutIcon: DefaultIcon, pairKey };
+  return transformedData;
+};
 
-  const tokenIn = infoPair?.assets.find((info) => info.toUpperCase() !== path.tokenOut.toUpperCase());
-  const tokenOut = path.tokenOut;
+export const processPairInfo = (actionSwap, flattenTokens, flattenTokensWithIcon, isLightMode) => {
+  let info;
+  let [TokenInIcon, TokenOutIcon]: any = [DefaultIcon, DefaultIcon];
+  const infoPair = PAIRS_CHART.find(
+    (pair) => pair.assets.includes(actionSwap.tokenIn) && pair.assets.includes(actionSwap.tokenOut)
+  );
+  const findIndexIn = infoPair.assets.findIndex((fdex) => fdex === actionSwap.tokenOut);
+  const TokenInIconPair = findBaseToken(
+    findTokenInfo(actionSwap.tokenIn, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
+  const TokenOutIconPair = findBaseToken(
+    findTokenInfo(actionSwap.tokenOut, flattenTokens)?.coinGeckoId,
+    flattenTokensWithIcon,
+    isLightMode
+  );
 
-  infoPair = {
+  TokenInIcon = TokenInIconPair;
+  TokenOutIcon = TokenOutIconPair;
+
+  info = {
     ...infoPair,
-    tokenIn: tokenIn,
-    tokenOut: tokenOut
+    tokenIn: infoPair.symbols[findIndexIn],
+    tokenOut: infoPair.symbols[findIndexIn ? 0 : 1]
+  };
+  return { info, TokenInIcon, TokenOutIcon };
+};
+
+export const getTokenInfo = (action, path, flattenTokens, assetList) => {
+  let info;
+  let [TokenInIcon, TokenOutIcon] = [DefaultIcon, DefaultIcon];
+
+  const tokenInAction = action.tokenIn;
+  const tokenOutAction = action.tokenOut;
+
+  const tokenInChainId = path.chainId;
+  const tokenOutChainId = path.tokenOutChainId;
+
+  const findToken = (token, tokens) =>
+    tokens.find(
+      (flat) =>
+        flat.denom?.toLowerCase() === token.toLowerCase() || flat.contractAddress?.toLowerCase() === token.toLowerCase()
+    );
+  const findTokenInfo = (tokenBase, assets) => assets?.assets.find((asset) => asset.base === tokenBase) ?? {};
+
+  if (action.type === 'Swap') {
+    let tokenInInfo, tokenOutInfo;
+
+    if (tokenInChainId === 'Oraichain') {
+      tokenInInfo = findToken(tokenInAction, flattenTokens);
+      tokenOutInfo = findToken(tokenOutAction, flattenTokens);
+
+      TokenInIcon = tokenInInfo.Icon;
+      TokenOutIcon = tokenOutInfo.Icon;
+      info = {
+        tokenIn: tokenInInfo?.name,
+        tokenOut: tokenOutInfo?.name
+      };
+    } else {
+      tokenInInfo = findTokenInfo(tokenInAction, assetList);
+      tokenOutInfo = findTokenInfo(tokenOutAction, assetList);
+
+      info = {
+        tokenInInfo,
+        tokenOutInfo,
+        tokenIn: tokenInInfo.symbol,
+        tokenOut: tokenOutInfo.symbol
+      };
+    }
+  }
+
+  if (action.type === 'Bridge') {
+    const getTokenInfoBridge = (token, tokens, chainId) => {
+      if (chainId === 'Oraichain') return findToken(token, tokens);
+      return findTokenInfo(token, assetList);
+    };
+
+    const tokenInInfo = getTokenInfoBridge(tokenInAction, flattenTokens, tokenInChainId);
+    const tokenOutInfo = getTokenInfoBridge(tokenOutAction, flattenTokens, tokenOutChainId);
+    console.log({ tokenInAction, tokenInChainId, tokenInInfo, tokenOutInfo });
+
+    info = {
+      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo?.name : tokenInInfo.symbol,
+      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo?.name : tokenOutInfo.symbol,
+      tokenInInfo,
+      tokenOutInfo
+    };
+
+    if (tokenInChainId === 'Oraichain') {
+      TokenInIcon = tokenInInfo.Icon;
+    }
+
+    if (tokenOutChainId === 'Oraichain') {
+      TokenOutIcon = tokenOutInfo.Icon;
+    }
+  }
+
+  return { info, TokenInIcon, TokenOutIcon };
+};
+
+export const getPathInfo = (path, chainIcons, assets) => {
+  let [NetworkFromIcon, NetworkToIcon] = [DefaultIcon, DefaultIcon];
+
+  const pathChainId = path.chainId.split('-')[0].toLowerCase();
+  const pathTokenOut = path.tokenOutChainId.split('-')[0].toLowerCase();
+
+  if (path.chainId) {
+    const chainFrom = chainIcons.find((cosmos) => cosmos.chainId === path.chainId);
+    NetworkFromIcon = chainFrom ? chainFrom.Icon : DefaultIcon;
+  }
+
+  if (path.tokenOutChainId) {
+    const chainTo = chainIcons.find((cosmos) => cosmos.chainId === path.tokenOutChainId);
+    NetworkToIcon = chainTo ? chainTo.Icon : DefaultIcon;
+  }
+
+  const getAssetsByChainName = (chainName) => assets.find(({ chain_name }) => chain_name === chainName)?.assets || [];
+
+  const assetList = {
+    assets: [...getAssetsByChainName(pathChainId), ...getAssetsByChainName(pathTokenOut)]
   };
 
-  const TokenInIcon = findBaseToken(
-    findTokenInfo(tokenIn, flattenTokens)?.coinGeckoId,
-    flattenTokensWithIcon,
-    isLightMode
-  );
-  const TokenOutIcon = findBaseToken(
-    findTokenInfo(tokenOut, flattenTokens)?.coinGeckoId,
-    flattenTokensWithIcon,
-    isLightMode
-  );
-
-  return { infoPair, TokenInIcon, TokenOutIcon, pairKey };
+  return { NetworkFromIcon, NetworkToIcon, assetList, pathChainId };
 };

@@ -1,0 +1,41 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.ai-dot {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 20px;
+  height: 29px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px !important;
+
+  @include theme() {
+    background-color: theme-get('neutral-6');
+  }
+
+  .dot {
+    display: flex;
+    margin-left: 8px;
+    margin-right: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 100%;
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  .dot-active {
+    margin-left: 3px;
+    display: flex;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.ai-dot-active {
+  @include theme() {
+    color: theme-get('primary-surface-default-dark');
+  }
+}

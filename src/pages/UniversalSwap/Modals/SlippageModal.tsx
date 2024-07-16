@@ -8,6 +8,7 @@ import { FC, useState } from 'react';
 import NumberFormat, { NumberFormatValues } from 'react-number-format';
 import { TooltipIcon } from './SettingTooltip';
 import styles from './SlippageModal.module.scss';
+import ToggleSwitch from 'components/ToggleSwitch';
 
 const cx = cn.bind(styles);
 
@@ -23,8 +24,8 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible, isB
   const [indexChosenOption, setIndexChosenOption] = useState(DEFAULT_INFDEX_SLIPPAGE_OPTION);
   const [theme] = useConfigReducer('theme');
   const [manualSlippage, setManualSlippage] = useState<number>();
-
   const [openTooltip, setOpenTooltip] = useState(false);
+  const [isAIRoute, setIsAIRoute] = useConfigReducer('AIRoute');
 
   return (
     <div className={cx('setting', `${theme}-modal`, { isBotomSheet })}>
@@ -33,6 +34,24 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible, isB
         <div className={cx('title')}>Settings</div>
         <CloseIcon className={cx('close-icon')} onClick={() => setVisible(false)} />
       </div>
+
+      <div className={cx('ai-smart-route')}>
+        <div className={cx('ai-label')}>
+          <div className={cx('label')}>Enable AI Smart Route</div>
+          <div className={cx('btn-switch')}>
+            <ToggleSwitch
+              small={true}
+              id="toggle-ai-mode"
+              checked={isAIRoute}
+              onChange={() => {
+                setIsAIRoute(!isAIRoute);
+              }}
+            />
+          </div>
+        </div>
+        <div className={cx('ai-description')}>Use AI to find the best return route for your order</div>
+      </div>
+
       <div className={cx('subtitle')}>
         <div className={cx('label')}>
           Slippage Rate

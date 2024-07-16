@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import _ from 'lodash';
 import { PairInfoExtend } from 'types/token';
 
 export interface TokenState {

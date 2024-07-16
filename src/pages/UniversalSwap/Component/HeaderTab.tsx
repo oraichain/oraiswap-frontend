@@ -24,6 +24,7 @@ import { calculateFinalPriceChange } from '../helpers';
 import { ChartTokenType } from '../hooks/useChartUsdPrice';
 import styles from './HeaderTab.module.scss';
 import { isMobile } from '@walletconnect/browser-utils';
+import { flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 
@@ -234,11 +235,17 @@ export const HeaderTop = ({
 
   const mobileMode = isMobile();
   let [ToTokenIcon, FromTokenIcon] = [DefaultIcon, DefaultIcon];
-  if (currentToToken && Object.keys(currentToToken.IconLight || currentToToken.Icon).length > 0) {
-    ToTokenIcon = theme === 'light' ? currentToToken.IconLight || currentToToken.Icon : currentToToken.Icon;
+  if (currentToToken) {
+    const tokenIcon = flattenTokensWithIcon.find(
+      (tokenWithIcon) => tokenWithIcon.coinGeckoId === currentToToken.coinGeckoId
+    );
+    if (tokenIcon) ToTokenIcon = theme === 'light' ? tokenIcon.IconLight : tokenIcon.Icon;
   }
-  if (currentFromToken && Object.keys(currentFromToken.IconLight || currentFromToken.Icon).length > 0) {
-    FromTokenIcon = theme === 'light' ? currentFromToken.IconLight || currentFromToken.Icon : currentFromToken.Icon;
+  if (currentFromToken) {
+    const tokenIcon = flattenTokensWithIcon.find(
+      (tokenWithIcon) => tokenWithIcon.coinGeckoId === currentFromToken.coinGeckoId
+    );
+    if (tokenIcon) FromTokenIcon = theme === 'light' ? tokenIcon.IconLight : tokenIcon.Icon;
   }
 
   return (
