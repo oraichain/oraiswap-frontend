@@ -92,10 +92,10 @@ export const transferIBCKwt = async (
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
-  var amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
+  const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
 
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-  var customMessages: any[];
+  let customMessages: any[];
 
   // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
   if (fromToken.evmDenoms) {

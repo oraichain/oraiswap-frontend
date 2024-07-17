@@ -33,19 +33,23 @@ const VolumeChart = ({
     // onClickChart
   } = useVolumeEventChart(filterDay, onUpdateCurrentItem, pair);
 
-  useEffect(() => {
-    resizeObserver.current = new ResizeObserver((entries, b) => {
-      window.requestAnimationFrame((): void | undefined => {
-        if (!Array.isArray(entries) || !entries.length) {
-          return;
-        }
+  function handleResizeObserver(entries: ResizeObserverEntry[]) {
+    window.requestAnimationFrame((): void | undefined => {
+      if (!Array.isArray(entries) || !entries.length) {
+        return;
+      }
 
-        const { width, height } = entries[0].contentRect;
-        chartRef.current.applyOptions({ width, height });
-        setTimeout(() => {
-          chartRef.current.timeScale().fitContent();
-        }, 0);
-      });
+      const { width, height } = entries[0].contentRect;
+      chartRef.current.applyOptions({ width, height });
+      setTimeout(() => {
+        chartRef.current.timeScale().fitContent();
+      }, 0);
+    });
+  }
+
+  useEffect(() => {
+    resizeObserver.current = new ResizeObserver((entries) => {
+      handleResizeObserver(entries);
     });
 
     resizeObserver.current.observe(containerRef.current, {

@@ -365,27 +365,45 @@ export const switchWalletTron = async (walletType: WalletType) => {
   };
 };
 
+export const isConnectTronInMobile = (walletByNetworks: WalletsByNetwork) => {
+  return isMobile() && !!walletByNetworks.tron;
+};
+
+export const isConnectCosmos = (walletByNetworks: WalletsByNetwork) => {
+  return !!walletByNetworks.cosmos || isMobile();
+};
+
+export const isConnectSpecificNetwork = (status: string | null) => {
+  return !!status || isMobile();
+};
+
+export const getAddressTransferForEvm = async (walletByNetworks: WalletsByNetwork) => {
+  let address = '';
+  if (network.chainId === EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID) {
+    if (isConnectTronInMobile(walletByNetworks)) {
+      const accountTron: interfaceRequestTron = await window.tronLinkDapp.request({
+        method: 'tron_requestAccounts'
+      });
+      address = accountTron.base58;
+    } else {
+      address = window?.tronWebDapp?.defaultAddress?.base58;
+    }
+  } else if (isConnectSpecificNetwork(walletByNetworks.evm)) {
+    if (walletByNetworks.evm === 'owallet') window.ethereumDapp = window.eth_owallet;
+    const check = window.Metamask.isWindowEthereum();
+    if (check) {
+      address = await window.Metamask.getEthAddress();
+    }
+  }
+  return address;
+};
+
 export const getAddressTransfer = async (network: CustomChainInfo, walletByNetworks: WalletsByNetwork) => {
   try {
-    let address;
+    let address = '';
     if (network.networkType === 'evm') {
-      if (network.chainId === EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID) {
-        if (isMobile() && walletByNetworks.tron) {
-          const accountTron: interfaceRequestTron = await window.tronLinkDapp.request({
-            method: 'tron_requestAccounts'
-          });
-          address = accountTron.base58;
-        } else {
-          address = window?.tronWebDapp?.defaultAddress?.base58;
-        }
-      } else if (walletByNetworks.evm || isMobile()) {
-        if (walletByNetworks.evm === 'owallet') window.ethereumDapp = window.eth_owallet;
-        const check = window.Metamask.isWindowEthereum();
-        if (check) {
-          address = await window.Metamask.getEthAddress();
-        }
-      }
-    } else if (walletByNetworks.cosmos || isMobile()) {
+      address = await getAddressTransferForEvm(walletByNetworks);
+    } else if (isConnectSpecificNetwork(walletByNetworks.cosmos)) {
       address = await window.Keplr.getKeplrAddr(network.chainId);
     }
     return address;

@@ -1,15 +1,10 @@
 import {
-  ChainIdEnum,
-  CustomChainInfo,
-  GAS_ESTIMATION_BRIDGE_DEFAULT,
-  NetworkChainId,
-  ORAI,
-  toDisplay,
-  TokenItemType,
-  BigDecimal
+  BigDecimal,
   // flattenTokens
+  NetworkChainId,
+  toDisplay,
+  TokenItemType
 } from '@oraichain/oraidex-common';
-import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
@@ -17,23 +12,23 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import classNames from 'classnames';
 import Input from 'components/Input';
 import Loader from 'components/Loader';
+import PowerByOBridge from 'components/PowerByOBridge';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, tokenMap, flattenTokens } from 'config/bridgeTokens';
+import { cosmosTokens, flattenTokens, tokenMap } from 'config/bridgeTokens';
 import { btcChains, evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
-import { feeEstimate, filterChainBridge, getAddressTransfer, networks, subNumber } from 'helper';
+import { filterChainBridge, getAddressTransfer, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
+import useWalletReducer from 'hooks/useWalletReducer';
 import { reduceString } from 'libs/utils';
 import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import styles from './index.module.scss';
 import { calcMaxAmount, useDepositFeesBitcoin, useGetWithdrawlFeesBitcoin } from '../helpers';
-import useWalletReducer from 'hooks/useWalletReducer';
-import PowerByOBridge from 'components/PowerByOBridge';
+import styles from './index.module.scss';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -131,11 +126,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const toNetwork = bridgeNetworks.find((n) => n.chainId === toNetworkChainId);
   const to = flattenTokens.find((t) => t.coinGeckoId === token.coinGeckoId && t.chainId === toNetworkChainId);
 
-  let remoteTokenDenomFrom;
-  let remoteTokenDenomTo;
+  const getRemoteTokenDenom = (token: TokenItemType) => {
+    if (!token) return null;
+    return token.contractAddress ? token.prefix + token.contractAddress : token.denom;
+  };
 
-  if (token) remoteTokenDenomFrom = token.contractAddress ? token.prefix + token.contractAddress : token.denom;
-  if (to) remoteTokenDenomTo = to.contractAddress ? to.prefix + to.contractAddress : to.denom;
+  const remoteTokenDenomFrom = getRemoteTokenDenom(token);
+  const remoteTokenDenomTo = getRemoteTokenDenom(to);
 
   // token fee
   const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
@@ -143,12 +140,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   // bridge fee & relayer fee
   const bridgeFee = fromTokenFee + toTokenFee;
-  console.log({
-    token,
-    to,
-    toNetwork,
-    toNetworkChainId
-  });
 
   const isFromOraichainToBitcoin = token.chainId === 'Oraichain' && toNetworkChainId === ('bitcoin' as any);
   const isFromBitcoinToOraichain = token.chainId === ('bitcoin' as string) && toNetworkChainId === 'Oraichain';

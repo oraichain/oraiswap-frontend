@@ -15,7 +15,7 @@ import { MyWalletMobile } from './MyWalletMobile';
 import styles from './WalletManagement.module.scss';
 import type { Wallet as WalletResetType } from './useResetBalance';
 import { useResetBalance } from './useResetBalance';
-import { WalletProvider, walletProvider } from './walletConfig';
+import { WalletNetwork, WalletProvider, walletProvider } from './walletConfig';
 const cx = cn.bind(styles);
 
 export const WalletManagement: FC<{}> = () => {
@@ -44,32 +44,34 @@ export const WalletManagement: FC<{}> = () => {
 
   // update wallet provider with status is active or not
   useEffect(() => {
+    function updateWalletStatus(wallet: WalletNetwork) {
+      let isActive = true;
+      switch (wallet.nameRegistry) {
+        case 'keplr':
+          isActive = isCheckKeplr;
+          break;
+        case 'owallet':
+          isActive = isCheckOwallet;
+          break;
+        case 'metamask':
+          isActive = isMetamask;
+          break;
+        case 'tronLink':
+          isActive = isTronLink;
+          break;
+        case 'eip191':
+          isActive = isMetamask;
+          break;
+        case 'bitcoin':
+          isActive = isCheckOwallet;
+          break;
+      }
+      return { ...wallet, isActive };
+    }
+
     async function updateWalletProvider() {
       const updatedWalletProvider = walletProviderWithStatus.map((item) => {
-        const updatedWallets = item.wallets.map((wallet) => {
-          let isActive = true;
-          switch (wallet.nameRegistry) {
-            case 'keplr':
-              isActive = isCheckKeplr;
-              break;
-            case 'owallet':
-              isActive = isCheckOwallet;
-              break;
-            case 'metamask':
-              isActive = isMetamask;
-              break;
-            case 'tronLink':
-              isActive = isTronLink;
-              break;
-            case 'eip191':
-              isActive = isMetamask;
-              break;
-            case 'bitcoin':
-              isActive = isCheckOwallet;
-              break;
-          }
-          return { ...wallet, isActive };
-        });
+        const updatedWallets = item.wallets.map(updateWalletStatus);
         return {
           ...item,
           wallets: updatedWallets
@@ -78,6 +80,7 @@ export const WalletManagement: FC<{}> = () => {
       setWalletProviderWithStatus(updatedWalletProvider);
     }
     updateWalletProvider();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCheckOwallet, isCheckKeplr, isMetamask, isTronLink]);
 
   // load balance every time change address
@@ -93,6 +96,7 @@ export const WalletManagement: FC<{}> = () => {
     if (Object.keys(filteredAddresses).length > 0) {
       loadTokenAmounts(filteredAddresses);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
 
   // reset balance when disconnect

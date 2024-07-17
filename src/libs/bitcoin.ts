@@ -24,8 +24,10 @@ export interface IBitcoin {
 }
 
 export default class Bitcoin {
-  constructor() {}
-  disconnect() {}
+  disconnect() {
+    // not implemented
+  }
+
   async getBitcoinKey(chainId?: string): Promise<Key | undefined> {
     try {
       chainId = chainId ?? network.chainId;
