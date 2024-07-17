@@ -16,7 +16,9 @@ import {
   NetworkName,
   ATOM_ORAICHAIN_DENOM,
   OSMOSIS_ORAICHAIN_DENOM,
-  USDC_CONTRACT
+  USDC_CONTRACT,
+  BigDecimal,
+  toAmount
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -368,6 +370,18 @@ export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
 
   if (fromToken.cosmosBased && toToken.cosmosBased) return true;
   return false;
+};
+
+export const getAverageRatio = (simulateData, averageSimulateData, fromAmountToken, originalFromToken) => {
+  let averageRatio = undefined;
+  if (simulateData && fromAmountToken) {
+    const displayAmount = new BigDecimal(simulateData.displayAmount).div(fromAmountToken).toNumber();
+    averageRatio = {
+      amount: toAmount(displayAmount ? displayAmount : averageSimulateData?.displayAmount, originalFromToken.decimals),
+      displayAmount: displayAmount ? displayAmount : averageSimulateData?.displayAmount ?? 0
+    };
+  }
+  return { averageRatio };
 };
 
 export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
