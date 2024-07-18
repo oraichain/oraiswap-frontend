@@ -397,10 +397,16 @@ const SwapComponent: React.FC<{
 
   const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
-    const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
-    const setIsSelect = isFrom ? setIsSelectTokenFrom : setIsSelectTokenTo;
+    let setSelectChain = setSelectChainTo;
+    let setIsSelect = setIsSelectTokenTo;
+    let tokenDenomSwap = fromTokenDenomSwap;
+    if (isFrom) {
+      setSelectChain = setSelectChainFrom;
+      setIsSelect = setIsSelectTokenFrom;
+      tokenDenomSwap = toTokenDenomSwap;
+    }
 
-    if (token.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap)) {
+    if (token.denom === tokenDenomSwap) {
       setFromTokenDenom(toTokenDenomSwap);
       setToTokenDenom(fromTokenDenomSwap);
       setSelectChainFrom(selectChainTo);
@@ -408,10 +414,17 @@ const SwapComponent: React.FC<{
 
       handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
     } else {
-      setFromTokenDenom(isFrom ? token.denom : fromTokenDenomSwap);
-      setToTokenDenom(isFrom ? toTokenDenomSwap : token.denom);
+      let fromTokenDenom = fromTokenDenomSwap;
+      let toTokenDenom = token.denom;
+      if (isFrom) {
+        fromTokenDenom = token.denom;
+        toTokenDenom = toTokenDenomSwap;
+      }
+
+      setFromTokenDenom(fromTokenDenom);
+      setToTokenDenom(toTokenDenom);
       setSelectChain(token.chainId);
-      handleUpdateQueryURL(isFrom ? [token.denom, toTokenDenomSwap] : [fromTokenDenomSwap, token.denom]);
+      handleUpdateQueryURL(isFrom ? [fromTokenDenom, toTokenDenomSwap] : [fromTokenDenomSwap, toTokenDenom]);
     }
 
     if (coe && isFrom) {
