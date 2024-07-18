@@ -32,7 +32,7 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
 import { chainIcons } from 'config/chainInfos';
 import { ethers } from 'ethers';
-import { getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { assert, getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
@@ -226,12 +226,6 @@ const SwapComponent: React.FC<{
       }
     }
   };
-
-  function assert(condition: any, msg?: string) {
-    if (!condition) {
-      throw new Error(msg || 'Condition is not truthy');
-    }
-  }
 
   const handleSubmit = async () => {
     try {

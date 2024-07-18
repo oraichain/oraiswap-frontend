@@ -32,6 +32,7 @@ import { tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { NomicContext } from 'context/nomic-context';
 import {
+  assert,
   EVM_CHAIN_ID,
   getSpecialCoingecko,
   getTransactionUrl,
@@ -353,6 +354,17 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const checkTransferBtc = async (fromAmount: number) => {
+    const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
+    const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
+    if (isBTCtoOraichain || isOraichainToBTC)
+      return handleTransferBTC({
+        isBTCToOraichain: isBTCtoOraichain,
+        fromToken: from,
+        transferAmount: fromAmount
+      });
+  };
+
   const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
     const btcAddr = await window.Bitcoin.getAddress();
     if (!btcAddr) throw Error('Not found your bitcoin address!');
@@ -363,100 +375,86 @@ const Balance: React.FC<BalanceProps> = () => {
     return handleTransferOraichainToBTC(fromToken, transferAmount, btcAddr);
   };
 
+  const checkTransferKwt = async (fromAmount: number) => {
+    let result: DeliverTxResponse | string | any;
+    // convert erc20 to native ==> ORAICHAIN
+    if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
+    else result = await transferIBCKwt(from, to, fromAmount, amounts);
+    processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
+  };
+
+  const getLatestEvmAddress = async (toNetworkChainId: NetworkChainId) => {
+    const isFromEvmNotTron = from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId);
+    const isToNetworkEvmNotTron = toNetworkChainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(toNetworkChainId);
+    // switch network for metamask, exclude TRON
+    if (isFromEvmNotTron) {
+      await window.Metamask.switchNetwork(from.chainId);
+    }
+
+    let latestEvmAddress = metamaskAddress;
+    // need to get latest tron address if cached
+    if (isFromEvmNotTron || isToNetworkEvmNotTron) {
+      latestEvmAddress = await window.Metamask.getEthAddress();
+    }
+    return latestEvmAddress;
+  };
+
   const onClickTransfer = async (
     fromAmount: number,
     from: TokenItemType,
     to: TokenItemType,
     toNetworkChainId?: NetworkChainId
   ) => {
-    await handleCheckWallet();
-
-    // await handleCheckChainEvmWallet(from.chainId);
-    // disable send amount < 0
-    if (!from || !to) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Please choose both from and to tokens'
-      });
-      return;
-    }
-
-    // get & check balance
-    const initFromBalance = amounts[from.denom];
-
-    const subAmounts = getSubAmountDetails(amounts, from);
-    const subAmount = toAmount(toSumDisplay(subAmounts), from.decimals);
-
-    const fromBalance = from && initFromBalance ? subAmount + BigInt(initFromBalance) : BigInt(0);
-
-    if (fromAmount <= 0 || toAmount(fromAmount, from.decimals) > fromBalance) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Your balance is insufficient to make this transfer'
-      });
-      return;
-    }
-
-    displayToast(TToastType.TX_BROADCASTING);
     try {
+      await handleCheckWallet();
+
+      assert(from && to, 'Please choose both from and to tokens');
+
+      // get & check balance
+      const initFromBalance = amounts[from.denom];
+
+      const subAmounts = getSubAmountDetails(amounts, from);
+      const subAmount = toAmount(toSumDisplay(subAmounts), from.decimals);
+
+      const fromBalance = from && initFromBalance ? subAmount + BigInt(initFromBalance) : BigInt(0);
+
+      const condition = fromAmount > 0 && toAmount(fromAmount, from.decimals) <= fromBalance;
+      assert(condition, 'Your balance is insufficient to make this transfer');
+
+      displayToast(TToastType.TX_BROADCASTING);
       let result: DeliverTxResponse | string | any;
 
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
-        // convert erc20 to native ==> ORAICHAIN
-        if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
-        else result = await transferIBCKwt(from, to, fromAmount, amounts);
-        processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
+        await checkTransferKwt(fromAmount);
         return;
       }
 
-      // TODO: hardcode check bitcoinTestnet need update later
       // [BTC Native] <==> ORAICHAIN
-      const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
-      const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
-      if (isBTCtoOraichain || isOraichainToBTC)
-        return handleTransferBTC({
-          isBTCToOraichain: isBTCtoOraichain,
-          fromToken: from,
-          transferAmount: fromAmount
-        });
+      await checkTransferBtc(fromAmount);
 
       let newToToken = to;
       if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
-        // newToToken = findToTokenOnOraiBridge(from.coinGeckoId, toNetworkChainId);
         newToToken = flattenTokens.find(
-          (flat) => flat.chainId == toNetworkChainId && flat.coinGeckoId === from.coinGeckoId
+          (flat) => flat.chainId === toNetworkChainId && flat.coinGeckoId === from.coinGeckoId
         );
-
-        // const isBridgeToCosmosNetwork = !EVM_CHAIN_ID.includes(toNetworkChainId);
-        // if (isBridgeToCosmosNetwork) {
-        //   newToToken = cosmosTokens.find((t) => t.chainId === toNetworkChainId && t.coinGeckoId === from.coinGeckoId);
-        // }
-        if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
+        assert(newToToken, 'Cannot find newToToken token that matches from token to bridge!');
       }
 
-      if (newToToken.coinGeckoId !== from.coinGeckoId)
-        throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
+      assert(
+        newToToken.coinGeckoId === from.coinGeckoId,
+        `From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`
+      );
 
-      // TODO: hardcode case Neutaro-1 & Noble-1
+      // hardcode case Neutaro-1 & Noble-1
       if (from.chainId === 'Neutaro-1') return await handleTransferIBC(from, newToToken, fromAmount);
+
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const cosmosAddress = await handleCheckAddress(from.cosmosBased ? (from.chainId as CosmosChainId) : 'Oraichain');
-
-      const isFromEvmNotTron = from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId);
-      const isToNetworkEvmNotTron = toNetworkChainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(toNetworkChainId);
-      // switch network for metamask, exclude TRON
-      if (isFromEvmNotTron) {
-        await window.Metamask.switchNetwork(from.chainId);
-      }
-
-      let latestEvmAddress = metamaskAddress;
-      // TODO: need to get latest tron address if cached
-      if (isFromEvmNotTron || isToNetworkEvmNotTron) {
-        latestEvmAddress = await window.Metamask.getEthAddress();
-      }
-
+      const latestEvmAddress = await getLatestEvmAddress(toNetworkChainId);
       let amountsBalance = amounts;
       let simulateAmount = toAmount(fromAmount).toString();
 
