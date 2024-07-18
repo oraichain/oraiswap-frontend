@@ -89,7 +89,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
         )
       : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
-  const simulateDisplayAmount = simulateData?.displayAmount ? simulateData.displayAmount : 0;
+  const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
   const bridgeTokenFee =
     simulateDisplayAmount && (fromTokenFee || toTokenFee)
       ? new BigDecimal(simulateDisplayAmount)
