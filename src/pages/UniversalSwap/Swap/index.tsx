@@ -135,12 +135,10 @@ const SwapComponent: React.FC<{
   } = useHandleEffectTokenChange({ fromTokenDenomSwap, toTokenDenomSwap });
   const { addressTransfer, initAddressTransfer, setAddressTransfer } = addressInfo;
 
-  const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(
-    originalFromToken?.chainId || ('OraiChain' as NetworkChainId)
-  );
-  const [selectChainTo, setSelectChainTo] = useState<NetworkChainId>(
-    originalToToken?.chainId || ('OraiChain' as NetworkChainId)
-  );
+  const getDefaultChainFrom = () => originalFromToken?.chainId || ('OraiChain' as NetworkChainId);
+  const getDefaultChainTo = () => originalToToken?.chainId || ('OraiChain' as NetworkChainId);
+  const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(getDefaultChainFrom());
+  const [selectChainTo, setSelectChainTo] = useState<NetworkChainId>(getDefaultChainTo());
 
   // hooks
   useGetFeeConfig();
@@ -473,23 +471,64 @@ const SwapComponent: React.FC<{
   }
   const isRoutersSwapData = +routersSwapData.amount;
 
-  const isImpactPrice = !!debouncedFromAmount && !!simulateData?.displayAmount && !!averageRatio?.amount;
-  let impactWarning = 0;
-  if (
-    isImpactPrice &&
-    simulateData?.displayAmount &&
-    averageRatio?.displayAmount &&
-    useAlphaSmartRouter &&
-    averageSimulateData
-  ) {
-    const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
-      .div(debouncedFromAmount)
-      .div(averageSimulateData.displayAmount)
-      .mul(100)
-      .toNumber();
+  function caculateImpactWarning() {
+    let impactWarning = 0;
+    const isImpactPrice = !!debouncedFromAmount && !!simulateData?.displayAmount && !!averageRatio?.amount;
+    if (
+      isImpactPrice &&
+      simulateData?.displayAmount &&
+      averageRatio?.displayAmount &&
+      useAlphaSmartRouter &&
+      averageSimulateData
+    ) {
+      const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
+        .div(debouncedFromAmount)
+        .div(averageSimulateData.displayAmount)
+        .mul(100)
+        .toNumber();
 
-    if (calculateImpactPrice) impactWarning = 100 - calculateImpactPrice;
+      if (calculateImpactPrice) impactWarning = 100 - calculateImpactPrice;
+    }
+    return impactWarning;
   }
+  const impactWarning = caculateImpactWarning();
+
+  const waringImpactBiggerTen = impactWarning > 10;
+  const waringImpactBiggerFive = impactWarning > 5;
+
+  const generateRatioComp = () => {
+    const getClassRatio = () => {
+      let classRatio = '';
+      const classWarningImpactBiggerFive = waringImpactBiggerFive && 'ratio-five';
+      if (isPreviousSimulate) classRatio = waringImpactBiggerTen ? 'ratio-ten' : classWarningImpactBiggerFive;
+      return classRatio;
+    };
+
+    return (
+      <div className={cx('ratio', getClassRatio())} onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}>
+        <span className={cx('text')}>
+          {waringImpactBiggerFive && <WarningIcon />}
+          {`1 ${originalFromToken.name} ≈ ${
+            averageRatio
+              ? numberWithCommas(averageRatio.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
+                  maximumFractionDigits: 6
+                })
+              : averageSimulateData
+              ? numberWithCommas(averageSimulateData?.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
+                  maximumFractionDigits: 6
+                })
+              : '0'
+          }
+      ${originalToToken.name}`}
+        </span>
+        {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
+          <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
+        )}
+      </div>
+    );
+  };
+
+  const getSwitchIcon = () => (isLightMode ? SwitchLightImg : SwitchDarkImg);
 
   return (
     <div className={cx('swap-box-wrapper')}>
@@ -549,43 +588,13 @@ const SwapComponent: React.FC<{
           </div>
           <div className={cx('swap-center')}>
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
-              <img src={isLightMode ? SwitchLightImg : SwitchDarkImg} onClick={handleRotateSwapDirection} alt="ant" />
+              <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
               {isAllowAlphaSmartRouter(originalFromToken, originalToToken) && (
                 <AIRouteSwitch isLoading={isPreviousSimulate} />
               )}
-              <div
-                className={cx(
-                  'ratio',
-                  isPreviousSimulate
-                    ? ''
-                    : Number(impactWarning) > 10
-                    ? 'ratio-ten'
-                    : Number(impactWarning) > 5 && 'ratio-five'
-                )}
-                onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
-              >
-                <span className={cx('text')}>
-                  {Number(impactWarning) > 5 && <WarningIcon />}
-                  {`1 ${originalFromToken.name} ≈ ${
-                    averageRatio
-                      ? numberWithCommas(averageRatio.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
-                          maximumFractionDigits: 6
-                        })
-                      : averageSimulateData
-                      ? numberWithCommas(averageSimulateData?.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
-                          maximumFractionDigits: 6
-                        })
-                      : '0'
-                  }
-                  ${originalToToken.name}`}
-                </span>
-
-                {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
-                  <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
-                )}
-              </div>
+              {generateRatioComp()}
             </div>
           </div>
 
@@ -635,13 +644,13 @@ const SwapComponent: React.FC<{
                   <div
                     className={cx(
                       'smart-router-price-impact-warning',
-                      Number(impactWarning) > 10
+                      waringImpactBiggerTen
                         ? 'smart-router-price-impact-warning-ten'
-                        : Number(impactWarning) > 5 && 'smart-router-price-impact-warning-five'
+                        : waringImpactBiggerFive && 'smart-router-price-impact-warning-five'
                     )}
                   >
                     <span>
-                      {Number(impactWarning) > 5 && <WarningIcon />} ≈{' '}
+                      {waringImpactBiggerFive && <WarningIcon />} ≈{' '}
                       {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
                     </span>
                   </div>
