@@ -227,17 +227,18 @@ const SwapComponent: React.FC<{
     }
   };
 
+  function assert(condition: any, msg?: string) {
+    if (!condition) {
+      throw new Error(msg || 'Condition is not truthy');
+    }
+  }
+
   const handleSubmit = async () => {
-    if (fromAmountToken <= 0)
-      return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!'
-      });
-
-    setSwapLoading(true);
-    displayToast(TToastType.TX_BROADCASTING);
     try {
-      // await handleCheckChainEvmWallet(originalFromToken.chainId);
+      assert(fromAmountToken > 0, 'From amount should be higher than 0!');
 
+      setSwapLoading(true);
+      displayToast(TToastType.TX_BROADCASTING);
       const cosmosAddress = await handleCheckAddress(
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
@@ -285,7 +286,7 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = useAlphaSmartRouter && simulateData && simulateData?.routes;
+      const alphaSmartRoutes = useAlphaSmartRouter && simulateData?.routes;
 
       let initSwapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
