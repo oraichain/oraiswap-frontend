@@ -76,8 +76,8 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const usdPriceShowFrom = (prices?.[originalFromToken?.coinGeckoId] * fromAmountToken).toFixed(6);
   const usdPriceShowTo = (prices?.[originalToToken?.coinGeckoId] * simulateData?.displayAmount).toFixed(6);
 
-  const isAverageRatio = averageRatio && averageRatio.amount;
-  const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
+  const isAverageRatio = averageRatio?.amount;
+  const isSimulateDataDisplay = simulateData?.displayAmount;
   const minimumReceive =
     isAverageRatio && fromAmountTokenBalance
       ? calculateMinReceive(
@@ -89,7 +89,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
         )
       : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
-  const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
+  const simulateDisplayAmount = simulateData?.displayAmount ? simulateData.displayAmount : 0;
   const bridgeTokenFee =
     simulateDisplayAmount && (fromTokenFee || toTokenFee)
       ? new BigDecimal(simulateDisplayAmount)
