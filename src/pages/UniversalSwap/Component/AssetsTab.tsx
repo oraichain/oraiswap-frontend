@@ -10,7 +10,7 @@ import { tokensIcon } from 'config/chainInfos';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getTotalUsd, toSumDisplay } from 'libs/utils';
-import { formatDisplayUsdt, numberWithCommas, toFixedIfNecessary } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetMyStake } from 'pages/Pools/hooks';
 import { FC, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -61,6 +61,12 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
     ];
   }
 
+  const checkShouldHide = (value: number) => {
+    const SMALL_BALANCE = 0.5;
+    const isHide = hideOtherSmallAmount && value < SMALL_BALANCE;
+    return isHide;
+  };
+
   const data = flattenTokens
     .reduce((result, token) => {
       // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
@@ -70,12 +76,12 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
           const amount = BigInt(amounts[token.denom] ?? 0);
           const isHaveSubAmounts = token.contractAddress && token.evmDenoms;
           const subAmounts = isHaveSubAmounts ? getSubAmountDetails(amounts, token) : {};
-          const totalAmount = amount + (isHaveSubAmounts ? toAmount(toSumDisplay(subAmounts), token.decimals) : 0n);
-          const value = toDisplay(totalAmount.toString(), token.decimals) * (prices[token.coinGeckoId] || 0);
+          const totalAmount = amount + toAmount(toSumDisplay(subAmounts), token.decimals);
 
-          const SMALL_BALANCE = 0.5;
-          const isHide = hideOtherSmallAmount && value < SMALL_BALANCE;
-          if (isHide) return result;
+          const tokenPrice = prices[token.coinGeckoId] || 0;
+          const value = toDisplay(totalAmount.toString(), token.decimals) * tokenPrice;
+
+          if (checkShouldHide(value)) return result;
 
           const tokenIcon = tokensIcon.find((tIcon) => tIcon.coinGeckoId === token.coinGeckoId);
           result.push({
@@ -83,7 +89,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
             chain: token.org,
             icon: tokenIcon?.Icon,
             iconLight: tokenIcon?.IconLight,
-            price: prices[token.coinGeckoId] || 0,
+            price: tokenPrice,
             balance: toDisplay(totalAmount.toString(), token.decimals),
             denom: token.denom,
             value,
