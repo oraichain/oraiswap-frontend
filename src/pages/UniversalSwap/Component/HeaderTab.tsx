@@ -55,7 +55,6 @@ export const HeaderTab: React.FC<HeaderTabPropsType> = ({
   setChartTokenType,
   showTokenInfo = true
 }) => {
-  const { isSmallMobileView } = useWindowSize();
   const filterTime = useSelector(selectCurrentSwapFilterTime);
   const tab = useSelector(selectCurrentSwapTabChart);
   const dispatch = useDispatch();
@@ -231,21 +230,24 @@ export const HeaderTop = ({
   const currentToChain = useSelector(selectCurrentToChain);
   const currentToToken = useSelector(selectCurrentToToken);
 
-  const { isSmallMobileView } = useWindowSize();
-
   const mobileMode = isMobile();
   let [ToTokenIcon, FromTokenIcon] = [DefaultIcon, DefaultIcon];
+
+  const generateIconTokenByTheme = (token) => {
+    return theme === 'light' ? token.IconLight : token.Icon;
+  };
+
   if (currentToToken) {
     const tokenIcon = flattenTokensWithIcon.find(
       (tokenWithIcon) => tokenWithIcon.coinGeckoId === currentToToken.coinGeckoId
     );
-    if (tokenIcon) ToTokenIcon = theme === 'light' ? tokenIcon.IconLight : tokenIcon.Icon;
+    if (tokenIcon) ToTokenIcon = generateIconTokenByTheme(tokenIcon);
   }
   if (currentFromToken) {
     const tokenIcon = flattenTokensWithIcon.find(
       (tokenWithIcon) => tokenWithIcon.coinGeckoId === currentFromToken.coinGeckoId
     );
-    if (tokenIcon) FromTokenIcon = theme === 'light' ? tokenIcon.IconLight : tokenIcon.Icon;
+    if (tokenIcon) FromTokenIcon = generateIconTokenByTheme(tokenIcon);
   }
 
   return (
