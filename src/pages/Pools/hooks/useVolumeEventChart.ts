@@ -11,12 +11,9 @@ export const useVolumeEventChart = (
 ) => {
   const [currentDataVolume, setCurrentDataVolume] = useState([]);
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const [currentItem, setCurrentItem] = useState<{
     value: number;
     time: string | number;
-    //| { day: number; month: number; year: number };
   }>({ value: 0, time: 0 });
 
   const dataClick = useRef({ time: { day: 1, month: 1, year: 1 }, value: 0, clickedTwice: true });
@@ -29,22 +26,18 @@ export const useVolumeEventChart = (
   const onMouseVolumeLeave = () => {
     if (currentDataVolume.length > 0)
       if (dataClick.current.clickedTwice) {
-        let lastElt = currentDataVolume[currentDataVolume.length - 1];
+        const lastElt = currentDataVolume[currentDataVolume.length - 1];
         setCurrentItem({ time: lastElt.time, value: lastElt.value });
         onUpdateCurrentItem && onUpdateCurrentItem(lastElt?.value || 0);
       }
-    // else {
-    //   setCurrentItem({ time: dataClick.current.time, value: dataClick.current.value });
-    //   onUpdateCurrentItem && onUpdateCurrentItem(dataClick?.current?.value || 0);
-    // }
   };
 
   const onClickChart = (e) => {
-    let index = getInclude(currentDataVolume, (item) => {
+    const index = getInclude(currentDataVolume, (item) => {
       return item.time.year === e.time.year && item.time.month === e.time.month && item.time.day === e.time.day;
     });
     if (index > -1) {
-      let same =
+      const same =
         e.time.year === dataClick.current.time.year &&
         e.time.month === dataClick.current.time.month &&
         e.time.day === dataClick.current.time.day;
@@ -59,7 +52,6 @@ export const useVolumeEventChart = (
 
   const onChangeRangeVolume = async (value: FILTER_DAY = FILTER_DAY.DAY) => {
     try {
-      setIsLoading(true);
       let data = [];
 
       if (pair) {
@@ -73,11 +65,8 @@ export const useVolumeEventChart = (
         setCurrentItem({ ...data[data.length - 1] });
         onUpdateCurrentItem && onUpdateCurrentItem(data[data.length - 1]?.value || 0);
       }
-
-      setIsLoading(false);
     } catch (e) {
-      console.log('Volume ERROR: e', 'background: #FF0000; color:#FFFFFF', e);
-      setIsLoading(false);
+      console.log('Volume ERROR: e', e);
     }
   };
 

@@ -83,7 +83,7 @@ const initApp = async () => {
   const walletType = getWalletByNetworkCosmosFromStorage();
   if (walletType) {
     const cosmWasmClient = await getCosmWasmClient({ chainId: network.chainId });
-    if (cosmWasmClient && cosmWasmClient.client) window.client = cosmWasmClient.client;
+    if (cosmWasmClient?.client) window.client = cosmWasmClient.client;
   }
 };
 

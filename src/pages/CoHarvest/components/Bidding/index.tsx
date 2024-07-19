@@ -1,10 +1,10 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { BigDecimal, ORAIX_CONTRACT, oraichainTokens, toAmount, toDisplay, tokenMap } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -12,9 +12,10 @@ import { network } from 'config/networks';
 import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { getUsd } from 'libs/utils';
-import { INIT_AMOUNT_SIMULATE, TF_PRICE_CHANGE, TIMER } from 'pages/CoHarvest/constants';
 import { useDebounce } from 'hooks/useDebounce';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import { getUsd } from 'libs/utils';
+import { INIT_AMOUNT_SIMULATE, TIMER } from 'pages/CoHarvest/constants';
 import {
   useGetAllBidPoolInRound,
   useGetBidding,
@@ -29,7 +30,6 @@ import { RootState } from 'store/configure';
 import InputBalance from '../InputBalance';
 import InputRange from '../InputRange';
 import styles from './index.module.scss';
-import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 
 export type BiddingProps = {
   openExplainModal: () => void;
@@ -194,7 +194,7 @@ const Bidding = ({ openExplainModal, isEnd, round, isStarted, isCurrentRound, ba
                 },
                 'auto'
               );
-              if (result && result.transactionHash) {
+              if (result?.transactionHash) {
                 displayToast(TToastType.TX_SUCCESSFUL, {
                   customLink: getTransactionUrl(network.chainId, result.transactionHash)
                 });

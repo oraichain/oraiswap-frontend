@@ -20,8 +20,8 @@ export const useSwapFee = ({ fromToken, toToken }) => {
   useEffect(() => {
     if (!fromToken || !toToken) return;
 
-    const { denom: fromDenom, name: fromName = '', chainId: fromChainId } = fromToken;
-    const { denom: toDenom, name: toName = '', chainId: toChainId } = toToken;
+    const { name: fromName = '', chainId: fromChainId } = fromToken;
+    const { name: toName = '', chainId: toChainId } = toToken;
 
     // case: same chainId as evm, or bnb => swap fee = 0
     // case: same Token Name and !== chainId => bridge token => swap fee = 0

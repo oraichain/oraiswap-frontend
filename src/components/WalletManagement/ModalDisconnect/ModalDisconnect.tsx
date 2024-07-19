@@ -17,7 +17,7 @@ export const ModalDisconnect: React.FC<{
   close: () => void;
   currentDisconnectingNetwork: NetworkType;
   setCurrentDisconnectingNetwork: React.Dispatch<React.SetStateAction<NetworkType>>;
-}> = ({ close, currentDisconnectingNetwork, setCurrentDisconnectingNetwork }) => {
+}> = ({ close, currentDisconnectingNetwork }) => {
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');

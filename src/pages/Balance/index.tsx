@@ -84,7 +84,7 @@ interface BalanceProps {}
 const Balance: React.FC<BalanceProps> = () => {
   // hook
   const [searchParams] = useSearchParams();
-  let tokenUrl = searchParams.get('token');
+  const tokenUrl = searchParams.get('token');
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const nomic = useContext(NomicContext);
@@ -103,7 +103,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
-  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
+  const [btcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
 
   const ref = useRef(null);
@@ -622,9 +622,8 @@ const Balance: React.FC<BalanceProps> = () => {
                 const isOwallet =
                   walletByNetworks.cosmos &&
                   walletByNetworks.cosmos === 'owallet' &&
-                  window.owallet &&
                   //@ts-ignore
-                  window.owallet?.isOwallet;
+                  window?.owallet?.isOwallet;
 
                 const isBtcToken = t.chainId === bitcoinChainId && t?.coinGeckoId === 'bitcoin';
                 const TokenItemELement: React.FC<TokenItemProps> = isBtcToken ? TokenItemBtc : TokenItem;

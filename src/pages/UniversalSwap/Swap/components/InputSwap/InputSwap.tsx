@@ -148,7 +148,7 @@ export default function InputSwapV4({
                 return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
               }}
               onValueChange={({ floatValue }) => {
-                onChangeAmount && onChangeAmount(floatValue);
+                onChangeAmount?.(floatValue);
               }}
             />
           </div>

@@ -1,11 +1,11 @@
 import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import TokenBalance from 'components/TokenBalance';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { FC, useEffect, useState } from 'react';
-import styles from './Header.module.scss';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { useGetBitcoinConfig, useGetCheckpointQueue, useGetTotalValueLocked } from '../../hooks';
+import styles from './Header.module.scss';
 
 // TODO: Update this method when BTC is added to pool
 // CURRENT REPLACEMENT: Fetch price from other platform
@@ -28,10 +28,6 @@ export const Header: FC<{}> = ({}) => {
   const valueLocked = useGetTotalValueLocked();
   const bitcoinConfig = useGetBitcoinConfig();
   const checkpointQueue = useGetCheckpointQueue();
-  //   const withdrawalFees = useGetWithdrawalFee(checkpointIndex);
-
-  //   const isMobileMode = isMobile(); // not use yet
-  //   const [openChart, setOpenChart] = useState(!isMobileMode); // not use yet
 
   const BITCOIN_INFO = {
     name: 'Bitcoin Price',

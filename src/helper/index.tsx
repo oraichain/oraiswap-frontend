@@ -312,7 +312,7 @@ export const owalletCheck = (type: WalletCosmosType) => {
 
 export const isUnlockMetamask = async (): Promise<boolean> => {
   const ethereum = window.ethereum;
-  if (!ethereum || !ethereum.isMetaMask || !ethereum._metamask) return false;
+  if (!ethereum?.isMetaMask || !ethereum._metamask) return false;
   return await window.ethereum._metamask.isUnlocked();
 };
 
@@ -512,13 +512,11 @@ export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
     });
 
     const stakeCurrencyyWithoutIcons = checkErrorObj(info.stakeCurrency);
-    const feeCurrenciesWithoutIcons =
-      info?.feeCurrencies &&
-      info.feeCurrencies.map((feeCurrency) => {
-        const feeCurrencyyWithoutIcon = checkErrorObj(feeCurrency);
+    const feeCurrenciesWithoutIcons = info?.feeCurrencies?.map((feeCurrency) => {
+      const feeCurrencyyWithoutIcon = checkErrorObj(feeCurrency);
 
-        return feeCurrencyyWithoutIcon;
-      });
+      return feeCurrencyyWithoutIcon;
+    });
 
     return {
       ...infoWithoutIcon,
@@ -567,4 +565,4 @@ export const assert = (condition: any, msg?: string) => {
   if (!condition) {
     throw new Error(msg || 'Condition is not truthy');
   }
-}
+};

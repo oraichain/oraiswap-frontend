@@ -139,7 +139,7 @@ export const MyWallet: React.FC<{
     return renderWalletAddress(
       cosmosNetworksWithIcon,
       cosmosWalletConnected,
-      (network) => cosmosAddresses && cosmosAddresses[network.chainId]
+      (network) => cosmosAddresses?.[network.chainId]
     );
   };
 

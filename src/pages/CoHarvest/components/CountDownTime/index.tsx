@@ -6,7 +6,7 @@ import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
 
 const CountDownTime = ({ bidInfo, onStart, onEnd, isCurrentRound }: CountDownType & { isCurrentRound: boolean }) => {
-  const { timeRemaining, percent, isEnd, start, end, isStarted } = useCountdown({
+  const { timeRemaining, percent, start, end, isStarted } = useCountdown({
     bidInfo,
     onStart,
     onEnd

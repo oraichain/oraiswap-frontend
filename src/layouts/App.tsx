@@ -38,7 +38,6 @@ const App = () => {
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  const [bannerTime] = useConfigReducer('bannerTime');
   const mobileMode = isMobile();
   const ethOwallet = window.eth_owallet;
 

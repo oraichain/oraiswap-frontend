@@ -1,22 +1,17 @@
-import { CoinIcon, TokenItemType, CustomChainInfo, truncDecimals, toDisplay } from '@oraichain/oraidex-common';
-import { TokenInfo } from 'types/token';
-import styles from './SelectToken.module.scss';
-import SearchInput from 'components/SearchInput';
-import cn from 'classnames/bind';
-import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
+import { CustomChainInfo, TokenItemType, truncDecimals } from '@oraichain/oraidex-common';
 import { ReactComponent as IconoirCancel } from 'assets/icons/iconoir_cancel.svg';
-import { ReactComponent as NoResultLight } from 'assets/images/no-result.svg';
 import { ReactComponent as NoResultDark } from 'assets/images/no-result-dark.svg';
-import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
-
-import { getUsd, toSumDisplay } from 'libs/utils';
-import { getSubAmountDetails } from 'rest/api';
-import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import React, { useState, useEffect } from 'react';
+import { ReactComponent as NoResultLight } from 'assets/images/no-result.svg';
+import cn from 'classnames/bind';
+import SearchInput from 'components/SearchInput';
+import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
+import styles from './SelectToken.module.scss';
 import { Themes } from 'context/theme-context';
-import classNames from 'classnames';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { toSumDisplay } from 'libs/utils';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import React, { useEffect, useState } from 'react';
+import { getSubAmountDetails } from 'rest/api';
 
 const cx = cn.bind(styles);
 interface InputSwapProps {
@@ -80,15 +75,8 @@ export default function SelectToken({
       (textSearch ? item.name.toLowerCase().includes(textSearch.toLowerCase()) : true)
   );
 
-  const unsupportedTokens = [].filter(
-    (item) =>
-      (textChain ? item.chainId === textChain : true) &&
-      (textSearch ? item.name.toLowerCase().includes(textSearch.toLowerCase()) : true)
-  );
-
   return (
     <>
-      {/* {isSelectToken && <div className={styles.selectTokenOverlay} onClick={() => setIsSelectToken(false)}></div>} */}
       <div className={`${styles.selectToken} ${isSelectToken ? styles.active : ''}`}>
         <div className={styles.selectTokenHeader}>
           <div />
@@ -144,7 +132,6 @@ export default function SelectToken({
                   sumAmountDetails = { ...sumAmountDetails, ...subAmounts };
                   sumAmount = toSumDisplay(sumAmountDetails);
                 }
-                // const usd = getUsd(BigInt(sumAmount), token, prices);
                 const balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
                 const usd =
                   sumAmount > 0 && token && prices[token.coinGeckoId] ? sumAmount * prices[token.coinGeckoId] : '0';

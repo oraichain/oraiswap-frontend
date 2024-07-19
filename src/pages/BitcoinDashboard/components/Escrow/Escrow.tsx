@@ -18,7 +18,6 @@ import { calculateTimeoutTimestamp, IBC_TRANSFER_TIMEOUT } from '@oraichain/orai
 import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 
 const Escrow = () => {
-  const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
   const [loading, setLoading] = useState<boolean>(false);
   const data = useGetEscrowBalance(deriveNomicAddress(address));
@@ -28,7 +27,7 @@ const Escrow = () => {
     if (!addr) {
       return undefined;
     }
-    let address = fromBech32(addr);
+    const address = fromBech32(addr);
     return toBech32(OraiBTCBridgeNetwork.bech32Config.bech32PrefixAccAddr, address.data);
   }
 

@@ -97,7 +97,7 @@ const Menu: React.FC = () => {
           {
             [styles.active]:
               !otherActive &&
-              ((link && link.includes(to) && link?.length === to?.length) || (link === '/' && to === '/universalswap'))
+              ((link?.includes(to) && link?.length === to?.length) || (link === '/' && to === '/universalswap'))
           },
           styles[theme],
           styles.spin

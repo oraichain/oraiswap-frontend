@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import styles from './Checkpoint.module.scss';
+import { toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
+import Search from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { useDebounce } from 'hooks/useDebounce';
+import useTheme from 'hooks/useTheme';
 import {
   useGetCheckpointData,
   useGetCheckpointFeeInfo,
@@ -8,14 +12,9 @@ import {
   useGetDepositFee,
   useGetWithdrawalFee
 } from 'pages/BitcoinDashboard/hooks';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { toDisplay } from '@oraichain/oraidex-common';
-import Search from 'components/SearchInput';
-import useTheme from 'hooks/useTheme';
-import { useDebounce } from 'hooks/useDebounce';
+import React, { useEffect, useState } from 'react';
+import styles from './Checkpoint.module.scss';
 import { TransactionInput, TransactionOutput } from './Transactions';
-import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
-import { isMobile } from '@walletconnect/browser-utils';
 
 const Checkpoint: React.FC<{}> = ({}) => {
   const theme = useTheme();
@@ -27,7 +26,6 @@ const Checkpoint: React.FC<{}> = ({}) => {
   const withdrawalFee = useGetWithdrawalFee(btcAddress, checkpointIndex);
   const checkpointData = useGetCheckpointData(checkpointIndex);
   const checkpointFeeInfo = useGetCheckpointFeeInfo();
-  const mobileMode = isMobile();
 
   useEffect(() => {
     (async () => {

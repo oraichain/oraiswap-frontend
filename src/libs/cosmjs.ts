@@ -43,12 +43,14 @@ const getCosmWasmClient = async (
 
 export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clientType: clientType, options?: any) => {
   switch (clientType) {
-    case 'cosmwasm':
+    case 'cosmwasm': {
       const { client } = await getCosmWasmClient({ signer, rpc }, options);
       return client;
-    case 'injective':
+    }
+    case 'injective': {
       const tmClient = await Tendermint37Client.connect(rpc);
       return Stargate.InjectiveSigningStargateClient.createWithSigner(tmClient as any, signer, options);
+    }
   }
 };
 
@@ -61,7 +63,7 @@ class CosmJs {
     walletAddr: string;
     address: string;
     handleMsg: cosmwasm.ExecuteInstruction;
-    funds?: readonly Coin[] | undefined;
+    funds?: readonly Coin[];
     gasAmount: Coin;
     gasLimits?: { exec: number };
     memo?: string;

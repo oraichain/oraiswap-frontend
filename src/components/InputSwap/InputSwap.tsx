@@ -35,7 +35,7 @@ export default function InputSwap({ Icon, setIsSelectFrom, token, amount, onChan
           type="text"
           value={amount}
           onValueChange={({ floatValue }) => {
-            onChangeAmount && onChangeAmount(floatValue);
+            onChangeAmount?.(floatValue);
           }}
         />
       </div>

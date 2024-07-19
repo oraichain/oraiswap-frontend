@@ -3,8 +3,7 @@ import { ChainInfo, FeeCurrency, Keplr as keplr, Key } from '@keplr-wallet/types
 import { CosmosChainId, CosmosWallet, NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { cosmosTokens } from 'config/bridgeTokens';
-import { OraiBTCBridgeNetwork, chainInfos } from 'config/chainInfos';
+import { chainInfos, OraiBTCBridgeNetwork } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { getAddress, getAddressByEIP191 } from 'helper';
 import { EIP_EIP_STORAGE_KEY_ACC, MetamaskOfflineSigner } from './eip191';
@@ -71,14 +70,6 @@ export default class Keplr extends CosmosWallet {
       const keplrChainInfos = await this.keplr.getChainInfosWithoutEndpoints();
       const keplrChain = keplrChainInfos.find((keplrChain) => keplrChain.chainId === chainInfo.chainId);
       if (!keplrChain) return;
-
-      const findFeeCurrencies = keplrChain.feeCurrencies.find((fee) => fee.gasPriceStep);
-      // check to update newest chain info
-      if (keplrChain.bip44.coinType !== chainInfo.bip44.coinType || !keplrChain.feeCurrencies?.[0]?.gasPriceStep) {
-        // displayToast(TToastType.TX_INFO, {
-        //   message: `${keplrChain.chainName} has Keplr cointype ${keplrChain.bip44.coinType}, while the chain info config cointype is ${chainInfo.bip44.coinType}. Please reach out to the developers regarding this problem!`
-        // });
-      }
     }
   }
 
