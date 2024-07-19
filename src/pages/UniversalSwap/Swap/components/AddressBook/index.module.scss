@@ -135,7 +135,8 @@ $padding-default: 16px;
 
       font-size: 14px;
       font-weight: 400;
-      line-height: 150%; /* 21px */
+      line-height: 150%;
+      /* 21px */
 
       .titleNodata {
         @include theme {
@@ -144,7 +145,8 @@ $padding-default: 16px;
 
         font-size: 14px;
         font-weight: 400;
-        line-height: 150%; /* 21px */
+        line-height: 150%;
+        /* 21px */
       }
     }
 
@@ -187,6 +189,7 @@ $padding-default: 16px;
           align-items: center;
 
           border-radius: 20px;
+
           @include theme {
             background: theme-get('neutral-surface-bg-section-6');
           }
@@ -208,11 +211,6 @@ $padding-default: 16px;
             vertical-align: middle;
             width: 30px;
             height: 30px;
-
-            @include theme {
-              path {
-              }
-            }
           }
         }
 
@@ -226,18 +224,22 @@ $padding-default: 16px;
             @include theme {
               color: theme-get('neutral-text-text-token-name-2');
             }
+
             font-size: 16px;
             font-weight: 500;
-            line-height: 150%; /* 24px */
+            line-height: 150%;
+            /* 24px */
           }
 
           .address {
             @include theme {
               color: theme-get('neutral-text-title-2');
             }
+
             font-size: 12px;
             font-weight: 500;
-            line-height: 150%; /* 18px */
+            line-height: 150%;
+            /* 18px */
 
             word-break: break-word;
           }
@@ -259,7 +261,8 @@ $padding-default: 16px;
 
               font-size: 12px;
               font-weight: 500;
-              line-height: 150%; /* 18px */
+              line-height: 150%;
+              /* 18px */
             }
 
             .memo {
@@ -273,11 +276,13 @@ $padding-default: 16px;
 
               font-size: 12px;
               font-weight: 500;
-              line-height: 150%; /* 18px */
+              line-height: 150%;
+              /* 18px */
             }
           }
         }
       }
+
       .edit {
         cursor: pointer;
 
@@ -338,7 +343,8 @@ $padding-default: 16px;
 
   font-size: 14px;
   font-weight: 500;
-  line-height: 150%; /* 21px */
+  line-height: 150%;
+  /* 21px */
 
   span {
     color: $yellow-brown-color;
@@ -356,6 +362,7 @@ $padding-default: 16px;
 
   &.dark {
     background: $warning-surface-default-subtle;
+
     span {
       color: $warning-surface-default;
     }

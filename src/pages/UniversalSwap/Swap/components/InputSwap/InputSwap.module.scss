@@ -98,10 +98,12 @@
         font-size: 24px;
       }
     }
+
     .usd {
       @include theme() {
         color: theme-get('colors-neutral-text-body');
       }
+
       display: flex;
       justify-content: flex-end;
     }
@@ -236,15 +238,14 @@
       }
     }
 
-    & > span {
+    &>span {
       text-align: right;
     }
 
     &.is-enable-coeff {
       cursor: pointer;
-      &:hover {
-      }
     }
+
     .coeff {
       display: flex;
       gap: 6px;
