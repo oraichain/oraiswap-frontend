@@ -9,7 +9,6 @@ remove_single_line_comments() {
 find . -name '*.scss' | while read filename; do
     echo "Removing comments from $filename"
     remove_single_line_comments "$filename"
-    remove_multi_line_comments "$filename"
 done
 
 echo "Comments removed from all .scss files."
