@@ -67,11 +67,11 @@
     $theme-map: $map !global;
 
     :global(.#{$theme}) & {
-      @content; // the content inside @include theme() {...}
+      @content; 
     }
 
     :global(.#{$theme}-modal) & {
-      @content; // the content inside @include theme() {...}
+      @content; 
     }
   }
 
