@@ -179,7 +179,6 @@
   }
 
   @include theme {
-    // color: $neutron-text-body-light;
     color: theme-get('neutral-1');
   }
 

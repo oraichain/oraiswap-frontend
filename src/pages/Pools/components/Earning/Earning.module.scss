@@ -116,7 +116,6 @@
 
         @include mobile {
           font-size: 12px;
-          // flex-direction: column-reverse;
         }
       }
     }
@@ -132,7 +131,6 @@
   padding: 24px 40px;
 
   gap: 32px;
-  // flex-wrap: wrap;
 
   @include theme() {
     background-color: theme-get('primary-surface-default-subtle');
@@ -140,7 +138,6 @@
   }
 
   @include small-mobile() {
-    // flex-wrap: wrap;
     padding: 24px 16px;
     gap: 24px;
   }
@@ -239,7 +236,6 @@
       .assetEarning:first-child {
         width: 100%;
         margin-right: 0;
-        // margin-bottom: 24px;
 
         .amount {
           margin-bottom: 0;
@@ -254,8 +250,6 @@
 
   .claim {
     display: flex;
-    // flex-direction: column;
-    // justify-content: center;
 
     .earnMore {
       margin-top: 15px;

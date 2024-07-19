@@ -24,7 +24,6 @@
     &.w60 {
       width: 100%;
       max-width: 1000px;
-      // min-width: 500px;
     }
 
     &.w40 {
@@ -77,9 +76,6 @@
     overflow: hidden;
   }
 
-  // @include theme {
-  //   background: theme-get('neutral-surface-bg-2');
-  // }
 
   &.activeChart {
     display: block;

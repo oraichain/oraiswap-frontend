@@ -8,6 +8,7 @@
   gap: 24px;
   padding: 24px;
   border-radius: 24px;
+
   @include theme {
     background: theme-get('bg-section-05');
   }
@@ -67,6 +68,7 @@
 
       gap: 16px;
       padding: 16px;
+
       @include theme {
         background: theme-get('neutral-surface-bg');
       }
@@ -102,6 +104,7 @@
           input[type='range' i]::-webkit-slider-container {
             height: 20px;
           }
+
           &[type='range'] {
             -webkit-appearance: none;
             appearance: none;
@@ -112,6 +115,7 @@
             border-radius: 99px;
 
             height: 6px;
+
             @include theme {
               background: theme-get('neutral-surface-bg-section-2');
             }
@@ -124,6 +128,7 @@
             width: 32px;
             border-radius: 50%;
             border: 4px solid;
+
             @include theme {
               background-color: theme-get('primary-text-text-link');
               border-color: theme-get('neutral-white');
@@ -138,6 +143,7 @@
             width: 15px;
             border-radius: 50%;
             border: 4px solid;
+
             @include theme {
               background-color: theme-get('primary-text-text-link');
               border-color: theme-get('neutral-white');
@@ -145,29 +151,7 @@
 
             transition: 0.2s ease-in-out;
           }
-          /* Hover, active & focus Thumb: Webkit */
 
-          // &[type='range']::-webkit-slider-thumb:hover {
-          //   box-shadow: 0 0 0 10px rgba(255, 85, 0, 0.1);
-          // }
-          // &[type='range']:active::-webkit-slider-thumb {
-          //   box-shadow: 0 0 0 13px rgba(255, 85, 0, 0.2);
-          // }
-          // &[type='range']:focus::-webkit-slider-thumb {
-          //   box-shadow: 0 0 0 13px rgba(255, 85, 0, 0.2);
-          // }
-
-          // /* Hover, active & focus Thumb: Firfox */
-
-          // &[type='range']::-moz-range-thumb:hover {
-          //   box-shadow: 0 0 0 10px rgba(255, 85, 0, 0.1);
-          // }
-          // &[type='range']:active::-moz-range-thumb {
-          //   box-shadow: 0 0 0 13px rgba(255, 85, 0, 0.2);
-          // }
-          // &[type='range']:focus::-moz-range-thumb {
-          //   box-shadow: 0 0 0 13px rgba(255, 85, 0, 0.2);
-          // }
         }
 
         div {
@@ -183,12 +167,13 @@
 
             @include theme() {
               background: theme-get('neutral-surface-bg-section-2');
-              color: theme-get('sea-stone-200'); // theme-get('text-color');
+              color: theme-get('sea-stone-200');
             }
 
             font-size: 18px;
             font-weight: 600;
-            line-height: 150%; /* 27px */
+            line-height: 150%;
+            /* 27px */
           }
         }
       }
@@ -197,9 +182,11 @@
         @include theme {
           color: theme-get('primary-surface-default');
         }
+
         font-size: 14px;
         font-weight: 400;
-        line-height: 150%; /* 21px */
+        line-height: 150%;
+        /* 21px */
       }
     }
   }
@@ -218,6 +205,7 @@
       @include theme() {
         color: theme-get('text-color');
       }
+
       font-size: 16px;
       font-weight: 500;
       line-height: 150%;
@@ -238,11 +226,13 @@
       padding: 16px;
       border-radius: 8px;
       border: 1px solid;
+
       @include theme() {
         background: theme-get('primary-surface-default-subtle');
         border-color: theme-get('primary-text-text-link');
         color: theme-get('text-color');
       }
+
       font-size: 16px;
       font-weight: 500;
       line-height: 150%;
@@ -257,9 +247,11 @@
           display: flex;
           justify-content: flex-end;
           align-items: center;
+
           @include theme {
             color: theme-get('primary-surface-default');
           }
+
           font-size: 18px;
           font-weight: 600;
           line-height: 150%;
@@ -287,9 +279,11 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           @include theme {
             color: theme-get('neutral-9');
           }
+
           font-size: 14px;
           font-weight: 400;
           line-height: 150%;
@@ -313,7 +307,8 @@
     .calcExplain {
       font-size: 14px;
       font-weight: 400;
-      line-height: 150%; /* 21px */
+      line-height: 150%;
+      /* 21px */
       letter-spacing: 0.1px;
 
       display: flex;
@@ -385,7 +380,6 @@
         font-weight: 500;
         line-height: 150%;
 
-        // max-width: 340px;
       }
     }
   }

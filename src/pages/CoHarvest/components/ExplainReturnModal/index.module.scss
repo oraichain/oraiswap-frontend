@@ -82,26 +82,22 @@
       .distribution {
         display: flex;
         width: 100%;
-        // justify-content: space-between;
         align-items: flex-start;
         gap: 24px;
         flex-wrap: wrap;
 
         .lottieWrapper {
           display: flex;
-          // align-items: center;
           justify-content: center;
           flex-direction: column;
           flex: 1;
 
           border-radius: 12px;
-          // background: #fff;
 
           img {
             width: 100%;
           }
 
-          // color: #686a66;
           text-align: right;
           font-size: 12px;
           font-weight: 400;
@@ -111,7 +107,6 @@
         .desc {
           display: flex;
           flex-direction: column;
-          // align-items: center;
           gap: 16px;
           width: 100%;
           max-width: 326px;

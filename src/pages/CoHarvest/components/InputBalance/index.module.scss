@@ -73,7 +73,6 @@
     }
 
     .symbol {
-      // color: #c7c8c6;
       @include theme {
         color: theme-get('neutral-text-text-disabled');
       }

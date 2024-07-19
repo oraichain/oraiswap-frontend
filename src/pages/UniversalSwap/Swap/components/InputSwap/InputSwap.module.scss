@@ -102,7 +102,6 @@
       @include theme() {
         color: theme-get('colors-neutral-text-body');
       }
-      // max-width: 100%;
       display: flex;
       justify-content: flex-end;
     }
@@ -113,7 +112,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  // padding-bottom: 16px;
   padding-bottom: 10px;
   font-size: 14px;
 
@@ -245,7 +243,6 @@
     &.is-enable-coeff {
       cursor: pointer;
       &:hover {
-        // font-weight: 500;
       }
     }
     .coeff {

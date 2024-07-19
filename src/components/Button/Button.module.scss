@@ -45,7 +45,6 @@
 
   @include theme() {
     background-color: theme-get('neutral-surface-bg-section-3');
-    // border-color: theme-get('neutral-text-text-token-name');
     color: theme-get('neutral-text-text-token-name');
   }
 }
@@ -58,12 +57,10 @@
 
   @include theme() {
     background-color: theme-get('neutral-surface-bg-section-3');
-    // border-color: theme-get('neutral-text-text-token-name');
     color: theme-get('neutral-text-text-token-name');
 
     svg {
       path {
-        // fill: theme-get('neutral-text-text-token-name');
       }
     }
   }

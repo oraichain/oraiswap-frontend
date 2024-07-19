@@ -9,9 +9,6 @@
     border-radius: 24px;
     overflow-x: auto;
 
-    // &::-webkit-scrollbar {
-    //   height: 8px;
-    // }
     border: 1px solid;
 
     @include theme {
@@ -22,12 +19,15 @@
 
   .title {
     margin-bottom: 8px;
+
     @include theme {
       color: theme-get('sea-stone-200');
     }
+
     font-size: 16px;
     font-weight: 500;
-    line-height: 150%; /* 24px */
+    line-height: 150%;
+    /* 24px */
   }
 
   .nodata {
@@ -35,10 +35,10 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    // color: #686a66;
     font-size: 14px;
     font-weight: 400;
-    line-height: 150%; /* 21px */
+    line-height: 150%;
+    /* 21px */
     border-radius: 12px;
 
     @include theme {
@@ -46,22 +46,27 @@
     }
 
     height: 200px;
+
     span {
       margin-top: 8px;
     }
   }
 
   table {
+
     /* required css to make the rows rounded */
     thead {
       white-space: nowrap;
+
       th:first-child {
         border-top-left-radius: 24px;
       }
+
       th:last-child {
         border-top-right-radius: 24px;
       }
     }
+
     tbody {
       @include theme {
         background: theme-get('neutral-6');
@@ -78,6 +83,7 @@
       tr:last-child td:first-child {
         border-bottom-left-radius: 24px;
       }
+
       tr:last-child td:last-child {
         border-bottom-right-radius: 24px;
       }
@@ -85,29 +91,31 @@
 
     th {
       padding: 10px 24px;
+
       @include theme {
         color: theme-get('neutral-9');
       }
 
       font-size: 14px;
       font-weight: 400;
-      line-height: 150%; /* 21px */
+      line-height: 150%;
+      /* 21px */
       letter-spacing: 0.1px;
     }
 
     td {
       padding: 24px;
+
       @include theme {
         color: theme-get('neutral-text-text-dropdown');
       }
+
       font-size: 14px;
       font-weight: 400;
-      line-height: 100%; /* 27px */
+      line-height: 100%;
+      /* 27px */
     }
 
-    .alignRight {
-      // text-align: right;
-    }
   }
 
   .hash {
@@ -161,7 +169,7 @@
       color: theme-get('neutral-9');
     }
 
-    & > div {
+    &>div {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
@@ -193,6 +201,7 @@
     @include theme {
       color: theme-get('neutral-9');
     }
+
     font-size: 14px;
     font-weight: 400;
     line-height: 100%;
@@ -209,9 +218,10 @@
     @include theme {
       color: theme-get('neutral-text-text-dropdown');
     }
+
     font-size: 14px;
     font-weight: 400;
-    line-height: 100%; /* 27px */
+    line-height: 100%;
 
     .item {
       width: 100%;
@@ -230,6 +240,7 @@
 
       .titleItem {
         margin-bottom: 12px;
+
         @include theme {
           color: theme-get('neutral-9');
         }

@@ -714,7 +714,6 @@
   line-height: 150%;
   /* identical to box height, or 21px */
 
-  // text-align: center;
   font-feature-settings: 'ss03' on;
 
   /* aiRight/Gray 3 */
@@ -736,7 +735,6 @@
       width: 70%;
       display: flex;
       justify-content: flex-start;
-      // align-items: center;
       gap: 5px;
     }
 
@@ -850,7 +848,6 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  // transition: all 0.2s ease;
   visibility: visible;
 
   &.hidden {
@@ -884,7 +881,6 @@
         flex: 1;
 
         .smart-router-item-line-detail {
-          // background: linear-gradient(90deg, #2f5711 0%, #78ca11 42.71%, #d0e54c 71.35%, #2f5711 100%);
           background: linear-gradient(
             90deg,
             rgb(115 255 11) 0%,
@@ -1031,18 +1027,6 @@
         }
       }
 
-      // .smart-router-price-impact-time {
-      //   @include theme() {
-      //     color: #2f5711;
-      //   }
-      //   font-family: 'IBM Plex Sans';
-      //   font-size: 14px;
-      //   font-weight: 400;
-      //   border-radius: 6px;
-      //   border: 1px solid #2f5711;
-      //   background-color: #eef9e5;
-      //   padding: 0 2px;
-      // }
     }
   }
 }

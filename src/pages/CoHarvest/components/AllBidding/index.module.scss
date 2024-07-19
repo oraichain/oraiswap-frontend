@@ -22,7 +22,6 @@
 
     @include theme {
       background: theme-get('neutral-6');
-      // color: theme-get('neutral-text-text-token-name');
       color: them-get('neutral-8');
     }
     font-size: 14px;

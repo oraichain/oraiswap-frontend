@@ -36,7 +36,6 @@
     justify-content: space-between;
     flex: 1;
 
-    // flex-wrap: wrap;
 
     @include mobile {
       flex-direction: column-reverse;

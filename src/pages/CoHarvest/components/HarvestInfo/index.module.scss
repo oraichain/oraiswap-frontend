@@ -92,7 +92,6 @@
       width: calc(100% - 10px);
       z-index: 0;
       border-radius: 24px;
-      // theme
       @include theme() {
         background: theme-get('primary-surface-default-dark-2');
       }
