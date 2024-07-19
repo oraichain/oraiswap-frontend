@@ -79,7 +79,7 @@
       background-color: #f7f7f7;
       border-radius: 8px;
 
-      & > div:last-child {
+      &>div:last-child {
         border-bottom: none;
       }
 
@@ -177,15 +177,6 @@
 
       .addressByNetworkItem {
         border-bottom: 1px solid #494949;
-
-        .addressByChainInNetwork {
-          .left {
-            .icon {
-              .iconWalletByChain {
-              }
-            }
-          }
-        }
       }
     }
   }

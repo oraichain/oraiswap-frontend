@@ -174,10 +174,6 @@
     .amount {
       height: 48px;
       font-size: 16px;
-
-      @include mobile {
-      }
-
       border-radius: 8px;
     }
 

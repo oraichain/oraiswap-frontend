@@ -12,7 +12,6 @@
   position: fixed;
   top: $menu-height;
   bottom: 0;
-
   overflow-y: auto;
 
   @include mobile {
@@ -29,9 +28,6 @@
 
   @include theme() {
     background-color: theme-get('neutral-surface-bg-section');
-  }
-
-  .luckyDraw {
   }
 }
 
@@ -80,6 +76,7 @@
     font-size: 14px;
     line-height: 100%;
     margin-left: 16px;
+
     @include theme() {
       color: theme-get('neutral-text-title');
     }
@@ -88,10 +85,11 @@
       height: 100%;
       width: 100%;
 
-      & > div {
+      &>div {
         height: 40px;
         width: 40px;
       }
+
       svg {
         path {
           stroke: unset !important;
