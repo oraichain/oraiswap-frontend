@@ -121,7 +121,7 @@ export const MyWallet: React.FC<{
               {index === 0 && (
                 <DisconnectButton
                   setIsShowDisconnect={setIsShowDisconnect}
-                  onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork(network.networkType)}
+                  onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork(network.typeChain)}
                 />
               )}
             </div>
@@ -136,11 +136,8 @@ export const MyWallet: React.FC<{
     const cosmosWalletConnected = cosmosWallets.find((item) => item.nameRegistry === walletByNetworks.cosmos);
     if (!cosmosWalletConnected) return <></>;
 
-    return renderWalletAddress(
-      cosmosNetworksWithIcon,
-      cosmosWalletConnected,
-      (network) => cosmosAddresses?.[network.chainId]
-    );
+    const cosmosNetworks = cosmosNetworksWithIcon.map((evm) => ({ ...evm, typeChain: 'cosmos' }));
+    return renderWalletAddress(cosmosNetworks, cosmosWalletConnected, (network) => cosmosAddresses?.[network.chainId]);
   };
 
   const renderEvmAddresses = () => {
@@ -149,7 +146,8 @@ export const MyWallet: React.FC<{
     const evmWalletConnected = evmWallets.find((item) => item.nameRegistry === walletByNetworks.evm);
     if (!evmWalletConnected) return <></>;
 
-    return renderWalletAddress(evmNetworksIconWithoutTron, evmWalletConnected, (_network) => metamaskAddress);
+    const evmNetworks = evmNetworksIconWithoutTron.map((evm) => ({ ...evm, typeChain: 'evm' }));
+    return renderWalletAddress(evmNetworks, evmWalletConnected, (_network) => metamaskAddress);
   };
 
   const renderTronAddresses = () => {
@@ -158,7 +156,8 @@ export const MyWallet: React.FC<{
     const tronWalletConnected = tronWallets.find((item) => item.nameRegistry === walletByNetworks.tron);
     if (!tronWalletConnected) return <></>;
 
-    return renderWalletAddress(tronNetworksWithIcon, tronWalletConnected, (_network) => tronAddress);
+    const tronNetworks = tronNetworksWithIcon.map((evm) => ({ ...evm, typeChain: 'tron' }));
+    return renderWalletAddress(tronNetworks, tronWalletConnected, (_network) => tronAddress);
   };
 
   const renderBtcAddresses = () => {
@@ -166,7 +165,8 @@ export const MyWallet: React.FC<{
     const btcWalletConnected = btcWallets.find((item) => item.nameRegistry === walletByNetworks.bitcoin);
     if (!btcWalletConnected) return <></>;
 
-    return renderWalletAddress(btcNetworksWithIcon, btcWalletConnected, (_network) => btcAddress);
+    const btcNetworks = btcNetworksWithIcon.map((evm) => ({ ...evm, typeChain: 'bitcoin' }));
+    return renderWalletAddress(btcNetworks, btcWalletConnected, (_network) => btcAddress);
   };
 
   return (
