@@ -34,7 +34,6 @@ export type PoolTableData = PoolInfoResponse & {
 };
 
 const Pools: React.FC<{}> = () => {
-  const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
   const [filteredPools, setFilteredPools] = useState<PoolInfoResponse[]>([]);
 

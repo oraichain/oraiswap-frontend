@@ -32,7 +32,7 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
 import { chainIcons } from 'config/chainInfos';
 import { ethers } from 'ethers';
-import { getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { assert, getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
@@ -135,12 +135,10 @@ const SwapComponent: React.FC<{
   } = useHandleEffectTokenChange({ fromTokenDenomSwap, toTokenDenomSwap });
   const { addressTransfer, initAddressTransfer, setAddressTransfer } = addressInfo;
 
-  const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(
-    originalFromToken?.chainId || ('OraiChain' as NetworkChainId)
-  );
-  const [selectChainTo, setSelectChainTo] = useState<NetworkChainId>(
-    originalToToken?.chainId || ('OraiChain' as NetworkChainId)
-  );
+  const getDefaultChainFrom = () => originalFromToken?.chainId || ('OraiChain' as NetworkChainId);
+  const getDefaultChainTo = () => originalToToken?.chainId || ('OraiChain' as NetworkChainId);
+  const [selectChainFrom, setSelectChainFrom] = useState<NetworkChainId>(getDefaultChainFrom());
+  const [selectChainTo, setSelectChainTo] = useState<NetworkChainId>(getDefaultChainTo());
 
   // hooks
   useGetFeeConfig();
@@ -228,16 +226,11 @@ const SwapComponent: React.FC<{
   };
 
   const handleSubmit = async () => {
-    if (fromAmountToken <= 0)
-      return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!'
-      });
-
-    setSwapLoading(true);
-    displayToast(TToastType.TX_BROADCASTING);
     try {
-      // await handleCheckChainEvmWallet(originalFromToken.chainId);
+      assert(fromAmountToken > 0, 'From amount should be higher than 0!');
 
+      setSwapLoading(true);
+      displayToast(TToastType.TX_BROADCASTING);
       const cosmosAddress = await handleCheckAddress(
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
@@ -285,7 +278,7 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = useAlphaSmartRouter && simulateData && simulateData?.routes;
+      const alphaSmartRoutes = useAlphaSmartRouter && simulateData?.routes;
 
       let initSwapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -397,10 +390,16 @@ const SwapComponent: React.FC<{
 
   const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
-    const setSelectChain = isFrom ? setSelectChainFrom : setSelectChainTo;
-    const setIsSelect = isFrom ? setIsSelectTokenFrom : setIsSelectTokenTo;
+    let setSelectChain = setSelectChainTo;
+    let setIsSelect = setIsSelectTokenTo;
+    let tokenDenomSwap = fromTokenDenomSwap;
+    if (isFrom) {
+      setSelectChain = setSelectChainFrom;
+      setIsSelect = setIsSelectTokenFrom;
+      tokenDenomSwap = toTokenDenomSwap;
+    }
 
-    if (token.denom === (isFrom ? toTokenDenomSwap : fromTokenDenomSwap)) {
+    if (token.denom === tokenDenomSwap) {
       setFromTokenDenom(toTokenDenomSwap);
       setToTokenDenom(fromTokenDenomSwap);
       setSelectChainFrom(selectChainTo);
@@ -408,10 +407,17 @@ const SwapComponent: React.FC<{
 
       handleUpdateQueryURL([toTokenDenomSwap, fromTokenDenomSwap]);
     } else {
-      setFromTokenDenom(isFrom ? token.denom : fromTokenDenomSwap);
-      setToTokenDenom(isFrom ? toTokenDenomSwap : token.denom);
+      let fromTokenDenom = fromTokenDenomSwap;
+      let toTokenDenom = token.denom;
+      if (isFrom) {
+        fromTokenDenom = token.denom;
+        toTokenDenom = toTokenDenomSwap;
+      }
+
+      setFromTokenDenom(fromTokenDenom);
+      setToTokenDenom(toTokenDenom);
       setSelectChain(token.chainId);
-      handleUpdateQueryURL(isFrom ? [token.denom, toTokenDenomSwap] : [fromTokenDenomSwap, token.denom]);
+      handleUpdateQueryURL(isFrom ? [fromTokenDenom, toTokenDenomSwap] : [fromTokenDenomSwap, toTokenDenom]);
     }
 
     if (coe && isFrom) {
@@ -465,23 +471,64 @@ const SwapComponent: React.FC<{
   }
   const isRoutersSwapData = +routersSwapData.amount;
 
-  const isImpactPrice = !!debouncedFromAmount && !!simulateData?.displayAmount && !!averageRatio?.amount;
-  let impactWarning = 0;
-  if (
-    isImpactPrice &&
-    simulateData?.displayAmount &&
-    averageRatio?.displayAmount &&
-    useAlphaSmartRouter &&
-    averageSimulateData
-  ) {
-    const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
-      .div(debouncedFromAmount)
-      .div(averageSimulateData.displayAmount)
-      .mul(100)
-      .toNumber();
+  function caculateImpactWarning() {
+    let impactWarning = 0;
+    const isImpactPrice = !!debouncedFromAmount && !!simulateData?.displayAmount && !!averageRatio?.amount;
+    if (
+      isImpactPrice &&
+      simulateData?.displayAmount &&
+      averageRatio?.displayAmount &&
+      useAlphaSmartRouter &&
+      averageSimulateData
+    ) {
+      const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
+        .div(debouncedFromAmount)
+        .div(averageSimulateData.displayAmount)
+        .mul(100)
+        .toNumber();
 
-    if (calculateImpactPrice) impactWarning = 100 - calculateImpactPrice;
+      if (calculateImpactPrice) impactWarning = 100 - calculateImpactPrice;
+    }
+    return impactWarning;
   }
+  const impactWarning = caculateImpactWarning();
+
+  const waringImpactBiggerTen = impactWarning > 10;
+  const waringImpactBiggerFive = impactWarning > 5;
+
+  const generateRatioComp = () => {
+    const getClassRatio = () => {
+      let classRatio = '';
+      const classWarningImpactBiggerFive = waringImpactBiggerFive && 'ratio-five';
+      if (isPreviousSimulate) classRatio = waringImpactBiggerTen ? 'ratio-ten' : classWarningImpactBiggerFive;
+      return classRatio;
+    };
+
+    return (
+      <div className={cx('ratio', getClassRatio())} onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}>
+        <span className={cx('text')}>
+          {waringImpactBiggerFive && <WarningIcon />}
+          {`1 ${originalFromToken.name} ≈ ${
+            averageRatio
+              ? numberWithCommas(averageRatio.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
+                  maximumFractionDigits: 6
+                })
+              : averageSimulateData
+              ? numberWithCommas(averageSimulateData?.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
+                  maximumFractionDigits: 6
+                })
+              : '0'
+          }
+      ${originalToToken.name}`}
+        </span>
+        {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
+          <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
+        )}
+      </div>
+    );
+  };
+
+  const getSwitchIcon = () => (isLightMode ? SwitchLightImg : SwitchDarkImg);
 
   return (
     <div className={cx('swap-box-wrapper')}>
@@ -541,43 +588,13 @@ const SwapComponent: React.FC<{
           </div>
           <div className={cx('swap-center')}>
             <div className={cx('wrap-img')} onClick={handleRotateSwapDirection}>
-              <img src={isLightMode ? SwitchLightImg : SwitchDarkImg} onClick={handleRotateSwapDirection} alt="ant" />
+              <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
               {isAllowAlphaSmartRouter(originalFromToken, originalToToken) && (
                 <AIRouteSwitch isLoading={isPreviousSimulate} />
               )}
-              <div
-                className={cx(
-                  'ratio',
-                  isPreviousSimulate
-                    ? ''
-                    : Number(impactWarning) > 10
-                    ? 'ratio-ten'
-                    : Number(impactWarning) > 5 && 'ratio-five'
-                )}
-                onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}
-              >
-                <span className={cx('text')}>
-                  {Number(impactWarning) > 5 && <WarningIcon />}
-                  {`1 ${originalFromToken.name} ≈ ${
-                    averageRatio
-                      ? numberWithCommas(averageRatio.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
-                          maximumFractionDigits: 6
-                        })
-                      : averageSimulateData
-                      ? numberWithCommas(averageSimulateData?.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
-                          maximumFractionDigits: 6
-                        })
-                      : '0'
-                  }
-                  ${originalToToken.name}`}
-                </span>
-
-                {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
-                  <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
-                )}
-              </div>
+              {generateRatioComp()}
             </div>
           </div>
 
@@ -627,13 +644,13 @@ const SwapComponent: React.FC<{
                   <div
                     className={cx(
                       'smart-router-price-impact-warning',
-                      Number(impactWarning) > 10
+                      waringImpactBiggerTen
                         ? 'smart-router-price-impact-warning-ten'
-                        : Number(impactWarning) > 5 && 'smart-router-price-impact-warning-five'
+                        : waringImpactBiggerFive && 'smart-router-price-impact-warning-five'
                     )}
                   >
                     <span>
-                      {Number(impactWarning) > 5 && <WarningIcon />} ≈{' '}
+                      {waringImpactBiggerFive && <WarningIcon />} ≈{' '}
                       {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
                     </span>
                   </div>

@@ -13,10 +13,6 @@
     flex-wrap: wrap;
     margin-bottom: 16px;
 
-    // // TODO: disable when has filter day
-    // @include mobile() {
-    //   display: none;
-    // }
 
     &_text {
       display: flex;
@@ -34,9 +30,11 @@
         @include theme() {
           color: theme-get('neutral-9');
         }
+
         font-size: 24px;
         font-weight: 500;
-        line-height: 120%; /* 28.8px */
+        line-height: 120%;
+        /* 28.8px */
       }
 
       @include mobile() {
@@ -53,7 +51,6 @@
     font-size: 18px;
     font-weight: 600;
     line-height: 150%;
-    /* 27px */
 
     .filter_day_wrapper {
       display: flex;
@@ -64,7 +61,6 @@
       border-radius: 99px;
       color: $neutron-text-body-light;
 
-      // TODO: hide filter
       display: none;
 
       @include mobile() {
@@ -122,11 +118,7 @@
       padding: 16px;
       flex-direction: column;
       flex: 1 0 0;
-      // transition: all ease-in-out 0.5s;
 
-      // &.activeChart {
-      //   gap: 16px;
-      // }
 
       color: $neutron-text-body-light;
       font-size: 16px;
@@ -151,7 +143,6 @@
       }
 
       .chart {
-        // display: none;
         max-height: 0px;
         padding: 0px 16px;
         border-radius: 12px;
@@ -165,7 +156,6 @@
         }
 
         &.active {
-          // display: block;
           padding: 16px;
           margin-top: 16px;
           max-height: 300px;
@@ -176,7 +166,6 @@
         border-start-end-radius: 12px;
         border-end-end-radius: 12px;
 
-        // odd
         @include theme() {
           background-color: theme-get('neutral-surface-bg-section-3');
         }

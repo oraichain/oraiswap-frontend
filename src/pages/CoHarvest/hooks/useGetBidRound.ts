@@ -216,7 +216,6 @@ export const useGetAllBidPoolInRound = (round: number) => {
 
   const {
     data: allBidPoolRound,
-    isLoading,
     isFetching,
     refetch: refetchAllBidPoolRound
   } = useQuery(['all-bid-pool-round', round], () => getAllBidPoolRound(), {
@@ -366,7 +365,6 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
   const {
     data: listPotentialReturn,
     isFetching,
-    isRefetching,
     refetch: refetchPotentialReturn
   } = useQuery(
     ['all-potential-return', listBidHistories, biddingInfo?.bid_info.end_time, biddingInfo?.bid_info.round],
@@ -456,7 +454,6 @@ export const useGetAllBids = (
 
   const {
     data: historyAllBidPool,
-    isLoading,
     isFetching,
     refetch: refetchAllHistoryBidPool
   } = useQuery(['history-bid-pool-all', round], () => getHistoryBidPool(), {

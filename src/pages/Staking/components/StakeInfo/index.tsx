@@ -37,11 +37,9 @@ const StakeInfo = () => {
 
   const stakedAmount = myStakeRewardInfo?.stakedAmount || '0';
   const reward = myStakeRewardInfo?.rewardPending || '0';
-  const lockAmount = lockInfo?.lockAmount || '0';
 
   const stakeAmountUsd = getUsd(stakedAmount, ORAIX_TOKEN_INFO, prices);
   const rewardUsd = getUsd(reward, USDC_TOKEN_INFO, prices);
-  const lockUsd = getUsd(lockAmount, ORAIX_TOKEN_INFO, prices);
   const [openCompound, setOpenCompound] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingCompound, setLoadingCompound] = useState<boolean>(false);

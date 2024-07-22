@@ -1,4 +1,3 @@
-import { isMobile } from '@walletconnect/browser-utils';
 import { useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
@@ -43,8 +42,6 @@ const InputBalance = ({
 
   const isInsufficient = amount && amount > toDisplay(balance);
   const disabled = loading || !amount || amount <= 0 || isInsufficient;
-
-  const isMobileMode = isMobile();
 
   return (
     <div className={styles.inputBalance}>

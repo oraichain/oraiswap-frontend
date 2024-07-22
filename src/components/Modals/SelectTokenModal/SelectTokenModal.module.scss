@@ -63,7 +63,6 @@
 
       /* aiRight/White */
 
-      // color: #ffffff;f
       @include theme() {
         color: theme-get('text-color');
       }

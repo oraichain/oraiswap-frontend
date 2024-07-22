@@ -46,9 +46,6 @@
   .action {
     width: calc(66% - 40px);
 
-    // @include medium-desktop {
-    //   width: calc(54% - 40px);
-    // }
 
     @include mobile {
       width: 100%;
@@ -58,9 +55,6 @@
   .info {
     width: 34%;
 
-    // @include medium-desktop {
-    //   width: 44%;
-    // }
 
     @include mobile {
       width: 100%;

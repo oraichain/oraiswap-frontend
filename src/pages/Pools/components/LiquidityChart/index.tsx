@@ -32,19 +32,22 @@ const LiquidityChart = ({
     onMouseLiquidityLeave: onMouseLeave
   } = useLiquidityEventChart(filterDay, onUpdateCurrentItem, pair);
 
+  function handleResizeObserver(entries: ResizeObserverEntry[]) {
+    window.requestAnimationFrame(() => {
+      if (!Array.isArray(entries) || !entries.length) {
+        return;
+      }
+
+      const { width, height } = entries[0].contentRect;
+      chartRef.current.applyOptions({ width, height });
+      setTimeout(() => {
+        chartRef.current.timeScale().fitContent();
+      }, 0);
+    });
+  }
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
-      window.requestAnimationFrame((): void | undefined => {
-        if (!Array.isArray(entries) || !entries.length) {
-          return;
-        }
-
-        const { width, height } = entries[0].contentRect;
-        chartRef.current.applyOptions({ width, height });
-        setTimeout(() => {
-          chartRef.current.timeScale().fitContent();
-        }, 0);
-      });
+      handleResizeObserver(entries);
     });
 
     resizeObserver.current.observe(containerRef.current, {

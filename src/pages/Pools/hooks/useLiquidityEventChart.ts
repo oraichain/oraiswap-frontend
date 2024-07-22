@@ -1,5 +1,4 @@
-import { sleep } from 'helper';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FILTER_DAY } from 'reducer/type';
 import axios from 'rest/request';
 
@@ -9,15 +8,10 @@ export const useLiquidityEventChart = (
   pair?: string
 ) => {
   const [currentDataLiquidity, setCurrentDataLiquidity] = useState([]);
-
-  const [isLoading, setIsLoading] = useState(false);
-
   const [currentItem, setCurrentItem] = useState<{
     value: number;
     time: string | number;
   }>({ value: 0, time: 0 });
-
-  const dataClick = useRef({ time: { day: 1, month: 1, year: 1 }, value: 0, clickedTwice: true });
 
   const onCrossMove = (item) => {
     setCurrentItem(item);
@@ -33,7 +27,6 @@ export const useLiquidityEventChart = (
 
   const onChangeRangeLiquidity = async (value: FILTER_DAY = FILTER_DAY.DAY) => {
     try {
-      setIsLoading(true);
       let data = [];
 
       if (pair) {
@@ -47,10 +40,8 @@ export const useLiquidityEventChart = (
         setCurrentItem({ ...data[data.length - 1] });
         onUpdateCurrentItem && onUpdateCurrentItem(data[data.length - 1]?.value || 0);
       }
-      setIsLoading(false);
     } catch (e) {
-      console.log('Liquidity ERROR: e', 'background: #FF0000; color:#FFFFFF', e);
-      setIsLoading(false);
+      console.log('Liquidity ERROR:', e);
     }
   };
 

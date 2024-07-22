@@ -8,7 +8,6 @@ import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useState } from 'react';
 import { PoolDetail } from 'types/pool';
 import styles from './OverviewPool.module.scss';
-import { isMobile } from '@walletconnect/browser-utils';
 
 export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
   const theme = useTheme();
@@ -16,7 +15,7 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
   const { pairAmountInfoData, lpTokenInfoData } = useGetPairInfo(poolDetailData);
   const { token1, token2 } = poolDetailData;
 
-  const [isShowMore, setIsShowMore] = useState(false);
+  const [isShowMore] = useState(false);
 
   let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
   if (token1) BaseTokenIcon = theme === 'light' ? token1.IconLight || token1.Icon : token1.Icon;

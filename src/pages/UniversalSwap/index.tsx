@@ -159,7 +159,7 @@ const Chart = ({
   const tabChart = useSelector(selectCurrentSwapTabChart);
   const tf = useSelector(selectChartTimeFrame);
 
-  const { isLoading, priceChange } = useGetPriceChange({
+  const {  priceChange } = useGetPriceChange({
     base_denom: currentPair.info.split('-')[0],
     quote_denom: currentPair.info.split('-')[1],
     tf

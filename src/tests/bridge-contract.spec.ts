@@ -19,6 +19,7 @@ import { oraib2oraichain } from '@oraichain/oraidex-common';
 import { ORAI } from '@oraichain/oraidex-common';
 import { AssetInfo, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import { toDisplay } from '@oraichain/oraidex-common';
+import { Attribute } from '@cosmjs/tendermint-rpc/build/tendermint37';
 
 let cosmosChain: CWSimulateApp;
 // oraichain support cosmwasm
@@ -31,9 +32,12 @@ const routerContractAddress = 'placeholder'; // we will update the contract conf
 const cosmosSenderAddress = bech32.encode('cosmos', bech32.decode(oraiSenderAddress).words);
 const relayerAddress = 'orai1704r4dhuwdqvt7vs35m0360py6ep6cwwxeyfxn';
 const oraibridgeSenderAddress = bech32.encode('oraib', bech32.decode(oraiSenderAddress).words);
-console.log({ cosmosSenderAddress });
 const ibcTransferAmount = '100000000';
 const initialBalanceAmount = '10000000000000';
+
+const assertKeyValue = (event: Event, key: string, value: string) => {
+  return event.attributes.find((attr) => attr.key === key && attr.value === value);
+};
 
 describe.only('IBCModule', () => {
   let oraiPort: string;
@@ -500,9 +504,7 @@ describe.only('IBCModule', () => {
       memo: ''
     };
     const findWasmEvent = (events: Event[], key: string, value: string) =>
-      events.find(
-        (event) => event.type === 'wasm' && event.attributes.find((attr) => attr.key === key && attr.value === value)
-      );
+      events.find((event) => event.type === 'wasm' && assertKeyValue(event, key, value));
     beforeEach(async () => {
       assetInfos = [{ native_token: { denom: ORAI } }, { token: { contract_addr: airiToken.contractAddress } }];
       // upload pair & lp token code id
@@ -709,9 +711,7 @@ describe.only('IBCModule', () => {
         expect(bobBalance[0].denom).toEqual(ORAI);
         expect(parseInt(bobBalance[0].amount)).toBeGreaterThan(0);
         const transferEvent = result.events.find(
-          (event) =>
-            event.type === 'transfer' &&
-            event.attributes.find((attr) => attr.key === 'recipient' && attr.value === expectedRecipient)
+          (event) => event.type === 'transfer' && assertKeyValue(event, 'recipient', expectedRecipient)
         );
         expect(transferEvent).not.toBeUndefined();
         const ibcErrorMsg = result.attributes.find((attr) => attr.key === 'ibc_error_msg');
@@ -844,10 +844,7 @@ describe.only('IBCModule', () => {
       // for ibc native transfer case, we wont have refund either
       expect(
         result.events.find(
-          (ev) =>
-            ev.type === 'wasm' &&
-            ev.attributes.find((attr) => attr.key === 'action' && attr.value === 'transfer') &&
-            ev.attributes.find((attr) => attr.key === 'to' && attr.value === bobAddress)
+          (ev) => ev.type === 'wasm' && assertKeyValue(ev, 'action', 'transfer') && assertKeyValue(ev, 'to', bobAddress)
         )
       ).toBeUndefined();
     });
@@ -902,10 +899,7 @@ describe.only('IBCModule', () => {
       // for ibc native transfer case, we wont have refund either
       expect(
         result.events.find(
-          (ev) =>
-            ev.type === 'wasm' &&
-            ev.attributes.find((attr) => attr.key === 'action' && attr.value === 'transfer') &&
-            ev.attributes.find((attr) => attr.key === 'to' && attr.value === bobAddress)
+          (ev) => ev.type === 'wasm' && assertKeyValue(ev, 'action', 'transfer') && assertKeyValue(ev, 'to', bobAddress)
         )
       ).toBeUndefined();
     });
@@ -1462,8 +1456,8 @@ describe.only('IBCModule', () => {
         const hasFees = result.events.find(
           (event) =>
             event.type === 'wasm' &&
-            event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
-            event.attributes.find((attr) => attr.key === 'amount' && attr.value === expectedTotalFee)
+            assertKeyValue(event, 'to', senderAddress) &&
+            assertKeyValue(event, 'amount', expectedTotalFee)
         );
         console.dir(result, { depth: null });
         expect(hasFees).not.toBeUndefined();

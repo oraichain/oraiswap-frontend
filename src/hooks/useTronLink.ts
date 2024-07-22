@@ -26,11 +26,15 @@ export function useTronEventListener() {
     }
   }, [mobileMode]);
 
+  function checkEventSetAccount(e: MessageEvent<any>) {
+    return e?.data?.message && e.data.message.action === 'setAccount';
+  }
+
   async function handleTronLink() {
     window.addEventListener('message', async function (e) {
       const walletByNetworks = await getWalletByNetworkFromStorage();
       if (walletByNetworks?.tron === 'tronLink') {
-        if (e?.data?.message && e.data.message.action === 'setAccount') {
+        if (checkEventSetAccount(e)) {
           if (window.tronLink) {
             window.tronLinkDapp = window.tronLink;
             await window.tronLink.request({ method: 'tron_requestAccounts' });

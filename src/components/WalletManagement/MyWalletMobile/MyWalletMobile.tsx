@@ -77,7 +77,7 @@ export const MyWalletMobile: React.FC<{
     return (
       <div className={styles.addressByNetworkItem}>
         {cosmosNetworksWithIcon.map((network) => {
-          const chainAddress = cosmosAddresses && cosmosAddresses[network.chainId];
+          const chainAddress = cosmosAddresses?.[network.chainId];
           let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
           if (!NetworkIcon) NetworkIcon = DefaultIcon;
 

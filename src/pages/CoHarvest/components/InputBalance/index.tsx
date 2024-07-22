@@ -43,7 +43,7 @@ const InputBalance = ({ amount, onChangeAmount, disable = false, balance }: Inpu
             return !floatValue || (floatValue >= 0 && floatValue <= 1e10);
           }}
           onValueChange={({ floatValue }) => {
-            onChangeAmount && onChangeAmount(floatValue);
+            onChangeAmount?.(floatValue);
           }}
         />
         <span className={styles.symbol}>ORAIX</span>

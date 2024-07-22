@@ -5,19 +5,19 @@
 .btn {
   margin-bottom: 10px;
   cursor: pointer;
-  // background: $aqua;
+  
 
-  // position: fixed;
-  // bottom: 10px;
-  // right: 10px;
-  // z-index: 100;
+  
+  
+  
+  
 
-  // animation: bounce ease-in-out 0.8s infinite;
-  // -webkit-animation: bounce ease-in-out 0.8s infinite;
+  
+  
 
-  // &:hover {
-  //   animation: unset;
-  // }
+  
+  
+  
 
   img {
     width: 100%;
@@ -50,7 +50,7 @@
     width: 100%;
     display: flex;
     flex-direction: column-reverse;
-    // justify-content: space-between;
+    
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
@@ -80,13 +80,13 @@
 
   .spin {
     position: relative;
-    // border-radius: 50%;
-    // background: $aqua;
+    
+    
 
     .spinMask {
       z-index: 100;
       position: absolute;
-      // background: rgba(7, 10, 19, 0.2);
+      
       background: #d7f5bf;
       border-radius: 50%;
       width: 72px;
@@ -125,7 +125,7 @@
         gap: 4px;
 
         img {
-          // filter: grayscale(100%);
+          
           filter: saturate(3);
         }
       }
@@ -152,7 +152,7 @@
     text-align: center;
 
     &.done {
-      animation-iteration-count: 4; // infinite
+      animation-iteration-count: 4; 
       animation: wiggle ease-in-out 0.8s;
       -webkit-animation: wiggle ease-in-out 0.8s;
     }
@@ -208,8 +208,8 @@
         @include theme {
           background-color: $primary-text-link;
           border-color: theme-get('neutral-white');
-          // background-color: theme-get('primary-text-text-link');
-          // border-color: theme-get('neutral-white');
+          
+          
         }
 
         transition: 0.2s ease-in-out;
@@ -239,7 +239,7 @@
   height: 100%;
   width: 100%;
 
-  // background: $aqua;
+  
 
   & > div {
     height: 100%;
@@ -283,7 +283,7 @@
   }
 }
 
-// Bounce animation
+
 
 @keyframes bounce {
   0%,

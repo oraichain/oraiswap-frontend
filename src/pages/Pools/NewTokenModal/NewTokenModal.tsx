@@ -1,6 +1,7 @@
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { AccountData } from '@cosmjs/proto-signing';
 // import { OraidexListingContractClient } from '@oraichain/oraidex-contracts-sdk';
+import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
 import { ReactComponent as TrashIcon } from 'assets/icons/trash.svg';
@@ -12,18 +13,16 @@ import Modal from 'components/Modal';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { handleErrorTransaction } from 'helper';
-import useOnClickOutside from 'hooks/useOnClickOutside';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { checkRegex, validateAddressCosmos } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
 import { FC, useRef, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
 import { InitBalancesItems, RewardItems } from './ItemsComponent';
 import { ModalDelete, ModalListToken } from './ModalComponent';
 import styles from './NewTokenModal.module.scss';
-import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -229,9 +228,13 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     }
   };
 
+  const generateOverlay = () => {
+    return isAddListToken || typeDelete ? <div className={cx('overlay')} /> : null;
+  };
+
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
-      {isAddListToken || typeDelete ? <div className={cx('overlay')} /> : null}
+      {generateOverlay()}
       <div className={cx('container', theme)}>
         <div className={cx('container-inner')}>
           <RewardIcon />

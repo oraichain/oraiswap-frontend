@@ -40,22 +40,3 @@
   @include flex(flex-start);
   display: inline-flex;
 }
-.icon {
-  // color: fade-out($slate, 0.25);
-  // cursor: pointer;
-  // background: $cultured;
-  // border-radius: 8px;
-  // padding: 12px;
-
-  // @include theme() {
-  //   background-color: theme-get('bg-color-secondary');
-  // }
-
-  svg {
-    path {
-      // @include theme() {
-      //   fill: theme-get('svg-fill-color');
-      // }
-    }
-  }
-}

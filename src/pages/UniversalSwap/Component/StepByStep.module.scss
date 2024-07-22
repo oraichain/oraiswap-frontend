@@ -53,10 +53,10 @@
         &::before {
           content: url('../../../assets/images/iconoir_check.png');
           @include theme() {
-            border-color: theme-get('sea-stone-200'); // green;
-            color: theme-get('sea-stone-200'); // green
-            border: 1px solid theme-get('sea-stone-200'); // #2f5711;
-            background: theme-get('sea-stone-200'); // #aee67f;
+            border-color: theme-get('sea-stone-200'); 
+            color: theme-get('sea-stone-200'); 
+            border: 1px solid theme-get('sea-stone-200'); 
+            background: theme-get('sea-stone-200'); 
           }
         }
       }

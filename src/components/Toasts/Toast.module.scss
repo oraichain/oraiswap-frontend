@@ -73,21 +73,3 @@
 
   }
 }
-
-.cw20_section {
-  padding-bottom: 10px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-
-  &_label {
-    color: $blue-color;
-  }
-
-  &_value {
-    color: $lavender-gray;
-    padding-left: 6px;
-    padding-right: 6px;
-
-  }
-}

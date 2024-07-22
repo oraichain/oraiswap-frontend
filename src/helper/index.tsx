@@ -312,7 +312,7 @@ export const owalletCheck = (type: WalletCosmosType) => {
 
 export const isUnlockMetamask = async (): Promise<boolean> => {
   const ethereum = window.ethereum;
-  if (!ethereum || !ethereum.isMetaMask || !ethereum._metamask) return false;
+  if (!ethereum?.isMetaMask || !ethereum._metamask) return false;
   return await window.ethereum._metamask.isUnlocked();
 };
 
@@ -365,27 +365,45 @@ export const switchWalletTron = async (walletType: WalletType) => {
   };
 };
 
+export const isConnectTronInMobile = (walletByNetworks: WalletsByNetwork) => {
+  return isMobile() && !!walletByNetworks.tron;
+};
+
+export const isConnectCosmos = (walletByNetworks: WalletsByNetwork) => {
+  return !!walletByNetworks.cosmos || isMobile();
+};
+
+export const isConnectSpecificNetwork = (status: string | null) => {
+  return !!status || isMobile();
+};
+
+export const getAddressTransferForEvm = async (walletByNetworks: WalletsByNetwork) => {
+  let address = '';
+  if (network.chainId === EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID) {
+    if (isConnectTronInMobile(walletByNetworks)) {
+      const accountTron: interfaceRequestTron = await window.tronLinkDapp.request({
+        method: 'tron_requestAccounts'
+      });
+      address = accountTron.base58;
+    } else {
+      address = window?.tronWebDapp?.defaultAddress?.base58;
+    }
+  } else if (isConnectSpecificNetwork(walletByNetworks.evm)) {
+    if (walletByNetworks.evm === 'owallet') window.ethereumDapp = window.eth_owallet;
+    const check = window.Metamask.isWindowEthereum();
+    if (check) {
+      address = await window.Metamask.getEthAddress();
+    }
+  }
+  return address;
+};
+
 export const getAddressTransfer = async (network: CustomChainInfo, walletByNetworks: WalletsByNetwork) => {
   try {
-    let address;
+    let address = '';
     if (network.networkType === 'evm') {
-      if (network.chainId === EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID) {
-        if (isMobile() && walletByNetworks.tron) {
-          const accountTron: interfaceRequestTron = await window.tronLinkDapp.request({
-            method: 'tron_requestAccounts'
-          });
-          address = accountTron.base58;
-        } else {
-          address = window?.tronWebDapp?.defaultAddress?.base58;
-        }
-      } else if (walletByNetworks.evm || isMobile()) {
-        if (walletByNetworks.evm === 'owallet') window.ethereumDapp = window.eth_owallet;
-        const check = window.Metamask.isWindowEthereum();
-        if (check) {
-          address = await window.Metamask.getEthAddress();
-        }
-      }
-    } else if (walletByNetworks.cosmos || isMobile()) {
+      address = await getAddressTransferForEvm(walletByNetworks);
+    } else if (isConnectSpecificNetwork(walletByNetworks.cosmos)) {
       address = await window.Keplr.getKeplrAddr(network.chainId);
     }
     return address;
@@ -494,13 +512,11 @@ export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
     });
 
     const stakeCurrencyyWithoutIcons = checkErrorObj(info.stakeCurrency);
-    const feeCurrenciesWithoutIcons =
-      info?.feeCurrencies &&
-      info.feeCurrencies.map((feeCurrency) => {
-        const feeCurrencyyWithoutIcon = checkErrorObj(feeCurrency);
+    const feeCurrenciesWithoutIcons = info?.feeCurrencies?.map((feeCurrency) => {
+      const feeCurrencyyWithoutIcon = checkErrorObj(feeCurrency);
 
-        return feeCurrencyyWithoutIcon;
-      });
+      return feeCurrencyyWithoutIcon;
+    });
 
     return {
       ...infoWithoutIcon,
@@ -543,4 +559,10 @@ export const getAddressByEIP191 = async (isSwitchWallet?: boolean) => {
   if (!metamaskOfflineSinger) return;
   const accounts = await metamaskOfflineSinger.getAccounts(isSwitchWallet);
   return accounts[0].address;
+};
+
+export const assert = (condition: any, msg?: string) => {
+  if (!condition) {
+    throw new Error(msg || 'Condition is not truthy');
+  }
 };

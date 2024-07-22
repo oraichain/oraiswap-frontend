@@ -27,7 +27,6 @@
 
     @include small-mobile {
       flex-direction: row;
-      // justify-content: space-between;
       align-items: center;
       gap: 0px;
       margin-bottom: 16px;
@@ -321,7 +320,6 @@
     .volume,
     .apr {
       width: 50%;
-      // display: none;
       transition: display 0.2s ease-in-out;
     }
 

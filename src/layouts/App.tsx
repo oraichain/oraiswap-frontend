@@ -7,27 +7,25 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { getListAddressCosmos, getNetworkGasPrice, interfaceRequestTron } from 'helper';
-import { leapWalletType } from 'helper/constants';
+import { getListAddressCosmos, interfaceRequestTron } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
+import { useTronEventListener } from 'hooks/useTronLink';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import useWebSocket from 'react-use-websocket';
+import { setAddressBookList } from 'reducer/addressBook';
 import routes from 'routes';
 import { persistor } from 'store/configure';
 import { ADDRESS_BOOK_KEY_BACKUP, PERSIST_VER } from 'store/constants';
-import Menu from './Menu';
 import './index.scss';
+import Menu from './Menu';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectAddressBookList, setAddressBookList } from 'reducer/addressBook';
-import FutureCompetition from 'components/FutureCompetitionModal';
-import { useTronEventListener } from 'hooks/useTronLink';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -40,11 +38,9 @@ const App = () => {
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  const [bannerTime] = useConfigReducer('bannerTime');
   const mobileMode = isMobile();
   const ethOwallet = window.eth_owallet;
 
-  const currentAddressBook = useSelector(selectAddressBookList);
   const dispatch = useDispatch();
 
   useTronEventListener();
@@ -146,49 +142,74 @@ const App = () => {
     };
   }, []);
 
+  const polyfillForMobileMode = () => {
+    if (mobileMode) {
+      window.tronWebDapp = window.tronWeb;
+      window.tronLinkDapp = window.tronLink;
+      window.ethereumDapp = window.ethereum;
+      window.Keplr = new Keplr('owallet');
+      window.Metamask = new Metamask(window.tronWebDapp);
+    }
+  };
+
+  const handleAddressCosmos = async () => {
+    let oraiAddress;
+    if (walletByNetworks.cosmos || mobileMode) {
+      oraiAddress = await window.Keplr.getKeplrAddr();
+      if (oraiAddress) {
+        const { listAddressCosmos } = await getListAddressCosmos(oraiAddress, walletByNetworks.cosmos);
+        setCosmosAddress(listAddressCosmos);
+        setOraiAddress(oraiAddress);
+      }
+    }
+    return oraiAddress;
+  };
+
+  const handleAddressEvmOwallet = async () => {
+    let metamaskAddress;
+    if (walletByNetworks.evm === 'owallet' || mobileMode) {
+      if (window.ethereumDapp) {
+        if (mobileMode) await window.Metamask.switchNetwork(Networks.bsc);
+        metamaskAddress = await window.Metamask.getEthAddress();
+        if (metamaskAddress) setMetamaskAddress(metamaskAddress);
+      }
+    }
+    return metamaskAddress;
+  };
+
+  const handleAddressBtcOwallet = async () => {
+    let btcAddress;
+    if (walletByNetworks.bitcoin === 'owallet' || mobileMode) {
+      if (window.Bitcoin) {
+        btcAddress = await window.Bitcoin.getAddress();
+        if (btcAddress) setBtcAddress(btcAddress);
+      }
+    }
+    return btcAddress;
+  };
+
+  const handleAddressTronOwallet = async () => {
+    let tronAddress;
+
+    if (walletByNetworks.tron === 'owallet' || mobileMode) {
+      if (window.tronWebDapp && window.tronLinkDapp) {
+        const res: interfaceRequestTron = await window.tronLinkDapp.request({
+          method: 'tron_requestAccounts'
+        });
+        tronAddress = res?.base58;
+        if (tronAddress) setTronAddress(tronAddress);
+      }
+    }
+    return tronAddress;
+  };
+
   const keplrHandler = async () => {
     try {
-      let metamaskAddress, oraiAddress, tronAddress, btcAddress;
-
-      if (mobileMode) {
-        window.tronWebDapp = window.tronWeb;
-        window.tronLinkDapp = window.tronLink;
-        window.ethereumDapp = window.ethereum;
-        window.Keplr = new Keplr('owallet');
-        window.Metamask = new Metamask(window.tronWebDapp);
-      }
-
-      if (walletByNetworks.cosmos || mobileMode) {
-        oraiAddress = await window.Keplr.getKeplrAddr();
-        if (oraiAddress) {
-          const { listAddressCosmos } = await getListAddressCosmos(oraiAddress, walletByNetworks.cosmos);
-          setCosmosAddress(listAddressCosmos);
-          setOraiAddress(oraiAddress);
-        }
-      }
-
-      if (walletByNetworks.evm === 'owallet' || mobileMode) {
-        if (window.ethereumDapp) {
-          if (mobileMode) await window.Metamask.switchNetwork(Networks.bsc);
-          metamaskAddress = await window.Metamask.getEthAddress();
-          if (metamaskAddress) setMetamaskAddress(metamaskAddress);
-        }
-      }
-      if (walletByNetworks.bitcoin === 'owallet' || mobileMode) {
-        if (window.Bitcoin) {
-          btcAddress = await window.Bitcoin.getAddress();
-          if (btcAddress) setBtcAddress(btcAddress);
-        }
-      }
-      if (walletByNetworks.tron === 'owallet' || mobileMode) {
-        if (window.tronWebDapp && window.tronLinkDapp) {
-          const res: interfaceRequestTron = await window.tronLinkDapp.request({
-            method: 'tron_requestAccounts'
-          });
-          tronAddress = res?.base58;
-          if (tronAddress) setTronAddress(tronAddress);
-        }
-      }
+      polyfillForMobileMode();
+      const oraiAddress = await handleAddressCosmos();
+      const metamaskAddress = await handleAddressEvmOwallet();
+      const btcAddress = await handleAddressBtcOwallet();
+      const tronAddress = await handleAddressTronOwallet();
 
       loadTokenAmounts({
         oraiAddress,

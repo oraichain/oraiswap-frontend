@@ -14,7 +14,7 @@ require('react-scripts/config/env');
 const webpack = require('webpack');
 const path = require('path');
 const fs = require('fs');
-const package = require('../package.json');
+const packageJson = require('../package.json');
 const { fallback } = require('../config-overrides');
 const ignores = [];
 const chalk = require('react-dev-utils/chalk');
@@ -32,7 +32,7 @@ const config = {
   target: 'web',
   cache: true,
   entry: {
-    vendor: Object.keys(package.dependencies).filter((dep) => !ignores.includes(dep))
+    vendor: Object.keys(packageJson.dependencies).filter((dep) => !ignores.includes(dep))
   },
   module: {
     rules: [
@@ -80,12 +80,9 @@ const config = {
       path: path.join(vendorPath, `manifest.${vendorHash}.json`)
     }),
     // fix error 'UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins'
-    new webpack.NormalModuleReplacementPlugin(
-      /node:crypto/,
-      (resource) => {
-        resource.request = resource.request.replace(/^node:/, '');
-      }
-    )
+    new webpack.NormalModuleReplacementPlugin(/node:crypto/, (resource) => {
+      resource.request = resource.request.replace(/^node:/, '');
+    })
   ]
 };
 

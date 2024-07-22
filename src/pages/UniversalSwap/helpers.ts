@@ -411,7 +411,6 @@ export const transformSwapInfo = (data) => {
 };
 
 export const processPairInfo = (actionSwap, flattenTokens, flattenTokensWithIcon, isLightMode) => {
-  let info;
   let [TokenInIcon, TokenOutIcon]: any = [DefaultIcon, DefaultIcon];
   const infoPair = PAIRS_CHART.find(
     (pair) => pair.assets.includes(actionSwap.tokenIn) && pair.assets.includes(actionSwap.tokenOut)
@@ -428,10 +427,11 @@ export const processPairInfo = (actionSwap, flattenTokens, flattenTokensWithIcon
     isLightMode
   );
 
-  TokenInIcon = TokenInIconPair;
-  TokenOutIcon = TokenOutIconPair;
+  if (TokenInIconPair) TokenInIcon = TokenInIconPair;
 
-  info = {
+  if (TokenOutIconPair) TokenOutIcon = TokenOutIconPair;
+
+  const info = {
     ...infoPair,
     tokenIn: infoPair.symbols[findIndexIn],
     tokenOut: infoPair.symbols[findIndexIn ? 0 : 1]

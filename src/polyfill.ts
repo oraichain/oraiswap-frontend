@@ -138,7 +138,7 @@ if (typeof BigInt === 'undefined') {
     }
   }
 
-  var _old = MyBigInt;
+  const _old = MyBigInt;
   MyBigInt = function (...args) {
     return new _old(...args);
   };

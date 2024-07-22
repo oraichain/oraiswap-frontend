@@ -1,10 +1,11 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import ChartImg from 'assets/icons/chart.svg';
 import HideImg from 'assets/icons/show.svg';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import cn from 'classnames/bind';
+import { flattenTokensWithIcon } from 'config/chainInfos';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
-import useWindowSize from 'hooks/useWindowSize';
 import { numberWithCommas, reverseSymbolArr } from 'pages/Pools/helpers';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -23,8 +24,6 @@ import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
 import { calculateFinalPriceChange } from '../helpers';
 import { ChartTokenType } from '../hooks/useChartUsdPrice';
 import styles from './HeaderTab.module.scss';
-import { isMobile } from '@walletconnect/browser-utils';
-import { flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 
@@ -55,7 +54,6 @@ export const HeaderTab: React.FC<HeaderTabPropsType> = ({
   setChartTokenType,
   showTokenInfo = true
 }) => {
-  const { isSmallMobileView } = useWindowSize();
   const filterTime = useSelector(selectCurrentSwapFilterTime);
   const tab = useSelector(selectCurrentSwapTabChart);
   const dispatch = useDispatch();
@@ -179,21 +177,10 @@ export const UsdPrice = ({
   const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
   const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
 
-  return (
-    <div className={cx('priceUsd')}>
-      {tab === TAB_CHART_SWAP.TOKEN ? (
-        <div>
-          <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
-          <span
-            className={cx('percent', isIncrementUsd ? 'increment' : 'decrement', {
-              hidePercent: chartTokenType === ChartTokenType.Volume
-            })}
-          >
-            {(isIncrementUsd ? '+' : '') + Number(percentChangeUsd).toFixed(2)}%
-          </span>
-        </div>
-      ) : (
-        !priceChange.isError && (
+  const headerTabAdvance = () => {
+    return priceChange.isError
+      ? null
+      : priceChange.isError && (
           <div className={cx('bottom')}>
             <div className={cx('balance')}>
               {`1 ${baseDenom} ≈ ${
@@ -204,10 +191,25 @@ export const UsdPrice = ({
               {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%
             </div>
           </div>
-        )
-      )}
-    </div>
-  );
+        );
+  };
+
+  const headerTabSimple = () => {
+    return (
+      <div>
+        <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+        <span
+          className={cx('percent', isIncrementUsd ? 'increment' : 'decrement', {
+            hidePercent: chartTokenType === ChartTokenType.Volume
+          })}
+        >
+          {(isIncrementUsd ? '+' : '') + Number(percentChangeUsd).toFixed(2)}%
+        </span>
+      </div>
+    );
+  };
+
+  return <div className={cx('priceUsd')}>{tab === TAB_CHART_SWAP.TOKEN ? headerTabSimple() : headerTabAdvance()}</div>;
 };
 
 export const HeaderTop = ({
@@ -231,21 +233,24 @@ export const HeaderTop = ({
   const currentToChain = useSelector(selectCurrentToChain);
   const currentToToken = useSelector(selectCurrentToToken);
 
-  const { isSmallMobileView } = useWindowSize();
-
   const mobileMode = isMobile();
   let [ToTokenIcon, FromTokenIcon] = [DefaultIcon, DefaultIcon];
+
+  const generateIconTokenByTheme = (token) => {
+    return theme === 'light' ? token.IconLight : token.Icon;
+  };
+
   if (currentToToken) {
     const tokenIcon = flattenTokensWithIcon.find(
       (tokenWithIcon) => tokenWithIcon.coinGeckoId === currentToToken.coinGeckoId
     );
-    if (tokenIcon) ToTokenIcon = theme === 'light' ? tokenIcon.IconLight : tokenIcon.Icon;
+    if (tokenIcon) ToTokenIcon = generateIconTokenByTheme(tokenIcon);
   }
   if (currentFromToken) {
     const tokenIcon = flattenTokensWithIcon.find(
       (tokenWithIcon) => tokenWithIcon.coinGeckoId === currentFromToken.coinGeckoId
     );
-    if (tokenIcon) FromTokenIcon = theme === 'light' ? tokenIcon.IconLight : tokenIcon.Icon;
+    if (tokenIcon) FromTokenIcon = generateIconTokenByTheme(tokenIcon);
   }
 
   return (

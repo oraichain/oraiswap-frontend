@@ -1,4 +1,4 @@
-import { CW20_DECIMALS, ORAI, toAmount } from '@oraichain/oraidex-common';
+import { ORAI, toAmount } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -10,8 +10,8 @@ import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
-import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useGetPoolDetail } from 'pages/Pools/hooks';
+import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { FC, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -32,24 +32,18 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
   myLpBalance
 }) => {
   const [theme] = useConfigReducer('theme');
-  let { poolUrl } = useParams();
+  const { poolUrl } = useParams();
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
 
   const { token1, token2, info: pairInfoData } = poolDetail;
   const { lpTokenInfoData, pairAmountInfoData } = useGetPairInfo(poolDetail);
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
   const [lpAmountBurn, setLpAmountBurn] = useState<bigint | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [isFocus, setIsFocus] = useState(true);
 
   const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData?.liquidityAddr]?.balance ?? '0' : 0);
   const token1Amount = BigInt(pairAmountInfoData?.token1Amount || 0);
   const token2Amount = BigInt(pairAmountInfoData?.token2Amount || 0);
-
-  const onChangeWithdrawPercent = (option: number) => {
-    setLpAmountBurn((toAmount(option, CW20_DECIMALS) * lpTokenBalance) / BigInt(100000000));
-  };
 
   const handleWithdrawLiquidity = async (amount: string) => {
     if (!pairInfoData) return;
@@ -124,11 +118,6 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
         />
 
         <div className={cx('detail')}>
-          {/* <div className={cx('arrow-down', theme)}>
-            <div className={cx('inner-arrow', theme)}>
-              <ArrowDownIcon />
-            </div>
-          </div> */}
           <div className={cx('row', theme)}>
             <div className={cx('row-title')}>
               <span>Receive</span>
