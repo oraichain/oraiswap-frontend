@@ -377,7 +377,7 @@ export const isConnectSpecificNetwork = (status: string | null) => {
   return !!status || isMobile();
 };
 
-export const getAddressTransferForEvm = async (walletByNetworks: WalletsByNetwork) => {
+export const getAddressTransferForEvm = async (walletByNetworks: WalletsByNetwork, network: CustomChainInfo) => {
   let address = '';
   if (network.chainId === EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID) {
     if (isConnectTronInMobile(walletByNetworks)) {
@@ -402,7 +402,7 @@ export const getAddressTransfer = async (network: CustomChainInfo, walletByNetwo
   try {
     let address = '';
     if (network.networkType === 'evm') {
-      address = await getAddressTransferForEvm(walletByNetworks);
+      address = await getAddressTransferForEvm(walletByNetworks, network);
     } else if (isConnectSpecificNetwork(walletByNetworks.cosmos)) {
       address = await window.Keplr.getKeplrAddr(network.chainId);
     }
