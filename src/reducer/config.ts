@@ -70,7 +70,7 @@ const initialState: ConfigState = {
   rewardPools: [],
   filterDefaultPool: KeyFilterPool.all_pool,
   persistVersion: PERSIST_VER,
-  AIRoute: false
+  AIRoute: true
 };
 
 export const configSlice = createSlice({
