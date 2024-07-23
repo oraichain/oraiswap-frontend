@@ -1,7 +1,7 @@
 import styles from './index.module.scss';
 
-const PoolDetail = () => {
+const PoolV3Detail = () => {
   return <div className={styles.poolDetail}>PoolDetail</div>;
 };
 
-export default PoolDetail;
+export default PoolV3Detail;

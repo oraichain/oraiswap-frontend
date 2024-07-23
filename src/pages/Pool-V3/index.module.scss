@@ -69,6 +69,16 @@
       border-radius: var(--Dimension-Corner-Radius-button, 99px);
       border: 1px solid var(--Colors-Neutral-Border-border-xbold, #595b57);
       background: var(--Colors-Neutral-Surface-bg-section-2, #494949);
+
+      color: var(--Colors-Neutral-Text-body-on-row, #efefef);
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%;
     }
+  }
+
+  .content {
+    width: 100%;
   }
 }

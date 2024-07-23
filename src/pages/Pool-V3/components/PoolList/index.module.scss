@@ -2,4 +2,57 @@
 @import 'src/styles/mixins';
 
 .poolList {
+  width: 100%;
+
+  .headerTable {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    align-self: stretch;
+
+    .total {
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%;
+      letter-spacing: 0.1px;
+
+      h1 {
+        margin-top: 8px;
+        color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 120%; /* 28.8px */
+      }
+    }
+
+    .search {
+      width: 258px;
+      height: 36px;
+      padding: 8px 16px 8px 0;
+      border-radius: 99px;
+      font-weight: 400;
+      font-size: 14px;
+
+      @include theme() {
+        background-color: theme-get('neutral-surface-bg-section');
+        color: theme-get('neutral-text-body');
+        border-color: theme-get('border-color');
+      }
+
+      @media (max-width: 575px) {
+        font-size: 15px;
+        width: 100%;
+      }
+
+      &::placeholder {
+        @include theme() {
+          color: theme-get('text-color-placeholder');
+        }
+      }
+    }
+  }
 }

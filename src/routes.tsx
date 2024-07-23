@@ -14,6 +14,9 @@ import BitcoinDashboard from 'pages/BitcoinDashboard';
 import StakingPage from 'pages/Staking';
 import DownloadApp from 'pages/DownloadApp';
 import SwapPoolV3 from 'pages/Pool-V3/components/Swap';
+import PositionDetail from 'pages/Pool-V3/components/PositionDetail';
+import PoolV3Detail from 'pages/Pool-V3/components/PoolDetail';
+import CreatePosition from 'pages/Pool-V3/components/CreatePosition';
 
 export default () => (
   <Suspense
@@ -38,6 +41,9 @@ export default () => (
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
       <Route path="/pools-v3" element={<PoolsV3 />} />
+      <Route path="/pools-v3/:poolId" element={<PoolV3Detail />} />
+      <Route path="/new-position/:item1?/:item2?/:item3?" element={<CreatePosition />} />
+      <Route path="/position/:address/:id" element={<PositionDetail />} />
       <Route path="/pools-v3/swap" element={<SwapPoolV3 />} />
       <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
