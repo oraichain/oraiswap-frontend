@@ -1,26 +1,22 @@
 import classNames from 'classnames';
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import PoolList from './components/PoolList';
 import PositionList from './components/PositionList';
 import styles from './index.module.scss';
-
-export const postMessagePoolV3 = (
-  statusWallet: 'connect' | 'disconnect',
-  walletType?: string,
-  address?: string,
-  allowUrl?: string
-) => {
-  const iframe = document.getElementById('iframe-v3');
-  //@ts-ignore
-  iframe.contentWindow.postMessage({ walletType, address, statusWallet: statusWallet }, allowUrl ?? '*');
-};
+import { Link } from 'react-router-dom';
 
 export enum PoolV3PageType {
   POOL = 'pools',
   POSITION = 'positions',
   SWAP = 'swap'
 }
+
+const listTab = [PoolV3PageType.POOL, PoolV3PageType.POSITION];
+const listTabRender = [
+  { id: PoolV3PageType.POOL, value: 'Pools' },
+  { id: PoolV3PageType.POSITION, value: 'Your Liquidity Positions' }
+];
 
 const PageContent = {
   [PoolV3PageType.POOL]: PoolList,
@@ -29,12 +25,13 @@ const PageContent = {
 };
 
 const PoolV3 = () => {
-  const { type } = useParams<{ type: PoolV3PageType }>();
   const navigate = useNavigate();
+  let [searchParams, setSearchParams] = useSearchParams();
+  const type = searchParams.get('type') as PoolV3PageType;
 
   useEffect(() => {
-    if (![PoolV3PageType.POOL, PoolV3PageType.POSITION].includes(type)) {
-      navigate(`/pools-v3/${PoolV3PageType.POOL}`);
+    if (!listTab.includes(type)) {
+      navigate(`/pools-v3?type=${PoolV3PageType.POOL}`);
     }
   }, [type]);
 
@@ -42,7 +39,25 @@ const PoolV3 = () => {
 
   return (
     <div className={classNames(styles.poolV3)}>
-      <div className={styles.header}>header</div>
+      <div className={styles.header}>
+        <div className={styles.headerTab}>
+          {listTabRender.map((e) => {
+            return (
+              <Link
+                to={`/pools-v3?type=${e.id}`}
+                key={e.id}
+                className={classNames(styles.item, { [styles.active]: type === e.id })}
+              >
+                {e.value}
+              </Link>
+            );
+          })}
+        </div>
+
+        <Link className={styles.swapBtn} to={`/pools-v3/swap`}>
+          Swap
+        </Link>
+      </div>
 
       <div className={styles.content}>{Content && <Content />}</div>
     </div>

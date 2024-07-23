@@ -15,7 +15,6 @@ import { useInactiveConnect } from 'hooks/useMetamask';
 import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
-import { postMessagePoolV3 } from 'pages/Pool-V3';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -43,9 +42,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       await initClient();
       const oraiAddr = await window.Keplr.getKeplrAddr();
       setOraiAddress(oraiAddr);
-      if (window.location.pathname === '/pools-v3') {
-        postMessagePoolV3('connect', walletType, oraiAddr);
-      }
 
       const { listAddressCosmos } = await getListAddressCosmos(oraiAddr, walletType);
 
@@ -151,9 +147,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     });
     switch (networkType) {
       case 'cosmos':
-        if (window.location.pathname === '/pools-v3') {
-          postMessagePoolV3('disconnect', 'owallet');
-        }
         setOraiAddress(undefined);
         break;
       case 'evm':

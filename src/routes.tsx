@@ -13,6 +13,7 @@ import CoHarvest from 'pages/CoHarvest';
 import BitcoinDashboard from 'pages/BitcoinDashboard';
 import StakingPage from 'pages/Staking';
 import DownloadApp from 'pages/DownloadApp';
+import SwapPoolV3 from 'pages/Pool-V3/components/Swap';
 
 export default () => (
   <Suspense
@@ -37,7 +38,7 @@ export default () => (
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
       <Route path="/pools-v3" element={<PoolsV3 />} />
-      <Route path="/pools-v3/:type" element={<PoolsV3 />} />
+      <Route path="/pools-v3/swap" element={<SwapPoolV3 />} />
       <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/download-owallet" element={<DownloadApp />} />

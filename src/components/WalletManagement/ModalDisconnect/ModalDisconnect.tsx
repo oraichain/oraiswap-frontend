@@ -9,7 +9,6 @@ import useWalletReducer from 'hooks/useWalletReducer';
 import { reduceString } from 'libs/utils';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
-import { postMessagePoolV3 } from 'pages/Pool-V3';
 
 const cx = cn.bind(styles);
 
@@ -61,9 +60,7 @@ export const ModalDisconnect: React.FC<{
     });
     switch (currentDisconnectingNetwork) {
       case 'cosmos':
-        if (window.location.pathname === '/pools-v3') {
-          postMessagePoolV3('disconnect', 'keplr', '');
-        }
+       
         setOraiAddress(undefined);
         // TODO: need to refactor later
         if (walletByNetworks.cosmos === 'eip191') {
