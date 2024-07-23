@@ -1,14 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
-import styles from './index.module.scss';
-import { getWalletByNetworkFromStorage } from 'helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { isMobile } from '@walletconnect/browser-utils';
-import { ReactComponent as CloseBannerIcon } from 'assets/icons/close.svg';
-import { ReactComponent as WarningIcon } from 'assets/icons/warning_icon.svg';
-import Lottie from 'lottie-react';
-import PoolV3Lottie from 'assets/lottie/poolv3-beta.json';
 import classNames from 'classnames';
-import LoadingBox from 'components/LoadingBox';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import PoolList from './components/PoolList';
+import PositionList from './components/PositionList';
+import styles from './index.module.scss';
 
 export const postMessagePoolV3 = (
   statusWallet: 'connect' | 'disconnect',
@@ -21,67 +16,36 @@ export const postMessagePoolV3 = (
   iframe.contentWindow.postMessage({ walletType, address, statusWallet: statusWallet }, allowUrl ?? '*');
 };
 
+export enum PoolV3PageType {
+  POOL = 'pools',
+  POSITION = 'positions',
+  SWAP = 'swap'
+}
+
+const PageContent = {
+  [PoolV3PageType.POOL]: PoolList,
+  [PoolV3PageType.POSITION]: PositionList
+  // [PoolV3PageType.SWAP]: PositionList
+};
+
 const PoolV3 = () => {
-  const iframeRef = useRef(null);
-  const [loading, setLoading] = useState(true);
-  const [address] = useConfigReducer('address');
-  const [openBanner, setOpenBanner] = useState(true);
+  const { type } = useParams<{ type: PoolV3PageType }>();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const iframe = iframeRef.current;
-    const handleLoad = () => {
-      callFunctionInIframe();
-    };
+    if (![PoolV3PageType.POOL, PoolV3PageType.POSITION].includes(type)) {
+      navigate(`/pools-v3/${PoolV3PageType.POOL}`);
+    }
+  }, [type]);
 
-    if (iframe) iframe.addEventListener('load', handleLoad);
-    return () => {
-      if (iframe) iframe.removeEventListener('load', handleLoad);
-    };
-  }, [address]);
-
-  const callFunctionInIframe = () => {
-    const walletType = getWalletByNetworkFromStorage();
-    postMessagePoolV3(
-      !walletType?.cosmos ? 'disconnect' : 'connect',
-      isMobile() ? 'owallet' : walletType?.cosmos,
-      address
-    );
-    setLoading(false);
-  };
+  const Content = PageContent[type || PoolV3PageType.POOL];
 
   return (
-    <LoadingBox loading={loading}>
-      <div className={classNames(styles.poolV3)}>
-        {openBanner && (
-          <div className={styles.banner}>
-            <div className={styles.text}>
-              {/* <WarningIcon />{' '} */}
+    <div className={classNames(styles.poolV3)}>
+      <div className={styles.header}>header</div>
 
-              <span className={styles.lottie}>
-                <Lottie animationData={PoolV3Lottie} autoPlay={true} loop />
-              </span>
-              <span>
-                {' '}
-                <strong>This version is flagged as community open beta.</strong> Please be mindful with issues &
-                feedback to us.
-              </span>
-            </div>
-            <div className={styles.closeBanner} onClick={() => setOpenBanner(false)}>
-              <CloseBannerIcon />
-            </div>
-          </div>
-        )}
-        <iframe
-          className={classNames({ [styles.inactiveMargin]: !openBanner })}
-          ref={iframeRef}
-          key={address}
-          id={'iframe-v3'}
-          src={'/v3'}
-          title="pool-v3"
-          frameBorder={0}
-        />
-      </div>
-    </LoadingBox>
+      <div className={styles.content}>{Content && <Content />}</div>
+    </div>
   );
 };
 

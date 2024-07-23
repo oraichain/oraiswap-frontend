@@ -37,6 +37,7 @@ export default () => (
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
       <Route path="/pools-v3" element={<PoolsV3 />} />
+      <Route path="/pools-v3/:type" element={<PoolsV3 />} />
       <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/download-owallet" element={<DownloadApp />} />
