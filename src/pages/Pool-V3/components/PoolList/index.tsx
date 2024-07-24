@@ -1,22 +1,22 @@
+import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
+import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
+import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
+import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
+import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
+import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
+import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import SearchLightSvg from 'assets/images/search-light-svg.svg';
 import SearchSvg from 'assets/images/search-svg.svg';
+import classNames from 'classnames';
+import { TooltipIcon } from 'components/Tooltip';
 import useTheme from 'hooks/useTheme';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
-import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
-import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
-import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
-import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
-import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
-import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
-import { Link } from 'react-router-dom';
-import classNames from 'classnames';
-import { TooltipIcon } from 'components/Tooltip';
 
 const PoolList = () => {
-  const [theme] = useTheme();
+  const theme = useTheme();
   const [search, setSearch] = useState<string>();
   const [list, setList] = useState<any[]>([...Array(9)]);
   const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
@@ -53,15 +53,19 @@ const PoolList = () => {
               <thead>
                 <tr>
                   <th>Pool name</th>
-                  <th>Liquidity</th>
-                  <th>Volume (24H)</th>
-                  <th>APR</th>
+                  <th className={styles.textRight}>Liquidity</th>
+                  <th className={styles.textRight}>Volume (24H)</th>
+                  <th className={styles.textRight}>APR</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {list.map((item, index) => {
-                  return <PoolItemTData item={item} key={`${index}-pool-${item?.id}`} theme={theme} />;
+                  return (
+                    <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
+                      <PoolItemTData item={item} theme={theme} />
+                    </tr>
+                  );
                 })}
               </tbody>
             </table>
@@ -77,14 +81,15 @@ const PoolList = () => {
   );
 };
 
-const PoolItemTData = ({ item, key, theme }) => {
+const PoolItemTData = ({ item, theme }) => {
   const [openTooltip, setOpenTooltip] = useState(false);
   const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
+  const navigate = useNavigate();
 
   return (
-    <tr className={styles.item} key={key}>
+    <>
       <td>
-        <div className={styles.name}>
+        <div className={styles.name} onClick={() => navigate(`/pools-v3/${item?.id}`)}>
           <div className={styles.icons}>
             <OraixIcon />
             <UsdtIcon />
@@ -96,10 +101,10 @@ const PoolItemTData = ({ item, key, theme }) => {
           </div>
         </div>
       </td>
-      <td>
+      <td className={styles.textRight}>
         <span className={styles.amount}>{formatDisplayUsdt(1232343)}</span>
       </td>
-      <td>
+      <td className={styles.textRight}>
         <span className={styles.amount}>{formatDisplayUsdt(1348)}</span>
       </td>
       <td>
@@ -107,6 +112,7 @@ const PoolItemTData = ({ item, key, theme }) => {
           <span className={styles.amount}>{formatDisplayUsdt(1348)}</span>
 
           <TooltipIcon
+            className={styles.tooltipWrapper}
             placement="top"
             visible={openTooltip}
             icon={<IconInfo />}
@@ -115,13 +121,14 @@ const PoolItemTData = ({ item, key, theme }) => {
               <div className={classNames(styles.tooltip, styles[theme])}>
                 <div className={styles.itemInfo}>
                   <span>Swap fee</span>
-                  <span>{numberWithCommas(11.91)}%</span>
+                  <span className={styles.value}>{numberWithCommas(11.91)}%</span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>
-                    ORAI Boost &nbsp; <IconBoots />
+                    ORAI Boost&nbsp;
+                    <IconBoots />
                   </span>
-                  <span>{numberWithCommas(11.91)}%</span>
+                  <span className={styles.value}>{numberWithCommas(11.91)}%</span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>Total APR</span>
@@ -133,9 +140,17 @@ const PoolItemTData = ({ item, key, theme }) => {
         </div>
       </td>
       <td>
-        <Link to="/new-position/ORAIX/USDT/0.01">Add Position</Link>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate('/new-position/ORAIX/USDT/0.01');
+          }}
+          className={styles.add}
+        >
+          Add Position
+        </button>
       </td>
-    </tr>
+    </>
   );
 };
 

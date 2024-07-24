@@ -12,6 +12,7 @@
   flex-shrink: 0;
   width: 100%;
 
+  margin: 0 auto;
   max-width: 1162px;
 
   .header {
@@ -30,7 +31,7 @@
       border-radius: var(--Dimension-Corner-Radius-button, 99px);
 
       @include theme {
-        background: var(--Colors-Neutral-Surface-bg-toast, #232521);
+        background: theme-get('neutral-surface-bg-modal');
         color: theme-get('neutral-9');
       }
 
@@ -49,9 +50,11 @@
         border-radius: var(--Dimension-Corner-Radius-button, 99px);
 
         &.active {
-          color: #efefef;
-          border: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
-          background: var(--Colors-Neutral-Surface-bg-strong, #131412);
+          @include theme {
+            color: theme-get('colors-neutral-text-body-on-row');
+            border: 1px solid theme-get('neutral-border-border-default');
+            background: theme-get('neutral-surface-bg-strong');
+          }
         }
       }
     }
@@ -67,10 +70,12 @@
       flex-shrink: 0;
 
       border-radius: var(--Dimension-Corner-Radius-button, 99px);
-      border: 1px solid var(--Colors-Neutral-Border-border-xbold, #595b57);
-      background: var(--Colors-Neutral-Surface-bg-section-2, #494949);
 
-      color: var(--Colors-Neutral-Text-body-on-row, #efefef);
+      @include theme {
+        border: 1px solid theme-get('neutral-border-border-xbold');
+        background: theme-get('colors-neutral-surface-bg-section-3');
+        color: theme-get('colors-neutral-text-body-on-row');
+      }
       text-align: center;
       font-size: 16px;
       font-weight: 500;
