@@ -1,8 +1,8 @@
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
-import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
+import OraixIcon from 'assets/icons/oraix.svg';
+import UsdtIcon from 'assets/icons/tether.svg';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import SearchLightSvg from 'assets/images/search-light-svg.svg';
@@ -91,8 +91,8 @@ const PoolItemTData = ({ item, theme }) => {
       <td>
         <div className={styles.name} onClick={() => navigate(`/pools-v3/${item?.id}`)}>
           <div className={styles.icons}>
-            <OraixIcon />
-            <UsdtIcon />
+            <img src={OraixIcon} alt="base-tk" />
+            <img src={UsdtIcon} alt="quote-tk" />
           </div>
           <span>ORAIX / USDT</span>
 

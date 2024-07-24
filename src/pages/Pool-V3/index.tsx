@@ -38,7 +38,7 @@ const PoolV3 = () => {
   const Content = PageContent[type || PoolV3PageType.POOL];
 
   return (
-    <div className={classNames(styles.poolV3)}>
+    <div className={classNames(styles.poolV3, 'small_container')}>
       <div className={styles.header}>
         <div className={styles.headerTab}>
           {listTabRender.map((e) => {

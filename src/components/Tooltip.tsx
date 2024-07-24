@@ -30,7 +30,13 @@ export const Tooltip: FC<Props> = ({ className, children, setVisible, visible, .
   const hide = () => setVisible(false);
 
   const button = (
-    <span className={classNames(styles.button, className)} onClick={() => setVisible(!visible)}>
+    <span
+      className={classNames(styles.button, className)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setVisible(!visible);
+      }}
+    >
       {children}
     </span>
   );

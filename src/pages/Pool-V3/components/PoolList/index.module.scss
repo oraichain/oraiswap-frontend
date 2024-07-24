@@ -170,13 +170,17 @@
         align-items: center;
         gap: 12px;
         align-self: stretch;
+        flex-wrap: nowrap;
+        white-space: nowrap;
 
         font-size: 16px;
         font-weight: 500;
         line-height: 150%;
 
         .icons {
-          svg {
+          display: inline-flex;
+
+          img {
             width: 24px;
             height: 24px;
             padding: 1px;
@@ -200,6 +204,7 @@
           font-weight: 400;
           line-height: 150%; /* 18px */
           letter-spacing: 0.012px;
+          white-space: nowrap;
         }
       }
 
@@ -248,6 +253,7 @@
         font-size: 14px;
         font-weight: 600;
         line-height: 150%; /* 21px */
+        white-space: nowrap;
 
         cursor: pointer;
         &:hover {
