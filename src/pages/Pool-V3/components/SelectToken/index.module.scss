@@ -1,0 +1,301 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.selectToken {
+  position: relative;
+  flex: 1;
+
+  .btn {
+    cursor: pointer;
+    display: flex;
+    height: 40px;
+    padding: 12px;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1 0 0;
+
+    border-radius: 8px;
+    background: var(--Colors-Neutral-Surface-bg-swap-pair, #232521);
+
+    color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 150%; /* 21px */
+
+    &:hover {
+      filter: brightness(1.25);
+    }
+
+    .arrow {
+      svg {
+        vertical-align: middle;
+      }
+    }
+
+    .name {
+      display: flex;
+      align-items: center;
+
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+    opacity: 0.25;
+    background: var(--Colors-Universal-Base-1000, #000);
+
+    width: 100%;
+    height: 100%;
+
+    visibility: hidden;
+
+    &.active {
+      visibility: visible;
+    }
+  }
+
+  .contentWrapper {
+    z-index: 1000;
+    visibility: hidden;
+    background: rgba(0, 0, 0, 0.75);
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+
+    @include small-mobile {
+      justify-content: flex-end;
+    }
+
+    &.active {
+      visibility: visible;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content {
+      position: relative;
+      display: flex;
+      width: 100%;
+      max-width: 500px;
+      padding: 24px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 24px;
+      border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+      background: var(--Colors-Neutral-Surface-bg, #181a17);
+
+      @include small-mobile {
+        max-width: unset;
+      }
+
+      .title {
+        width: 100%;
+        text-align: center;
+
+        h1 {
+          color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+          font-size: 20px;
+          font-weight: 600;
+          line-height: 150%; /* 30px */
+        }
+
+        svg {
+          cursor: pointer;
+          width: 30px;
+          height: 30px;
+
+          position: absolute;
+          top: 24px;
+          right: 24px;
+        }
+      }
+
+      .selectTokenSearch {
+        width: 100%;
+
+        .selectTokenSearchInput {
+          font-size: 14px;
+          font-weight: 400;
+          width: 100%;
+          padding: 4px 16px;
+          height: 36px;
+
+          @include theme() {
+            background: theme-get('colors-neutral-surface-bg-section');
+            border: 1px solid theme-get('colors-neutral-border-border-btn-default');
+            color: theme-get('colors-neutral-text-text-token-name');
+          }
+
+          &::placeholder {
+            @include theme() {
+              color: theme-get('neutral-9');
+            }
+          }
+        }
+      }
+
+      .selectTokenList {
+        width: 100%;
+        overflow-y: auto;
+        height: calc(100vh - 120px);
+        max-height: 400px;
+        padding-right: 4px;
+
+        .selectTokenTitle {
+          @include theme() {
+            color: theme-get('colors-neutral-text-title');
+          }
+          font-size: 14px;
+          line-height: 150%;
+        }
+
+        .selectTokenListNoResult {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+        }
+
+        .selectTokenItem {
+          display: flex;
+          justify-content: space-between;
+          padding: 12px 8px 12px 12px;
+          cursor: pointer;
+
+          &:hover {
+            border-radius: 8px;
+            @include theme() {
+              background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
+            }
+          }
+
+          &.unsupported {
+            cursor: not-allowed;
+            opacity: 0.5;
+          }
+
+          .selectTokenItemLeft {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+
+            .selectTokenItemLeftImg {
+              display: flex;
+              align-items: center;
+              position: relative;
+
+              svg {
+                border-radius: 50%;
+                width: 38px;
+                height: 38px;
+              }
+
+              .selectTokenItemLeftImgChain {
+                border-radius: 2px;
+                position: absolute;
+                top: 65%;
+                left: 25px;
+                z-index: 1;
+                border-radius: 50%;
+
+                svg {
+                  width: 18px;
+                  height: 18px;
+
+                  @include theme() {
+                    background-color: theme-get('colors-neutral-surface-bg-dropdown-hover');
+                  }
+                  border-radius: 50%;
+                }
+              }
+            }
+
+            .selectTokenItemTokenName {
+              font-size: 18px;
+              font-weight: 500;
+
+              @include theme() {
+                color: theme-get('colors-neutral-text-text-token-name');
+              }
+
+              svg {
+                width: 17px;
+                height: 17px;
+                margin: 0px 0px -2px 4px;
+
+                path {
+                  @include theme {
+                    stroke: theme-get('warning-text-default');
+                  }
+                }
+              }
+            }
+
+            .selectTokenItemTokenOrg {
+              font-size: 12px;
+              font-weight: 500;
+
+              @include theme() {
+                color: theme-get('colors-neutral-text-body');
+              }
+            }
+          }
+          .selectTokenItemRight {
+            text-align: right;
+
+            .selectTokenItemTokenBalance {
+              font-size: 18px;
+              font-weight: 500;
+
+              @include theme() {
+                color: theme-get('colors-neutral-text-text-token-name');
+              }
+            }
+
+            .selectTokenItemTokenUsd {
+              font-size: 12px;
+              font-weight: 500;
+              @include theme() {
+                color: theme-get('colors-neutral-text-body');
+              }
+            }
+          }
+        }
+
+        .divider {
+          width: 100%;
+          border-bottom: 1px solid;
+          margin: auto;
+          margin-top: 12px;
+
+          @include theme {
+            border-color: theme-get('neutral-surface-bg-btn-disabled');
+          }
+        }
+
+        .warning {
+          margin: 12px 0;
+
+          @include theme {
+            color: theme-get('warning-text-default');
+          }
+
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 150%;
+          letter-spacing: 0.1px;
+        }
+      }
+    }
+  }
+}

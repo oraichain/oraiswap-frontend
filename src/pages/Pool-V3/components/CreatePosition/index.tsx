@@ -9,6 +9,8 @@ import useTheme from 'hooks/useTheme';
 import PriceRangePlot from '../PriceRangePlot/PriceRangePlot';
 import { useEffect, useState } from 'react';
 import { calcPrice, calcTicksAmountInRange, spacingMultiplicityGte } from '../PriceRangePlot/utils';
+import { TokenItemType, truncDecimals } from '@oraichain/oraidex-common';
+import TokenForm from '../TokenForm';
 // import { getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm.js';
 
 const args = {
@@ -54,6 +56,11 @@ const args = {
 const CreatePosition = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const [tokenFrom, setTokenFrom] = useState<TokenItemType>();
+  const [tokenTo, setTokenTo] = useState<TokenItemType>();
+  const [fee, setFee] = useState<number>(0.01);
+  const [toAmount, setToAmount] = useState();
+  const [fromAmount, setFromAmount] = useState();
 
   const [plotMin, setPlotMin] = useState(0);
   const [plotMax, setPlotMax] = useState(1);
@@ -140,7 +147,20 @@ const CreatePosition = () => {
           </div>
         </div>
         <div className={styles.content}>
-          <div className={styles.item}>TOKEN section</div>
+          <div className={styles.item}>
+            <TokenForm
+              tokenFrom={tokenFrom}
+              handleChangeTokenFrom={(tk) => setTokenFrom(tk)}
+              tokenTo={tokenTo}
+              handleChangeTokenTo={(tk) => setTokenTo(tk)}
+              setFee={setFee}
+              setToAmount={setToAmount}
+              setFromAmount={setFromAmount}
+              fromAmount={fromAmount}
+              toAmount={toAmount}
+              fee={fee}
+            />
+          </div>
           <div className={styles.item}>
             <div className={styles.wrapper}>
               <div className={styles.itemTitleWrapper}>
