@@ -29,11 +29,9 @@ const walletType = getWalletByNetworkFromStorage();
 window.Keplr = new Keplr(walletType?.cosmos);
 
 window.ethereumDapp = window.ethereum;
-window.tronWebDapp = window.tronWeb;
-window.tronLinkDapp = window.tronLink;
 
 window.Bitcoin = new Bitcoin();
-window.Metamask = new Metamask(window.tronWebDapp);
+window.Metamask = new Metamask(window.tronWeb);
 
 window.React = require('react');
 window.Buffer = require('buffer').Buffer;
