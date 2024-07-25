@@ -6,6 +6,7 @@
   "author": "Oraichain Labs",
   "license": "Apache-2.0",
   "dependencies": {
+    "@babel/plugin-proposal-import-wasm-source": "^7.24.7",
     "@cosmjs/cosmwasm-stargate": "^0.31.0",
     "@cosmjs/proto-signing": "^0.31.0",
     "@cosmjs/stargate": "^0.31.0",
@@ -14,6 +15,8 @@
     "@injectivelabs/sdk-ts": "1.12.1",
     "@leapwallet/cosmos-snap-provider": "0.1.25",
     "@lucky-canvas/react": "^0.1.13",
+    "@nivo/bar": "^0.87.0",
+    "@nivo/line": "^0.86.0",
     "@oraichain/common-contracts-sdk": "^1.0.31",
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",

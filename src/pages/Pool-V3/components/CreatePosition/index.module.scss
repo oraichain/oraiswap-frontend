@@ -60,6 +60,156 @@
 
     .item {
       flex: 1;
+
+      .wrapper {
+        width: 100%;
+        display: flex;
+        margin-bottom: 48px;
+
+        .itemTitleWrapper {
+          width: 70%;
+
+          .itemTitle {
+            color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+            font-weight: 600;
+            font-size: 16px;
+          }
+
+          .liquidityActive {
+            color: #979995;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 18px;
+
+            .activeLiquidityIcon {
+              display: inline-block;
+              height: 14px;
+              width: 14px;
+              border: 2px solid;
+              border-color: #979995;
+              color: #979995;
+              border-radius: 50%;
+              font-size: 8px;
+              line-height: 10px;
+              font-weight: bolder;
+              text-align: center;
+              box-sizing: border-box;
+              cursor: default;
+            }
+          }
+        }
+
+        .itemSwitcherWrapper {
+          width: 30%;
+          display: flex;
+          flex-direction: row-reverse;
+
+          .switcherContainer {
+            overflow: visible;
+            height: 33px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-evenly;
+            width: 90px;
+            align-items: end;
+            background-color: #232521;
+
+            .singleTabClasses {
+              z-index: 1;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+
+              .continuous {
+                display: block;
+              }
+
+              .discrete {
+                display: block;
+              }
+            }
+          }
+        }
+      }
+
+      .itemChartAndPriceWrapper {
+        gap: 12px;
+        display: flex;
+        flex-direction: column;
+
+        .currentPriceWrapper {
+          border-radius: 8px;
+          padding: 12px;
+          display: flex;
+          background-color: #232521;
+          align-items: center;
+          justify-content: space-between;
+
+          .currentPriceTitle {
+            color: var(--Colors-Neutral-Text-text-token-name, #979995);
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 18px;
+          }
+          
+          .currentPriceValue {
+            color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+            text-align: end;
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 30px;
+
+            .pair {
+              color: var(--Colors-Neutral-Text-text-token-name, #979995);
+              font-size: 12px;
+              font-weight: 400;
+              line-height: 18px;
+            }
+          }
+        }
+
+        .minMaxPriceWrapper {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+
+          .minMaxPrice {
+            border-radius: 8px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #232521;
+            width: 100%;
+            padding: 12px;
+
+            .minMaxPriceTitle {
+              color: var(--Colors-Neutral-Text-text-token-name, #979995);
+              font-size: 13px;
+              text-align: end;
+              font-weight: 400;
+              line-height: 18px;
+            }
+
+            .minMaxPriceValue {
+              color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+              font-size: 18px;
+              text-align: end;
+              font-weight: 600;
+              line-height: 30px;
+
+              .pair {
+                color: var(--Colors-Neutral-Text-text-token-name, #979995);
+                font-size: 12px;
+                font-weight: 400;
+                line-height: 18px;
+              }
+            }
+          }
+        }
+      }
     }
 
     @include mobile {
