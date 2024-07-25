@@ -8,13 +8,18 @@
   flex-wrap: wrap;
 
   border-radius: 16px;
-  border: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
-  background: var(--Colors-Neutral-Surface-bg-swap, #1b1d19);
+
+  @include theme {
+    border: 1px solid theme-get('neutral-border-border-default');
+    background: theme-get('neutral-surface-bg-swap');
+  }
 
   overflow: hidden;
 
   &:hover {
-    background: #232521;
+    @include theme {
+      background: theme-get('neutral-6');
+    }
   }
 
   .trigger {
@@ -33,6 +38,10 @@
       gap: 16px;
       flex: 1;
 
+      @include theme {
+        color: theme-get('colors-neutral-text-body-on-row');
+      }
+
       .icons {
         display: inline-flex;
 
@@ -42,6 +51,12 @@
 
           &:not(:first-of-type) {
             margin-left: -10px;
+          }
+        }
+
+        &.light {
+          img {
+            filter: invert(1);
           }
         }
       }
@@ -91,22 +106,36 @@
         text-align: right;
 
         p {
-          color: var(--Colors-Neutral-Text-body, #979995);
+          @include theme {
+            color: theme-get('neutral-9');
+          }
           font-size: 14px;
           font-weight: 400;
           line-height: 150%; /* 21px */
         }
 
         .value {
-          color: var(--Colors-Neutral-Text-title, #efefef);
+          @include theme {
+            color: theme-get('colors-neutral-text-body-on-row');
+          }
+
           font-size: 16px;
           font-weight: 500;
           line-height: 150%; /* 24px */
           margin-top: 16px;
 
           &.apr {
-            color: var(--Colors-Primary-Text-text-highlight, #aee67f);
-            margin-right: 6px;
+            @include theme {
+              color: theme-get('primary-surface-default-dark-3');
+            }
+
+            svg {
+              path {
+                @include theme {
+                  fill: theme-get('primary-surface-default-dark-3');
+                }
+              }
+            }
           }
         }
       }
@@ -142,15 +171,20 @@
       align-self: stretch;
 
       border-radius: 16px;
-      border: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
-      background: var(--Colors-Neutral-Surface-bg, #181a17);
+
+      @include theme {
+        border: 1px solid theme-get('neutral-border-border-default');
+        background: theme-get('neutral-surface-bg-tooltip');
+      }
 
       .title {
         display: flex;
         gap: 12px;
         align-items: center;
 
-        color: var(--Colors-Neutral-Text-title, #efefef);
+        @include theme {
+          color: theme-get('colors-neutral-text-body-on-row');
+        }
         font-size: 18px;
         font-weight: 500;
         line-height: 150%; /* 27px */
@@ -159,6 +193,12 @@
           width: 20px;
           height: 20px;
           vertical-align: middle;
+
+          path {
+            @include theme {
+              stroke: theme-get('primary-surface-default-dark-3');
+            }
+          }
         }
       }
 
@@ -166,11 +206,27 @@
         width: 100%;
 
         h4 {
-          color: var(--Colors-Neutral-Text-body, #979995);
           font-size: 14px;
           font-weight: 400;
           line-height: 150%; /* 21px */
           margin-bottom: 24px;
+
+          display: flex;
+          align-items: center;
+
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+
+          svg {
+            margin-left: 2px;
+
+            path {
+              @include theme {
+                fill: theme-get('neutral-9');
+              }
+            }
+          }
         }
 
         .itemRow {
@@ -181,27 +237,43 @@
           gap: 12px;
           width: 100%;
 
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+
           .usd {
             flex: 1;
-            color: var(--Colors-Neutral-Text-title, #efefef);
+            @include theme {
+              color: theme-get('colors-neutral-text-body-on-row');
+            }
             font-size: 18px;
             font-weight: 500;
             line-height: 150%; /* 27px */
 
-            &.highlight {
+            &.green {
               color: #0ecb81;
             }
-          }
 
-          img {
-            width: 20px;
-            height: 20px;
+            &.red {
+              color: #ff4d52;
+            }
           }
 
           .token {
             display: flex;
             align-items: center;
             gap: 6px;
+
+            img {
+              width: 20px;
+              height: 20px;
+            }
+
+            &.light {
+              img {
+                filter: invert(1);
+              }
+            }
           }
         }
       }
@@ -209,7 +281,10 @@
       .divider {
         margin: 24px 0;
         width: 100%;
-        border-bottom: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
+
+        @include theme {
+          border-bottom: 1px solid theme-get('neutral-border-border-default');
+        }
       }
 
       .btnGroup {

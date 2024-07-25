@@ -18,7 +18,7 @@ import styles from './index.module.scss';
 const PoolList = () => {
   const theme = useTheme();
   const [search, setSearch] = useState<string>();
-  const [list, setList] = useState<any[]>([...Array(9)]);
+  const [list, setList] = useState<any[]>([...Array(10)]);
   const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
 
   return (
@@ -47,7 +47,7 @@ const PoolList = () => {
         </div>
       </div>
       <div className={styles.list}>
-        {[list]?.length > 0 ? (
+        {list?.length > 0 ? (
           <div className={styles.tableWrapper}>
             <table>
               <thead>
@@ -90,7 +90,7 @@ const PoolItemTData = ({ item, theme }) => {
     <>
       <td>
         <div className={styles.name} onClick={() => navigate(`/pools-v3/${item?.id}`)}>
-          <div className={styles.icons}>
+          <div className={classNames(styles.icons, styles[theme])}>
             <img src={OraixIcon} alt="base-tk" />
             <img src={UsdtIcon} alt="quote-tk" />
           </div>

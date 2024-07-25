@@ -29,10 +29,10 @@ const PositionItem = ({ item }) => {
   });
 
   return (
-    <div className={styles.positionItem}>
-      <div ref={ref} className={styles.trigger} onClick={() => setCollapse(!openCollapse)}>
+    <div ref={ref} className={styles.positionItem}>
+      <div className={styles.trigger} onClick={() => setCollapse(!openCollapse)}>
         <div className={styles.name}>
-          <div className={styles.icons}>
+          <div className={classNames(styles.icons, styles[theme])}>
             <img src={OraixIcon} alt="base-tk" />
             <img src={UsdtIcon} alt="quote-tk" />
           </div>
@@ -99,12 +99,14 @@ const PositionItem = ({ item }) => {
           <div className={styles.row}>
             <h4>Current Assets</h4>
             <div className={styles.itemRow}>
-              <span className={classNames(styles.usd, styles.highlight)}>{formatDisplayUsdt(8612.12)}</span>
-              <span className={styles.token}>
+              <span className={classNames(styles.usd, { [styles.green]: true, [styles.red]: false })}>
+                {formatDisplayUsdt(8612.12)}
+              </span>
+              <span className={classNames(styles.token, styles[theme])}>
                 <img src={OraixIcon} alt="tokenIcon" />
                 {numberWithCommas(8612.12)} ORAIX
               </span>
-              <span className={styles.token}>
+              <span className={classNames(styles.token, styles[theme])}>
                 <img src={UsdtIcon} alt="tokenIcon" />
                 {numberWithCommas(82.12)} USDT
               </span>
@@ -128,11 +130,11 @@ const PositionItem = ({ item }) => {
               </h4>
               <div className={styles.itemRow}>
                 <span className={styles.usd}>{formatDisplayUsdt(8612.12)}</span>
-                <span className={styles.token}>
+                <span className={classNames(styles.token, styles[theme])}>
                   <img src={OraixIcon} alt="tokenIcon" />
                   {numberWithCommas(8612.12)} ORAIX
                 </span>
-                <span className={styles.token}>
+                <span className={classNames(styles.token, styles[theme])}>
                   <img src={UsdtIcon} alt="tokenIcon" />
                   {numberWithCommas(82.12)} USDT
                 </span>
@@ -162,11 +164,11 @@ const PositionItem = ({ item }) => {
             <h4>Total Reward Earned</h4>
             <div className={styles.itemRow}>
               <span className={styles.usd}>{formatDisplayUsdt(8612.12)}</span>
-              <span className={styles.token}>
+              <span className={classNames(styles.token, styles[theme])}>
                 <img src={OraixIcon} alt="tokenIcon" />
                 {numberWithCommas(8612.12)} ORAIX
               </span>
-              <span className={styles.token}>
+              <span className={classNames(styles.token, styles[theme])}>
                 <img src={UsdtIcon} alt="tokenIcon" />
                 {numberWithCommas(82.12)} USDT
               </span>
@@ -176,11 +178,11 @@ const PositionItem = ({ item }) => {
               <h4>Unclaimed Rewards</h4>
               <div className={styles.itemRow}>
                 <span className={styles.usd}>{formatDisplayUsdt(8612.12)}</span>
-                <span className={styles.token}>
+                <span className={classNames(styles.token, styles[theme])}>
                   <img src={OraixIcon} alt="tokenIcon" />
                   {numberWithCommas(8612.12)} ORAIX
                 </span>
-                <span className={styles.token}>
+                <span className={classNames(styles.token, styles[theme])}>
                   <img src={UsdtIcon} alt="tokenIcon" />
                   {numberWithCommas(82.12)} USDT
                 </span>

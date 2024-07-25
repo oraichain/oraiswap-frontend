@@ -54,6 +54,12 @@
               margin-left: -10px;
             }
           }
+
+          &.light {
+            img {
+              filter: invert(1);
+            }
+          }
         }
       }
 
@@ -106,8 +112,11 @@
       flex: 1 0 0;
 
       border-radius: 16px;
-      border: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
-      background: var(--Colors-Neutral-Surface-bg-swap, #1b1d19);
+
+      @include theme {
+        border: 1px solid theme-get('neutral-border-border-default');
+        background: theme-get('neutral-surface-bg-swap');
+      }
     }
 
     .infos {
@@ -123,7 +132,9 @@
           align-self: stretch;
 
           p {
-            color: var(--Colors-Neutral-Text-body, #979995);
+            @include theme {
+              color: theme-get('neutral-9');
+            }
             font-size: 14px;
             font-weight: 400;
             line-height: 150%; /* 21px */
@@ -131,7 +142,9 @@
           }
 
           h1 {
-            color: var(--Colors-Neutral-Text-title, #efefef);
+            @include theme {
+              color: theme-get('colors-neutral-text-body-on-row');
+            }
             font-size: 18px;
             font-weight: 500;
             line-height: 150%; /* 27px */
@@ -155,7 +168,9 @@
 
       .alloc {
         p {
-          color: var(--Colors-Neutral-Text-body, #979995);
+          @include theme {
+            color: theme-get('neutral-9');
+          }
           font-size: 14px;
           font-weight: 400;
           line-height: 150%; /* 21px */
@@ -171,7 +186,9 @@
 
           .base {
             height: 6px;
-            background: var(--Colors-Neutral-Text-title, #efefef);
+            @include theme {
+              background: theme-get('colors-neutral-text-body-on-row');
+            }
             border-radius: 4px 0 0 4px;
           }
 
@@ -195,7 +212,9 @@
             align-items: center;
             gap: 8px;
 
-            color: var(--Colors-Neutral-Text-title, #efefef);
+            @include theme {
+              color: theme-get('colors-neutral-text-body-on-row');
+            }
             font-size: 16px;
             font-weight: 500;
             line-height: 150%; /* 24px */
@@ -206,11 +225,19 @@
             }
 
             .value {
-              color: var(--Colors-Neutral-Text-body, #979995);
+              @include theme {
+                color: theme-get('neutral-9');
+              }
               font-size: 14px;
               font-weight: 400;
               line-height: 150%; /* 21px */
               letter-spacing: 0.1px;
+            }
+
+            &.light {
+              img {
+                filter: invert(1);
+              }
             }
           }
         }
@@ -219,17 +246,24 @@
 
     .reward {
       border-radius: 16px;
-      border: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
-      background: var(--Colors-Neutral-Surface-bg-swap, #1b1d19);
+
+      @include theme {
+        border: 1px solid theme-get('neutral-border-border-default');
+        background: theme-get('neutral-surface-bg-swap');
+      }
 
       .title {
         padding: 24px;
-        color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+        @include theme {
+          color: theme-get('colors-neutral-text-text-token-name');
+        }
         font-size: 18px;
         font-weight: 600;
         line-height: 150%; /* 27px */
 
-        border-bottom: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
+        @include theme {
+          border-bottom: 1px solid theme-get('neutral-border-border-default');
+        }
       }
 
       .desc {
@@ -248,7 +282,9 @@
           align-self: stretch;
           gap: 8px;
 
-          color: var(--Colors-Neutral-Text-body, #979995);
+          @include theme {
+            color: theme-get('neutral-9');
+          }
           font-size: 14px;
           font-weight: 400;
           line-height: 150%; /* 21px */
@@ -261,13 +297,18 @@
           }
 
           p {
-            color: var(--Colors-Neutral-Text-title, #efefef);
+            @include theme {
+              color: theme-get('colors-neutral-text-body-on-row');
+            }
+
             font-size: 14px;
             font-weight: 500;
             line-height: 150%; /* 21px */
 
             &.total {
-              color: var(--Colors-Primary-Text-text-highlight, #aee67f);
+              @include theme {
+                color: theme-get('primary-surface-default-dark-3');
+              }
             }
           }
         }
@@ -279,7 +320,9 @@
     width: 100%;
 
     h1 {
-      color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+      @include theme {
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
       font-size: 18px;
       font-weight: 600;
       line-height: 150%; /* 27px */

@@ -28,7 +28,7 @@ const PoolV3Detail = () => {
             <BackIcon />
           </div>
           <div className={styles.info}>
-            <div className={styles.icons}>
+            <div className={classNames(styles.icons, styles[theme])}>
               <img src={OraixIcon} alt="base-tk" />
               <img src={UsdtIcon} alt="quote-tk" />
             </div>
@@ -83,12 +83,12 @@ const PoolV3Detail = () => {
               <div className={styles.quote} style={{ width: '40%' }}></div>
             </div>
             <div className={styles.tokens}>
-              <div className={styles.tokenItem}>
+              <div className={classNames(styles.tokenItem, styles[theme])}>
                 <img src={OraixIcon} alt="base-tk" />
                 <span>{'ORAIX'}</span>
                 <span className={styles.value}>{formatNumberKMB(1223242342, false)}</span>
               </div>
-              <div className={styles.tokenItem}>
+              <div className={classNames(styles.tokenItem, styles[theme])}>
                 <img src={UsdtIcon} alt="quote-tk" />
                 <span>{'USDT'}</span>
                 <span className={styles.value}>{formatNumberKMB(89034232324, false)}</span>
