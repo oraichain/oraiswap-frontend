@@ -39,6 +39,7 @@ const App = () => {
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const mobileMode = isMobile();
+  const { tron, evm } = walletByNetworks;
   const ethOwallet = window.eth_owallet;
 
   const dispatch = useDispatch();
@@ -47,15 +48,15 @@ const App = () => {
 
   // TODO: polyfill evm, tron, need refactor
   useEffect(() => {
-    if (walletByNetworks.tron === 'owallet') {
-      window.tronWebDapp = window.tronWeb_owallet;
-      window.tronLinkDapp = window.tronLink_owallet;
+    if (tron) {
+      window.tronWebDapp = tron === 'owallet' ? window.tronWeb_owallet : window.tronWeb;
+      window.tronLinkDapp = tron === 'owallet' ? window.tronLink_owallet : window.tronLink;
       window.Metamask = new Metamask(window.tronWebDapp);
     }
-    if (walletByNetworks.evm === 'owallet' && ethOwallet) {
+    if (evm === 'owallet' && ethOwallet) {
       window.ethereumDapp = ethOwallet;
     }
-  }, [walletByNetworks, ethOwallet]);
+  }, [walletByNetworks, window.tronWeb, window.tronLink, ethOwallet]);
 
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
