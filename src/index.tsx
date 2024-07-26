@@ -19,6 +19,7 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
+import loadWasm from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
 
 const queryClient = new QueryClient();
 
@@ -87,4 +88,6 @@ const initApp = async () => {
   }
 };
 
-initApp();
+loadWasm().then(() => {
+  initApp();
+});

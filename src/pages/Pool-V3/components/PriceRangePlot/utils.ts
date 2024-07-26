@@ -11,6 +11,50 @@ import {
 export const PRICE_SCALE = 24;
 export const CONCENTRATION_FACTOR = 1.00001526069123;
 
+export const getTickAtSqrtPriceDelta = (
+  tickSpacing: number,
+  minimumRange: number,
+  concentration: number
+) => {
+  const base = Math.pow(1.0001, -(tickSpacing / 4));
+  const logArg =
+    (1 - 1 / (concentration * CONCENTRATION_FACTOR)) /
+    Math.pow(1.0001, (-tickSpacing * minimumRange) / 4);
+
+  return Math.ceil(Math.log(logArg) / Math.log(base) / 2);
+};
+
+export const calculateConcentrationRange = (
+  tickSpacing: number,
+  concentration: number,
+  minimumRange: number,
+  currentTick: number,
+  isXToY: boolean
+) => {
+  const tickDelta = getTickAtSqrtPriceDelta(tickSpacing, minimumRange, concentration);
+  const lowerTick = currentTick - (minimumRange / 2 + tickDelta) * tickSpacing;
+  const upperTick = currentTick + (minimumRange / 2 + tickDelta) * tickSpacing;
+
+  return {
+    leftRange: isXToY ? lowerTick : upperTick,
+    rightRange: isXToY ? upperTick : lowerTick
+  };
+};
+
+export const toMaxNumericPlaces = (num: number, places: number): string => {
+  const log = Math.floor(Math.log10(num));
+
+  if (log >= places) {
+    return num.toFixed(0);
+  }
+
+  if (log >= 0) {
+    return num.toFixed(places - log - 1);
+  }
+
+  return num.toFixed(places + Math.abs(log) - 1);
+};
+
 export const getPrimaryUnitsPrice = (price: number, isXtoY: boolean, xDecimal: number, yDecimal: number) => {
   const xToYPrice = isXtoY ? price : 1 / price;
 
