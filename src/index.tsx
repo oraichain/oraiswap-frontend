@@ -19,6 +19,7 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
+import * as fs from 'fs';
 
 const queryClient = new QueryClient();
 
@@ -86,5 +87,40 @@ const initApp = async () => {
     if (cosmWasmClient?.client) window.client = cosmWasmClient.client;
   }
 };
+
+export interface WasmInfo {
+  imports: {
+    from: string;
+    names: string[];
+  }[];
+  exports: string[];
+}
+
+export async function parseWasm(wasmFilePath: string): Promise<WasmInfo> {
+  try {
+    const wasmBinary = await fetch(wasmFilePath)
+      .then((res) => res.arrayBuffer())
+      .then((buf) => buf);
+
+    console.log('wasmBinary', wasmBinary);
+    // const wasmBinary = await fs.promises.readFile(wasmFilePath);
+    const wasmModule = await WebAssembly.compile(wasmBinary);
+    const imports = Object.entries(
+      WebAssembly.Module.imports(wasmModule).reduce(
+        (result, item) => ({
+          ...result,
+          [item.module]: [...(result[item.module] || []), item.name]
+        }),
+        {} as Record<string, string[]>
+      )
+    ).map(([from, names]) => ({ from, names }));
+
+    const exports = WebAssembly.Module.exports(wasmModule).map((item) => item.name);
+
+    return { imports, exports };
+  } catch (e) {
+    throw new Error(`Failed to parse WASM file: ${e.message}`);
+  }
+}
 
 initApp();

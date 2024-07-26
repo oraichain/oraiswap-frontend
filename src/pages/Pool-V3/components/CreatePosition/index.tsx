@@ -11,7 +11,9 @@ import { useEffect, useState } from 'react';
 import { calcPrice, calcTicksAmountInRange, spacingMultiplicityGte } from '../PriceRangePlot/utils';
 import { TokenItemType, truncDecimals } from '@oraichain/oraidex-common';
 import TokenForm from '../TokenForm';
-import { getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm'
+import { getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+import NewPositionNoPool from '../NewPositionNoPool';
+import SlippageSetting from '../SettingSlippage';
 
 const args = {
   currentPrice: 10000,
@@ -53,6 +55,12 @@ const args = {
   hasTicksError: false
 };
 
+export type PriceInfo = {
+  startPrice: number;
+  minPrice?: number;
+  maxPrice?: number;
+};
+
 const CreatePosition = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -61,6 +69,11 @@ const CreatePosition = () => {
   const [fee, setFee] = useState<number>(0.01);
   const [toAmount, setToAmount] = useState();
   const [fromAmount, setFromAmount] = useState();
+  const [priceInfo, setPriceInfo] = useState<PriceInfo>({
+    startPrice: 1
+  });
+  const [isOpen, setIsOpen] = useState(false);
+  const [slippage, setSlippage] = useState(1);
 
   const [plotMin, setPlotMin] = useState(0);
   const [plotMax, setPlotMax] = useState(1);
@@ -90,20 +103,20 @@ const CreatePosition = () => {
   };
 
   useEffect(() => {
-    const initSideDist = Math.abs(
-      leftRange.x -
-        calcPrice(
-          Math.max(
-            spacingMultiplicityGte(Number(getMinTick(Number(args.tickSpacing))), Number(args.tickSpacing)),
-            Number(leftRange.index) - Number(args.tickSpacing) * 15
-          ),
-          args.xToY,
-          tokenX.decimal,
-          tokenY.decimal
-        )
-    );
-    setPlotMin(leftRange.x - initSideDist);
-    setPlotMax(rightRange.x + initSideDist);
+    // const initSideDist = Math.abs(
+    //   leftRange.x -
+    //     calcPrice(
+    //       Math.max(
+    //         spacingMultiplicityGte(Number(getMinTick(Number(args.tickSpacing))), Number(args.tickSpacing)),
+    //         Number(leftRange.index) - Number(args.tickSpacing) * 15
+    //       ),
+    //       args.xToY,
+    //       tokenX.decimal,
+    //       tokenY.decimal
+    //     )
+    // );
+    // setPlotMin(leftRange.x - initSideDist);
+    // setPlotMax(rightRange.x + initSideDist);
   }, [args.ticksLoading, leftRange, rightRange]);
 
   const zoomMinus = () => {
@@ -143,7 +156,8 @@ const CreatePosition = () => {
           </div>
           <h1>Add new liquidity position</h1>
           <div className={styles.setting}>
-            <SettingIcon />
+            <SettingIcon onClick={() => setIsOpen(true)} />
+            <SlippageSetting isOpen={isOpen} setIsOpen={setIsOpen} setSlippage={setSlippage} slippage={slippage} />
           </div>
         </div>
         <div className={styles.content}>
@@ -162,93 +176,108 @@ const CreatePosition = () => {
             />
           </div>
           <div className={styles.item}>
-            <div className={styles.wrapper}>
-              <div className={styles.itemTitleWrapper}>
-                <p className={styles.itemTitle}>Price Range</p>
-                <p className={styles.liquidityActive}>
-                  Active Liquidity <span className={styles.activeLiquidityIcon}>i</span>
-                </p>
+            {!(tokenFrom && tokenTo) ? (
+              <div className={styles.noToken}>
+                <span>Select tokens to set price range.</span>
               </div>
-              <div className={styles.itemSwitcherWrapper}>
-                <div className={styles.switcherContainer}>
-                  <div className={styles.singleTabClasses}>
-                    <div className={styles.continuous}>
-                      <Continuous />
-                    </div>
-                  </div>
-                  <div className={styles.singleTabClasses}>
-                    <div className={styles.discrete}>
-                      <Discrete />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.itemChartAndPriceWrapper}>
-              <div>
-                Chart
-                {/* <PriceRangePlot
-                data={args.data}
-                plotMin={args.min}
-                plotMax={args.max}
-                zoomMinus={zoomMinus}
-                zoomPlus={zoomPlus}
-                disabled
-                leftRange={leftRange}
-                rightRange={rightRange}
-                midPrice={midPrice}
-                className={styles.plot}
-                loading={args.ticksLoading}
-                isXtoY={args.xToY}
-                tickSpacing={args.tickSpacing}
-                xDecimal={tokenX.decimal}
-                yDecimal={tokenY.decimal}
-                isDiscrete={isPlotDiscrete}
-                coverOnLoading
-                hasError={args.hasTicksError}
-                reloadHandler={args.reloadHandler}
-              /> */}
-              </div>
-
-              <div className={styles.currentPriceWrapper}>
-                <div className={styles.currentPriceTitle}>
-                  <p>Current Price</p>
-                </div>
-                <div className={styles.currentPriceValue}>
-                  <p>
-                    <p>0.081242</p>
-                    <p className={styles.pair}>ORAI / USDT</p>
-                  </p>
-                </div>
-              </div>
-
-              <div className={styles.minMaxPriceWrapper}>
-                <div className={styles.minMaxPrice}>
-                  <div className={styles.minMaxPriceTitle}>
-                    <p>Min Price</p>
-                  </div>
-                  <div className={styles.minMaxPriceValue}>
-                    <p>
-                      <p>0.081242</p>
-                      <p className={styles.pair}>ORAI / USDT</p>
+            ) : true ? (
+              <NewPositionNoPool
+                fromToken={tokenFrom}
+                toToken={tokenTo}
+                priceInfo={priceInfo}
+                setPriceInfo={setPriceInfo}
+              />
+            ) : (
+              <div className={styles.priceSectionExisted}>
+                <div className={styles.wrapper}>
+                  <div className={styles.itemTitleWrapper}>
+                    <p className={styles.itemTitle}>Price Range</p>
+                    <p className={styles.liquidityActive}>
+                      Active Liquidity <span className={styles.activeLiquidityIcon}>i</span>
                     </p>
                   </div>
+                  <div className={styles.itemSwitcherWrapper}>
+                    <div className={styles.switcherContainer}>
+                      <div className={styles.singleTabClasses}>
+                        <div className={styles.continuous}>
+                          <Continuous />
+                        </div>
+                      </div>
+                      <div className={styles.singleTabClasses}>
+                        <div className={styles.discrete}>
+                          <Discrete />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className={styles.minMaxPrice}>
-                  <div className={styles.minMaxPriceTitle}>
-                    <p>Max Price</p>
+                <div className={styles.itemChartAndPriceWrapper}>
+                  <div>
+                    Chart
+                    {/* <PriceRangePlot
+                      data={args.data}
+                      plotMin={args.min}
+                      plotMax={args.max}
+                      zoomMinus={zoomMinus}
+                      zoomPlus={zoomPlus}
+                      disabled
+                      leftRange={leftRange}
+                      rightRange={rightRange}
+                      midPrice={midPrice}
+                      className={styles.plot}
+                      loading={args.ticksLoading}
+                      isXtoY={args.xToY}
+                      tickSpacing={args.tickSpacing}
+                      xDecimal={tokenX.decimal}
+                      yDecimal={tokenY.decimal}
+                      isDiscrete={isPlotDiscrete}
+                      coverOnLoading
+                      hasError={args.hasTicksError}
+                      reloadHandler={args.reloadHandler}
+                    /> */}
                   </div>
-                  <div className={styles.minMaxPriceValue}>
-                    <p>
-                      <p>0.081242</p>
-                      <p className={styles.pair}>ORAI / USDT</p>
-                    </p>
+
+                  <div className={styles.currentPriceWrapper}>
+                    <div className={styles.currentPriceTitle}>
+                      <p>Current Price</p>
+                    </div>
+                    <div className={styles.currentPriceValue}>
+                      <p>
+                        <p>0.081242</p>
+                        <p className={styles.pair}>ORAI / USDT</p>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.minMaxPriceWrapper}>
+                    <div className={styles.minMaxPrice}>
+                      <div className={styles.minMaxPriceTitle}>
+                        <p>Min Price</p>
+                      </div>
+                      <div className={styles.minMaxPriceValue}>
+                        <p>
+                          <p>0.081242</p>
+                          <p className={styles.pair}>ORAI / USDT</p>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className={styles.minMaxPrice}>
+                      <div className={styles.minMaxPriceTitle}>
+                        <p>Max Price</p>
+                      </div>
+                      <div className={styles.minMaxPriceValue}>
+                        <p>
+                          <p>0.081242</p>
+                          <p className={styles.pair}>ORAI / USDT</p>
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

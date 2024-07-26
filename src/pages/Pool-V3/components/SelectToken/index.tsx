@@ -17,7 +17,15 @@ import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './index.module.scss';
 
-const SelectToken = ({ token, handleChangeToken }: { token: TokenItemType; handleChangeToken: (token) => void }) => {
+const SelectToken = ({
+  token,
+  handleChangeToken,
+  otherTokenDenom
+}: {
+  token: TokenItemType;
+  handleChangeToken: (token) => void;
+  otherTokenDenom?: string;
+}) => {
   const theme = useTheme();
   const [textSearch, setTextSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -25,8 +33,10 @@ const SelectToken = ({ token, handleChangeToken }: { token: TokenItemType; handl
   const { data: prices } = useCoinGeckoPrices();
   const isLightTheme = theme === 'light';
 
-  const listItems = oraichainTokensWithIcon.filter((item) =>
-    textSearch ? item.name.toLowerCase().includes(textSearch.toLowerCase()) : true
+  const listItems = oraichainTokensWithIcon.filter(
+    (item) =>
+      (otherTokenDenom ? item.denom !== otherTokenDenom : true) &&
+      (textSearch ? item.name.toLowerCase().includes(textSearch.toLowerCase()) : true)
   );
 
   const TokenIcon =
@@ -145,7 +155,7 @@ const SelectToken = ({ token, handleChangeToken }: { token: TokenItemType; handl
                       <div>
                         <div className={styles.selectTokenItemLeftImg}>
                           {tokenIcon}
-                          <div className={styles.selectTokenItemLeftImgChain}>{networkIcon}</div>
+                          {/* <div className={styles.selectTokenItemLeftImgChain}>{networkIcon}</div> */}
                         </div>
                       </div>
                       <div>

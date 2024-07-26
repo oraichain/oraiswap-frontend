@@ -79,11 +79,11 @@ const TokenForm = ({
       <div className={styles.select}>
         <h1>Tokens</h1>
         <div className={styles.selectContent}>
-          <SelectToken token={tokenFrom} handleChangeToken={handleChangeTokenFrom} />
+          <SelectToken token={tokenFrom} handleChangeToken={handleChangeTokenFrom} otherTokenDenom={tokenTo?.denom} />
           <div className={styles.switch} onClick={() => handleSwitch()}>
             <SwitchIcon />
           </div>
-          <SelectToken token={tokenTo} handleChangeToken={handleChangeTokenTo} />
+          <SelectToken token={tokenTo} handleChangeToken={handleChangeTokenTo} otherTokenDenom={tokenFrom?.denom} />
         </div>
         <div className={styles.fee}>
           {[0.01, 0.05, 0.3, 1].map((e, index) => {
