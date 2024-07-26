@@ -51,6 +51,7 @@ import {
   getTokenBalance,
   getTokenInfo,
   isAllowAlphaSmartRouter,
+  isAllowIBCWasm,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
 import React, { useRef, useState } from 'react';
@@ -174,6 +175,7 @@ const SwapComponent: React.FC<{
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
   const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
+  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
 
   const settingRef = useRef();
   const smartRouteRef = useRef();
@@ -278,7 +280,7 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = useAlphaSmartRouter && simulateData?.routes;
+      const alphaSmartRoutes = (useAlphaSmartRouter || useIbcWasm) && simulateData?.routes;
 
       let initSwapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -307,7 +309,9 @@ const SwapComponent: React.FC<{
         cosmosWallet: window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
-          isAlphaSmartRouter: useAlphaSmartRouter
+          isAlphaSmartRouter: useAlphaSmartRouter,
+          ibcInfoTestMode: true,
+          isSourceReceiverTest: true
         }
       });
 

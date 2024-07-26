@@ -372,6 +372,11 @@ export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
   return false;
 };
 
+export const isAllowIBCWasm = (fromToken, toToken) => {
+  if (!fromToken.cosmosBased && toToken.cosmosBased) return true;
+  return false;
+};
+
 export const getAverageRatio = (simulateData, averageSimulateData, fromAmountToken, originalFromToken) => {
   let averageRatio = undefined;
   if (simulateData && fromAmountToken) {
