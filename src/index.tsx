@@ -19,7 +19,7 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
-import * as fs from 'fs';
+import loadWasm from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
 
 const queryClient = new QueryClient();
 
@@ -123,4 +123,6 @@ export async function parseWasm(wasmFilePath: string): Promise<WasmInfo> {
   }
 }
 
-initApp();
+loadWasm().then(() => {
+  initApp();
+});
