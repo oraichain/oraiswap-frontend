@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { calcPrice, calcTicksAmountInRange, spacingMultiplicityGte } from '../PriceRangePlot/utils';
 import { TokenItemType, truncDecimals } from '@oraichain/oraidex-common';
 import TokenForm from '../TokenForm';
-// import { getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm.js';
+import { getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm'
 
 const args = {
   currentPrice: 10000,
@@ -90,20 +90,20 @@ const CreatePosition = () => {
   };
 
   useEffect(() => {
-    // const initSideDist = Math.abs(
-    //   leftRange.x -
-    //     calcPrice(
-    //       Math.max(
-    //         spacingMultiplicityGte(Number(getMinTick(Number(args.tickSpacing))), Number(args.tickSpacing)),
-    //         Number(leftRange.index) - Number(args.tickSpacing) * 15
-    //       ),
-    //       args.xToY,
-    //       tokenX.decimal,
-    //       tokenY.decimal
-    //     )
-    // );
-    // setPlotMin(leftRange.x - initSideDist);
-    // setPlotMax(rightRange.x + initSideDist);
+    const initSideDist = Math.abs(
+      leftRange.x -
+        calcPrice(
+          Math.max(
+            spacingMultiplicityGte(Number(getMinTick(Number(args.tickSpacing))), Number(args.tickSpacing)),
+            Number(leftRange.index) - Number(args.tickSpacing) * 15
+          ),
+          args.xToY,
+          tokenX.decimal,
+          tokenY.decimal
+        )
+    );
+    setPlotMin(leftRange.x - initSideDist);
+    setPlotMax(rightRange.x + initSideDist);
   }, [args.ticksLoading, leftRange, rightRange]);
 
   const zoomMinus = () => {

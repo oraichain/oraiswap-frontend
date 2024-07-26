@@ -13,12 +13,14 @@
   "files": [
     "oraiswap_v3_wasm_bg.wasm",
     "oraiswap_v3_wasm.js",
+    "oraiswap_v3_wasm_bg.js",
     "oraiswap_v3_wasm.d.ts"
   ],
   "main": "oraiswap_v3_wasm.js",
   "homepage": "https://orai.io",
   "types": "oraiswap_v3_wasm.d.ts",
   "sideEffects": [
+    "./oraiswap_v3_wasm.js",
     "./snippets/*"
   ]
 }
