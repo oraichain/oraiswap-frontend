@@ -16,7 +16,7 @@ const SlippageSetting = ({ isOpen, setIsOpen, slippage, setSlippage }) => {
         <div className={styles.close} onClick={() => setIsOpen(false)}>
           <CloseIcon />
         </div>
-        <h1>Position Transaction Settings</h1>
+        <span className={styles.title}>Position Transaction Settings</span>
         <div className={styles.content}>
           <h2>Slippage tolerance:</h2>
           <div className={styles.input}>

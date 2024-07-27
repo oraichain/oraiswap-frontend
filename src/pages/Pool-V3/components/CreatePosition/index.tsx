@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
 import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
+import { ReactComponent as TooltipIc } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
 import styles from './index.module.scss';
@@ -21,6 +22,7 @@ import TokenForm from '../TokenForm';
 import NewPositionNoPool from '../NewPositionNoPool';
 import SlippageSetting from '../SettingSlippage';
 import { getMaxTick, getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+import { TooltipIcon } from 'components/Tooltip';
 
 let args = {
   data: [
@@ -288,9 +290,14 @@ export type PriceInfo = {
   maxPrice?: number;
 };
 
+export enum TYPE_CHART {
+  CONTINUOUS,
+  DISCRETE
+}
+
 const CreatePosition = () => {
   const navigate = useNavigate();
-  // const theme = useTheme();
+  const theme = useTheme();
   const [tokenFrom, setTokenFrom] = useState<TokenItemType>();
   const [tokenTo, setTokenTo] = useState<TokenItemType>();
   const [fee, setFee] = useState<number>(0.01);
@@ -300,7 +307,9 @@ const CreatePosition = () => {
     startPrice: 1
   });
   const [isOpen, setIsOpen] = useState(false);
+  const [openTooltip, setOpenTooltip] = useState(false);
   const [slippage, setSlippage] = useState(1);
+  const [typeChart, setTypeChart] = useState(TYPE_CHART.CONTINUOUS);
 
   const [leftRange, setLeftRange] = useState(args.leftRange.index);
   const [rightRange, setRightRange] = useState(args.rightRange.index);
@@ -637,17 +646,39 @@ const CreatePosition = () => {
         <div className={styles.itemTitleWrapper}>
           <p className={styles.itemTitle}>Price Range</p>
           <p className={styles.liquidityActive}>
-            Active Liquidity <span className={styles.activeLiquidityIcon}>i</span>
+            Active Liquidity
+            <TooltipIcon
+              className={styles.tooltipWrapper}
+              placement="top"
+              visible={openTooltip}
+              icon={<TooltipIc />}
+              setVisible={setOpenTooltip}
+              content={<div className={classNames(styles.tooltip, styles[theme])}>Active Liquidity</div>}
+            />
           </p>
         </div>
         <div className={styles.itemSwitcherWrapper}>
           <div className={styles.switcherContainer}>
-            <div className={styles.singleTabClasses}>
+            <div
+              className={classNames(
+                styles.singleTabClasses,
+                { [styles.chosen]: typeChart === TYPE_CHART.CONTINUOUS },
+                styles[theme]
+              )}
+              onClick={() => setTypeChart(TYPE_CHART.CONTINUOUS)}
+            >
               <div className={styles.continuous}>
                 <Continuous />
               </div>
-            </div>
-            <div className={styles.singleTabClasses}>
+            </div>{' '}
+            <div
+              className={classNames(
+                styles.singleTabClasses,
+                { [styles.chosen]: typeChart === TYPE_CHART.DISCRETE },
+                styles[theme]
+              )}
+              onClick={() => setTypeChart(TYPE_CHART.DISCRETE)}
+            >
               <div className={styles.discrete}>
                 <Discrete />
               </div>

@@ -13,15 +13,16 @@
 .box {
   width: 100%;
   display: flex;
-  //   max-width: 926px;
   padding: 24px;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
 
   border-radius: var(--Dimension-Corner-Radius-modal, 12px);
-  border: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
-  background: var(--Colors-Neutral-Surface-bg-swap, #1b1d19);
+  @include theme {
+    border: 1px solid theme-get('neutral-border-border-default');
+    background: theme-get('neutral-surface-bg-swap');
+  }
 
   /* Shadow/1 */
   box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
@@ -33,10 +34,14 @@
     justify-content: space-between;
     align-items: center;
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--Colors-Neutral-Border-border-default, #232521);
+    @include theme {
+      border-bottom: 1px solid theme-get('neutral-border-border-default');
+    }
 
     h1 {
-      color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+      @include theme {
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
       font-size: 18px;
       font-weight: 600;
       line-height: 150%; /* 27px */
@@ -77,10 +82,14 @@
         width: 100%;
         height: 500px;
         opacity: 0.8;
-        background: var(--Colors-Neutral-Surface-bg-section-05, #1b1c1a);
+        border-radius: 12px;
+
+        @include theme {
+          background: theme-get('bg-section-05');
+          color: theme-get('colors-neutral-text-text-token-name');
+        }
 
         text-align: center;
-        color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
         font-size: 16px;
         font-weight: 600;
         line-height: 150%; /* 24px */
@@ -99,31 +108,28 @@
           width: 70%;
 
           .itemTitle {
-            color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+            @include theme {
+              color: theme-get('colors-neutral-text-text-token-name');
+            }
             font-weight: 600;
             font-size: 16px;
           }
 
           .liquidityActive {
-            color: #979995;
+            @include theme {
+              color: theme-get('neutral-9');
+            }
             font-size: 12px;
             font-weight: 400;
             line-height: 18px;
 
-            .activeLiquidityIcon {
-              display: inline-block;
-              height: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            svg {
               width: 14px;
-              border: 2px solid;
-              border-color: #979995;
-              color: #979995;
-              border-radius: 50%;
-              font-size: 8px;
-              line-height: 10px;
-              font-weight: bolder;
-              text-align: center;
-              box-sizing: border-box;
-              cursor: default;
+              height: 14px;
             }
           }
         }
@@ -135,19 +141,42 @@
 
           .switcherContainer {
             overflow: visible;
-            height: 33px;
-            border-radius: 14px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-evenly;
-            width: 90px;
-            align-items: end;
-            background-color: #232521;
+            align-items: center;
+            padding: 4px;
+            height: 36px;
+
+            @include theme {
+              background-color: theme-get('neutral-6');
+            }
 
             .singleTabClasses {
               z-index: 1;
               display: flex;
               justify-content: center;
               align-items: center;
+              cursor: pointer;
+              padding: 4px;
+              border-radius: 8px;
+              width: 45px;
+
+              svg {
+                vertical-align: middle;
+              }
+
+              &.light {
+                svg {
+                  filter: invert(1);
+                }
+              }
+
+              &.chosen {
+                @include theme {
+                  background: theme-get('neutral-surface-bg-swap');
+                }
+              }
 
               .continuous {
                 display: block;
@@ -180,26 +209,34 @@
           border-radius: 8px;
           padding: 12px;
           display: flex;
-          background-color: #232521;
+          @include theme {
+            background-color: theme-get('neutral-6');
+          }
           align-items: center;
           justify-content: space-between;
 
           .currentPriceTitle {
-            color: var(--Colors-Neutral-Text-text-token-name, #979995);
+            @include theme {
+              color: theme-get('colors-neutral-text-text-token-name');
+            }
             font-size: 13px;
             font-weight: 400;
             line-height: 18px;
           }
 
           .currentPriceValue {
-            color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+            @include theme {
+              color: theme-get('colors-neutral-text-text-token-name');
+            }
             text-align: end;
             font-size: 18px;
             font-weight: 600;
             line-height: 30px;
 
             .pair {
-              color: var(--Colors-Neutral-Text-text-token-name, #979995);
+              @include theme {
+                color: theme-get('neutral-9');
+              }
               font-size: 12px;
               font-weight: 400;
               line-height: 18px;
@@ -220,12 +257,17 @@
             gap: 12px;
             align-items: center;
             justify-content: space-between;
-            background-color: #232521;
+
+            @include theme {
+              background-color: theme-get('neutral-6');
+            }
             width: 100%;
             padding: 12px;
 
             .minMaxPriceTitle {
-              color: var(--Colors-Neutral-Text-text-token-name, #979995);
+              @include theme {
+                color: theme-get('neutral-9');
+              }
               font-size: 13px;
               text-align: end;
               font-weight: 400;
@@ -233,14 +275,18 @@
             }
 
             .minMaxPriceValue {
-              color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+              @include theme {
+                color: theme-get('colors-neutral-text-text-token-name');
+              }
               font-size: 18px;
               text-align: end;
               font-weight: 600;
               line-height: 30px;
 
               .pair {
-                color: var(--Colors-Neutral-Text-text-token-name, #979995);
+                @include theme {
+                  color: theme-get('neutral-9');
+                }
                 font-size: 12px;
                 font-weight: 400;
                 line-height: 18px;
@@ -255,4 +301,81 @@
       flex-direction: column;
     }
   }
+}
+
+.tooltip {
+  color: var(--Colors-Neutral-Text-body, #979995);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+
+  display: flex;
+  width: 200px;
+  padding: 12px;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 8px;
+  background: var(--Colors-Trading-trade-bg-section, #232521);
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+
+  .itemInfo {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 200px;
+
+    color: var(--Colors-Neutral-Text-body, #979995);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%; /* 21px */
+
+    .value {
+      color: var(--Colors-Neutral-Icon-icon-negative-btn, #fff);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 150%; /* 18px */
+    }
+
+    .totalApr {
+      color: var(--Colors-Primary-Text-text-highlight, #aee67f);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 150%; /* 18px */
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &.light {
+    border-color: #f0f1ee;
+    background: #fff;
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+
+    .itemInfo {
+      color: var(--Colors-Neutral-Text-body, #979995);
+
+      .value {
+        color: #232521;
+      }
+
+      .totalApr {
+        color: #2f5711;
+      }
+    }
+  }
+
+  @include mobile {
+    font-size: 12px;
+    padding: 8px;
+    width: calc(100% - 20px);
+  }
+}
+
+.tooltipWrapper {
 }

@@ -1,18 +1,18 @@
-import { CustomLayerProps } from '@nivo/line'
-import React, { useState, useEffect, useRef, PointerEventHandler, TouchEventHandler } from 'react'
-import { MaxHandle, MinHandle } from './svgHandles'
-import styles from './index.module.scss'
+import { CustomLayerProps } from '@nivo/line';
+import React, { useState, useEffect, useRef, PointerEventHandler, TouchEventHandler } from 'react';
+import { MaxHandle, MinHandle } from './svgHandles';
+import styles from './index.module.scss';
 
 export interface HandleProps {
-  plotWidth: number
-  height: number
-  position: number
-  minPosition: number
-  maxPosition: number
-  onDrop: (position: number) => void
-  isStart?: boolean
-  onStart: () => void
-  disabled?: boolean
+  plotWidth: number;
+  height: number;
+  position: number;
+  minPosition: number;
+  maxPosition: number;
+  onDrop: (position: number) => void;
+  isStart?: boolean;
+  onStart: () => void;
+  disabled?: boolean;
 }
 
 export const Handle: React.FC<HandleProps> = ({
@@ -26,82 +26,82 @@ export const Handle: React.FC<HandleProps> = ({
   onStart,
   disabled = false
 }) => {
-  const [drag, setDrag] = useState(false)
-  const [currentPosition, setCurrentPosition] = useState(position)
-  const [offset, setOffset] = useState(0)
+  const [drag, setDrag] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState(position);
+  const [offset, setOffset] = useState(0);
 
-  const handleRef = useRef<SVGRectElement>(null)
+  const handleRef = useRef<SVGRectElement>(null);
 
   useEffect(() => {
-    setCurrentPosition(position)
-  }, [position, drag])
+    setCurrentPosition(position);
+  }, [position, drag]);
 
-  const startDrag: PointerEventHandler<SVGRectElement> = event => {
-    onStart()
-    setDrag(true)
+  const startDrag: PointerEventHandler<SVGRectElement> = (event) => {
+    onStart();
+    setDrag(true);
     if (handleRef.current) {
-      const CTM = handleRef.current.getScreenCTM()
+      const CTM = handleRef.current.getScreenCTM();
 
       if (CTM) {
-        const ctmX = (event.clientX - CTM.e) / CTM.a
-        setOffset(ctmX - currentPosition)
+        const ctmX = (event.clientX - CTM.e) / CTM.a;
+        setOffset(ctmX - currentPosition);
       }
     }
-  }
+  };
 
-  const startTouchDrag: TouchEventHandler<SVGRectElement> = event => {
-    onStart()
-    setDrag(true)
+  const startTouchDrag: TouchEventHandler<SVGRectElement> = (event) => {
+    onStart();
+    setDrag(true);
     if (handleRef.current) {
-      const CTM = handleRef.current.getScreenCTM()
+      const CTM = handleRef.current.getScreenCTM();
 
       if (CTM) {
-        const ctmX = (event.targetTouches[0].clientX - CTM.e) / CTM.a
-        setOffset(ctmX - currentPosition)
+        const ctmX = (event.targetTouches[0].clientX - CTM.e) / CTM.a;
+        setOffset(ctmX - currentPosition);
       }
     }
-  }
+  };
 
   const endDrag = () => {
     if (drag) {
-      setDrag(false)
-      onDrop(currentPosition)
+      setDrag(false);
+      onDrop(currentPosition);
     }
-  }
+  };
 
-  const dragHandler: PointerEventHandler<SVGRectElement> = event => {
+  const dragHandler: PointerEventHandler<SVGRectElement> = (event) => {
     if (drag && handleRef.current) {
-      event.preventDefault()
-      event.stopPropagation()
-      const CTM = handleRef.current.getScreenCTM()
+      event.preventDefault();
+      event.stopPropagation();
+      const CTM = handleRef.current.getScreenCTM();
 
       if (CTM) {
-        const x = (event.clientX - CTM.e) / CTM.a - offset
+        const x = (event.clientX - CTM.e) / CTM.a - offset;
 
         if (x >= minPosition && x <= maxPosition) {
-          setCurrentPosition(x)
+          setCurrentPosition(x);
         }
       }
     }
-  }
+  };
 
-  const dragTouchHandler: TouchEventHandler<SVGRectElement> = event => {
+  const dragTouchHandler: TouchEventHandler<SVGRectElement> = (event) => {
     if (drag && handleRef.current) {
-      event.preventDefault()
-      event.stopPropagation()
-      const CTM = handleRef.current.getScreenCTM()
+      event.preventDefault();
+      event.stopPropagation();
+      const CTM = handleRef.current.getScreenCTM();
 
       if (CTM) {
-        const x = (event.targetTouches[0].clientX - CTM.e) / CTM.a - offset
+        const x = (event.targetTouches[0].clientX - CTM.e) / CTM.a - offset;
 
         if (x >= minPosition && x <= maxPosition) {
-          setCurrentPosition(x)
+          setCurrentPosition(x);
         }
       }
     }
-  }
+  };
 
-  const isReversed = () => (isStart ? currentPosition < 37 : plotWidth - currentPosition < 37)
+  const isReversed = () => (isStart ? currentPosition < 37 : plotWidth - currentPosition < 37);
 
   return (
     <>
@@ -109,29 +109,23 @@ export const Handle: React.FC<HandleProps> = ({
         <MinHandle
           height={height}
           x={!isReversed() ? currentPosition - 37 : currentPosition}
-          fill={disabled ? '#494949' : '#EF84F5'}
-          textColor={disabled ? '#A9B6BF' : '#232521'}
+          fill={disabled ? '#494949' : '#7e5cc5'} // Brush Color origin EF84F5
+          textColor={disabled ? '#A9B6BF' : '#efefef'} // MIN MAX text color
           isReversed={isReversed()}
         />
       ) : (
         <MaxHandle
           height={height}
           x={!isReversed() ? currentPosition : currentPosition - 37}
-          fill={disabled ? '#494949' : '#EF84F5'}
-          textColor={disabled ? '#A9B6BF' : '#232521'}
+          fill={disabled ? '#494949' : '#7e5cc5'}
+          textColor={disabled ? '#A9B6BF' : '#efefef'}
           isReversed={isReversed()}
         />
       )}
       <rect
         className={!disabled ? styles.handle : undefined}
         ref={handleRef}
-        x={
-          drag
-            ? 0
-            : (isStart && !isReversed()) || (!isStart && isReversed())
-              ? currentPosition - 40
-              : currentPosition
-        }
+        x={drag ? 0 : (isStart && !isReversed()) || (!isStart && isReversed()) ? currentPosition - 40 : currentPosition}
         y={0}
         width={drag ? plotWidth : 42}
         height={height}
@@ -143,20 +137,20 @@ export const Handle: React.FC<HandleProps> = ({
         onTouchEnd={!disabled ? endDrag : undefined}
         onTouchMove={!disabled ? dragTouchHandler : undefined}
         onTouchCancel={!disabled ? endDrag : undefined}
-        fill='transparent'
+        fill="transparent"
       />
     </>
-  )
-}
+  );
+};
 
 export interface InnerBrushProps extends CustomLayerProps {
-  leftPosition?: number
-  rightPosition?: number
-  onLeftDrop: (position: number) => void
-  onRightDrop: (position: number) => void
-  plotMin: number
-  plotMax: number
-  disabled: boolean
+  leftPosition?: number;
+  rightPosition?: number;
+  onLeftDrop: (position: number) => void;
+  onRightDrop: (position: number) => void;
+  plotMin: number;
+  plotMax: number;
+  disabled: boolean;
 }
 
 export const InnerBrush: React.FC<InnerBrushProps> = ({
@@ -170,40 +164,36 @@ export const InnerBrush: React.FC<InnerBrushProps> = ({
   plotMax,
   disabled
 }) => {
-  const unitLen = innerWidth / (plotMax - plotMin)
-  const [reverse, setReverse] = useState(false)
+  const unitLen = innerWidth / (plotMax - plotMin);
+  const [reverse, setReverse] = useState(false);
 
   const start =
     typeof leftPosition !== 'undefined' && leftPosition >= plotMin && leftPosition <= plotMax ? (
       <Handle
-        key='start'
+        key="start"
         plotWidth={innerWidth}
         height={innerHeight}
         position={(leftPosition - plotMin) * unitLen}
         minPosition={Math.max(0, -plotMin * unitLen)}
-        maxPosition={
-          typeof rightPosition !== 'undefined'
-            ? (rightPosition - plotMin) * unitLen - 0.001
-            : innerWidth
-        }
-        onDrop={position => {
-          onLeftDrop(position / innerWidth)
+        maxPosition={typeof rightPosition !== 'undefined' ? (rightPosition - plotMin) * unitLen - 0.001 : innerWidth}
+        onDrop={(position) => {
+          onLeftDrop(position / innerWidth);
           if ((leftPosition - plotMin) * unitLen < 37) {
-            setReverse(false)
+            setReverse(false);
           }
         }}
         isStart
         onStart={() => {
-          setReverse(true)
+          setReverse(true);
         }}
         disabled={disabled}
       />
-    ) : null
+    ) : null;
 
   const end =
     typeof rightPosition !== 'undefined' && rightPosition >= plotMin && rightPosition <= plotMax ? (
       <Handle
-        key='end'
+        key="end"
         plotWidth={innerWidth}
         height={innerHeight}
         position={(rightPosition - plotMin) * unitLen}
@@ -213,18 +203,18 @@ export const InnerBrush: React.FC<InnerBrushProps> = ({
             : Math.max(0, -plotMin * unitLen)
         }
         maxPosition={innerWidth}
-        onDrop={position => {
-          onRightDrop(position / innerWidth)
+        onDrop={(position) => {
+          onRightDrop(position / innerWidth);
           if (innerWidth - (rightPosition - plotMin) * unitLen < 37) {
-            setReverse(true)
+            setReverse(true);
           }
         }}
         onStart={() => {
-          setReverse(false)
+          setReverse(false);
         }}
         disabled={disabled}
       />
-    ) : null
+    ) : null;
 
   return (
     <>
@@ -232,8 +222,8 @@ export const InnerBrush: React.FC<InnerBrushProps> = ({
 
       {reverse ? start : end}
     </>
-  )
-}
+  );
+};
 
 export const Brush =
   (
@@ -245,17 +235,18 @@ export const Brush =
     plotMax: number,
     disabled: boolean = false
   ): React.FC<CustomLayerProps> =>
-  layerProps => (
-    <InnerBrush
-      leftPosition={leftPosition}
-      rightPosition={rightPosition}
-      onLeftDrop={onLeftDrop}
-      onRightDrop={onRightDrop}
-      plotMin={plotMin}
-      plotMax={plotMax}
-      disabled={disabled}
-      {...layerProps}
-    />
-  )
+  (layerProps) =>
+    (
+      <InnerBrush
+        leftPosition={leftPosition}
+        rightPosition={rightPosition}
+        onLeftDrop={onLeftDrop}
+        onRightDrop={onRightDrop}
+        plotMin={plotMin}
+        plotMax={plotMax}
+        disabled={disabled}
+        {...layerProps}
+      />
+    );
 
-export default Brush
+export default Brush;

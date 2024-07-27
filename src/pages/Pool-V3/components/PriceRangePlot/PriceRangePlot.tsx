@@ -66,7 +66,6 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
   hasError = false,
   reloadHandler
 }) => {
-
   console.log({
     data,
     leftRange,
@@ -89,7 +88,7 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
     coverOnLoading,
     hasError,
     reloadHandler
-  })
+  });
   // const { classes } = useStyles();
 
   // const isSmDown = useMediaQuery(theme.breakpoints.down('sm'))
@@ -294,15 +293,15 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
             <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
           </filter>
         </defs>
-        <rect x={14} y={20} width="16" height={innerHeight} filter="url(#shadow-global-price)" opacity="0.3" />
-        <rect x={19} y={20} width="3" height={innerHeight} fill="#EFD063" />
+        <rect x={14} y={20} width="16" height={innerHeight} filter="url(#shadow-global-price)" opacity="0.1" />
+        <rect x={19} y={20} width="3" height={innerHeight} fill="#E6CF00" />
       </svg>
     );
   };
 
   const bottomLineLayer: Layer = ({ innerWidth, innerHeight }) => {
     const bottomLine = innerHeight;
-    return <rect x={0} y={bottomLine} width={innerWidth} height={1} fill="#494949" />;
+    return <rect x={0} y={bottomLine} width={innerWidth} height={1} fill="#979995" />;
   };
 
   const lazyLoadingLayer: Layer = ({ innerWidth, innerHeight }) => {
@@ -404,7 +403,7 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
         ]}
         curve={isDiscrete ? (isXtoY ? 'stepAfter' : 'stepBefore') : 'basis'}
         margin={{ top: true ? 55 : 25, bottom: 15 }}
-        colors={['#EF84F5', '#2EE09A', '#EF84F5']}
+        colors={['#7e5cc5', '#AEE67F', '#7e5cc5']}
         axisTop={null}
         axisRight={null}
         axisLeft={null}

@@ -50,30 +50,37 @@
   align-items: flex-start;
   gap: 24px;
   border-radius: var(--Dimension-Corner-Radius-modal, 12px);
-  background: var(--Colors-Neutral-Surface-bg, #181a17);
+
+  @include theme {
+    background: theme-get('colors-neutral-surface-bg');
+  }
 
   @include small-mobile {
     max-width: unset;
   }
 
-  h1 {
+  .title {
     width: 100%;
     text-align: center;
-    color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+
+    @include theme {
+      color: theme-get('colors-neutral-text-text-token-name');
+    }
+
     font-size: 20px;
     font-weight: 600;
     line-height: 150%; /* 30px */
   }
 
   .close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+
     svg {
       cursor: pointer;
       width: 30px;
       height: 30px;
-
-      position: absolute;
-      top: 24px;
-      right: 24px;
     }
   }
 
@@ -84,7 +91,10 @@
       font-size: 16px;
       line-height: 20px;
       font-weight: 400;
-      color: rgb(247, 247, 247);
+
+      @include theme {
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
     }
 
     .input {
@@ -100,13 +110,19 @@
         padding: 8px 12px;
 
         border-radius: 99px;
-        background-color: #232521;
-        border: 1px solid #494949;
+
+        @include theme {
+          color: theme-get('colors-neutral-text-text-token-name');
+          background-color: theme-get('neutral-6');
+          border: 1px solid theme-get('colors-neutral-border-border-bold');
+        }
       }
     }
 
     .desc {
-      color: var(--Colors-Neutral-Text-body-on-section, #979995);
+      @include theme {
+        color: theme-get('neutral-9');
+      }
       font-size: 13px;
       font-weight: 400;
       line-height: 150%; /* 19.5px */

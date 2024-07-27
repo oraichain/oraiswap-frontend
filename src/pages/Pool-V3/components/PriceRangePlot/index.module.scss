@@ -1,3 +1,6 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
 .container {
   height: 185px;
   position: relative;
@@ -46,8 +49,21 @@
       border-radius: 8px;
       background-color: transparent;
       border: 1px solid;
-      border-color: #595B57;
       padding: 8px 0;
+
+      &:hover {
+        opacity: 0.7;
+      }
+
+      @include theme {
+        border-color: theme-get('neutral-9');
+
+        svg {
+          path {
+            stroke: theme-get('neutral-9');
+          }
+        }
+      }
     }
   }
 }
