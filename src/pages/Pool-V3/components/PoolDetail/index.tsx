@@ -17,8 +17,9 @@ import PositionItem from '../PositionItem';
 const PoolV3Detail = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const [list, setList] = useState<any[]>([...Array(2)]);
-  const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
+  const isLight = theme === 'light';
+  const [dataPosition, setDataPosition] = useState<any[]>([...Array(2)]);
+  const IconBoots = isLight ? BootsIcon : BootsIconDark;
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -124,10 +125,10 @@ const PoolV3Detail = () => {
       <div className={styles.positions}>
         <h1>Your Liquidity Positions</h1>
         <div className={styles.list}>
-          {list.map((item, index) => {
+          {dataPosition.map((position, index) => {
             return (
               <div className={styles.positionWrapper} key={`pos-${index}`}>
-                <PositionItem item={item} />
+                <PositionItem position={position} />
               </div>
             );
           })}

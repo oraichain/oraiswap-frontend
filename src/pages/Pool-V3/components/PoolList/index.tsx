@@ -11,15 +11,35 @@ import classNames from 'classnames';
 import { TooltipIcon } from 'components/Tooltip';
 import useTheme from 'hooks/useTheme';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import { network } from 'config/networks';
+import { oraichainTokens } from 'config/bridgeTokens';
+import { toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 
 const PoolList = () => {
   const theme = useTheme();
   const [search, setSearch] = useState<string>();
-  const [list, setList] = useState<any[]>([...Array(10)]);
+  const [dataPool, setDataPool] = useState([...Array(10)]);
   const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
+
+  useEffect(() => {
+    (async () => {
+      const { client } = await getCosmWasmClient({ chainId: network.chainId });
+      const pools = await client.queryContractSmart('orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a', {
+        pools: {}
+      });
+      setDataPool(pools);
+    })();
+
+    // get list pool o day => set vo
+    // setDataPool
+    return () => {};
+  }, []);
 
   return (
     <div className={styles.poolList}>
@@ -47,7 +67,7 @@ const PoolList = () => {
         </div>
       </div>
       <div className={styles.list}>
-        {list?.length > 0 ? (
+        {dataPool?.length > 0 ? (
           <div className={styles.tableWrapper}>
             <table>
               <thead>
@@ -60,7 +80,7 @@ const PoolList = () => {
                 </tr>
               </thead>
               <tbody>
-                {list.map((item, index) => {
+                {dataPool.map((item, index) => {
                   return (
                     <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
                       <PoolItemTData item={item} theme={theme} />
@@ -83,21 +103,43 @@ const PoolList = () => {
 
 const PoolItemTData = ({ item, theme }) => {
   const [openTooltip, setOpenTooltip] = useState(false);
-  const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
+  const isLight = theme === 'light';
+  const IconBoots = isLight ? BootsIcon : BootsIconDark;
   const navigate = useNavigate();
+  const [tokenX, tokenY] = [item?.pool_key.token_x, item?.pool_key.token_y];
+
+  let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
+  const feeTier = item?.pool_key.fee_tier.fee || 0;
+  const tokenXinfo =
+    tokenX && oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
+  const tokenYinfo =
+    tokenY && oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
+
+  if (tokenXinfo) {
+    const findFromToken = oraichainTokensWithIcon.find(
+      (tokenIcon) => tokenIcon.denom === tokenXinfo.denom || tokenIcon.contractAddress === tokenXinfo.contractAddress
+    );
+    const findToToken = oraichainTokensWithIcon.find(
+      (tokenIcon) => tokenIcon.denom === tokenYinfo.denom || tokenIcon.contractAddress === tokenYinfo.contractAddress
+    );
+    FromTokenIcon = isLight ? findFromToken.IconLight : findFromToken.Icon;
+    ToTokenIcon = isLight ? findToToken.IconLight : findToToken.Icon;
+  }
 
   return (
     <>
       <td>
         <div className={styles.name} onClick={() => navigate(`/pools-v3/${item?.id}`)}>
           <div className={classNames(styles.icons, styles[theme])}>
-            <img src={OraixIcon} alt="base-tk" />
-            <img src={UsdtIcon} alt="quote-tk" />
+            <FromTokenIcon />
+            <ToTokenIcon />
           </div>
-          <span>ORAIX / USDT</span>
+          <span>
+            {tokenXinfo?.name} / {tokenYinfo?.name}
+          </span>
 
           <div>
-            <span className={styles.fee}>Fee: 0.003%</span>
+            <span className={styles.fee}>Fee: {toDisplay(BigInt(feeTier), 10)}%</span>
           </div>
         </div>
       </td>
