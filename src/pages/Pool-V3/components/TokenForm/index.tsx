@@ -80,7 +80,7 @@ const TokenForm = ({
         <h1>Tokens</h1>
         <div className={styles.selectContent}>
           <SelectToken token={tokenFrom} handleChangeToken={handleChangeTokenFrom} otherTokenDenom={tokenTo?.denom} />
-          <div className={styles.switch} onClick={() => handleSwitch()}>
+          <div className={classNames(styles.switch, styles[theme])} onClick={() => handleSwitch()}>
             <SwitchIcon />
           </div>
           <SelectToken token={tokenTo} handleChangeToken={handleChangeTokenTo} otherTokenDenom={tokenFrom?.denom} />

@@ -52,6 +52,7 @@ $primary-text-highlight: #d7f5bf;
 
 $themes: (
   dark: (
+    'warning-surface-default-subtle': #383200,
     'colors-neutral-text-text-token-name': #f7f7f7,
     'colors-neutral-text-body-on-section': #979995,
     'colors-primary-surface-default': #aee67f,
@@ -171,6 +172,7 @@ $themes: (
     'neutral-surface-bg-strong': #131412
   ),
   light: (
+    'warning-surface-default-subtle': #fffdeb,
     'colors-neutral-text-text-token-name': #181a17,
     'colors-neutral-text-body-on-section': #686a66,
     'colors-primary-surface-default': #aee67f,

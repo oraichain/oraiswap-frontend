@@ -636,7 +636,7 @@ const CreatePosition = () => {
   //   }
   // }, [midPrice.index, concentrationArray]);
 
-  const checkNoPool = false;
+  const checkNoPool = true;
 
   const renderPriceSection = checkNoPool ? (
     <NewPositionNoPool fromToken={tokenFrom} toToken={tokenTo} priceInfo={priceInfo} setPriceInfo={setPriceInfo} />

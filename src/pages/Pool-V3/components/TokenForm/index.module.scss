@@ -13,7 +13,9 @@
     width: 100%;
 
     h1 {
-      color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+      @include theme {
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
       font-size: 16px;
       font-weight: 600;
       line-height: 150%; /* 24px */
@@ -39,6 +41,12 @@
           width: 24px;
           height: 24px;
         }
+
+        &.light {
+          svg {
+            filter: invert(1) opacity(0.3);
+          }
+        }
       }
     }
 
@@ -56,10 +64,13 @@
         justify-content: center;
         align-items: center;
         border-radius: var(--Dimension-Corner-Radius-button, 99px);
-        background: var(--Colors-Neutral-Surface-bg-section-2, #494949);
-        border: 1px solid var(--Colors-Neutral-Border-border-btn-default, #494949);
 
-        color: var(--Colors-Neutral-Text-text-dropdown, #f7f7f7);
+        @include theme {
+          border: 1px solid theme-get('colors-neutral-border-border-bold');
+          background: theme-get('colors-neutral-border-border-bold');
+          color: theme-get('colors-neutral-text-text-token-name');
+        }
+
         text-align: center;
         font-size: 14px;
         font-weight: 400;
@@ -70,7 +81,9 @@
         }
 
         &.chosen {
-          border: 1px solid var(--Colors-Neutral-Border-border-btn-default, #f7f7f7);
+          @include theme {
+            border: 1px solid theme-get('colors-neutral-text-text-token-name');
+          }
         }
       }
     }
@@ -80,7 +93,9 @@
     width: 100%;
 
     h1 {
-      color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+      @include theme {
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
       font-size: 16px;
       font-weight: 600;
       line-height: 150%; /* 24px */
@@ -97,7 +112,9 @@
       align-self: stretch;
 
       border-radius: 8px;
-      background: var(--Colors-Neutral-Surface-bg-swap-pair, #232521);
+      @include theme {
+        background: theme-get('neutral-6');
+      }
 
       &:first-of-type {
         margin-bottom: 8px;
@@ -120,10 +137,13 @@
           white-space: nowrap;
 
           border-radius: var(--Dimension-Corner-Radius-button, 99px);
-          border: 1px solid var(--Colors-Neutral-Border-border-xbold, #595b57);
-          background: var(--Colors-Neutral-Surface-bg-section-3, #494949);
 
-          color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+          @include theme {
+            border: 1px solid theme-get('neutral-border-border-xbold');
+            background: theme-get('colors-neutral-border-border-bold');
+            color: theme-get('colors-neutral-text-text-token-name');
+          }
+
           font-size: 16px;
           font-weight: 500;
           line-height: 150%; /* 24px */
@@ -172,7 +192,11 @@
 
       .balance {
         width: 100%;
-        color: var(--Colors-Neutral-Text-title, #efefef);
+
+        @include theme {
+          color: theme-get('neutral-9');
+        }
+
         font-size: 12px;
         font-weight: 400;
         line-height: 150%; /* 18px */
@@ -184,12 +208,17 @@
         .bal {
           margin-right: 8px;
           p {
-            color: var(--Colors-Neutral-Text-body-on-section, #979995);
+            @include theme {
+              color: theme-get('colors-neutral-text-text-token-name');
+            }
           }
         }
 
         button {
-          color: var(--Colors-Primary-Surface-default, #aee67f);
+          @include theme {
+            color: theme-get('primary-highlight-section');
+          }
+
           font-size: 12px;
           font-weight: 400;
           line-height: 150%; /* 18px */
