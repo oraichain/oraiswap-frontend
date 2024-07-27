@@ -1,10 +1,5 @@
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import {
-  OraiswapV3Client,
-  OraiswapV3QueryClient,
-  OraiswapTokenClient,
-  OraiswapTokenQueryClient
-} from '@oraichain/oraidex-contracts-sdk';
+import { OraiswapTokenClient, OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
   Tickmap,
   getMaxTick,
@@ -29,6 +24,7 @@ import {
 // } from '@store/consts/utils';
 import { ArrayOfTupleOfUint16AndUint64, PoolWithPoolKey } from '../pages/Pool-V3/packages/sdk/OraiswapV3.types';
 import { network } from 'config/networks';
+import { OraiswapV3Client, OraiswapV3QueryClient } from 'pages/Pool-V3/packages/sdk';
 // import { defaultState } from '@store/reducers/connection';
 
 const FAUCET_LIST_TOKEN = [];
