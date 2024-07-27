@@ -48,6 +48,8 @@
     }
 
     svg {
+      cursor: pointer;
+
       path {
         @include theme {
           fill: theme-get('neutral-9');
