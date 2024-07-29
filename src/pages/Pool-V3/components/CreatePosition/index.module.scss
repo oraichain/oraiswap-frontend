@@ -219,7 +219,7 @@
 
           .currentPriceTitle {
             @include theme {
-              color: theme-get('colors-neutral-text-text-token-name');
+              color: theme-get('neutral-9');
             }
             font-size: 13px;
             font-weight: 400;
