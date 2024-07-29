@@ -29,7 +29,7 @@ import {
   PoolWithPoolKey
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { Tick } from 'pages/Pool-V3/packages/sdk/OraiswapV3.types';
+import { ArrayOfPosition, Tick } from 'pages/Pool-V3/packages/sdk/OraiswapV3.types';
 // import { defaultState } from '@store/reducers/connection';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
@@ -293,13 +293,13 @@ export default class SingletonOraiswapV3 {
     }
   }
 
-  public static async getAllPosition(address: string, limit?: number, offset?: PoolKey): Promise<any> {
-    const position = await this.dex.client.queryContractSmart(defaultState.dexAddress, {
-      positions: {
-        limit,
-        offset,
-        owner_id: address
-      }
+  public static async getAllPosition(address: string, limit?: number, offset?: number): Promise<ArrayOfPosition> {
+    const client = await CosmWasmClient.connect(network.rpc);
+    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
+    const position = await queryClient.positions({
+      ownerId: address,
+      limit,
+      offset
     });
     return position;
   }

@@ -5,15 +5,13 @@ import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import useTheme from 'hooks/useTheme';
 import { useEffect } from 'react';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { oraichainTokens } from 'config/bridgeTokens';
-import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { PERCENTAGE_SCALE, calcYPerXPriceByTickIndex } from 'pages/Pool-V3/helper';
 import { printBigint } from '../PriceRangePlot/utils';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
 
 const PositionList = () => {
   const theme = useTheme();
@@ -23,14 +21,7 @@ const PositionList = () => {
 
   useEffect(() => {
     (async () => {
-      // TODO: AMM V3 Pool
-      const { client } = await getCosmWasmClient({ chainId: network.chainId });
-      const positions = await client.queryContractSmart(network.pool_v3, {
-        positions: {
-          owner_id: address
-        }
-      });
-
+      const positions = await SingletonOraiswapV3.getAllPosition(address);
       const positionsMap = positions.map((position: any, index) => {
         const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
         let [tokenXIcon, tokenYIcon] = [DefaultIcon, DefaultIcon];
