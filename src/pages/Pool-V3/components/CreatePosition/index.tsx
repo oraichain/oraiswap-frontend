@@ -772,29 +772,46 @@ const CreatePosition = () => {
         </div>
 
         <div className={styles.minMaxPriceWrapper}>
-          <div className={styles.minMaxPrice}>
-            <div className={styles.minMaxPriceTitle}>
-              <p>Min Price</p>
+          <div className={styles.item}>
+            <div className={styles.minMaxPrice}>
+              <div className={styles.minMaxPriceTitle}>
+                <p>Min Price</p>
+              </div>
+              <div className={styles.minMaxPriceValue}>
+                <p>
+                  <p>0.081242</p>
+                  <p className={styles.pair}>ORAI / USDT</p>
+                </p>
+              </div>
             </div>
-            <div className={styles.minMaxPriceValue}>
-              <p>
-                <p>0.081242</p>
-                <p className={styles.pair}>ORAI / USDT</p>
-              </p>
+            <div className={styles.percent}>
+              <p>Min Current Price:</p>
+              <span className={classNames(styles.value, { [styles.positive]: false })}>{-56.0}%</span>
             </div>
           </div>
 
-          <div className={styles.minMaxPrice}>
-            <div className={styles.minMaxPriceTitle}>
-              <p>Max Price</p>
+          <div className={styles.item}>
+            <div className={styles.minMaxPrice}>
+              <div className={styles.minMaxPriceTitle}>
+                <p>Max Price</p>
+              </div>
+              <div className={styles.minMaxPriceValue}>
+                <p>
+                  <p>0.081242</p>
+                  <p className={styles.pair}>ORAI / USDT</p>
+                </p>
+              </div>
             </div>
-            <div className={styles.minMaxPriceValue}>
-              <p>
-                <p>0.081242</p>
-                <p className={styles.pair}>ORAI / USDT</p>
-              </p>
+            <div className={styles.percent}>
+              <p>Max Current Price:</p>
+              <span className={classNames(styles.value, { [styles.positive]: true })}>{+56.0}%</span>
             </div>
           </div>
+        </div>
+
+        <div className={styles.actions}>
+          <button>Reset range</button>
+          <button>Set full range</button>
         </div>
       </div>
     </div>

@@ -66,9 +66,9 @@ const PoolV3Detail = () => {
     ? MID_PERCENT
     : new BigDecimal(balanceX).div(new BigDecimal(balanceX).add(balanceY)).mul(100).toNumber();
 
-  if (!poolDetail) {
-    return null;
-  }
+  // if (!poolDetail) {
+  //   return null;
+  // }
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -79,8 +79,11 @@ const PoolV3Detail = () => {
           </div>
           <div className={styles.info}>
             <div className={classNames(styles.icons, styles[theme])}>
-              <img src={OraixIcon} alt="base-tk" />
-              <img src={UsdtIcon} alt="quote-tk" />
+              {/* <img src={OraixIcon} alt="base-tk" />
+              <img src={UsdtIcon} alt="quote-tk" /> */}
+
+              {FromTokenIcon && <FromTokenIcon />}
+              {ToTokenIcon && <ToTokenIcon />}
             </div>
             <span>
               {tokenXinfo?.name?.toUpperCase()} / {tokenYinfo?.name?.toUpperCase()}
@@ -138,19 +141,15 @@ const PoolV3Detail = () => {
             <div className={styles.tokens}>
               <div className={classNames(styles.tokenItem, styles[theme])}>
                 {/* <img src={OraixIcon} alt="base-tk" /> */}
-                <FromTokenIcon />
+                {FromTokenIcon && <FromTokenIcon />}
                 <span>{tokenXinfo?.name?.toUpperCase()}</span>
-                <span className={styles.value}>
-                  {formatNumberKMB(allocation[pool_key.token_x]?.balance || 0, false)}
-                </span>
+                <span className={styles.value}>{formatNumberKMB(balanceX, false)}</span>
               </div>
               <div className={classNames(styles.tokenItem, styles[theme])}>
                 {/* <img src={UsdtIcon} alt="quote-tk" /> */}
-                <ToTokenIcon />
+                {ToTokenIcon && <ToTokenIcon />}
                 <span>{tokenYinfo?.name?.toUpperCase()}</span>
-                <span className={styles.value}>
-                  {formatNumberKMB(allocation[pool_key.token_y]?.balance || 0, false)}
-                </span>
+                <span className={styles.value}>{formatNumberKMB(balanceY, false)}</span>
               </div>
             </div>
           </div>
