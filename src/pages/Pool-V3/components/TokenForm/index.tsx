@@ -26,7 +26,7 @@ const TokenForm = ({
   setToAmount,
   toAmount,
   fromAmount,
-  fee
+  fee,
 }: {
   tokenFrom: TokenItemType;
   handleChangeTokenFrom: (token) => void;
@@ -76,6 +76,7 @@ const TokenForm = ({
     handleChangeTokenTo(originFromToken);
   };
 
+  console.log('fee', fee);
   return (
     <div className={styles.tokenForm}>
       <div className={styles.select}>
@@ -91,7 +92,7 @@ const TokenForm = ({
           {ALL_FEE_TIERS_DATA.map((e, index) => {
             return (
               <div
-                className={classNames(styles.feeItem, { [styles.chosen]: e === fee })}
+                className={classNames(styles.feeItem, { [styles.chosen]: e.fee === fee.fee })}
                 key={`${index}-${e}-fee`}
                 onClick={() => setFee(e)}
               >

@@ -261,6 +261,10 @@
 
       border-radius: 8px;
 
+      @include small-mobile {
+        width: 100%;
+      }
+
       @include theme {
         border: 1.5px solid theme-get('neutral-border-border-default');
         color: theme-get('colors-neutral-text-text-token-name');

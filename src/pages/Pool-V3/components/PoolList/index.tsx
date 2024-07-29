@@ -151,9 +151,6 @@ const PoolItemTData = ({ item, theme, liquidity }) => {
   const navigate = useNavigate();
   const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey } = item;
 
-  console.log('tokenXinfo', tokenXinfo);
-  console.log('tokenYinfo', tokenYinfo);
-
   return (
     <>
       <td>
@@ -219,7 +216,7 @@ const PoolItemTData = ({ item, theme, liquidity }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/new-position/${tokenXinfo.denom}-${tokenYinfo.denom}-0.01`);
+            navigate(`/new-position/${item.pool_key.token_x}-${item.pool_key.token_y}-${item.pool_key.fee_tier.fee}`);
           }}
           className={styles.add}
         >

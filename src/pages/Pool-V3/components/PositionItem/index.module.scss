@@ -30,6 +30,11 @@
     flex-wrap: wrap;
     padding: 32px;
 
+    @include mobile {
+      flex-direction: column;
+      padding: 16px;
+    }
+
     cursor: pointer;
 
     .name {
@@ -37,6 +42,7 @@
       align-items: center;
       gap: 16px;
       flex: 1;
+      flex-wrap: wrap;
 
       @include theme {
         color: theme-get('colors-neutral-text-body-on-row');
@@ -103,8 +109,17 @@
       justify-content: space-between;
       align-items: center;
 
+      @include mobile {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
       .item {
         text-align: right;
+
+        @include mobile {
+          text-align: left;
+        }
 
         p {
           @include theme {
@@ -158,6 +173,14 @@
     // height: 0%;
     transition: all ease-in-out 0.5s;
 
+    @include mobile {
+      padding: 0 16px 16px 16px;
+    }
+
+    @include small-mobile {
+      grid-template-columns: 1fr;
+    }
+
     &.openCollapse {
       //   padding: 0 32px 32px 32px;
       //   height: max-content;
@@ -174,6 +197,11 @@
       align-self: stretch;
 
       border-radius: 16px;
+
+      @include mobile {
+        padding: 16px;
+        gap: 16px;
+      }
 
       @include theme {
         border: 1px solid theme-get('neutral-border-border-default');
