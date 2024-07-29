@@ -23,6 +23,8 @@ import NewPositionNoPool from '../NewPositionNoPool';
 import SlippageSetting from '../SettingSlippage';
 import { getMaxTick, getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
 import { TooltipIcon } from 'components/Tooltip';
+import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA, loadChunkSize } from 'libs/contractSingleton';
+import { FeeTier } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 
 let args = {
   data: [
@@ -300,7 +302,7 @@ const CreatePosition = () => {
   const theme = useTheme();
   const [tokenFrom, setTokenFrom] = useState<TokenItemType>();
   const [tokenTo, setTokenTo] = useState<TokenItemType>();
-  const [fee, setFee] = useState<number>(0.01);
+  const [feeTier, setFeeTier] = useState<FeeTier>(ALL_FEE_TIERS_DATA[0]);
   const [toAmount, setToAmount] = useState();
   const [fromAmount, setFromAmount] = useState();
   const [priceInfo, setPriceInfo] = useState<PriceInfo>({
@@ -325,15 +327,21 @@ const CreatePosition = () => {
 
   const [isPlotDiscrete, setIsPlotDiscrete] = useState(false);
 
+  const [isPoolExist, setIsPoolExist] = useState(false);
+
   const isMountedRef = useRef(false);
 
   useEffect(() => {
-    console.log({ plotMin, plotMax });
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    checkNoPool(feeTier, tokenFrom, tokenTo);
+    console.log({ feeTier, tokenFrom, tokenTo, isPoolExist });
+  }, [feeTier, tokenFrom, tokenTo, isPoolExist]);
 
   const concentrationArray = useMemo(
     () => getConcentrationArray(Number(args.tickSpacing), 2, Number(args.midPrice.index)).sort((a, b) => a - b),
@@ -636,11 +644,27 @@ const CreatePosition = () => {
   //   }
   // }, [midPrice.index, concentrationArray]);
 
-  const checkNoPool = true;
+  const checkNoPool = async (
+    fee: FeeTier,
+    tokenFrom: TokenItemType | undefined,
+    tokenTo: TokenItemType | undefined
+  ) => {
+    if (fee && tokenFrom && tokenTo) {
+      const pool = await SingletonOraiswapV3.getPool({
+        fee_tier: fee,
+        token_x: tokenFrom.contractAddress ? tokenFrom.contractAddress : tokenFrom.denom,
+        token_y: tokenTo.contractAddress ? tokenTo.contractAddress : tokenTo.denom
+      });
+      console.log(pool !== null);
+      setIsPoolExist(pool !== null);
+      return;
+    }
+    setIsPoolExist(false);
+  };
 
-  const renderPriceSection = checkNoPool ? (
-    <NewPositionNoPool fromToken={tokenFrom} toToken={tokenTo} priceInfo={priceInfo} setPriceInfo={setPriceInfo} />
-  ) : (
+  console.log('isPoolExist', isPoolExist);
+
+  const renderPriceSection = isPoolExist ? (
     <div className={styles.priceSectionExisted}>
       <div className={styles.wrapper}>
         <div className={styles.itemTitleWrapper}>
@@ -759,6 +783,8 @@ const CreatePosition = () => {
         </div>
       </div>
     </div>
+  ) : (
+    <NewPositionNoPool fromToken={tokenFrom} toToken={tokenTo} priceInfo={priceInfo} setPriceInfo={setPriceInfo} />
   );
 
   return (
@@ -781,12 +807,12 @@ const CreatePosition = () => {
               handleChangeTokenFrom={(tk) => setTokenFrom(tk)}
               tokenTo={tokenTo}
               handleChangeTokenTo={(tk) => setTokenTo(tk)}
-              setFee={setFee}
+              setFee={setFeeTier}
               setToAmount={setToAmount}
               setFromAmount={setFromAmount}
               fromAmount={fromAmount}
               toAmount={toAmount}
-              fee={fee}
+              fee={feeTier}
             />
           </div>
           <div className={styles.item}>

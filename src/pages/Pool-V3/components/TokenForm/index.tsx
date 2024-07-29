@@ -13,6 +13,8 @@ import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
 import { Button } from 'components/Button';
 import classNames from 'classnames';
+import { FeeTier } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 
 const TokenForm = ({
   tokenFrom,
@@ -30,12 +32,12 @@ const TokenForm = ({
   handleChangeTokenFrom: (token) => void;
   tokenTo: TokenItemType;
   handleChangeTokenTo: (token) => void;
-  setFee: Dispatch<SetStateAction<number>>;
+  setFee: Dispatch<SetStateAction<FeeTier>>;
   setToAmount: Dispatch<SetStateAction<number>>;
   setFromAmount: Dispatch<SetStateAction<number>>;
   toAmount: number;
   fromAmount: number;
-  fee: number;
+  fee: FeeTier;
 }) => {
   const theme = useTheme();
   const isLightTheme = theme === 'light';
@@ -86,14 +88,14 @@ const TokenForm = ({
           <SelectToken token={tokenTo} handleChangeToken={handleChangeTokenTo} otherTokenDenom={tokenFrom?.denom} />
         </div>
         <div className={styles.fee}>
-          {[0.01, 0.05, 0.3, 1].map((e, index) => {
+          {ALL_FEE_TIERS_DATA.map((e, index) => {
             return (
               <div
                 className={classNames(styles.feeItem, { [styles.chosen]: e === fee })}
                 key={`${index}-${e}-fee`}
                 onClick={() => setFee(e)}
               >
-                {e}%
+                {toDisplay(e.fee.toString(), 10)}%
               </div>
             );
           })}
