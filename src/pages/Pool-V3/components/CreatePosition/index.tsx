@@ -1,5 +1,10 @@
 import { BigDecimal, toAmount, TokenItemType } from '@oraichain/oraidex-common';
-import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import {
+  FeeTier,
+  PoolKey,
+  PoolWithPoolKey,
+  TokenAmount
+} from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
 import { ReactComponent as TooltipIc } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
@@ -22,7 +27,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NewPositionNoPool from '../NewPositionNoPool';
-import PriceRangePlot, { TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
+import PriceRangePlot, { PlotTickData, TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
 import {
   calcPrice,
   calcTicksAmountInRange,
@@ -30,6 +35,7 @@ import {
   determinePositionTokenBlock,
   extractDenom,
   getConcentrationArray,
+  handleGetCurrentPlotTicks,
   PositionTokenBlock,
   printBigint,
   toMaxNumericPlaces,
@@ -67,211 +73,211 @@ let args = {
       y: 924.768717954767,
       index: 17900
     },
-    {
-      x: 6.10989449517122,
-      y: 924.768717954767,
-      index: 18100
-    },
-    {
-      x: 6.171296870242322,
-      y: 1228.305125020546,
-      index: 18200
-    },
-    {
-      x: 6.359231302043402,
-      y: 1228.305125020546,
-      index: 18500
-    },
-    {
-      x: 6.423139427776829,
-      y: 1376.412271951954,
-      index: 18600
-    },
-    {
-      x: 6.552888898896388,
-      y: 1376.412271951954,
-      index: 18800
-    },
-    {
-      x: 6.618743218034855,
-      y: 1410.741026226673,
-      index: 18900
-    },
-    {
-      x: 6.685259350841405,
-      y: 1410.741026226673,
-      index: 19000
-    },
-    {
-      x: 6.752443948298717,
-      y: 1478.817972850278,
-      index: 19100
-    },
-    {
-      x: 6.820303728262422,
-      y: 1478.817972850278,
-      index: 19200
-    },
-    {
-      x: 6.888845476080644,
-      y: 1481.7502422703,
-      index: 19300
-    },
-    {
-      x: 6.958076045297614,
-      y: 1702.310045768757,
-      index: 19400
-    },
-    {
-      x: 7.028002358348769,
-      y: 1872.108774095546,
-      index: 19500
-    },
-    {
-      x: 7.0986314072148335,
-      y: 2055.451081292155,
-      index: 19600
-    },
-    {
-      x: 7.1699702541778905,
-      y: 2052.518811872133,
-      index: 19700
-    },
-    {
-      x: 7.314805946896031,
-      y: 2052.518811872133,
-      index: 19900
-    },
-    {
-      x: 7.388317274916235,
-      y: 2390.259553179729,
-      index: 20000
-    },
-    {
-      x: 7.462567366921463,
-      y: 2390.259553179729,
-      index: 20100
-    },
-    {
-      x: 7.537563647291317,
-      y: 2086.72314611395,
-      index: 20200
-    },
-    {
-      x: 7.767104985346781,
-      y: 2086.72314611395,
-      index: 20500
-    },
-    {
-      x: 7.84516176585385,
-      y: 1938.615999182542,
-      index: 20600
-    },
-    {
-      x: 8.165312561538634,
-      y: 1938.615999182542,
-      index: 21000
-    },
-    {
-      x: 8.247371193639982,
-      y: 1912.043286002816,
-      index: 21100
-    },
-    {
-      x: 8.58393563024182,
-      y: 1912.043286002816,
-      index: 21500
-    },
-    {
-      x: 8.670201282734537,
-      y: 1554.049862267195,
-      index: 21600
-    },
-    {
-      x: 8.757333875870172,
-      y: 1565.535658474116,
-      index: 21700
-    },
-    {
-      x: 8.845342122132077,
-      y: 1565.535658474116,
-      index: 21800
-    },
-    {
-      x: 8.934234821530346,
-      y: 1497.458711850511,
-      index: 21900
-    },
-    {
-      x: 9.024020862509365,
-      y: 1497.458711850511,
-      index: 22000
-    },
-    {
-      x: 9.114709222876904,
-      y: 1159.717970542915,
-      index: 22100
-    },
-    {
-      x: 9.582006404274413,
-      y: 1159.717970542915,
-      index: 22600
-    },
-    {
-      x: 9.67830233079223,
-      y: 1148.232174335994,
-      index: 22700
-    },
-    {
-      x: 9.97303555905674,
-      y: 1148.232174335994,
-      index: 23000
-    },
-    {
-      x: 10.07326119645574,
-      y: 1140.476133241001,
-      index: 23100
-    },
-    {
-      x: 10.58970186938534,
-      y: 1140.476133241001,
-      index: 23600
-    },
-    {
-      x: 10.696124794801273,
-      y: 1010.198394790202,
-      index: 23700
-    },
-    {
-      x: 11.820986957813748,
-      y: 1010.198394790202,
-      index: 24700
-    },
-    {
-      x: 11.939783882305553,
-      y: 840.399666463413,
-      index: 24800
-    },
-    {
-      x: 99.46143826221535,
-      y: 840.399666463413,
-      index: 46000
-    },
-    {
-      x: 100.4609921079365,
-      y: 838.025081466683,
-      index: 46100
-    },
-    {
-      x: 4244507227.6354027,
-      y: 838.025081466683,
-      index: 221700
-    },
-    {
-      x: 4287163091.0193543,
-      y: 0,
-      index: 221800
-    }
+    // {
+    //   x: 6.10989449517122,
+    //   y: 924.768717954767,
+    //   index: 18100
+    // },
+    // {
+    //   x: 6.171296870242322,
+    //   y: 1228.305125020546,
+    //   index: 18200
+    // },
+    // {
+    //   x: 6.359231302043402,
+    //   y: 1228.305125020546,
+    //   index: 18500
+    // },
+    // {
+    //   x: 6.423139427776829,
+    //   y: 1376.412271951954,
+    //   index: 18600
+    // },
+    // {
+    //   x: 6.552888898896388,
+    //   y: 1376.412271951954,
+    //   index: 18800
+    // },
+    // {
+    //   x: 6.618743218034855,
+    //   y: 1410.741026226673,
+    //   index: 18900
+    // },
+    // {
+    //   x: 6.685259350841405,
+    //   y: 1410.741026226673,
+    //   index: 19000
+    // },
+    // {
+    //   x: 6.752443948298717,
+    //   y: 1478.817972850278,
+    //   index: 19100
+    // },
+    // {
+    //   x: 6.820303728262422,
+    //   y: 1478.817972850278,
+    //   index: 19200
+    // },
+    // {
+    //   x: 6.888845476080644,
+    //   y: 1481.7502422703,
+    //   index: 19300
+    // },
+    // {
+    //   x: 6.958076045297614,
+    //   y: 1702.310045768757,
+    //   index: 19400
+    // },
+    // {
+    //   x: 7.028002358348769,
+    //   y: 1872.108774095546,
+    //   index: 19500
+    // },
+    // {
+    //   x: 7.0986314072148335,
+    //   y: 2055.451081292155,
+    //   index: 19600
+    // },
+    // {
+    //   x: 7.1699702541778905,
+    //   y: 2052.518811872133,
+    //   index: 19700
+    // },
+    // {
+    //   x: 7.314805946896031,
+    //   y: 2052.518811872133,
+    //   index: 19900
+    // },
+    // {
+    //   x: 7.388317274916235,
+    //   y: 2390.259553179729,
+    //   index: 20000
+    // },
+    // {
+    //   x: 7.462567366921463,
+    //   y: 2390.259553179729,
+    //   index: 20100
+    // },
+    // {
+    //   x: 7.537563647291317,
+    //   y: 2086.72314611395,
+    //   index: 20200
+    // },
+    // {
+    //   x: 7.767104985346781,
+    //   y: 2086.72314611395,
+    //   index: 20500
+    // },
+    // {
+    //   x: 7.84516176585385,
+    //   y: 1938.615999182542,
+    //   index: 20600
+    // },
+    // {
+    //   x: 8.165312561538634,
+    //   y: 1938.615999182542,
+    //   index: 21000
+    // },
+    // {
+    //   x: 8.247371193639982,
+    //   y: 1912.043286002816,
+    //   index: 21100
+    // },
+    // {
+    //   x: 8.58393563024182,
+    //   y: 1912.043286002816,
+    //   index: 21500
+    // },
+    // {
+    //   x: 8.670201282734537,
+    //   y: 1554.049862267195,
+    //   index: 21600
+    // },
+    // {
+    //   x: 8.757333875870172,
+    //   y: 1565.535658474116,
+    //   index: 21700
+    // },
+    // {
+    //   x: 8.845342122132077,
+    //   y: 1565.535658474116,
+    //   index: 21800
+    // },
+    // {
+    //   x: 8.934234821530346,
+    //   y: 1497.458711850511,
+    //   index: 21900
+    // },
+    // {
+    //   x: 9.024020862509365,
+    //   y: 1497.458711850511,
+    //   index: 22000
+    // },
+    // {
+    //   x: 9.114709222876904,
+    //   y: 1159.717970542915,
+    //   index: 22100
+    // },
+    // {
+    //   x: 9.582006404274413,
+    //   y: 1159.717970542915,
+    //   index: 22600
+    // },
+    // {
+    //   x: 9.67830233079223,
+    //   y: 1148.232174335994,
+    //   index: 22700
+    // },
+    // {
+    //   x: 9.97303555905674,
+    //   y: 1148.232174335994,
+    //   index: 23000
+    // },
+    // {
+    //   x: 10.07326119645574,
+    //   y: 1140.476133241001,
+    //   index: 23100
+    // },
+    // {
+    //   x: 10.58970186938534,
+    //   y: 1140.476133241001,
+    //   index: 23600
+    // },
+    // {
+    //   x: 10.696124794801273,
+    //   y: 1010.198394790202,
+    //   index: 23700
+    // },
+    // {
+    //   x: 11.820986957813748,
+    //   y: 1010.198394790202,
+    //   index: 24700
+    // },
+    // {
+    //   x: 11.939783882305553,
+    //   y: 840.399666463413,
+    //   index: 24800
+    // },
+    // {
+    //   x: 99.46143826221535,
+    //   y: 840.399666463413,
+    //   index: 46000
+    // },
+    // {
+    //   x: 100.4609921079365,
+    //   y: 838.025081466683,
+    //   index: 46100
+    // },
+    // {
+    //   x: 4244507227.6354027,
+    //   y: 838.025081466683,
+    //   index: 221700
+    // },
+    // {
+    //   x: 4287163091.0193543,
+    //   y: 0,
+    //   index: 221800
+    // }
   ],
   leftRange: {
     index: 18700,
@@ -354,6 +360,8 @@ const CreatePosition = () => {
   const [isPoolExist, setIsPoolExist] = useState(false);
 
   const [poolInfo, setPoolInfo] = useState<PoolWithPoolKey>();
+
+  const [notInitPoolKey, setNotInitPoolKey] = useState<PoolKey>();
 
   const [currentPrice, setCurrentPrice] = useState(1);
 
@@ -536,10 +544,7 @@ const CreatePosition = () => {
     setLeftRange(Number(left));
     setRightRange(Number(right));
 
-    if (
-      tokenFrom &&
-      (isXtoY ? rightRange > midPrice.index : rightRange < midPrice.index)
-    ) {
+    if (tokenFrom && (isXtoY ? rightRange > midPrice.index : rightRange < midPrice.index)) {
       const deposit = amountFrom;
       // console.log({ deposit, leftRange, rightRange });
       const amount = getOtherTokenAmount(
@@ -556,10 +561,7 @@ const CreatePosition = () => {
       }
     }
 
-    if (
-      tokenTo &&
-      (isXtoY ? leftRange < midPrice.index : leftRange > midPrice.index)
-    ) {
+    if (tokenTo && (isXtoY ? leftRange < midPrice.index : leftRange > midPrice.index)) {
       const deposit = amountTo;
       // console.log({ deposit, leftRange, rightRange });
       const amount = getOtherTokenAmount(
@@ -757,6 +759,13 @@ const CreatePosition = () => {
       setIsPoolExist(pool !== null);
       if (pool) {
         setPoolInfo(pool);
+        setNotInitPoolKey(pool.pool_key);
+      } else {
+        setNotInitPoolKey({
+          fee_tier: fee,
+          token_x: tokenFrom.contractAddress ? tokenFrom.contractAddress : tokenFrom.denom,
+          token_y: tokenTo.contractAddress ? tokenTo.contractAddress : tokenTo.denom
+        });
       }
       return;
     }
@@ -865,6 +874,32 @@ const CreatePosition = () => {
     }
   };
 
+  // args
+  // args
+  const [liquidityData, setLiquidityData] = useState<PlotTickData[]>([
+    {
+      x: 5.0,
+      y: 1000.0,
+      index: 0
+    }
+  ]);
+  useEffect(() => {
+    const fetchTickData = async () => {
+      const ticksData = await handleGetCurrentPlotTicks({
+        poolKey: notInitPoolKey,
+        isXtoY: isXtoY,
+        xDecimal: tokenFrom.decimals,
+        yDecimal: tokenTo.decimals
+      });
+      setLiquidityData(ticksData);
+      console.log({ ticksData });
+    };
+    if (isPoolExist && notInitPoolKey) {
+      console.log('here');
+      fetchTickData();
+    }
+  }, [isPoolExist, notInitPoolKey, isXtoY]);
+
   const renderPriceSection = isPoolExist ? (
     <div className={styles.priceSectionExisted}>
       <div className={styles.wrapper}>
@@ -922,7 +957,7 @@ const CreatePosition = () => {
         <div>
           <PriceRangePlot
             className={styles.plot}
-            data={args.data}
+            data={liquidityData}
             onChangeRange={changeRangeHandler}
             leftRange={{
               index: leftRange,
@@ -1008,9 +1043,9 @@ const CreatePosition = () => {
       </div>
     </div>
   ) : (
-    <NewPositionNoPool 
+    <NewPositionNoPool
       fromToken={tokenFrom} // symbol + decimal
-      toToken={tokenTo}  // symbol + decimal
+      toToken={tokenTo} // symbol + decimal
       priceInfo={priceInfo} // startPrice, minPrice, maxPrice
       setPriceInfo={setPriceInfo} // setStartPrice, setMinPrice, setMaxPrice
       onChangeMidPrice={onChangeMidPrice}
