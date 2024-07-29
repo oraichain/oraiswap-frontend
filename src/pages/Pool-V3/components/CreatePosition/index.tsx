@@ -662,8 +662,6 @@ const CreatePosition = () => {
     setIsPoolExist(false);
   };
 
-  console.log('isPoolExist', isPoolExist);
-
   const renderPriceSection = isPoolExist ? (
     <div className={styles.priceSectionExisted}>
       <div className={styles.wrapper}>
@@ -689,7 +687,10 @@ const CreatePosition = () => {
                 { [styles.chosen]: typeChart === TYPE_CHART.CONTINUOUS },
                 styles[theme]
               )}
-              onClick={() => setTypeChart(TYPE_CHART.CONTINUOUS)}
+              onClick={() => {
+                setTypeChart(TYPE_CHART.CONTINUOUS);
+                setIsPlotDiscrete(false);
+              }}
             >
               <div className={styles.continuous}>
                 <Continuous />
@@ -701,7 +702,10 @@ const CreatePosition = () => {
                 { [styles.chosen]: typeChart === TYPE_CHART.DISCRETE },
                 styles[theme]
               )}
-              onClick={() => setTypeChart(TYPE_CHART.DISCRETE)}
+              onClick={() => {
+                setTypeChart(TYPE_CHART.DISCRETE);
+                setIsPlotDiscrete(true);
+              }}
             >
               <div className={styles.discrete}>
                 <Discrete />
