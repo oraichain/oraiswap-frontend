@@ -17,7 +17,7 @@ import {
   spacingMultiplicityGte,
   toMaxNumericPlaces
 } from '../PriceRangePlot/utils';
-import { TokenItemType, truncDecimals } from '@oraichain/oraidex-common';
+import { TokenItemType, truncDecimals, BigDecimal } from '@oraichain/oraidex-common';
 import TokenForm from '../TokenForm';
 import NewPositionNoPool from '../NewPositionNoPool';
 import SlippageSetting from '../SettingSlippage';
@@ -26,6 +26,7 @@ import { TooltipIcon } from 'components/Tooltip';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA, loadChunkSize } from 'libs/contractSingleton';
 import { FeeTier } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import useFillToken from 'pages/Pool-V3/hooks/useFillToken';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 let args = {
   data: [
@@ -300,6 +301,7 @@ export enum TYPE_CHART {
 
 const CreatePosition = () => {
   const navigate = useNavigate();
+  const { data: prices } = useCoinGeckoPrices();
   const theme = useTheme();
   const { initFee, initFromToken, initToToken } = useFillToken();
 
@@ -332,6 +334,8 @@ const CreatePosition = () => {
 
   const [isPoolExist, setIsPoolExist] = useState(false);
 
+  const [currentPrice, setCurrentPrice] = useState(1);
+
   const isMountedRef = useRef(false);
 
   useEffect(() => {
@@ -345,6 +349,13 @@ const CreatePosition = () => {
     checkNoPool(feeTier, tokenFrom, tokenTo);
     console.log({ feeTier, tokenFrom, tokenTo, isPoolExist });
   }, [feeTier, tokenFrom, tokenTo, isPoolExist]);
+
+  useEffect(() => {
+    setCurrentPrice(
+      new BigDecimal(prices[tokenFrom?.coinGeckoId] || 0).div(prices[tokenTo?.coinGeckoId] || 1).toNumber()
+    );
+    setPriceInfo({ ...priceInfo, startPrice: currentPrice });
+  }, [tokenFrom, tokenTo]);
 
   const concentrationArray = useMemo(
     () => getConcentrationArray(Number(args.tickSpacing), 2, Number(args.midPrice.index)).sort((a, b) => a - b),
@@ -757,7 +768,7 @@ const CreatePosition = () => {
           </div>
           <div className={styles.currentPriceValue}>
             <p>
-              <p>0.081242</p>
+              <p>{currentPrice}</p>
               <p className={styles.pair}>ORAI / USDT</p>
             </p>
           </div>
@@ -808,7 +819,13 @@ const CreatePosition = () => {
       </div>
     </div>
   ) : (
-    <NewPositionNoPool fromToken={tokenFrom} toToken={tokenTo} priceInfo={priceInfo} setPriceInfo={setPriceInfo} />
+    <NewPositionNoPool 
+      fromToken={tokenFrom} 
+      toToken={tokenTo} 
+      priceInfo={priceInfo} 
+      setPriceInfo={setPriceInfo} 
+    
+    />
   );
 
   return (
@@ -843,6 +860,7 @@ const CreatePosition = () => {
               fromAmount={fromAmount}
               toAmount={toAmount}
               fee={feeTier}
+              
             />
           </div>
           <div className={styles.item}>

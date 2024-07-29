@@ -26,7 +26,7 @@ const TokenForm = ({
   setToAmount,
   toAmount,
   fromAmount,
-  fee
+  fee,
 }: {
   tokenFrom: TokenItemType;
   handleChangeTokenFrom: (token) => void;
