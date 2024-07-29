@@ -164,3 +164,45 @@ export const calculateFee = (pool: Pool, position: Position, lowerTick: Tick, up
     BigInt(position.liquidity)
   );
 };
+
+export const getTick = (tickData) => {
+  return {
+    fee_growth_outside_x: tickData.fee_growth_outside_x,
+    fee_growth_outside_y: BigInt(tickData.fee_growth_outside_y),
+    index: tickData.index,
+    liquidity_change: BigInt(tickData.liquidity_change),
+    sign: tickData.sign,
+    liquidity_gross: BigInt(tickData.liquidity_gross),
+    seconds_outside: tickData.seconds_outside,
+    sqrt_price: BigInt(tickData.sqrt_price)
+  };
+};
+
+export const getConvertedPool = (positions) => {
+  return {
+    liquidity: BigInt(positions.poolData.pool.liquidity),
+    sqrt_price: BigInt(positions.poolData.pool.sqrt_price),
+    current_tick_index: positions.poolData.pool.current_tick_index,
+    fee_growth_global_x: BigInt(positions.poolData.pool.fee_growth_global_x),
+    fee_growth_global_y: BigInt(positions.poolData.pool.fee_growth_global_y),
+    fee_protocol_token_x: BigInt(positions.poolData.pool.fee_protocol_token_x),
+    fee_protocol_token_y: BigInt(positions.poolData.pool.fee_protocol_token_y),
+    start_timestamp: positions.poolData.pool.start_timestamp,
+    last_timestamp: positions.poolData.pool.last_timestamp,
+    fee_receiver: positions.poolData.pool.fee_receiver
+  };
+};
+
+export const getConvertedPosition = (position) => {
+  return {
+    fee_growth_inside_x: position.fee_growth_inside_x,
+    fee_growth_inside_y: position.fee_growth_inside_y,
+    last_block_number: position.last_block_number,
+    liquidity: BigInt(position.liquidity),
+    lower_tick_index: position.lower_tick_index,
+    tokens_owed_x: BigInt(position.tokens_owed_x),
+    tokens_owed_y: BigInt(position.tokens_owed_y),
+    upper_tick_index: position.upper_tick_index,
+    pool_key: position.pool_key
+  };
+};

@@ -8,8 +8,6 @@ import { ReactComponent as LiquidityIcon } from 'assets/icons/liquidity.svg';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
-import OraixIcon from 'assets/icons/oraix.svg';
-import UsdtIcon from 'assets/icons/tether.svg';
 import useTheme from 'hooks/useTheme';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -21,6 +19,9 @@ import {
   calculateFee,
   calculateTokenAmounts,
   formatNumbers,
+  getConvertedPool,
+  getConvertedPosition,
+  getTick,
   initialXtoY,
   showPrefix,
   tickerToAddress
@@ -28,6 +29,7 @@ import {
 import useConfigReducer from 'hooks/useConfigReducer';
 import { printBigint } from '../PriceRangePlot/utils';
 import { network } from 'config/networks';
+import { Tick } from 'pages/Pool-V3/packages/sdk/OraiswapV3.types';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -39,14 +41,16 @@ const PositionItem = ({ position }) => {
   const { min, max, fee } = position;
   const theme = useTheme();
   const ref = useRef();
+  const [cachePrices] = useConfigReducer('coingecko');
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
   const [openCollapse, setCollapse] = useState(false);
   const [address] = useConfigReducer('address');
-  const [tick, setTick] = useState<any>({
-    lowerTick: {},
-    upperTick: {}
+  const [tick, setTick] = useState<{ lowerTick: any; upperTick: any }>({
+    lowerTick: undefined,
+    upperTick: undefined
   });
+  const [positions, setPositions] = useState<any>({});
   const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
 
   const [xToY, setXToY] = useState<boolean>(
@@ -57,35 +61,32 @@ const PositionItem = ({ position }) => {
     setCollapse(false);
   });
 
-  const [tokenXLiquidity, tokenYLiquidity] = useMemo(() => {
-    if (position?.poolData) {
-      const convertedPool = {
-        liquidity: BigInt(position.poolData.pool.liquidity),
-        sqrt_price: BigInt(position.poolData.pool.sqrt_price),
-        current_tick_index: position.poolData.pool.current_tick_index,
-        fee_growth_global_x: BigInt(position.poolData.pool.fee_growth_global_x),
-        fee_growth_global_y: BigInt(position.poolData.pool.fee_growth_global_y),
-        fee_protocol_token_x: BigInt(position.poolData.pool.fee_protocol_token_x),
-        fee_protocol_token_y: BigInt(position.poolData.pool.fee_protocol_token_y),
-        start_timestamp: position.poolData.pool.start_timestamp,
-        last_timestamp: position.poolData.pool.last_timestamp,
-        fee_receiver: position.poolData.pool.fee_receiver
-      };
-      const res = calculateTokenAmounts(convertedPool, position);
+  const [tokenXLiquidity, tokenYLiquidity, tokenXLiquidityInUsd, tokenYLiquidityInUsd] = useMemo(() => {
+    if (positions?.poolData) {
+      const convertedPool = getConvertedPool(positions);
+      const convertedPosition = getConvertedPosition(position);
+      const res = calculateTokenAmounts(convertedPool, convertedPosition);
+
       const x = res.x;
       const y = res.y;
-      console.log({ x, y });
 
-      return [+printBigint(x, position.tokenX.decimals), +printBigint(y, position.tokenY.decimals)];
+      const x_balance = +printBigint(x, position.tokenX.decimals);
+      const y_balance = +printBigint(y, position.tokenY.decimals);
+
+      const x_usd = x_balance * cachePrices[position.tokenX.coinGeckoId];
+      const y_usd = x_balance * cachePrices[position.tokenY.coinGeckoId];
+
+      return [x_balance, y_balance, x_usd, y_usd];
     }
 
-    return [0, 0];
-  }, [position]);
+    return [0, 0, 0, 0];
+  }, [position, positions, openCollapse]);
 
   useEffect(() => {
+    if (!openCollapse) return;
     (async () => {
       const { pool_key, lower_tick_index, upper_tick_index } = position;
-      const [lowerTickData, upperTickData] = await Promise.all([
+      const [lowerTickData, upperTickData, poolsData] = await Promise.all([
         window.client.queryContractSmart(network.pool_v3, {
           tick: {
             index: lower_tick_index,
@@ -97,80 +98,51 @@ const PositionItem = ({ position }) => {
             index: upper_tick_index,
             key: pool_key
           }
+        }),
+        window.client.queryContractSmart(network.pool_v3, {
+          pools: {}
         })
       ]);
-      setTick({
-        lowerTick: {
-          fee_growth_outside_x: BigInt(lowerTickData.fee_growth_outside_x),
-          fee_growth_outside_y: BigInt(lowerTickData.fee_growth_outside_y),
-          index: lowerTickData.index,
-          liquidity_change: BigInt(lowerTickData.liquidity_change),
-          sign: lowerTickData.sign,
-          liquidity_gross: BigInt(lowerTickData.liquidity_gross),
-          seconds_outside: lowerTickData.seconds_outside,
-          sqrt_price: BigInt(lowerTickData.sqrt_price)
-        },
-        upperTick: {
-          fee_growth_outside_x: BigInt(upperTickData.fee_growth_outside_x),
-          fee_growth_outside_y: BigInt(upperTickData.fee_growth_outside_y),
-          index: lowerTickData.index,
-          liquidity_change: BigInt(upperTickData.liquidity_change),
-          sign: lowerTickData.sign,
-          liquidity_gross: BigInt(upperTickData.liquidity_gross),
-          seconds_outside: upperTickData.seconds_outside,
-          sqrt_price: BigInt(upperTickData.sqrt_price)
+
+      const positionsData = poolsData.find(
+        (pool) => pool.pool_key.token_x === pool_key.token_x && pool.pool_key.token_y === pool_key.token_y
+      );
+
+      setPositions({
+        poolData: {
+          ...positionsData,
+          ...position
         }
+      });
+
+      setTick({
+        lowerTick: getTick(lowerTickData),
+        upperTick: getTick(upperTickData)
       });
     })();
 
     return () => {};
-  }, []);
+  }, [openCollapse]);
 
-  const [tokenXClaim, tokenYClaim] = useMemo(() => {
-    if (
-      // waitingForTicksData === false &&
-      // position?.poolData &&
-      // typeof lowerTick !== 'undefined' &&
-      // typeof upperTick !== 'undefined' &&
-      tick.lowerTick.index &&
-      tick.upperTick.index &&
-      position.pool_data
-    ) {
-      const convertedPool = {
-        liquidity: BigInt(position.poolData.pool.liquidity),
-        sqrt_price: BigInt(position.poolData.pool.sqrt_price),
-        current_tick_index: position.poolData.pool.current_tick_index,
-        fee_growth_global_x: BigInt(position.poolData.pool.fee_growth_global_x),
-        fee_growth_global_y: BigInt(position.poolData.pool.fee_growth_global_y),
-        fee_protocol_token_x: BigInt(position.poolData.pool.fee_protocol_token_x),
-        fee_protocol_token_y: BigInt(position.poolData.pool.fee_protocol_token_y),
-        start_timestamp: position.poolData.pool.start_timestamp,
-        last_timestamp: position.poolData.pool.last_timestamp,
-        fee_receiver: position.poolData.pool.fee_receiver
-      };
-      const res = calculateFee(convertedPool, position, tick.lowerTick, tick.upperTick);
+  const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd] = useMemo(() => {
+    if (positions.poolData && openCollapse) {
+      const convertedPool = getConvertedPool(positions);
+      const convertedPosition = getConvertedPosition(position);
+      const res = calculateFee(convertedPool, convertedPosition, tick.lowerTick, tick.upperTick);
+
       const bnX = res.x;
       const bnY = res.y;
 
-      return [+printBigint(bnX, position.tokenX.decimals), +printBigint(bnY, position.tokenY.decimals)];
+      const x_claim = +printBigint(bnX, position.tokenX.decimals);
+      const y_claim = +printBigint(bnY, position.tokenY.decimals);
+
+      const x_usd = x_claim * cachePrices[position.tokenX.coinGeckoId];
+      const y_usd = y_claim * cachePrices[position.tokenY.coinGeckoId];
+      return [x_claim, y_claim, x_usd, y_usd];
     }
 
-    return [0, 0];
-    // }, [position, lowerTick, upperTick, waitingForTicksData]);
-  }, [position, tick]);
-
-  const tokenX = {
-    name: position.tokenX.symbol,
-    icon: position.tokenX.logoURI,
-    decimal: position.tokenX.decimals,
-    balance: +printBigint(BigInt(position.tokenX.balance || 0) ?? 0n, position.tokenX.decimals),
-    liqValue: tokenXLiquidity,
-    claimValue: tokenXClaim
-    // usdValue:
-    //   typeof tokenXPriceData?.price === 'undefined'
-    //     ? undefined
-    //     : tokenXPriceData.price * +printBigint(BigInt(position.tokenX.balance) ?? 0n, position.tokenX.decimals)
-  };
+    return [0, 0, 0, 0];
+  }, [position, positions, tick.lowerTick, tick.upperTick, openCollapse]);
 
   return (
     <div ref={ref} className={styles.positionItem}>
@@ -210,7 +182,7 @@ const PositionItem = ({ position }) => {
           <div className={styles.item}>
             <p>APR</p>
             <span className={classNames(styles.value, styles.apr)}>
-              76.20%&nbsp;
+              0%&nbsp;
               <TooltipIcon
                 className={styles.tooltipWrapper}
                 placement="top"
@@ -253,15 +225,15 @@ const PositionItem = ({ position }) => {
             <h4>Current Assets</h4>
             <div className={styles.itemRow}>
               <span className={classNames(styles.usd, { [styles.green]: true, [styles.red]: false })}>
-                {formatDisplayUsdt(8612.12)}
+                {formatDisplayUsdt(0)}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
-                <img src={OraixIcon} alt="tokenIcon" />
-                {numberWithCommas(8612.12)} ORAIX
+                <position.tokenXIcon />
+                {numberWithCommas(0)} {position?.tokenX.name}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
-                <img src={UsdtIcon} alt="tokenIcon" />
-                {numberWithCommas(82.12)} USDT
+                <position.tokenYIcon />
+                {numberWithCommas(0)} {position?.tokenY.name}
               </span>
             </div>
             <div className={styles.divider}></div>
@@ -282,14 +254,14 @@ const PositionItem = ({ position }) => {
                 />
               </h4>
               <div className={styles.itemRow}>
-                <span className={styles.usd}>{formatDisplayUsdt(8612.12)}</span>
+                <span className={styles.usd}>{formatDisplayUsdt(tokenXLiquidityInUsd + tokenYLiquidityInUsd)}</span>
                 <span className={classNames(styles.token, styles[theme])}>
-                  <img src={OraixIcon} alt="tokenIcon" />
-                  {numberWithCommas(8612.12)} ORAIX
+                  <position.tokenXIcon />
+                  {tokenXLiquidity} {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
-                  <img src={UsdtIcon} alt="tokenIcon" />
-                  {numberWithCommas(82.12)} USDT
+                  <position.tokenYIcon />
+                  {tokenYLiquidity} {position?.tokenY.name}
                 </span>
               </div>
             </div>
@@ -332,28 +304,28 @@ const PositionItem = ({ position }) => {
           <div className={styles.row}>
             <h4>Total Reward Earned</h4>
             <div className={styles.itemRow}>
-              <span className={styles.usd}>{formatDisplayUsdt(8612.12)}</span>
+              <span className={styles.usd}>{formatDisplayUsdt(0)}</span>
               <span className={classNames(styles.token, styles[theme])}>
-                <img src={OraixIcon} alt="tokenIcon" />
-                {numberWithCommas(tokenXClaim)} ORAIX
+                <position.tokenXIcon />
+                {numberWithCommas(0)} {position?.tokenX.name}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
-                <img src={UsdtIcon} alt="tokenIcon" />
-                {numberWithCommas(tokenXClaim)} USDT
+                <position.tokenYIcon />
+                {numberWithCommas(0)} {position?.tokenY.name}
               </span>
             </div>
             <div className={styles.divider}></div>
             <div className={styles.row}>
               <h4>Unclaimed Rewards</h4>
               <div className={styles.itemRow}>
-                <span className={styles.usd}>{formatDisplayUsdt(8612.12)}</span>
+                <span className={styles.usd}>{formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd)}</span>
                 <span className={classNames(styles.token, styles[theme])}>
-                  <img src={OraixIcon} alt="tokenIcon" />
-                  {numberWithCommas(8612.12)} ORAIX
+                  <position.tokenXIcon />
+                  {tokenXClaim} {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
-                  <img src={UsdtIcon} alt="tokenIcon" />
-                  {numberWithCommas(82.12)} USDT
+                  <position.tokenYIcon />
+                  {tokenYClaim} {position?.tokenY.name}
                 </span>
               </div>
             </div>

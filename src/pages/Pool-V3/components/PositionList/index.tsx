@@ -32,8 +32,6 @@ const PositionList = () => {
       });
 
       const positionsMap = positions.map((position: any, index) => {
-        console.log({ position });
-
         const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
         let [tokenXIcon, tokenYIcon] = [DefaultIcon, DefaultIcon];
         const tokenXinfo =
