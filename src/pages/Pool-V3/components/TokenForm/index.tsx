@@ -27,9 +27,6 @@ const TokenForm = ({
   toAmount,
   fromAmount,
   fee,
-  onAddLiquidity,
-  tokenAInputState,
-  tokenBInputState
 }: {
   tokenFrom: TokenItemType;
   handleChangeTokenFrom: (token) => void;
