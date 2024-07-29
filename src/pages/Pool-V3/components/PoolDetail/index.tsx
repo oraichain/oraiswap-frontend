@@ -18,7 +18,7 @@ const PoolV3Detail = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isLight = theme === 'light';
-  const [dataPosition, setDataPosition] = useState<any[]>([...Array(2)]);
+  const [dataPosition, setDataPosition] = useState<any[]>([...Array(0)]);
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
 
   return (
@@ -123,7 +123,7 @@ const PoolV3Detail = () => {
         </div>
       </div>
       <div className={styles.positions}>
-        <h1>Your Liquidity Positions</h1>
+        {!!dataPosition?.length && <h1>Your Liquidity Positions</h1>}
         <div className={styles.list}>
           {dataPosition.map((position, index) => {
             return (

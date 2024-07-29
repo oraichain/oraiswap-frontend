@@ -27,6 +27,7 @@ import {
 } from 'pages/Pool-V3/helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { printBigint } from '../PriceRangePlot/utils';
+import { network } from 'config/networks';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -85,13 +86,13 @@ const PositionItem = ({ position }) => {
     (async () => {
       const { pool_key, lower_tick_index, upper_tick_index } = position;
       const [lowerTickData, upperTickData] = await Promise.all([
-        window.client.queryContractSmart('orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a', {
+        window.client.queryContractSmart(network.pool_v3, {
           tick: {
             index: lower_tick_index,
             key: pool_key
           }
         }),
-        window.client.queryContractSmart('orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a', {
+        window.client.queryContractSmart(network.pool_v3, {
           tick: {
             index: upper_tick_index,
             key: pool_key
@@ -299,7 +300,7 @@ const PositionItem = ({ position }) => {
                   // TODO: AMM v3 remove position
                   await window.client.execute(
                     address,
-                    'orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a',
+                    network.pool_v3,
                     {
                       remove_position: {
                         index: position.id
@@ -362,7 +363,7 @@ const PositionItem = ({ position }) => {
                 onClick={async () => {
                   await window.client.execute(
                     address,
-                    'orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a',
+                    network.pool_v3,
                     {
                       claim_fee: {
                         index: position.id

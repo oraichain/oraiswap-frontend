@@ -30,10 +30,46 @@ const PoolList = () => {
   useEffect(() => {
     (async () => {
       const { client } = await getCosmWasmClient({ chainId: network.chainId });
-      const pools = await client.queryContractSmart('orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a', {
+      const pools = await client.queryContractSmart(network.pool_v3, {
         pools: {}
       });
-      setDataPool(pools);
+
+      const fmtPools = (pools || []).map((p) => {
+        const isLight = theme === 'light';
+
+        const [tokenX, tokenY] = [p?.pool_key.token_x, p?.pool_key.token_y];
+
+        let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
+        const feeTier = p?.pool_key.fee_tier.fee || 0;
+        const tokenXinfo =
+          tokenX && oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
+        const tokenYinfo =
+          tokenY && oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
+
+        if (tokenXinfo) {
+          const findFromToken = oraichainTokensWithIcon.find(
+            (tokenIcon) =>
+              tokenIcon.denom === tokenXinfo.denom || tokenIcon.contractAddress === tokenXinfo.contractAddress
+          );
+          const findToToken = oraichainTokensWithIcon.find(
+            (tokenIcon) =>
+              tokenIcon.denom === tokenYinfo.denom || tokenIcon.contractAddress === tokenYinfo.contractAddress
+          );
+          FromTokenIcon = isLight ? findFromToken.IconLight : findFromToken.Icon;
+          ToTokenIcon = isLight ? findToToken.IconLight : findToToken.Icon;
+        }
+
+        return {
+          ...p,
+          FromTokenIcon,
+          ToTokenIcon,
+          feeTier,
+          tokenXinfo,
+          tokenYinfo
+        };
+      });
+
+      setDataPool(fmtPools);
     })();
 
     // get list pool o day => set vo
@@ -80,13 +116,30 @@ const PoolList = () => {
                 </tr>
               </thead>
               <tbody>
-                {dataPool.map((item, index) => {
-                  return (
-                    <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                      <PoolItemTData item={item} theme={theme} />
-                    </tr>
-                  );
-                })}
+                {dataPool
+                  .filter((p) => {
+                    if (!search) return true;
+
+                    const [tokenX, tokenY] = [p?.pool_key.token_x, p?.pool_key.token_y];
+                    const tokenXinfo =
+                      tokenX &&
+                      oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
+                    const tokenYinfo =
+                      tokenY &&
+                      oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
+
+                    return (
+                      (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
+                      (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
+                    );
+                  })
+                  .map((item, index) => {
+                    return (
+                      <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
+                        <PoolItemTData item={item} theme={theme} />
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -106,25 +159,7 @@ const PoolItemTData = ({ item, theme }) => {
   const isLight = theme === 'light';
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
   const navigate = useNavigate();
-  const [tokenX, tokenY] = [item?.pool_key.token_x, item?.pool_key.token_y];
-
-  let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
-  const feeTier = item?.pool_key.fee_tier.fee || 0;
-  const tokenXinfo =
-    tokenX && oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
-  const tokenYinfo =
-    tokenY && oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
-
-  if (tokenXinfo) {
-    const findFromToken = oraichainTokensWithIcon.find(
-      (tokenIcon) => tokenIcon.denom === tokenXinfo.denom || tokenIcon.contractAddress === tokenXinfo.contractAddress
-    );
-    const findToToken = oraichainTokensWithIcon.find(
-      (tokenIcon) => tokenIcon.denom === tokenYinfo.denom || tokenIcon.contractAddress === tokenYinfo.contractAddress
-    );
-    FromTokenIcon = isLight ? findFromToken.IconLight : findFromToken.Icon;
-    ToTokenIcon = isLight ? findToToken.IconLight : findToToken.Icon;
-  }
+  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo } = item;
 
   return (
     <>
@@ -151,7 +186,7 @@ const PoolItemTData = ({ item, theme }) => {
       </td>
       <td>
         <div className={styles.apr}>
-          <span className={styles.amount}>{formatDisplayUsdt(1348)}</span>
+          <span className={styles.amount}>{numberWithCommas(13.48)}%</span>
 
           <TooltipIcon
             className={styles.tooltipWrapper}

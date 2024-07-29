@@ -54,9 +54,9 @@ const PoolV3 = () => {
           })}
         </div>
 
-        <Link className={styles.swapBtn} to={`/pools-v3/swap`}>
+        {/* <Link className={styles.swapBtn} to={`/pools-v3/swap`}>
           Swap
-        </Link>
+        </Link> */}
       </div>
 
       <div className={styles.content}>{Content && <Content />}</div>

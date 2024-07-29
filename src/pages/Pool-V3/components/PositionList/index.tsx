@@ -25,14 +25,11 @@ const PositionList = () => {
     (async () => {
       // TODO: AMM V3 Pool
       const { client } = await getCosmWasmClient({ chainId: network.chainId });
-      const positions = await client.queryContractSmart(
-        'orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a',
-        {
-          positions: {
-            owner_id: address
-          }
+      const positions = await client.queryContractSmart(network.pool_v3, {
+        positions: {
+          owner_id: address
         }
-      );
+      });
 
       const positionsMap = positions.map((position: any, index) => {
         console.log({ position });
