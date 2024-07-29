@@ -379,7 +379,6 @@ const CreatePosition = () => {
     setCurrentPrice(
       new BigDecimal(prices[tokenFrom?.coinGeckoId] || 0).div(prices[tokenTo?.coinGeckoId] || 1).toNumber()
     );
-    setPriceInfo({ ...priceInfo, startPrice: currentPrice });
   }, [tokenFrom, tokenTo]);
 
   const concentrationArray = useMemo(

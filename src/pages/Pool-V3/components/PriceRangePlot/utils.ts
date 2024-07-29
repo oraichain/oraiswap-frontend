@@ -252,3 +252,31 @@ export const trimLeadingZeros = (amount: string): string => {
 export const extractDenom = (tokenInfo: TokenItemType) => {
   return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
 }
+
+export enum PositionTokenBlock {
+  None,
+  A,
+  B
+}
+
+export const determinePositionTokenBlock = (
+  currentSqrtPrice: bigint,
+  lowerTick: number,
+  upperTick: number,
+  isXtoY: boolean
+) => {
+  const lowerPrice = calculateSqrtPrice(lowerTick);
+  const upperPrice = calculateSqrtPrice(upperTick);
+
+  const isBelowLowerPrice = lowerPrice >= currentSqrtPrice;
+  const isAboveUpperPrice = upperPrice <= currentSqrtPrice;
+
+  if (isBelowLowerPrice) {
+    return isXtoY ? PositionTokenBlock.B : PositionTokenBlock.A;
+  }
+  if (isAboveUpperPrice) {
+    return isXtoY ? PositionTokenBlock.A : PositionTokenBlock.B;
+  }
+
+  return PositionTokenBlock.None;
+};
