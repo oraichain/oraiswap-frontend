@@ -45,7 +45,8 @@
       .icons {
         display: inline-flex;
 
-        img {
+        img,
+        svg {
           width: 32px;
           height: 32px;
 
@@ -125,6 +126,8 @@
           margin-top: 16px;
 
           &.apr {
+            display: flex;
+            margin: auto;
             @include theme {
               color: theme-get('primary-surface-default-dark-3');
             }
@@ -264,7 +267,8 @@
             align-items: center;
             gap: 6px;
 
-            img {
+            img,
+            svg {
               width: 20px;
               height: 20px;
             }

@@ -1,88 +1,87 @@
+import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
+import Loading from 'assets/gif/loading.gif';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
-import OraixIcon from 'assets/icons/oraix.svg';
-import UsdtIcon from 'assets/icons/tether.svg';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import SearchLightSvg from 'assets/images/search-light-svg.svg';
 import SearchSvg from 'assets/images/search-svg.svg';
 import classNames from 'classnames';
 import { TooltipIcon } from 'components/Tooltip';
+import { network } from 'config/networks';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import { formatPoolData } from 'pages/Pool-V3/helpers/format';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import { network } from 'config/networks';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { toDisplay } from '@oraichain/oraidex-common';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
-import { oraichainTokensWithIcon } from 'config/chainInfos';
 
 const PoolList = () => {
+  const { data: prices } = useCoinGeckoPrices();
   const theme = useTheme();
   const [search, setSearch] = useState<string>();
+  const [liquidity, setLiquidity] = useState<Record<string, number>>({});
+  const [totalLiquidity, setTotalLiquidity] = useState<number>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
   const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
 
   useEffect(() => {
     (async () => {
-      const { client } = await getCosmWasmClient({ chainId: network.chainId });
-      const pools = await client.queryContractSmart(network.pool_v3, {
-        pools: {}
-      });
+      try {
+        const { client } = await getCosmWasmClient({ chainId: network.chainId });
+        const pools = await client.queryContractSmart(network.pool_v3, {
+          pools: {}
+        });
 
-      const fmtPools = (pools || []).map((p) => {
-        const isLight = theme === 'light';
+        const fmtPools = (pools || []).map((p) => {
+          const isLight = theme === 'light';
+          return formatPoolData(p, isLight);
+        });
 
-        const [tokenX, tokenY] = [p?.pool_key.token_x, p?.pool_key.token_y];
-
-        let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
-        const feeTier = p?.pool_key.fee_tier.fee || 0;
-        const tokenXinfo =
-          tokenX && oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
-        const tokenYinfo =
-          tokenY && oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
-
-        if (tokenXinfo) {
-          const findFromToken = oraichainTokensWithIcon.find(
-            (tokenIcon) =>
-              tokenIcon.denom === tokenXinfo.denom || tokenIcon.contractAddress === tokenXinfo.contractAddress
-          );
-          const findToToken = oraichainTokensWithIcon.find(
-            (tokenIcon) =>
-              tokenIcon.denom === tokenYinfo.denom || tokenIcon.contractAddress === tokenYinfo.contractAddress
-          );
-          FromTokenIcon = isLight ? findFromToken.IconLight : findFromToken.Icon;
-          ToTokenIcon = isLight ? findToToken.IconLight : findToToken.Icon;
-        }
-
-        return {
-          ...p,
-          FromTokenIcon,
-          ToTokenIcon,
-          feeTier,
-          tokenXinfo,
-          tokenYinfo
-        };
-      });
-
-      setDataPool(fmtPools);
+        setDataPool(fmtPools);
+      } catch (error) {
+        console.log('error: get pools', error);
+      }
     })();
 
-    // get list pool o day => set vo
-    // setDataPool
     return () => {};
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (dataPool.length) {
+          const liquidityByPools = await SingletonOraiswapV3.getPoolLiquidities(dataPool, prices);
+
+          setLiquidity(liquidityByPools);
+
+          const totalLiq = Object.values(liquidityByPools).reduce((acc, cur) => {
+            acc = acc.add(cur || 0);
+            return acc;
+          }, new BigDecimal(0));
+
+          setTotalLiquidity(totalLiq.toNumber());
+        }
+      } catch (error) {
+        console.log('error: get liquidities', error);
+      }
+    })();
+  }, [dataPool]);
 
   return (
     <div className={styles.poolList}>
       <div className={styles.headerTable}>
         <div className={styles.total}>
           <p>Total liquidity</p>
-          <h1>{formatDisplayUsdt(29512.16)}</h1>
+          {totalLiquidity === 0 || totalLiquidity ? (
+            <h1>{formatDisplayUsdt(totalLiquidity || 0)}</h1>
+          ) : (
+            <img src={Loading} alt="loading" width={32} height={32} />
+          )}
         </div>
         <div className={styles.search}>
           <input
@@ -130,7 +129,7 @@ const PoolList = () => {
                   .map((item, index) => {
                     return (
                       <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                        <PoolItemTData item={item} theme={theme} />
+                        <PoolItemTData item={item} theme={theme} liquidity={liquidity[item?.poolKey]} />
                       </tr>
                     );
                   })}
@@ -148,17 +147,20 @@ const PoolList = () => {
   );
 };
 
-const PoolItemTData = ({ item, theme }) => {
+const PoolItemTData = ({ item, theme, liquidity }) => {
   const [openTooltip, setOpenTooltip] = useState(false);
   const isLight = theme === 'light';
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
   const navigate = useNavigate();
-  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo } = item;
+  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey } = item;
+
+  console.log('tokenXinfo', tokenXinfo);
+  console.log('tokenYinfo', tokenYinfo);
 
   return (
     <>
       <td>
-        <div className={styles.name} onClick={() => navigate(`/pools-v3/${item?.id}`)}>
+        <div className={styles.name} onClick={() => navigate(`/pools-v3/${poolKey}`)}>
           <div className={classNames(styles.icons, styles[theme])}>
             <FromTokenIcon />
             <ToTokenIcon />
@@ -173,7 +175,13 @@ const PoolItemTData = ({ item, theme }) => {
         </div>
       </td>
       <td className={styles.textRight}>
-        <span className={styles.amount}>{formatDisplayUsdt(1232343)}</span>
+        <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
+          {liquidity === 0 || liquidity ? (
+            formatDisplayUsdt(liquidity)
+          ) : (
+            <img src={Loading} alt="loading" width={30} height={30} />
+          )}
+        </span>
       </td>
       {/* <td className={styles.textRight}>
         <span className={styles.amount}>{formatDisplayUsdt(1348)}</span>
@@ -214,7 +222,7 @@ const PoolItemTData = ({ item, theme }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            navigate('/new-position/ORAIX/USDT/0.01');
+            navigate(`/new-position/${tokenXinfo.denom}/${tokenYinfo.denom}/0.01`);
           }}
           className={styles.add}
         >
