@@ -331,6 +331,8 @@ const CreatePosition = () => {
   useEffect(() => {
     console.log("here");
     console.log("test", loadChunkSize());
+    const res2 = SingletonOraiswapV3.getPoolLiquidities()
+    console.log("res", res2);
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;

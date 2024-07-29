@@ -23,12 +23,69 @@ import {
 // } from '@store/consts/utils';
 import { network } from 'config/networks';
 import { OraiswapTokenClient, OraiswapV3Client, OraiswapV3QueryClient } from '@oraichain/oraidex-contracts-sdk';
-import { ArrayOfTupleOfUint16AndUint64, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import {
+  ArrayOfTupleOfUint16AndUint64,
+  PoolWithPoolKey
+} from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 // import { defaultState } from '@store/reducers/connection';
 
-const FAUCET_LIST_TOKEN = [];
+export interface Token {
+  symbol: string;
+  address: string;
+  decimals: number;
+  name: string;
+  balance?: bigint;
+  coingeckoId?: string;
+  isUnknown?: boolean;
+}
+
+export const OCH: Token = {
+  symbol: 'OCH',
+  address: 'orai1hn8w33cqvysun2aujk5sv33tku4pgcxhhnsxmvnkfvdxagcx0p8qa4l98q',
+  decimals: 6,
+  name: 'Orchai Token',
+
+  coingeckoId: 'och'
+};
+
+export const USDT: Token = {
+  symbol: 'USDT',
+  address: 'orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh',
+  decimals: 6,
+  name: 'USDC',
+  coingeckoId: 'tether'
+};
+
+export const USDC: Token = {
+  symbol: 'USDC',
+  address: 'orai15un8msx3n5zf9ahlxmfeqd2kwa5wm0nrpxer304m9nd5q6qq0g6sku5pdd',
+  decimals: 6,
+  name: 'USDC',
+
+  coingeckoId: 'usd-coin'
+};
+
+export const ORAI: Token = {
+  symbol: 'ORAI',
+  address: 'orai',
+  decimals: 6,
+  name: 'Orai Token',
+  // logoURI: 'https://assets.coingecko.com/coins/images/12931/standard/orai.png',
+  coingeckoId: 'oraichain-token'
+};
+
+export const ORAIX: Token = {
+  symbol: 'ORAIX',
+  address: 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge',
+  decimals: 6,
+  name: 'ORAIX',
+  // logoURI: 'https://i.ibb.co/VmMJtf7/oraix.png',
+  coingeckoId: 'oraidex'
+};
+
+const FAUCET_LIST_TOKEN = [ORAIX, USDT, USDC, OCH, ORAI];
 const defaultState = {
-  dexAddress: ''
+  dexAddress: network.pool_v3
 };
 
 export const parse = (value: any) => {
@@ -80,17 +137,17 @@ const isObject = (value: any): boolean => {
 export const loadChunkSize = () => {
   const chunkSize = getChunkSize();
   return chunkSize;
-}
+};
 
 export const loadLiquidityTicksLimit = () => {
   const liquidityTicksLimit = getLiquidityTicksLimit();
   return liquidityTicksLimit;
-}
+};
 
 export const loadMaxTickmapQuerySize = () => {
   const maxTickmapQuerySize = getMaxTickmapQuerySize();
   return maxTickmapQuerySize;
-}
+};
 
 export const poolKeyToString = (poolKey: PoolKey): string => {
   return poolKey.token_x + '-' + poolKey.token_y + '-' + poolKey.fee_tier.fee + '-' + poolKey.fee_tier.tick_spacing;
@@ -294,7 +351,8 @@ export default class SingletonOraiswapV3 {
     });
   };
 
-  public static getPoolLiquidities = async (pools: PoolWithPoolKey[]): Promise<Record<string, number>> => {
+  public static getPoolLiquidities = async (pools?: PoolWithPoolKey[]): Promise<Record<string, number>> => {
+    pools = await SingletonOraiswapV3.getPools();
     const poolLiquidities: Record<string, number> = {};
     for (const pool of pools) {
       const tickmap = await this.getFullTickmap(pool.pool_key);
@@ -353,6 +411,8 @@ export default class SingletonOraiswapV3 {
         }
       ];
 
+      console.log({ tokenWithLiquidities });
+
       const tokenWithUSDValue = tokenWithLiquidities.map((token) => {
         const tokenInfo = tokenInfos.filter((item) => item.info.address === token.address)[0];
         return {
@@ -365,7 +425,6 @@ export default class SingletonOraiswapV3 {
 
       poolLiquidities[poolKeyToString(pool.pool_key)] = totalValue;
     }
-    console.log({ poolLiquidities });
 
     return poolLiquidities;
   };
