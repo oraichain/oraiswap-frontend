@@ -16,7 +16,8 @@ import {
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
-  getMinTick
+  getMinTick,
+  Price
 } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -37,6 +38,7 @@ import {
 import SlippageSetting from '../SettingSlippage';
 import TokenForm from '../TokenForm';
 import styles from './index.module.scss';
+import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 
 let args = {
   data: [
@@ -328,7 +330,7 @@ const CreatePosition = () => {
   );
 
   const [priceInfo, setPriceInfo] = useState<PriceInfo>({
-    startPrice: 1
+    startPrice: 1.0
   });
   const [isOpen, setIsOpen] = useState(false);
   const [openTooltip, setOpenTooltip] = useState(false);
@@ -367,8 +369,8 @@ const CreatePosition = () => {
     return true;
   }, [tokenFrom, tokenTo]);
 
-  const [amountTo, setAmountTo] = useState<string>();
-  const [amountFrom, setAmountFrom] = useState<string>();
+  const [amountTo, setAmountTo] = useState<string>('');
+  const [amountFrom, setAmountFrom] = useState<string>('');
   const [tokenFromInput, setTokenFromInput] = useState({
     value: amountFrom,
     setValue: (value) => {
@@ -432,7 +434,6 @@ const CreatePosition = () => {
 
   useEffect(() => {
     checkNoPool(feeTier, tokenFrom, tokenTo);
-    console.log({ feeTier, tokenFrom, tokenTo, isPoolExist });
   }, [feeTier, tokenFrom, tokenTo, isPoolExist]);
 
   useEffect(() => {
@@ -517,7 +518,6 @@ const CreatePosition = () => {
   };
 
   const onChangeRange = (left: number, right: number) => {
-    // console.log({ left, right });
     let leftRange: number;
     let rightRange: number;
 
@@ -536,50 +536,49 @@ const CreatePosition = () => {
     setLeftRange(Number(left));
     setRightRange(Number(right));
 
-    // if (
-    //   tokenAIndex !== null &&
-    //   (isXtoY ? rightRange > midPrice.index : rightRange < midPrice.index)
-    // ) {
-    //   const deposit = tokenADeposit;
-    //   // console.log({ deposit, leftRange, rightRange });
-    //   const amount = getOtherTokenAmount(
-    //     convertBalanceToBigint(deposit, Number(tokens[tokenAIndex].decimals)),
-    //     Number(leftRange),
-    //     Number(rightRange),
-    //     true
-    //   );
+    if (
+      tokenFrom &&
+      (isXtoY ? rightRange > midPrice.index : rightRange < midPrice.index)
+    ) {
+      const deposit = amountFrom;
+      // console.log({ deposit, leftRange, rightRange });
+      const amount = getOtherTokenAmount(
+        convertBalanceToBigint(deposit, tokenFrom.decimals).toString(),
+        Number(leftRange),
+        Number(rightRange),
+        true
+      );
 
-    //   if (tokenBIndex !== null && +deposit !== 0) {
-    //     setTokenADeposit(deposit);
-    //     setTokenBDeposit(amount);
-    //     return;
-    //   }
-    // }
+      if (tokenTo && +deposit !== 0) {
+        setAmountFrom(deposit);
+        setAmountTo(amount);
+        return;
+      }
+    }
 
-    // if (
-    //   tokenBIndex !== null &&
-    //   (isXtoY ? leftRange < midPrice.index : leftRange > midPrice.index)
-    // ) {
-    //   const deposit = tokenBDeposit;
-    //   // console.log({ deposit, leftRange, rightRange });
-    //   const amount = getOtherTokenAmount(
-    //     convertBalanceToBigint(deposit, Number(tokens[tokenBIndex].decimals)),
-    //     Number(leftRange),
-    //     Number(rightRange),
-    //     false
-    //   );
+    if (
+      tokenTo &&
+      (isXtoY ? leftRange < midPrice.index : leftRange > midPrice.index)
+    ) {
+      const deposit = amountTo;
+      // console.log({ deposit, leftRange, rightRange });
+      const amount = getOtherTokenAmount(
+        convertBalanceToBigint(deposit, tokenTo.decimals).toString(),
+        Number(leftRange),
+        Number(rightRange),
+        false
+      );
 
-    //   if (tokenAIndex !== null && +deposit !== 0) {
-    //     setTokenBDeposit(deposit);
-    //     setTokenADeposit(amount);
-    //   }
-    // }
+      if (tokenFrom && +deposit !== 0) {
+        setAmountTo(deposit);
+        setAmountFrom(amount);
+      }
+    }
   };
 
   const changeRangeHandler = (left: number, right: number) => {
     let leftRange: number;
     let rightRange: number;
-    console.log({ left, right });
 
     if (args.positionOpeningMethod === 'range') {
       const { leftInRange, rightInRange } = getTicksInsideRange(left, right, args.isXtoY);
@@ -755,7 +754,6 @@ const CreatePosition = () => {
         token_x: tokenFrom.contractAddress ? tokenFrom.contractAddress : tokenFrom.denom,
         token_y: tokenTo.contractAddress ? tokenTo.contractAddress : tokenTo.denom
       });
-      console.log(pool !== null);
       setIsPoolExist(pool !== null);
       if (pool) {
         setPoolInfo(pool);
@@ -830,6 +828,41 @@ const CreatePosition = () => {
     const result = calcAmount(amount, left, right, extractDenom(calcToken));
 
     return trimLeadingZeros(printBigint(result, printToken.decimals));
+  };
+
+  const onChangeMidPrice = (mid: Price) => {
+    const convertedMid = Number(mid);
+    setMidPrice({
+      index: convertedMid,
+      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+    });
+    if (amountFrom && (isXtoY ? rightRange > convertedMid : rightRange < convertedMid)) {
+      const deposit = amountFrom;
+      const amount = getOtherTokenAmount(
+        convertBalanceToBigint(deposit, tokenFrom.decimals).toString(),
+        leftRange,
+        rightRange,
+        true
+      );
+      if (tokenTo && +deposit !== 0) {
+        setAmountFrom(deposit);
+        setAmountTo(amount);
+        return;
+      }
+    }
+    if (amountTo && (isXtoY ? leftRange < convertedMid : leftRange > convertedMid)) {
+      const deposit = amountTo;
+      const amount = getOtherTokenAmount(
+        convertBalanceToBigint(deposit, tokenTo.decimals).toString(),
+        leftRange,
+        rightRange,
+        false
+      );
+      if (tokenFrom && +deposit !== 0) {
+        setAmountTo(deposit);
+        setAmountFrom(amount);
+      }
+    }
   };
 
   const renderPriceSection = isPoolExist ? (
@@ -975,7 +1008,16 @@ const CreatePosition = () => {
       </div>
     </div>
   ) : (
-    <NewPositionNoPool fromToken={tokenFrom} toToken={tokenTo} priceInfo={priceInfo} setPriceInfo={setPriceInfo} />
+    <NewPositionNoPool 
+      fromToken={tokenFrom} // symbol + decimal
+      toToken={tokenTo}  // symbol + decimal
+      priceInfo={priceInfo} // startPrice, minPrice, maxPrice
+      setPriceInfo={setPriceInfo} // setStartPrice, setMinPrice, setMaxPrice
+      onChangeMidPrice={onChangeMidPrice}
+      tickSpacing={args.tickSpacing}
+      isXtoY={isXtoY}
+      onChangeRange={changeRangeHandler}
+    />
   );
 
   return (

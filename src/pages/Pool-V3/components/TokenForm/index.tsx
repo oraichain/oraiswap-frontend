@@ -88,7 +88,7 @@ const TokenForm = ({
     handleChangeTokenTo(originFromToken);
   };
 
-  console.log('fee', fee);
+  // console.log('fee', fee);
   return (
     <div className={styles.tokenForm}>
       <div className={styles.select}>
