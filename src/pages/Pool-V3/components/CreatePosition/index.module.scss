@@ -8,6 +8,10 @@
   align-items: center;
   gap: 40px;
   flex-shrink: 0;
+
+  @include mobile {
+    padding: 90px 10px 48px 10px;
+  }
 }
 
 .box {
@@ -19,6 +23,11 @@
   gap: 8px;
 
   border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+
+  @include mobile {
+    padding: 16px;
+  }
+
   @include theme {
     border: 1px solid theme-get('neutral-border-border-default');
     background: theme-get('neutral-surface-bg-swap');
@@ -78,9 +87,9 @@
       position: relative;
 
       .noToken {
-        position: absolute;
-        top: 0;
-        left: 0;
+        // position: absolute;
+        // top: 0;
+        // left: 0;
         width: 100%;
         height: 500px;
         opacity: 0.8;

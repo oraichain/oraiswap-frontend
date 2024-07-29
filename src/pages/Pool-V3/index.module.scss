@@ -12,6 +12,11 @@
   flex-shrink: 0;
   width: 100%;
 
+  @include mobile {
+    gap: 24px;
+    padding: 90px 10px 48px 10px;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;
