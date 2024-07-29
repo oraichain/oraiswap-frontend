@@ -99,7 +99,7 @@ const PoolV3Detail = () => {
         <div className={styles.addPosition}>
           <Button
             onClick={() => {
-              navigate('/new-position/ORAIX/USDT/0.01');
+              navigate(`/new-position/${tokenXinfo?.denom}/${tokenYinfo?.denom}/0.01`);
             }}
             type="primary-sm"
           >

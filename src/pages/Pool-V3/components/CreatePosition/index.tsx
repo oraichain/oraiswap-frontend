@@ -5,7 +5,7 @@ import { ReactComponent as TooltipIc } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
 import styles from './index.module.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useTheme from 'hooks/useTheme';
 import PriceRangePlot, { TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -34,6 +34,7 @@ import {
 import { TooltipIcon } from 'components/Tooltip';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA, loadChunkSize } from 'libs/contractSingleton';
 import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import useFillToken from 'pages/Pool-V3/hooks/useFillToken';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 let args = {
@@ -311,9 +312,11 @@ const CreatePosition = () => {
   const navigate = useNavigate();
   const { data: prices } = useCoinGeckoPrices();
   const theme = useTheme();
-  const [tokenFrom, setTokenFrom] = useState<TokenItemType>();
-  const [tokenTo, setTokenTo] = useState<TokenItemType>();
-  const [feeTier, setFeeTier] = useState<FeeTier>(ALL_FEE_TIERS_DATA[0]);
+  const { initFee, initFromToken, initToToken } = useFillToken();
+
+  const [tokenFrom, setTokenFrom] = useState<TokenItemType>(initFromToken);
+  const [tokenTo, setTokenTo] = useState<TokenItemType>(initToToken);
+  const [feeTier, setFeeTier] = useState<FeeTier>(initFee || ALL_FEE_TIERS_DATA[0]);
   const [toAmount, setToAmount] = useState();
   const [fromAmount, setFromAmount] = useState();
   const [priceInfo, setPriceInfo] = useState<PriceInfo>({
@@ -918,7 +921,13 @@ const CreatePosition = () => {
     <div className={classNames('small_container', styles.createPosition)}>
       <div className={styles.box}>
         <div className={styles.header}>
-          <div className={styles.back} onClick={() => navigate('/pools-v3')}>
+          <div
+            className={styles.back}
+            onClick={() => {
+              // navigate(-1);
+              navigate('/pools-v3');
+            }}
+          >
             <BackIcon />
           </div>
           <h1>Add new liquidity position</h1>

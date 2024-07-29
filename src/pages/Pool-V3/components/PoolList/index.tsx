@@ -154,9 +154,6 @@ const PoolItemTData = ({ item, theme, liquidity }) => {
   const navigate = useNavigate();
   const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey } = item;
 
-  console.log('tokenXinfo', tokenXinfo);
-  console.log('tokenYinfo', tokenYinfo);
-
   return (
     <>
       <td>
