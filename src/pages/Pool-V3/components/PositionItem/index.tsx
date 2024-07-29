@@ -29,7 +29,10 @@ import {
 import useConfigReducer from 'hooks/useConfigReducer';
 import { printBigint } from '../PriceRangePlot/utils';
 import { network } from 'config/networks';
-import { Tick } from 'pages/Pool-V3/packages/sdk/OraiswapV3.types';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
+import { getTransactionUrl, handleErrorTransaction } from 'helper';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { getCosmWasmClient } from 'libs/cosmjs';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -50,7 +53,12 @@ const PositionItem = ({ position }) => {
     lowerTick: undefined,
     upperTick: undefined
   });
-  const [positions, setPositions] = useState<any>({});
+  const [positions, setPositions] = useState<{
+    poolData: any;
+  }>();
+  const [claimLoading, setClaimLoading] = useState<boolean>(false);
+  const [removeLoading, setRemoveLoading] = useState<boolean>(false);
+  const [statusRange, setStatusRange] = useState(undefined);
   const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
 
   const [xToY, setXToY] = useState<boolean>(
@@ -87,21 +95,9 @@ const PositionItem = ({ position }) => {
     (async () => {
       const { pool_key, lower_tick_index, upper_tick_index } = position;
       const [lowerTickData, upperTickData, poolsData] = await Promise.all([
-        window.client.queryContractSmart(network.pool_v3, {
-          tick: {
-            index: lower_tick_index,
-            key: pool_key
-          }
-        }),
-        window.client.queryContractSmart(network.pool_v3, {
-          tick: {
-            index: upper_tick_index,
-            key: pool_key
-          }
-        }),
-        window.client.queryContractSmart(network.pool_v3, {
-          pools: {}
-        })
+        SingletonOraiswapV3.getTicks(lower_tick_index, pool_key),
+        SingletonOraiswapV3.getTicks(upper_tick_index, pool_key),
+        SingletonOraiswapV3.getPools()
       ]);
 
       const positionsData = poolsData.find(
@@ -124,8 +120,22 @@ const PositionItem = ({ position }) => {
     return () => {};
   }, [openCollapse]);
 
+  useEffect(() => {
+    (async () => {
+      const { pool } = await SingletonOraiswapV3.getPool({
+        fee_tier: position.pool_key.fee_tier,
+        token_x: position.pool_key.token_x,
+        token_y: position.pool_key.token_y
+      });
+      const { lower_tick_index, upper_tick_index } = position;
+      setStatusRange(pool.current_tick_index >= lower_tick_index && pool.current_tick_index <= upper_tick_index);
+    })();
+
+    return () => {};
+  }, []);
+
   const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd] = useMemo(() => {
-    if (positions.poolData && openCollapse) {
+    if (positions?.poolData && openCollapse) {
       const convertedPool = getConvertedPool(positions);
       const convertedPosition = getConvertedPosition(position);
       const res = calculateFee(convertedPool, convertedPosition, tick.lowerTick, tick.upperTick);
@@ -144,6 +154,10 @@ const PositionItem = ({ position }) => {
     return [0, 0, 0, 0];
   }, [position, positions, tick.lowerTick, tick.upperTick, openCollapse]);
 
+  const reloadBalanceComponent = (balanceX, balanceY, token) => {
+    return balanceX || balanceY ? `${balanceX} ${token.name}` : <Loader width={20} height={20} />;
+  };
+
   return (
     <div ref={ref} className={styles.positionItem}>
       <div className={styles.trigger} onClick={() => setCollapse(!openCollapse)}>
@@ -157,9 +171,11 @@ const PositionItem = ({ position }) => {
           </span>
           <div className={styles.fee}>
             <span className={styles.item}>Fee: {fee}%</span>
-            <span className={classNames(styles.item, styles.status, { [styles.inRange]: true })}>
-              {true ? 'In Range' : 'Out Range'}
-            </span>
+            {statusRange !== undefined && (
+              <span className={classNames(styles.item, styles.status, { [styles.inRange]: statusRange })}>
+                {statusRange ? 'In Range' : 'Out Range'}
+              </span>
+            )}
           </div>
         </div>
 
@@ -225,15 +241,19 @@ const PositionItem = ({ position }) => {
             <h4>Current Assets</h4>
             <div className={styles.itemRow}>
               <span className={classNames(styles.usd, { [styles.green]: true, [styles.red]: false })}>
-                {formatDisplayUsdt(0)}
+                {tokenXLiquidityInUsd || tokenYLiquidityInUsd ? (
+                  formatDisplayUsdt(tokenXLiquidityInUsd + tokenYLiquidityInUsd)
+                ) : (
+                  <Loader width={20} height={20} />
+                )}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
-                {numberWithCommas(0)} {position?.tokenX.name}
+                {reloadBalanceComponent(tokenXLiquidity, tokenYLiquidity, position?.tokenX)}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenYIcon />
-                {numberWithCommas(0)} {position?.tokenY.name}
+                {reloadBalanceComponent(tokenYLiquidity, tokenXLiquidity, position?.tokenY)}
               </span>
             </div>
             <div className={styles.divider}></div>
@@ -254,40 +274,56 @@ const PositionItem = ({ position }) => {
                 />
               </h4>
               <div className={styles.itemRow}>
-                <span className={styles.usd}>{formatDisplayUsdt(tokenXLiquidityInUsd + tokenYLiquidityInUsd)}</span>
+                <span className={styles.usd}>{formatDisplayUsdt(0)}</span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
-                  {tokenXLiquidity} {position?.tokenX.name}
+                  {0} {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
-                  {tokenYLiquidity} {position?.tokenY.name}
+                  {0} {position?.tokenY.name}
                 </span>
               </div>
             </div>
             <div className={styles.btnGroup}>
               <Button
+                disabled={removeLoading}
                 type="third-sm"
                 onClick={async () => {
-                  // TODO: AMM v3 remove position
-                  await window.client.execute(
-                    address,
-                    network.pool_v3,
-                    {
-                      remove_position: {
-                        index: position.id
-                      }
-                    },
-                    'auto',
-                    ''
+                  try {
+                    setRemoveLoading(true);
+                    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+                    SingletonOraiswapV3.load(client, address);
+                    const { transactionHash } = await SingletonOraiswapV3.dex.removePosition({
+                      index: Number(position.id)
+                    });
+
+                    if (transactionHash) {
+                      displayToast(TToastType.TX_SUCCESSFUL, {
+                        customLink: getTransactionUrl(network.chainId, transactionHash)
+                      });
+                    }
+                  } catch (error) {
+                    console.log({ error });
+                    handleErrorTransaction(error);
+                  } finally {
+                    setRemoveLoading(false);
+                  }
+                }}
+              >
+                {removeLoading && <Loader width={20} height={20} />}
+                Close Position
+              </Button>
+              <Button
+                type="primary-sm"
+                onClick={() => {
+                  console.log({ position });
+                  navigate(
+                    // fee_tier.fee / 1e10
+                    `/new-position/${position.pool_key.token_x}-${position.pool_key.token_y}-${position.pool_key.fee_tier.fee}`
                   );
                 }}
               >
-                {/* <Loader width={20} height={20} />
-                 */}
-                Close Position
-              </Button>
-              <Button type="primary-sm" onClick={() => navigate('/new-position/ORAIX/USDT/0.01')}>
                 Add Liquidity
               </Button>
             </div>
@@ -318,37 +354,50 @@ const PositionItem = ({ position }) => {
             <div className={styles.row}>
               <h4>Unclaimed Rewards</h4>
               <div className={styles.itemRow}>
-                <span className={styles.usd}>{formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd)}</span>
+                <span className={styles.usd}>
+                  {tokenXClaimInUsd || tokenYClaimInUsd ? (
+                    formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd)
+                  ) : (
+                    <Loader width={20} height={20} />
+                  )}
+                </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
-                  {tokenXClaim} {position?.tokenX.name}
+                  {reloadBalanceComponent(tokenXClaim, tokenYLiquidity, position?.tokenX)}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
-                  {tokenYClaim} {position?.tokenY.name}
+                  {reloadBalanceComponent(tokenYClaim, tokenXLiquidity, position?.tokenY)}
                 </span>
               </div>
             </div>
             <div className={styles.btnGroup}>
               <Button
                 type="third-sm"
+                disabled={claimLoading}
                 onClick={async () => {
-                  await window.client.execute(
-                    address,
-                    network.pool_v3,
-                    {
-                      claim_fee: {
-                        index: position.id
-                      }
-                    },
-                    'auto',
-                    ''
-                  );
+                  try {
+                    setClaimLoading(true);
+                    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+                    SingletonOraiswapV3.load(client, address);
+                    const { transactionHash } = await SingletonOraiswapV3.dex.claimFee({
+                      index: Number(position.id)
+                    });
+
+                    if (transactionHash) {
+                      displayToast(TToastType.TX_SUCCESSFUL, {
+                        customLink: getTransactionUrl(network.chainId, transactionHash)
+                      });
+                    }
+                  } catch (error) {
+                    console.log({ error });
+                    handleErrorTransaction(error);
+                  } finally {
+                    setClaimLoading(false);
+                  }
                 }}
               >
-                {/* <Loader width={20} height={20} />
-                 */}
-                Claim Rewards
+                {claimLoading && <Loader width={20} height={20} />} Claim Rewards
               </Button>
             </div>
           </div>

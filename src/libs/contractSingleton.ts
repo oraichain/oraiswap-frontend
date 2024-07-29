@@ -29,6 +29,7 @@ import {
   PoolWithPoolKey
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { Tick } from 'pages/Pool-V3/packages/sdk/OraiswapV3.types';
 // import { defaultState } from '@store/reducers/connection';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
@@ -36,7 +37,7 @@ export const ALL_FEE_TIERS_DATA: FeeTier[] = [
   { fee: 500000000, tick_spacing: 10 },
   { fee: 3000000000, tick_spacing: 100 },
   { fee: 10000000000, tick_spacing: 100 }
-]
+];
 
 export interface Token {
   symbol: string;
@@ -266,6 +267,12 @@ export default class SingletonOraiswapV3 {
     const client = await CosmWasmClient.connect(network.rpc);
     const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
     return await queryClient.pools({});
+  }
+
+  public static async getTicks(index, key): Promise<Tick> {
+    const client = await CosmWasmClient.connect(network.rpc);
+    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
+    return await queryClient.tick({ index, key });
   }
 
   public static async getPool(poolKey: PoolKey): Promise<PoolWithPoolKey> {

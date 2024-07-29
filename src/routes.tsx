@@ -43,7 +43,7 @@ export default () => (
       <Route path="/pools" element={<Pools />} />
       <Route path="/pools-v3" element={<PoolsV3 />} />
       <Route path="/pools-v3/:poolId" element={<PoolV3Detail />} />
-      <Route path="/new-position/:item1?/:item2?/:item3?" element={<CreatePosition />} />
+      <Route path="/new-position/:item" element={<CreatePosition />} />
       <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/download-owallet" element={<DownloadApp />} />

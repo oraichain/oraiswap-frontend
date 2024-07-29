@@ -32,10 +32,7 @@ const PoolList = () => {
   useEffect(() => {
     (async () => {
       try {
-        const { client } = await getCosmWasmClient({ chainId: network.chainId });
-        const pools = await client.queryContractSmart(network.pool_v3, {
-          pools: {}
-        });
+        const pools = await SingletonOraiswapV3.getPools();
 
         const fmtPools = (pools || []).map((p) => {
           const isLight = theme === 'light';
@@ -222,7 +219,7 @@ const PoolItemTData = ({ item, theme, liquidity }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/new-position/${tokenXinfo.denom}/${tokenYinfo.denom}/0.01`);
+            navigate(`/new-position/${tokenXinfo.denom}-${tokenYinfo.denom}-0.01`);
           }}
           className={styles.add}
         >

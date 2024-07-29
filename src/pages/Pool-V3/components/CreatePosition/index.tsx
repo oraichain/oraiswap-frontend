@@ -5,7 +5,7 @@ import { ReactComponent as TooltipIc } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
 import styles from './index.module.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useTheme from 'hooks/useTheme';
 import PriceRangePlot from '../PriceRangePlot/PriceRangePlot';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -25,6 +25,7 @@ import { getMaxTick, getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_
 import { TooltipIcon } from 'components/Tooltip';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA, loadChunkSize } from 'libs/contractSingleton';
 import { FeeTier } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { oraichainTokens } from 'config/bridgeTokens';
 
 let args = {
   data: [
@@ -300,9 +301,17 @@ export enum TYPE_CHART {
 const CreatePosition = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const [tokenFrom, setTokenFrom] = useState<TokenItemType>();
-  const [tokenTo, setTokenTo] = useState<TokenItemType>();
-  const [feeTier, setFeeTier] = useState<FeeTier>(ALL_FEE_TIERS_DATA[0]);
+  const { item } = useParams();
+  const [tokenX, tokenY, fee] = item.split('-');
+  const [tokenFrom, setTokenFrom] = useState<TokenItemType>(
+    tokenX && oraichainTokens.find((orai) => [orai.denom, orai.contractAddress].includes(tokenX))
+  );
+  const [tokenTo, setTokenTo] = useState<TokenItemType>(
+    tokenY && oraichainTokens.find((orai) => [orai.denom, orai.contractAddress].includes(tokenY))
+  );
+  const [feeTier, setFeeTier] = useState<FeeTier>(
+    fee ? ALL_FEE_TIERS_DATA.find((allFee) => allFee.fee === Number(fee)) : ALL_FEE_TIERS_DATA[0]
+  );
   const [toAmount, setToAmount] = useState();
   const [fromAmount, setFromAmount] = useState();
   const [priceInfo, setPriceInfo] = useState<PriceInfo>({
