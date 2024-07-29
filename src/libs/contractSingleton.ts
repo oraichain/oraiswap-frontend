@@ -1,5 +1,4 @@
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { OraiswapTokenClient, OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
   Tickmap,
   getMaxTick,
@@ -22,9 +21,9 @@ import {
 //   poolKeyToString
 //   // parse
 // } from '@store/consts/utils';
-import { ArrayOfTupleOfUint16AndUint64, PoolWithPoolKey } from '../pages/Pool-V3/packages/sdk/OraiswapV3.types';
 import { network } from 'config/networks';
-import { OraiswapV3Client, OraiswapV3QueryClient } from 'pages/Pool-V3/packages/sdk';
+import { OraiswapTokenClient, OraiswapV3Client, OraiswapV3QueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { ArrayOfTupleOfUint16AndUint64, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 // import { defaultState } from '@store/reducers/connection';
 
 const FAUCET_LIST_TOKEN = [];
@@ -74,9 +73,24 @@ const isObject = (value: any): boolean => {
   return typeof value === 'object' && value !== null;
 };
 
-export const CHUNK_SIZE = getChunkSize();
-export const LIQUIDITY_TICKS_LIMIT = getLiquidityTicksLimit();
-export const MAX_TICKMAP_QUERY_SIZE = getMaxTickmapQuerySize();
+// export let CHUNK_SIZE = getChunkSize();
+// export let LIQUIDITY_TICKS_LIMIT = getLiquidityTicksLimit();
+// export let MAX_TICKMAP_QUERY_SIZE = getMaxTickmapQuerySize();
+
+export const loadChunkSize = () => {
+  const chunkSize = getChunkSize();
+  return chunkSize;
+}
+
+export const loadLiquidityTicksLimit = () => {
+  const liquidityTicksLimit = getLiquidityTicksLimit();
+  return liquidityTicksLimit;
+}
+
+export const loadMaxTickmapQuerySize = () => {
+  const maxTickmapQuerySize = getMaxTickmapQuerySize();
+  return maxTickmapQuerySize;
+}
 
 export const poolKeyToString = (poolKey: PoolKey): string => {
   return poolKey.token_x + '-' + poolKey.token_y + '-' + poolKey.fee_tier.fee + '-' + poolKey.fee_tier.tick_spacing;
@@ -201,11 +215,11 @@ export default class SingletonOraiswapV3 {
     const tickSpacing = poolKey.fee_tier.tick_spacing;
     assert(tickSpacing <= 100);
 
-    assert(MAX_TICKMAP_QUERY_SIZE > 3);
-    assert(CHUNK_SIZE * 2 > tickSpacing);
+    assert(loadMaxTickmapQuerySize() > 3);
+    assert(loadChunkSize() * 2 > tickSpacing);
     // move back 1 chunk since the range is inclusive
     // then move back additional 2 chunks to ensure that adding tickspacing won't exceed the query limit
-    const jump = (MAX_TICKMAP_QUERY_SIZE - 3) * CHUNK_SIZE;
+    const jump = (loadMaxTickmapQuerySize() - 3) * loadChunkSize();
 
     while (lowerTick <= maxTick) {
       let nextTick = lowerTick + jump;
@@ -244,7 +258,7 @@ export default class SingletonOraiswapV3 {
   public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
     const tickIndexes: number[] = [];
     for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
-      for (let bit = 0; bit < CHUNK_SIZE; bit++) {
+      for (let bit = 0; bit < loadChunkSize(); bit++) {
         const checkedBit = chunk & (1n << BigInt(bit));
         if (checkedBit) {
           const tickIndex = positionToTick(Number(chunkIndex), bit, poolKey.fee_tier.tick_spacing);
@@ -252,7 +266,7 @@ export default class SingletonOraiswapV3 {
         }
       }
     }
-    const tickLimit = LIQUIDITY_TICKS_LIMIT;
+    const tickLimit = loadLiquidityTicksLimit();
     const promises: Promise<LiquidityTick[]>[] = [];
     const client = await CosmWasmClient.connect(network.rpc);
     this._dexQuerier = new OraiswapV3QueryClient(client, defaultState.dexAddress);
@@ -289,7 +303,7 @@ export default class SingletonOraiswapV3 {
 
       const tickIndexes: number[] = [];
       for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
-        for (let bit = 0; bit < CHUNK_SIZE; bit++) {
+        for (let bit = 0; bit < loadChunkSize(); bit++) {
           const checkedBit = chunk & (1n << BigInt(bit));
           if (checkedBit) {
             const tickIndex = positionToTick(Number(chunkIndex), bit, pool.pool_key.fee_tier.tick_spacing);
@@ -369,7 +383,7 @@ export default class SingletonOraiswapV3 {
 
         const tickIndexes: number[] = [];
         for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
-          for (let bit = 0; bit < CHUNK_SIZE; bit++) {
+          for (let bit = 0; bit < loadChunkSize(); bit++) {
             const checkedBit = chunk & (1n << BigInt(bit));
             if (checkedBit) {
               const tickIndex = positionToTick(Number(chunkIndex), bit, pool.pool_key.fee_tier.tick_spacing);

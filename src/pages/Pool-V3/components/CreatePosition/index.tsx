@@ -23,6 +23,7 @@ import NewPositionNoPool from '../NewPositionNoPool';
 import SlippageSetting from '../SettingSlippage';
 import { getMaxTick, getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
 import { TooltipIcon } from 'components/Tooltip';
+import SingletonOraiswapV3, { loadChunkSize } from 'libs/contractSingleton'
 
 let args = {
   data: [
@@ -328,7 +329,8 @@ const CreatePosition = () => {
   const isMountedRef = useRef(false);
 
   useEffect(() => {
-    console.log({ plotMin, plotMax });
+    console.log("here");
+    console.log("test", loadChunkSize());
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
@@ -636,7 +638,7 @@ const CreatePosition = () => {
   //   }
   // }, [midPrice.index, concentrationArray]);
 
-  const checkNoPool = true;
+  const checkNoPool = false;
 
   const renderPriceSection = checkNoPool ? (
     <NewPositionNoPool fromToken={tokenFrom} toToken={tokenTo} priceInfo={priceInfo} setPriceInfo={setPriceInfo} />
