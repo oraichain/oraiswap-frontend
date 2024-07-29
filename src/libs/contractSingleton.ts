@@ -25,10 +25,18 @@ import { network } from 'config/networks';
 import { OraiswapTokenClient, OraiswapV3Client, OraiswapV3QueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
   ArrayOfTupleOfUint16AndUint64,
+  FeeTier,
   PoolWithPoolKey
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 // import { defaultState } from '@store/reducers/connection';
+
+export const ALL_FEE_TIERS_DATA: FeeTier[] = [
+  { fee: 100000000, tick_spacing: 1 },
+  { fee: 500000000, tick_spacing: 10 },
+  { fee: 3000000000, tick_spacing: 100 },
+  { fee: 10000000000, tick_spacing: 100 }
+]
 
 export interface Token {
   symbol: string;
@@ -261,17 +269,21 @@ export default class SingletonOraiswapV3 {
   }
 
   public static async getPool(poolKey: PoolKey): Promise<PoolWithPoolKey> {
-    const client = await CosmWasmClient.connect(network.rpc);
-    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-    const pool = await queryClient.pool({
-      feeTier: poolKey.fee_tier,
-      token0: poolKey.token_x,
-      token1: poolKey.token_y
-    });
-    return {
-      pool: pool,
-      pool_key: poolKey
-    };
+    try {
+      const client = await CosmWasmClient.connect(network.rpc);
+      const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
+      const pool = await queryClient.pool({
+        feeTier: poolKey.fee_tier,
+        token0: poolKey.token_x,
+        token1: poolKey.token_y
+      });
+      return {
+        pool: pool,
+        pool_key: poolKey
+      };
+    } catch (error) {
+      return null;
+    }
   }
 
   public static async getAllPosition(address: string, limit?: number, offset?: PoolKey): Promise<any> {
