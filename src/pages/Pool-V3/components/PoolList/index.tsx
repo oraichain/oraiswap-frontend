@@ -24,7 +24,7 @@ import { oraichainTokensWithIcon } from 'config/chainInfos';
 const PoolList = () => {
   const theme = useTheme();
   const [search, setSearch] = useState<string>();
-  const [dataPool, setDataPool] = useState([...Array(10)]);
+  const [dataPool, setDataPool] = useState([...Array(0)]);
   const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
 
   useEffect(() => {
@@ -110,7 +110,7 @@ const PoolList = () => {
                 <tr>
                   <th>Pool name</th>
                   <th className={styles.textRight}>Liquidity</th>
-                  <th className={styles.textRight}>Volume (24H)</th>
+                  {/* <th className={styles.textRight}>Volume (24H)</th> */}
                   <th className={styles.textRight}>APR</th>
                   <th></th>
                 </tr>
@@ -120,13 +120,7 @@ const PoolList = () => {
                   .filter((p) => {
                     if (!search) return true;
 
-                    const [tokenX, tokenY] = [p?.pool_key.token_x, p?.pool_key.token_y];
-                    const tokenXinfo =
-                      tokenX &&
-                      oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
-                    const tokenYinfo =
-                      tokenY &&
-                      oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
+                    const { tokenXinfo, tokenYinfo } = p;
 
                     return (
                       (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
@@ -181,9 +175,9 @@ const PoolItemTData = ({ item, theme }) => {
       <td className={styles.textRight}>
         <span className={styles.amount}>{formatDisplayUsdt(1232343)}</span>
       </td>
-      <td className={styles.textRight}>
+      {/* <td className={styles.textRight}>
         <span className={styles.amount}>{formatDisplayUsdt(1348)}</span>
-      </td>
+      </td> */}
       <td>
         <div className={styles.apr}>
           <span className={styles.amount}>{numberWithCommas(13.48)}%</span>
