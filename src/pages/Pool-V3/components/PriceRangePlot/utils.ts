@@ -7,6 +7,7 @@ import {
   getMinTick,
 //   getPriceScale
 } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm.js';
+import { TokenItemType } from '@oraichain/oraidex-common';
 
 export const PRICE_SCALE = 24;
 export const CONCENTRATION_FACTOR = 1.00001526069123;
@@ -224,3 +225,30 @@ export const calcTicksAmountInRange = (
 
   return Math.ceil(Math.abs(maxIndex - minIndex) / tickSpacing);
 };
+
+export const trimLeadingZeros = (amount: string): string => {
+  const amountParts = amount.split('.');
+
+  if (!amountParts.length) {
+    return '0';
+  }
+
+  if (amountParts.length === 1) {
+    return amountParts[0];
+  }
+
+  const reversedDec = Array.from(amountParts[1]).reverse();
+  const firstNonZero = reversedDec.findIndex(char => char !== '0');
+
+  if (firstNonZero === -1) {
+    return amountParts[0];
+  }
+
+  const trimmed = reversedDec.slice(firstNonZero, reversedDec.length).reverse().join('');
+
+  return `${amountParts[0]}.${trimmed}`;
+};
+
+export const extractDenom = (tokenInfo: TokenItemType) => {
+  return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
+}

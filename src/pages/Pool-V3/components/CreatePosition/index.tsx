@@ -7,24 +7,33 @@ import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
 import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
 import useTheme from 'hooks/useTheme';
-import PriceRangePlot from '../PriceRangePlot/PriceRangePlot';
+import PriceRangePlot, { TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   calcPrice,
   calcTicksAmountInRange,
   calculateConcentrationRange,
+  extractDenom,
   getConcentrationArray,
+  printBigint,
   spacingMultiplicityGte,
-  toMaxNumericPlaces
+  toMaxNumericPlaces,
+  trimLeadingZeros
 } from '../PriceRangePlot/utils';
 import { TokenItemType, truncDecimals, BigDecimal } from '@oraichain/oraidex-common';
 import TokenForm from '../TokenForm';
 import NewPositionNoPool from '../NewPositionNoPool';
 import SlippageSetting from '../SettingSlippage';
-import { getMaxTick, getMinTick } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+import {
+  calculateSqrtPrice,
+  getLiquidityByX,
+  getLiquidityByY,
+  getMaxTick,
+  getMinTick
+} from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
 import { TooltipIcon } from 'components/Tooltip';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA, loadChunkSize } from 'libs/contractSingleton';
-import { FeeTier } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 let args = {
@@ -331,7 +340,14 @@ const CreatePosition = () => {
 
   const [isPoolExist, setIsPoolExist] = useState(false);
 
+  const [poolInfo, setPoolInfo] = useState<PoolWithPoolKey>();
+
   const [currentPrice, setCurrentPrice] = useState(1);
+
+  const [midPrice, setMidPrice] = useState<TickPlotPositionData>({
+    index: 0,
+    x: 1
+  });
 
   const isMountedRef = useRef(false);
 
@@ -358,6 +374,8 @@ const CreatePosition = () => {
     () => getConcentrationArray(Number(args.tickSpacing), 2, Number(args.midPrice.index)).sort((a, b) => a - b),
     [args.tickSpacing]
   );
+
+  const liquidityRef = useRef<any>(0n);
 
   const [concentrationIndex, setConcentrationIndex] = useState(0);
 
@@ -668,9 +686,86 @@ const CreatePosition = () => {
       });
       console.log(pool !== null);
       setIsPoolExist(pool !== null);
+      if (pool) {
+        setPoolInfo(pool);
+      }
       return;
     }
     setIsPoolExist(false);
+  };
+
+  const isXtoY = useMemo(() => {
+    if (tokenFrom && tokenTo) {
+      return extractDenom(tokenFrom) < extractDenom(tokenTo);
+    }
+    return true;
+  }, [tokenFrom, tokenTo]);
+
+  const calcAmount = (amount: TokenAmount, left: number, right: number, tokenAddress: string) => {
+    if (tokenFrom || tokenTo || isNaN(left) || isNaN(right)) {
+      return BigInt(0);
+    }
+
+    const byX = tokenAddress === (isXtoY ? extractDenom(tokenFrom) : extractDenom(tokenTo));
+
+    const lowerTick = Math.min(left, right);
+    const upperTick = Math.max(left, right);
+
+    try {
+      if (byX) {
+        const { amount: tokenYAmount, l: positionLiquidity } = getLiquidityByX(
+          BigInt(amount),
+          lowerTick,
+          upperTick,
+          isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+          true
+        );
+
+        if (isMountedRef.current) {
+          liquidityRef.current = positionLiquidity;
+        }
+
+        return tokenYAmount;
+      }
+
+      const { amount: tokenXAmount, l: positionLiquidity } = getLiquidityByY(
+        BigInt(amount),
+        lowerTick,
+        upperTick,
+        isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+        true
+      );
+
+      if (isMountedRef.current) {
+        liquidityRef.current = positionLiquidity;
+      }
+
+      return tokenXAmount;
+    } catch (error) {
+      const result = (byX ? getLiquidityByY : getLiquidityByX)(
+        BigInt(amount),
+        lowerTick,
+        upperTick,
+        isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+        true
+      );
+      if (isMountedRef.current) {
+        liquidityRef.current = result.l;
+      }
+    }
+
+    return BigInt(0);
+  };
+
+  const getOtherTokenAmount = (amount: TokenAmount, left: number, right: number, byFirst: boolean) => {
+    const [printToken, calcToken] = byFirst ? [tokenTo, tokenFrom] : [tokenFrom, tokenTo];
+    if (printToken === null || calcToken === null) {
+      return '0.0';
+    }
+
+    const result = calcAmount(amount, left, right, extractDenom(calcToken));
+
+    return trimLeadingZeros(printBigint(result, printToken.decimals));
   };
 
   const renderPriceSection = isPoolExist ? (
@@ -816,13 +911,7 @@ const CreatePosition = () => {
       </div>
     </div>
   ) : (
-    <NewPositionNoPool 
-      fromToken={tokenFrom} 
-      toToken={tokenTo} 
-      priceInfo={priceInfo} 
-      setPriceInfo={setPriceInfo} 
-    
-    />
+    <NewPositionNoPool fromToken={tokenFrom} toToken={tokenTo} priceInfo={priceInfo} setPriceInfo={setPriceInfo} />
   );
 
   return (
@@ -851,7 +940,6 @@ const CreatePosition = () => {
               fromAmount={fromAmount}
               toAmount={toAmount}
               fee={feeTier}
-              
             />
           </div>
           <div className={styles.item}>
