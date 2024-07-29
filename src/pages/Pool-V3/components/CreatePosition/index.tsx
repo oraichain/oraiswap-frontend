@@ -1,29 +1,16 @@
-import classNames from 'classnames';
+import { BigDecimal, toAmount, TokenItemType } from '@oraichain/oraidex-common';
+import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
-import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
 import { ReactComponent as TooltipIc } from 'assets/icons/icon_tooltip.svg';
+import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
-import styles from './index.module.scss';
-import { useNavigate, useParams } from 'react-router-dom';
+import classNames from 'classnames';
+import { TooltipIcon } from 'components/Tooltip';
+import { oraichainTokens } from 'config/bridgeTokens';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
-import PriceRangePlot, { TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  calcPrice,
-  calcTicksAmountInRange,
-  calculateConcentrationRange,
-  extractDenom,
-  getConcentrationArray,
-  printBigint,
-  spacingMultiplicityGte,
-  toMaxNumericPlaces,
-  trimLeadingZeros
-} from '../PriceRangePlot/utils';
-import { TokenItemType, truncDecimals, BigDecimal } from '@oraichain/oraidex-common';
-import TokenForm from '../TokenForm';
-import NewPositionNoPool from '../NewPositionNoPool';
-import SlippageSetting from '../SettingSlippage';
+import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import {
   calculateSqrtPrice,
   getLiquidityByX,
@@ -31,12 +18,25 @@ import {
   getMaxTick,
   getMinTick
 } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
-import { TooltipIcon } from 'components/Tooltip';
-import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA, loadChunkSize } from 'libs/contractSingleton';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import useFillToken from 'pages/Pool-V3/hooks/useFillToken';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import NewPositionNoPool from '../NewPositionNoPool';
+import PriceRangePlot, { TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
+import {
+  calcPrice,
+  calcTicksAmountInRange,
+  calculateConcentrationRange,
+  determinePositionTokenBlock,
+  extractDenom,
+  getConcentrationArray,
+  PositionTokenBlock,
+  printBigint,
+  toMaxNumericPlaces,
+  trimLeadingZeros
+} from '../PriceRangePlot/utils';
+import SlippageSetting from '../SettingSlippage';
+import TokenForm from '../TokenForm';
+import styles from './index.module.scss';
 
 let args = {
   data: [
@@ -326,8 +326,7 @@ const CreatePosition = () => {
       ? ALL_FEE_TIERS_DATA.find((allFee) => allFee.fee === Number(fee)) || ALL_FEE_TIERS_DATA[0]
       : ALL_FEE_TIERS_DATA[0]
   );
-  const [toAmount, setToAmount] = useState();
-  const [fromAmount, setFromAmount] = useState();
+
   const [priceInfo, setPriceInfo] = useState<PriceInfo>({
     startPrice: 1
   });
@@ -359,6 +358,67 @@ const CreatePosition = () => {
   const [midPrice, setMidPrice] = useState<TickPlotPositionData>({
     index: 0,
     x: 1
+  });
+
+  const isXtoY = useMemo(() => {
+    if (tokenFrom && tokenTo) {
+      return extractDenom(tokenFrom) < extractDenom(tokenTo);
+    }
+    return true;
+  }, [tokenFrom, tokenTo]);
+
+  const [amountTo, setAmountTo] = useState<string>();
+  const [amountFrom, setAmountFrom] = useState<string>();
+  const [tokenFromInput, setTokenFromInput] = useState({
+    value: amountFrom,
+    setValue: (value) => {
+      if (!tokenFrom) {
+        return;
+      }
+
+      setAmountFrom(value);
+      setAmountTo(
+        getOtherTokenAmount(toAmount(value, tokenFrom.decimals).toString(), Number(leftRange), Number(rightRange), true)
+      );
+    },
+    blocked:
+      tokenFrom &&
+      tokenTo &&
+      determinePositionTokenBlock(
+        BigInt(poolInfo ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index)),
+        Math.min(Number(leftRange), Number(rightRange)),
+        Math.max(Number(leftRange), Number(rightRange)),
+        isXtoY
+      ) === PositionTokenBlock.A,
+
+    blockerInfo: 'Range only for single-asset deposit.',
+    decimalsLimit: tokenFrom ? Number(tokenFrom.decimals) : 0
+  });
+
+  const [tokenToInput, setTokenToInput] = useState({
+    value: amountTo,
+    setValue: (value) => {
+      if (!tokenTo) {
+        return;
+      }
+
+      setAmountFrom(value);
+      setAmountTo(
+        getOtherTokenAmount(toAmount(value, tokenTo.decimals).toString(), Number(leftRange), Number(rightRange), false)
+      );
+    },
+    blocked:
+      tokenFrom &&
+      tokenTo &&
+      determinePositionTokenBlock(
+        BigInt(poolInfo ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index)),
+        Math.min(Number(leftRange), Number(rightRange)),
+        Math.max(Number(leftRange), Number(rightRange)),
+        isXtoY
+      ) === PositionTokenBlock.B,
+
+    blockerInfo: 'Range only for single-asset deposit.',
+    decimalsLimit: tokenTo ? Number(tokenTo.decimals) : 0
   });
 
   const isMountedRef = useRef(false);
@@ -705,13 +765,6 @@ const CreatePosition = () => {
     setIsPoolExist(false);
   };
 
-  const isXtoY = useMemo(() => {
-    if (tokenFrom && tokenTo) {
-      return extractDenom(tokenFrom) < extractDenom(tokenTo);
-    }
-    return true;
-  }, [tokenFrom, tokenTo]);
-
   const calcAmount = (amount: TokenAmount, left: number, right: number, tokenAddress: string) => {
     if (tokenFrom || tokenTo || isNaN(left) || isNaN(right)) {
       return BigInt(0);
@@ -952,11 +1005,13 @@ const CreatePosition = () => {
               tokenTo={tokenTo}
               handleChangeTokenTo={(tk) => setTokenTo(tk)}
               setFee={setFeeTier}
-              setToAmount={setToAmount}
-              setFromAmount={setFromAmount}
-              fromAmount={fromAmount}
-              toAmount={toAmount}
+              setToAmount={setAmountTo}
+              setFromAmount={setAmountFrom}
+              fromAmount={amountFrom}
+              toAmount={amountTo}
               fee={feeTier}
+              tokenFromInput={tokenFromInput}
+              tokenToInput={tokenToInput}
             />
           </div>
           <div className={styles.item}>

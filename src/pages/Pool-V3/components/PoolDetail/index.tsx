@@ -198,7 +198,7 @@ const PoolV3Detail = () => {
         <div className={styles.addPosition}>
           <Button
             onClick={() => {
-              navigate(`/new-position/${pool_key.token_x}/${pool_key?.token_y}/${pool_key.fee_tier.fee}`);
+              navigate(`/new-position/${pool_key?.token_x}-${pool_key?.token_y}-${pool_key.fee_tier.fee}`);
             }}
             type="primary-sm"
           >

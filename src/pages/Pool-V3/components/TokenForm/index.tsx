@@ -16,6 +16,14 @@ import classNames from 'classnames';
 import { FeeTier } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 
+export interface InputState {
+  value: string;
+  setValue: (value: string) => void;
+  blocked: boolean;
+  blockerInfo?: string;
+  decimalsLimit: number;
+}
+
 const TokenForm = ({
   tokenFrom,
   handleChangeTokenFrom,
@@ -27,16 +35,20 @@ const TokenForm = ({
   toAmount,
   fromAmount,
   fee,
+  tokenFromInput,
+  tokenToInput
 }: {
   tokenFrom: TokenItemType;
   handleChangeTokenFrom: (token) => void;
   tokenTo: TokenItemType;
   handleChangeTokenTo: (token) => void;
   setFee: Dispatch<SetStateAction<FeeTier>>;
-  setToAmount: Dispatch<SetStateAction<number>>;
-  setFromAmount: Dispatch<SetStateAction<number>>;
-  toAmount: number;
-  fromAmount: number;
+  setToAmount: Dispatch<SetStateAction<number | string>>;
+  setFromAmount: Dispatch<SetStateAction<number | string>>;
+  toAmount: number | string;
+  fromAmount: number | string;
+  tokenFromInput: InputState;
+  tokenToInput: InputState;
   fee: FeeTier;
 }) => {
   const theme = useTheme();
@@ -63,8 +75,8 @@ const TokenForm = ({
       width: 30,
       height: 30
     });
-  const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * fromAmount).toFixed(6);
-  const toUsd = (prices?.[tokenFrom?.coinGeckoId] * toAmount).toFixed(6);
+  const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(fromAmount)).toFixed(6);
+  const toUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(toAmount)).toFixed(6);
 
   const handleSwitch = () => {
     const originFromToken = tokenFrom;
@@ -134,6 +146,7 @@ const TokenForm = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   setFromAmount && setFromAmount(floatValue);
+                  tokenFromInput.setValue(floatValue?.toString());
                 }}
               />
               <div className={styles.usd}>
@@ -145,7 +158,15 @@ const TokenForm = ({
             <p className={styles.bal}>
               <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenFrom?.denom] || '0'))} {tokenFrom?.name}
             </p>
-            <button disabled={!tokenFrom} onClick={() => setFromAmount(toDisplay(amounts[tokenFrom?.denom] || '0'))}>
+            <button
+              disabled={!tokenFrom}
+              onClick={() => {
+                const val = toDisplay(amounts[tokenFrom?.denom] || '0');
+                setFromAmount(val);
+
+                tokenFromInput.setValue(val.toString());
+              }}
+            >
               Max
             </button>
           </div>
@@ -179,6 +200,7 @@ const TokenForm = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   setToAmount && setToAmount(floatValue);
+                  tokenToInput.setValue(floatValue?.toString());
                 }}
               />
               <div className={styles.usd}>
@@ -193,7 +215,12 @@ const TokenForm = ({
             <button
               className=""
               disabled={!tokenTo}
-              onClick={() => setToAmount(toDisplay(amounts[tokenTo?.denom] || '0'))}
+              onClick={() => {
+                const val = toDisplay(amounts[tokenTo?.denom] || '0');
+                setToAmount(val);
+
+                tokenToInput.setValue(val.toString());
+              }}
             >
               Max
             </button>
