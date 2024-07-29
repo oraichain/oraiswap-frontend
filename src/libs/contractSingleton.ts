@@ -27,6 +27,7 @@ import {
   ArrayOfTupleOfUint16AndUint64,
   PoolWithPoolKey
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 // import { defaultState } from '@store/reducers/connection';
 
 export interface Token {
@@ -151,6 +152,28 @@ export const loadMaxTickmapQuerySize = () => {
 
 export const poolKeyToString = (poolKey: PoolKey): string => {
   return poolKey.token_x + '-' + poolKey.token_y + '-' + poolKey.fee_tier.fee + '-' + poolKey.fee_tier.tick_spacing;
+};
+
+export const stringToPoolKey = (str: string): PoolKey => {
+  try {
+    const [token_x, token_y, fee, tick_spacing] = str.split('-');
+
+    if (!token_x || !token_y || !fee || !tick_spacing) {
+      throw 'Cannot convert string to pool_key';
+    }
+
+    return {
+      token_x,
+      token_y,
+      fee_tier: {
+        fee: Number(fee),
+        tick_spacing: Number(tick_spacing)
+      }
+    };
+  } catch (error) {
+    console.log('error', error);
+    return null;
+  }
 };
 
 export const assert = (condition: boolean, message?: string) => {
@@ -351,8 +374,84 @@ export default class SingletonOraiswapV3 {
     });
   };
 
-  public static getPoolLiquidities = async (pools?: PoolWithPoolKey[]): Promise<Record<string, number>> => {
-    pools = await SingletonOraiswapV3.getPools();
+  public static getLiquidityByPool = async (pool: PoolWithPoolKey, prices: CoinGeckoPrices<string>): Promise<any> => {
+    const tickmap = await this.getFullTickmap(pool.pool_key);
+
+    const liquidityTicks = await this.getAllLiquidityTicks(pool.pool_key, tickmap);
+
+    const tickIndexes: number[] = [];
+    for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
+      for (let bit = 0; bit < loadChunkSize(); bit++) {
+        const checkedBit = chunk & (1n << BigInt(bit));
+        if (checkedBit) {
+          const tickIndex = positionToTick(Number(chunkIndex), bit, pool.pool_key.fee_tier.tick_spacing);
+          tickIndexes.push(tickIndex);
+        }
+      }
+    }
+
+    const tickArray: VirtualRange[] = [];
+
+    for (let i = 0; i < tickIndexes.length - 1; i++) {
+      tickArray.push({
+        lowerTick: tickIndexes[i],
+        upperTick: tickIndexes[i + 1]
+      });
+    }
+
+    const posTest: PositionTest[] = calculateLiquidityForRanges(liquidityTicks, tickArray);
+
+    const res = await calculateLiquidityForPair(posTest, BigInt(pool.pool.sqrt_price));
+
+    const tokens = [pool.pool_key.token_x, pool.pool_key.token_y];
+
+    const tokenInfos = await Promise.all(
+      tokens.map(async (token) => {
+        if (FAUCET_LIST_TOKEN.filter((item) => item.address === token).length > 0) {
+          const info = FAUCET_LIST_TOKEN.filter((item) => item.address === token)[0];
+
+          return { info, price: prices[info.coingeckoId] };
+        }
+      })
+    );
+
+    const tokenWithLiquidities = [
+      {
+        address: pool.pool_key.token_x,
+        balance: res.liquidityX
+      },
+      {
+        address: pool.pool_key.token_y,
+        balance: res.liquidityY
+      }
+    ];
+
+    const allocation = {};
+    const tokenWithUSDValue = tokenWithLiquidities.map((token) => {
+      const tokenInfo = tokenInfos.filter((item) => item.info.address === token.address)[0];
+
+      const data = {
+        address: token.address,
+        balance: Number(token.balance) / 10 ** 6,
+        usdValue: (Number(token.balance) / 10 ** 6) * tokenInfo.price
+      };
+      allocation[token.address] = data;
+
+      return data;
+    });
+
+    const totalValue = tokenWithUSDValue.reduce((acc, item) => acc + item.usdValue, 0);
+
+    return {
+      total: totalValue,
+      allocation
+    };
+  };
+
+  public static getPoolLiquidities = async (
+    pools: PoolWithPoolKey[],
+    prices: CoinGeckoPrices<string>
+  ): Promise<Record<string, number>> => {
     const poolLiquidities: Record<string, number> = {};
     for (const pool of pools) {
       const tickmap = await this.getFullTickmap(pool.pool_key);
@@ -389,13 +488,8 @@ export default class SingletonOraiswapV3 {
         tokens.map(async (token) => {
           if (FAUCET_LIST_TOKEN.filter((item) => item.address === token).length > 0) {
             const info = FAUCET_LIST_TOKEN.filter((item) => item.address === token)[0];
-            return {
-              info,
-              price: {
-                price: 0
-              }
-            };
-            // return { info, price: await getCoingeckoTokenPriceV2(info.coingeckoId) };
+
+            return { info, price: prices[info.coingeckoId] };
           }
         })
       );
@@ -411,13 +505,11 @@ export default class SingletonOraiswapV3 {
         }
       ];
 
-      console.log({ tokenWithLiquidities });
-
       const tokenWithUSDValue = tokenWithLiquidities.map((token) => {
         const tokenInfo = tokenInfos.filter((item) => item.info.address === token.address)[0];
         return {
           address: token.address,
-          usdValue: (Number(token.balance) / 10 ** 6) * tokenInfo.price.price
+          usdValue: (Number(token.balance) / 10 ** 6) * tokenInfo.price
         };
       });
 
@@ -502,8 +594,6 @@ export default class SingletonOraiswapV3 {
         .reduce((acc, item) => acc + item.balance, 0n);
       return { address: token, balance: liquidity };
     });
-
-    // console.log({ tokenWithLiquidities })
 
     // tokenWithUSDValue
     const tokenWithUSDValue = tokenWithLiquidities.map((token) => {

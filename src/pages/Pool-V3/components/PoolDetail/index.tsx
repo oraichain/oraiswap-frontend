@@ -6,20 +6,69 @@ import UsdtIcon from 'assets/icons/tether.svg';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
 import { Button } from 'components/Button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import classNames from 'classnames';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import useTheme from 'hooks/useTheme';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatNumberKMB } from 'helper/format';
 import PositionItem from '../PositionItem';
+import SingletonOraiswapV3, { stringToPoolKey } from 'libs/contractSingleton';
+import { toDisplay, BigDecimal } from '@oraichain/oraidex-common';
+import { formatPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+
+const MID_PERCENT = 50;
 
 const PoolV3Detail = () => {
+  const { data: prices } = useCoinGeckoPrices();
   const navigate = useNavigate();
   const theme = useTheme();
   const isLight = theme === 'light';
   const [dataPosition, setDataPosition] = useState<any[]>([...Array(0)]);
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
+  const { poolId } = useParams<{ poolId: string }>();
+  const [poolDetail, setPoolDetail] = useState<PoolWithTokenInfo>();
+  const [liquidity, setLiquidity] = useState({
+    total: 0,
+    allocation: {}
+  });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const poolKey = stringToPoolKey(poolId);
+        const pool = await SingletonOraiswapV3.getPool(poolKey);
+        const isLight = theme === 'light';
+        const fmtPool = formatPoolData(pool, isLight);
+
+        setPoolDetail(fmtPool);
+
+        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, prices);
+
+        setLiquidity(liquidity);
+      } catch (error) {
+        console.log('error: get pool detail', error);
+      }
+    })();
+  }, [poolId]);
+
+  const { FromTokenIcon, ToTokenIcon, feeTier, spread, tokenXinfo, tokenYinfo, poolKey, pool_key } = poolDetail || {};
+
+  const { allocation, total } = liquidity;
+
+  const [balanceX, balanceY] = [
+    allocation[pool_key?.token_x]?.balance || 0,
+    allocation[pool_key?.token_y]?.balance || 0
+  ];
+
+  const percentX = !(balanceX && balanceY)
+    ? MID_PERCENT
+    : new BigDecimal(balanceX).div(new BigDecimal(balanceX).add(balanceY)).mul(100).toNumber();
+
+  if (!poolDetail) {
+    return null;
+  }
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -33,11 +82,14 @@ const PoolV3Detail = () => {
               <img src={OraixIcon} alt="base-tk" />
               <img src={UsdtIcon} alt="quote-tk" />
             </div>
-            <span>ORAIX / USDT</span>
+            <span>
+              {tokenXinfo?.name?.toUpperCase()} / {tokenYinfo?.name?.toUpperCase()}
+            </span>
           </div>
           <div className={styles.fee}>
-            <span className={styles.item}>Fee: 0.003%</span>
-            <span className={styles.item}>0.03% Spread</span>
+            <span className={styles.item}>Fee: {toDisplay((feeTier || 0).toString(), 10)}%</span>
+            {/* <span className={styles.item}>{toDisplay((spread || 0).toString(), 3)}% Spread</span> */}
+            <span className={styles.item}>0.01% Spread</span>
           </div>
         </div>
 
@@ -61,38 +113,44 @@ const PoolV3Detail = () => {
           <div className={styles.tvl}>
             <div className={styles.box}>
               <p>Liquidity</p>
-              <h1>{formatDisplayUsdt(223343908)}</h1>
-              <span className={classNames(styles.percent, { [styles.positive]: true })}>
+              <h1>{formatDisplayUsdt(total || 0)}</h1>
+              {/* <span className={classNames(styles.percent, { [styles.positive]: true })}>
                 {true ? '+' : '-'}
                 {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 2 })}%
-              </span>
+              </span> */}
             </div>
             <div className={styles.box}>
               <p>Volume (24H)</p>
               <h1>{formatDisplayUsdt(14334398)}</h1>
-              <span className={classNames(styles.percent, { [styles.positive]: false })}>
+              {/* <span className={classNames(styles.percent, { [styles.positive]: false })}>
                 {false ? '+' : '-'}
                 {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 2 })}%
-              </span>
+              </span> */}
             </div>
           </div>
 
           <div className={classNames(styles.box, styles.alloc)}>
             <p>Liquidity Allocation</p>
             <div className={styles.tokensAlloc}>
-              <div className={styles.base} style={{ width: '60%' }}></div>
-              <div className={styles.quote} style={{ width: '40%' }}></div>
+              <div className={styles.base} style={{ width: `${percentX}%` }}></div>
+              <div className={styles.quote} style={{ width: `${100 - percentX}%` }}></div>
             </div>
             <div className={styles.tokens}>
               <div className={classNames(styles.tokenItem, styles[theme])}>
-                <img src={OraixIcon} alt="base-tk" />
-                <span>{'ORAIX'}</span>
-                <span className={styles.value}>{formatNumberKMB(1223242342, false)}</span>
+                {/* <img src={OraixIcon} alt="base-tk" /> */}
+                <FromTokenIcon />
+                <span>{tokenXinfo?.name?.toUpperCase()}</span>
+                <span className={styles.value}>
+                  {formatNumberKMB(allocation[pool_key.token_x]?.balance || 0, false)}
+                </span>
               </div>
               <div className={classNames(styles.tokenItem, styles[theme])}>
-                <img src={UsdtIcon} alt="quote-tk" />
-                <span>{'USDT'}</span>
-                <span className={styles.value}>{formatNumberKMB(89034232324, false)}</span>
+                {/* <img src={UsdtIcon} alt="quote-tk" /> */}
+                <ToTokenIcon />
+                <span>{tokenYinfo?.name?.toUpperCase()}</span>
+                <span className={styles.value}>
+                  {formatNumberKMB(allocation[pool_key.token_y]?.balance || 0, false)}
+                </span>
               </div>
             </div>
           </div>
@@ -102,7 +160,7 @@ const PoolV3Detail = () => {
           <div className={styles.desc}>
             <div className={styles.item}>
               <span>Incentive</span>
-              <p>ORAI</p>
+              <p>ORAIX</p>
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>

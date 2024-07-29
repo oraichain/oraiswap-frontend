@@ -44,8 +44,6 @@ export default () => (
       <Route path="/pools-v3" element={<PoolsV3 />} />
       <Route path="/pools-v3/:poolId" element={<PoolV3Detail />} />
       <Route path="/new-position/:item1?/:item2?/:item3?" element={<CreatePosition />} />
-      {/* <Route path="/position/:address/:id" element={<PositionDetail />} /> */}
-      <Route path="/pools-v3/swap" element={<SwapPoolV3 />} />
       <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/download-owallet" element={<DownloadApp />} />
