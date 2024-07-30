@@ -45,6 +45,9 @@ export interface ConfigState {
   persistVersion: number;
   bannerTime?: number;
   AIRoute?: boolean;
+  liquidityPools?: {
+    [key: string]: number;
+  };
 }
 
 const initialState: ConfigState = {
@@ -68,6 +71,7 @@ const initialState: ConfigState = {
   coingecko: {},
   apr: {},
   rewardPools: [],
+  liquidityPools: {},
   filterDefaultPool: KeyFilterPool.all_pool,
   persistVersion: PERSIST_VER,
   AIRoute: true

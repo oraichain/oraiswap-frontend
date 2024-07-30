@@ -16,16 +16,16 @@ import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { formatPoolData } from 'pages/Pool-V3/helpers/format';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
+  const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const theme = useTheme();
   const [search, setSearch] = useState<string>();
-  const [liquidity, setLiquidity] = useState<Record<string, number>>({});
-  const [totalLiquidity, setTotalLiquidity] = useState<number>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
   const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
 
@@ -34,10 +34,12 @@ const PoolList = () => {
       try {
         const pools = await SingletonOraiswapV3.getPools();
 
-        const fmtPools = (pools || []).map((p) => {
-          const isLight = theme === 'light';
-          return formatPoolData(p, isLight);
-        });
+        const fmtPools = (pools || [])
+          .map((p) => {
+            const isLight = theme === 'light';
+            return formatPoolData(p, isLight);
+          })
+          .sort((a, b) => Number(b.pool.liquidity) - Number(a.pool.liquidity));
 
         setDataPool(fmtPools);
       } catch (error) {
@@ -48,20 +50,19 @@ const PoolList = () => {
     return () => {};
   }, []);
 
+  const totalLiquidity = useMemo(() => {
+    if (Object.values(liquidityPools).length) {
+      return Object.values(liquidityPools).reduce((acc, cur) => Number(acc) + Number(cur), 0);
+    }
+    return 0;
+  }, [liquidityPools]);
+
   useEffect(() => {
     (async () => {
       try {
         if (dataPool.length) {
           const liquidityByPools = await SingletonOraiswapV3.getPoolLiquidities(dataPool, prices);
-
-          setLiquidity(liquidityByPools);
-
-          const totalLiq = Object.values(liquidityByPools).reduce((acc, cur) => {
-            acc = acc.add(cur || 0);
-            return acc;
-          }, new BigDecimal(0));
-
-          setTotalLiquidity(totalLiq.toNumber());
+          setLiquidityPools(liquidityByPools);
         }
       } catch (error) {
         console.log('error: get liquidities', error);
@@ -75,7 +76,7 @@ const PoolList = () => {
         <div className={styles.total}>
           <p>Total liquidity</p>
           {totalLiquidity === 0 || totalLiquidity ? (
-            <h1>{formatDisplayUsdt(totalLiquidity || 0)}</h1>
+            <h1>{formatDisplayUsdt(Number(totalLiquidity) || 0)}</h1>
           ) : (
             <img src={Loading} alt="loading" width={32} height={32} />
           )}
@@ -126,7 +127,7 @@ const PoolList = () => {
                   .map((item, index) => {
                     return (
                       <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                        <PoolItemTData item={item} theme={theme} liquidity={liquidity[item?.poolKey]} />
+                        <PoolItemTData item={item} theme={theme} liquidity={liquidityPools?.[item?.poolKey]} />
                       </tr>
                     );
                   })}
