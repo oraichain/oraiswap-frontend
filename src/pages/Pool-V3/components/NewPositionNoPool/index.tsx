@@ -258,7 +258,7 @@ const NewPositionNoPool = ({
           <div className={styles.percent}>
             <p>Min Current Price:</p>
             <span className={classNames(styles.value, { [styles.positive]: false })}>
-              {numberWithCommas(((+leftInput - price) / price) * 100, undefined, { maximumFractionDigits: 3 })}%
+              {(((+leftInput - price) / price) * 100).toLocaleString(undefined, { maximumFractionDigits: 3 })}%
             </span>
           </div>
         </div>
