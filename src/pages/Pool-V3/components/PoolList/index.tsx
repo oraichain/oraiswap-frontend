@@ -54,7 +54,7 @@ const PoolList = () => {
   }, []);
 
   const totalLiquidity = useMemo(() => {
-    if (Object.values(liquidityPools).length) {
+    if (liquidityPools && Object.values(liquidityPools).length) {
       return Object.values(liquidityPools).reduce((acc, cur) => Number(acc) + Number(cur), 0);
     }
     return 0;
