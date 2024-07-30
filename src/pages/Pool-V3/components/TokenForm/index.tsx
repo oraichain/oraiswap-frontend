@@ -88,7 +88,6 @@ const TokenForm = ({
     handleChangeTokenTo(originFromToken);
   };
 
-  // console.log('fee', fee);
   return (
     <div className={styles.tokenForm}>
       <div className={styles.select}>
@@ -145,7 +144,7 @@ const TokenForm = ({
                   return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
                 }}
                 onValueChange={({ floatValue }) => {
-                  setFromAmount && setFromAmount(floatValue);
+                  // setFromAmount && setFromAmount(floatValue);
                   tokenFromInput.setValue(floatValue?.toString());
                 }}
               />
@@ -162,8 +161,7 @@ const TokenForm = ({
               disabled={!tokenFrom}
               onClick={() => {
                 const val = toDisplay(amounts[tokenFrom?.denom] || '0');
-                setFromAmount(val);
-
+                // setFromAmount(val);
                 tokenFromInput.setValue(val.toString());
               }}
             >
@@ -199,7 +197,7 @@ const TokenForm = ({
                   return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
                 }}
                 onValueChange={({ floatValue }) => {
-                  setToAmount && setToAmount(floatValue);
+                  // setToAmount && setToAmount(floatValue);
                   tokenToInput.setValue(floatValue?.toString());
                 }}
               />
@@ -217,8 +215,7 @@ const TokenForm = ({
               disabled={!tokenTo}
               onClick={() => {
                 const val = toDisplay(amounts[tokenTo?.denom] || '0');
-                setToAmount(val);
-
+                // setToAmount(val);
                 tokenToInput.setValue(val.toString());
               }}
             >

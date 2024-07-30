@@ -171,7 +171,7 @@ const NewPositionNoPool = ({
             // onValueChange={({ floatValue }) => {
             //   setPriceInfo && setPriceInfo({ ...priceInfo, startPrice: floatValue });
             // }}
-            onBlur={e => {
+            onBlur={(e) => {
               setMidPriceInput(validateMidPriceInput(e.target.value || '0'));
             }}
           />
@@ -258,7 +258,7 @@ const NewPositionNoPool = ({
           <div className={styles.percent}>
             <p>Min Current Price:</p>
             <span className={classNames(styles.value, { [styles.positive]: false })}>
-              {((+leftInput - price) / price) * 100}%
+              {numberWithCommas(((+leftInput - price) / price) * 100, undefined, { maximumFractionDigits: 3 })}%
             </span>
           </div>
         </div>
@@ -329,7 +329,7 @@ const NewPositionNoPool = ({
           <div className={styles.percent}>
             <p>Max Current Price:</p>
             <span className={classNames(styles.value, { [styles.positive]: true })}>
-              {((+rightInput - price) / price) * 100}%
+              {numberWithCommas(((+rightInput - price) / price) * 100, undefined, { maximumFractionDigits: 3 })}%
             </span>
           </div>
         </div>

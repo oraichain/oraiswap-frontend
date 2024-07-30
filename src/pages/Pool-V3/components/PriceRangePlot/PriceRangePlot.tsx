@@ -95,8 +95,6 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  console.log('data', data);
-
   const maxVal = useMemo(() => {
     if (!data.length) return 0;
     Math.max(...(data || []).map((element) => element.y));
