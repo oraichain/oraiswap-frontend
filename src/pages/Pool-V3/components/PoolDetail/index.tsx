@@ -234,8 +234,8 @@ const PoolV3Detail = () => {
           <div className={classNames(styles.box, styles.alloc)}>
             <p>Liquidity Allocation</p>
             <div className={styles.tokensAlloc}>
-              <div className={styles.base} style={{ width: `${percentX}%` }}></div>
-              <div className={styles.quote} style={{ width: `${100 - percentX}%` }}></div>
+              <div className={styles.base} style={{ width: `50%` }}></div>
+              <div className={styles.quote} style={{ width: `50%` }}></div>
             </div>
             <div className={styles.tokens}>
               <div className={classNames(styles.tokenItem, styles[theme])}>
@@ -262,11 +262,11 @@ const PoolV3Detail = () => {
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>
-              <p>11.91%</p>
+              <p>0%</p>
             </div>
             <div className={styles.item}>
               <span className={styles.label}>
-                ORAI Boost&nbsp;
+                Incentive Boost&nbsp;
                 <IconBoots />
               </span>
               <p>22.91%</p>
