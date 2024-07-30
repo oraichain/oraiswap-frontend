@@ -1,5 +1,8 @@
 export const convertBalanceToBigint = (amount: string, decimals: bigint | number): bigint => {
-  const balanceString = amount.split('.');
+  if (!amount) {
+    return 0n;
+  }
+  const balanceString = amount.toString().split('.');
   if (balanceString.length !== 2) {
     return BigInt(balanceString[0] + '0'.repeat(Number(decimals)));
   }

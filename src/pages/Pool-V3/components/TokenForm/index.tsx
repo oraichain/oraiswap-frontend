@@ -3,8 +3,8 @@ import { ReactComponent as SwitchIcon } from 'assets/icons/ant_swap_light.svg';
 import { ReactComponent as ArrowIcon } from 'assets/icons/ic_arrow_down.svg';
 import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import SelectToken from '../SelectToken';
-import { Dispatch, SetStateAction } from 'react';
-import { getIcon } from 'helper';
+import { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import { getIcon, sleep } from 'helper';
 import useTheme from 'hooks/useTheme';
 import NumberFormat from 'react-number-format';
 import { numberWithCommas } from 'helper/format';
@@ -15,6 +15,7 @@ import { Button } from 'components/Button';
 import classNames from 'classnames';
 import { FeeTier } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
+import Loader from 'components/Loader';
 
 export interface InputState {
   value: string;
@@ -36,7 +37,8 @@ const TokenForm = ({
   fromAmount,
   fee,
   tokenFromInput,
-  tokenToInput
+  tokenToInput,
+  setFocusInput
 }: {
   tokenFrom: TokenItemType;
   handleChangeTokenFrom: (token) => void;
@@ -50,11 +52,13 @@ const TokenForm = ({
   tokenFromInput: InputState;
   tokenToInput: InputState;
   fee: FeeTier;
+  setFocusInput: Dispatch<React.SetStateAction<'from' | 'to'>>;
 }) => {
   const theme = useTheme();
   const isLightTheme = theme === 'light';
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
+  const [loading, setLoading] = useState(false);
 
   const TokenFromIcon =
     tokenFrom &&
@@ -88,6 +92,29 @@ const TokenForm = ({
     handleChangeTokenTo(originFromToken);
   };
 
+  const getButtonMessage = () => {
+    if (!tokenFrom || !tokenTo) {
+      return 'Select tokens';
+    }
+
+    if (tokenFrom.denom === tokenTo.denom) {
+      return 'Select different tokens';
+    }
+
+    // if (
+    //   (!poolInfo  && !isPoolExist) ||
+    //   (poolInfo && isPoolExist)
+    // ) {
+    //   return 'Insufficient Orai';
+    // }
+
+    if ((!tokenFromInput.blocked && +fromAmount === 0) || (!tokenToInput.blocked && +toAmount === 0)) {
+      return 'Liquidity must be greater than 0';
+    }
+
+    return 'Add Liquidity';
+  };
+
   return (
     <div className={styles.tokenForm}>
       <div className={styles.select}>
@@ -116,7 +143,7 @@ const TokenForm = ({
 
       <div className={styles.deposit}>
         <h1>Deposit Amount</h1>
-        <div className={styles.itemInput}>
+        <div className={classNames(styles.itemInput, { [styles.disabled]: tokenFromInput.blocked })}>
           <div className={styles.tokenInfo}>
             <div className={styles.name}>
               {TokenFromIcon ? (
@@ -130,11 +157,13 @@ const TokenForm = ({
             </div>
             <div className={styles.input}>
               <NumberFormat
+                onFocus={() => setFocusInput('from')}
+                onBlur={() => setFocusInput(null)}
                 placeholder="0"
                 thousandSeparator
                 className={styles.amount}
                 decimalScale={6}
-                disabled={false}
+                disabled={tokenFromInput.blocked}
                 type="text"
                 value={fromAmount}
                 onChange={() => {}}
@@ -144,8 +173,8 @@ const TokenForm = ({
                   return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
                 }}
                 onValueChange={({ floatValue }) => {
-                  // setFromAmount && setFromAmount(floatValue);
-                  tokenFromInput.setValue(floatValue?.toString());
+                  setFromAmount && setFromAmount(floatValue);
+                  // tokenFromInput.setValue(floatValue?.toString());
                 }}
               />
               <div className={styles.usd}>
@@ -161,15 +190,17 @@ const TokenForm = ({
               disabled={!tokenFrom}
               onClick={() => {
                 const val = toDisplay(amounts[tokenFrom?.denom] || '0');
-                // setFromAmount(val);
-                tokenFromInput.setValue(val.toString());
+                setFromAmount(val);
+                // tokenFromInput.setValue(val.toString());
+
+                setFocusInput('from');
               }}
             >
               Max
             </button>
           </div>
         </div>
-        <div className={styles.itemInput}>
+        <div className={classNames(styles.itemInput, { [styles.disabled]: tokenToInput.blocked })}>
           <div className={styles.tokenInfo}>
             <div className={styles.name}>
               {TokenToIcon ? (
@@ -183,11 +214,13 @@ const TokenForm = ({
             </div>
             <div className={styles.input}>
               <NumberFormat
+                onFocus={() => setFocusInput('to')}
+                onBlur={() => setFocusInput(null)}
                 placeholder="0"
                 thousandSeparator
                 className={styles.amount}
                 decimalScale={6}
-                disabled={false}
+                disabled={tokenToInput.blocked}
                 type="text"
                 value={toAmount}
                 onChange={() => {}}
@@ -197,8 +230,8 @@ const TokenForm = ({
                   return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
                 }}
                 onValueChange={({ floatValue }) => {
-                  // setToAmount && setToAmount(floatValue);
-                  tokenToInput.setValue(floatValue?.toString());
+                  setToAmount && setToAmount(floatValue);
+                  // tokenToInput.setValue(floatValue?.toString());
                 }}
               />
               <div className={styles.usd}>
@@ -215,8 +248,9 @@ const TokenForm = ({
               disabled={!tokenTo}
               onClick={() => {
                 const val = toDisplay(amounts[tokenTo?.denom] || '0');
-                // setToAmount(val);
-                tokenToInput.setValue(val.toString());
+                setToAmount(val);
+                setFocusInput('to');
+                // tokenToInput.setValue(val.toString());
               }}
             >
               Max
@@ -226,9 +260,36 @@ const TokenForm = ({
       </div>
 
       <div className={styles.btn}>
-        <Button type="primary" onClick={() => console.log('add liq')} disabled={!tokenFrom || !tokenTo}>
-          Add Liquidity
-        </Button>
+        {(() => {
+          const btnText = getButtonMessage();
+          return (
+            <Button
+              type="primary"
+              disabled={!tokenFrom || !tokenTo || btnText !== 'Add Liquidity' || loading}
+              onClick={async () => {
+                try {
+                  setLoading(true);
+
+                  console.log('first', {
+                    tokenFrom,
+                    tokenTo,
+                    fee,
+                    toAmount,
+                    fromAmount
+                  });
+
+                  await sleep(2000);
+                } catch (error) {
+                  console.log('error:>> Add liquidity', error);
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              {loading && <Loader width={22} height={22} />}&nbsp;&nbsp;{btnText}
+            </Button>
+          );
+        })()}
       </div>
     </div>
   );

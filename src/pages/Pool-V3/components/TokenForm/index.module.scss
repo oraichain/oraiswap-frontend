@@ -120,6 +120,12 @@
         margin-bottom: 8px;
       }
 
+      &.disabled {
+        opacity: 0.5;
+        filter: blur(2px);
+        pointer-events: none;
+      }
+
       .tokenInfo {
         display: flex;
         justify-content: space-between;

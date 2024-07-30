@@ -24,7 +24,7 @@ import {
   getMinTick,
   Price
 } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NewPositionNoPool from '../NewPositionNoPool';
 import PriceRangePlot, { PlotTickData, TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
@@ -344,6 +344,7 @@ const CreatePosition = () => {
   const [openTooltip, setOpenTooltip] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const [typeChart, setTypeChart] = useState(TYPE_CHART.CONTINUOUS);
+  const [focusId, setFocusId] = useState<'from' | 'to' | null>(null);
 
   const [notInitPoolKey, setNotInitPoolKey] = useState<PoolKey>({
     token_x: tokenFrom?.denom || '',
@@ -389,82 +390,89 @@ const CreatePosition = () => {
   const [amountTo, setAmountTo] = useState<string>('');
   const [amountFrom, setAmountFrom] = useState<string>('');
 
-  const tokenFromInput = useMemo(() => {
-    return {
-      value: amountFrom,
-      setValue: (value) => {
-        console.log('value', value);
-        if (!tokenFrom) {
-          return;
-        }
+  const tokenFromInput = {
+    value: amountFrom,
+    setValue: (value) => {
+      console.log('value', value);
+      if (!tokenFrom) {
+        return;
+      }
 
-        console.log(
-          '390',
-          getOtherTokenAmount(
-            toAmount(value, tokenFrom.decimals).toString(),
-            Number(leftRange),
-            Number(rightRange),
-            true
-          )
-        );
+      console.log(
+        '390',
+        getOtherTokenAmount(toAmount(value, tokenFrom.decimals).toString(), Number(leftRange), Number(rightRange), true)
+      );
 
-        setAmountFrom(value);
-        setAmountTo(
-          getOtherTokenAmount(
-            toAmount(value, tokenFrom.decimals).toString(),
-            Number(leftRange),
-            Number(rightRange),
-            true
-          )
-        );
-      },
-      blocked:
-        tokenFrom &&
-        tokenTo &&
-        determinePositionTokenBlock(
-          BigInt(poolInfo ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index)),
-          Math.min(Number(leftRange), Number(rightRange)),
-          Math.max(Number(leftRange), Number(rightRange)),
-          isXtoY
-        ) === PositionTokenBlock.A,
+      setAmountFrom(value);
+      setAmountTo(
+        getOtherTokenAmount(toAmount(value, tokenFrom.decimals).toString(), Number(leftRange), Number(rightRange), true)
+      );
+    },
+    blocked:
+      tokenFrom &&
+      tokenTo &&
+      determinePositionTokenBlock(
+        BigInt(poolInfo ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index)),
+        Math.min(Number(leftRange), Number(rightRange)),
+        Math.max(Number(leftRange), Number(rightRange)),
+        isXtoY
+      ) === PositionTokenBlock.A,
 
-      blockerInfo: 'Range only for single-asset deposit.',
-      decimalsLimit: tokenFrom ? Number(tokenFrom.decimals) : 0
-    };
-  }, [tokenFrom, tokenTo, leftRange, rightRange, poolInfo, midPrice, isXtoY]);
+    blockerInfo: 'Range only for single-asset deposit.',
+    decimalsLimit: tokenFrom ? Number(tokenFrom.decimals) : 0
+  };
 
-  const tokenToInput = useMemo(() => {
-    return {
-      value: amountTo,
-      setValue: (value) => {
-        if (!tokenTo) {
-          return;
-        }
+  const tokenToInput = {
+    value: amountTo,
+    setValue: (value) => {
+      if (!tokenTo) {
+        return;
+      }
 
-        setAmountTo(value);
-        setAmountFrom(
-          getOtherTokenAmount(
-            toAmount(value, tokenTo.decimals).toString(),
-            Number(leftRange),
-            Number(rightRange),
-            false
-          )
-        );
-      },
-      blocked:
-        tokenFrom &&
-        tokenTo &&
-        determinePositionTokenBlock(
-          BigInt(poolInfo ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index)),
-          Math.min(Number(leftRange), Number(rightRange)),
-          Math.max(Number(leftRange), Number(rightRange)),
-          isXtoY
-        ) === PositionTokenBlock.B,
+      setAmountTo(value);
+      setAmountFrom(
+        getOtherTokenAmount(toAmount(value, tokenTo.decimals).toString(), Number(leftRange), Number(rightRange), false)
+      );
+    },
+    blocked:
+      tokenFrom &&
+      tokenTo &&
+      determinePositionTokenBlock(
+        BigInt(poolInfo ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index)),
+        Math.min(Number(leftRange), Number(rightRange)),
+        Math.max(Number(leftRange), Number(rightRange)),
+        isXtoY
+      ) === PositionTokenBlock.B,
 
-      blockerInfo: 'Range only for single-asset deposit.',
-      decimalsLimit: tokenTo ? Number(tokenTo.decimals) : 0
-    };
-  }, [tokenFrom, tokenTo, leftRange, rightRange, poolInfo, midPrice, isXtoY]);
+    blockerInfo: 'Range only for single-asset deposit.',
+    decimalsLimit: tokenTo ? Number(tokenTo.decimals) : 0
+  };
+
+  useEffect(() => {
+    if (focusId === 'from') {
+      setAmountTo(
+        getOtherTokenAmount(
+          toAmount(amountFrom, tokenFrom.decimals).toString(),
+          Number(leftRange),
+          Number(rightRange),
+          true
+        )
+      );
+    }
+  }, [amountFrom, focusId]);
+
+  useEffect(() => {
+    if (focusId === 'to') {
+      setAmountFrom(
+        getOtherTokenAmount(
+          toAmount(amountTo, tokenTo.decimals).toString(),
+          Number(leftRange),
+          Number(rightRange),
+          false
+        )
+      );
+    }
+  }, [amountTo, focusId]);
 
   const positionOpeningMethod = 'range'; // always range
 
@@ -894,7 +902,6 @@ const CreatePosition = () => {
       resetPlot();
     }
   }, [liquidityData, midPrice]);
-  console.log('loading', loading);
 
   useEffect(() => {
     try {
@@ -1042,7 +1049,7 @@ const CreatePosition = () => {
               </div>
               <div className={styles.minMaxPriceValue}>
                 <p>
-                  <p>{leftInputRounded}</p>
+                  <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
                   <p className={styles.pair}>
                     {tokenFrom.denom.toUpperCase()} / {tokenTo.denom.toUpperCase()}
                   </p>
@@ -1052,7 +1059,10 @@ const CreatePosition = () => {
             <div className={styles.percent}>
               <p>Min Current Price:</p>
               <span className={classNames(styles.value, { [styles.positive]: false })}>
-                {(((+leftInput - midPrice.x) / midPrice.x) * 100).toLocaleString(undefined, {maximumFractionDigits: 3})}%
+                {(((+leftInput - midPrice.x) / midPrice.x) * 100).toLocaleString(undefined, {
+                  maximumFractionDigits: 3
+                })}
+                %
               </span>
             </div>
           </div>
@@ -1064,7 +1074,7 @@ const CreatePosition = () => {
               </div>
               <div className={styles.minMaxPriceValue}>
                 <p>
-                  <p>{rightInputRounded}</p>
+                  <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
                   <p className={styles.pair}>
                     {tokenFrom.denom.toUpperCase()} / {tokenTo.denom.toUpperCase()}
                   </p>
@@ -1149,6 +1159,7 @@ const CreatePosition = () => {
               fee={feeTier}
               tokenFromInput={tokenFromInput}
               tokenToInput={tokenToInput}
+              setFocusInput={setFocusId}
             />
           </div>
           <div className={styles.item}>
