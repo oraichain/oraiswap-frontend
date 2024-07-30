@@ -45,6 +45,8 @@ import SlippageSetting from '../SettingSlippage';
 import TokenForm from '../TokenForm';
 import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
+import { calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helper';
+import { numberWithCommas } from 'helper/format';
 
 let args = {
   data: [
@@ -708,18 +710,6 @@ const CreatePosition = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (currentPairReversed !== null && isMountedRef.current) {
-  //     reversePlot();
-  //   }
-  // }, [currentPairReversed]);
-
-  // useEffect(() => {
-  //   if (!ticksLoading && isMountedRef.current) {
-  //     resetPlot();
-  //   }
-  // }, [ticksLoading, midPrice]);
-
   const autoZoomHandler = (left: number, right: number, canZoomCloser: boolean = false) => {
     const leftX = calcPrice(left, isXtoY, tokenFrom.decimals, tokenTo.decimals);
     const rightX = calcPrice(right, isXtoY, tokenFrom.decimals, tokenTo.decimals);
@@ -766,42 +756,6 @@ const CreatePosition = () => {
       setPlotMax(rightX + dist);
     }
   };
-
-  // useEffect(() => {
-  //   if (positionOpeningMethod === 'concentration' && isMountedRef.current && !ticksLoading) {
-  //     setConcentrationIndex(0);
-  //     const { leftRange, rightRange } = calculateConcentrationRange(
-  //       tickSpacing,
-  //       concentrationArray[0],
-  //       2,
-  //       midPrice.index,
-  //       isXtoY
-  //     );
-  //     changeRangeHandler(leftRange, rightRange);
-  //     autoZoomHandler(leftRange, rightRange, true);
-  //   } else {
-  //     changeRangeHandler(leftRange, rightRange);
-  //   }
-  // }, [positionOpeningMethod]);
-
-  // useEffect(() => {
-  //   if (positionOpeningMethod === 'concentration' && !ticksLoading && isMountedRef.current) {
-  //     const index =
-  //       concentrationIndex > concentrationArray.length - 1
-  //         ? concentrationArray.length - 1
-  //         : concentrationIndex;
-  //     setConcentrationIndex(index);
-  //     const { leftRange, rightRange } = calculateConcentrationRange(
-  //       tickSpacing,
-  //       concentrationArray[index],
-  //       2,
-  //       midPrice.index,
-  //       isXtoY
-  //     );
-  //     changeRangeHandler(leftRange, rightRange);
-  //     autoZoomHandler(leftRange, rightRange, true);
-  //   }
-  // }, [midPrice.index, concentrationArray]);
 
   const checkNoPool = async (
     fee: FeeTier,
@@ -935,7 +889,11 @@ const CreatePosition = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [liquidityData, setLiquidityData] = useState<PlotTickData[]>([]);
-
+  useEffect(() => {
+    if (isMountedRef.current && liquidityData) {
+      resetPlot();
+    }
+  }, [liquidityData, midPrice]);
   console.log('loading', loading);
 
   useEffect(() => {
@@ -963,6 +921,17 @@ const CreatePosition = () => {
       setLoading(false);
     }
   }, [isPoolExist, notInitPoolKey, isXtoY]);
+
+  useEffect(() => {
+    if (poolInfo) {
+      setMidPrice({
+        index: poolInfo.pool.current_tick_index,
+        x:
+          calcYPerXPriceBySqrtPrice(BigInt(poolInfo.pool.sqrt_price), tokenFrom.decimals, tokenTo.decimals) **
+          (isXtoY ? 1 : -1)
+      });
+    }
+  }, [poolInfo, isXtoY, tokenFrom, tokenTo]);
 
   const renderPriceSection = isPoolExist ? (
     <div className={styles.priceSectionExisted}>
@@ -1057,8 +1026,10 @@ const CreatePosition = () => {
           </div>
           <div className={styles.currentPriceValue}>
             <p>
-              <p>{currentPrice}</p>
-              <p className={styles.pair}>ORAI / USDT</p>
+              <p>{numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: 6 })}</p>
+              <p className={styles.pair}>
+                {tokenFrom.denom.toUpperCase()} / {tokenTo.denom.toUpperCase()}
+              </p>
             </p>
           </div>
         </div>
@@ -1071,14 +1042,18 @@ const CreatePosition = () => {
               </div>
               <div className={styles.minMaxPriceValue}>
                 <p>
-                  <p>0.081242</p>
-                  <p className={styles.pair}>ORAI / USDT</p>
+                  <p>{leftInputRounded}</p>
+                  <p className={styles.pair}>
+                    {tokenFrom.denom.toUpperCase()} / {tokenTo.denom.toUpperCase()}
+                  </p>
                 </p>
               </div>
             </div>
             <div className={styles.percent}>
               <p>Min Current Price:</p>
-              <span className={classNames(styles.value, { [styles.positive]: false })}>{-56.0}%</span>
+              <span className={classNames(styles.value, { [styles.positive]: false })}>
+                {(((+leftInput - midPrice.x) / midPrice.x) * 100).toLocaleString(undefined, {maximumFractionDigits: 3})}%
+              </span>
             </div>
           </div>
 
@@ -1089,21 +1064,41 @@ const CreatePosition = () => {
               </div>
               <div className={styles.minMaxPriceValue}>
                 <p>
-                  <p>0.081242</p>
-                  <p className={styles.pair}>ORAI / USDT</p>
+                  <p>{rightInputRounded}</p>
+                  <p className={styles.pair}>
+                    {tokenFrom.denom.toUpperCase()} / {tokenTo.denom.toUpperCase()}
+                  </p>
                 </p>
               </div>
             </div>
             <div className={styles.percent}>
               <p>Max Current Price:</p>
-              <span className={classNames(styles.value, { [styles.positive]: true })}>{+56.0}%</span>
+              <span className={classNames(styles.value, { [styles.positive]: true })}>
+                {numberWithCommas(((+rightInput - midPrice.x) / midPrice.x) * 100, undefined, {
+                  maximumFractionDigits: 3
+                })}
+                %
+              </span>
             </div>
           </div>
         </div>
 
         <div className={styles.actions}>
-          <button>Reset range</button>
-          <button>Set full range</button>
+          <button onClick={resetPlot}>Reset range</button>
+          <button
+            onClick={() => {
+              const left = isXtoY
+                ? getMinTick(poolInfo.pool_key.fee_tier.tick_spacing)
+                : getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing);
+              const right = isXtoY
+                ? getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing)
+                : getMinTick(poolInfo.pool_key.fee_tier.tick_spacing);
+              changeRangeHandler(left, right);
+              autoZoomHandler(left, right);
+            }}
+          >
+            Set full range
+          </button>
         </div>
       </div>
     </div>
