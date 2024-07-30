@@ -47,6 +47,7 @@ const PositionItem = ({ position }) => {
   const [cachePrices] = useConfigReducer('coingecko');
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
+  const [openTooltipApr, setOpenTooltipApr] = useState(false);
   const [openCollapse, setCollapse] = useState(false);
   const [address] = useConfigReducer('address');
   const [tick, setTick] = useState<{ lowerTick: any; upperTick: any }>({
@@ -202,9 +203,9 @@ const PositionItem = ({ position }) => {
               <TooltipIcon
                 className={styles.tooltipWrapper}
                 placement="top"
-                visible={openTooltip}
+                visible={openTooltipApr}
                 icon={<IconInfo />}
-                setVisible={setOpenTooltip}
+                setVisible={setOpenTooltipApr}
                 content={
                   <div className={classNames(styles.tooltip, styles[theme])}>
                     <div className={styles.itemInfo}>
