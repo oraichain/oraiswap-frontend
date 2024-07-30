@@ -6,13 +6,15 @@
   position: relative;
 
   .cover {
-    width: calc(100% + 10px);
-    height: calc(100% + 10px);
+    width: 100%;
     background: #01051499;
     position: absolute;
     z-index: 11;
     border-radius: 10px;
     backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     .errorWrapper {
       margin: auto;

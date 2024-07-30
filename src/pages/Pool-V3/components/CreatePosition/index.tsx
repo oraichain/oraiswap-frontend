@@ -46,266 +46,6 @@ import TokenForm from '../TokenForm';
 import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 
-let args = {
-  data: [
-    {
-      x: 2.3325447947424105e-10,
-      y: 838.025081466683,
-      index: -221800
-    },
-    {
-      x: 4.095666666838582,
-      y: 838.025081466683,
-      index: 14100
-    },
-    {
-      x: 4.13682673287254,
-      y: 922.394132958037,
-      index: 14200
-    },
-    {
-      x: 5.929328716731552,
-      y: 922.394132958037,
-      index: 17800
-    },
-    {
-      x: 5.988916466746253,
-      y: 924.768717954767,
-      index: 17900
-    },
-    // {
-    //   x: 6.10989449517122,
-    //   y: 924.768717954767,
-    //   index: 18100
-    // },
-    // {
-    //   x: 6.171296870242322,
-    //   y: 1228.305125020546,
-    //   index: 18200
-    // },
-    // {
-    //   x: 6.359231302043402,
-    //   y: 1228.305125020546,
-    //   index: 18500
-    // },
-    // {
-    //   x: 6.423139427776829,
-    //   y: 1376.412271951954,
-    //   index: 18600
-    // },
-    // {
-    //   x: 6.552888898896388,
-    //   y: 1376.412271951954,
-    //   index: 18800
-    // },
-    // {
-    //   x: 6.618743218034855,
-    //   y: 1410.741026226673,
-    //   index: 18900
-    // },
-    // {
-    //   x: 6.685259350841405,
-    //   y: 1410.741026226673,
-    //   index: 19000
-    // },
-    // {
-    //   x: 6.752443948298717,
-    //   y: 1478.817972850278,
-    //   index: 19100
-    // },
-    // {
-    //   x: 6.820303728262422,
-    //   y: 1478.817972850278,
-    //   index: 19200
-    // },
-    // {
-    //   x: 6.888845476080644,
-    //   y: 1481.7502422703,
-    //   index: 19300
-    // },
-    // {
-    //   x: 6.958076045297614,
-    //   y: 1702.310045768757,
-    //   index: 19400
-    // },
-    // {
-    //   x: 7.028002358348769,
-    //   y: 1872.108774095546,
-    //   index: 19500
-    // },
-    // {
-    //   x: 7.0986314072148335,
-    //   y: 2055.451081292155,
-    //   index: 19600
-    // },
-    // {
-    //   x: 7.1699702541778905,
-    //   y: 2052.518811872133,
-    //   index: 19700
-    // },
-    // {
-    //   x: 7.314805946896031,
-    //   y: 2052.518811872133,
-    //   index: 19900
-    // },
-    // {
-    //   x: 7.388317274916235,
-    //   y: 2390.259553179729,
-    //   index: 20000
-    // },
-    // {
-    //   x: 7.462567366921463,
-    //   y: 2390.259553179729,
-    //   index: 20100
-    // },
-    // {
-    //   x: 7.537563647291317,
-    //   y: 2086.72314611395,
-    //   index: 20200
-    // },
-    // {
-    //   x: 7.767104985346781,
-    //   y: 2086.72314611395,
-    //   index: 20500
-    // },
-    // {
-    //   x: 7.84516176585385,
-    //   y: 1938.615999182542,
-    //   index: 20600
-    // },
-    // {
-    //   x: 8.165312561538634,
-    //   y: 1938.615999182542,
-    //   index: 21000
-    // },
-    // {
-    //   x: 8.247371193639982,
-    //   y: 1912.043286002816,
-    //   index: 21100
-    // },
-    // {
-    //   x: 8.58393563024182,
-    //   y: 1912.043286002816,
-    //   index: 21500
-    // },
-    // {
-    //   x: 8.670201282734537,
-    //   y: 1554.049862267195,
-    //   index: 21600
-    // },
-    // {
-    //   x: 8.757333875870172,
-    //   y: 1565.535658474116,
-    //   index: 21700
-    // },
-    // {
-    //   x: 8.845342122132077,
-    //   y: 1565.535658474116,
-    //   index: 21800
-    // },
-    // {
-    //   x: 8.934234821530346,
-    //   y: 1497.458711850511,
-    //   index: 21900
-    // },
-    // {
-    //   x: 9.024020862509365,
-    //   y: 1497.458711850511,
-    //   index: 22000
-    // },
-    // {
-    //   x: 9.114709222876904,
-    //   y: 1159.717970542915,
-    //   index: 22100
-    // },
-    // {
-    //   x: 9.582006404274413,
-    //   y: 1159.717970542915,
-    //   index: 22600
-    // },
-    // {
-    //   x: 9.67830233079223,
-    //   y: 1148.232174335994,
-    //   index: 22700
-    // },
-    // {
-    //   x: 9.97303555905674,
-    //   y: 1148.232174335994,
-    //   index: 23000
-    // },
-    // {
-    //   x: 10.07326119645574,
-    //   y: 1140.476133241001,
-    //   index: 23100
-    // },
-    // {
-    //   x: 10.58970186938534,
-    //   y: 1140.476133241001,
-    //   index: 23600
-    // },
-    // {
-    //   x: 10.696124794801273,
-    //   y: 1010.198394790202,
-    //   index: 23700
-    // },
-    // {
-    //   x: 11.820986957813748,
-    //   y: 1010.198394790202,
-    //   index: 24700
-    // },
-    // {
-    //   x: 11.939783882305553,
-    //   y: 840.399666463413,
-    //   index: 24800
-    // },
-    // {
-    //   x: 99.46143826221535,
-    //   y: 840.399666463413,
-    //   index: 46000
-    // },
-    // {
-    //   x: 100.4609921079365,
-    //   y: 838.025081466683,
-    //   index: 46100
-    // },
-    // {
-    //   x: 4244507227.6354027,
-    //   y: 838.025081466683,
-    //   index: 221700
-    // },
-    // {
-    //   x: 4287163091.0193543,
-    //   y: 0,
-    //   index: 221800
-    // }
-  ],
-  leftRange: {
-    index: 18700,
-    x: 6.487689808579399
-  },
-  rightRange: {
-    index: 20700,
-    x: 7.924002990634724
-  },
-  midPrice: {
-    index: 19700,
-    x: 7.170765721904195
-  },
-  // className: 'css-rdpzh4-plot',
-  disabled: false,
-  plotMin: 6.171296870242322,
-  plotMax: 8.17023457356607,
-  loading: false,
-  isXtoY: true,
-  xDecimal: 6,
-  yDecimal: 6,
-  tickSpacing: 100,
-  isDiscrete: true,
-  coverOnLoading: false,
-  hasError: false,
-  positionOpeningMethod: 'concentration'
-};
-
 export type PriceInfo = {
   startPrice: number;
   minPrice?: number;
@@ -343,8 +83,17 @@ const CreatePosition = () => {
   const [slippage, setSlippage] = useState(1);
   const [typeChart, setTypeChart] = useState(TYPE_CHART.CONTINUOUS);
 
-  const [leftRange, setLeftRange] = useState(args.leftRange.index);
-  const [rightRange, setRightRange] = useState(args.rightRange.index);
+  const [notInitPoolKey, setNotInitPoolKey] = useState<PoolKey>({
+    token_x: tokenFrom?.denom || '',
+    token_y: tokenTo?.denom || '',
+    fee_tier: {
+      fee: feeTier.fee,
+      tick_spacing: 1
+    }
+  });
+
+  const [leftRange, setLeftRange] = useState(getMinTick(notInitPoolKey.fee_tier.tick_spacing));
+  const [rightRange, setRightRange] = useState(getMaxTick(notInitPoolKey.fee_tier.tick_spacing));
 
   const [leftInput, setLeftInput] = useState('');
   const [rightInput, setRightInput] = useState('');
@@ -352,16 +101,14 @@ const CreatePosition = () => {
   const [leftInputRounded, setLeftInputRounded] = useState('');
   const [rightInputRounded, setRightInputRounded] = useState('');
 
-  const [plotMin, setPlotMin] = useState(args.plotMin);
-  const [plotMax, setPlotMax] = useState(args.plotMax);
+  const [plotMin, setPlotMin] = useState(0);
+  const [plotMax, setPlotMax] = useState(1);
 
   const [isPlotDiscrete, setIsPlotDiscrete] = useState(false);
 
   const [isPoolExist, setIsPoolExist] = useState(false);
 
   const [poolInfo, setPoolInfo] = useState<PoolWithPoolKey>();
-
-  const [notInitPoolKey, setNotInitPoolKey] = useState<PoolKey>();
 
   const [currentPrice, setCurrentPrice] = useState(1);
 
@@ -431,6 +178,8 @@ const CreatePosition = () => {
     decimalsLimit: tokenTo ? Number(tokenTo.decimals) : 0
   });
 
+  const positionOpeningMethod = 'range'; // always range
+
   const isMountedRef = useRef(false);
 
   useEffect(() => {
@@ -451,8 +200,9 @@ const CreatePosition = () => {
   }, [tokenFrom, tokenTo]);
 
   const concentrationArray = useMemo(
-    () => getConcentrationArray(Number(args.tickSpacing), 2, Number(args.midPrice.index)).sort((a, b) => a - b),
-    [args.tickSpacing]
+    () =>
+      getConcentrationArray(Number(notInitPoolKey.fee_tier.tick_spacing), 2, Number(midPrice)).sort((a, b) => a - b),
+    [notInitPoolKey.fee_tier.tick_spacing]
   );
 
   const liquidityRef = useRef<any>(0n);
@@ -476,10 +226,10 @@ const CreatePosition = () => {
       calcTicksAmountInRange(
         Math.max(newMin, 0),
         newMax,
-        Number(args.tickSpacing),
-        args.isXtoY,
-        args.xDecimal,
-        args.yDecimal
+        Number(notInitPoolKey.fee_tier.tick_spacing),
+        isXtoY,
+        tokenFrom.decimals,
+        tokenTo.decimals
       ) >= 4
     ) {
       setPlotMin(newMin);
@@ -488,8 +238,12 @@ const CreatePosition = () => {
   };
 
   const getTicksInsideRange = (left: number, right: number, isXtoY: boolean) => {
-    const leftMax = isXtoY ? getMinTick(args.tickSpacing) : getMaxTick(args.tickSpacing);
-    const rightMax = isXtoY ? getMaxTick(args.tickSpacing) : getMinTick(args.tickSpacing);
+    const leftMax = isXtoY
+      ? getMinTick(notInitPoolKey.fee_tier.tick_spacing)
+      : getMaxTick(notInitPoolKey.fee_tier.tick_spacing);
+    const rightMax = isXtoY
+      ? getMaxTick(notInitPoolKey.fee_tier.tick_spacing)
+      : getMinTick(notInitPoolKey.fee_tier.tick_spacing);
 
     let leftInRange: number;
     let rightInRange: number;
@@ -529,8 +283,8 @@ const CreatePosition = () => {
     let leftRange: number;
     let rightRange: number;
 
-    if (args.positionOpeningMethod === 'range') {
-      const { leftInRange, rightInRange } = getTicksInsideRange(left, right, args.isXtoY);
+    if (positionOpeningMethod === 'range') {
+      const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
       leftRange = leftInRange;
       rightRange = rightInRange;
     } else {
@@ -582,8 +336,8 @@ const CreatePosition = () => {
     let leftRange: number;
     let rightRange: number;
 
-    if (args.positionOpeningMethod === 'range') {
-      const { leftInRange, rightInRange } = getTicksInsideRange(left, right, args.isXtoY);
+    if (positionOpeningMethod === 'range') {
+      const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
       leftRange = leftInRange;
       rightRange = rightInRange;
     } else {
@@ -594,46 +348,49 @@ const CreatePosition = () => {
     setLeftRange(Number(leftRange));
     setRightRange(Number(rightRange));
 
-    setLeftInputValues(calcPrice(Number(leftRange), args.isXtoY, args.xDecimal, args.yDecimal).toString());
-    setRightInputValues(calcPrice(Number(rightRange), args.isXtoY, args.xDecimal, args.yDecimal).toString());
+    setLeftInputValues(calcPrice(Number(leftRange), isXtoY, tokenFrom.decimals, tokenTo.decimals).toString());
+    setRightInputValues(calcPrice(Number(rightRange), isXtoY, tokenFrom.decimals, tokenTo.decimals).toString());
 
     onChangeRange(left, right);
   };
 
   const resetPlot = () => {
-    if (args.positionOpeningMethod === 'range') {
+    if (positionOpeningMethod === 'range') {
       const initSideDist = Math.abs(
-        args.midPrice.x -
+        midPrice.x -
           calcPrice(
-            Math.max(getMinTick(args.tickSpacing), Number(args.midPrice.index) - args.tickSpacing * 15),
-            args.isXtoY,
-            args.xDecimal,
-            args.yDecimal
+            Math.max(
+              getMinTick(notInitPoolKey.fee_tier.tick_spacing),
+              Number(midPrice.index) - notInitPoolKey.fee_tier.tick_spacing * 15
+            ),
+            isXtoY,
+            tokenFrom.decimals,
+            tokenTo.decimals
           )
       );
 
       const higherTick = Math.max(
-        Number(getMinTick(Number(args.tickSpacing))),
-        Number(args.midPrice.index) - Number(args.tickSpacing) * 10
+        Number(getMinTick(Number(notInitPoolKey.fee_tier.tick_spacing))),
+        Number(midPrice.index) - Number(notInitPoolKey.fee_tier.tick_spacing) * 10
       );
 
       const lowerTick = Math.min(
-        Number(getMaxTick(Number(args.tickSpacing))),
-        Number(args.midPrice.index) + Number(args.tickSpacing) * 10
+        Number(getMaxTick(Number(notInitPoolKey.fee_tier.tick_spacing))),
+        Number(midPrice.index) + Number(notInitPoolKey.fee_tier.tick_spacing) * 10
       );
 
-      changeRangeHandler(args.isXtoY ? higherTick : lowerTick, args.isXtoY ? lowerTick : higherTick);
+      changeRangeHandler(isXtoY ? higherTick : lowerTick, isXtoY ? lowerTick : higherTick);
 
-      setPlotMin(args.midPrice.x - initSideDist);
-      setPlotMax(args.midPrice.x + initSideDist);
+      setPlotMin(midPrice.x - initSideDist);
+      setPlotMax(midPrice.x + initSideDist);
     } else {
       setConcentrationIndex(0);
       const { leftRange, rightRange } = calculateConcentrationRange(
         1,
         concentrationArray[0],
         2,
-        args.midPrice.index,
-        args.isXtoY
+        midPrice.index,
+        isXtoY
       );
       changeRangeHandler(leftRange, rightRange);
       autoZoomHandler(leftRange, rightRange, true);
@@ -648,17 +405,20 @@ const CreatePosition = () => {
       setPlotMax(pom);
     } else {
       const initSideDist = Math.abs(
-        args.midPrice.x -
+        midPrice.x -
           calcPrice(
-            Math.max(getMinTick(args.tickSpacing), args.midPrice.index - args.tickSpacing * 15),
-            args.isXtoY,
-            args.xDecimal,
-            args.yDecimal
+            Math.max(
+              getMinTick(notInitPoolKey.fee_tier.tick_spacing),
+              midPrice.index - notInitPoolKey.fee_tier.tick_spacing * 15
+            ),
+            isXtoY,
+            tokenFrom.decimals,
+            tokenTo.decimals
           )
       );
 
-      setPlotMin(args.midPrice.x - initSideDist);
-      setPlotMax(args.midPrice.x + initSideDist);
+      setPlotMin(midPrice.x - initSideDist);
+      setPlotMax(midPrice.x + initSideDist);
     }
   };
 
@@ -675,23 +435,35 @@ const CreatePosition = () => {
   // }, [ticksLoading, midPrice]);
 
   const autoZoomHandler = (left: number, right: number, canZoomCloser: boolean = false) => {
-    const leftX = calcPrice(left, args.isXtoY, args.xDecimal, args.yDecimal);
-    const rightX = calcPrice(right, args.isXtoY, args.xDecimal, args.yDecimal);
+    const leftX = calcPrice(left, isXtoY, tokenFrom.decimals, tokenTo.decimals);
+    const rightX = calcPrice(right, isXtoY, tokenFrom.decimals, tokenTo.decimals);
 
-    const higherLeftIndex = Math.max(getMinTick(args.tickSpacing), left - args.tickSpacing * 15);
+    const higherLeftIndex = Math.max(
+      getMinTick(notInitPoolKey.fee_tier.tick_spacing),
+      left - notInitPoolKey.fee_tier.tick_spacing * 15
+    );
 
-    const lowerLeftIndex = Math.min(getMaxTick(args.tickSpacing), left + args.tickSpacing * 15);
+    const lowerLeftIndex = Math.min(
+      getMaxTick(notInitPoolKey.fee_tier.tick_spacing),
+      left + notInitPoolKey.fee_tier.tick_spacing * 15
+    );
 
-    const lowerRightIndex = Math.min(getMaxTick(args.tickSpacing), right + args.tickSpacing * 15);
+    const lowerRightIndex = Math.min(
+      getMaxTick(notInitPoolKey.fee_tier.tick_spacing),
+      right + notInitPoolKey.fee_tier.tick_spacing * 15
+    );
 
-    const higherRightIndex = Math.max(getMinTick(args.tickSpacing), right - args.tickSpacing * 15);
+    const higherRightIndex = Math.max(
+      getMinTick(notInitPoolKey.fee_tier.tick_spacing),
+      right - notInitPoolKey.fee_tier.tick_spacing * 15
+    );
 
     if (leftX < plotMin || rightX > plotMax || canZoomCloser) {
       const leftDist = Math.abs(
-        leftX - calcPrice(args.isXtoY ? higherLeftIndex : lowerLeftIndex, args.isXtoY, args.xDecimal, args.yDecimal)
+        leftX - calcPrice(isXtoY ? higherLeftIndex : lowerLeftIndex, isXtoY, tokenFrom.decimals, tokenTo.decimals)
       );
       const rightDist = Math.abs(
-        rightX - calcPrice(args.isXtoY ? lowerRightIndex : higherRightIndex, args.isXtoY, args.xDecimal, args.yDecimal)
+        rightX - calcPrice(isXtoY ? lowerRightIndex : higherRightIndex, isXtoY, tokenFrom.decimals, tokenTo.decimals)
       );
 
       let dist;
@@ -874,29 +646,34 @@ const CreatePosition = () => {
     }
   };
 
-  // args
-  // args
-  const [liquidityData, setLiquidityData] = useState<PlotTickData[]>([
-    {
-      x: 5.0,
-      y: 1000.0,
-      index: 0
-    }
-  ]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [liquidityData, setLiquidityData] = useState<PlotTickData[]>([]);
+
+  console.log('loading', loading);
+
   useEffect(() => {
-    const fetchTickData = async () => {
-      const ticksData = await handleGetCurrentPlotTicks({
-        poolKey: notInitPoolKey,
-        isXtoY: isXtoY,
-        xDecimal: tokenFrom.decimals,
-        yDecimal: tokenTo.decimals
-      });
-      setLiquidityData(ticksData);
-      console.log({ ticksData });
-    };
-    if (isPoolExist && notInitPoolKey) {
-      console.log('here');
-      fetchTickData();
+    try {
+      const fetchTickData = async () => {
+        setLoading(true);
+
+        const ticksData = await handleGetCurrentPlotTicks({
+          poolKey: notInitPoolKey,
+          isXtoY: isXtoY,
+          xDecimal: tokenFrom.decimals,
+          yDecimal: tokenTo.decimals
+        });
+
+        setLiquidityData(ticksData);
+
+        console.log({ ticksData });
+      };
+      if (isPoolExist && notInitPoolKey) {
+        fetchTickData();
+      }
+    } catch (error) {
+      console.log('error: >> liquidity', error);
+    } finally {
+      setLoading(false);
     }
   }, [isPoolExist, notInitPoolKey, isXtoY]);
 
@@ -961,26 +738,27 @@ const CreatePosition = () => {
             onChangeRange={changeRangeHandler}
             leftRange={{
               index: leftRange,
-              x: calcPrice(leftRange, args.isXtoY, args.xDecimal, args.yDecimal)
+              x: calcPrice(leftRange, isXtoY, tokenFrom.decimals, tokenTo.decimals)
             }}
             rightRange={{
               index: rightRange,
-              x: calcPrice(rightRange, args.isXtoY, args.xDecimal, args.yDecimal)
+              x: calcPrice(rightRange, isXtoY, tokenFrom.decimals, tokenTo.decimals)
             }}
-            midPrice={args.midPrice}
+            midPrice={midPrice}
             plotMin={plotMin}
             plotMax={plotMax}
             zoomMinus={zoomMinus}
             zoomPlus={zoomPlus}
-            loading={args.loading}
-            isXtoY={args.isXtoY}
-            tickSpacing={args.tickSpacing}
-            xDecimal={args.xDecimal}
-            yDecimal={args.yDecimal}
+            loading={loading}
+            coverOnLoading={true}
+            isXtoY={isXtoY}
+            tickSpacing={notInitPoolKey.fee_tier.tick_spacing}
+            xDecimal={tokenFrom.decimals}
+            yDecimal={tokenTo.decimals}
             isDiscrete={isPlotDiscrete}
             // disabled={positionOpeningMethod === 'concentration'}
             disabled={false}
-            hasError={args.hasError}
+            // hasError={args.hasError}
             // reloadHandler={reloadHandler}
             reloadHandler={() => {}}
           />
@@ -1049,7 +827,7 @@ const CreatePosition = () => {
       priceInfo={priceInfo} // startPrice, minPrice, maxPrice
       setPriceInfo={setPriceInfo} // setStartPrice, setMinPrice, setMaxPrice
       onChangeMidPrice={onChangeMidPrice}
-      tickSpacing={args.tickSpacing}
+      tickSpacing={notInitPoolKey.fee_tier.tick_spacing}
       isXtoY={isXtoY}
       onChangeRange={changeRangeHandler}
     />

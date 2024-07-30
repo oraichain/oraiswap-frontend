@@ -99,7 +99,7 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
 
   const maxVal = useMemo(() => {
     if (!data.length) return 0;
-    Math.max(...data.map((element) => element.y));
+    Math.max(...(data || []).map((element) => element.y));
   }, [data]);
 
   const pointsOmitter = useCallback(
@@ -366,9 +366,19 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
     disabled
   );
 
+  if (data.length === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.cover}>
+          <img src={loadingGif} alt="loading" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
-      {loading && coverOnLoading ? (
+      {loading && !data.length && coverOnLoading ? (
         <div className={styles.cover}>
           <img src={loadingGif} alt="loading-gif" width={30} height={30} />
         </div>
