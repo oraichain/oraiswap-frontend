@@ -25,7 +25,8 @@ const NewPositionNoPool = ({
   onChangeMidPrice,
   tickSpacing,
   isXtoY,
-  onChangeRange
+  onChangeRange,
+  midPrice
 }: {
   fromToken: TokenItemType;
   toToken: TokenItemType;
@@ -35,6 +36,7 @@ const NewPositionNoPool = ({
   tickSpacing: number;
   isXtoY: boolean;
   onChangeRange: (left: number, right: number) => void;
+  midPrice: number;
 }) => {
   const { data: prices } = useCoinGeckoPrices();
   const currentPrice = new BigDecimal(prices[fromToken?.coinGeckoId] || 0)
@@ -108,7 +110,7 @@ const NewPositionNoPool = ({
 
   useEffect(() => {
     changeRangeHandler(leftRange, rightRange);
-  }, [priceInfo.startPrice]);
+  }, [midPrice]);
 
   const validateMidPriceInput = (midPriceInput: string) => {
     const minTick = getMinTick(tickSpacing);
@@ -133,10 +135,9 @@ const NewPositionNoPool = ({
   //   }
   // }, [currentPairReversed]);
 
-  const price = useMemo(
-    () => calcPrice(Number(priceInfo.startPrice), isXtoY, fromToken.decimals, toToken.decimals),
-    [priceInfo.startPrice, isXtoY, fromToken.decimals, toToken.decimals]
-  );
+  const price = useMemo(() => {
+    return calcPrice(midPrice, isXtoY, fromToken.decimals, toToken.decimals);
+  }, [midPrice, isXtoY, fromToken.decimals, toToken.decimals]);
 
   return (
     <div className={styles.newPositionNoPool}>

@@ -854,9 +854,18 @@ const CreatePosition = () => {
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
+    console.log('mid', {
+      index: convertedMid,
+      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+    });
+
     setMidPrice({
       index: convertedMid,
       x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+    });
+    setPriceInfo({
+      ...priceInfo,
+      startPrice: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
     });
     if (amountFrom && (isXtoY ? rightRange > convertedMid : rightRange < convertedMid)) {
       const deposit = amountFrom;
@@ -894,7 +903,7 @@ const CreatePosition = () => {
       resetPlot();
     }
   }, [liquidityData, midPrice]);
-  console.log('loading', loading);
+  // console.log('loading', loading);
 
   useEffect(() => {
     try {
@@ -1052,7 +1061,10 @@ const CreatePosition = () => {
             <div className={styles.percent}>
               <p>Min Current Price:</p>
               <span className={classNames(styles.value, { [styles.positive]: false })}>
-                {(((+leftInput - midPrice.x) / midPrice.x) * 100).toLocaleString(undefined, {maximumFractionDigits: 3})}%
+                {(((+leftInput - midPrice.x) / midPrice.x) * 100).toLocaleString(undefined, {
+                  maximumFractionDigits: 3
+                })}
+                %
               </span>
             </div>
           </div>
@@ -1112,6 +1124,7 @@ const CreatePosition = () => {
       tickSpacing={notInitPoolKey.fee_tier.tick_spacing}
       isXtoY={isXtoY}
       onChangeRange={changeRangeHandler}
+      midPrice={midPrice.index}
     />
   );
 
