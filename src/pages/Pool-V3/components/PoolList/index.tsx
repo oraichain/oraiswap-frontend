@@ -12,7 +12,7 @@ import { TooltipIcon } from 'components/Tooltip';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
+import SingletonOraiswapV3, { poolKeyToString } from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { formatPoolData } from 'pages/Pool-V3/helpers/format';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
@@ -20,10 +20,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
+import axios from 'axios';
+import { oraichainTokens } from 'config/bridgeTokens';
 
 const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
+  const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const theme = useTheme();
   const [search, setSearch] = useState<string>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
@@ -70,6 +73,221 @@ const PoolList = () => {
     })();
   }, [dataPool]);
 
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await axios.get('/pool-v3/status', { baseURL: 'https://api-staging.oraidex.io/v1' });
+        return res.data;
+      } catch (error) {
+        return [];
+      }
+    };
+
+    fetchBanners().then(async (data) => {
+      const pools = await SingletonOraiswapV3.getPools();
+      const allPoolsData = pools.map((pool) => {
+        return {
+          tokenX: pool.pool_key.token_x,
+          tokenY: pool.pool_key.token_y,
+          fee: BigInt(pool.pool_key.fee_tier.fee),
+          poolKey: poolKeyToString(pool.pool_key)
+        };
+      });
+      const poolsDataObject: Record<
+        string,
+        {
+          tokenX: string;
+          tokenY: string;
+          fee: bigint;
+          poolKey: string;
+        }
+      > = {};
+      allPoolsData.forEach((pool) => {
+        poolsDataObject[pool.poolKey.toString()] = pool;
+      });
+
+      // let allTokens = oraichainTokens.reduce((acc, cur) => {
+      //   return { ...acc, [cur.contractAddress || cur.denom]: cur };
+      // }, {});
+
+      // const unknownTokens = new Set<string>();
+      // allPoolsData.forEach((pool) => {
+      //   if (!allTokens[pool.tokenX.toString()]) {
+      //     unknownTokens.add(pool.tokenX);
+      //   }
+
+      //   if (!allTokens[pool.tokenY.toString()]) {
+      //     unknownTokens.add(pool.tokenY);
+      //   }
+      // });
+
+      // const tokenInfos = await SingletonOraiswapV3.getTokensInfo([...unknownTokens]);
+      // // yield* put(poolsActions.addTokens(newTokens))
+
+      // const preparedTokens: Record<string, any> = {};
+      // Object.entries(allTokens).forEach(([key, val]) => {
+      //   // @ts-ignore
+      //   if (typeof val.coinGeckoId !== 'undefined') {
+      //     preparedTokens[key] = val as Required<any>;
+      //   }
+      // });
+
+      // let tokensPricesData: Record<string, any> = {};
+
+      // const volume24 = {
+      //   value: 0,
+      //   change: 0
+      // };
+      // const tvl24 = {
+      //   value: 0,
+      //   change: 0
+      // };
+      // const fees24 = {
+      //   value: 0,
+      //   change: 0
+      // };
+
+      // const tokensDataObject: Record<string, any> = {};
+      let poolsData: {
+        poolAddress: string;
+        tokenX: string;
+        tokenY: string;
+        fee: number;
+        volume24: number;
+        tvl: number;
+        apy: number;
+      }[] = [];
+      // const volumeForTimestamps: Record<string, number> = {};
+      // const liquidityForTimestamps: Record<string, number> = {};
+      // const feesForTimestamps: Record<string, number> = {};
+
+      const lastTimestamp = Math.max(
+        ...Object.values(data)
+          .filter((snaps: any) => snaps.length > 0)
+          .map((snaps: any) => +snaps[snaps.length - 1].timestamp)
+      );
+
+      Object.entries(data).forEach(([address, snapshots]) => {
+        //   if (!poolsDataObject[address]) {
+        //     return;
+        //   }
+        //   const tokenXId = preparedTokens?.[poolsDataObject[address].tokenX.toString()]?.coingeckoId ?? '';
+        //   const tokenYId = preparedTokens?.[poolsDataObject[address].tokenY.toString()]?.coingeckoId ?? '';
+        //   if (!tokensDataObject[poolsDataObject[address].tokenX.toString()]) {
+        //     tokensDataObject[poolsDataObject[address].tokenX.toString()] = {
+        //       address: poolsDataObject[address].tokenX,
+        //       price: tokensPricesData?.[tokenXId]?.price ?? 0,
+        //       volume24: 0,
+        //       tvl: 0,
+        //       priceChange: 0
+        //     };
+        //   }
+        //   if (!tokensDataObject[poolsDataObject[address].tokenY.toString()]) {
+        //     tokensDataObject[poolsDataObject[address].tokenY.toString()] = {
+        //       address: poolsDataObject[address].tokenY,
+        //       price: tokensPricesData?.[tokenYId]?.price ?? 0,
+        //       volume24: 0,
+        //       tvl: 0,
+        //       priceChange: 0
+        //     };
+        //   }
+        // @ts-ignore
+        if (!snapshots.length) {
+          poolsData.push({
+            volume24: 0,
+            tvl: 0,
+            tokenX: poolsDataObject[address].tokenX,
+            tokenY: poolsDataObject[address].tokenY,
+            // TODO: hard code decimals
+            fee: Number(poolsDataObject[address].fee),
+            apy: 0, // TODO: calculate apy
+            poolAddress: address
+          });
+          return;
+        }
+        //   const tokenX = allTokens[poolsDataObject[address].tokenX.toString()];
+        //   const tokenY = allTokens[poolsDataObject[address].tokenY.toString()];
+        //@ts-ignore
+        const lastSnapshot = snapshots[snapshots.length - 1];
+        //   console.log('token: ', tokenX.coingeckoId, tokenY.coingeckoId, lastSnapshot, lastTimestamp);
+        //   tokensDataObject[(tokenX.contractAddress || tokenX.denom).toString()].volume24 +=
+        //     lastSnapshot.timestamp === lastTimestamp ? lastSnapshot.volumeX.usdValue24 : 0;
+        //   tokensDataObject[(tokenX.contractAddress || tokenX.denom).toString()].volume24 +=
+        //     lastSnapshot.timestamp === lastTimestamp ? lastSnapshot.volumeY.usdValue24 : 0;
+        //   tokensDataObject[(tokenX.contractAddress || tokenX.denom).toString()].tvl += lastSnapshot.liquidityX.usdValue24;
+        //   tokensDataObject[(tokenX.contractAddress || tokenX.denom).toString()].tvl += lastSnapshot.liquidityY.usdValue24;
+        poolsData.push({
+          volume24:
+            lastSnapshot.timestamp === lastTimestamp
+              ? lastSnapshot.volumeX.usdValue24 + lastSnapshot.volumeY.usdValue24
+              : 0,
+          tvl:
+            lastSnapshot.timestamp === lastTimestamp
+              ? lastSnapshot.liquidityX.usdValue24 + lastSnapshot.liquidityY.usdValue24
+              : 0,
+          tokenX: poolsDataObject[address].tokenX,
+          tokenY: poolsDataObject[address].tokenY,
+          fee: Number(poolsDataObject[address].fee),
+          apy: 0, // TODO: calculate apy
+          poolAddress: address
+        });
+        //   // @ts-ignore
+        //   snapshots.slice(-30).forEach((snapshot) => {
+        //     const timestamp = snapshot.timestamp.toString();
+        //     if (!volumeForTimestamps[timestamp]) {
+        //       volumeForTimestamps[timestamp] = 0;
+        //     }
+        //     if (!liquidityForTimestamps[timestamp]) {
+        //       liquidityForTimestamps[timestamp] = 0;
+        //     }
+        //     if (!feesForTimestamps[timestamp]) {
+        //       feesForTimestamps[timestamp] = 0;
+        //     }
+        //     volumeForTimestamps[timestamp] += snapshot.volumeX.usdValue24 + snapshot.volumeY.usdValue24;
+        //     liquidityForTimestamps[timestamp] += snapshot.liquidityX.usdValue24 + snapshot.liquidityY.usdValue24;
+        //     feesForTimestamps[timestamp] += snapshot.feeX.usdValue24 + snapshot.feeY.usdValue24;
+        //   });
+      });
+
+      // const volumePlot: any[] = Object.entries(volumeForTimestamps)
+      //   .map(([timestamp, value]) => ({
+      //     timestamp: +timestamp,
+      //     value
+      //   }))
+      //   .sort((a, b) => a.timestamp - b.timestamp);
+      // const liquidityPlot: any[] = Object.entries(liquidityForTimestamps)
+      //   .map(([timestamp, value]) => ({
+      //     timestamp: +timestamp,
+      //     value
+      //   }))
+      //   .sort((a, b) => a.timestamp - b.timestamp);
+      // const feePlot: any[] = Object.entries(feesForTimestamps)
+      //   .map(([timestamp, value]) => ({
+      //     timestamp: +timestamp,
+      //     value
+      //   }))
+      //   .sort((a, b) => a.timestamp - b.timestamp);
+
+      const tiersToOmit = [0.001, 0.003];
+
+      poolsData = poolsData.filter((pool) => !tiersToOmit.includes(pool.fee));
+
+      // volume24.value = volumePlot.length ? volumePlot[volumePlot.length - 1].value : 0;
+      // tvl24.value = liquidityPlot.length ? liquidityPlot[liquidityPlot.length - 1].value : 0;
+      // fees24.value = feePlot.length ? feePlot[feePlot.length - 1].value : 0;
+
+      // const prevVolume24 = volumePlot.length > 1 ? volumePlot[volumePlot.length - 2].value : 0;
+      // const prevTvl24 = liquidityPlot.length > 1 ? liquidityPlot[liquidityPlot.length - 2].value : 0;
+      // const prevFees24 = feePlot.length > 1 ? feePlot[feePlot.length - 2].value : 0;
+
+      // volume24.change = ((volume24.value - prevVolume24) / prevVolume24) * 100;
+      // tvl24.change = ((tvl24.value - prevTvl24) / prevTvl24) * 100;
+      // fees24.change = ((fees24.value - prevFees24) / prevFees24) * 100;
+
+      setVolumnePools(poolsData);
+    });
+  }, []);
+
   return (
     <div className={styles.poolList}>
       <div className={styles.headerTable}>
@@ -107,7 +325,7 @@ const PoolList = () => {
                 <tr>
                   <th>Pool name</th>
                   <th className={styles.textRight}>Liquidity</th>
-                  {/* <th className={styles.textRight}>Volume (24H)</th> */}
+                  <th className={styles.textRight}>Volume (24H)</th>
                   <th className={styles.textRight}>APR</th>
                   <th></th>
                 </tr>
@@ -125,9 +343,20 @@ const PoolList = () => {
                     );
                   })
                   .map((item, index) => {
+                    let volumn = 0;
+                    if (item?.poolKey) {
+                      const findPool = volumnePools && volumnePools.find((vo) => vo.poolAddress === item?.poolKey);
+                      if (findPool) volumn = findPool.volume24;
+                    }
+
                     return (
                       <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                        <PoolItemTData item={item} theme={theme} liquidity={liquidityPools?.[item?.poolKey]} />
+                        <PoolItemTData
+                          item={item}
+                          theme={theme}
+                          volumn={volumn}
+                          liquidity={liquidityPools?.[item?.poolKey]}
+                        />
                       </tr>
                     );
                   })}
@@ -145,7 +374,7 @@ const PoolList = () => {
   );
 };
 
-const PoolItemTData = ({ item, theme, liquidity }) => {
+const PoolItemTData = ({ item, theme, liquidity, volumn }) => {
   const [openTooltip, setOpenTooltip] = useState(false);
   const isLight = theme === 'light';
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
@@ -178,13 +407,12 @@ const PoolItemTData = ({ item, theme, liquidity }) => {
           )}
         </span>
       </td>
-      {/* <td className={styles.textRight}>
-        <span className={styles.amount}>{formatDisplayUsdt(1348)}</span>
-      </td> */}
+      <td className={styles.textRight}>
+        <span className={styles.amount}>{formatDisplayUsdt(volumn)}</span>
+      </td>
       <td>
         <div className={styles.apr}>
-          <span className={styles.amount}>{numberWithCommas(13.48)}%</span>
-
+          <span className={styles.amount}>{numberWithCommas(Math.random())}%</span>
           <TooltipIcon
             className={styles.tooltipWrapper}
             placement="top"

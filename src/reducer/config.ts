@@ -48,6 +48,15 @@ export interface ConfigState {
   liquidityPools?: {
     [key: string]: number;
   };
+  volumnePools?: {
+    apy: number;
+    fee: number;
+    poolAddress: string;
+    tokenX: string;
+    tokenY: string;
+    tvl: number;
+    volume24: number;
+  }[];
 }
 
 const initialState: ConfigState = {
@@ -72,6 +81,7 @@ const initialState: ConfigState = {
   apr: {},
   rewardPools: [],
   liquidityPools: {},
+  volumnePools: [],
   filterDefaultPool: KeyFilterPool.all_pool,
   persistVersion: PERSIST_VER,
   AIRoute: true
