@@ -218,7 +218,7 @@ const PositionItem = ({ position }) => {
                     </div>
                     <div className={styles.itemInfo}>
                       <span>
-                        ORAI Boost&nbsp;
+                        ORAIX Boost&nbsp;
                         <IconBoots />
                       </span>
                       <span className={styles.value}>{numberWithCommas(11.91)}%</span>
@@ -314,7 +314,12 @@ const PositionItem = ({ position }) => {
                   }
                 }}
               >
-                {removeLoading && <Loader width={20} height={20} />}
+                {removeLoading && (
+                  <>
+                    <Loader width={20} height={20} />
+                    <span style={{ width: 6 }}> </span>
+                  </>
+                )}
                 Close Position
               </Button>
               <Button
@@ -395,7 +400,13 @@ const PositionItem = ({ position }) => {
                   }
                 }}
               >
-                {claimLoading && <Loader width={20} height={20} />} Claim Rewards
+                {claimLoading && (
+                  <>
+                    <Loader width={20} height={20} />
+                    <span style={{ width: 6 }}> </span>
+                  </>
+                )}
+                Claim Rewards
               </Button>
             </div>
           </div>

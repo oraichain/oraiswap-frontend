@@ -127,20 +127,20 @@ const PositionList = () => {
   return (
     <div className={styles.positionList}>
       <LoadingBox loading={loading}>
-        {dataPosition.length ? (
-          dataPosition.map((position, key) => {
-            return (
-              <div className={styles.item} key={`position-list-item-${key}`}>
-                <PositionItem position={position} />
+        {dataPosition.length
+          ? dataPosition.map((position, key) => {
+              return (
+                <div className={styles.item} key={`position-list-item-${key}`}>
+                  <PositionItem position={position} />
+                </div>
+              );
+            })
+          : !loading && (
+              <div className={styles.nodata}>
+                {theme === 'light' ? <NoData /> : <NoDataDark />}
+                <span>No Positions!</span>
               </div>
-            );
-          })
-        ) : (
-          <div className={styles.nodata}>
-            {theme === 'light' ? <NoData /> : <NoDataDark />}
-            <span>No Positions!</span>
-          </div>
-        )}
+            )}
       </LoadingBox>
     </div>
   );

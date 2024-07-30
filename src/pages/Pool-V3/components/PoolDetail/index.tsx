@@ -29,15 +29,19 @@ const MID_PERCENT = 50;
 const PoolV3Detail = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [address] = useConfigReducer('address');
+  const [liquidityPools] = useConfigReducer('liquidityPools');
+  const [volumnePools] = useConfigReducer('volumnePools');
   const navigate = useNavigate();
   const theme = useTheme();
   const isLight = theme === 'light';
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
   const { poolId } = useParams<{ poolId: string }>();
+  const totalLiquidity = liquidityPools?.[poolId] ?? 0;
+  const volumn24h = (volumnePools && volumnePools.find((vo) => vo.poolAddress === poolId))?.volume24 ?? 0;
   const [poolDetail, setPoolDetail] = useState<PoolWithTokenInfo>();
   const [liquidity, setLiquidity] = useState({
-    total: 0,
+    total: totalLiquidity,
     allocation: {}
   });
 
@@ -73,6 +77,7 @@ const PoolV3Detail = () => {
 
   useEffect(() => {
     (async () => {
+      if (!address) return setDataPosition([]);
       if (!pool_key) return;
       const positions = await SingletonOraiswapV3.getAllPosition(address);
       const positionsMap = positions
@@ -167,7 +172,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [poolDetail]);
+  }, [poolDetail, address]);
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -223,7 +228,7 @@ const PoolV3Detail = () => {
             </div>
             <div className={styles.box}>
               <p>Volume (24H)</p>
-              <h1>{formatDisplayUsdt(14334398)}</h1>
+              <h1>{formatDisplayUsdt(volumn24h)}</h1>
               {/* <span className={classNames(styles.percent, { [styles.positive]: false })}>
                 {false ? '+' : '-'}
                 {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 2 })}%
