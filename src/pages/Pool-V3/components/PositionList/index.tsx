@@ -25,6 +25,7 @@ const PositionList = () => {
     (async () => {
       try {
         setLoading(true);
+        if (!address) return setDataPosition([]);
 
         const positions = await SingletonOraiswapV3.getAllPosition(address);
         const positionsMap = positions.map((position: any, index) => {
@@ -112,16 +113,16 @@ const PositionList = () => {
           };
         });
 
-        setLoading(false);
         setDataPosition(positionsMap);
       } catch (error) {
-        setLoading(false);
         console.log({ error });
+      } finally {
+        setLoading(false);
       }
     })();
 
     return () => {};
-  }, []);
+  }, [address]);
 
   return (
     <div className={styles.positionList}>
