@@ -862,9 +862,18 @@ const CreatePosition = () => {
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
+    console.log('mid', {
+      index: convertedMid,
+      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+    });
+
     setMidPrice({
       index: convertedMid,
       x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+    });
+    setPriceInfo({
+      ...priceInfo,
+      startPrice: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
     });
     if (amountFrom && (isXtoY ? rightRange > convertedMid : rightRange < convertedMid)) {
       const deposit = amountFrom;
@@ -1122,6 +1131,7 @@ const CreatePosition = () => {
       tickSpacing={notInitPoolKey.fee_tier.tick_spacing}
       isXtoY={isXtoY}
       onChangeRange={changeRangeHandler}
+      midPrice={midPrice.index}
     />
   );
 

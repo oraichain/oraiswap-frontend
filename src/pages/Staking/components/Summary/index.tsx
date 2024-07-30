@@ -41,7 +41,7 @@ const Summary = () => {
         </div>
         <div className={styles.item}>
           <div className={styles.header}>{numberWithCommas(toDisplay(stakeInfo?.total_bond_amount || '0'))} ORAIX</div>
-          <span>Total staked</span>
+          <span>Total LP</span>
         </div>
         {/* <div className={styles.item}>
           <div className={styles.header}>{numberWithCommas(allRewardStakerInfo?.length || 0)}</div>
