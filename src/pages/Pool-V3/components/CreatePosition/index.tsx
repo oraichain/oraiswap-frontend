@@ -45,6 +45,7 @@ import SlippageSetting from '../SettingSlippage';
 import TokenForm from '../TokenForm';
 import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
+import { calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helper';
 
 let args = {
   data: [
@@ -714,12 +715,6 @@ const CreatePosition = () => {
   //   }
   // }, [currentPairReversed]);
 
-  // useEffect(() => {
-  //   if (!ticksLoading && isMountedRef.current) {
-  //     resetPlot();
-  //   }
-  // }, [ticksLoading, midPrice]);
-
   const autoZoomHandler = (left: number, right: number, canZoomCloser: boolean = false) => {
     const leftX = calcPrice(left, isXtoY, tokenFrom.decimals, tokenTo.decimals);
     const rightX = calcPrice(right, isXtoY, tokenFrom.decimals, tokenTo.decimals);
@@ -935,7 +930,11 @@ const CreatePosition = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [liquidityData, setLiquidityData] = useState<PlotTickData[]>([]);
-
+  useEffect(() => {
+    if (isMountedRef.current && liquidityData) {
+      resetPlot();
+    }
+  }, [liquidityData, midPrice]);
   console.log('loading', loading);
 
   useEffect(() => {
@@ -963,6 +962,17 @@ const CreatePosition = () => {
       setLoading(false);
     }
   }, [isPoolExist, notInitPoolKey, isXtoY]);
+
+  useEffect(() => {
+    if (poolInfo) {
+      setMidPrice({
+        index: poolInfo.pool.current_tick_index,
+        x:
+          calcYPerXPriceBySqrtPrice(BigInt(poolInfo.pool.sqrt_price), tokenFrom.decimals, tokenTo.decimals) **
+          (isXtoY ? 1 : -1)
+      });
+    }
+  }, [poolInfo, isXtoY, tokenFrom, tokenTo]);
 
   const renderPriceSection = isPoolExist ? (
     <div className={styles.priceSectionExisted}>
