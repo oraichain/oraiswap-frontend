@@ -47,6 +47,7 @@ const PositionItem = ({ position }) => {
   const [cachePrices] = useConfigReducer('coingecko');
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
+  const [openTooltipApr, setOpenTooltipApr] = useState(false);
   const [openCollapse, setCollapse] = useState(false);
   const [address] = useConfigReducer('address');
   const [tick, setTick] = useState<{ lowerTick: any; upperTick: any }>({
@@ -57,7 +58,9 @@ const PositionItem = ({ position }) => {
     poolData: any;
   }>();
   const [claimLoading, setClaimLoading] = useState<boolean>(false);
+  const [isClaimSuccess, setIsClaimSuccess] = useState<boolean>(false);
   const [removeLoading, setRemoveLoading] = useState<boolean>(false);
+  const [isRemoveSuccess, setIsRemoveSuccess] = useState<boolean>(false);
   const [statusRange, setStatusRange] = useState(undefined);
   const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
 
@@ -70,6 +73,7 @@ const PositionItem = ({ position }) => {
   });
 
   const [tokenXLiquidity, tokenYLiquidity, tokenXLiquidityInUsd, tokenYLiquidityInUsd] = useMemo(() => {
+    if (isRemoveSuccess) return [0, 0, 0, 0];
     if (positions?.poolData) {
       const convertedPool = getConvertedPool(positions);
       const convertedPosition = getConvertedPosition(position);
@@ -82,13 +86,13 @@ const PositionItem = ({ position }) => {
       const y_balance = +printBigint(y, position.tokenY.decimals);
 
       const x_usd = x_balance * cachePrices[position.tokenX.coinGeckoId];
-      const y_usd = x_balance * cachePrices[position.tokenY.coinGeckoId];
+      const y_usd = y_balance * cachePrices[position.tokenY.coinGeckoId];
 
       return [x_balance, y_balance, x_usd, y_usd];
     }
 
     return [0, 0, 0, 0];
-  }, [position, positions, openCollapse]);
+  }, [position, positions, openCollapse, isRemoveSuccess]);
 
   useEffect(() => {
     if (!openCollapse) return;
@@ -135,6 +139,7 @@ const PositionItem = ({ position }) => {
   }, []);
 
   const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd] = useMemo(() => {
+    if (isClaimSuccess) return [0, 0, 0, 0];
     if (positions?.poolData && openCollapse) {
       const convertedPool = getConvertedPool(positions);
       const convertedPosition = getConvertedPosition(position);
@@ -152,7 +157,7 @@ const PositionItem = ({ position }) => {
     }
 
     return [0, 0, 0, 0];
-  }, [position, positions, tick.lowerTick, tick.upperTick, openCollapse]);
+  }, [position, positions, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess]);
 
   const reloadBalanceComponent = (balanceX, balanceY, token) => {
     return balanceX || balanceY ? `${balanceX} ${token.name}` : <Loader width={20} height={20} />;
@@ -202,9 +207,9 @@ const PositionItem = ({ position }) => {
               <TooltipIcon
                 className={styles.tooltipWrapper}
                 placement="top"
-                visible={openTooltip}
+                visible={openTooltipApr}
                 icon={<IconInfo />}
-                setVisible={setOpenTooltip}
+                setVisible={setOpenTooltipApr}
                 content={
                   <div className={classNames(styles.tooltip, styles[theme])}>
                     <div className={styles.itemInfo}>
@@ -241,19 +246,15 @@ const PositionItem = ({ position }) => {
             <h4>Current Assets</h4>
             <div className={styles.itemRow}>
               <span className={classNames(styles.usd, { [styles.green]: true, [styles.red]: false })}>
-                {tokenXLiquidityInUsd || tokenYLiquidityInUsd ? (
-                  formatDisplayUsdt(tokenXLiquidityInUsd + tokenYLiquidityInUsd)
-                ) : (
-                  <Loader width={20} height={20} />
-                )}
+                {formatDisplayUsdt(tokenXLiquidityInUsd + tokenYLiquidityInUsd)}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
-                {reloadBalanceComponent(tokenXLiquidity, tokenYLiquidity, position?.tokenX)}
+                {tokenXLiquidity} {position?.tokenX.name}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenYIcon />
-                {reloadBalanceComponent(tokenYLiquidity, tokenXLiquidity, position?.tokenY)}
+                {tokenYLiquidity} {position?.tokenY.name}
               </span>
             </div>
             <div className={styles.divider}></div>
@@ -292,6 +293,7 @@ const PositionItem = ({ position }) => {
                 onClick={async () => {
                   try {
                     setRemoveLoading(true);
+
                     const { client } = await getCosmWasmClient({ chainId: network.chainId });
                     SingletonOraiswapV3.load(client, address);
                     const { transactionHash } = await SingletonOraiswapV3.dex.removePosition({
@@ -299,6 +301,7 @@ const PositionItem = ({ position }) => {
                     });
 
                     if (transactionHash) {
+                      setIsRemoveSuccess(true);
                       displayToast(TToastType.TX_SUCCESSFUL, {
                         customLink: getTransactionUrl(network.chainId, transactionHash)
                       });
@@ -354,20 +357,14 @@ const PositionItem = ({ position }) => {
             <div className={styles.row}>
               <h4>Unclaimed Rewards</h4>
               <div className={styles.itemRow}>
-                <span className={styles.usd}>
-                  {tokenXClaimInUsd || tokenYClaimInUsd ? (
-                    formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd)
-                  ) : (
-                    <Loader width={20} height={20} />
-                  )}
-                </span>
+                <span className={styles.usd}>{formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd)}</span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
-                  {reloadBalanceComponent(tokenXClaim, tokenYLiquidity, position?.tokenX)}
+                  {tokenXClaim} {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
-                  {reloadBalanceComponent(tokenYClaim, tokenXLiquidity, position?.tokenY)}
+                  {tokenYClaim} {position?.tokenY.name}
                 </span>
               </div>
             </div>
@@ -385,6 +382,7 @@ const PositionItem = ({ position }) => {
                     });
 
                     if (transactionHash) {
+                      setIsClaimSuccess(true);
                       displayToast(TToastType.TX_SUCCESSFUL, {
                         customLink: getTransactionUrl(network.chainId, transactionHash)
                       });
