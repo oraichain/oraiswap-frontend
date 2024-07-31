@@ -35,6 +35,7 @@ const SelectToken = ({
 
   const listItems = oraichainTokensWithIcon.filter(
     (item) =>
+      item.decimals !== 18 &&
       (otherTokenDenom ? item.denom !== otherTokenDenom : true) &&
       (textSearch ? item.name.toLowerCase().includes(textSearch.toLowerCase()) : true)
   );
@@ -153,7 +154,7 @@ const SelectToken = ({
                   >
                     <div className={styles.selectTokenItemLeft}>
                       <div>
-                        <div className={styles.selectTokenItemLeftImg}>
+                        <div className={styles.selectTokenItemLeftImg} key={Math.random()}>
                           {tokenIcon}
                           {/* <div className={styles.selectTokenItemLeftImgChain}>{networkIcon}</div> */}
                         </div>
