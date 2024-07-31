@@ -42,7 +42,6 @@ const PoolList = () => {
       try {
         setLoading(true);
         const pools = await SingletonOraiswapV3.getPools();
-
         const fmtPools = (pools || [])
           .map((p) => {
             const isLight = theme === 'light';
@@ -95,7 +94,7 @@ const PoolList = () => {
   }, [dataPool, prices, liquidityPools]);
 
   useEffect(() => {
-    const fetchBanners = async () => {
+    const fetchStatusAmmV3 = async () => {
       try {
         const res = await axios.get('/pool-v3/status', { baseURL: 'https://api-staging.oraidex.io/v1' });
         return res.data;
@@ -104,7 +103,7 @@ const PoolList = () => {
       }
     };
 
-    fetchBanners().then(async (data) => {
+    fetchStatusAmmV3().then(async (data) => {
       const pools = await SingletonOraiswapV3.getPools();
       const allPoolsData = pools.map((pool) => {
         return {
