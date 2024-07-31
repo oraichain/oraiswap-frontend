@@ -486,10 +486,6 @@ const CreatePosition = () => {
   }, []);
 
   useEffect(() => {
-    checkNoPool(feeTier, tokenFrom, tokenTo);
-  }, [feeTier, tokenFrom, tokenTo, isPoolExist]);
-
-  useEffect(() => {
     setCurrentPrice(
       new BigDecimal(prices[tokenFrom?.coinGeckoId] || 0).div(prices[tokenTo?.coinGeckoId] || 1).toNumber()
     );
@@ -913,6 +909,22 @@ const CreatePosition = () => {
   }, [liquidityData, midPrice]);
 
   useEffect(() => {
+    checkNoPool(feeTier, tokenFrom, tokenTo);
+  }, [feeTier, tokenFrom, tokenTo, isPoolExist]);
+
+  const handleSuccessAdd = async () => {
+    try {
+      await checkNoPool(feeTier, tokenFrom, tokenTo);
+
+      if (isPoolExist && notInitPoolKey) {
+        handleGetTicks();
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
+  const handleGetTicks = () => {
     try {
       const fetchTickData = async () => {
         setLoading(true);
@@ -928,6 +940,7 @@ const CreatePosition = () => {
 
         console.log({ ticksData });
       };
+
       if (isPoolExist && notInitPoolKey) {
         fetchTickData();
       }
@@ -936,6 +949,10 @@ const CreatePosition = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    handleGetTicks();
   }, [isPoolExist, notInitPoolKey, isXtoY]);
 
   useEffect(() => {
@@ -982,7 +999,7 @@ const CreatePosition = () => {
               <div className={styles.continuous}>
                 <Continuous />
               </div>
-            </div>{' '}
+            </div>
             <div
               className={classNames(
                 styles.singleTabClasses,
@@ -1170,6 +1187,14 @@ const CreatePosition = () => {
               tokenFromInput={tokenFromInput}
               tokenToInput={tokenToInput}
               setFocusInput={setFocusId}
+              left={leftRange}
+              right={rightRange}
+              slippage={slippage}
+              poolData={poolInfo}
+              isPoolExist={isPoolExist}
+              liquidity={liquidityRef.current}
+              midPrice={midPrice}
+              handleSuccessAdd={handleSuccessAdd}
             />
           </div>
           <div className={styles.item}>

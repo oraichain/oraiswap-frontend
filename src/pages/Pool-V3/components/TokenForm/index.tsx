@@ -1,10 +1,10 @@
 import styles from './index.module.scss';
 import { ReactComponent as SwitchIcon } from 'assets/icons/ant_swap_light.svg';
 import { ReactComponent as ArrowIcon } from 'assets/icons/ic_arrow_down.svg';
-import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { TokenItemType, toDisplay, toAmount as toAmountFn } from '@oraichain/oraidex-common';
 import SelectToken from '../SelectToken';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
-import { getIcon, sleep } from 'helper';
+import { getIcon, getTransactionUrl, sleep } from 'helper';
 import useTheme from 'hooks/useTheme';
 import NumberFormat from 'react-number-format';
 import { numberWithCommas } from 'helper/format';
@@ -13,9 +13,16 @@ import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
 import { Button } from 'components/Button';
 import classNames from 'classnames';
-import { FeeTier } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { FeeTier, PoolKey, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import Loader from 'components/Loader';
+import { createLoaderKey, InitPositionData, isNativeToken } from 'pages/Pool-V3/helper';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { calculateSqrtPrice, newPoolKey } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+import { extractDenom } from '../PriceRangePlot/utils';
+import { TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
 
 export interface InputState {
   value: string;
@@ -38,7 +45,15 @@ const TokenForm = ({
   fee,
   tokenFromInput,
   tokenToInput,
-  setFocusInput
+  setFocusInput,
+  left,
+  right,
+  slippage,
+  poolData,
+  isPoolExist,
+  liquidity,
+  midPrice,
+  handleSuccessAdd
 }: {
   tokenFrom: TokenItemType;
   handleChangeTokenFrom: (token) => void;
@@ -53,12 +68,52 @@ const TokenForm = ({
   tokenToInput: InputState;
   fee: FeeTier;
   setFocusInput: Dispatch<React.SetStateAction<'from' | 'to'>>;
+  left: number;
+  right: number;
+  slippage: number;
+  poolData: PoolWithPoolKey;
+  isPoolExist: boolean;
+  liquidity: bigint;
+  midPrice: TickPlotPositionData;
+  handleSuccessAdd: () => Promise<void>;
 }) => {
   const theme = useTheme();
   const isLightTheme = theme === 'light';
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const [loading, setLoading] = useState(false);
+  const [walletAddress] = useConfigReducer('address');
+
+  const { handleInitPosition } = useAddLiquidity();
+
+  const addLiquidity = async (data: InitPositionData) => {
+    setLoading(true);
+    console.log('first', {
+      tokenFrom,
+      tokenTo,
+      fee,
+      toAmount,
+      fromAmount
+    });
+
+    await handleInitPosition(
+      data,
+      walletAddress,
+      (tx: string) => {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: getTransactionUrl('Oraichain', tx)
+        });
+        handleSuccessAdd();
+      },
+      (e) => {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Add liquidity failed!'
+        });
+      }
+    );
+
+    setLoading(false);
+  };
 
   const TokenFromIcon =
     tokenFrom &&
@@ -93,6 +148,10 @@ const TokenForm = ({
   };
 
   const getButtonMessage = () => {
+    if (!walletAddress) {
+      return 'Connect wallet';
+    }
+
     if (!tokenFrom || !tokenTo) {
       return 'Select tokens';
     }
@@ -100,13 +159,6 @@ const TokenForm = ({
     if (tokenFrom.denom === tokenTo.denom) {
       return 'Select different tokens';
     }
-
-    // if (
-    //   (!poolInfo  && !isPoolExist) ||
-    //   (poolInfo && isPoolExist)
-    // ) {
-    //   return 'Insufficient Orai';
-    // }
 
     if ((!tokenFromInput.blocked && +fromAmount === 0) || (!tokenToInput.blocked && +toAmount === 0)) {
       return 'Liquidity must be greater than 0';
@@ -267,23 +319,19 @@ const TokenForm = ({
               type="primary"
               disabled={!tokenFrom || !tokenTo || btnText !== 'Add Liquidity' || loading}
               onClick={async () => {
-                try {
-                  setLoading(true);
-
-                  console.log('first', {
-                    tokenFrom,
-                    tokenTo,
-                    fee,
-                    toAmount,
-                    fromAmount
-                  });
-
-                  await sleep(2000);
-                } catch (error) {
-                  console.log('error:>> Add liquidity', error);
-                } finally {
-                  setLoading(false);
-                }
+                const lowerTick = Math.min(left, right);
+                const upperTick = Math.max(left, right);
+                await addLiquidity({
+                  poolKeyData: newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), fee),
+                  lowerTick: lowerTick,
+                  upperTick: upperTick,
+                  liquidityDelta: liquidity,
+                  spotSqrtPrice: isPoolExist ? BigInt(poolData.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+                  slippageTolerance: BigInt(slippage),
+                  tokenXAmount: toAmountFn(fromAmount || 0, tokenFrom.decimals || 6),
+                  tokenYAmount: toAmountFn(toAmount || 0, tokenTo.decimals || 6),
+                  initPool: !isPoolExist
+                });
               }}
             >
               {loading && <Loader width={22} height={22} />}&nbsp;&nbsp;{btnText}

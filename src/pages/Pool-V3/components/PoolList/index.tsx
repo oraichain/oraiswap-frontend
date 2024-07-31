@@ -225,9 +225,9 @@ const PoolList = () => {
             lastSnapshot.timestamp === lastTimestamp
               ? lastSnapshot.liquidityX.usdValue24 + lastSnapshot.liquidityY.usdValue24
               : 0,
-          tokenX: poolsDataObject[address].tokenX,
-          tokenY: poolsDataObject[address].tokenY,
-          fee: Number(poolsDataObject[address].fee),
+          tokenX: poolsDataObject[address]?.tokenX,
+          tokenY: poolsDataObject[address]?.tokenY,
+          fee: Number(poolsDataObject[address]?.fee),
           apy: 0, // TODO: calculate apy
           poolAddress: address
         });
