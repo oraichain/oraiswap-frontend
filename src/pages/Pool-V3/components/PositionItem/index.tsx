@@ -32,6 +32,9 @@ import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { oraichainTokens } from 'config/bridgeTokens';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
+import { toDisplay } from '@oraichain/oraidex-common';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -58,6 +61,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
     lowerTick: undefined,
     upperTick: undefined
   });
+  const [incentives, setIncentives] = useState<any>();
   const [claimLoading, setClaimLoading] = useState<boolean>(false);
   const [isClaimSuccess, setIsClaimSuccess] = useState<boolean>(false);
   const [removeLoading, setRemoveLoading] = useState<boolean>(false);
@@ -96,11 +100,22 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
     if (!openCollapse) return;
     (async () => {
       const { pool_key, lower_tick_index, upper_tick_index } = position;
-      const [lowerTickData, upperTickData] = await Promise.all([
+      const [lowerTickData, upperTickData, incentives] = await Promise.all([
         SingletonOraiswapV3.getTicks(lower_tick_index, pool_key),
-        SingletonOraiswapV3.getTicks(upper_tick_index, pool_key)
+        SingletonOraiswapV3.getTicks(upper_tick_index, pool_key),
+        SingletonOraiswapV3.getIncentivesPosition(position, address)
       ]);
 
+      const tokenIncentive = incentives.reduce((acc, cur) => {
+        //@ts-ignore
+        const tokenAttr = cur.info?.token?.contract_addr || cur.info?.native_token?.denom;
+        return {
+          ...acc,
+          [tokenAttr]: Number(acc[tokenAttr] || 0) + Number(cur.amount)
+        };
+      }, {});
+
+      setIncentives(tokenIncentive);
       setTick({
         lowerTick: getTick(lowerTickData),
         upperTick: getTick(upperTickData)
@@ -353,6 +368,24 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
                   {tokenYClaim} {position?.tokenY.name}
                 </span>
               </div>
+              {incentives && <div style={{ height: 8 }} />}
+              {incentives &&
+                Object.keys(incentives).map((incent, i) => {
+                  const tokenIncentive = oraichainTokensWithIcon.find((orai) =>
+                    [orai.denom, orai.contractAddress].includes(incent)
+                  );
+
+                  return (
+                    <div className={styles.itemRow} key={i}>
+                      <span className={styles.usd}></span>
+                      <span className={classNames(styles.token, styles[theme])}></span>
+                      <span className={classNames(styles.token, styles[theme])}>
+                        {theme === 'light' ? <tokenIncentive.IconLight /> : <tokenIncentive.Icon />}
+                        {toDisplay(incentives[incent].toString())} {tokenIncentive?.name}
+                      </span>
+                    </div>
+                  );
+                })}
             </div>
             <div className={styles.btnGroup}>
               <Button

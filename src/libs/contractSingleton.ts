@@ -30,6 +30,7 @@ import {
   OraiswapV3QueryClient
 } from '@oraichain/oraidex-contracts-sdk';
 import {
+  ArrayOfAsset,
   ArrayOfTupleOfUint16AndUint64,
   FeeTier,
   PoolWithPoolKey,
@@ -314,6 +315,12 @@ export default class SingletonOraiswapV3 {
     const client = await CosmWasmClient.connect(network.rpc);
     const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
     return await queryClient.pools({});
+  }
+
+  public static async getIncentivesPosition(position, ownerId: string): Promise<ArrayOfAsset> {
+    const client = await CosmWasmClient.connect(network.rpc);
+    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
+    return await queryClient.positionIncentives({ index: position.id, ownerId });
   }
 
   public static async getTicks(index, key): Promise<Tick> {
@@ -895,7 +902,7 @@ export type PoolAprInfo = {
 export async function fetchPoolAprInfo(
   poolKeys: PoolKey[],
   prices: CoinGeckoPrices<CoinGeckoId>,
-  poolLiquidities: Record<string, number>,
+  poolLiquidities: Record<string, number>
 ): Promise<Record<string, PoolAprInfo>> {
   const feeAndLiquidityInfo = await axios.get<PoolFeeAndLiquidityDaily[]>('pool-v3/fee', {});
   const avgFeeAPRs = feeAndLiquidityInfo.data.map((pool) => {
@@ -922,7 +929,7 @@ export async function fetchPoolAprInfo(
       const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
 
       sumIncentivesApr += rewardPerYear / (totalPoolLiquidity * 0.25);
-      console.log({ rewardPerYear, totalPoolLiquidity })
+      console.log({ rewardPerYear, totalPoolLiquidity });
     }
 
     poolAprs[poolKeyToString(poolKey)] = {
