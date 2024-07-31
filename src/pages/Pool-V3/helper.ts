@@ -1,3 +1,4 @@
+import { oraichainTokens } from 'config/bridgeTokens';
 import { PRICE_SCALE, printBigint } from './components/PriceRangePlot/utils';
 import {
   AmountDeltaResult,
@@ -107,15 +108,14 @@ export const tickerToAddress = (ticker: string): string => {
   return addressTickerMap[ticker] || ticker;
 };
 
-export const FaucetTokenList = {
-  ORAI: 'orai',
-  ORAIX: 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge',
-  OCH: 'orai1hn8w33cqvysun2aujk5sv33tku4pgcxhhnsxmvnkfvdxagcx0p8qa4l98q',
-  USDT: 'orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh',
-  USDC: 'orai15un8msx3n5zf9ahlxmfeqd2kwa5wm0nrpxer304m9nd5q6qq0g6sku5pdd'
-};
+export const TokenList = oraichainTokens.reduce((acc, cur) => {
+  return {
+    ...acc,
+    [cur.name]: cur.contractAddress ?? cur.denom
+  };
+}, {});
 
-export const addressTickerMap: { [key: string]: string } = FaucetTokenList;
+export const addressTickerMap: { [key: string]: string } = TokenList;
 
 export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, yDecimal: number): number => {
   const sqrt = +printBigint(calculateSqrtPrice(tickIndex), PRICE_SCALE);
