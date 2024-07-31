@@ -45,7 +45,7 @@ import SlippageSetting from '../SettingSlippage';
 import TokenForm from '../TokenForm';
 import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
-import { calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helper';
+import { calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
 import { numberWithCommas } from 'helper/format';
 
 let args = {

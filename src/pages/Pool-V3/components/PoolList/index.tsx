@@ -321,7 +321,7 @@ const PoolList = () => {
           />
         </div>
       </div>
-      <LoadingBox loading={loading}>
+      <LoadingBox loading={loading} styles={{ height: '60vh' }}>
         <div className={styles.list}>
           {dataPool?.length > 0 ? (
             <div className={styles.tableWrapper}>
