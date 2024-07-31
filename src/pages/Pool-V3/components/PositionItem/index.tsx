@@ -33,6 +33,8 @@ import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { getCosmWasmClient } from 'libs/cosmjs';
+import { fetchPositionAprInfo } from 'rest/api';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -44,6 +46,7 @@ const PositionItem = ({ position }) => {
   const { min, max, fee } = position;
   const theme = useTheme();
   const ref = useRef();
+  const { data: prices } = useCoinGeckoPrices();
   const [cachePrices] = useConfigReducer('coingecko');
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
@@ -93,6 +96,17 @@ const PositionItem = ({ position }) => {
 
     return [0, 0, 0, 0];
   }, [position, positions, openCollapse, isRemoveSuccess]);
+
+  useEffect(() => {
+    const getAPRInfo = async () => {
+      const res = await fetchPositionAprInfo(position, prices, tokenXLiquidityInUsd, tokenYLiquidityInUsd, statusRange);
+      console.log({ res });
+    };
+    console.log({ statusRange, tokenXLiquidityInUsd, tokenYLiquidityInUsd, prices, position });
+    if (statusRange && tokenXLiquidityInUsd && tokenYLiquidityInUsd && prices && position) {
+      getAPRInfo();
+    }
+  }, [statusRange, tokenXLiquidityInUsd, tokenYLiquidityInUsd, prices, position]);
 
   useEffect(() => {
     if (!openCollapse) return;
@@ -218,7 +232,7 @@ const PositionItem = ({ position }) => {
                     </div>
                     <div className={styles.itemInfo}>
                       <span>
-                        ORAIX Boost&nbsp;
+                        Incentives Boost&nbsp;
                         <IconBoots />
                       </span>
                       <span className={styles.value}>{numberWithCommas(11.91)}%</span>
