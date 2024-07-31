@@ -48,13 +48,6 @@ import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { BondLP, MiningLP, UnbondLP, WithdrawLP } from 'types/pool';
 import { PairInfoExtend, TokenInfo } from 'types/token';
-import Axios from 'axios';
-import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions';
-import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD } from '@oraichain/oraidex-common';
-import SingletonOraiswapV3, { FAUCET_LIST_TOKEN, poolKeyToString } from 'libs/contractSingleton';
-import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { CoinGeckoId } from '@oraichain/oraidex-common';
-import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -69,88 +62,6 @@ export enum Type {
   'CONVERT_TOKEN' = 'Convert IBC or CW20 Tokens',
   'CLAIM_ORAIX' = 'Claim ORAIX tokens',
   'CONVERT_TOKEN_REVERSE' = 'Convert reverse IBC or CW20 Tokens'
-}
-
-const axios = Axios.create({
-  timeout: AXIOS_TIMEOUT,
-  retryTimes: 3,
-  // cache will be enabled by default in 2 seconds
-  adapter: retryAdapterEnhancer(
-    throttleAdapterEnhancer(Axios.defaults.adapter!, {
-      threshold: AXIOS_THROTTLE_THRESHOLD
-    })
-  ),
-  baseURL: 'https://api-staging.oraidex.io/v1/'
-});
-
-export type PositionAprInfo = {
-  swapFee: number;
-  incentive: number;
-  total: number;
-};
-
-export interface PoolFeeAndLiquidityDaily {
-  poolKey: string;
-  feeDaily: number;
-  liquidityDaily: number;
-}
-
-function parseAssetInfo(assetInfo: AssetInfo): string {
-  if ('native_token' in assetInfo) {
-    return assetInfo.native_token.denom;
-  } else {
-    return assetInfo.token.contract_addr;
-  }
-}
-
-async function fetchPositionAprInfo(
-  position: Position,
-  prices: CoinGeckoPrices<CoinGeckoId>,
-  tokenXLiquidityInUsd: number,
-  tokenYLiquidityInUsd: number,
-  isInRange: boolean
-): Promise<PositionAprInfo> {
-  const feeAndLiquidityInfo = await axios.get<PoolFeeAndLiquidityDaily[]>('pool-v3/fee', {});
-  const avgFeeAPRs = feeAndLiquidityInfo.data.map((pool) => {
-    const feeAPR = (pool.feeDaily * 365) / pool.liquidityDaily;
-    return {
-      poolKey: pool.poolKey,
-      feeAPR
-    };
-  });
-  const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(position.pool_key))?.feeAPR;
-
-  const poolInfo = await SingletonOraiswapV3.getPool(position.pool_key);
-  const incentives = poolInfo.pool.incentives;
-
-  let sumIncentivesApr = 0;
-
-  if (!isInRange) {
-    return {
-      swapFee: feeAPR ? feeAPR : 0,
-      incentive: sumIncentivesApr,
-      total: feeAPR
-    };
-  }
-
-  for (const incentive of incentives) {
-    const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
-    const rewardsPerSec = incentive.reward_per_sec;
-    const rewardInUsd = prices[token.coinGeckoId];
-    const currentLiquidity = poolInfo.pool.liquidity;
-    const positionLiquidity = position.liquidity;
-    const totalPositionLiquidity = tokenXLiquidityInUsd + tokenYLiquidityInUsd;
-    const rewardPerYear = ((rewardInUsd * Number(rewardsPerSec)) / token.decimals) * 86400 * 365;
-
-    sumIncentivesApr +=
-      (Number(positionLiquidity) * rewardPerYear) / (Number(currentLiquidity) * totalPositionLiquidity);
-  }
-
-  return {
-    swapFee: feeAPR ? feeAPR : 0,
-    incentive: sumIncentivesApr,
-    total: sumIncentivesApr + (feeAPR ? feeAPR : 0)
-  };
 }
 
 async function fetchTokenInfo(token: TokenItemType): Promise<TokenInfo> {
@@ -799,7 +710,6 @@ async function getPairAmountInfo(
 }
 
 export {
-  fetchPositionAprInfo,
   fetchCachedPairInfo,
   fetchPairInfo,
   fetchPoolInfoAmount,

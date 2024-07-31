@@ -22,15 +22,28 @@ import {
 //   // parse
 // } from '@store/consts/utils';
 import { network } from 'config/networks';
-import { OraiswapTokenClient, OraiswapTokenQueryClient, OraiswapV3Client, OraiswapV3QueryClient } from '@oraichain/oraidex-contracts-sdk';
+import {
+  AssetInfo,
+  OraiswapTokenClient,
+  OraiswapTokenQueryClient,
+  OraiswapV3Client,
+  OraiswapV3QueryClient
+} from '@oraichain/oraidex-contracts-sdk';
 import {
   ArrayOfTupleOfUint16AndUint64,
   FeeTier,
-  PoolWithPoolKey
+  PoolWithPoolKey,
+  Position
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { ArrayOfPosition, Tick } from 'pages/Pool-V3/packages/sdk/OraiswapV3.types';
 import { TokenDataOnChain } from 'pages/Pool-V3/components/PriceRangePlot/utils';
+import Axios from 'axios';
+import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions';
+import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD } from '@oraichain/oraidex-common';
+import { CoinGeckoId } from '@oraichain/oraidex-common';
+import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRangePlot/utils';
+import { oraichainTokens } from 'config/bridgeTokens';
 // import { defaultState } from '@store/reducers/connection';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
@@ -263,14 +276,11 @@ export default class SingletonOraiswapV3 {
     });
     return tickmaps;
   }
-  
-  public static async getTokensInfo(
-    tokens: string[],
-    address?: string
-  ): Promise<TokenDataOnChain[]> {
+
+  public static async getTokensInfo(tokens: string[], address?: string): Promise<TokenDataOnChain[]> {
     const client = await CosmWasmClient.connect(network.rpc);
     return await Promise.all(
-      tokens.map(async token => {
+      tokens.map(async (token) => {
         if (token.includes('ibc') || token == 'orai') {
           const balance = address ? BigInt(await this.queryBalance(address, token)) : 0n;
           return {
@@ -281,7 +291,6 @@ export default class SingletonOraiswapV3 {
             name: token == 'orai' ? 'ORAI' : 'IBC Token'
           };
         }
-
 
         const queryClient = new OraiswapTokenQueryClient(client, token);
         const balance = address ? await queryClient.balance({ address: address }) : { balance: '0' };
@@ -395,30 +404,30 @@ export default class SingletonOraiswapV3 {
   public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
     const ticks: number[] = [];
 
-  for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
-    for (let i = 0; i < 64; i++) {
-      if ((chunk & (1n << BigInt(i))) != 0n) {
-        const tickIndex = positionToTick(Number(chunkIndex), i, poolKey.fee_tier.tick_spacing);
-        ticks.push(Number(tickIndex.toString()));
+    for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
+      for (let i = 0; i < 64; i++) {
+        if ((chunk & (1n << BigInt(i))) != 0n) {
+          const tickIndex = positionToTick(Number(chunkIndex), i, poolKey.fee_tier.tick_spacing);
+          ticks.push(Number(tickIndex.toString()));
+        }
       }
     }
-  }
 
-  const client = await CosmWasmClient.connect(network.rpc);
-  const querier = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-  const liquidityTicks = await querier.liquidityTicks({
-    poolKey,
-    tickIndexes: ticks
-  });
-  const convertedLiquidityTicks: LiquidityTick[] = liquidityTicks.map((tickData: any) => {
-    return {
-      index: tickData.index,
-      liquidity_change: BigInt(tickData.liquidity_change),
-      sign: tickData.sign
-    };
-  });
+    const client = await CosmWasmClient.connect(network.rpc);
+    const querier = new OraiswapV3QueryClient(client, defaultState.dexAddress);
+    const liquidityTicks = await querier.liquidityTicks({
+      poolKey,
+      tickIndexes: ticks
+    });
+    const convertedLiquidityTicks: LiquidityTick[] = liquidityTicks.map((tickData: any) => {
+      return {
+        index: tickData.index,
+        liquidity_change: BigInt(tickData.liquidity_change),
+        sign: tickData.sign
+      };
+    });
 
-  return convertedLiquidityTicks;
+    return convertedLiquidityTicks;
   }
 
   public static approveToken = async (token: string, amount: bigint, address: string) => {
@@ -792,4 +801,86 @@ function calculateLiquidityForRanges(liquidityChanges: LiquidityTick[], tickRang
     upper_tick_index: tickRanges[index].upperTick,
     liquidity: liquidity
   }));
+}
+
+const axios = Axios.create({
+  timeout: AXIOS_TIMEOUT,
+  retryTimes: 3,
+  // cache will be enabled by default in 2 seconds
+  adapter: retryAdapterEnhancer(
+    throttleAdapterEnhancer(Axios.defaults.adapter!, {
+      threshold: AXIOS_THROTTLE_THRESHOLD
+    })
+  ),
+  baseURL: 'https://api-staging.oraidex.io/v1/'
+});
+
+export type PositionAprInfo = {
+  swapFee: number;
+  incentive: number;
+  total: number;
+};
+
+export interface PoolFeeAndLiquidityDaily {
+  poolKey: string;
+  feeDaily: number;
+  liquidityDaily: number;
+}
+
+function parseAssetInfo(assetInfo: AssetInfo): string {
+  if ('native_token' in assetInfo) {
+    return assetInfo.native_token.denom;
+  } else {
+    return assetInfo.token.contract_addr;
+  }
+}
+
+async function fetchPositionAprInfo(
+  position: Position,
+  prices: CoinGeckoPrices<CoinGeckoId>,
+  tokenXLiquidityInUsd: number,
+  tokenYLiquidityInUsd: number,
+  isInRange: boolean
+): Promise<PositionAprInfo> {
+  const feeAndLiquidityInfo = await axios.get<PoolFeeAndLiquidityDaily[]>('pool-v3/fee', {});
+  const avgFeeAPRs = feeAndLiquidityInfo.data.map((pool) => {
+    const feeAPR = (pool.feeDaily * 365) / pool.liquidityDaily;
+    return {
+      poolKey: pool.poolKey,
+      feeAPR
+    };
+  });
+  const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(position.pool_key))?.feeAPR;
+
+  const poolInfo = await SingletonOraiswapV3.getPool(position.pool_key);
+  const incentives = poolInfo.pool.incentives;
+
+  let sumIncentivesApr = 0;
+
+  if (!isInRange) {
+    return {
+      swapFee: feeAPR ? feeAPR : 0,
+      incentive: sumIncentivesApr,
+      total: feeAPR
+    };
+  }
+
+  for (const incentive of incentives) {
+    const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
+    const rewardsPerSec = incentive.reward_per_sec;
+    const rewardInUsd = prices[token.coinGeckoId];
+    const currentLiquidity = poolInfo.pool.liquidity;
+    const positionLiquidity = position.liquidity;
+    const totalPositionLiquidity = tokenXLiquidityInUsd + tokenYLiquidityInUsd;
+    const rewardPerYear = ((rewardInUsd * Number(rewardsPerSec)) / token.decimals) * 86400 * 365;
+
+    sumIncentivesApr +=
+      (Number(positionLiquidity) * rewardPerYear) / (Number(currentLiquidity) * totalPositionLiquidity);
+  }
+
+  return {
+    swapFee: feeAPR ? feeAPR : 0,
+    incentive: sumIncentivesApr,
+    total: sumIncentivesApr + (feeAPR ? feeAPR : 0)
+  };
 }
