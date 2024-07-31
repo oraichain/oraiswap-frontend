@@ -1,5 +1,8 @@
+import { Coin } from '@cosmjs/proto-signing';
 import { PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { PRICE_SCALE, printBigint } from './components/PriceRangePlot/utils';
+import { oraichainTokens } from 'config/bridgeTokens';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
+import { PRICE_SCALE, printBigint } from '../components/PriceRangePlot/utils';
 import {
   AmountDeltaResult,
   Pool,
@@ -9,13 +12,11 @@ import {
   calculateAmountDelta,
   calculateSqrtPrice,
   getPercentageDenominator,
-  getPercentageScale,
   getSqrtPriceDenominator,
   getTickAtSqrtPrice,
   calculateFee as wasmCalculateFee
-} from './packages/wasm/oraiswap_v3_wasm';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
-import { Coin } from '@cosmjs/proto-signing';
+} from '../packages/wasm/oraiswap_v3_wasm';
+import { getIconPoolData } from './format';
 
 // export const PERCENTAGE_SCALE = Number(getPercentageScale());
 export interface InitPositionData {
@@ -124,15 +125,14 @@ export const tickerToAddress = (ticker: string): string => {
   return addressTickerMap[ticker] || ticker;
 };
 
-export const FaucetTokenList = {
-  ORAI: 'orai',
-  ORAIX: 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge',
-  OCH: 'orai1hn8w33cqvysun2aujk5sv33tku4pgcxhhnsxmvnkfvdxagcx0p8qa4l98q',
-  USDT: 'orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh',
-  USDC: 'orai15un8msx3n5zf9ahlxmfeqd2kwa5wm0nrpxer304m9nd5q6qq0g6sku5pdd'
-};
+export const TokenList = oraichainTokens.reduce((acc, cur) => {
+  return {
+    ...acc,
+    [cur.name]: cur.contractAddress ?? cur.denom
+  };
+}, {});
 
-export const addressTickerMap: { [key: string]: string } = FaucetTokenList;
+export const addressTickerMap: { [key: string]: string } = TokenList;
 
 export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, yDecimal: number): number => {
   const sqrt = +printBigint(calculateSqrtPrice(tickIndex), PRICE_SCALE);
@@ -407,4 +407,98 @@ export const createPositionWithNativeTx = async (
   );
 
   return res.transactionHash;
+};
+
+export const convertPosition = ({ positions, poolsData, isLight, cachePrices, address }) => {
+  return positions.map((position: any, index) => {
+    const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
+    let {
+      FromTokenIcon: tokenXIcon,
+      ToTokenIcon: tokenYIcon,
+      tokenXinfo,
+      tokenYinfo
+    } = getIconPoolData(tokenX, tokenY, isLight);
+
+    const positionsData = poolsData.find(
+      (pool) =>
+        pool.pool_key.token_x === position.pool_key.token_x && pool.pool_key.token_y === position.pool_key.token_y
+    );
+
+    const positions = {
+      poolData: {
+        ...positionsData,
+        ...position
+      }
+    };
+
+    const lowerPrice = Number(
+      calcYPerXPriceByTickIndex(position.lower_tick_index, tokenXinfo.decimals, tokenYinfo.decimals)
+    );
+
+    const upperPrice = calcYPerXPriceByTickIndex(position.upper_tick_index, tokenXinfo.decimals, tokenYinfo.decimals);
+
+    const min = Math.min(lowerPrice, upperPrice);
+    const max = Math.max(lowerPrice, upperPrice);
+
+    let tokenXLiq: any, tokenYLiq: any;
+
+    let x = 0n;
+    let y = 0n;
+
+    if (positions.poolData) {
+      const convertedPool = getConvertedPool(positions);
+      const convertedPosition = getConvertedPosition(position);
+      const res = calculateTokenAmounts(convertedPool, convertedPosition);
+      x = res.x;
+      y = res.y;
+    }
+
+    try {
+      tokenXLiq = +printBigint(x, tokenXinfo.decimals);
+    } catch (error) {
+      tokenXLiq = 0;
+    }
+
+    try {
+      tokenYLiq = +printBigint(y, tokenYinfo.decimals);
+    } catch (error) {
+      tokenYLiq = 0;
+    }
+
+    const currentPrice = calcYPerXPriceByTickIndex(
+      position.poolData?.pool?.current_tick_index ?? 0,
+      tokenXinfo.decimals,
+      tokenYinfo.decimals
+    );
+
+    const valueX = tokenXLiq + tokenYLiq / currentPrice;
+    const valueY = tokenYLiq + tokenXLiq * currentPrice;
+
+    return {
+      ...position,
+      poolData: {
+        ...positionsData,
+        ...position
+      },
+      tokenX: tokenXinfo,
+      tokenY: tokenYinfo,
+      tokenXName: tokenXinfo.name,
+      tokenYName: tokenYinfo.name,
+      tokenXIcon: tokenXIcon,
+      tokenYIcon: tokenYIcon,
+      fee: +printBigint(BigInt(position.pool_key.fee_tier.fee), PERCENTAGE_SCALE - 2),
+      min,
+      max,
+      tokenXLiq,
+      tokenXLiqInUsd: tokenXLiq * cachePrices[tokenXinfo.coinGeckoId],
+      tokenYLiqInUsd: tokenYLiq * cachePrices[tokenYinfo.coinGeckoId],
+      tokenYLiq,
+      valueX,
+      valueY,
+      address,
+      id: index,
+      isActive: currentPrice >= min && currentPrice <= max,
+      tokenXId: tokenXinfo.coinGeckoId
+    };
+  });
 };

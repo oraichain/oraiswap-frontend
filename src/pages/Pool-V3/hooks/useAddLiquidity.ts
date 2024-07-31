@@ -7,7 +7,7 @@ import {
   createPositionWithNativeTx,
   InitPositionData,
   isNativeToken
-} from '../helper';
+} from '../helpers/helper';
 
 import { newPoolKey } from '../packages/wasm/oraiswap_v3_wasm';
 import { getCosmWasmClient } from 'libs/cosmjs';

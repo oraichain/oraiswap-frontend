@@ -22,11 +22,13 @@ import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 import axios from 'axios';
 import { oraichainTokens } from 'config/bridgeTokens';
+import LoadingBox from 'components/LoadingBox';
 
 const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
+  const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const [search, setSearch] = useState<string>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
@@ -35,6 +37,7 @@ const PoolList = () => {
   useEffect(() => {
     (async () => {
       try {
+        setLoading(true);
         const pools = await SingletonOraiswapV3.getPools();
 
         const fmtPools = (pools || [])
@@ -43,10 +46,11 @@ const PoolList = () => {
             return formatPoolData(p, isLight);
           })
           .sort((a, b) => Number(b.pool.liquidity) - Number(a.pool.liquidity));
-
         setDataPool(fmtPools);
       } catch (error) {
         console.log('error: get pools', error);
+      } finally {
+        setLoading(false);
       }
     })();
 
@@ -317,59 +321,63 @@ const PoolList = () => {
           />
         </div>
       </div>
-      <div className={styles.list}>
-        {dataPool?.length > 0 ? (
-          <div className={styles.tableWrapper}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Pool name</th>
-                  <th className={styles.textRight}>Liquidity</th>
-                  <th className={styles.textRight}>Volume (24H)</th>
-                  <th className={styles.textRight}>APR</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {dataPool
-                  .filter((p) => {
-                    if (!search) return true;
+      <LoadingBox loading={loading} styles={{ height: '60vh' }}>
+        <div className={styles.list}>
+          {dataPool?.length > 0 ? (
+            <div className={styles.tableWrapper}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Pool name</th>
+                    <th className={styles.textRight}>Liquidity</th>
+                    <th className={styles.textRight}>Volume (24H)</th>
+                    <th className={styles.textRight}>APR</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dataPool
+                    .filter((p) => {
+                      if (!search) return true;
 
-                    const { tokenXinfo, tokenYinfo } = p;
+                      const { tokenXinfo, tokenYinfo } = p;
 
-                    return (
-                      (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
-                      (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
-                    );
-                  })
-                  .map((item, index) => {
-                    let volumn = 0;
-                    if (item?.poolKey) {
-                      const findPool = volumnePools && volumnePools.find((vo) => vo.poolAddress === item?.poolKey);
-                      if (findPool) volumn = findPool.volume24;
-                    }
+                      return (
+                        (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
+                        (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
+                      );
+                    })
+                    .map((item, index) => {
+                      let volumn = 0;
+                      if (item?.poolKey) {
+                        const findPool = volumnePools && volumnePools.find((vo) => vo.poolAddress === item?.poolKey);
+                        if (findPool) volumn = findPool.volume24;
+                      }
 
-                    return (
-                      <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                        <PoolItemTData
-                          item={item}
-                          theme={theme}
-                          volumn={volumn}
-                          liquidity={liquidityPools?.[item?.poolKey]}
-                        />
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className={styles.nodata}>
-            {theme === 'light' ? <NoData /> : <NoDataDark />}
-            <span>No Pools!</span>
-          </div>
-        )}
-      </div>
+                      return (
+                        <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
+                          <PoolItemTData
+                            item={item}
+                            theme={theme}
+                            volumn={volumn}
+                            liquidity={liquidityPools?.[item?.poolKey]}
+                          />
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            !loading && (
+              <div className={styles.nodata}>
+                {theme === 'light' ? <NoData /> : <NoDataDark />}
+                <span>No Pools!</span>
+              </div>
+            )
+          )}
+        </div>
+      </LoadingBox>
     </div>
   );
 };
@@ -427,7 +435,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn }) => {
                 </div>
                 <div className={styles.itemInfo}>
                   <span>
-                    ORAI Boost&nbsp;
+                    ORAIX Boost&nbsp;
                     <IconBoots />
                   </span>
                   <span className={styles.value}>{numberWithCommas(11.91)}%</span>

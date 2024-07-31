@@ -45,7 +45,7 @@ import SlippageSetting from '../SettingSlippage';
 import TokenForm from '../TokenForm';
 import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
-import { calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helper';
+import { calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
 import { numberWithCommas } from 'helper/format';
 
 let args = {
@@ -767,10 +767,14 @@ const CreatePosition = () => {
     tokenTo: TokenItemType | undefined
   ) => {
     if (fee && tokenFrom && tokenTo) {
+      const denom_x = extractDenom(tokenFrom);
+      const denom_y = extractDenom(tokenTo);
+      const token_x = denom_x < denom_y ? denom_x : denom_y;
+      const token_y = denom_x < denom_y ? denom_y : denom_x;
       const pool = await SingletonOraiswapV3.getPool({
         fee_tier: fee,
-        token_x: tokenFrom.contractAddress ? tokenFrom.contractAddress : tokenFrom.denom,
-        token_y: tokenTo.contractAddress ? tokenTo.contractAddress : tokenTo.denom
+        token_x: token_x,
+        token_y: token_y
       });
       setIsPoolExist(pool !== null);
       if (pool) {
@@ -779,8 +783,8 @@ const CreatePosition = () => {
       } else {
         setNotInitPoolKey({
           fee_tier: fee,
-          token_x: tokenFrom.contractAddress ? tokenFrom.contractAddress : tokenFrom.denom,
-          token_y: tokenTo.contractAddress ? tokenTo.contractAddress : tokenTo.denom
+          token_x: token_x,
+          token_y: token_y
         });
       }
       return;
