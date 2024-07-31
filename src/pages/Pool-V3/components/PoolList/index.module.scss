@@ -288,9 +288,10 @@
   line-height: 150%;
 
   display: flex;
-  width: 200px;
+  width: 250px;
   padding: 12px;
   flex-direction: column;
+  align-items: center;
   gap: 12px;
   border-radius: 8px;
   background: var(--Colors-Trading-trade-bg-section, #232521);

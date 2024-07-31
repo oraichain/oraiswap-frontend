@@ -211,7 +211,7 @@ const PoolV3Detail = () => {
           <div className={styles.desc}>
             <div className={styles.item}>
               <span>Incentive</span>
-              <p>{aprInfo.incentives.join(',')}</p>
+              <p>{[...new Set(aprInfo.incentives)].join(', ')}</p>
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>

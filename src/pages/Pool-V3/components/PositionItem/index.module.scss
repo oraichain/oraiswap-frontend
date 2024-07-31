@@ -104,7 +104,7 @@
 
     .info {
       display: flex;
-      gap: 60px;
+      gap: 30px;
       flex: 1 1 1;
       justify-content: space-between;
       align-items: center;
@@ -143,6 +143,8 @@
 
           &.apr {
             display: flex;
+            width: 100px;
+            justify-content: flex-end;
             margin: auto;
             @include theme {
               color: theme-get('primary-surface-default-dark-3');
@@ -337,7 +339,8 @@
   line-height: 150%;
 
   display: flex;
-  width: 200px;
+  width: 250px;
+  align-items: center;
   padding: 12px;
   flex-direction: column;
   gap: 12px;
