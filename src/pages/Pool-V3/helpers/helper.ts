@@ -17,6 +17,8 @@ import {
   calculateFee as wasmCalculateFee
 } from '../packages/wasm/oraiswap_v3_wasm';
 import { getIconPoolData } from './format';
+import { network } from 'config/networks';
+import { SwapHop } from '../packages/sdk/OraiswapV3.types';
 
 // export const PERCENTAGE_SCALE = Number(getPercentageScale());
 export interface InitPositionData {
@@ -307,13 +309,32 @@ export const calculateTokenAmountsWithSlippage = (
 };
 
 export const approveToken = async (token: string, amount: bigint, address: string): Promise<string> => {
-  // console.log('approveToken', token, amount, address);
   if (isNativeToken(token)) {
     return '';
   }
 
   const result = await SingletonOraiswapV3.approveToken(token, amount, address);
   return result.transactionHash;
+};
+
+export const approveListToken = async (msg: any, address: string): Promise<string> => {
+  const result = await SingletonOraiswapV3.dex.client.executeMultiple(address, msg, 'auto');
+  return result.transactionHash;
+};
+
+export const genMsgAllowance = (datas: string[]) => {
+  const MAX_ALLOWANCE_AMOUNT = '18446744073709551615';
+  const spender = network.pool_v3;
+
+  return datas.map((data) => ({
+    contractAddress: data,
+    msg: {
+      increase_allowance: {
+        amount: MAX_ALLOWANCE_AMOUNT,
+        spender
+      }
+    }
+  }));
 };
 
 export const createPoolTx = async (poolKey: PoolKey, initSqrtPrice: string, address: string): Promise<string> => {
@@ -496,7 +517,7 @@ export const convertPosition = ({ positions, poolsData, isLight, cachePrices, ad
       valueX,
       valueY,
       address,
-      id: index,
+      id: position.ind,
       isActive: currentPrice >= min && currentPrice <= max,
       tokenXId: tokenXinfo.coinGeckoId
     };

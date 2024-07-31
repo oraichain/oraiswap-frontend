@@ -1,10 +1,12 @@
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import {
+  approveListToken,
   approveToken,
   calculateTokenAmountsWithSlippage,
   createPoolTx,
   createPositionTx,
   createPositionWithNativeTx,
+  genMsgAllowance,
   InitPositionData,
   isNativeToken
 } from '../helpers/helper';
@@ -30,9 +32,13 @@ const useAddLiquidity = () => {
         true
       );
 
-      await approveToken(token_x, xAmountWithSlippage, walletAddress);
+      let listTokenApprove = [];
+      if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
+      if (!isNativeToken(token_y)) listTokenApprove.push(token_y);
 
-      await approveToken(token_y, yAmountWithSlippage, walletAddress);
+      const msg = genMsgAllowance(listTokenApprove);
+
+      await approveListToken(msg, walletAddress);
 
       const poolKey = newPoolKey(token_x, token_y, fee_tier);
 
@@ -101,9 +107,13 @@ const useAddLiquidity = () => {
         true
       );
 
-      await approveToken(token_x, xAmountWithSlippage, walletAddress);
+      let listTokenApprove = [];
+      if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
+      if (!isNativeToken(token_y)) listTokenApprove.push(token_y);
 
-      await approveToken(token_y, yAmountWithSlippage, walletAddress);
+      const msg = genMsgAllowance(listTokenApprove);
+
+      await approveListToken(msg, walletAddress);
 
       const poolKey = newPoolKey(token_x, token_y, fee_tier);
 

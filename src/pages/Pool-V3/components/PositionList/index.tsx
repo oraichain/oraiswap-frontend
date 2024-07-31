@@ -34,7 +34,7 @@ const PositionList = () => {
         ]);
 
         const positionsMap = convertPosition({
-          positions,
+          positions: positions.map((po, ind) => ({ ...po, ind })),
           poolsData,
           cachePrices,
           address,

@@ -107,9 +107,9 @@ const PoolV3Detail = () => {
         ]);
 
         const positionsMap = convertPosition({
-          positions: positions.filter(
-            (pos) => pos.pool_key.token_x === pool_key.token_x && pos.pool_key.token_y === pool_key.token_y
-          ),
+          positions: positions
+            .map((po, ind) => ({ ...po, ind }))
+            .filter((pos) => pos.pool_key.token_x === pool_key.token_x && pos.pool_key.token_y === pool_key.token_y),
           poolsData,
           cachePrices,
           address,
@@ -232,7 +232,7 @@ const PoolV3Detail = () => {
         </div>
       </div>
       <div className={styles.positions}>
-        {<h1>Your Liquidity Positions ({dataPosition.length ?? 0})</h1>}
+        {<h1>Your Liquidity Positions ({(indexRemove ? dataPosition.length - 1 : dataPosition.length) ?? 0})</h1>}
         <LoadingBox loading={loading} styles={{ height: '30vh' }}>
           <div className={styles.list}>
             {dataPosition.length

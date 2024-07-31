@@ -75,7 +75,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
     swapFee: 0,
     incentive: 0
   });
-  
+
   useEffect(() => {
     const getAPRInfo = async () => {
       const res = await fetchPositionAprInfo(
@@ -270,12 +270,11 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
             </div>
             <div className={styles.btnGroup}>
               <Button
-                disabled={removeLoading}
+                disabled={removeLoading || (!position.tokenXLiqInUsd && !position.tokenYLiqInUsd)}
                 type="third-sm"
                 onClick={async () => {
                   try {
                     setRemoveLoading(true);
-
                     const { client } = await getCosmWasmClient({ chainId: network.chainId });
                     SingletonOraiswapV3.load(client, address);
                     const { transactionHash } = await SingletonOraiswapV3.dex.removePosition({
@@ -308,7 +307,6 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
               <Button
                 type="primary-sm"
                 onClick={() => {
-                  console.log({ position });
                   navigate(
                     // fee_tier.fee / 1e10
                     `/new-position/${position.pool_key.token_x}-${position.pool_key.token_y}-${position.pool_key.fee_tier.fee}`
@@ -359,7 +357,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
             <div className={styles.btnGroup}>
               <Button
                 type="third-sm"
-                disabled={claimLoading}
+                disabled={claimLoading || (!tokenXClaimInUsd && !tokenYClaimInUsd)}
                 onClick={async () => {
                   try {
                     setClaimLoading(true);
