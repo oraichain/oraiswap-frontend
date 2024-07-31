@@ -187,7 +187,7 @@ const NewPositionNoPool = ({
         <div className={styles.value}>
           <h2>{numberWithCommas(currentPrice, undefined, { maximumFractionDigits: 6 })}</h2>
           <span>
-            {fromToken.name.toUpperCase()} / {toToken.name.toUpperCase()}
+            {toToken.name.toUpperCase()} / {fromToken.name.toUpperCase()}
           </span>
         </div>
       </div>
