@@ -89,89 +89,91 @@ const SelectToken = ({
             />
           </div>
 
-          <div className={styles.selectTokenList}>
-            {!listItems.length && (
-              <div className={styles.selectTokenListNoResult}>
-                {isLightTheme ? <NoResultLight /> : <NoResultDark />}
-              </div>
-            )}
+          {!isOpen ? null : (
+            <div className={styles.selectTokenList}>
+              {!listItems.length && (
+                <div className={styles.selectTokenListNoResult}>
+                  {isLightTheme ? <NoResultLight /> : <NoResultDark />}
+                </div>
+              )}
 
-            {listItems
-              .map((token) => {
-                const tokenIcon = getIcon({
-                  isLightTheme,
-                  type: 'token',
-                  coinGeckoId: token.coinGeckoId,
-                  width: 30,
-                  height: 30
-                });
+              {listItems
+                .map((token) => {
+                  const tokenIcon = getIcon({
+                    isLightTheme,
+                    type: 'token',
+                    coinGeckoId: token.coinGeckoId,
+                    width: 30,
+                    height: 30
+                  });
 
-                const networkIcon = getIcon({
-                  isLightTheme,
-                  type: 'network',
-                  chainId: token.chainId,
-                  width: 16,
-                  height: 16
-                });
-                const key = token.denom;
-                let sumAmountDetails: AmountDetails = {};
+                  const networkIcon = getIcon({
+                    isLightTheme,
+                    type: 'network',
+                    chainId: token.chainId,
+                    width: 16,
+                    height: 16
+                  });
+                  const key = token.denom;
+                  let sumAmountDetails: AmountDetails = {};
 
-                // by default, we only display the amount that matches the token denom
-                sumAmountDetails[token.denom] = amounts?.[token.denom];
-                let sumAmount: number = toSumDisplay(sumAmountDetails);
+                  // by default, we only display the amount that matches the token denom
+                  sumAmountDetails[token.denom] = amounts?.[token.denom];
+                  let sumAmount: number = toSumDisplay(sumAmountDetails);
 
-                // if there are sub-denoms, we get sub amounts & calculate sum display of both sub & main amount
-                if (token.evmDenoms) {
-                  const subAmounts = getSubAmountDetails(amounts, token);
-                  sumAmountDetails = { ...sumAmountDetails, ...subAmounts };
-                  sumAmount = toSumDisplay(sumAmountDetails);
-                }
-                const balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
-                const usd =
-                  sumAmount > 0 && token && prices[token.coinGeckoId] ? sumAmount * prices[token.coinGeckoId] : '0';
+                  // if there are sub-denoms, we get sub amounts & calculate sum display of both sub & main amount
+                  if (token.evmDenoms) {
+                    const subAmounts = getSubAmountDetails(amounts, token);
+                    sumAmountDetails = { ...sumAmountDetails, ...subAmounts };
+                    sumAmount = toSumDisplay(sumAmountDetails);
+                  }
+                  const balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
+                  const usd =
+                    sumAmount > 0 && token && prices[token.coinGeckoId] ? sumAmount * prices[token.coinGeckoId] : '0';
 
-                return {
-                  ...token,
-                  tokenIcon,
-                  networkIcon,
-                  key,
-                  balance,
-                  usd
-                };
-              })
-              .sort((a, b) => {
-                return Number(b.usd) - Number(a.usd);
-              })
-              .map(({ key, tokenIcon, networkIcon, balance, usd, ...token }) => {
-                return (
-                  <div
-                    key={key}
-                    className={styles.selectTokenItem}
-                    onClick={() => {
-                      handleChangeToken(token as TokenItemType);
-                      setIsOpen(false);
-                    }}
-                  >
-                    <div className={styles.selectTokenItemLeft}>
-                      <div>
-                        <div className={styles.selectTokenItemLeftImg} key={Math.random()}>
-                          {tokenIcon}
-                          {/* <div className={styles.selectTokenItemLeftImgChain}>{networkIcon}</div> */}
+                  return {
+                    ...token,
+                    tokenIcon,
+                    networkIcon,
+                    key,
+                    balance,
+                    usd
+                  };
+                })
+                .sort((a, b) => {
+                  return Number(b.usd) - Number(a.usd);
+                })
+                .map(({ key, tokenIcon, networkIcon, balance, usd, ...token }) => {
+                  return (
+                    <div
+                      key={key}
+                      className={styles.selectTokenItem}
+                      onClick={() => {
+                        handleChangeToken(token as TokenItemType);
+                        setIsOpen(false);
+                      }}
+                    >
+                      <div className={styles.selectTokenItemLeft}>
+                        <div>
+                          <div className={styles.selectTokenItemLeftImg} key={Math.random()}>
+                            {tokenIcon}
+                            {/* <div className={styles.selectTokenItemLeftImgChain}>{networkIcon}</div> */}
+                          </div>
+                        </div>
+                        <div>
+                          <div className={styles.selectTokenItemTokenName}>{token.name}</div>
+                          <div className={styles.selectTokenItemTokenOrg}>{token.org}</div>
                         </div>
                       </div>
-                      <div>
-                        <div className={styles.selectTokenItemTokenName}>{token.name}</div>
-                        <div className={styles.selectTokenItemTokenOrg}>{token.org}</div>
+                      <div className={styles.selectTokenItemRight}>
+                        <div className={styles.selectTokenItemTokenBalance}>{balance} </div>
+                        <div className={styles.selectTokenItemTokenUsd}>{formatDisplayUsdt(usd)}</div>
                       </div>
                     </div>
-                    <div className={styles.selectTokenItemRight}>
-                      <div className={styles.selectTokenItemTokenBalance}>{balance} </div>
-                      <div className={styles.selectTokenItemTokenUsd}>{formatDisplayUsdt(usd)}</div>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
+                  );
+                })}
+            </div>
+          )}
         </div>
       </div>
     </div>
