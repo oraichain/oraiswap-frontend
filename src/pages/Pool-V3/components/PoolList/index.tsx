@@ -439,7 +439,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn }) => {
                 </div>
                 <div className={styles.itemInfo}>
                   <span>
-                    ORAIX Boost&nbsp;
+                    Incentives Boost&nbsp;
                     <IconBoots />
                   </span>
                   <span className={styles.value}>{numberWithCommas(11.91)}%</span>

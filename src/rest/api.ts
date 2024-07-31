@@ -38,6 +38,7 @@ import {
   CoharvestBidPoolTypes
 } from '@oraichain/oraidex-contracts-sdk';
 import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
+import { Position } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { generateSwapOperationMsgs, simulateSwap } from '@oraichain/oraidex-universal-swap';
 import { oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
 import { network } from 'config/networks';

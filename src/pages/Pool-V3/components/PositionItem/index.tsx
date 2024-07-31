@@ -27,10 +27,11 @@ import {
 import useConfigReducer from 'hooks/useConfigReducer';
 import { printBigint } from '../PriceRangePlot/utils';
 import { network } from 'config/networks';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
+import SingletonOraiswapV3, { fetchPositionAprInfo } from 'libs/contractSingleton';
 import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { getCosmWasmClient } from 'libs/cosmjs';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -41,6 +42,7 @@ const shorterPrefixConfig: PrefixConfig = {
 const PositionItem = ({ position, setInRemoveSuccess }) => {
   const theme = useTheme();
   const ref = useRef();
+  const { data: prices } = useCoinGeckoPrices();
   const navigate = useNavigate();
 
   const { min, max, fee } = position;
@@ -67,6 +69,16 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
   useOnClickOutside(ref, () => {
     setCollapse(false);
   });
+
+  useEffect(() => {
+    const getAPRInfo = async () => {
+      const res = await fetchPositionAprInfo(position, prices, position.tokenXLiqInUsd, position.tokenYLiqInUsd, statusRange);
+      console.log({ res });
+    };
+    if (statusRange &&  position.tokenXLiqInUsd && position.tokenYLiqInUsd && prices && position) {
+      getAPRInfo();
+    }
+  }, [statusRange, prices, position]);
 
   useEffect(() => {
     if (!openCollapse) return;
@@ -176,7 +188,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
                     </div>
                     <div className={styles.itemInfo}>
                       <span>
-                        ORAIX Boost&nbsp;
+                        Incentives Boost&nbsp;
                         <IconBoots />
                       </span>
                       <span className={styles.value}>{numberWithCommas(11.91)}%</span>

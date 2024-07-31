@@ -259,6 +259,10 @@ export const extractDenom = (tokenInfo: TokenItemType) => {
   return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
 }
 
+export const extractAddress = (tokenInfo: TokenItemType) => {
+  return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
+}
+
 export enum PositionTokenBlock {
   None,
   A,
