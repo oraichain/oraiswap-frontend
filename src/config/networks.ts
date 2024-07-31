@@ -15,7 +15,8 @@ import {
   CW20_STAKING_CONTRACT
 } from '@oraichain/oraidex-common';
 
-const POOL_V3 = 'orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a';
+// const POOL_V3 = 'orai10s0c75gw5y5eftms5ncfknw6lzmx0dyhedn75uz793m8zwz4g8zq4d9x9a';
+const POOL_V3 = 'orai1wsemv2wuyfeesh3afcxy02lh8sy4yz2wjj6cxgzmcxklpdyyxjfs5qzl7q';
 
 export const network: CustomChainInfo & NetworkConfig & { pool_v3: string } = {
   ...oraichainNetwork,

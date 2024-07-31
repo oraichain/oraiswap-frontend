@@ -1,4 +1,7 @@
+import { Coin } from '@cosmjs/proto-signing';
+import { PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { oraichainTokens } from 'config/bridgeTokens';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { PRICE_SCALE, printBigint } from '../components/PriceRangePlot/utils';
 import {
   AmountDeltaResult,
@@ -8,12 +11,25 @@ import {
   TokenAmounts,
   calculateAmountDelta,
   calculateSqrtPrice,
-  getPercentageScale,
+  getPercentageDenominator,
+  getSqrtPriceDenominator,
+  getTickAtSqrtPrice,
   calculateFee as wasmCalculateFee
 } from '../packages/wasm/oraiswap_v3_wasm';
 import { getIconPoolData } from './format';
 
 // export const PERCENTAGE_SCALE = Number(getPercentageScale());
+export interface InitPositionData {
+  poolKeyData: PoolKey;
+  lowerTick: number;
+  upperTick: number;
+  liquidityDelta: bigint;
+  spotSqrtPrice: bigint;
+  slippageTolerance: bigint;
+  tokenXAmount: bigint;
+  tokenYAmount: bigint;
+  initPool?: boolean;
+}
 
 export const PERCENTAGE_SCALE = 12;
 export interface FormatNumberThreshold {
@@ -206,6 +222,191 @@ export const getConvertedPosition = (position) => {
     upper_tick_index: position.upper_tick_index,
     pool_key: position.pool_key
   };
+};
+
+export const createLoaderKey = () => (new Date().getMilliseconds() + Math.random()).toString();
+
+export const isNativeToken = (token: string): boolean => {
+  return token === 'orai' || token.includes('ibc');
+};
+
+const newtonIteration = (n: bigint, x0: bigint): bigint => {
+  const x1 = (n / x0 + x0) >> 1n;
+  if (x0 === x1 || x0 === x1 - 1n) {
+    return x0;
+  }
+  return newtonIteration(n, x1);
+};
+
+const sqrt = (value: bigint): bigint => {
+  if (value < 0n) {
+    throw 'square root of negative numbers is not supported';
+  }
+
+  if (value < 2n) {
+    return value;
+  }
+
+  return newtonIteration(value, 1n);
+};
+export const sqrtPriceToPrice = (sqrtPrice: bigint): bigint => {
+  return (BigInt(sqrtPrice) * BigInt(sqrtPrice)) / getSqrtPriceDenominator();
+};
+
+export const priceToSqrtPrice = (price: bigint): bigint => {
+  return sqrt(price * getSqrtPriceDenominator());
+};
+
+export const calculateSqrtPriceAfterSlippage = (sqrtPrice: bigint, slippage: number, up: boolean): bigint => {
+  if (slippage === 0) {
+    return BigInt(sqrtPrice);
+  }
+
+  const multiplier = getPercentageDenominator() + BigInt(up ? slippage : -slippage);
+  const price = sqrtPriceToPrice(sqrtPrice);
+  const priceWithSlippage = BigInt(price) * multiplier * getPercentageDenominator();
+  const sqrtPriceWithSlippage = priceToSqrtPrice(priceWithSlippage) / getPercentageDenominator();
+  return sqrtPriceWithSlippage;
+};
+
+export const calculateTokenAmountsWithSlippage = (
+  tickSpacing: number,
+  currentSqrtPrice: bigint,
+  liquidity: bigint,
+  lowerTickIndex: number,
+  upperTickIndex: number,
+  slippage: number,
+  roundingUp: boolean
+): [bigint, bigint] => {
+  const lowerBound = calculateSqrtPriceAfterSlippage(currentSqrtPrice, slippage, false);
+  const upperBound = calculateSqrtPriceAfterSlippage(currentSqrtPrice, slippage, true);
+
+  const currentTickIndex = getTickAtSqrtPrice(currentSqrtPrice, tickSpacing);
+
+  const { x: lowerX, y: lowerY } = calculateAmountDelta(
+    currentTickIndex,
+    lowerBound,
+    liquidity,
+    roundingUp,
+    upperTickIndex,
+    lowerTickIndex
+  );
+
+  const { x: upperX, y: upperY } = calculateAmountDelta(
+    currentTickIndex,
+    upperBound,
+    liquidity,
+    roundingUp,
+    upperTickIndex,
+    lowerTickIndex
+  );
+
+  const x = lowerX > upperX ? lowerX : upperX;
+  const y = lowerY > upperY ? lowerY : upperY;
+  return [x, y];
+};
+
+export const approveToken = async (token: string, amount: bigint, address: string): Promise<string> => {
+  // console.log('approveToken', token, amount, address);
+  if (isNativeToken(token)) {
+    return '';
+  }
+
+  const result = await SingletonOraiswapV3.approveToken(token, amount, address);
+  return result.transactionHash;
+};
+
+export const createPoolTx = async (poolKey: PoolKey, initSqrtPrice: string, address: string): Promise<string> => {
+  const initTick = getTickAtSqrtPrice(BigInt(initSqrtPrice), poolKey.fee_tier.tick_spacing);
+  if (SingletonOraiswapV3.dex.sender !== address) {
+    SingletonOraiswapV3.load(SingletonOraiswapV3.dex.client, address);
+  }
+  return (
+    await SingletonOraiswapV3.dex.createPool({
+      feeTier: poolKey.fee_tier,
+      initSqrtPrice,
+      initTick,
+      token0: poolKey.token_x,
+      token1: poolKey.token_y
+    })
+  ).transactionHash;
+};
+
+export const createPositionTx = async (
+  poolKey: PoolKey,
+  lowerTick: number,
+  upperTick: number,
+  liquidityDelta: bigint,
+  spotSqrtPrice: bigint,
+  slippageTolerance: bigint,
+  address: string
+): Promise<string> => {
+  const slippageLimitLower = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), false);
+  const slippageLimitUpper = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), true);
+
+  if (SingletonOraiswapV3.dex.sender !== address) {
+    SingletonOraiswapV3.load(SingletonOraiswapV3.dex.client, address);
+  }
+
+  const res = await SingletonOraiswapV3.dex.createPosition({
+    poolKey,
+    lowerTick: lowerTick,
+    upperTick: upperTick,
+    liquidityDelta: liquidityDelta.toString(),
+    slippageLimitLower: slippageLimitLower.toString(),
+    slippageLimitUpper: slippageLimitUpper.toString()
+  });
+
+  return res.transactionHash;
+};
+
+export const createPositionWithNativeTx = async (
+  poolKey: PoolKey,
+  lowerTick: number,
+  upperTick: number,
+  liquidityDelta: bigint,
+  spotSqrtPrice: bigint,
+  slippageTolerance: bigint,
+  initialAmountX: bigint,
+  initialAmountY: bigint,
+  address: string
+): Promise<string> => {
+  const slippageLimitLower = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), false);
+  const slippageLimitUpper = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), true);
+
+  const token_x = poolKey.token_x;
+  const token_y = poolKey.token_y;
+
+  const fund: Coin[] = [];
+
+  if (isNativeToken(token_x)) {
+    fund.push({ denom: token_x, amount: initialAmountX.toString() });
+  }
+
+  if (isNativeToken(token_y)) {
+    fund.push({ denom: token_y, amount: initialAmountY.toString() });
+  }
+
+  if (SingletonOraiswapV3.dex.sender !== address) {
+    SingletonOraiswapV3.load(SingletonOraiswapV3.dex.client, address);
+  }
+
+  // console.log({ poolKey, lowerTick, upperTick, liquidityDelta, slippageLimitLower, slippageLimitUpper })
+  const res = await SingletonOraiswapV3.dex.createPosition(
+    {
+      poolKey,
+      lowerTick: lowerTick,
+      upperTick: upperTick,
+      liquidityDelta: liquidityDelta.toString(),
+      slippageLimitLower: slippageLimitLower.toString(),
+      slippageLimitUpper: slippageLimitUpper.toString()
+    },
+    'auto',
+    '',
+    fund
+  );
+
+  return res.transactionHash;
 };
 
 export const convertPosition = ({ positions, poolsData, isLight, cachePrices, address }) => {
