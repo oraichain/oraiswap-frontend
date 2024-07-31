@@ -209,7 +209,7 @@ export const getConvertedPosition = (position) => {
 };
 
 export const convertPosition = ({ positions, poolsData, isLight, cachePrices, address }) => {
-  return positions.map((position: any, index) => {
+  return positions.map((position: Position | any, index) => {
     const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
     let {
       FromTokenIcon: tokenXIcon,
@@ -239,7 +239,7 @@ export const convertPosition = ({ positions, poolsData, isLight, cachePrices, ad
     const min = Math.min(lowerPrice, upperPrice);
     const max = Math.max(lowerPrice, upperPrice);
 
-    let tokenXLiq: any, tokenYLiq: any;
+    let tokenXLiq: number, tokenYLiq: number;
 
     let x = 0n;
     let y = 0n;

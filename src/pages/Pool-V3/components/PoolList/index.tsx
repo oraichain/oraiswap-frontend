@@ -28,11 +28,14 @@ const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
-  const [loading, setLoading] = useState(false);
+
   const theme = useTheme();
+
+  const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
+
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
-  const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
 
   useEffect(() => {
     (async () => {
@@ -383,10 +386,12 @@ const PoolList = () => {
 };
 
 const PoolItemTData = ({ item, theme, liquidity, volumn }) => {
+  const navigate = useNavigate();
+
   const [openTooltip, setOpenTooltip] = useState(false);
+
   const isLight = theme === 'light';
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
-  const navigate = useNavigate();
   const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey } = item;
 
   return (

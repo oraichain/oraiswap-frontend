@@ -13,11 +13,9 @@ import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { useNavigate } from 'react-router-dom';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import { toDisplay } from '@oraichain/oraidex-common';
 import {
   PrefixConfig,
   calculateFee,
-  calculateTokenAmounts,
   formatNumbers,
   getConvertedPool,
   getConvertedPosition,
@@ -41,15 +39,19 @@ const shorterPrefixConfig: PrefixConfig = {
 };
 
 const PositionItem = ({ position, setInRemoveSuccess }) => {
-  const { min, max, fee } = position;
   const theme = useTheme();
   const ref = useRef();
-  const [cachePrices] = useConfigReducer('coingecko');
   const navigate = useNavigate();
+
+  const { min, max, fee } = position;
+  const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
+
+  const [address] = useConfigReducer('address');
+  const [cachePrices] = useConfigReducer('coingecko');
+
   const [openTooltip, setOpenTooltip] = useState(false);
   const [openTooltipApr, setOpenTooltipApr] = useState(false);
   const [openCollapse, setCollapse] = useState(false);
-  const [address] = useConfigReducer('address');
   const [tick, setTick] = useState<{ lowerTick: any; upperTick: any }>({
     lowerTick: undefined,
     upperTick: undefined
@@ -58,8 +60,6 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
   const [isClaimSuccess, setIsClaimSuccess] = useState<boolean>(false);
   const [removeLoading, setRemoveLoading] = useState<boolean>(false);
   const [statusRange, setStatusRange] = useState(undefined);
-  const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
-
   const [xToY, _] = useState<boolean>(
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );

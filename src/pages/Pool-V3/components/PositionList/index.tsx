@@ -6,29 +6,20 @@ import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import useTheme from 'hooks/useTheme';
 import { useEffect } from 'react';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
-import { oraichainTokensWithIcon } from 'config/chainInfos';
-import {
-  PERCENTAGE_SCALE,
-  calcYPerXPriceByTickIndex,
-  calculateTokenAmounts,
-  convertPosition,
-  getConvertedPool,
-  getConvertedPosition
-} from 'pages/Pool-V3/helpers/helper';
-import { printBigint } from '../PriceRangePlot/utils';
+import { convertPosition } from 'pages/Pool-V3/helpers/helper';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import LoadingBox from 'components/LoadingBox';
-import { getIconPoolData } from 'pages/Pool-V3/helpers/format';
 
 const PositionList = () => {
   const theme = useTheme();
+
+  const isLight = theme === 'light';
+
+  const [cachePrices] = useConfigReducer('coingecko');
+  const [address] = useConfigReducer('address');
+
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [address] = useConfigReducer('address');
-  const isLight = theme === 'light';
-  const [cachePrices] = useConfigReducer('coingecko');
   const [indexRemove, setInRemoveSuccess] = useState<boolean>(undefined);
 
   useEffect(() => {

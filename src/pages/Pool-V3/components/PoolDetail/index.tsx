@@ -17,23 +17,31 @@ import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { convertPosition } from 'pages/Pool-V3/helpers/helper';
 import useConfigReducer from 'hooks/useConfigReducer';
+import LoadingBox from 'components/LoadingBox';
+import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
+import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 
 const PoolV3Detail = () => {
-  const { data: prices } = useCoinGeckoPrices();
   const [address] = useConfigReducer('address');
   const [liquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools] = useConfigReducer('volumnePools');
+  const [cachePrices] = useConfigReducer('coingecko');
+
+  const { data: prices } = useCoinGeckoPrices();
   const navigate = useNavigate();
   const theme = useTheme();
-  const isLight = theme === 'light';
-  const [dataPosition, setDataPosition] = useState<any[]>([]);
-  const IconBoots = isLight ? BootsIcon : BootsIconDark;
   const { poolId } = useParams<{ poolId: string }>();
+
   const [tokenX, tokenY, fee, tick] = poolId.split('-');
-  const [cachePrices] = useConfigReducer('coingecko');
+  const isLight = theme === 'light';
+  const IconBoots = isLight ? BootsIcon : BootsIconDark;
+
   const { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo } = getIconPoolData(tokenX, tokenY, isLight);
   const totalLiquidity = liquidityPools?.[poolId] ?? 0;
   const volumn24h = (volumnePools && volumnePools.find((vo) => vo.poolAddress === poolId))?.volume24 ?? 0;
+
+  const [dataPosition, setDataPosition] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [poolDetail, setPoolDetail] = useState<PoolWithTokenInfo>();
   const [indexRemove, setInRemoveSuccess] = useState<boolean>(undefined);
   const [liquidity, setLiquidity] = useState({
@@ -72,24 +80,31 @@ const PoolV3Detail = () => {
 
   useEffect(() => {
     (async () => {
-      if (!address) return setDataPosition([]);
-      if (!pool_key) return;
-      const [positions, poolsData] = await Promise.all([
-        SingletonOraiswapV3.getAllPosition(address),
-        SingletonOraiswapV3.getPools()
-      ]);
+      try {
+        if (!address) return setDataPosition([]);
+        if (!pool_key) return;
+        setLoading(true);
+        const [positions, poolsData] = await Promise.all([
+          SingletonOraiswapV3.getAllPosition(address),
+          SingletonOraiswapV3.getPools()
+        ]);
 
-      const positionsMap = convertPosition({
-        positions: positions.filter(
-          (pos) => pos.pool_key.token_x === pool_key.token_x && pos.pool_key.token_y === pool_key.token_y
-        ),
-        poolsData,
-        cachePrices,
-        address,
-        isLight
-      });
+        const positionsMap = convertPosition({
+          positions: positions.filter(
+            (pos) => pos.pool_key.token_x === pool_key.token_x && pos.pool_key.token_y === pool_key.token_y
+          ),
+          poolsData,
+          cachePrices,
+          address,
+          isLight
+        });
 
-      setDataPosition(positionsMap);
+        setDataPosition(positionsMap);
+      } catch (error) {
+        console.log('error call position');
+      } finally {
+        setLoading(false);
+      }
     })();
 
     return () => {};
@@ -200,18 +215,29 @@ const PoolV3Detail = () => {
         </div>
       </div>
       <div className={styles.positions}>
-        {!!dataPosition?.length && <h1>Your Liquidity Positions ({dataPosition.length})</h1>}
-        <div className={styles.list}>
-          {dataPosition
-            .filter((data) => (indexRemove === undefined ? data : data.id !== indexRemove))
-            .map((position, index) => {
-              return (
-                <div className={styles.positionWrapper} key={`pos-${index}`}>
-                  <PositionItem position={position} setInRemoveSuccess={setInRemoveSuccess} />
-                </div>
-              );
-            })}
-        </div>
+        {<h1>Your Liquidity Positions ({dataPosition.length ?? 0})</h1>}
+        <LoadingBox loading={loading} styles={{ height: '30vh' }}>
+          <div className={styles.list}>
+            {dataPosition.length
+              ? dataPosition
+                  .filter((data) => (indexRemove === undefined ? data : data.id !== indexRemove))
+                  .map((position, index) => {
+                    return (
+                      <div className={styles.positionWrapper} key={`pos-${index}`}>
+                        <PositionItem position={position} setInRemoveSuccess={setInRemoveSuccess} />
+                      </div>
+                    );
+                  })
+              : !loading && (
+                  <>
+                    <div className={styles.nodata}>
+                      {theme === 'light' ? <NoData /> : <NoDataDark />}
+                      <span>No Positions!</span>
+                    </div>
+                  </>
+                )}
+          </div>
+        </LoadingBox>
       </div>
     </div>
   );
