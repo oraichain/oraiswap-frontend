@@ -23,6 +23,26 @@ export type PoolWithTokenInfo = PoolWithPoolKey & {
   poolKey: string;
 };
 
+export const getIconPoolData = (tokenX, tokenY, isLight) => {
+  let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
+  const tokenXinfo =
+    tokenX && oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
+  const tokenYinfo =
+    tokenY && oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
+
+  if (tokenXinfo && tokenYinfo) {
+    const findFromToken = oraichainTokensWithIcon.find(
+      (tokenIcon) => tokenIcon.denom === tokenXinfo.denom || tokenIcon.contractAddress === tokenXinfo.contractAddress
+    );
+    const findToToken = oraichainTokensWithIcon.find(
+      (tokenIcon) => tokenIcon.denom === tokenYinfo.denom || tokenIcon.contractAddress === tokenYinfo.contractAddress
+    );
+    FromTokenIcon = isLight ? findFromToken.IconLight : findFromToken.Icon;
+    ToTokenIcon = isLight ? findToToken.IconLight : findToToken.Icon;
+  }
+  return { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo };
+};
+
 export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => {
   const [tokenX, tokenY] = [p?.pool_key.token_x, p?.pool_key.token_y];
 
