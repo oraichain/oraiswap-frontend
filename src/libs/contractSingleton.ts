@@ -835,7 +835,7 @@ function parseAssetInfo(assetInfo: AssetInfo): string {
   }
 }
 
-async function fetchPositionAprInfo(
+export async function fetchPositionAprInfo(
   position: Position,
   prices: CoinGeckoPrices<CoinGeckoId>,
   tokenXLiquidityInUsd: number,

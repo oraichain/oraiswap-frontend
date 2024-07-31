@@ -27,11 +27,10 @@ import {
 import useConfigReducer from 'hooks/useConfigReducer';
 import { printBigint } from '../PriceRangePlot/utils';
 import { network } from 'config/networks';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
+import SingletonOraiswapV3, { fetchPositionAprInfo } from 'libs/contractSingleton';
 import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { getCosmWasmClient } from 'libs/cosmjs';
-import { fetchPositionAprInfo } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const shorterPrefixConfig: PrefixConfig = {
