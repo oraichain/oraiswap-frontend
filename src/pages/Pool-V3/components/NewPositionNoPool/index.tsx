@@ -75,11 +75,13 @@ const NewPositionNoPool = ({
   }, [midPriceInput]);
 
   const setLeftInputValues = (val: string) => {
+    // setLeftInput(toMaxNumericPlaces(+val, 5));
     setLeftInput(val);
     setLeftInputRounded(toMaxNumericPlaces(+val, 5));
   };
 
   const setRightInputValues = (val: string) => {
+    // setRightInput(toMaxNumericPlaces(+val, 5));
     setRightInput(val);
     setRightInputRounded(toMaxNumericPlaces(+val, 5));
   };
@@ -98,8 +100,11 @@ const NewPositionNoPool = ({
     setLeftRange(left);
     setRightRange(right);
 
-    setLeftInputValues(calcPrice(left, isXtoY, fromToken.decimals, toToken.decimals).toString());
-    setRightInputValues(calcPrice(right, isXtoY, fromToken.decimals, toToken.decimals).toString());
+    const leftInput = calcPrice(left, isXtoY, fromToken.decimals, toToken.decimals).toString();
+    const rightInput = calcPrice(right, isXtoY, fromToken.decimals, toToken.decimals).toString();
+
+    setLeftInputValues(leftInput);
+    setRightInputValues(rightInput);
 
     onChangeRange(left, right);
   };
@@ -108,9 +113,9 @@ const NewPositionNoPool = ({
     changeRangeHandler(tickSpacing * 10 * (isXtoY ? -1 : 1), tickSpacing * 10 * (isXtoY ? 1 : -1));
   };
 
-  useEffect(() => {
-    changeRangeHandler(leftRange, rightRange);
-  }, [midPrice]);
+  // useEffect(() => {
+  //   changeRangeHandler(leftRange, rightRange);
+  // }, [midPrice]);
 
   const validateMidPriceInput = (midPriceInput: string) => {
     const minTick = getMinTick(tickSpacing);
@@ -170,6 +175,7 @@ const NewPositionNoPool = ({
               return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
             }}
             // onValueChange={({ floatValue }) => {
+            //   setMidPriceInput(validateMidPriceInput((floatValue || 0).toString() || '0'));
             //   setPriceInfo && setPriceInfo({ ...priceInfo, startPrice: floatValue });
             // }}
             onBlur={(e) => {
@@ -206,6 +212,7 @@ const NewPositionNoPool = ({
                 disabled={false}
                 type="text"
                 value={leftInputRounded}
+                // value={leftInput}
                 onChange={() => {}}
                 isAllowed={(values) => {
                   const { floatValue } = values;
@@ -214,7 +221,7 @@ const NewPositionNoPool = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   // setPriceInfo && setPriceInfo({ ...priceInfo, minPrice: floatValue });
-                  onLeftInputChange(floatValue.toString());
+                  onLeftInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
                   const newLeft = isXtoY
@@ -276,6 +283,7 @@ const NewPositionNoPool = ({
                 disabled={false}
                 type="text"
                 value={rightInputRounded}
+                // value={rightInput}
                 onChange={() => {}}
                 isAllowed={(values) => {
                   const { floatValue } = values;
@@ -284,7 +292,7 @@ const NewPositionNoPool = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   // setPriceInfo && setPriceInfo({ ...priceInfo, maxPrice: floatValue });
-                  onRightInputChange(floatValue.toString());
+                  onRightInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
                   const newRight = isXtoY

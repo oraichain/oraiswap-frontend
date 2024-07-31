@@ -14,12 +14,12 @@ import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import { InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
 import { calculateSqrtPrice, newPoolKey } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import { TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
-import { extractDenom } from '../PriceRangePlot/utils';
+import { determinePositionTokenBlock, extractDenom, PositionTokenBlock } from '../PriceRangePlot/utils';
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
 
@@ -42,8 +42,6 @@ const TokenForm = ({
   toAmount,
   fromAmount,
   fee,
-  tokenFromInput,
-  tokenToInput,
   setFocusInput,
   left,
   right,
@@ -63,8 +61,6 @@ const TokenForm = ({
   setFromAmount: Dispatch<SetStateAction<number | string>>;
   toAmount: number | string;
   fromAmount: number | string;
-  tokenFromInput: InputState;
-  tokenToInput: InputState;
   fee: FeeTier;
   setFocusInput: Dispatch<React.SetStateAction<'from' | 'to'>>;
   left: number;
@@ -87,13 +83,6 @@ const TokenForm = ({
 
   const addLiquidity = async (data: InitPositionData) => {
     setLoading(true);
-    console.log('first', {
-      tokenFrom,
-      tokenTo,
-      fee,
-      toAmount,
-      fromAmount
-    });
 
     await handleInitPosition(
       data,
@@ -113,6 +102,37 @@ const TokenForm = ({
 
     setLoading(false);
   };
+
+  const isXtoY = useMemo(() => {
+    if (tokenFrom && tokenTo) {
+      return extractDenom(tokenFrom) < extractDenom(tokenTo);
+    }
+    return true;
+  }, [tokenFrom, tokenTo]);
+
+  const [isFromBlocked, setIsFromBlocked] = useState(false);
+  const [isToBlocked, setIsToBlocked] = useState(false);
+
+  useEffect(() => {
+    const fromBlocked =
+      determinePositionTokenBlock(
+        isPoolExist ? BigInt(poolData.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+        Math.min(Number(left), Number(right)),
+        Math.max(Number(left), Number(right)),
+        isXtoY
+      ) === PositionTokenBlock.A;
+
+    const toBlocked =
+      determinePositionTokenBlock(
+        isPoolExist ? BigInt(poolData.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+        Math.min(Number(left), Number(right)),
+        Math.max(Number(left), Number(right)),
+        isXtoY
+      ) === PositionTokenBlock.B;
+
+    setIsFromBlocked(fromBlocked);
+    setIsToBlocked(toBlocked);
+  }, [isPoolExist, poolData, midPrice, left, right, isXtoY]);
 
   const TokenFromIcon =
     tokenFrom &&
@@ -159,7 +179,7 @@ const TokenForm = ({
       return 'Select different tokens';
     }
 
-    if ((!tokenFromInput.blocked && +fromAmount === 0) || (!tokenToInput.blocked && +toAmount === 0)) {
+    if ((!isFromBlocked && +fromAmount === 0) || (!isToBlocked && +toAmount === 0)) {
       return 'Liquidity must be greater than 0';
     }
 
@@ -194,7 +214,7 @@ const TokenForm = ({
 
       <div className={styles.deposit}>
         <h1>Deposit Amount</h1>
-        <div className={classNames(styles.itemInput, { [styles.disabled]: tokenFromInput.blocked })}>
+        <div className={classNames(styles.itemInput, { [styles.disabled]: isFromBlocked })}>
           <div className={styles.tokenInfo}>
             <div className={styles.name}>
               {TokenFromIcon ? (
@@ -214,7 +234,7 @@ const TokenForm = ({
                 thousandSeparator
                 className={styles.amount}
                 decimalScale={6}
-                disabled={tokenFromInput.blocked}
+                disabled={isFromBlocked}
                 type="text"
                 value={fromAmount}
                 onChange={() => {}}
@@ -225,7 +245,6 @@ const TokenForm = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   setFromAmount && setFromAmount(floatValue);
-                  // tokenFromInput.setValue(floatValue?.toString());
                 }}
               />
               <div className={styles.usd}>
@@ -242,7 +261,6 @@ const TokenForm = ({
               onClick={() => {
                 const val = toDisplay(amounts[tokenFrom?.denom] || '0');
                 setFromAmount(val);
-                // tokenFromInput.setValue(val.toString());
 
                 setFocusInput('from');
               }}
@@ -251,7 +269,7 @@ const TokenForm = ({
             </button>
           </div>
         </div>
-        <div className={classNames(styles.itemInput, { [styles.disabled]: tokenToInput.blocked })}>
+        <div className={classNames(styles.itemInput, { [styles.disabled]: isToBlocked })}>
           <div className={styles.tokenInfo}>
             <div className={styles.name}>
               {TokenToIcon ? (
@@ -271,7 +289,7 @@ const TokenForm = ({
                 thousandSeparator
                 className={styles.amount}
                 decimalScale={6}
-                disabled={tokenToInput.blocked}
+                disabled={isToBlocked}
                 type="text"
                 value={toAmount}
                 onChange={() => {}}
@@ -282,7 +300,6 @@ const TokenForm = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   setToAmount && setToAmount(floatValue);
-                  // tokenToInput.setValue(floatValue?.toString());
                 }}
               />
               <div className={styles.usd}>
@@ -301,7 +318,6 @@ const TokenForm = ({
                 const val = toDisplay(amounts[tokenTo?.denom] || '0');
                 setToAmount(val);
                 setFocusInput('to');
-                // tokenToInput.setValue(val.toString());
               }}
             >
               Max

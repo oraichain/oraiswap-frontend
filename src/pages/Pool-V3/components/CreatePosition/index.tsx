@@ -130,58 +130,6 @@ const CreatePosition = () => {
   const [amountTo, setAmountTo] = useState<string>('');
   const [amountFrom, setAmountFrom] = useState<string>('');
 
-  const tokenFromInput = {
-    value: amountFrom,
-    setValue: (value) => {
-      if (!tokenFrom) {
-        return;
-      }
-
-      setAmountFrom(value);
-      setAmountTo(
-        getOtherTokenAmount(toAmount(value, tokenFrom.decimals).toString(), Number(leftRange), Number(rightRange), true)
-      );
-    },
-    blocked:
-      tokenFrom &&
-      tokenTo &&
-      determinePositionTokenBlock(
-        BigInt(poolInfo ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index)),
-        Math.min(Number(leftRange), Number(rightRange)),
-        Math.max(Number(leftRange), Number(rightRange)),
-        isXtoY
-      ) === PositionTokenBlock.A,
-
-    blockerInfo: 'Range only for single-asset deposit.',
-    decimalsLimit: tokenFrom ? Number(tokenFrom.decimals) : 0
-  };
-
-  const tokenToInput = {
-    value: amountTo,
-    setValue: (value) => {
-      if (!tokenTo) {
-        return;
-      }
-
-      setAmountTo(value);
-      setAmountFrom(
-        getOtherTokenAmount(toAmount(value, tokenTo.decimals).toString(), Number(leftRange), Number(rightRange), false)
-      );
-    },
-    blocked:
-      tokenFrom &&
-      tokenTo &&
-      determinePositionTokenBlock(
-        BigInt(poolInfo ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index)),
-        Math.min(Number(leftRange), Number(rightRange)),
-        Math.max(Number(leftRange), Number(rightRange)),
-        isXtoY
-      ) === PositionTokenBlock.B,
-
-    blockerInfo: 'Range only for single-asset deposit.',
-    decimalsLimit: tokenTo ? Number(tokenTo.decimals) : 0
-  };
-
   useEffect(() => {
     if (focusId === 'from') {
       setAmountTo(
@@ -319,7 +267,6 @@ const CreatePosition = () => {
     }
     leftRange = left;
     rightRange = right;
-    // console.log({ left, right });
 
     setLeftRange(Number(left));
     setRightRange(Number(right));
@@ -609,6 +556,7 @@ const CreatePosition = () => {
       ...priceInfo,
       startPrice: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
     });
+
     if (amountFrom && (isXtoY ? rightRange > convertedMid : rightRange < convertedMid)) {
       const deposit = amountFrom;
       const amount = getOtherTokenAmount(
@@ -640,11 +588,12 @@ const CreatePosition = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [liquidityData, setLiquidityData] = useState<PlotTickData[]>([]);
+
   useEffect(() => {
     if (isMountedRef.current && liquidityData) {
       resetPlot();
     }
-  }, [liquidityData, midPrice]);
+  }, [liquidityData]); // midPrice TODO:
 
   useEffect(() => {
     checkNoPool(feeTier, tokenFrom, tokenTo);
@@ -922,8 +871,6 @@ const CreatePosition = () => {
               fromAmount={amountFrom}
               toAmount={amountTo}
               fee={feeTier}
-              tokenFromInput={tokenFromInput}
-              tokenToInput={tokenToInput}
               setFocusInput={setFocusId}
               left={leftRange}
               right={rightRange}
