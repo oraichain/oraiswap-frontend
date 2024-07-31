@@ -1,4 +1,4 @@
-import { PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { PoolKey, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { poolKeyToString } from 'libs/contractSingleton';
@@ -76,3 +76,15 @@ export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => 
     poolKey: poolKeyToString(p.pool_key)
   };
 };
+
+export const parsePoolKeyString = (poolKey: string): PoolKey => {
+  const [tokenX, tokenY, fee, tickSpacing] = poolKey.split('-');
+  return {
+    fee_tier: {
+      fee: Number(fee),
+      tick_spacing: Number(tickSpacing)
+    },
+    token_x: tokenX,
+    token_y: tokenY
+  };
+}

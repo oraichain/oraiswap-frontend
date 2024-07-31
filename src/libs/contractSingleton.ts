@@ -872,7 +872,7 @@ export async function fetchPositionAprInfo(
     const currentLiquidity = poolInfo.pool.liquidity;
     const positionLiquidity = position.liquidity;
     const totalPositionLiquidity = tokenXLiquidityInUsd + tokenYLiquidityInUsd;
-    const rewardPerYear = ((rewardInUsd * Number(rewardsPerSec)) / token.decimals) * 86400 * 365;
+    const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
 
     sumIncentivesApr +=
       (Number(positionLiquidity) * rewardPerYear) / (Number(currentLiquidity) * totalPositionLiquidity);
@@ -883,4 +883,58 @@ export async function fetchPositionAprInfo(
     incentive: sumIncentivesApr,
     total: sumIncentivesApr + (feeAPR ? feeAPR : 0)
   };
+}
+
+export type PoolAprInfo = {
+  apr: number;
+  incentives: string[];
+  swapFee: number;
+  incentivesApr: number;
+};
+
+export async function fetchPoolAprInfo(
+  poolKeys: PoolKey[],
+  prices: CoinGeckoPrices<CoinGeckoId>,
+  poolLiquidities: Record<string, number>,
+): Promise<Record<string, PoolAprInfo>> {
+  const feeAndLiquidityInfo = await axios.get<PoolFeeAndLiquidityDaily[]>('pool-v3/fee', {});
+  const avgFeeAPRs = feeAndLiquidityInfo.data.map((pool) => {
+    const feeAPR = (pool.feeDaily * 365) / pool.liquidityDaily;
+    return {
+      poolKey: pool.poolKey,
+      feeAPR
+    };
+  });
+
+  const poolAprs: Record<string, PoolAprInfo> = {};
+  for (const poolKey of poolKeys) {
+    const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(poolKey))?.feeAPR;
+
+    const poolInfo = await SingletonOraiswapV3.getPool(poolKey);
+    const incentives = poolInfo.pool.incentives;
+
+    let sumIncentivesApr = 0;
+    for (const incentive of incentives) {
+      const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
+      const rewardsPerSec = incentive.reward_per_sec;
+      const rewardInUsd = prices[token.coinGeckoId];
+      const totalPoolLiquidity = poolLiquidities[poolKeyToString(poolKey)];
+      const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
+
+      sumIncentivesApr += rewardPerYear / (totalPoolLiquidity * 0.25);
+      console.log({ rewardPerYear, totalPoolLiquidity })
+    }
+
+    poolAprs[poolKeyToString(poolKey)] = {
+      apr: sumIncentivesApr + (feeAPR ? feeAPR : 0),
+      incentives: incentives.map((incentive) => {
+        const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
+        return token.denom.toUpperCase();
+      }),
+      swapFee: feeAPR ? feeAPR : 0,
+      incentivesApr: sumIncentivesApr
+    };
+  }
+
+  return poolAprs;
 }

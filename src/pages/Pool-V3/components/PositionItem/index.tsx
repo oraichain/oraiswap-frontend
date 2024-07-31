@@ -27,7 +27,7 @@ import {
 import useConfigReducer from 'hooks/useConfigReducer';
 import { printBigint } from '../PriceRangePlot/utils';
 import { network } from 'config/networks';
-import SingletonOraiswapV3, { fetchPositionAprInfo } from 'libs/contractSingleton';
+import SingletonOraiswapV3, { fetchPositionAprInfo, PositionAprInfo } from 'libs/contractSingleton';
 import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { getCosmWasmClient } from 'libs/cosmjs';
@@ -70,12 +70,24 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
     setCollapse(false);
   });
 
+  const [aprInfo, setAprInfo] = useState<PositionAprInfo>({
+    total: 0,
+    swapFee: 0,
+    incentive: 0
+  });
+  
   useEffect(() => {
     const getAPRInfo = async () => {
-      const res = await fetchPositionAprInfo(position, prices, position.tokenXLiqInUsd, position.tokenYLiqInUsd, statusRange);
-      console.log({ res });
+      const res = await fetchPositionAprInfo(
+        position,
+        prices,
+        position.tokenXLiqInUsd,
+        position.tokenYLiqInUsd,
+        statusRange
+      );
+      setAprInfo(res);
     };
-    if (statusRange &&  position.tokenXLiqInUsd && position.tokenYLiqInUsd && prices && position) {
+    if (statusRange && position.tokenXLiqInUsd && position.tokenYLiqInUsd && prices && position) {
       getAPRInfo();
     }
   }, [statusRange, prices, position]);
@@ -173,7 +185,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
           <div className={styles.item}>
             <p>APR</p>
             <span className={classNames(styles.value, styles.apr)}>
-              0%&nbsp;
+              {numberWithCommas(aprInfo.total * 100)}%&nbsp;
               <TooltipIcon
                 className={styles.tooltipWrapper}
                 placement="top"
@@ -184,18 +196,18 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
                   <div className={classNames(styles.tooltip, styles[theme])}>
                     <div className={styles.itemInfo}>
                       <span>Swap fee</span>
-                      <span className={styles.value}>{numberWithCommas(11.91)}%</span>
+                      <span className={styles.value}>{numberWithCommas(aprInfo.swapFee * 100)}%</span>
                     </div>
                     <div className={styles.itemInfo}>
                       <span>
                         Incentives Boost&nbsp;
                         <IconBoots />
                       </span>
-                      <span className={styles.value}>{numberWithCommas(11.91)}%</span>
+                      <span className={styles.value}>{numberWithCommas(aprInfo.incentive * 100)}%</span>
                     </div>
                     <div className={styles.itemInfo}>
                       <span>Total APR</span>
-                      <span className={styles.totalApr}>{numberWithCommas(11.91)}%</span>
+                      <span className={styles.totalApr}>{numberWithCommas(aprInfo.total * 100)}%</span>
                     </div>
                   </div>
                 }

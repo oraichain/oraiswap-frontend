@@ -12,9 +12,9 @@ import { TooltipIcon } from 'components/Tooltip';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3, { poolKeyToString } from 'libs/contractSingleton';
+import SingletonOraiswapV3, { fetchPoolAprInfo, PoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
-import { formatPoolData } from 'pages/Pool-V3/helpers/format';
+import { formatPoolData, parsePoolKeyString } from 'pages/Pool-V3/helpers/format';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -79,6 +79,20 @@ const PoolList = () => {
       }
     })();
   }, [dataPool]);
+
+  const [aprInfo, setAprInfo] = useState<Record<string, PoolAprInfo>>();
+  useEffect(() => {
+    const getAPRInfo = async () => {
+      const poolKeys = dataPool.map((pool) => parsePoolKeyString(pool.poolKey));
+
+      const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools);
+      console.log({res});
+      setAprInfo(res);
+    };
+    if (dataPool && prices && liquidityPools) {
+      getAPRInfo();
+    }
+  }, [dataPool, prices, liquidityPools]);
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -364,6 +378,12 @@ const PoolList = () => {
                             theme={theme}
                             volumn={volumn}
                             liquidity={liquidityPools?.[item?.poolKey]}
+                            aprInfo={aprInfo?.[item?.poolKey] ?? {
+                              apr: 0,
+                              incentives: [],
+                              swapFee: 0,
+                              incentivesApr: 0
+                            }}
                           />
                         </tr>
                       );
@@ -385,7 +405,7 @@ const PoolList = () => {
   );
 };
 
-const PoolItemTData = ({ item, theme, liquidity, volumn }) => {
+const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
   const navigate = useNavigate();
 
   const [openTooltip, setOpenTooltip] = useState(false);
@@ -425,7 +445,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn }) => {
       </td>
       <td>
         <div className={styles.apr}>
-          <span className={styles.amount}>{numberWithCommas(Math.random())}%</span>
+          <span className={styles.amount}>{numberWithCommas(aprInfo.apr * 100)}%</span>
           <TooltipIcon
             className={styles.tooltipWrapper}
             placement="top"
@@ -436,18 +456,18 @@ const PoolItemTData = ({ item, theme, liquidity, volumn }) => {
               <div className={classNames(styles.tooltip, styles[theme])}>
                 <div className={styles.itemInfo}>
                   <span>Swap fee</span>
-                  <span className={styles.value}>{numberWithCommas(11.91)}%</span>
+                  <span className={styles.value}>{numberWithCommas(aprInfo.swapFee * 100)}%</span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>
                     Incentives Boost&nbsp;
                     <IconBoots />
                   </span>
-                  <span className={styles.value}>{numberWithCommas(11.91)}%</span>
+                  <span className={styles.value}>{numberWithCommas(aprInfo.incentivesApr * 100)}%</span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>Total APR</span>
-                  <span className={styles.totalApr}>{numberWithCommas(11.91)}%</span>
+                  <span className={styles.totalApr}>{numberWithCommas(aprInfo.apr * 100)}%</span>
                 </div>
               </div>
             }

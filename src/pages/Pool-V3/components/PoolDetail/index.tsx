@@ -9,9 +9,9 @@ import classNames from 'classnames';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import useTheme from 'hooks/useTheme';
 import { useEffect, useState } from 'react';
-import { formatNumberKMB } from 'helper/format';
+import { formatNumberKMB, numberWithCommas } from 'helper/format';
 import PositionItem from '../PositionItem';
-import SingletonOraiswapV3, { stringToPoolKey } from 'libs/contractSingleton';
+import SingletonOraiswapV3, { fetchPoolAprInfo, PoolAprInfo, stringToPoolKey } from 'libs/contractSingleton';
 import { toDisplay } from '@oraichain/oraidex-common';
 import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -65,6 +65,23 @@ const PoolV3Detail = () => {
       }
     })();
   }, [poolId]);
+
+  const [aprInfo, setAprInfo] = useState<PoolAprInfo>({
+    apr: 0,
+    incentives: [],
+    incentivesApr: 0,
+    swapFee: 0
+  });
+  useEffect(() => {
+    const getAPRInfo = async () => {
+      const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools);
+      console.log({ res });
+      setAprInfo(res[poolDetail.poolKey]);
+    };
+    if (poolDetail && prices && liquidityPools) {
+      getAPRInfo();
+    }
+  }, [poolDetail, prices, liquidityPools]);
 
   const { spread, pool_key } = poolDetail || {};
   const { allocation, total } = liquidity;
@@ -194,22 +211,22 @@ const PoolV3Detail = () => {
           <div className={styles.desc}>
             <div className={styles.item}>
               <span>Incentive</span>
-              <p>ORAIX</p>
+              <p>{aprInfo.incentives.join(',')}</p>
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>
-              <p>{Math.random()}%</p>
+              <p>{numberWithCommas(aprInfo.swapFee * 100)}%</p>
             </div>
             <div className={styles.item}>
               <span className={styles.label}>
                 Incentive Boost&nbsp;
                 <IconBoots />
               </span>
-              <p>{Math.random()}%</p>
+              <p>{numberWithCommas(aprInfo.incentivesApr * 100)}%</p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
-              <p className={styles.total}>{Math.random()}%</p>
+              <p className={styles.total}>{numberWithCommas(aprInfo.apr * 100)}%</p>
             </div>
           </div>
         </div>
