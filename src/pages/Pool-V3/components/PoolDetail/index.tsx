@@ -49,7 +49,7 @@ const PoolV3Detail = () => {
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [poolDetail, setPoolDetail] = useState<PoolWithTokenInfo>();
-  const [indexRemove, setInRemoveSuccess] = useState<boolean>(undefined);
+  const [statusRemove, setStatusRemove] = useState<boolean>(undefined);
   const [liquidity, setLiquidity] = useState({
     total: totalLiquidity,
     allocation: {}
@@ -131,11 +131,12 @@ const PoolV3Detail = () => {
         console.log('error call position', error);
       } finally {
         setLoading(false);
+        setStatusRemove(false);
       }
     })();
 
     return () => {};
-  }, [poolDetail, address, indexRemove]);
+  }, [poolDetail, address, statusRemove]);
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -249,7 +250,7 @@ const PoolV3Detail = () => {
               ? dataPosition.map((position, index) => {
                   return (
                     <div className={styles.positionWrapper} key={`pos-${index}`}>
-                      <PositionItem position={position} setInRemoveSuccess={setInRemoveSuccess} />
+                      <PositionItem position={position} setStatusRemove={setStatusRemove} />
                     </div>
                   );
                 })

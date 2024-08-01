@@ -76,7 +76,7 @@ const PositionList = () => {
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [feeClaimData, setFeeClaimData] = useState([]);
-  const [indexRemove, setInRemoveSuccess] = useState<boolean>(undefined);
+  const [statusRemove, setStatusRemove] = useState<boolean>(undefined);
 
   useEffect(() => {
     (async () => {
@@ -98,32 +98,30 @@ const PositionList = () => {
           isLight,
           feeClaimData
         });
-        console.log({ positionsMap });
 
         setDataPosition(positionsMap);
       } catch (error) {
         console.log({ error });
       } finally {
         setLoading(false);
+        setStatusRemove(false);
       }
     })();
 
     return () => {};
-  }, [address]);
+  }, [address, statusRemove]);
 
   return (
     <div className={styles.positionList}>
       <LoadingBox loading={loading} styles={{ height: '60vh' }}>
         {dataPosition.length
-          ? dataPosition
-              .filter((data) => (indexRemove === undefined ? data : data.id !== indexRemove))
-              .map((position, key) => {
-                return (
-                  <div className={styles.item} key={`position-list-item-${key}`}>
-                    <PositionItem position={position} setInRemoveSuccess={setInRemoveSuccess} />
-                  </div>
-                );
-              })
+          ? dataPosition.map((position, key) => {
+              return (
+                <div className={styles.item} key={`position-list-item-${key}`}>
+                  <PositionItem position={position} setStatusRemove={setStatusRemove} />
+                </div>
+              );
+            })
           : !loading && (
               <div className={styles.nodata}>
                 {theme === 'light' ? <NoData /> : <NoDataDark />}
