@@ -341,7 +341,7 @@
     box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
 
     .itemInfo {
-      color: var(--Colors-Neutral-Text-body, #979995);
+      color: var(--Colors-Neutral-Text-body, #686a66);
 
       .value {
         color: #232521;
@@ -356,6 +356,59 @@
         height: 12px;
       }
     }
+  }
+
+  @include mobile {
+    font-size: 12px;
+    padding: 8px;
+    width: calc(100% - 20px);
+  }
+}
+
+.aprHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+
+  svg {
+    vertical-align: middle;
+
+    path {
+      @include theme {
+        fill: theme-get('neutral-9');
+      }
+    }
+  }
+}
+
+.tooltipApr {
+  border: 1px solid #494949;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+  text-align: left;
+
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  gap: 12px;
+  border-radius: 8px;
+  background: var(--Colors-Trading-trade-bg-section, #232521);
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+  color: var(--Colors-Neutral-Text-body, #979995);
+
+  .titleApr {
+    font-size: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  &.light {
+    border-color: #f0f1ee;
+    background: #fff;
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+    color: var(--Colors-Neutral-Text-body, #686a66);
   }
 
   @include mobile {

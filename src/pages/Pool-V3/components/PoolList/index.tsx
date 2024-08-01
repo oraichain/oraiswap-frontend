@@ -28,6 +28,7 @@ const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
+  const [openTooltip, setOpenTooltip] = useState(false);
 
   const theme = useTheme();
 
@@ -346,7 +347,30 @@ const PoolList = () => {
                     <th>Pool name</th>
                     <th className={styles.textRight}>Liquidity</th>
                     <th className={styles.textRight}>Volume (24H)</th>
-                    <th className={styles.textRight}>APR</th>
+                    <th className={classNames(styles.textRight, styles.aprHeader)}>
+                      APR
+                      <TooltipIcon
+                        className={styles.tooltipWrapper}
+                        placement="top"
+                        visible={openTooltip}
+                        icon={<IconInfo />}
+                        setVisible={setOpenTooltip}
+                        content={
+                          <div className={classNames(styles.tooltipApr, styles[theme])}>
+                            <h3 className={styles.titleApr}>How are APRs calculated?</h3>
+                            <p className={styles.desc}>
+                              All APRs are estimated. They are calculated by taking the average APR for liquidity in the
+                              pool.
+                            </p>
+                            <br />
+                            <p className={styles.desc}>
+                              In concentrated pools, most users will receive lower rewards. This is due to positions
+                              that are more concentrated, which capture more of the incentives.
+                            </p>
+                          </div>
+                        }
+                      />
+                    </th>
                     <th></th>
                   </tr>
                 </thead>
