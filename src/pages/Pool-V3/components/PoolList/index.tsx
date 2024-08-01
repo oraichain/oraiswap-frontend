@@ -57,7 +57,7 @@ const PoolList = () => {
     })();
 
     return () => {};
-  }, []);
+  }, [theme]);
 
   const totalLiquidity = useMemo(() => {
     if (liquidityPools && Object.values(liquidityPools).length) {
@@ -336,7 +336,7 @@ const PoolList = () => {
           />
         </div>
       </div>
-      <LoadingBox loading={loading} styles={{ height: '60vh' }}>
+      <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}>
         <div className={styles.list}>
           {dataPool?.length > 0 ? (
             <div className={styles.tableWrapper}>
