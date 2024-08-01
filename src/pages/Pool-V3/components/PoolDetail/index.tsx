@@ -78,10 +78,11 @@ const PoolV3Detail = () => {
     incentivesApr: 0,
     swapFee: 0
   });
+  
   useEffect(() => {
     const getAPRInfo = async () => {
       const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools);
-      console.log({ res });
+      // console.log({ res });
       setAprInfo(res[poolDetail.poolKey]);
     };
     if (poolDetail && prices && liquidityPools) {

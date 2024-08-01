@@ -133,6 +133,8 @@ const TokenForm = ({
         isXtoY
       ) === PositionTokenBlock.B;
 
+    console.log({fromBlocked, toBlocked, left, right});
+
     setIsFromBlocked(fromBlocked);
     setIsToBlocked(toBlocked);
   }, [isPoolExist, poolData, midPrice, left, right, isXtoY]);

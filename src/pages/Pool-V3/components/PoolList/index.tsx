@@ -85,7 +85,11 @@ const PoolList = () => {
       const poolKeys = dataPool.map((pool) => parsePoolKeyString(pool.poolKey));
 
       const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools);
+<<<<<<< HEAD
       console.log({ res });
+=======
+      // console.log({res});
+>>>>>>> 9e2e96078e5a33696e16c499f6c6aed021e0a986
       setAprInfo(res);
     };
     if (dataPool && prices && liquidityPools) {

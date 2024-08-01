@@ -64,51 +64,6 @@ export interface Token {
   isUnknown?: boolean;
 }
 
-export const OCH: Token = {
-  symbol: 'OCH',
-  address: 'orai1hn8w33cqvysun2aujk5sv33tku4pgcxhhnsxmvnkfvdxagcx0p8qa4l98q',
-  decimals: 6,
-  name: 'Orchai Token',
-
-  coingeckoId: 'och'
-};
-
-export const USDT: Token = {
-  symbol: 'USDT',
-  address: 'orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh',
-  decimals: 6,
-  name: 'USDC',
-  coingeckoId: 'tether'
-};
-
-export const USDC: Token = {
-  symbol: 'USDC',
-  address: 'orai15un8msx3n5zf9ahlxmfeqd2kwa5wm0nrpxer304m9nd5q6qq0g6sku5pdd',
-  decimals: 6,
-  name: 'USDC',
-
-  coingeckoId: 'usd-coin'
-};
-
-export const ORAI: Token = {
-  symbol: 'ORAI',
-  address: 'orai',
-  decimals: 6,
-  name: 'Orai Token',
-  // logoURI: 'https://assets.coingecko.com/coins/images/12931/standard/orai.png',
-  coingeckoId: 'oraichain-token'
-};
-
-export const ORAIX: Token = {
-  symbol: 'ORAIX',
-  address: 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge',
-  decimals: 6,
-  name: 'ORAIX',
-  // logoURI: 'https://i.ibb.co/VmMJtf7/oraix.png',
-  coingeckoId: 'oraidex'
-};
-
-export const FAUCET_LIST_TOKEN = [ORAIX, USDT, USDC, OCH, ORAI];
 const defaultState = {
   dexAddress: network.pool_v3
 };
@@ -479,10 +434,10 @@ export default class SingletonOraiswapV3 {
 
     const tokenInfos = await Promise.all(
       tokens.map(async (token) => {
-        if (FAUCET_LIST_TOKEN.filter((item) => item.address === token).length > 0) {
-          const info = FAUCET_LIST_TOKEN.filter((item) => item.address === token)[0];
+        if (oraichainTokens.filter((item) => extractAddress(item) === token).length > 0) {
+          const info = oraichainTokens.filter((item) => extractAddress(item) === token)[0];
 
-          return { info, price: prices[info.coingeckoId] };
+          return { info, price: prices[info.coinGeckoId] };
         }
       })
     );
@@ -500,7 +455,7 @@ export default class SingletonOraiswapV3 {
 
     const allocation = {};
     const tokenWithUSDValue = tokenWithLiquidities.map((token) => {
-      const tokenInfo = tokenInfos.filter((item) => item.info.address === token.address)[0];
+      const tokenInfo = tokenInfos.filter((item) => extractAddress(item.info) === token.address)[0];
 
       const data = {
         address: token.address,
@@ -558,10 +513,10 @@ export default class SingletonOraiswapV3 {
 
       const tokenInfos = await Promise.all(
         tokens.map(async (token) => {
-          if (FAUCET_LIST_TOKEN.filter((item) => item.address === token).length > 0) {
-            const info = FAUCET_LIST_TOKEN.filter((item) => item.address === token)[0];
+          if (oraichainTokens.filter((item) => extractAddress(item) === token).length > 0) {
+            const info = oraichainTokens.filter((item) => extractAddress(item) === token)[0];
 
-            return { info, price: prices[info.coingeckoId] };
+            return { info, price: prices[info.coinGeckoId] };
           }
         })
       );
@@ -578,7 +533,7 @@ export default class SingletonOraiswapV3 {
       ];
 
       const tokenWithUSDValue = tokenWithLiquidities.map((token) => {
-        const tokenInfo = tokenInfos.filter((item) => item.info.address === token.address)[0];
+        const tokenInfo = tokenInfos.filter((item) => extractAddress(item.info) === token.address)[0];
         return {
           address: token.address,
           usdValue: (Number(token.balance) / 10 ** 6) * tokenInfo.price
@@ -645,8 +600,8 @@ export default class SingletonOraiswapV3 {
     // get token info
     const tokenInfos = await Promise.all(
       tokens.map(async (token) => {
-        if (FAUCET_LIST_TOKEN.filter((item) => item.address === token).length > 0) {
-          const info = FAUCET_LIST_TOKEN.filter((item) => item.address === token)[0];
+        if (oraichainTokens.filter((item) => extractAddress(item) === token).length > 0) {
+          const info = oraichainTokens.filter((item) => extractAddress(item) === token)[0];
           return {
             info,
             price: {
@@ -669,7 +624,7 @@ export default class SingletonOraiswapV3 {
 
     // tokenWithUSDValue
     const tokenWithUSDValue = tokenWithLiquidities.map((token) => {
-      const tokenInfo = tokenInfos.filter((item) => item.info.address === token.address)[0];
+      const tokenInfo = tokenInfos.filter((item) => extractAddress(item.info) === token.address)[0];
       return {
         address: token.address,
         usdValue: (Number(token.balance) / 10 ** 6) * tokenInfo.price.price
@@ -929,7 +884,7 @@ export async function fetchPoolAprInfo(
       const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
 
       sumIncentivesApr += rewardPerYear / (totalPoolLiquidity * 0.25);
-      console.log({ rewardPerYear, totalPoolLiquidity });
+      // console.log({ rewardPerYear, totalPoolLiquidity });
     }
 
     poolAprs[poolKeyToString(poolKey)] = {
