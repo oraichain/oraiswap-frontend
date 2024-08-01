@@ -3,98 +3,89 @@
 @import 'src/styles/variables';
 
 .poolV3 {
-  margin: 0 auto;
+  display: flex;
+  padding: 48px 64px 24px 64px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  flex-shrink: 0;
   width: 100%;
 
-  iframe {
-    width: 100%;
-    height: calc(100vh - 76px - 70px);
-    padding: 10px;
-
-    &.inactiveMargin {
-      height: calc(100vh - 76px);
-    }
-
-    @include mobile {
-      margin-top: 0;
-
-      &.inactiveMargin {
-        margin-top: 68px;
-      }
-    }
+  @include mobile {
+    gap: 24px;
+    padding: 90px 10px 48px 10px;
   }
 
-  .banner {
-
-    font-size: 16px;
-    font-weight: 400;
-
-    background: $primary-banner-default;
-    color: $dropdown-bg-color-hover-dark;
+  .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px;
-    padding-left: 80px;
-    padding-right: 80px;
+    align-self: stretch;
 
-    @include mobile {
-      font-size: 14px;
-      margin-top: 68px;
-    }
-
-    @include medium-desktop {
-      padding-left: 80px;
-      padding-right: 80px;
-    }
-
-    @include mobile {
-      top: $menu-height;
-      padding: 10px 8px;
-    }
-
-    .text {
-      display: inline-flex;
+    .headerTab {
+      display: flex;
+      height: 36px;
+      padding: 4px;
       align-items: center;
-    }
+      gap: 4px;
 
-    svg {
-      vertical-align: bottom;
-      width: 30px;
-      height: 30px;
-    }
+      border-radius: var(--Dimension-Corner-Radius-button, 99px);
 
-    .lottie {
-      margin-right: 6px;
-      & > div {
-        height: 40px;
-        width: 40px;
+      @include theme {
+        background: theme-get('neutral-surface-bg-modal');
+        color: theme-get('neutral-9');
       }
-      svg {
-        path {
-          stroke: unset !important;
+
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%; /* 24px */
+
+      .item {
+        display: flex;
+        padding: 12px 24px;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        align-self: stretch;
+
+        border-radius: var(--Dimension-Corner-Radius-button, 99px);
+
+        &.active {
+          @include theme {
+            color: theme-get('colors-neutral-text-body-on-row');
+            border: 1px solid theme-get('neutral-border-border-default');
+            background: theme-get('neutral-surface-bg-strong');
+          }
         }
       }
     }
 
-    .closeBanner {
-      cursor: pointer;
+    .swapBtn {
+      display: flex;
+      width: 128px;
+      height: 36px;
+      padding: 8px 16px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
 
-      svg {
-        margin-left: 4px;
-        vertical-align: middle;
-        width: 20px;
-        height: 20px;
+      border-radius: var(--Dimension-Corner-Radius-button, 99px);
 
-        @include mobile {
-          width: 14px;
-          height: 14px;
-        }
-
-        path {
-          fill: $dropdown-bg-color-hover-dark;
-        }
+      @include theme {
+        border: 1px solid theme-get('neutral-border-border-xbold');
+        background: theme-get('colors-neutral-surface-bg-section-3');
+        color: theme-get('colors-neutral-text-body-on-row');
       }
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%;
     }
+  }
+
+  .content {
+    width: 100%;
   }
 }

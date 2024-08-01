@@ -6,6 +6,7 @@
   "author": "Oraichain Labs",
   "license": "Apache-2.0",
   "dependencies": {
+    "@babel/plugin-proposal-import-wasm-source": "^7.24.7",
     "@cosmjs/cosmwasm-stargate": "^0.31.0",
     "@cosmjs/proto-signing": "^0.31.0",
     "@cosmjs/stargate": "^0.31.0",
@@ -14,13 +15,15 @@
     "@injectivelabs/sdk-ts": "1.12.1",
     "@leapwallet/cosmos-snap-provider": "0.1.25",
     "@lucky-canvas/react": "^0.1.13",
+    "@nivo/bar": "^0.87.0",
+    "@nivo/line": "^0.86.0",
     "@oraichain/common-contracts-sdk": "^1.0.31",
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",
     "@oraichain/orai-bitcoin": "2.0.0",
     "@oraichain/oraidex-common-ui": "1.0.11",
-    "@oraichain/oraidex-contracts-sdk": "^1.0.26",
-    "@oraichain/oraidex-universal-swap": "1.0.93",
+    "@oraichain/oraidex-contracts-sdk": "^1.0.47",
+    "@oraichain/oraidex-universal-swap": "1.0.95",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/react": "^7.47.0",
     "@tanstack/react-query": "^4.32.6",
@@ -54,11 +57,14 @@
     "react-use-websocket": "3.0.0",
     "redux-persist": "^6.0.0",
     "serialize-error": "8.0.0",
-    "tronweb": "^5.1.0"
+    "tronweb": "^5.1.0",
+    "urql": "^4.1.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@ethersproject/providers": "^5.0.10",
+    "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/client-preset": "^4.3.3",
     "@keplr-wallet/types": "^0.11.38",
     "@oraichain/babel-plugin-operator-overloading": "^1.0.4",
     "@oraichain/common-contracts-build": "1.0.35",
@@ -75,6 +81,7 @@
     "@types/react-router-dom": "^5.3.3",
     "crypto-browserify": "^3.12.0",
     "firebase-tools": "^11.30.0",
+    "graphql": "^16.9.0",
     "https-browserify": "^1.0.0",
     "husky": "^8.0.3",
     "node-polyfill-webpack-plugin": "^3.0.0",
@@ -100,7 +107,8 @@
     "postinstall": "patch-package",
     "prepare": "husky install",
     "ts-css": "typed-scss-modules src --watch --implementation sass -n all -e default",
-    "clear-module-cache": "rm -rf node_modules/.cache/vendor & rm -rf public/vendor*"
+    "clear-module-cache": "rm -rf node_modules/.cache/vendor & rm -rf public/vendor*",
+    "codegen": "graphql-codegen"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -119,7 +127,8 @@
   },
   "resolutions": {
     "bech32": "1.1.4",
-    "bitcoinjs-lib": "5.2.0"
+    "bitcoinjs-lib": "5.2.0",
+    "axios": "0.26.1"
   },
   "engines": {
     "node": "^18 || ^20"

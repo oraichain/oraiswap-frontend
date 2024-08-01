@@ -1,0 +1,412 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.positionItem {
+  width: 100%;
+  display: flex;
+  align-self: stretch;
+  flex-wrap: wrap;
+
+  border-radius: 16px;
+
+  @include theme {
+    border: 1px solid theme-get('neutral-border-border-default');
+    background: theme-get('neutral-surface-bg-swap');
+  }
+
+  overflow: hidden;
+
+  &:hover {
+    @include theme {
+      background: theme-get('neutral-6');
+    }
+  }
+
+  .trigger {
+    width: 100%;
+    display: flex;
+    gap: 24px;
+    align-self: stretch;
+    flex-wrap: wrap;
+    padding: 32px;
+
+    @include mobile {
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    cursor: pointer;
+
+    .name {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      flex-wrap: wrap;
+
+      @include theme {
+        color: theme-get('colors-neutral-text-body-on-row');
+      }
+
+      .icons {
+        display: inline-flex;
+
+        img,
+        svg {
+          width: 32px;
+          height: 32px;
+
+          &:not(:first-of-type) {
+            margin-left: -10px;
+          }
+        }
+
+        &.light {
+          img {
+            filter: invert(1);
+          }
+        }
+      }
+
+      .fee {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .item {
+          padding: 8px 12px;
+          border-radius: 8px;
+
+          @include theme {
+            background: theme-get('neutral-6');
+            color: theme-get('colors-neutral-text-body-on-row');
+          }
+
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 150%; /* 18px */
+          letter-spacing: 0.012px;
+          white-space: nowrap;
+
+          &.status {
+            text-transform: uppercase;
+            color: var(--chart-bear-action, #fb6060);
+            background: var(--chart-bear-16, rgba(255, 77, 82, 0.16));
+
+            &.inRange {
+              color: var(--chart-bear-action, #0ecb81);
+              background: var(--chart-bull-16, rgba(14, 203, 129, 0.16));
+            }
+          }
+        }
+      }
+    }
+
+    .info {
+      display: flex;
+      gap: 30px;
+      flex: 1 1 1;
+      justify-content: space-between;
+      align-items: center;
+
+      @include mobile {
+        width: 100%;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .item {
+        text-align: right;
+
+        @include mobile {
+          text-align: left;
+        }
+
+        p {
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 150%; /* 21px */
+        }
+
+        .value {
+          @include theme {
+            color: theme-get('colors-neutral-text-body-on-row');
+          }
+
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 150%; /* 24px */
+          margin-top: 16px;
+
+          &.apr {
+            display: flex;
+            width: 100px;
+            justify-content: flex-end;
+            margin: auto;
+            @include theme {
+              color: theme-get('primary-surface-default-dark-3');
+            }
+
+            svg {
+              path {
+                @include theme {
+                  fill: theme-get('primary-surface-default-dark-3');
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .content {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: 16px;
+
+    padding: 0 32px 32px 32px;
+    display: none;
+
+    // padding: 0;
+    // height: 0%;
+    transition: all ease-in-out 0.5s;
+
+    @include mobile {
+      padding: 0 16px 16px 16px;
+    }
+
+    @include small-mobile {
+      grid-template-columns: 1fr;
+    }
+
+    &.openCollapse {
+      //   padding: 0 32px 32px 32px;
+      //   height: max-content;
+      display: grid;
+    }
+
+    .item {
+      display: flex;
+      width: 100%;
+      padding: 24px var(--Dimensions-32, 32px);
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--Dimensions-32, 24px);
+      align-self: stretch;
+
+      border-radius: 16px;
+
+      @include mobile {
+        padding: 16px;
+        gap: 16px;
+      }
+
+      @include theme {
+        border: 1px solid theme-get('neutral-border-border-default');
+        background: theme-get('neutral-surface-bg-tooltip');
+      }
+
+      .title {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+
+        @include theme {
+          color: theme-get('colors-neutral-text-body-on-row');
+        }
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 150%; /* 27px */
+
+        svg {
+          width: 20px;
+          height: 20px;
+          vertical-align: middle;
+
+          path {
+            @include theme {
+              stroke: theme-get('primary-surface-default-dark-3');
+            }
+          }
+        }
+      }
+
+      .row {
+        width: 100%;
+
+        h4 {
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 150%; /* 21px */
+          margin-bottom: 24px;
+
+          display: flex;
+          align-items: center;
+
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+
+          svg {
+            margin-left: 2px;
+
+            path {
+              @include theme {
+                fill: theme-get('neutral-9');
+              }
+            }
+          }
+        }
+
+        .itemRow {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          align-self: stretch;
+          gap: 12px;
+          width: 100%;
+
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+
+          .usd {
+            flex: 1;
+            @include theme {
+              color: theme-get('colors-neutral-text-body-on-row');
+            }
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 150%; /* 27px */
+
+            &.green {
+              color: #0ecb81;
+            }
+
+            &.red {
+              color: #ff4d52;
+            }
+          }
+
+          .token {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            img,
+            svg {
+              width: 20px;
+              height: 20px;
+            }
+
+            &.light {
+              img {
+                filter: invert(1);
+              }
+            }
+          }
+        }
+      }
+
+      .divider {
+        margin: 24px 0;
+        width: 100%;
+
+        @include theme {
+          border-bottom: 1px solid theme-get('neutral-border-border-default');
+        }
+      }
+
+      .btnGroup {
+        margin-top: 32px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+    }
+  }
+}
+
+.tooltip {
+  border: 1px solid #494949;
+  color: var(--Colors-Neutral-Text-body, #979995);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+
+  display: flex;
+  width: 250px;
+  align-items: center;
+  padding: 12px;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 8px;
+  background: var(--Colors-Trading-trade-bg-section, #232521);
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+
+  .itemInfo {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 200px;
+
+    color: var(--Colors-Neutral-Text-body, #979995);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%; /* 21px */
+
+    .value {
+      color: var(--Colors-Neutral-Icon-icon-negative-btn, #fff);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 150%; /* 18px */
+    }
+
+    .totalApr {
+      color: var(--Colors-Primary-Text-text-highlight, #aee67f);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 150%; /* 18px */
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &.light {
+    border-color: #f0f1ee;
+    background: #fff;
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+
+    .itemInfo {
+      color: var(--Colors-Neutral-Text-body, #979995);
+
+      .value {
+        color: #232521;
+      }
+
+      .totalApr {
+        color: #2f5711;
+      }
+    }
+  }
+
+  @include mobile {
+    font-size: 12px;
+    padding: 8px;
+    width: calc(100% - 20px);
+  }
+}
+
+.tooltipWrapper {
+}

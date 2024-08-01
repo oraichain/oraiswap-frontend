@@ -12,10 +12,11 @@ import {
   ROUTER_V2_CONTRACT,
   STAKING_CONTRACT,
   ORAIDEX_BID_POOL_CONTRACT,
-  CW20_STAKING_CONTRACT
+  CW20_STAKING_CONTRACT,
+  AMM_V3_CONTRACT
 } from '@oraichain/oraidex-common';
 
-export const network: CustomChainInfo & NetworkConfig = {
+export const network: CustomChainInfo & NetworkConfig & { pool_v3: string } = {
   ...oraichainNetwork,
   prefix: oraichainNetwork.bech32Config.bech32PrefixAccAddr,
   denom: 'orai',
@@ -32,5 +33,6 @@ export const network: CustomChainInfo & NetworkConfig = {
   bid_pool: ORAIDEX_BID_POOL_CONTRACT,
   staking_oraix: CW20_STAKING_CONTRACT,
   multicall: MULTICALL_CONTRACT,
-  explorer: 'https://scan.orai.io'
+  explorer: 'https://scan.orai.io',
+  pool_v3: AMM_V3_CONTRACT
 };

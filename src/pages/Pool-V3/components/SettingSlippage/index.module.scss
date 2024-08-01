@@ -1,0 +1,132 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+  opacity: 0.25;
+  background: var(--Colors-Universal-Base-1000, #000);
+
+  width: 100%;
+  height: 100%;
+
+  visibility: hidden;
+
+  &.active {
+    visibility: visible;
+  }
+}
+
+.contentWrapper {
+  z-index: 1000;
+  visibility: hidden;
+  background: rgba(0, 0, 0, 0.75);
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+
+  @include small-mobile {
+    justify-content: flex-end;
+  }
+
+  &.active {
+    visibility: visible;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.modal {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 500px;
+  padding: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  border-radius: var(--Dimension-Corner-Radius-modal, 12px);
+
+  @include theme {
+    background: theme-get('colors-neutral-surface-bg');
+  }
+
+  @include small-mobile {
+    max-width: unset;
+  }
+
+  .title {
+    width: 100%;
+    text-align: center;
+
+    @include theme {
+      color: theme-get('colors-neutral-text-text-token-name');
+    }
+
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 150%; /* 30px */
+  }
+
+  .close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+
+    svg {
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  .content {
+    h2 {
+      margin: 12px 0px 16px;
+      letter-spacing: 0.00938em;
+      font-size: 16px;
+      line-height: 20px;
+      font-weight: 400;
+
+      @include theme {
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
+    }
+
+    .input {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+
+      margin-bottom: 16px;
+
+      input {
+        flex: 1;
+        padding: 8px 12px;
+
+        border-radius: 99px;
+
+        @include theme {
+          color: theme-get('colors-neutral-text-text-token-name');
+          background-color: theme-get('neutral-6');
+          border: 1px solid theme-get('colors-neutral-border-border-bold');
+        }
+      }
+    }
+
+    .desc {
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 150%; /* 19.5px */
+      letter-spacing: 0.013px;
+    }
+  }
+}

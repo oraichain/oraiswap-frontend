@@ -24,7 +24,7 @@ import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraic
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { WalletType } from 'components/WalletManagement/walletConfig';
-import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
+import { chainIcons, chainInfos, chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
 import { WalletsByNetwork } from 'reducer/wallet';
@@ -564,5 +564,32 @@ export const getAddressByEIP191 = async (isSwitchWallet?: boolean) => {
 export const assert = (condition: any, msg?: string) => {
   if (!condition) {
     throw new Error(msg || 'Condition is not truthy');
+  }
+};
+
+export interface GetIconInterface {
+  type: 'token' | 'network';
+  chainId?: string;
+  coinGeckoId?: string;
+  isLightTheme: boolean;
+  width?: number;
+  height?: number;
+}
+
+export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, height }: GetIconInterface) => {
+  if (type === 'token') {
+    const tokenIcon = flattenTokensWithIcon.find((tokenWithIcon) => tokenWithIcon.coinGeckoId === coinGeckoId);
+    return isLightTheme ? (
+      <tokenIcon.IconLight width={width} height={height} />
+    ) : (
+      <tokenIcon.Icon width={width} height={height} />
+    );
+  } else {
+    const networkIcon = chainIcons.find((chain) => chain.chainId === chainId);
+    return isLightTheme ? (
+      <networkIcon.IconLight width={width} height={height} />
+    ) : (
+      <networkIcon.Icon width={width} height={height} />
+    );
   }
 };

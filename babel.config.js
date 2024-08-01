@@ -6,7 +6,8 @@ module.exports = function (api) {
         '@oraichain/operator-overloading',
         {
           classNames: ['BigDecimal']
-        }
+        },
+        "@babel/plugin-proposal-import-wasm-source"
       ]
     ]
   };

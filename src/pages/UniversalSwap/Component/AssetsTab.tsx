@@ -55,7 +55,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       ...listAsset,
       {
         src: StakeIcon,
-        label: 'Total staked',
+        label: 'Total LP',
         balance: formatDisplayUsdt(toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS))
       }
     ];
