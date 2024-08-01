@@ -91,7 +91,7 @@ const PoolList = () => {
     if (dataPool && prices && liquidityPools) {
       getAPRInfo();
     }
-  }, [dataPool, prices, liquidityPools, aprInfo]);
+  }, [dataPool, prices, liquidityPools]);
 
   useEffect(() => {
     const fetchStatusAmmV3 = async () => {
