@@ -19,7 +19,8 @@ import {
 import { getIconPoolData } from './format';
 import { network } from 'config/networks';
 import { SwapHop } from '../packages/sdk/OraiswapV3.types';
-
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
 // export const PERCENTAGE_SCALE = Number(getPercentageScale());
 export interface InitPositionData {
   poolKeyData: PoolKey;
@@ -430,8 +431,25 @@ export const createPositionWithNativeTx = async (
   return res.transactionHash;
 };
 
-export const convertPosition = ({ positions, poolsData, isLight, cachePrices, address }) => {
-  return positions.map((position: Position | any, index) => {
+export const convertPosition = ({
+  positions,
+  poolsData,
+  isLight,
+  cachePrices,
+  address
+}: {
+  positions: Position[] | any[];
+  poolsData: {
+    pool_key: {
+      token_x: string;
+      token_y: string;
+    };
+  }[];
+  isLight: boolean;
+  address: string;
+  cachePrices: CoinGeckoPrices<CoinGeckoId>;
+}) => {
+  return positions.map((position: Position & { poolData: { pool: Pool }; ind: number }) => {
     const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
     let {
       FromTokenIcon: tokenXIcon,

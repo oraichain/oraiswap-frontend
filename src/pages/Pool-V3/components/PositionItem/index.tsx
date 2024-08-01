@@ -34,7 +34,8 @@ import { getCosmWasmClient } from 'libs/cosmjs';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { toDisplay } from '@oraichain/oraidex-common';
+import { toDisplay, parseAssetInfo } from '@oraichain/oraidex-common';
+import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -57,11 +58,11 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
   const [openTooltip, setOpenTooltip] = useState(false);
   const [openTooltipApr, setOpenTooltipApr] = useState(false);
   const [openCollapse, setCollapse] = useState(false);
-  const [tick, setTick] = useState<{ lowerTick: any; upperTick: any }>({
+  const [tick, setTick] = useState<{ lowerTick: Tick | any; upperTick: Tick | any }>({
     lowerTick: undefined,
     upperTick: undefined
   });
-  const [incentives, setIncentives] = useState<any>();
+  const [incentives, setIncentives] = useState<{ [key: string]: number }>();
   const [claimLoading, setClaimLoading] = useState<boolean>(false);
   const [isClaimSuccess, setIsClaimSuccess] = useState<boolean>(false);
   const [removeLoading, setRemoveLoading] = useState<boolean>(false);
@@ -107,8 +108,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
       ]);
 
       const tokenIncentive = incentives.reduce((acc, cur) => {
-        //@ts-ignore
-        const tokenAttr = cur.info?.token?.contract_addr || cur.info?.native_token?.denom;
+        const tokenAttr = parseAssetInfo(cur.info);
         return {
           ...acc,
           [tokenAttr]: Number(acc[tokenAttr] || 0) + Number(cur.amount)
