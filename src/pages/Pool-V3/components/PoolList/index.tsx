@@ -88,7 +88,7 @@ const PoolList = () => {
       const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools);
       setAprInfo(res);
     };
-    if (!aprInfo && dataPool && prices && liquidityPools) {
+    if (dataPool && prices && liquidityPools) {
       getAPRInfo();
     }
   }, [dataPool, prices, liquidityPools, aprInfo]);
