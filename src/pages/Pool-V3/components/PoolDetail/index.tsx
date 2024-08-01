@@ -246,15 +246,13 @@ const PoolV3Detail = () => {
         <LoadingBox loading={loading} styles={{ height: '30vh' }}>
           <div className={styles.list}>
             {dataPosition.length
-              ? dataPosition
-                  // .filter((data) => (indexRemove === undefined ? data : data.id !== indexRemove))
-                  .map((position, index) => {
-                    return (
-                      <div className={styles.positionWrapper} key={`pos-${index}`}>
-                        <PositionItem position={position} setInRemoveSuccess={setInRemoveSuccess} />
-                      </div>
-                    );
-                  })
+              ? dataPosition.map((position, index) => {
+                  return (
+                    <div className={styles.positionWrapper} key={`pos-${index}`}>
+                      <PositionItem position={position} setInRemoveSuccess={setInRemoveSuccess} />
+                    </div>
+                  );
+                })
               : !loading && (
                   <>
                     <div className={styles.nodata}>
