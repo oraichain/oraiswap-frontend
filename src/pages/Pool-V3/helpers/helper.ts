@@ -493,10 +493,7 @@ export const convertPosition = ({
 }: {
   positions: Position[] | any[];
   poolsData: {
-    pool_key: {
-      token_x: string;
-      token_y: string;
-    };
+    pool_key: PoolKey;
   }[];
   isLight: boolean;
   address: string;
@@ -514,21 +511,22 @@ export const convertPosition = ({
       tokenYinfo
     } = getIconPoolData(tokenX, tokenY, isLight);
 
-    const positionsData = poolsData.find(
+    const poolData = poolsData.find(
       (pool) =>
-        pool.pool_key.token_x === position.pool_key.token_x && pool.pool_key.token_y === position.pool_key.token_y
+        pool.pool_key.token_x === position.pool_key.token_x &&
+        pool.pool_key.token_y === position.pool_key.token_y &&
+        position.pool_key.fee_tier.fee === pool.pool_key.fee_tier.fee &&
+        position.pool_key.fee_tier.tick_spacing === pool.pool_key.fee_tier.tick_spacing
     );
 
     const positions = {
       poolData: {
-        ...positionsData,
+        ...poolData,
         ...position
       }
     };
 
-    const lowerPrice = Number(
-      calcYPerXPriceByTickIndex(position.lower_tick_index, tokenXinfo.decimals, tokenYinfo.decimals)
-    );
+    const lowerPrice = calcYPerXPriceByTickIndex(position.lower_tick_index, tokenXinfo.decimals, tokenYinfo.decimals);
 
     const upperPrice = calcYPerXPriceByTickIndex(position.upper_tick_index, tokenXinfo.decimals, tokenYinfo.decimals);
 
@@ -544,6 +542,7 @@ export const convertPosition = ({
       const convertedPool = getConvertedPool(positions);
       const convertedPosition = getConvertedPosition(position);
       const res = calculateTokenAmounts(convertedPool, convertedPosition);
+      console.log({ convertedPool });
       x = res.x;
       y = res.y;
     }
@@ -551,12 +550,14 @@ export const convertPosition = ({
     try {
       tokenXLiq = +printBigint(x, tokenXinfo.decimals);
     } catch (error) {
+      console.log(error);
       tokenXLiq = 0;
     }
 
     try {
       tokenYLiq = +printBigint(y, tokenYinfo.decimals);
     } catch (error) {
+      console.log(error);
       tokenYLiq = 0;
     }
 
@@ -597,7 +598,7 @@ export const convertPosition = ({
     return {
       ...position,
       poolData: {
-        ...positionsData,
+        ...poolData,
         ...position
       },
       tokenX: tokenXinfo,

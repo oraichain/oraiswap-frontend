@@ -98,6 +98,7 @@ const PositionList = () => {
           isLight,
           feeClaimData
         });
+        console.log({ positionsMap });
 
         setDataPosition(positionsMap);
       } catch (error) {
