@@ -422,7 +422,7 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
         axisLeft={null}
         axisBottom={{
           tickSize: 0,
-          tickPadding: 0,
+          tickPadding: 4,
           tickRotation: 0,
           tickValues: 5
         }}
@@ -469,6 +469,16 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
             id: 'gradient'
           }
         ]}
+        theme={{
+          axis: {
+            ticks: {
+              text: {
+                fill: '#979995',
+                fontSize: 12
+              }
+            }
+          }
+        }}
       />
     </div>
   );
