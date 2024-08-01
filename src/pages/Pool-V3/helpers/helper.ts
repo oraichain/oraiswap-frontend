@@ -501,7 +501,6 @@ export const convertPosition = ({
   feeClaimData: PositionsNode[];
 }) => {
   const fmtFeeClaim = formatClaimFeeData(feeClaimData);
-  console.log('positions', positions);
   return positions.map((position: Position & { poolData: { pool: Pool }; ind: number; token_id: number }) => {
     const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
     let {
@@ -511,13 +510,7 @@ export const convertPosition = ({
       tokenYinfo
     } = getIconPoolData(tokenX, tokenY, isLight);
 
-    const poolData = poolsData.find(
-      (pool) =>
-        pool.pool_key.token_x === position.pool_key.token_x &&
-        pool.pool_key.token_y === position.pool_key.token_y &&
-        position.pool_key.fee_tier.fee === pool.pool_key.fee_tier.fee &&
-        position.pool_key.fee_tier.tick_spacing === pool.pool_key.fee_tier.tick_spacing
-    );
+    const poolData = poolsData.find((pool) => poolKeyToString(pool.pool_key) === poolKeyToString(position.pool_key));
 
     const positions = {
       poolData: {

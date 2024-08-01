@@ -49,7 +49,7 @@ const PoolV3Detail = () => {
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [poolDetail, setPoolDetail] = useState<PoolWithTokenInfo>();
-  const [indexRemove, setInRemoveSuccess] = useState<boolean>(undefined);
+  const [statusRemove, setStatusRemove] = useState<boolean>(undefined);
   const [liquidity, setLiquidity] = useState({
     total: totalLiquidity,
     allocation: {}
@@ -78,7 +78,7 @@ const PoolV3Detail = () => {
     incentivesApr: 0,
     swapFee: 0
   });
-  
+
   useEffect(() => {
     const getAPRInfo = async () => {
       const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools);
@@ -105,6 +105,7 @@ const PoolV3Detail = () => {
   useEffect(() => {
     (async () => {
       try {
+        setLoading(false);
         if (!address) return setDataPosition([]);
         if (!pool_key) return;
         setLoading(true);
@@ -130,11 +131,12 @@ const PoolV3Detail = () => {
         console.log('error call position', error);
       } finally {
         setLoading(false);
+        setStatusRemove(false);
       }
     })();
 
     return () => {};
-  }, [poolDetail, address]);
+  }, [poolDetail, address, statusRemove]);
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -241,19 +243,17 @@ const PoolV3Detail = () => {
         </div>
       </div>
       <div className={styles.positions}>
-        {<h1>Your Liquidity Positions ({(indexRemove ? dataPosition.length - 1 : dataPosition.length) ?? 0})</h1>}
+        {<h1>Your Liquidity Positions ({dataPosition?.length ?? 0})</h1>}
         <LoadingBox loading={loading} styles={{ height: '30vh' }}>
           <div className={styles.list}>
             {dataPosition.length
-              ? dataPosition
-                  .filter((data) => (indexRemove === undefined ? data : data.id !== indexRemove))
-                  .map((position, index) => {
-                    return (
-                      <div className={styles.positionWrapper} key={`pos-${index}`}>
-                        <PositionItem position={position} setInRemoveSuccess={setInRemoveSuccess} />
-                      </div>
-                    );
-                  })
+              ? dataPosition.map((position, index) => {
+                  return (
+                    <div className={styles.positionWrapper} key={`pos-${index}`}>
+                      <PositionItem position={position} setStatusRemove={setStatusRemove} />
+                    </div>
+                  );
+                })
               : !loading && (
                   <>
                     <div className={styles.nodata}>

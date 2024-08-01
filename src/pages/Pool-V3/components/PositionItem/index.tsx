@@ -43,7 +43,7 @@ const shorterPrefixConfig: PrefixConfig = {
   K: 1000
 };
 
-const PositionItem = ({ position, setInRemoveSuccess }) => {
+const PositionItem = ({ position, setStatusRemove }) => {
   const theme = useTheme();
   const ref = useRef();
   const { data: prices } = useCoinGeckoPrices();
@@ -340,7 +340,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
                     });
 
                     if (transactionHash) {
-                      setInRemoveSuccess(position.id);
+                      setStatusRemove(true);
                       setCollapse(false);
                       displayToast(TToastType.TX_SUCCESSFUL, {
                         customLink: getTransactionUrl(network.chainId, transactionHash)
