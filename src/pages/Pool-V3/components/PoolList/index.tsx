@@ -87,10 +87,10 @@ const PoolList = () => {
       const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools);
       setAprInfo(res);
     };
-    if (dataPool && prices && liquidityPools) {
+    if (!aprInfo && dataPool && prices && liquidityPools) {
       getAPRInfo();
     }
-  }, [dataPool, prices, liquidityPools]);
+  }, [dataPool, prices, liquidityPools, aprInfo]);
 
   useEffect(() => {
     const fetchStatusAmmV3 = async () => {

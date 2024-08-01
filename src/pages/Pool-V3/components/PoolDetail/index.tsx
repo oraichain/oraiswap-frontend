@@ -78,7 +78,7 @@ const PoolV3Detail = () => {
     incentivesApr: 0,
     swapFee: 0
   });
-  
+
   useEffect(() => {
     const getAPRInfo = async () => {
       const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools);
@@ -105,6 +105,7 @@ const PoolV3Detail = () => {
   useEffect(() => {
     (async () => {
       try {
+        setLoading(false);
         if (!address) return setDataPosition([]);
         if (!pool_key) return;
         setLoading(true);
@@ -134,7 +135,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [poolDetail, address]);
+  }, [poolDetail, address, indexRemove]);
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -241,12 +242,12 @@ const PoolV3Detail = () => {
         </div>
       </div>
       <div className={styles.positions}>
-        {<h1>Your Liquidity Positions ({(indexRemove ? dataPosition.length - 1 : dataPosition.length) ?? 0})</h1>}
+        {<h1>Your Liquidity Positions ({dataPosition?.length ?? 0})</h1>}
         <LoadingBox loading={loading} styles={{ height: '30vh' }}>
           <div className={styles.list}>
             {dataPosition.length
               ? dataPosition
-                  .filter((data) => (indexRemove === undefined ? data : data.id !== indexRemove))
+                  // .filter((data) => (indexRemove === undefined ? data : data.id !== indexRemove))
                   .map((position, index) => {
                     return (
                       <div className={styles.positionWrapper} key={`pos-${index}`}>
