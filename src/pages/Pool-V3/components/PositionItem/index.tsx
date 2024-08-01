@@ -300,22 +300,28 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
               </h4>
               <div className={styles.itemRow}>
                 <span className={styles.usd}>
-                  {formatDisplayUsdt(
-                    new BigDecimal(toDisplay(principalAmountX || 0) * tokenXUsd)
-                      .add(toDisplay(principalAmountY || 0) * tokenYUsd)
-                      .toNumber(),
-                    6,
-                    6
-                  )}
+                  {!principalAmountX || !principalAmountY
+                    ? '--'
+                    : formatDisplayUsdt(
+                        new BigDecimal(toDisplay(principalAmountX || 0) * tokenXUsd)
+                          .add(toDisplay(principalAmountY || 0) * tokenYUsd)
+                          .toNumber(),
+                        6,
+                        6
+                      )}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
-                  {numberWithCommas(toDisplay(principalAmountX || 0), undefined, { maximumFractionDigits: 6 })}{' '}
+                  {!principalAmountX
+                    ? '--'
+                    : numberWithCommas(toDisplay(principalAmountX || 0), undefined, { maximumFractionDigits: 6 })}{' '}
                   {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
-                  {numberWithCommas(toDisplay(principalAmountY || 0), undefined, { maximumFractionDigits: 6 })}{' '}
+                  {!principalAmountY
+                    ? '--'
+                    : numberWithCommas(toDisplay(principalAmountY || 0), undefined, { maximumFractionDigits: 6 })}{' '}
                   {position?.tokenY.name}
                 </span>
               </div>
@@ -382,22 +388,26 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
             <h4>Total Reward Earned</h4>
             <div className={styles.itemRow}>
               <span className={styles.usd}>
-                {formatDisplayUsdt(
-                  new BigDecimal(toDisplay(earnX || 0) * tokenXUsd)
-                    .add(toDisplay(earnY || 0) * tokenYUsd)
-                    .add(totalEarnIncentiveUsd)
-                    .toNumber(),
-                  6,
-                  6
-                )}
+                {!earnX || !earnY
+                  ? '--'
+                  : formatDisplayUsdt(
+                      new BigDecimal(toDisplay(earnX || 0) * tokenXUsd)
+                        .add(toDisplay(earnY || 0) * tokenYUsd)
+                        .add(totalEarnIncentiveUsd)
+                        .toNumber(),
+                      6,
+                      6
+                    )}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
-                {numberWithCommas(toDisplay(earnX), undefined, { maximumFractionDigits: 6 })} {position?.tokenX.name}
+                {!earnX ? '--' : numberWithCommas(toDisplay(earnX), undefined, { maximumFractionDigits: 6 })}{' '}
+                {position?.tokenX.name}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenYIcon />
-                {numberWithCommas(toDisplay(earnY), undefined, { maximumFractionDigits: 6 })} {position?.tokenY.name}
+                {!earnY ? '--' : numberWithCommas(toDisplay(earnY), undefined, { maximumFractionDigits: 6 })}{' '}
+                {position?.tokenY.name}
               </span>
             </div>
             {earnIncentive && <div style={{ height: 8 }} />}
@@ -411,7 +421,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
                     <span className={classNames(styles.token, styles[theme])}></span>
                     <span className={classNames(styles.token, styles[theme])}>
                       {theme === 'light' ? <token.IconLight /> : <token.Icon />}
-                      {toDisplay(amount.toString())} {token?.name}
+                      {!amount || !Number(amount) ? '--' : toDisplay(amount.toString())} {token?.name}
                     </span>
                   </div>
                 );
