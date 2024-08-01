@@ -127,7 +127,7 @@ const PoolV3Detail = () => {
 
         setDataPosition(positionsMap);
       } catch (error) {
-        console.log('error call position');
+        console.log('error call position', error);
       } finally {
         setLoading(false);
       }
