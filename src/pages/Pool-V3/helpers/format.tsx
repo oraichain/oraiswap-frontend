@@ -61,6 +61,7 @@ export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => 
     const findToToken = oraichainTokensWithIcon.find(
       (tokenIcon) => tokenIcon.denom === tokenYinfo.denom || tokenIcon.contractAddress === tokenYinfo.contractAddress
     );
+
     FromTokenIcon = isLight ? findFromToken.IconLight : findFromToken.Icon;
     ToTokenIcon = isLight ? findToToken.IconLight : findToToken.Icon;
   }
@@ -87,4 +88,4 @@ export const parsePoolKeyString = (poolKey: string): PoolKey => {
     token_x: tokenX,
     token_y: tokenY
   };
-}
+};
