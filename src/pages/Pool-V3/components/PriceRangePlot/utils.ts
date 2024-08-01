@@ -12,7 +12,7 @@ import {
 //   getPriceScale
 } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm.js';
 import { TokenItemType } from '@oraichain/oraidex-common';
-import SingletonOraiswapV3, { FAUCET_LIST_TOKEN, poolKeyToString, Token } from 'libs/contractSingleton';
+import SingletonOraiswapV3, {Token} from 'libs/contractSingleton';
 import { PlotTickData } from './PriceRangePlot';
 
 export const PRICE_SCALE = 24;

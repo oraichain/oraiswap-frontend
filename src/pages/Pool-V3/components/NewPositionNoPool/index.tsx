@@ -71,6 +71,8 @@ const NewPositionNoPool = ({
       toToken.decimals
     );
 
+    console.log('tickIndex', tickIndex);
+
     onChangeMidPrice(BigInt(tickIndex));
   }, [midPriceInput]);
 
@@ -113,9 +115,9 @@ const NewPositionNoPool = ({
     changeRangeHandler(tickSpacing * 10 * (isXtoY ? -1 : 1), tickSpacing * 10 * (isXtoY ? 1 : -1));
   };
 
-  // useEffect(() => {
-  //   changeRangeHandler(leftRange, rightRange);
-  // }, [midPrice]);
+  useEffect(() => {
+    changeRangeHandler(leftRange, rightRange);
+  }, [midPrice]);
 
   const validateMidPriceInput = (midPriceInput: string) => {
     const minTick = getMinTick(tickSpacing);

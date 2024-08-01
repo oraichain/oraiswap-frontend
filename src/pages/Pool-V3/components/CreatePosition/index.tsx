@@ -24,7 +24,7 @@ import {
   getMinTick,
   Price
 } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NewPositionNoPool from '../NewPositionNoPool';
 import PriceRangePlot, { PlotTickData, TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
@@ -32,11 +32,9 @@ import {
   calcPrice,
   calcTicksAmountInRange,
   calculateConcentrationRange,
-  determinePositionTokenBlock,
   extractDenom,
   getConcentrationArray,
   handleGetCurrentPlotTicks,
-  PositionTokenBlock,
   printBigint,
   toMaxNumericPlaces,
   trimLeadingZeros
@@ -462,6 +460,10 @@ const CreatePosition = () => {
         setPoolInfo(pool);
         setNotInitPoolKey(pool.pool_key);
       } else {
+        setMidPrice({
+          index: 0,
+          x: 1
+        });
         setNotInitPoolKey({
           fee_tier: fee,
           token_x: token_x,
