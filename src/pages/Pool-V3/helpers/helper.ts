@@ -1,4 +1,4 @@
-import { BigDecimal } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay, TokenItemType } from '@oraichain/oraidex-common';
 import { reduce } from 'lodash';
 import { Coin } from '@cosmjs/proto-signing';
 import { PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
@@ -581,6 +581,19 @@ export const convertPosition = ({
       }
     };
 
+    const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: number, cur) => {
+      const { amount = '0', token } = cur as {
+        amount: string;
+        token: TokenItemType;
+      };
+
+      const usd = toDisplay(amount) * (cachePrices[token?.coinGeckoId] || 0);
+
+      acc = new BigDecimal(acc || 0).add(usd).toNumber();
+
+      return acc;
+    }, 0);
+
     return {
       ...position,
       poolData: {
@@ -596,6 +609,8 @@ export const convertPosition = ({
       fee: +printBigint(BigInt(position.pool_key.fee_tier.fee), PERCENTAGE_SCALE - 2),
       min,
       max,
+      tokenXUsd: cachePrices[tokenXinfo.coinGeckoId],
+      tokenYUsd: cachePrices[tokenYinfo.coinGeckoId],
       tokenXLiq,
       tokenXLiqInUsd: tokenXLiq * cachePrices[tokenXinfo.coinGeckoId],
       tokenYLiqInUsd: tokenYLiq * cachePrices[tokenYinfo.coinGeckoId],
@@ -608,7 +623,8 @@ export const convertPosition = ({
       tokenXId: tokenXinfo.coinGeckoId,
       principalAmountX,
       principalAmountY,
-      totalEarn
+      totalEarn,
+      totalEarnIncentiveUsd
     };
   });
 };

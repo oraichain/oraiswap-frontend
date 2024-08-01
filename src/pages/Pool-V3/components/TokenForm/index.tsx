@@ -133,7 +133,7 @@ const TokenForm = ({
         isXtoY
       ) === PositionTokenBlock.B;
 
-    console.log({fromBlocked, toBlocked, left, right});
+    console.log({ fromBlocked, toBlocked, left, right });
 
     setIsFromBlocked(fromBlocked);
     setIsToBlocked(toBlocked);
@@ -159,7 +159,7 @@ const TokenForm = ({
       height: 30
     });
   const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(fromAmount)).toFixed(6);
-  const toUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(toAmount)).toFixed(6);
+  const toUsd = (prices?.[tokenTo?.coinGeckoId] * Number(toAmount)).toFixed(6);
 
   const handleSwitch = () => {
     const originFromToken = tokenFrom;

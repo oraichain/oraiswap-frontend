@@ -34,7 +34,7 @@ import { getCosmWasmClient } from 'libs/cosmjs';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { toDisplay, parseAssetInfo, TokenItemType } from '@oraichain/oraidex-common';
+import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal } from '@oraichain/oraidex-common';
 import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 
 const shorterPrefixConfig: PrefixConfig = {
@@ -49,9 +49,20 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
   const { data: prices } = useCoinGeckoPrices();
   const navigate = useNavigate();
 
-  const { min, max, fee, principalAmountX = 0, principalAmountY = 0, totalEarn } = position || {};
+  const {
+    min,
+    max,
+    fee,
+    principalAmountX = 0,
+    principalAmountY = 0,
+    totalEarn,
+    totalEarnIncentiveUsd = 0,
+    tokenXUsd = 0,
+    tokenYUsd = 0
+  } = position || {};
 
   const { earnX = 0, earnY = 0, earnIncentive = null } = totalEarn || {};
+
   const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
 
   const [address] = useConfigReducer('address');
@@ -141,9 +152,9 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
     return () => {};
   }, []);
 
-  const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd] = useMemo(() => {
-    if (isClaimSuccess) return [0, 0, 0, 0];
-    if (position?.poolData && openCollapse && tick.lowerTick && tick.lowerTick) {
+  const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd, incentivesUSD] = useMemo(() => {
+    if (isClaimSuccess) return [0, 0, 0, 0, 0];
+    if (position?.poolData && openCollapse && tick.lowerTick && tick.lowerTick && incentives) {
       const convertedPool = getConvertedPool(position);
       const convertedPosition = getConvertedPosition(position);
       const res = calculateFee(convertedPool, convertedPosition, tick.lowerTick, tick.upperTick);
@@ -156,10 +167,24 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
 
       const x_usd = x_claim * cachePrices[position.tokenX.coinGeckoId];
       const y_usd = y_claim * cachePrices[position.tokenY.coinGeckoId];
-      return [x_claim, y_claim, x_usd, y_usd];
+
+      const totalIncentiveUsd = Object.entries(incentives).reduce((acc: number, [tokenAddress, amount]) => {
+        const token = oraichainTokens.find((e) => [e.contractAddress, e.denom].includes(tokenAddress));
+
+        console.log('first', [tokenAddress, amount, token]);
+        const usd = toDisplay(amount.toString()) * cachePrices[token.coinGeckoId];
+
+        acc = new BigDecimal(acc || 0).add(usd).toNumber();
+
+        return acc;
+      }, 0);
+
+      console.log('totalIncentiveUsd', totalIncentiveUsd);
+
+      return [x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd];
     }
 
-    return [0, 0, 0, 0];
+    return [0, 0, 0, 0, 0];
   }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess]);
 
   return (
@@ -245,7 +270,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
             <h4>Current Assets</h4>
             <div className={styles.itemRow}>
               <span className={classNames(styles.usd, { [styles.green]: true, [styles.red]: false })}>
-                {formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd)}
+                {formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd, 6, 6)}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
@@ -274,7 +299,15 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
                 />
               </h4>
               <div className={styles.itemRow}>
-                <span className={styles.usd}>{formatDisplayUsdt(0)}</span>
+                <span className={styles.usd}>
+                  {formatDisplayUsdt(
+                    new BigDecimal(toDisplay(principalAmountX || 0) * tokenXUsd)
+                      .add(toDisplay(principalAmountY || 0) * tokenYUsd)
+                      .toNumber(),
+                    6,
+                    6
+                  )}
+                </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
                   {numberWithCommas(toDisplay(principalAmountX || 0), undefined, { maximumFractionDigits: 6 })}{' '}
@@ -348,7 +381,16 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
           <div className={styles.row}>
             <h4>Total Reward Earned</h4>
             <div className={styles.itemRow}>
-              <span className={styles.usd}>{formatDisplayUsdt(0)}</span>
+              <span className={styles.usd}>
+                {formatDisplayUsdt(
+                  new BigDecimal(toDisplay(earnX || 0) * tokenXUsd)
+                    .add(toDisplay(earnY || 0) * tokenYUsd)
+                    .add(totalEarnIncentiveUsd)
+                    .toNumber(),
+                  6,
+                  6
+                )}
+              </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
                 {numberWithCommas(toDisplay(earnX), undefined, { maximumFractionDigits: 6 })} {position?.tokenX.name}
@@ -378,7 +420,9 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
             <div className={styles.row}>
               <h4>Unclaimed Rewards</h4>
               <div className={styles.itemRow}>
-                <span className={styles.usd}>{formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd)}</span>
+                <span className={styles.usd}>
+                  {formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd + incentivesUSD, 6, 6)}
+                </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
                   {tokenXClaim} {position?.tokenX.name}
@@ -410,7 +454,7 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
             <div className={styles.btnGroup}>
               <Button
                 type="third-sm"
-                disabled={claimLoading || (!tokenXClaimInUsd && !tokenYClaimInUsd)}
+                disabled={claimLoading || (!tokenXClaimInUsd && !tokenYClaimInUsd && !incentives)}
                 onClick={async () => {
                   try {
                     setClaimLoading(true);
