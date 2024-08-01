@@ -13,6 +13,7 @@ import { gql, request, GraphQLClient } from 'graphql-request';
 
 export const getFeeClaimData = async (address: string) => {
   try {
+    return [];
     // https://subql-staging.orai.io/
     const endpoint = `http://10.10.20.72:3000/`;
     const client = new GraphQLClient(endpoint);
