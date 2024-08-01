@@ -106,11 +106,6 @@ const Menu: React.FC = () => {
         {Icon}
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
-          {to === '/pools-v3' && (
-            <span className={classNames(styles.suffix)}>
-              <Lottie animationData={PoolV3Lottie} autoPlay={open} loop />
-            </span>
-          )}
         </span>
       </Link>
     );
