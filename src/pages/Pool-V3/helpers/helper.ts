@@ -514,7 +514,8 @@ export const convertPosition = ({
 
     const positions = {
       poolData: {
-        ...poolData
+        ...poolData,
+        ...position
       }
     };
 
