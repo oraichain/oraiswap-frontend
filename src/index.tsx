@@ -20,6 +20,12 @@ import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
 import loadWasm from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+import { Client, cacheExchange, fetchExchange, Provider as UrqlProvider } from 'urql';
+
+// const client = new Client({
+//   url: 'http://10.10.20.72:3000/',
+//   exchanges: [cacheExchange, fetchExchange]
+// });
 
 const queryClient = new QueryClient();
 
@@ -63,6 +69,7 @@ window.client = new CosmWasmClient(new Tendermint37Client(rpcClient));
 const initApp = async () => {
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
+    // <UrqlProvider value={client}>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ToastProvider>
@@ -78,6 +85,7 @@ const initApp = async () => {
         </ToastProvider>
       </PersistGate>
     </Provider>
+    // </UrqlProvider>
   );
 
   // init cosmwasm client when user connected cosmos wallet

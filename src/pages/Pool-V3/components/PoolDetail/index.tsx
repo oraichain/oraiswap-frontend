@@ -11,7 +11,12 @@ import useTheme from 'hooks/useTheme';
 import { useEffect, useState } from 'react';
 import { formatNumberKMB, numberWithCommas } from 'helper/format';
 import PositionItem from '../PositionItem';
-import SingletonOraiswapV3, { fetchPoolAprInfo, PoolAprInfo, stringToPoolKey } from 'libs/contractSingleton';
+import SingletonOraiswapV3, {
+  fetchPoolAprInfo,
+  PoolAprInfo,
+  poolKeyToString,
+  stringToPoolKey
+} from 'libs/contractSingleton';
 import { toDisplay } from '@oraichain/oraidex-common';
 import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -20,6 +25,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import LoadingBox from 'components/LoadingBox';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
+import { getFeeClaimData } from '../PositionList';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
@@ -101,19 +107,21 @@ const PoolV3Detail = () => {
         if (!address) return setDataPosition([]);
         if (!pool_key) return;
         setLoading(true);
-        const [positions, poolsData] = await Promise.all([
+        const [positions, poolsData, feeClaimData] = await Promise.all([
           SingletonOraiswapV3.getAllPosition(address),
-          SingletonOraiswapV3.getPools()
+          SingletonOraiswapV3.getPools(),
+          getFeeClaimData(address)
         ]);
 
         const positionsMap = convertPosition({
           positions: positions
             .map((po, ind) => ({ ...po, ind }))
-            .filter((pos) => pos.pool_key.token_x === pool_key.token_x && pos.pool_key.token_y === pool_key.token_y),
+            .filter((pos) => poolKeyToString(pos.pool_key) === poolKeyToString(pool_key)),
           poolsData,
           cachePrices,
           address,
-          isLight
+          isLight,
+          feeClaimData
         });
 
         setDataPosition(positionsMap);

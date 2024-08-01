@@ -660,14 +660,14 @@ const CreatePosition = () => {
           <p className={styles.itemTitle}>Price Range</p>
           <p className={styles.liquidityActive}>
             Active Liquidity
-            <TooltipIcon
+            {/* <TooltipIcon
               className={styles.tooltipWrapper}
               placement="top"
               visible={openTooltip}
               icon={<TooltipIc />}
               setVisible={setOpenTooltip}
               content={<div className={classNames(styles.tooltip, styles[theme])}>Active Liquidity</div>}
-            />
+            /> */}
           </p>
         </div>
         <div className={styles.itemSwitcherWrapper}>

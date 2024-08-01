@@ -189,8 +189,8 @@
 
           img,
           svg {
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             padding: 1px;
 
             &:not(:first-of-type) {
@@ -206,7 +206,10 @@
         }
 
         .fee {
-          padding: 12px;
+          display: flex;
+          align-items: center;
+          height: 32px;
+          padding: 0 12px;
           border-radius: 8px;
 
           @include theme {

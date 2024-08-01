@@ -57,11 +57,14 @@
     "react-use-websocket": "3.0.0",
     "redux-persist": "^6.0.0",
     "serialize-error": "8.0.0",
-    "tronweb": "^5.1.0"
+    "tronweb": "^5.1.0",
+    "urql": "^4.1.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@ethersproject/providers": "^5.0.10",
+    "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/client-preset": "^4.3.3",
     "@keplr-wallet/types": "^0.11.38",
     "@oraichain/babel-plugin-operator-overloading": "^1.0.4",
     "@oraichain/common-contracts-build": "1.0.35",
@@ -78,6 +81,7 @@
     "@types/react-router-dom": "^5.3.3",
     "crypto-browserify": "^3.12.0",
     "firebase-tools": "^11.30.0",
+    "graphql": "^16.9.0",
     "https-browserify": "^1.0.0",
     "husky": "^8.0.3",
     "node-polyfill-webpack-plugin": "^3.0.0",
@@ -103,7 +107,8 @@
     "postinstall": "patch-package",
     "prepare": "husky install",
     "ts-css": "typed-scss-modules src --watch --implementation sass -n all -e default",
-    "clear-module-cache": "rm -rf node_modules/.cache/vendor & rm -rf public/vendor*"
+    "clear-module-cache": "rm -rf node_modules/.cache/vendor & rm -rf public/vendor*",
+    "codegen": "graphql-codegen"
   },
   "eslintConfig": {
     "extends": "react-app"

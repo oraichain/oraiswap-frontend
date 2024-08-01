@@ -85,7 +85,7 @@ const PoolList = () => {
       const poolKeys = dataPool.map((pool) => parsePoolKeyString(pool.poolKey));
 
       const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools);
-      console.log({res});
+      console.log({ res });
       setAprInfo(res);
     };
     if (dataPool && prices && liquidityPools) {
@@ -377,12 +377,14 @@ const PoolList = () => {
                             theme={theme}
                             volumn={volumn}
                             liquidity={liquidityPools?.[item?.poolKey]}
-                            aprInfo={aprInfo?.[item?.poolKey] ?? {
-                              apr: 0,
-                              incentives: [],
-                              swapFee: 0,
-                              incentivesApr: 0
-                            }}
+                            aprInfo={
+                              aprInfo?.[item?.poolKey] ?? {
+                                apr: 0,
+                                incentives: [],
+                                swapFee: 0,
+                                incentivesApr: 0
+                              }
+                            }
                           />
                         </tr>
                       );

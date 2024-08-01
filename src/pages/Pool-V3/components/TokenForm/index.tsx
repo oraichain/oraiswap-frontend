@@ -22,6 +22,7 @@ import { TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
 import { determinePositionTokenBlock, extractDenom, PositionTokenBlock } from '../PriceRangePlot/utils';
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 
 export interface InputState {
   value: string;
@@ -79,6 +80,7 @@ const TokenForm = ({
   const [loading, setLoading] = useState(false);
   const [walletAddress] = useConfigReducer('address');
 
+  const loadOraichainToken = useLoadOraichainTokens();
   const { handleInitPosition } = useAddLiquidity();
 
   const addLiquidity = async (data: InitPositionData) => {
@@ -92,6 +94,7 @@ const TokenForm = ({
           customLink: getTransactionUrl('Oraichain', tx)
         });
         handleSuccessAdd();
+        loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
       },
       (e) => {
         displayToast(TToastType.TX_FAILED, {
@@ -167,6 +170,9 @@ const TokenForm = ({
   };
 
   const getButtonMessage = () => {
+    const isInsufficientTo = toAmount && Number(toAmount) > toDisplay(amounts[tokenTo.denom]);
+    const isInsufficientFrom = fromAmount && Number(fromAmount) > toDisplay(amounts[tokenFrom.denom]);
+
     if (!walletAddress) {
       return 'Connect wallet';
     }
@@ -177,6 +183,14 @@ const TokenForm = ({
 
     if (tokenFrom.denom === tokenTo.denom) {
       return 'Select different tokens';
+    }
+
+    if (isInsufficientFrom) {
+      return `Insufficient ${tokenFrom.name.toUpperCase()}`;
+    }
+
+    if (isInsufficientTo) {
+      return `Insufficient ${tokenTo.name.toUpperCase()}`;
     }
 
     if ((!isFromBlocked && +fromAmount === 0) || (!isToBlocked && +toAmount === 0)) {

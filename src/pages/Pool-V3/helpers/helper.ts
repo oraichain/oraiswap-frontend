@@ -1,7 +1,9 @@
+import { BigDecimal } from '@oraichain/oraidex-common';
+import { reduce } from 'lodash';
 import { Coin } from '@cosmjs/proto-signing';
 import { PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { oraichainTokens } from 'config/bridgeTokens';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
+import SingletonOraiswapV3, { poolKeyToString } from 'libs/contractSingleton';
 import { PRICE_SCALE, printBigint } from '../components/PriceRangePlot/utils';
 import {
   AmountDeltaResult,
@@ -21,6 +23,9 @@ import { network } from 'config/networks';
 import { SwapHop } from '../packages/sdk/OraiswapV3.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
+import { ClaimFee, Position as PositionsNode } from 'gql/graphql';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
+
 // export const PERCENTAGE_SCALE = Number(getPercentageScale());
 export interface InitPositionData {
   poolKeyData: PoolKey;
@@ -431,12 +436,60 @@ export const createPositionWithNativeTx = async (
   return res.transactionHash;
 };
 
+export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
+  const fmtFeeClaimData = feeClaimData.reduce((acc, cur) => {
+    const { principalAmountX, principalAmountY, poolId, id, fees } = cur || {};
+
+    const totalEarn = (fees.nodes || []).reduce(
+      (total, fee) => {
+        total.earnX = new BigDecimal(total.earnX).add(fee.amountX).toNumber();
+        total.earnY = new BigDecimal(total.earnY).add(fee.amountY).toNumber();
+        total.earnIncentive = fee.claimFeeIncentiveTokens.nodes.reduce((acc, currentFee) => {
+          if (!acc[currentFee.tokenId]?.amount) {
+            acc[currentFee.tokenId] = {
+              amount: 0,
+              token: oraichainTokensWithIcon.find(
+                (tk) => tk.contractAddress === currentFee.tokenId || tk.denom === currentFee.tokenId
+              )
+            };
+          }
+
+          acc[currentFee.tokenId].amount = new BigDecimal(acc[currentFee.tokenId]?.amount || 0)
+            .add(currentFee.rewardAmount)
+            .toNumber();
+
+          return acc;
+        }, {});
+
+        return total;
+      },
+      {
+        earnX: 0,
+        earnY: 0,
+        earnIncentive: {}
+      }
+    );
+
+    acc[id] = {
+      principalAmountX,
+      principalAmountY,
+      totalEarn
+    };
+
+    return acc;
+  }, {});
+
+  console.log('fmtFeeClaimData', fmtFeeClaimData);
+  return fmtFeeClaimData;
+};
+
 export const convertPosition = ({
   positions,
   poolsData,
   isLight,
   cachePrices,
-  address
+  address,
+  feeClaimData
 }: {
   positions: Position[] | any[];
   poolsData: {
@@ -448,8 +501,11 @@ export const convertPosition = ({
   isLight: boolean;
   address: string;
   cachePrices: CoinGeckoPrices<CoinGeckoId>;
+  feeClaimData: PositionsNode[];
 }) => {
-  return positions.map((position: Position & { poolData: { pool: Pool }; ind: number }) => {
+  const fmtFeeClaim = formatClaimFeeData(feeClaimData);
+  console.log('positions', positions);
+  return positions.map((position: Position & { poolData: { pool: Pool }; ind: number; token_id: number }) => {
     const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
     let {
       FromTokenIcon: tokenXIcon,
@@ -513,6 +569,18 @@ export const convertPosition = ({
     const valueX = tokenXLiq + tokenYLiq / currentPrice;
     const valueY = tokenYLiq + tokenXLiq * currentPrice;
 
+    const { principalAmountX, principalAmountY, totalEarn } = fmtFeeClaim[
+      `${poolKeyToString(position.pool_key)}-${position.token_id}`
+    ] || {
+      principalAmountX: 0,
+      principalAmountY: 0,
+      totalEarn: {
+        earnX: 0,
+        earnY: 0,
+        earnIncentive: {}
+      }
+    };
+
     return {
       ...position,
       poolData: {
@@ -537,7 +605,10 @@ export const convertPosition = ({
       address,
       id: position.ind,
       isActive: currentPrice >= min && currentPrice <= max,
-      tokenXId: tokenXinfo.coinGeckoId
+      tokenXId: tokenXinfo.coinGeckoId,
+      principalAmountX,
+      principalAmountY,
+      totalEarn
     };
   });
 };

@@ -34,7 +34,7 @@ import { getCosmWasmClient } from 'libs/cosmjs';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { toDisplay, parseAssetInfo } from '@oraichain/oraidex-common';
+import { toDisplay, parseAssetInfo, TokenItemType } from '@oraichain/oraidex-common';
 import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 
 const shorterPrefixConfig: PrefixConfig = {
@@ -49,7 +49,9 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
   const { data: prices } = useCoinGeckoPrices();
   const navigate = useNavigate();
 
-  const { min, max, fee } = position;
+  const { min, max, fee, principalAmountX = 0, principalAmountY = 0, totalEarn } = position || {};
+
+  const { earnX = 0, earnY = 0, earnIncentive = null } = totalEarn || {};
   const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
 
   const [address] = useConfigReducer('address');
@@ -275,11 +277,13 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
                 <span className={styles.usd}>{formatDisplayUsdt(0)}</span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
-                  {0} {position?.tokenX.name}
+                  {numberWithCommas(toDisplay(principalAmountX || 0), undefined, { maximumFractionDigits: 6 })}{' '}
+                  {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
-                  {0} {position?.tokenY.name}
+                  {numberWithCommas(toDisplay(principalAmountY || 0), undefined, { maximumFractionDigits: 6 })}{' '}
+                  {position?.tokenY.name}
                 </span>
               </div>
             </div>
@@ -347,13 +351,29 @@ const PositionItem = ({ position, setInRemoveSuccess }) => {
               <span className={styles.usd}>{formatDisplayUsdt(0)}</span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
-                {numberWithCommas(0)} {position?.tokenX.name}
+                {numberWithCommas(toDisplay(earnX), undefined, { maximumFractionDigits: 6 })} {position?.tokenX.name}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenYIcon />
-                {numberWithCommas(0)} {position?.tokenY.name}
+                {numberWithCommas(toDisplay(earnY), undefined, { maximumFractionDigits: 6 })} {position?.tokenY.name}
               </span>
             </div>
+            {earnIncentive && <div style={{ height: 8 }} />}
+            {earnIncentive &&
+              Object.values(earnIncentive).map((incentiveEarned: { amount: number; token: TokenItemType }, i) => {
+                const { amount, token } = incentiveEarned;
+
+                return (
+                  <div className={styles.itemRow} key={'incentEarned-' + i}>
+                    <span className={styles.usd}></span>
+                    <span className={classNames(styles.token, styles[theme])}></span>
+                    <span className={classNames(styles.token, styles[theme])}>
+                      {theme === 'light' ? <token.IconLight /> : <token.Icon />}
+                      {toDisplay(amount.toString())} {token?.name}
+                    </span>
+                  </div>
+                );
+              })}
             <div className={styles.divider}></div>
             <div className={styles.row}>
               <h4>Unclaimed Rewards</h4>
