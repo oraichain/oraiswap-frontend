@@ -212,12 +212,12 @@ const PositionItem = ({ position, setStatusRemove }) => {
           <div className={styles.item}>
             <p>Price Range</p>
             <span className={styles.value}>
-              {formatNumbers(undefined)((xToY ? min : 1 / max).toString())}
-              {showPrefix(xToY ? min : 1 / max, shorterPrefixConfig)}
+              {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)))}
+              {/* {showPrefix(xToY ? min : 1 / max, shorterPrefixConfig)} */}
               {' - '}
-              {formatNumbers(undefined)((xToY ? max : 1 / min).toString())}
-              {showPrefix(xToY ? max : 1 / min, shorterPrefixConfig)} {xToY ? position.tokenYName : position.tokenXName}{' '}
-              per {xToY ? position.tokenXName : position.tokenYName}
+              {numberWithCommas(Number(formatNumbers(undefined)(xToY ? max : 1 / min)))}
+              {/* {showPrefix(xToY ? max : 1 / min, shorterPrefixConfig)}  */}{' '}
+              {xToY ? position.tokenYName : position.tokenXName} per {xToY ? position.tokenXName : position.tokenYName}
             </span>
           </div>
           <div className={styles.item}>

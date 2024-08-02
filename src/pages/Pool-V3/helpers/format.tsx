@@ -38,6 +38,7 @@ export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => 
   const feeTier = p?.pool_key.fee_tier.fee || 0;
   const { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo } = getIconPoolData(tokenX, tokenY, isLight);
   const spread = p?.pool_key.fee_tier.tick_spacing || 100;
+
   return {
     ...p,
     FromTokenIcon,
@@ -46,7 +47,8 @@ export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => 
     spread,
     tokenXinfo,
     tokenYinfo,
-    poolKey: poolKeyToString(p.pool_key)
+    poolKey: poolKeyToString(p.pool_key),
+    isValid: tokenXinfo && tokenYinfo
   };
 };
 

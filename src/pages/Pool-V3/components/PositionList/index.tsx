@@ -113,7 +113,7 @@ const PositionList = () => {
 
   return (
     <div className={styles.positionList}>
-      <LoadingBox loading={loading} styles={{ height: '60vh' }}>
+      <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}>
         {dataPosition.length
           ? dataPosition.map((position, key) => {
               return (
