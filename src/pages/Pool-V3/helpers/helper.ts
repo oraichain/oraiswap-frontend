@@ -235,7 +235,7 @@ export const getConvertedPosition = (position) => {
 export const createLoaderKey = () => (new Date().getMilliseconds() + Math.random()).toString();
 
 export const isNativeToken = (token: string): boolean => {
-  return token === 'orai' || token.includes('ibc');
+  return token === 'orai' || token.includes('ibc') || token.includes('factory');
 };
 
 const newtonIteration = (n: bigint, x0: bigint): bigint => {
@@ -501,124 +501,130 @@ export const convertPosition = ({
   feeClaimData: PositionsNode[];
 }) => {
   const fmtFeeClaim = formatClaimFeeData(feeClaimData);
-  return positions.map((position: Position & { poolData: { pool: Pool }; ind: number; token_id: number }) => {
-    const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
-    let {
-      FromTokenIcon: tokenXIcon,
-      ToTokenIcon: tokenYIcon,
-      tokenXinfo,
-      tokenYinfo
-    } = getIconPoolData(tokenX, tokenY, isLight);
 
-    const poolData = poolsData.find((pool) => poolKeyToString(pool.pool_key) === poolKeyToString(position.pool_key));
+  return positions
+    .map((position: Position & { poolData: { pool: Pool }; ind: number; token_id: number }) => {
+      const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
+      let {
+        FromTokenIcon: tokenXIcon,
+        ToTokenIcon: tokenYIcon,
+        tokenXinfo,
+        tokenYinfo
+      } = getIconPoolData(tokenX, tokenY, isLight);
 
-    const positions = {
-      poolData: {
-        ...poolData,
-        ...position
+      if (!tokenXinfo || !tokenYinfo) {
+        return null;
       }
-    };
 
-    const lowerPrice = calcYPerXPriceByTickIndex(position.lower_tick_index, tokenXinfo.decimals, tokenYinfo.decimals);
+      const poolData = poolsData.find((pool) => poolKeyToString(pool.pool_key) === poolKeyToString(position.pool_key));
 
-    const upperPrice = calcYPerXPriceByTickIndex(position.upper_tick_index, tokenXinfo.decimals, tokenYinfo.decimals);
-
-    const min = Math.min(lowerPrice, upperPrice);
-    const max = Math.max(lowerPrice, upperPrice);
-
-    let tokenXLiq: number, tokenYLiq: number;
-
-    let x = 0n;
-    let y = 0n;
-
-    if (positions.poolData) {
-      const convertedPool = getConvertedPool(positions);
-      const convertedPosition = getConvertedPosition(position);
-      const res = calculateTokenAmounts(convertedPool, convertedPosition);
-      console.log({ convertedPool });
-      x = res.x;
-      y = res.y;
-    }
-
-    try {
-      tokenXLiq = +printBigint(x, tokenXinfo.decimals);
-    } catch (error) {
-      console.log(error);
-      tokenXLiq = 0;
-    }
-
-    try {
-      tokenYLiq = +printBigint(y, tokenYinfo.decimals);
-    } catch (error) {
-      console.log(error);
-      tokenYLiq = 0;
-    }
-
-    const currentPrice = calcYPerXPriceByTickIndex(
-      position.poolData?.pool?.current_tick_index ?? 0,
-      tokenXinfo.decimals,
-      tokenYinfo.decimals
-    );
-
-    const valueX = tokenXLiq + tokenYLiq / currentPrice;
-    const valueY = tokenYLiq + tokenXLiq * currentPrice;
-
-    const { principalAmountX, principalAmountY, totalEarn } = fmtFeeClaim[
-      `${poolKeyToString(position.pool_key)}-${position.token_id}`
-    ] || {
-      principalAmountX: 0,
-      principalAmountY: 0,
-      totalEarn: {
-        earnX: 0,
-        earnY: 0,
-        earnIncentive: {}
-      }
-    };
-
-    const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: number, cur) => {
-      const { amount = '0', token } = cur as {
-        amount: string;
-        token: TokenItemType;
+      const positions = {
+        poolData: {
+          ...poolData,
+          ...position
+        }
       };
 
-      const usd = toDisplay(amount) * (cachePrices[token?.coinGeckoId] || 0);
+      const lowerPrice = calcYPerXPriceByTickIndex(position.lower_tick_index, tokenXinfo.decimals, tokenYinfo.decimals);
+      const upperPrice = calcYPerXPriceByTickIndex(position.upper_tick_index, tokenXinfo.decimals, tokenYinfo.decimals);
 
-      acc = new BigDecimal(acc || 0).add(usd).toNumber();
+      const min = Math.min(lowerPrice, upperPrice);
+      const max = Math.max(lowerPrice, upperPrice);
 
-      return acc;
-    }, 0);
+      let tokenXLiq: number, tokenYLiq: number;
 
-    return {
-      ...position,
-      poolData: {
-        ...poolData,
-        ...position
-      },
-      tokenX: tokenXinfo,
-      tokenY: tokenYinfo,
-      tokenXName: tokenXinfo.name,
-      tokenYName: tokenYinfo.name,
-      tokenXIcon: tokenXIcon,
-      tokenYIcon: tokenYIcon,
-      fee: +printBigint(BigInt(position.pool_key.fee_tier.fee), PERCENTAGE_SCALE - 2),
-      min,
-      max,
-      tokenXUsd: cachePrices[tokenXinfo.coinGeckoId],
-      tokenYUsd: cachePrices[tokenYinfo.coinGeckoId],
-      tokenXLiq,
-      tokenXLiqInUsd: tokenXLiq * cachePrices[tokenXinfo.coinGeckoId],
-      tokenYLiqInUsd: tokenYLiq * cachePrices[tokenYinfo.coinGeckoId],
-      tokenYLiq,
-      valueX,
-      valueY,
-      address,
-      id: position.ind,
-      isActive: currentPrice >= min && currentPrice <= max,
-      tokenXId: tokenXinfo.coinGeckoId,
-      principalAmountX,
-      principalAmountY,
-      totalEarn,
-      totalEarnIncentiveUsd
-    };
-  });
+      let x = 0n;
+      let y = 0n;
+
+      if (positions.poolData) {
+        const convertedPool = getConvertedPool(positions);
+        const convertedPosition = getConvertedPosition(position);
+        const res = calculateTokenAmounts(convertedPool, convertedPosition);
+        // console.log({ convertedPool });
+        x = res.x;
+        y = res.y;
+      }
+
+      try {
+        tokenXLiq = +printBigint(x, tokenXinfo.decimals);
+      } catch (error) {
+        console.log(error);
+        tokenXLiq = 0;
+      }
+
+      try {
+        tokenYLiq = +printBigint(y, tokenYinfo.decimals);
+      } catch (error) {
+        console.log(error);
+        tokenYLiq = 0;
+      }
+
+      const currentPrice = calcYPerXPriceByTickIndex(
+        position.poolData?.pool?.current_tick_index ?? 0,
+        tokenXinfo.decimals,
+        tokenYinfo.decimals
+      );
+
+      const valueX = tokenXLiq + tokenYLiq / currentPrice;
+      const valueY = tokenYLiq + tokenXLiq * currentPrice;
+
+      const { principalAmountX, principalAmountY, totalEarn } = fmtFeeClaim[
+        `${poolKeyToString(position.pool_key)}-${position.token_id}`
+      ] || {
+        principalAmountX: 0,
+        principalAmountY: 0,
+        totalEarn: {
+          earnX: 0,
+          earnY: 0,
+          earnIncentive: {}
+        }
+      };
+
+      const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: number, cur) => {
+        const { amount = '0', token } = cur as {
+          amount: string;
+          token: TokenItemType;
+        };
+
+        const usd = toDisplay(amount) * (cachePrices[token?.coinGeckoId] || 0);
+
+        acc = new BigDecimal(acc || 0).add(usd).toNumber();
+
+        return acc;
+      }, 0);
+
+      return {
+        ...position,
+        poolData: {
+          ...poolData,
+          ...position
+        },
+        tokenX: tokenXinfo,
+        tokenY: tokenYinfo,
+        tokenXName: tokenXinfo.name,
+        tokenYName: tokenYinfo.name,
+        tokenXIcon: tokenXIcon,
+        tokenYIcon: tokenYIcon,
+        fee: +printBigint(BigInt(position.pool_key.fee_tier.fee), PERCENTAGE_SCALE - 2),
+        min,
+        max,
+        tokenXUsd: cachePrices[tokenXinfo.coinGeckoId],
+        tokenYUsd: cachePrices[tokenYinfo.coinGeckoId],
+        tokenXLiq,
+        tokenXLiqInUsd: tokenXLiq * cachePrices[tokenXinfo.coinGeckoId],
+        tokenYLiqInUsd: tokenYLiq * cachePrices[tokenYinfo.coinGeckoId],
+        tokenYLiq,
+        valueX,
+        valueY,
+        address,
+        id: position.ind,
+        isActive: currentPrice >= min && currentPrice <= max,
+        tokenXId: tokenXinfo.coinGeckoId,
+        principalAmountX,
+        principalAmountY,
+        totalEarn,
+        totalEarnIncentiveUsd
+      };
+    })
+    .filter(Boolean);
 };

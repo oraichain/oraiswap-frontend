@@ -750,7 +750,7 @@ const CreatePosition = () => {
             <p>
               <p>{numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: 6 })}</p>
               <p className={styles.pair}>
-                {tokenTo.denom.toUpperCase()} / {tokenFrom.denom.toUpperCase()}
+                {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
               </p>
             </p>
           </div>
@@ -766,7 +766,7 @@ const CreatePosition = () => {
                 <p>
                   <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
                   <p className={styles.pair}>
-                    {tokenTo.denom.toUpperCase()} / {tokenFrom.denom.toUpperCase()}
+                    {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
                   </p>
                 </p>
               </div>
@@ -791,7 +791,7 @@ const CreatePosition = () => {
                 <p>
                   <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
                   <p className={styles.pair}>
-                    {tokenTo.denom.toUpperCase()} / {tokenFrom.denom.toUpperCase()}
+                    {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
                   </p>
                 </p>
               </div>

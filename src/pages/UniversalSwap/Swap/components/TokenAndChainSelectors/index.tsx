@@ -24,7 +24,8 @@ const TokenAndChainSelectors = ({
   setSelectChainFrom,
   setTokenDenomFromChain,
   originalFromToken,
-  unSupportSimulateToken
+  unSupportSimulateToken,
+  supportedChain = ['Oraichain']
 }) => {
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
@@ -57,7 +58,7 @@ const TokenAndChainSelectors = ({
         isSelectToken={isSelectTokenFrom}
       />
       <SelectChain
-        filterChainId={unSupportSimulateToken.includes(originalFromToken?.denom) ? ['Oraichain'] : []}
+        filterChainId={unSupportSimulateToken.includes(originalFromToken?.denom) ? supportedChain : []}
         setIsSelectToken={setIsSelectChainTo}
         amounts={amounts}
         theme={theme}

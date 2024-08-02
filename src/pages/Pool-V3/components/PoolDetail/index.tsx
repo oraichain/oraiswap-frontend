@@ -163,8 +163,9 @@ const PoolV3Detail = () => {
 
         <div className={styles.addPosition}>
           <Button
+            disabled={!poolDetail}
             onClick={() => {
-              navigate(`/new-position/${pool_key?.token_x}-${pool_key?.token_y}-${pool_key.fee_tier.fee}`);
+              navigate(`/new-position/${encodeURIComponent(poolKeyToString(pool_key))}`);
             }}
             type="primary-sm"
           >
@@ -222,7 +223,7 @@ const PoolV3Detail = () => {
           <div className={styles.desc}>
             <div className={styles.item}>
               <span>Incentive</span>
-              <p>{[...new Set(aprInfo.incentives)].join(', ')}</p>
+              <p>{!aprInfo.incentives?.length ? '--' : [...new Set(aprInfo.incentives)].join(', ')}</p>
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>
@@ -233,7 +234,7 @@ const PoolV3Detail = () => {
                 Incentive Boost&nbsp;
                 <IconBoots />
               </span>
-              <p>{numberWithCommas(aprInfo.incentivesApr * 100)}%</p>
+              <p>{!aprInfo.incentivesApr ? '-- ' : `${numberWithCommas(aprInfo.incentivesApr * 100)}%`}</p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
