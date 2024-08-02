@@ -25,47 +25,19 @@ export type PoolWithTokenInfo = PoolWithPoolKey & {
 
 export const getIconPoolData = (tokenX, tokenY, isLight) => {
   let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
-  const tokenXinfo =
-    tokenX && oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
-  const tokenYinfo =
-    tokenY && oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
+  const tokenXinfo = oraichainTokensWithIcon.find((token) => [token.denom, token.contractAddress].includes(tokenX));
+  const tokenYinfo = oraichainTokensWithIcon.find((token) => [token.denom, token.contractAddress].includes(tokenY));
 
-  if (tokenXinfo && tokenYinfo) {
-    const findFromToken = oraichainTokensWithIcon.find(
-      (tokenIcon) => tokenIcon.denom === tokenXinfo.denom || tokenIcon.contractAddress === tokenXinfo.contractAddress
-    );
-    const findToToken = oraichainTokensWithIcon.find(
-      (tokenIcon) => tokenIcon.denom === tokenYinfo.denom || tokenIcon.contractAddress === tokenYinfo.contractAddress
-    );
-    FromTokenIcon = isLight ? findFromToken.IconLight : findFromToken.Icon;
-    ToTokenIcon = isLight ? findToToken.IconLight : findToToken.Icon;
-  }
+  if (tokenXinfo) FromTokenIcon = isLight ? tokenXinfo.IconLight : tokenXinfo.Icon;
+  if (tokenYinfo) ToTokenIcon = isLight ? tokenYinfo.IconLight : tokenYinfo.Icon;
   return { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo };
 };
 
 export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => {
   const [tokenX, tokenY] = [p?.pool_key.token_x, p?.pool_key.token_y];
-
-  let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
   const feeTier = p?.pool_key.fee_tier.fee || 0;
+  const { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo } = getIconPoolData(tokenX, tokenY, isLight);
   const spread = p?.pool_key.fee_tier.tick_spacing || 100;
-  const tokenXinfo =
-    tokenX && oraichainTokens.find((token) => token.denom === tokenX || token.contractAddress === tokenX);
-  const tokenYinfo =
-    tokenY && oraichainTokens.find((token) => token.denom === tokenY || token.contractAddress === tokenY);
-
-  if (tokenXinfo) {
-    const findFromToken = oraichainTokensWithIcon.find(
-      (tokenIcon) => tokenIcon.denom === tokenXinfo.denom || tokenIcon.contractAddress === tokenXinfo.contractAddress
-    );
-    const findToToken = oraichainTokensWithIcon.find(
-      (tokenIcon) => tokenIcon.denom === tokenYinfo.denom || tokenIcon.contractAddress === tokenYinfo.contractAddress
-    );
-
-    FromTokenIcon = isLight ? findFromToken.IconLight : findFromToken.Icon;
-    ToTokenIcon = isLight ? findToToken.IconLight : findToToken.Icon;
-  }
-
   return {
     ...p,
     FromTokenIcon,
