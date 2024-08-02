@@ -463,8 +463,12 @@ export const getTokenInfo = (action, path, flattenTokens, assetList) => {
       tokenInInfo = findToken(tokenInAction, flattenTokens);
       tokenOutInfo = findToken(tokenOutAction, flattenTokens);
 
-      TokenInIcon = tokenInInfo.Icon;
-      TokenOutIcon = tokenOutInfo.Icon;
+      if (tokenInInfo?.Icon) {
+        TokenInIcon = tokenInInfo.Icon;
+      }
+      if (tokenOutInfo?.Icon) {
+        TokenOutIcon = tokenOutInfo.Icon;
+      }
       info = {
         tokenIn: tokenInInfo?.name,
         tokenOut: tokenOutInfo?.name
