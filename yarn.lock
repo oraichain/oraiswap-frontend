@@ -4249,20 +4249,6 @@
   resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.31.tgz#595f93b168438d69d64896909b37855c9afc92fb"
   integrity sha512-s8H20RXy5gCnu3DnM7L5ClQyj2mdQpbSBpZrXCpIAX9qY0LKsDdZG3sYaDQ8+VN333jz9Pp/qGWdFSYD+6PBsg==
 
-"@oraichain/common@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@oraichain/common/-/common-1.0.3.tgz#c6746473deed39622a1368a8f8f733a13f628a7e"
-  integrity sha512-4Rwwl8DF3bMNh5XSlP44LjUIKCOglDc/R1bUCeVFifZlrTGaz6Zo7Fdw6xwych7b4doxcuQBBh2gr7AZE6jQyQ==
-  dependencies:
-    "@cosmjs/cosmwasm-stargate" "0.31.3"
-    "@cosmjs/tendermint-rpc" "^0.31.3"
-    axios "0.21.4"
-    axios-extensions "3.1.6"
-    bech32 "^1.1.4"
-    cosmjs-types "^0.8.0"
-    ethers "^5.5.1"
-    lodash "^4.17.21"
-
 "@oraichain/cosmosjs@^0.0.94":
   version "0.0.94"
   resolved "https://registry.yarnpkg.com/@oraichain/cosmosjs/-/cosmosjs-0.0.94.tgz#35f1a045737b86015f728aa22b1a974058eb4104"
@@ -4411,12 +4397,11 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.47.tgz#2e9df9900d38ebf3741f98f02b531a9671554726"
   integrity sha512-VkMYwyo6vG8En/GICZ+J8YfSuRJpBIK6ppEifuvbeGLUmiLrlA1TsMdqs2rIa1UJQNvEVO3mXodiSXr4V2IDLg==
 
-"@oraichain/oraidex-universal-swap@1.0.95-beta.3":
-  version "1.0.95-beta.3"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.95-beta.3.tgz#41149abdd525a13d7fb34fa1f8d4efde9ec73e16"
-  integrity sha512-8qAKTfupc/qfynHxgFgu6PTsfD+hTT9peKfdOn8QpgymPZ51PSWRW1npMHr9OpZFELoZdZTdKH/bkSd6uysBPg==
+"@oraichain/oraidex-universal-swap@1.0.96":
+  version "1.0.96"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.96.tgz#d4c6c3da7f22d4f63706cf2780dfbf686850de10"
+  integrity sha512-NkAJKrXtmWdqtOK+IB8xlye/2QM+oVSyjtwXxqAECYLe6KY1RCdV0CfHg4qUlEitzxxGRGUXXeogCmawGHeeuw==
   dependencies:
-    "@oraichain/common" "^1.0.3"
     "@oraichain/oraidex-common" "^1.0.91"
     "@oraichain/oraidex-contracts-sdk" "^1.0.43"
     bech32 "1.1.4"
@@ -6977,15 +6962,6 @@ axe-core@=4.7.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.0.tgz#34ba5a48a8b564f67e103f0aa5768d76e15bbbbf"
   integrity sha512-M0JtH+hlOL5pLQwHOLNYZaXuhqmvS8oExsqB1SBYgA4Dk7u/xx+YdGHXaK5pyUfed5mYXdlYiphWq3G8cRi5JQ==
 
-axios-extensions@3.1.6, axios-extensions@^3.1.3:
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/axios-extensions/-/axios-extensions-3.1.6.tgz#bfa72f65f44f0a3efa55a030cdaaa6451c246b1e"
-  integrity sha512-CmwMYxxAw4DcQDJ7/2Iv4GJj1Ao48lJEPieycgZQH6m1KcYZqf9zm2HM/CsULqheCpYxZbiGrCfZf5tVjXqoLg==
-  dependencies:
-    lru-cache "^7.14.0"
-    tslib "^2.1.0"
-    util "^0.12.3"
-
 axios-extensions@3.1.7:
   version "3.1.7"
   resolved "https://registry.yarnpkg.com/axios-extensions/-/axios-extensions-3.1.7.tgz#0c3965dcb5b0d4969cb4df0170d111a811715541"
@@ -6995,7 +6971,16 @@ axios-extensions@3.1.7:
     tslib "^2.1.0"
     util "^0.12.3"
 
-axios@0.21.4, axios@0.26.1, axios@1.7.2, axios@^0.21.0, axios@^0.21.1, axios@^0.21.2, axios@^0.26.1, axios@^0.27.2, axios@^1.6.0, axios@^1.6.2, axios@^1.6.7, axios@^1.6.8:
+axios-extensions@^3.1.3:
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/axios-extensions/-/axios-extensions-3.1.6.tgz#bfa72f65f44f0a3efa55a030cdaaa6451c246b1e"
+  integrity sha512-CmwMYxxAw4DcQDJ7/2Iv4GJj1Ao48lJEPieycgZQH6m1KcYZqf9zm2HM/CsULqheCpYxZbiGrCfZf5tVjXqoLg==
+  dependencies:
+    lru-cache "^7.14.0"
+    tslib "^2.1.0"
+    util "^0.12.3"
+
+axios@0.26.1, axios@1.7.2, axios@^0.21.0, axios@^0.21.1, axios@^0.21.2, axios@^0.26.1, axios@^0.27.2, axios@^1.6.0, axios@^1.6.2, axios@^1.6.7, axios@^1.6.8:
   version "0.26.1"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.26.1.tgz#1ede41c51fcf51bbbd6fd43669caaa4f0495aaa9"
   integrity sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==
@@ -10232,7 +10217,7 @@ ethereumjs-util@^6.0.0, ethereumjs-util@^6.2.1:
     ethjs-util "0.1.6"
     rlp "^2.2.3"
 
-ethers@5.7.2, ethers@^5.0.15, ethers@^5.5.1, ethers@^5.7.2:
+ethers@5.7.2, ethers@^5.0.15, ethers@^5.7.2:
   version "5.7.2"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.2.tgz#3a7deeabbb8c030d4126b24f84e525466145872e"
   integrity sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg==
