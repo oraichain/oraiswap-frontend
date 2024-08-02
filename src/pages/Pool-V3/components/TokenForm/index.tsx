@@ -270,12 +270,13 @@ const TokenForm = ({
           </div>
           <div className={styles.balance}>
             <p className={styles.bal}>
-              <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenFrom?.denom] || '0'))} {tokenFrom?.name}
+              <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenFrom?.denom] || '0', tokenFrom.decimals))}{' '}
+              {tokenFrom?.name}
             </p>
             <button
               disabled={!tokenFrom}
               onClick={() => {
-                const val = toDisplay(amounts[tokenFrom?.denom] || '0');
+                const val = toDisplay(amounts[tokenFrom?.denom] || '0', tokenFrom.decimals);
                 setFromAmount(val);
 
                 setFocusInput('from');
@@ -325,13 +326,14 @@ const TokenForm = ({
           </div>
           <div className={styles.balance}>
             <p className={styles.bal}>
-              <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenTo?.denom] || '0'))} {tokenTo?.name}
+              <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenTo?.denom] || '0', tokenTo.decimals))}{' '}
+              {tokenTo?.name}
             </p>
             <button
               className=""
               disabled={!tokenTo}
               onClick={() => {
-                const val = toDisplay(amounts[tokenTo?.denom] || '0');
+                const val = toDisplay(amounts[tokenTo?.denom] || '0', tokenTo.decimals);
                 setToAmount(val);
                 setFocusInput('to');
               }}

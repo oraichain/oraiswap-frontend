@@ -454,12 +454,12 @@ export default class SingletonOraiswapV3 {
     const allocation = {
       [xAddress]: {
         address: xAddress,
-        balance: toDisplay(tvlX),
+        balance: toDisplay(tvlX, tokenX.decimals),
         usdValue: xUsd
       },
       [yAddress]: {
         address: yAddress,
-        balance: toDisplay(tvlY),
+        balance: toDisplay(tvlY, tokenY.decimals),
         usdValue: yUsd
       }
     };
