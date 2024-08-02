@@ -311,11 +311,15 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: Cu
 }
 
 async function loadBtcAmounts(dispatch: Dispatch, btcAddress: string, chains: CustomChainInfo[]) {
-  const amountDetails = Object.fromEntries(
-    flatten(await Promise.all(chains.map((chain) => loadBtcEntries(btcAddress, chain))))
-  );
+  try {
+    const amountDetails = Object.fromEntries(
+      flatten(await Promise.all(chains.map((chain) => loadBtcEntries(btcAddress, chain))))
+    );
 
-  dispatch(updateAmounts(amountDetails));
+    dispatch(updateAmounts(amountDetails));
+  } catch (error) {
+    console.log('error: loadBtcAmounts', error);
+  }
 }
 
 async function loadKawaiiSubnetAmount(dispatch: Dispatch, kwtAddress: string) {
