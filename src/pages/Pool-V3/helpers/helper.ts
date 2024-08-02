@@ -235,7 +235,7 @@ export const getConvertedPosition = (position) => {
 export const createLoaderKey = () => (new Date().getMilliseconds() + Math.random()).toString();
 
 export const isNativeToken = (token: string): boolean => {
-  return token === 'orai' || token.includes('ibc');
+  return token === 'orai' || token.includes('ibc') || token.includes('factory');
 };
 
 const newtonIteration = (n: bigint, x0: bigint): bigint => {

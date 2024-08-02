@@ -441,7 +441,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
   return (
     <>
       <td>
-        <div className={styles.name} onClick={() => navigate(`/pools-v3/${poolKey}`)}>
+        <div className={styles.name} onClick={() => navigate(`/pools-v3/${encodeURIComponent(poolKey)}`)}>
           <div className={classNames(styles.icons, styles[theme])}>
             <FromTokenIcon />
             <ToTokenIcon />
@@ -502,7 +502,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/new-position/${item.pool_key.token_x}-${item.pool_key.token_y}-${item.pool_key.fee_tier.fee}`);
+            navigate(`/new-position/${encodeURIComponent(poolKeyToString(item.pool_key))}`);
           }}
           className={styles.add}
         >

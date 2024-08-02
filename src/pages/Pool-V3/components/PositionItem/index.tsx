@@ -27,7 +27,7 @@ import {
 import useConfigReducer from 'hooks/useConfigReducer';
 import { printBigint } from '../PriceRangePlot/utils';
 import { network } from 'config/networks';
-import SingletonOraiswapV3, { fetchPositionAprInfo, PositionAprInfo } from 'libs/contractSingleton';
+import SingletonOraiswapV3, { fetchPositionAprInfo, poolKeyToString, PositionAprInfo } from 'libs/contractSingleton';
 import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { getCosmWasmClient } from 'libs/cosmjs';
@@ -213,11 +213,11 @@ const PositionItem = ({ position, setStatusRemove }) => {
             <p>Price Range</p>
             <span className={styles.value}>
               {formatNumbers(undefined)((xToY ? min : 1 / max).toString())}
-              {showPrefix(xToY ? min : 1 / max, shorterPrefixConfig)}
+              {showPrefix(xToY ? min : 1 / max, undefined)}
               {' - '}
               {formatNumbers(undefined)((xToY ? max : 1 / min).toString())}
-              {showPrefix(xToY ? max : 1 / min, shorterPrefixConfig)} {xToY ? position.tokenYName : position.tokenXName}{' '}
-              per {xToY ? position.tokenXName : position.tokenYName}
+              {showPrefix(xToY ? max : 1 / min, undefined)} {xToY ? position.tokenYName : position.tokenXName} per{' '}
+              {xToY ? position.tokenXName : position.tokenYName}
             </span>
           </div>
           <div className={styles.item}>
@@ -365,10 +365,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
               <Button
                 type="primary-sm"
                 onClick={() => {
-                  navigate(
-                    // fee_tier.fee / 1e10
-                    `/new-position/${position.pool_key.token_x}-${position.pool_key.token_y}-${position.pool_key.fee_tier.fee}`
-                  );
+                  navigate(`/new-position/${encodeURIComponent(poolKeyToString(position.pool_key))}`);
                 }}
               >
                 Add Liquidity

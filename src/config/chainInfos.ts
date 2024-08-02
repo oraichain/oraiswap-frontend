@@ -34,6 +34,7 @@ import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
 import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as CelestiaIcon } from 'assets/icons/celestia.svg';
+import { ReactComponent as TonIcon } from 'assets/icons/ton.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -245,6 +246,11 @@ export const tokensIcon: TokenIcon[] = [
     coinGeckoId: 'celestia',
     Icon: CelestiaIcon,
     IconLight: CelestiaIcon
+  },
+  {
+    coinGeckoId: 'the-open-network',
+    Icon: TonIcon,
+    IconLight: TonIcon
   }
 ];
 
