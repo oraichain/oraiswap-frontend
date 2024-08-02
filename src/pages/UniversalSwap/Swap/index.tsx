@@ -9,7 +9,8 @@ import {
   getTokenOnOraichain,
   toAmount,
   toDisplay,
-  TON_ORAICHAIN_DENOM
+  TON_ORAICHAIN_DENOM,
+  chainInfos
 } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
@@ -394,7 +395,11 @@ const SwapComponent: React.FC<{
     setCoe(coeff);
   };
 
-  const unSupportSimulateToken = ['bnb', 'bep20_wbnb', 'eth'];
+  const unSupportSimulateToken = ['bnb', 'bep20_wbnb', 'eth', TON_ORAICHAIN_DENOM];
+  const supportedChain =
+    originalFromToken.denom === TON_ORAICHAIN_DENOM || originalToToken.denom === TON_ORAICHAIN_DENOM
+      ? chainInfos.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId)
+      : undefined;
 
   const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
@@ -806,6 +811,7 @@ const SwapComponent: React.FC<{
         setTokenDenomFromChain={setTokenDenomFromChain}
         originalFromToken={originalFromToken}
         unSupportSimulateToken={unSupportSimulateToken}
+        supportedChain={supportedChain}
       />
 
       <AddressBook
