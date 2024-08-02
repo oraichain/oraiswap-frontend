@@ -8,7 +8,8 @@ import {
   TokenItemType,
   getTokenOnOraichain,
   toAmount,
-  toDisplay
+  toDisplay,
+  TON_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
@@ -173,7 +174,14 @@ const SwapComponent: React.FC<{
   const fromTokenBalance = getTokenBalance(originalFromToken, amounts, subAmountFrom);
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
-  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
+  let useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
+  if (
+    [originalFromToken.contractAddress, originalFromToken.denom, originalToToken.contractAddress, originalToToken.denom]
+      .filter(Boolean)
+      .includes(TON_ORAICHAIN_DENOM)
+  ) {
+    useAlphaSmartRouter = true;
+  }
 
   const settingRef = useRef();
   const smartRouteRef = useRef();

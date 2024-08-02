@@ -25,24 +25,19 @@ export type PoolWithTokenInfo = PoolWithPoolKey & {
 
 export const getIconPoolData = (tokenX, tokenY, isLight) => {
   let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
-  const tokenXinfo = oraichainTokensWithIcon.find((token) =>
-    [token.denom, token.contractAddress].filter(Boolean).includes(tokenX)
-  );
-  const tokenYinfo = oraichainTokensWithIcon.find((token) =>
-    [token.denom, token.contractAddress].filter(Boolean).includes(tokenY)
-  );
+  const tokenXinfo = oraichainTokensWithIcon.find((token) => [token.denom, token.contractAddress].includes(tokenX));
+  const tokenYinfo = oraichainTokensWithIcon.find((token) => [token.denom, token.contractAddress].includes(tokenY));
 
   if (tokenXinfo) FromTokenIcon = isLight ? tokenXinfo.IconLight : tokenXinfo.Icon;
   if (tokenYinfo) ToTokenIcon = isLight ? tokenYinfo.IconLight : tokenYinfo.Icon;
-
   return { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo };
 };
 
 export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => {
   const [tokenX, tokenY] = [p?.pool_key.token_x, p?.pool_key.token_y];
   const feeTier = p?.pool_key.fee_tier.fee || 0;
-  const spread = p?.pool_key.fee_tier.tick_spacing || 100;
   const { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo } = getIconPoolData(tokenX, tokenY, isLight);
+  const spread = p?.pool_key.fee_tier.tick_spacing || 100;
 
   return {
     ...p,
@@ -52,7 +47,8 @@ export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => 
     spread,
     tokenXinfo,
     tokenYinfo,
-    poolKey: poolKeyToString(p.pool_key)
+    poolKey: poolKeyToString(p.pool_key),
+    isValid: tokenXinfo && tokenYinfo
   };
 };
 

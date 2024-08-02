@@ -43,12 +43,14 @@ const PoolList = () => {
       try {
         setLoading(true);
         const pools = await SingletonOraiswapV3.getPools();
+
         const fmtPools = (pools || [])
           .map((p) => {
             const isLight = theme === 'light';
             return formatPoolData(p, isLight);
           })
-          .sort((a, b) => Number(b.pool.liquidity) - Number(a.pool.liquidity));
+          .filter((e) => e.isValid);
+        // .sort((a, b) => Number(b.pool.liquidity) - Number(a.pool.liquidity));
         setDataPool(fmtPools);
       } catch (error) {
         console.log('error: get pools', error);
@@ -344,10 +346,14 @@ const PoolList = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>Pool name</th>
-                    <th className={styles.textRight}>Liquidity</th>
-                    <th className={styles.textRight}>Volume (24H)</th>
-                    <th className={classNames(styles.textRight, styles.aprHeader)}>
+                    <th style={{ width: '40%' }}>Pool name</th>
+                    <th style={{ width: '15%' }} className={styles.textRight}>
+                      Liquidity
+                    </th>
+                    <th style={{ width: '15%' }} className={styles.textRight}>
+                      Volume (24H)
+                    </th>
+                    <th style={{ width: '15%' }} className={classNames(styles.textRight, styles.aprHeader)}>
                       APR
                       <TooltipIcon
                         className={styles.tooltipWrapper}
@@ -371,7 +377,7 @@ const PoolList = () => {
                         }
                       />
                     </th>
-                    <th></th>
+                    <th style={{ width: '15%' }}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -386,6 +392,7 @@ const PoolList = () => {
                         (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
                       );
                     })
+                    .sort((a, b) => (liquidityPools?.[b?.poolKey] || 0) - (liquidityPools?.[a?.poolKey] || 0))
                     .map((item, index) => {
                       let volumn = 0;
                       if (item?.poolKey) {
@@ -498,7 +505,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
           />
         </div>
       </td>
-      <td>
+      <td className={styles.actions}>
         <button
           onClick={(e) => {
             e.stopPropagation();

@@ -124,6 +124,14 @@
           background: theme-get('neutral-surface-bg-swap');
         }
 
+        tr {
+          width: '15%';
+
+          &:first-of-type {
+            width: '50%';
+          }
+        }
+
         tr:not(:last-of-type) {
           border-bottom: 1px solid;
 
@@ -246,12 +254,18 @@
         }
 
         svg {
+          transform: translateY(1px);
           path {
             @include theme {
               fill: theme-get('primary-surface-default-dark-3');
             }
           }
         }
+      }
+
+      .actions {
+        display: flex;
+        justify-content: flex-end;
       }
 
       .add {
@@ -366,13 +380,15 @@
 }
 
 .aprHeader {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
+  // display: flex;
+  // align-items: center;
+  // justify-content: flex-end;
+  // gap: 4px;
 
   svg {
     vertical-align: middle;
+    margin-left: 4px;
+    transform: translateY(4px);
 
     path {
       @include theme {
