@@ -35,7 +35,7 @@ import { ArrayOfPosition, Pool, Tick } from 'pages/Pool-V3/packages/sdk/Oraiswap
 import { TokenDataOnChain } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import Axios from 'axios';
 import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions';
-import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD } from '@oraichain/oraidex-common';
+import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD, toDisplay } from '@oraichain/oraidex-common';
 import { CoinGeckoId } from '@oraichain/oraidex-common';
 import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import { oraichainTokens } from 'config/bridgeTokens';
@@ -427,75 +427,45 @@ export default class SingletonOraiswapV3 {
   };
 
   public static getLiquidityByPool = async (pool: PoolWithPoolKey, prices: CoinGeckoPrices<string>): Promise<any> => {
-    const tickmap = await this.getFullTickmap(pool.pool_key);
+    const allPosition = await SingletonOraiswapV3.queryPosition();
 
-    const liquidityTicks = await this.getAllLiquidityTicks(pool.pool_key, tickmap);
+    const poolKey = pool.pool_key;
+    const poolData = pool.pool;
+    const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
+    const tokenY = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_y);
 
-    const tickIndexes: number[] = [];
-    for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
-      for (let bit = 0; bit < loadChunkSize(); bit++) {
-        const checkedBit = chunk & (1n << BigInt(bit));
-        if (checkedBit) {
-          const tickIndex = positionToTick(Number(chunkIndex), bit, pool.pool_key.fee_tier.tick_spacing);
-          tickIndexes.push(tickIndex);
-        }
+    let tvlX = 0n;
+    let tvlY = 0n;
+    allPosition.forEach((position) => {
+      if (position.poolId === poolKeyToString(poolKey)) {
+        tvlX += BigInt(position.principalAmountX);
+        tvlY += BigInt(position.principalAmountY);
       }
-    }
-
-    const tickArray: VirtualRange[] = [];
-
-    for (let i = 0; i < tickIndexes.length - 1; i++) {
-      tickArray.push({
-        lowerTick: tickIndexes[i],
-        upperTick: tickIndexes[i + 1]
-      });
-    }
-
-    const posTest: PositionTest[] = calculateLiquidityForRanges(liquidityTicks, tickArray);
-
-    const res = await calculateLiquidityForPair(posTest, BigInt(pool.pool.sqrt_price));
-
-    const tokens = [pool.pool_key.token_x, pool.pool_key.token_y];
-
-    const tokenInfos = await Promise.all(
-      tokens.map(async (token) => {
-        if (oraichainTokens.filter((item) => extractAddress(item) === token).length > 0) {
-          const info = oraichainTokens.filter((item) => extractAddress(item) === token)[0];
-
-          return { info, price: prices[info.coinGeckoId] };
-        }
-      })
-    );
-
-    const tokenWithLiquidities = [
-      {
-        address: pool.pool_key.token_x,
-        balance: res.liquidityX
-      },
-      {
-        address: pool.pool_key.token_y,
-        balance: res.liquidityY
-      }
-    ];
-
-    const allocation = {};
-    const tokenWithUSDValue = tokenWithLiquidities.map((token) => {
-      const tokenInfo = tokenInfos.filter((item) => extractAddress(item.info) === token.address)[0];
-
-      const data = {
-        address: token.address,
-        balance: Number(token.balance) / 10 ** 6,
-        usdValue: (Number(token.balance) / 10 ** 6) * tokenInfo.price
-      };
-      allocation[token.address] = data;
-
-      return data;
     });
 
-    const totalValue = tokenWithUSDValue.reduce((acc, item) => acc + item.usdValue, 0);
+    const xUsd = (prices[tokenX.coinGeckoId] * Number(tvlX)) / 10 ** tokenX.decimals;
+    const yUsd = (prices[tokenY.coinGeckoId] * Number(tvlY)) / 10 ** tokenY.decimals;
+
+    const tvlLockedUSD = xUsd + yUsd;
+
+    const xAddress = extractAddress(tokenX);
+    const yAddress = extractAddress(tokenY);
+
+    const allocation = {
+      [xAddress]: {
+        address: xAddress,
+        balance: toDisplay(tvlX),
+        usdValue: xUsd
+      },
+      [yAddress]: {
+        address: yAddress,
+        balance: toDisplay(tvlY),
+        usdValue: yUsd
+      }
+    };
 
     return {
-      total: totalValue,
+      total: tvlLockedUSD,
       allocation
     };
   };

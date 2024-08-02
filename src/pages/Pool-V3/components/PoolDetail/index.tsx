@@ -222,7 +222,7 @@ const PoolV3Detail = () => {
           <div className={styles.desc}>
             <div className={styles.item}>
               <span>Incentive</span>
-              <p>{[...new Set(aprInfo.incentives)].join(', ')}</p>
+              <p>{!aprInfo.incentives?.length ? '--' : [...new Set(aprInfo.incentives)].join(', ')}</p>
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>
@@ -233,7 +233,7 @@ const PoolV3Detail = () => {
                 Incentive Boost&nbsp;
                 <IconBoots />
               </span>
-              <p>{numberWithCommas(aprInfo.incentivesApr * 100)}%</p>
+              <p>{!aprInfo.incentivesApr ? '-- ' : `${numberWithCommas(aprInfo.incentivesApr * 100)}%`}</p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
