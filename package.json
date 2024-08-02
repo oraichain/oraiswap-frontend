@@ -128,7 +128,8 @@
   "resolutions": {
     "bech32": "1.1.4",
     "bitcoinjs-lib": "5.2.0",
-    "axios": "0.26.1"
+    "axios": "0.26.1",
+    "@oraichain/oraidex-common": "1.1.2-beta.1"
   },
   "engines": {
     "node": "^18 || ^20"
