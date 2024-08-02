@@ -163,6 +163,7 @@ const PoolV3Detail = () => {
 
         <div className={styles.addPosition}>
           <Button
+            disabled={!poolDetail}
             onClick={() => {
               navigate(`/new-position/${encodeURIComponent(poolKeyToString(pool_key))}`);
             }}
