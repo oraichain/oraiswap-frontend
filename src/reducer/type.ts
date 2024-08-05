@@ -1,5 +1,5 @@
 import { NetworkName, TokenItemType, CustomChainInfo } from '@oraichain/oraidex-common';
-import { OrderDirection } from '@oraichain/oraidex-contracts-sdk/build/OraiswapLimitOrder.types';
+import { OrderDirection } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOrderbook.types';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 

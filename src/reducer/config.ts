@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { PoolAprInfo } from 'libs/contractSingleton';
 import { DepositInfo } from 'pages/BitcoinDashboard/@types';
 import { KeyFilterPool } from 'pages/Pools/components/Filter';
 import { PERSIST_VER } from 'store/constants';
@@ -45,6 +46,22 @@ export interface ConfigState {
   persistVersion: number;
   bannerTime?: number;
   AIRoute?: boolean;
+  //pool v3
+  liquidityPools?: {
+    [key: string]: number;
+  };
+  aprPools?: {
+    [key: string]: PoolAprInfo;
+  };
+  volumnePools?: {
+    apy: number;
+    fee: number;
+    poolAddress: string;
+    tokenX: string;
+    tokenY: string;
+    tvl: number;
+    volume24: number;
+  }[];
 }
 
 const initialState: ConfigState = {
@@ -68,6 +85,9 @@ const initialState: ConfigState = {
   coingecko: {},
   apr: {},
   rewardPools: [],
+  liquidityPools: {},
+  aprPools: {},
+  volumnePools: [],
   filterDefaultPool: KeyFilterPool.all_pool,
   persistVersion: PERSIST_VER,
   AIRoute: true

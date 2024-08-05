@@ -21,6 +21,7 @@ import TransactionHistory from './components/TransactionHistory';
 import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools, useGetPriceChange } from './hooks';
 import { useGetLpBalance } from './hooks/useGetLpBalance';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 
 const PoolDetail: React.FC = () => {
   const theme = useTheme();
@@ -89,7 +90,18 @@ const PoolDetail: React.FC = () => {
   const quoteToken = (token2?.contractAddress || token2?.denom) === params.base_denom ? token1 : token2;
 
   let BaseTokenIcon = DefaultIcon;
-  if (baseToken) BaseTokenIcon = theme === 'light' ? baseToken.IconLight || baseToken.Icon : baseToken.Icon;
+  const BaseTokenInOraichain = oraichainTokensWithIcon.find(
+    (oraiTokens) =>
+      [oraiTokens.denom, oraiTokens.contractAddress].filter(Boolean).includes(baseToken.contractAddress) ||
+      [oraiTokens.denom, oraiTokens.contractAddress].filter(Boolean).includes(baseToken.denom)
+  );
+  const QuoteTokenInOraichain = oraichainTokensWithIcon.find(
+    (oraiTokens) =>
+      [oraiTokens.denom, oraiTokens.contractAddress].filter(Boolean).includes(quoteToken.contractAddress) ||
+      [oraiTokens.denom, oraiTokens.contractAddress].filter(Boolean).includes(quoteToken.denom)
+  );
+  if (BaseTokenInOraichain)
+    BaseTokenIcon = theme === 'light' ? BaseTokenInOraichain.IconLight : BaseTokenInOraichain.Icon;
 
   return (
     <Content nonBackground otherBackground>
@@ -113,7 +125,13 @@ const PoolDetail: React.FC = () => {
         </div>
         <div className={styles.summary}>
           <div className={styles.overview}>
-            <OverviewPool poolDetailData={poolDetailData} />
+            <OverviewPool
+              poolDetailData={{
+                ...poolDetailData,
+                token1: BaseTokenInOraichain,
+                token2: QuoteTokenInOraichain
+              }}
+            />
           </div>
           <div className={styles.chart}>
             <ChartDetailSection pair={pair} symbol={poolDetailData?.info?.symbols} />
@@ -121,7 +139,7 @@ const PoolDetail: React.FC = () => {
         </div>
         <Earning onLiquidityChange={onLiquidityChange} />
         <MyPoolInfo myLpBalance={lpTokenBalance} onLiquidityChange={onLiquidityChange} />
-        <TransactionHistory baseToken={token1} quoteToken={token2} />
+        <TransactionHistory baseToken={BaseTokenInOraichain} quoteToken={QuoteTokenInOraichain} />
       </div>
     </Content>
   );
