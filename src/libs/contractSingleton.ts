@@ -874,9 +874,7 @@ export async function fetchPoolAprInfo(
       const rewardInUsd = prices[token.coinGeckoId];
       const totalPoolLiquidity = poolLiquidities[poolKeyToString(poolKey)];
       const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
-
-      sumIncentivesApr += rewardPerYear / (totalPoolLiquidity * 0.25);
-      // console.log({ rewardPerYear, totalPoolLiquidity });
+      if (totalPoolLiquidity) sumIncentivesApr += rewardPerYear / (totalPoolLiquidity * 0.25);
     }
 
     poolAprs[poolKeyToString(poolKey)] = {

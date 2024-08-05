@@ -39,6 +39,14 @@ const PoolV3Detail = () => {
   const { poolId } = useParams<{ poolId: string }>();
 
   const [tokenX, tokenY, fee, tick] = poolId.split('-');
+  const poolKeyString = poolKeyToString({
+    token_x: tokenX,
+    token_y: tokenY,
+    fee_tier: {
+      fee: Number(fee),
+      tick_spacing: Number(tick)
+    }
+  });
   const isLight = theme === 'light';
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
 
@@ -72,20 +80,17 @@ const PoolV3Detail = () => {
     })();
   }, [poolId]);
 
-  const [aprInfo, setAprInfo] = useState<PoolAprInfo>({
-    apr: 0,
-    incentives: [],
-    incentivesApr: 0,
-    swapFee: 0
-  });
+  const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
 
   useEffect(() => {
     const getAPRInfo = async () => {
       const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools);
-      // console.log({ res });
-      setAprInfo(res[poolDetail.poolKey]);
+      setAprInfo({
+        ...aprInfo,
+        [poolKeyString]: res[poolKeyString]
+      });
     };
-    if (poolDetail && prices && liquidityPools) {
+    if (poolDetail && prices && Object.values(liquidityPools).length && poolDetail.poolKey === poolKeyString) {
       getAPRInfo();
     }
   }, [poolDetail, prices, liquidityPools]);
@@ -223,22 +228,30 @@ const PoolV3Detail = () => {
           <div className={styles.desc}>
             <div className={styles.item}>
               <span>Incentive</span>
-              <p>{!aprInfo.incentives?.length ? '--' : [...new Set(aprInfo.incentives)].join(', ')}</p>
+              <p>
+                {!aprInfo[poolKeyString]?.incentives?.length
+                  ? '--'
+                  : [...new Set(aprInfo[poolKeyString].incentives)].join(', ')}
+              </p>
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>
-              <p>{numberWithCommas(aprInfo.swapFee * 100)}%</p>
+              <p>{numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100)}%</p>
             </div>
             <div className={styles.item}>
               <span className={styles.label}>
                 Incentive Boost&nbsp;
                 <IconBoots />
               </span>
-              <p>{!aprInfo.incentivesApr ? '-- ' : `${numberWithCommas(aprInfo.incentivesApr * 100)}%`}</p>
+              <p>
+                {!aprInfo[poolKeyString]?.incentivesApr
+                  ? '-- '
+                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr * 100)}%`}
+              </p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
-              <p className={styles.total}>{numberWithCommas(aprInfo.apr * 100)}%</p>
+              <p className={styles.total}>{numberWithCommas((aprInfo[poolKeyString]?.apr || 0) * 100)}%</p>
             </div>
           </div>
         </div>

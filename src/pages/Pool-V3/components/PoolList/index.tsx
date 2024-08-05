@@ -28,6 +28,7 @@ const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
+  const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
   const [openTooltip, setOpenTooltip] = useState(false);
 
   const theme = useTheme();
@@ -82,7 +83,6 @@ const PoolList = () => {
     })();
   }, [dataPool]);
 
-  const [aprInfo, setAprInfo] = useState<Record<string, PoolAprInfo>>();
   useEffect(() => {
     const getAPRInfo = async () => {
       const poolKeys = dataPool.map((pool) => parsePoolKeyString(pool.poolKey));
@@ -90,7 +90,7 @@ const PoolList = () => {
       const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools);
       setAprInfo(res);
     };
-    if (dataPool && prices && liquidityPools) {
+    if (dataPool.length && prices && liquidityPools) {
       getAPRInfo();
     }
   }, [dataPool, prices, liquidityPools]);
@@ -407,14 +407,13 @@ const PoolList = () => {
                             theme={theme}
                             volumn={volumn}
                             liquidity={liquidityPools?.[item?.poolKey]}
-                            aprInfo={
-                              aprInfo?.[item?.poolKey] ?? {
-                                apr: 0,
-                                incentives: [],
-                                swapFee: 0,
-                                incentivesApr: 0
-                              }
-                            }
+                            aprInfo={{
+                              apr: 0,
+                              incentives: [],
+                              swapFee: 0,
+                              incentivesApr: 0,
+                              ...aprInfo?.[item?.poolKey]
+                            }}
                           />
                         </tr>
                       );
@@ -438,7 +437,6 @@ const PoolList = () => {
 
 const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
   const navigate = useNavigate();
-
   const [openTooltip, setOpenTooltip] = useState(false);
 
   const isLight = theme === 'light';
@@ -476,7 +474,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       </td>
       <td>
         <div className={styles.apr}>
-          <span className={styles.amount}>{numberWithCommas(aprInfo.apr * 100)}%</span>
+          <span className={styles.amount}>{numberWithCommas((aprInfo.apr ?? 0) * 100)}%</span>
           <TooltipIcon
             className={styles.tooltipWrapper}
             placement="top"
@@ -487,18 +485,18 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
               <div className={classNames(styles.tooltip, styles[theme])}>
                 <div className={styles.itemInfo}>
                   <span>Swap fee</span>
-                  <span className={styles.value}>{numberWithCommas(aprInfo.swapFee * 100)}%</span>
+                  <span className={styles.value}>{numberWithCommas((aprInfo.swapFee ?? 0) * 100)}%</span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>
                     Incentives Boost&nbsp;
                     <IconBoots />
                   </span>
-                  <span className={styles.value}>{numberWithCommas(aprInfo.incentivesApr * 100)}%</span>
+                  <span className={styles.value}>{numberWithCommas((aprInfo.incentivesApr ?? 0) * 100)}%</span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>Total APR</span>
-                  <span className={styles.totalApr}>{numberWithCommas(aprInfo.apr * 100)}%</span>
+                  <span className={styles.totalApr}>{numberWithCommas((aprInfo.apr ?? 0) * 100)}%</span>
                 </div>
               </div>
             }
