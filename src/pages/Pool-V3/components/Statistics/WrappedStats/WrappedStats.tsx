@@ -1,0 +1,146 @@
+import React, { useEffect, useState } from 'react';
+import loader from 'assets/gif/loading.gif';
+import useStyles from './styles';
+import { Grid, Typography } from '@mui/material';
+import { EmptyPlaceholder } from '../EmptyPlaceholder/EmptyPlaceholder';
+
+import Volume from '../Volume/Volume';
+import Liquidity from '../Liquidity/Liquidity';
+import VolumeBar from '../volumeBar/VolumeBar';
+import TokensList from '../TokensList/TokensList';
+import PoolList from '../PoolList/PoolList';
+import useGetStatistic from '../hooks/useGetStatistic';
+import LoadingBox from 'components/LoadingBox';
+
+export const WrappedStats: React.FC = () => {
+  const { classes } = useStyles();
+  const [isLoadingStats, setLoading] = useState(false);
+  const [stats, setStats] = useState({
+    volume24: {
+      value: 0,
+      change: 0
+    },
+    tvl24: {
+      value: 0,
+      change: 0
+    },
+    fees24: {
+      value: 0,
+      change: 0
+    },
+    tokensData: [],
+    poolsData: [],
+    volumePlot: [],
+    liquidityPlot: []
+  });
+  const { getStats } = useGetStatistic();
+
+  const {
+    volume24: volume24h,
+    tvl24: tvl24h,
+    fees24: fees24h,
+    tokensData,
+    poolsData,
+    volumePlot: volumePlotData,
+    liquidityPlot: liquidityPlotData
+  } = stats;
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const data = await getStats();
+
+      if (data) {
+        setStats(data);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  // isLoadingStats ? (
+  //   <img src={loader} className={classes.loading} alt="Loading" />
+  // ) :
+  return (
+    <Grid container className={classes.wrapper} direction="column">
+      <LoadingBox loading={isLoadingStats} styles={{ minHeight: '60vh', height: 'fit-content' }}>
+        {!isLoadingStats && liquidityPlotData.length === 0 ? (
+          <Grid container direction="column" alignItems="center">
+            <EmptyPlaceholder desc={'We have not started collecting statistics yet'} />
+          </Grid>
+        ) : (
+          !isLoadingStats && (
+            <>
+              <Typography className={classes.subheader}>Overview</Typography>
+              <Grid container className={classes.plotsRow} wrap="nowrap">
+                <Volume
+                  volume={volume24h.value}
+                  percentVolume={volume24h.change}
+                  data={volumePlotData}
+                  className={classes.plot}
+                />
+                <Liquidity
+                  liquidityVolume={tvl24h.value}
+                  liquidityPercent={tvl24h.change}
+                  data={liquidityPlotData}
+                  className={classes.plot}
+                />
+              </Grid>
+              <Grid className={classes.row}>
+                <VolumeBar
+                  volume={volume24h.value}
+                  percentVolume={volume24h.change}
+                  tvlVolume={tvl24h.value}
+                  percentTvl={tvl24h.change}
+                  feesVolume={fees24h.value}
+                  percentFees={fees24h.change}
+                />
+              </Grid>
+              <Typography className={classes.subheader}>Top tokens</Typography>
+              <Grid container className={classes.row}>
+                <TokensList
+                  data={tokensData.map((tokenData) => ({
+                    icon: tokenData.Icon,
+                    name: tokenData.tokenInfo.name,
+                    symbol: tokenData.tokenInfo.name,
+                    price: tokenData.price,
+                    priceChange: tokenData.priceChange,
+                    volume: tokenData.volume24,
+                    TVL: tokenData.tvl
+                  }))}
+                />
+              </Grid>
+              <Typography className={classes.subheader}>Top pools</Typography>
+              <PoolList
+                data={poolsData.map((poolData) => ({
+                  symbolFrom: poolData.tokenXinfo.name,
+                  symbolTo: poolData.tokenYinfo.name,
+                  iconFrom: poolData.FromTokenIcon,
+                  iconTo: poolData.ToTokenIcon,
+                  volume: poolData.volume24,
+                  TVL: poolData.tvl,
+                  fee: poolData.fee,
+                  apy: poolData.apy
+                  // apyData: {
+                  //   fees: poolData.apy,
+                  //   accumulatedFarmsSingleTick: 0,
+                  //   accumulatedFarmsAvg: 0
+                  // },
+                  // apy:
+                  //   poolData.apy + (accumulatedSingleTickAPY?.[poolData.poolAddress.toString()] ?? 0),
+                  // apyData: {
+                  //   fees: poolData.apy,
+                  //   accumulatedFarmsSingleTick:
+                  //     accumulatedSingleTickAPY?.[poolData.poolAddress.toString()] ?? 0,
+                  //   accumulatedFarmsAvg: accumulatedAverageAPY?.[poolData.poolAddress.toString()] ?? 0
+                  // }
+                }))}
+              />
+            </>
+          )
+        )}
+      </LoadingBox>
+    </Grid>
+  );
+};
+
+export default WrappedStats;

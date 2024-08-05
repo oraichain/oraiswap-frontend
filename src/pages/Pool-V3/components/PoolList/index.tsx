@@ -231,13 +231,6 @@ const PoolList = () => {
         //   const tokenY = allTokens[poolsDataObject[address].tokenY.toString()];
         //@ts-ignore
         const lastSnapshot = snapshots[snapshots.length - 1];
-        //   console.log('token: ', tokenX.coingeckoId, tokenY.coingeckoId, lastSnapshot, lastTimestamp);
-        //   tokensDataObject[(tokenX.contractAddress || tokenX.denom).toString()].volume24 +=
-        //     lastSnapshot.timestamp === lastTimestamp ? lastSnapshot.volumeX.usdValue24 : 0;
-        //   tokensDataObject[(tokenX.contractAddress || tokenX.denom).toString()].volume24 +=
-        //     lastSnapshot.timestamp === lastTimestamp ? lastSnapshot.volumeY.usdValue24 : 0;
-        //   tokensDataObject[(tokenX.contractAddress || tokenX.denom).toString()].tvl += lastSnapshot.liquidityX.usdValue24;
-        //   tokensDataObject[(tokenX.contractAddress || tokenX.denom).toString()].tvl += lastSnapshot.liquidityY.usdValue24;
         poolsData.push({
           volume24:
             lastSnapshot.timestamp === lastTimestamp

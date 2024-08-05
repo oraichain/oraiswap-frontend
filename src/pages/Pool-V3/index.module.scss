@@ -87,5 +87,9 @@
 
   .content {
     width: 100%;
+
+    &.light.stats {
+      filter: invert(1);
+    }
   }
 }

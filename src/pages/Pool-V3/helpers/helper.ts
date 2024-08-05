@@ -1,4 +1,4 @@
-import { BigDecimal, toDisplay, TokenItemType } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { reduce } from 'lodash';
 import { Coin } from '@cosmjs/proto-signing';
 import { PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
@@ -502,7 +502,7 @@ export const convertPosition = ({
 }) => {
   const fmtFeeClaim = formatClaimFeeData(feeClaimData);
 
-  return positions
+  const fmtData = positions
     .map((position: Position & { poolData: { pool: Pool }; ind: number; token_id: number }) => {
       const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
       let {
@@ -586,12 +586,16 @@ export const convertPosition = ({
           token: TokenItemType;
         };
 
-        const usd = toDisplay(amount) * (cachePrices[token?.coinGeckoId] || 0);
+        const usd =
+          toDisplay(amount.toString(), token.decimals || CW20_DECIMALS) * Number(cachePrices[token?.coinGeckoId] || 0);
 
         acc = new BigDecimal(acc || 0).add(usd).toNumber();
 
         return acc;
       }, 0);
+
+      const tokenYDecimal = tokenYinfo.decimals || CW20_DECIMALS;
+      const tokenXDecimal = tokenXinfo.decimals || CW20_DECIMALS;
 
       return {
         ...position,
@@ -605,6 +609,10 @@ export const convertPosition = ({
         tokenYName: tokenYinfo.name,
         tokenXIcon: tokenXIcon,
         tokenYIcon: tokenYIcon,
+        tokenYinfo,
+        tokenXinfo,
+        tokenYDecimal,
+        tokenXDecimal,
         fee: +printBigint(BigInt(position.pool_key.fee_tier.fee), PERCENTAGE_SCALE - 2),
         min,
         max,
@@ -627,4 +635,5 @@ export const convertPosition = ({
       };
     })
     .filter(Boolean);
+  return fmtData;
 };
