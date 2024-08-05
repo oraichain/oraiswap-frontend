@@ -42,6 +42,7 @@
       line-height: 150%; /* 24px */
 
       .item {
+        white-space: nowrap;
         display: flex;
         padding: 12px 24px;
         justify-content: center;
@@ -50,6 +51,10 @@
         align-self: stretch;
 
         border-radius: var(--Dimension-Corner-Radius-button, 99px);
+
+        @include small-mobile {
+          padding: 12px 18px;
+        }
 
         &.active {
           @include theme {

@@ -7,6 +7,7 @@ import styles from './index.module.scss';
 import { Link } from 'react-router-dom';
 import WrappedStats from './components/Statistics/WrappedStats/WrappedStats';
 import useTheme from 'hooks/useTheme';
+import { isMobile } from '@walletconnect/browser-utils';
 
 export enum PoolV3PageType {
   POOL = 'pools',
@@ -32,6 +33,7 @@ const PoolV3 = () => {
   const navigate = useNavigate();
   let [searchParams, setSearchParams] = useSearchParams();
   const type = searchParams.get('type') as PoolV3PageType;
+  const mobileMode = isMobile();
 
   useEffect(() => {
     if (!listTab.includes(type)) {
@@ -40,6 +42,7 @@ const PoolV3 = () => {
   }, [type]);
 
   const Content = PageContent[type || PoolV3PageType.POOL];
+  console.log('isMobile()', mobileMode);
 
   return (
     <div className={classNames(styles.poolV3, 'small_container')}>
@@ -52,7 +55,7 @@ const PoolV3 = () => {
                 key={e.id}
                 className={classNames(styles.item, { [styles.active]: type === e.id })}
               >
-                {e.value}
+                {!mobileMode ? e.value : e.value === 'Your Liquidity Positions' ? 'Your Positions' : e.value}
               </Link>
             );
           })}
