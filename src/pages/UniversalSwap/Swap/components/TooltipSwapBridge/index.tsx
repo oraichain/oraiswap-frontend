@@ -13,7 +13,6 @@ export const TooltipSwapBridge = ({
   info
 }) => {
   const isOraichain = (chainId) => chainId === 'Oraichain';
-  console.log({ info });
   return (
     <div className={styles.tooltipUniversalSwap}>
       <div className={styles.tooltipUniversalSwapType}>{type === 'Swap' ? pathChainId : 'IBC Transfer'}</div>
@@ -22,7 +21,7 @@ export const TooltipSwapBridge = ({
         <div className={styles.tooltipUniversalSwapRoute}>
           <div className={styles.tooltipUniversalSwapRouteImg}>
             {isOraichain(tokenInChainId) ? (
-              <TokenInIcon width={40} height={40} />
+              TokenInIcon && <TokenInIcon width={40} height={40} />
             ) : (
               <img src={info?.tokenInInfo?.logo_URIs?.svg} width={45} height={45} alt="arrow" />
             )}
@@ -40,7 +39,7 @@ export const TooltipSwapBridge = ({
         <div className={styles.tooltipUniversalSwapRoute}>
           <div className={styles.tooltipUniversalSwapRouteImg}>
             {isOraichain(type === 'Swap' ? tokenInChainId : tokenOutChainId) ? (
-              <TokenOutIcon width={40} height={40} />
+              TokenOutIcon && <TokenOutIcon width={40} height={40} />
             ) : (
               <img src={info?.tokenOutInfo?.logo_URIs?.svg} width={45} height={45} alt="arrow" />
             )}
