@@ -293,13 +293,14 @@ export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
   const results =
     rewardPerSecInfoDataIsArray &&
     rewardPerSecInfoData.assets
-      .filter((asset) => parseInt(asset.amount))
+      // .filter((asset) => parseInt(asset.amount))
       .map(async (asset) => {
         const pendingWithdraw = BigInt(
           currentPoolReward?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
         );
 
-        const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
+        const amount =
+          (!totalRewardPerSec ? 0n : (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec) + pendingWithdraw;
 
         let token =
           'token' in asset.info
