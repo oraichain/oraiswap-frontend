@@ -41,10 +41,10 @@ export const useSimulate = (
           useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute || simulateOption?.useIbcWasm,
           useIbcWasm: simulateOption?.useIbcWasm
         },
-        optionRouter: {
+        routerConfig: {
           url: 'https://osor.oraidex.io',
           path: '/smart-router/alpha-router',
-          protocol: ['Oraidex', 'OraidexV3', 'Osmosis']
+          protocols: ['Oraidex', 'OraidexV3', 'Osmosis']
         }
       });
     },
