@@ -318,7 +318,8 @@ const SwapComponent: React.FC<{
         cosmosWallet: window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
-          isAlphaSmartRouter: useAlphaSmartRouter
+          isAlphaSmartRouter: useAlphaSmartRouter,
+          isIbcWasm: useIbcWasm
         }
       });
 
