@@ -26,6 +26,7 @@ import './index.scss';
 import Menu from './Menu';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
+import { TonProvider } from 'context/ton-provider';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -231,15 +232,17 @@ const App = () => {
 
   return (
     <ThemeProvider>
-      <div className={`app ${theme}`}>
-        <Menu />
-        <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
-        <div className="main">
-          <Sidebar />
-          <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
+      <TonProvider>
+        <div className={`app ${theme}`}>
+          <Menu />
+          <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
+          {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
+          <div className="main">
+            <Sidebar />
+            <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
+          </div>
         </div>
-      </div>
+      </TonProvider>
     </ThemeProvider>
   );
 };

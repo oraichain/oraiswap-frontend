@@ -9,6 +9,7 @@ import useWalletReducer from 'hooks/useWalletReducer';
 import { reduceString } from 'libs/utils';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import useTonConnectAddress from 'hooks/useTonConnectAddress';
 
 const cx = cn.bind(styles);
 
@@ -21,9 +22,11 @@ export const ModalDisconnect: React.FC<{
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
+  const [tonAddress, setTonAddress] = useConfigReducer('tonAddress');
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const { isCopied, copiedValue, handleCopy } = useCopyClipboard();
+  const { handleDisconnectTon } = useTonConnectAddress();
 
   const chains =
     walletProvider.find((provider) => provider.networkType === currentDisconnectingNetwork)?.networks || [];
@@ -47,6 +50,9 @@ export const ModalDisconnect: React.FC<{
       case 'tron':
         choosedAddressDisplayByNetwork = tronAddress;
         break;
+      case 'ton':
+        choosedAddressDisplayByNetwork = tonAddress;
+        break;
       default:
         break;
     }
@@ -60,7 +66,6 @@ export const ModalDisconnect: React.FC<{
     });
     switch (currentDisconnectingNetwork) {
       case 'cosmos':
-       
         setOraiAddress(undefined);
         // TODO: need to refactor later
         if (walletByNetworks.cosmos === 'eip191') {
@@ -75,6 +80,9 @@ export const ModalDisconnect: React.FC<{
         break;
       case 'tron':
         setTronAddress(undefined);
+        break;
+      case 'ton':
+        handleDisconnectTon();
         break;
       default:
         break;

@@ -29,6 +29,7 @@
     "@tanstack/react-query": "^4.32.6",
     "@tharsis/proto": "^0.1.17",
     "@tippyjs/react": "^4.2.0",
+    "@tonconnect/ui-react": "^2.0.6",
     "@walletconnect/browser-utils": "^1.8.0",
     "@walletconnect/ethereum-provider": "^1.7.8",
     "axios": "^0.26.1",

@@ -29,6 +29,7 @@ import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
 import { WalletsByNetwork } from 'reducer/wallet';
 import { evmChainInfos } from 'config/evmChainInfos';
+import { TonChainId } from 'context/ton-provider';
 
 export interface Tokens {
   denom?: string;
@@ -67,6 +68,7 @@ export const evmNetworksIconWithoutTron = chainInfosWithIcon.filter(
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const tronNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === '0x2b6653dc');
 export const btcNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === bitcoinChainId);
+export const tonNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === TonChainId);
 
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];

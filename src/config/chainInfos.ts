@@ -84,6 +84,7 @@ import { flatten } from 'lodash';
 import { bitcoinChainId } from 'helper/constants';
 import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
 import { listOsmosisToken } from './alphaNetwwork';
+import { TON_SCAN, TonChainId } from 'context/ton-provider';
 
 const [otherChainTokens, oraichainTokens] = tokens;
 type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
@@ -136,6 +137,55 @@ export const bitcoinMainnet: CustomChainInfo = {
     accountUrl: 'https://blockstream.info/address/{address}'
   }
 };
+export const tonNetworkMainnet: CustomChainInfo = {
+  rest: 'https://blockstream.info/api',
+  rpc: 'https://blockstream.info/api',
+  chainId: TonChainId,
+  chainName: 'Ton',
+  bip44: {
+    coinType: 0
+  },
+  coinType: 0,
+  Icon: TonIcon,
+  IconLight: TonIcon,
+  stakeCurrency: {
+    coinDenom: 'TON',
+    coinMinimalDenom: 'ton',
+    coinDecimals: 8,
+    coinGeckoId: 'the-open-network',
+    coinImageUrl: 'https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png'
+  },
+  bech32Config: defaultBech32Config('bc'),
+  networkType: 'ton',
+  currencies: [
+    {
+      coinDenom: 'TON',
+      coinMinimalDenom: 'ton',
+      coinDecimals: 8,
+      bridgeTo: ['Oraichain'],
+      prefixToken: 'ton',
+      Icon: BTCIcon,
+      coinGeckoId: 'ton',
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png',
+      gasPriceStep: {
+        low: 0,
+        average: 0,
+        high: 0
+      }
+    }
+  ],
+  get feeCurrencies() {
+    return this.currencies;
+  },
+  // features: ['isBtc'],
+
+  txExplorer: {
+    name: 'BlockStream',
+    txUrl: `${TON_SCAN}/transaction/{txHash}`,
+    accountUrl: `${TON_SCAN}/{address}`
+  }
+};
+
 export const tokensIcon: TokenIcon[] = [
   {
     coinGeckoId: 'oraichain-token',
@@ -319,6 +369,11 @@ export const chainIcons: ChainIcon[] = [
     chainId: 'oraibtc-mainnet-1',
     Icon: BitcoinIcon,
     IconLight: BitcoinIcon
+  },
+  {
+    chainId: TonChainId,
+    Icon: TonIcon,
+    IconLight: TonIcon
   }
 ];
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
@@ -341,7 +396,11 @@ export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[]
 };
 
 // mapped chain info with icon
-export const chainInfosWithIcon = mapListWithIcon([...customChainInfos, bitcoinMainnet], chainIcons, 'chainId');
+export const chainInfosWithIcon = mapListWithIcon(
+  [...customChainInfos, bitcoinMainnet, tonNetworkMainnet],
+  chainIcons,
+  'chainId'
+);
 
 // mapped token with icon
 export const oraichainTokensWithIcon = mapListWithIcon(oraichainTokens, tokensIcon, 'coinGeckoId');

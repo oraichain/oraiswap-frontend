@@ -25,6 +25,7 @@ export interface ConfigState {
   metamaskAddress: string | null;
   tronAddress: string | null;
   btcAddress: string | null;
+  tonAddress: string | null;
   cosmosAddress: { [key: string]: string };
   allPendingDeposits: { [key: string]: DepositInfo[] };
   chainId: string;
@@ -69,6 +70,7 @@ const initialState: ConfigState = {
   metamaskAddress: '',
   bannerTime: 0,
   btcAddress: '',
+  tonAddress: '',
   tronAddress: '',
   walletTypeStore: 'owallet',
   cosmosAddress: {},

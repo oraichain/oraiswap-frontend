@@ -65,6 +65,9 @@ export const WalletManagement: FC<{}> = () => {
         case 'bitcoin':
           isActive = isCheckOwallet;
           break;
+        case 'ton':
+          isActive = true;
+          break;
       }
       return { ...wallet, isActive };
     }
