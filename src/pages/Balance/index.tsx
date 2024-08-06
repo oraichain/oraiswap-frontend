@@ -503,6 +503,7 @@ const Balance: React.FC<BalanceProps> = () => {
             relayerAmount: relayerAmount,
             relayerDecimals: 6
           },
+          userSlippage: 0,
           amounts: amountsBalance,
           simulateAmount
         },
