@@ -302,8 +302,11 @@ const PositionItem = ({ position, setStatusRemove }) => {
                   {!principalAmountX || !principalAmountY
                     ? '--'
                     : formatDisplayUsdt(
-                        new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal) * tokenXUsd)
-                          .add(toDisplay((principalAmountY || 0).toString(), tokenYDecimal) * tokenYUsd)
+                        new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal))
+                          .mul(tokenXUsd)
+                          .add(
+                            new BigDecimal(toDisplay((principalAmountY || 0).toString(), tokenYDecimal)).mul(tokenYUsd)
+                          )
                           .toNumber(),
                         6,
                         6

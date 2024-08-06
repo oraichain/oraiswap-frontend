@@ -479,7 +479,6 @@ export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
     return acc;
   }, {});
 
-  console.log('fmtFeeClaimData', fmtFeeClaimData);
   return fmtFeeClaimData;
 };
 

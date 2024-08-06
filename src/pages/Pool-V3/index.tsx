@@ -42,7 +42,6 @@ const PoolV3 = () => {
   }, [type]);
 
   const Content = PageContent[type || PoolV3PageType.POOL];
-  console.log('isMobile()', mobileMode);
 
   return (
     <div className={classNames(styles.poolV3, 'small_container')}>
