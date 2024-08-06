@@ -78,6 +78,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
+import { isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
 
 interface BalanceProps {}
 
@@ -505,7 +506,13 @@ const Balance: React.FC<BalanceProps> = () => {
           amounts: amountsBalance,
           simulateAmount
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
+        {
+          cosmosWallet: window.Keplr,
+          evmWallet: new Metamask(window.tronWebDapp),
+          swapOptions: {
+            isIbcWasm: isAllowIBCWasm(from, newToToken)
+          }
+        }
       );
 
       result = await universalSwapHandler.processUniversalSwap();
