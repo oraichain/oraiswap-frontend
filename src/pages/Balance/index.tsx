@@ -486,12 +486,22 @@ const Balance: React.FC<BalanceProps> = () => {
         simulateAmount = toAmount(fromAmount, newToToken.decimals).toString();
       }
 
+      // TODO: hardcode relayer fee
+      let relayerAmount = '100000';
+      if (from.chainId === '0x01') relayerAmount = '1000000';
+      if (from.chainId === '0x2b6653dc') relayerAmount = '800000';
+      if (from.chainId === 'noble-1') relayerAmount = '300000';
+
       const universalSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
+          relayerFee: {
+            relayerAmount: relayerAmount,
+            relayerDecimals: 6
+          },
           amounts: amountsBalance,
           simulateAmount
         },
