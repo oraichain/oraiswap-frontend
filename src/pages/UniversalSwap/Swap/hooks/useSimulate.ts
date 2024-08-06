@@ -25,6 +25,7 @@ export const useSimulate = (
     useAlphaSmartRoute?: boolean;
     useIbcWasm?: boolean;
     isAIRoute?: boolean;
+    protocols?: string[];
   }
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
@@ -44,7 +45,7 @@ export const useSimulate = (
         routerConfig: {
           url: 'https://osor.oraidex.io',
           path: '/smart-router/alpha-router',
-          protocols: ['Oraidex', 'OraidexV3', 'Osmosis']
+          protocols: simulateOption?.protocols ?? ['Oraidex', 'OraidexV3', 'Osmosis']
         }
       });
     },

@@ -29,7 +29,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const useAlphaSmartRoute = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-
+  const protocols = useIbcWasm ? ['Oraidex', 'OraidexV3'] : undefined;
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
     originalFromToken,
     originalToToken
@@ -51,7 +51,8 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
       {
         useAlphaSmartRoute,
         useIbcWasm,
-        isAIRoute
+        isAIRoute,
+        protocols
       }
     );
 
@@ -66,7 +67,8 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     {
       useAlphaSmartRoute,
       useIbcWasm,
-      isAIRoute
+      isAIRoute,
+      protocols
     }
   );
 
