@@ -38,7 +38,7 @@ export const useSimulate = (
         originalAmount: debouncedFromAmount,
         routerClient,
         routerOption: {
-          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute || simulateOption?.useIbcWasm,
+          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute,
           useIbcWasm: simulateOption?.useIbcWasm
         },
         routerConfig: {

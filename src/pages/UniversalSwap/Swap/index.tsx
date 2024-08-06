@@ -177,7 +177,7 @@ const SwapComponent: React.FC<{
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
-  let useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
+  let useAlphaSmartRouter = useIbcWasm ?? (isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute);
   if (
     [originalFromToken.contractAddress, originalFromToken.denom, originalToToken.contractAddress, originalToToken.denom]
       .filter(Boolean)
@@ -289,7 +289,8 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = (useAlphaSmartRouter || useIbcWasm) && simulateData?.routes;
+      const alphaSmartRoutes = useAlphaSmartRouter && simulateData?.routes;
+      console.log({ alphaSmartRoutes, useAlphaSmartRouter });
 
       let initSwapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },

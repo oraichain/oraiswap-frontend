@@ -367,12 +367,14 @@ export const getDisableSwap = ({
 export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
   const notAllowChainId = ['Neutaro-1'];
   if (notAllowChainId.includes(fromToken.chainId) || notAllowChainId.includes(toToken.chainId)) return false;
-
+  if (isAllowIBCWasm(fromToken, toToken)) return true;
+  // Case FromToken is Cosmos -> ToToken is Cosmos
   if (fromToken.cosmosBased && toToken.cosmosBased) return true;
   return false;
 };
 
 export const isAllowIBCWasm = (fromToken, toToken) => {
+  // Case FromToken is Evm -> ToToken is Cosmos
   if (!fromToken.cosmosBased && toToken.cosmosBased) return true;
   return false;
 };
