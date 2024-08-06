@@ -14,6 +14,7 @@ import { tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { Themes } from 'context/theme-context';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { isMaintainBridge } from 'pages/Balance';
 
 const cx = cn.bind(styles);
 interface InputSwapProps {
@@ -46,6 +47,7 @@ export default function SelectChain({
     const totalUsd = getTotalUsd(subAmounts, prices);
     return acc + totalUsd;
   }, 0);
+
   return (
     <>
       {/* <div className={cx('selectChainWrap', isSelectToken ? 'active' : '')}> */}
@@ -75,6 +77,7 @@ export default function SelectChain({
               .filter(
                 (net) => !isAllowChainId(net.chainId) && (!filterChainId.length || filterChainId.includes(net.chainId))
               )
+              .filter((n) => !isMaintainBridge || (isMaintainBridge && n.chainId === 'Oraichain'))
               .map((n) => {
                 const subAmounts = Object.fromEntries(
                   Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === n.chainId)

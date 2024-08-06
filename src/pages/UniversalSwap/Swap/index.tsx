@@ -32,7 +32,7 @@ import LoadingBox from 'components/LoadingBox';
 import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
-import { chainIcons } from 'config/chainInfos';
+import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import { assert, getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -849,7 +849,7 @@ const SwapComponent: React.FC<{
                   assets
                 );
                 return path.actions?.map((action, index, actions) => {
-                  const { info, TokenInIcon, TokenOutIcon } = getTokenInfo(action, path, flattenTokens, assetList);
+                  const { info, TokenInIcon, TokenOutIcon } = getTokenInfo(action, path, assetList);
                   const tokenInChainId = path.chainId;
                   const tokenOutChainId = path.tokenOutChainId;
                   const hasTypeConvert = actions.find((act) => act.type === 'Convert');
