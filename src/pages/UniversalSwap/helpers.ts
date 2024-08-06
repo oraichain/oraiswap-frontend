@@ -376,6 +376,8 @@ export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
 export const isAllowIBCWasm = (fromToken, toToken) => {
   // Case FromToken is Evm -> ToToken is Cosmos
   if (!fromToken.cosmosBased && toToken.cosmosBased) return true;
+  if (!fromToken.cosmosBased && !toToken.cosmosBased && fromToken.chaiId !== toToken.chaiId) return true;
+  if (fromToken.chainId === 'noble-1') return true;
   return false;
 };
 

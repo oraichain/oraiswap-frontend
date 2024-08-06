@@ -78,6 +78,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
+import { isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
 
 interface BalanceProps {}
 
@@ -486,16 +487,33 @@ const Balance: React.FC<BalanceProps> = () => {
         simulateAmount = toAmount(fromAmount, newToToken.decimals).toString();
       }
 
+      // TODO: hardcode relayer fee
+      let relayerAmount = '100000';
+      if (from.chainId === '0x01') relayerAmount = '1000000';
+      if (from.chainId === '0x2b6653dc') relayerAmount = '800000';
+      if (from.chainId === 'noble-1') relayerAmount = '300000';
+
       const universalSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
+          relayerFee: {
+            relayerAmount: relayerAmount,
+            relayerDecimals: 6
+          },
+          userSlippage: 0,
           amounts: amountsBalance,
           simulateAmount
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
+        {
+          cosmosWallet: window.Keplr,
+          evmWallet: new Metamask(window.tronWebDapp),
+          swapOptions: {
+            isIbcWasm: isAllowIBCWasm(from, newToToken)
+          }
+        }
       );
 
       result = await universalSwapHandler.processUniversalSwap();
