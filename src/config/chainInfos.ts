@@ -77,7 +77,8 @@ import {
   NEUTARO_ORAICHAIN_DENOM,
   OCH_CONTRACT,
   OCH_ETH_CONTRACT,
-  ORAIX_ETH_CONTRACT
+  ORAIX_ETH_CONTRACT,
+  TON_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -610,6 +611,13 @@ export const oraichainNetwork: CustomChainInfo = {
       Icon: BTCIcon,
       IconLight: BTCIcon,
       coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
+    },
+    {
+      coinDenom: 'TON',
+      coinMinimalDenom: TON_ORAICHAIN_DENOM,
+      coinDecimals: 9,
+      coinGeckoId: 'the-open-network',
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png?1696517498'
     }
     // {
     //   coinDenom: 'ATOM-CW20',

@@ -41,7 +41,7 @@ import {
   handleErrorTransaction,
   networks
 } from 'helper';
-import { bitcoinChainId } from 'helper/constants';
+import { DEFAULT_RELAYER_FEE, RELAYER_DECIMAL, bitcoinChainId } from 'helper/constants';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -78,7 +78,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
-import { isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
+import { isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
 
 interface BalanceProps {}
 
@@ -90,7 +90,9 @@ const Balance: React.FC<BalanceProps> = () => {
   const tokenUrl = searchParams.get('token');
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
   const nomic = useContext(NomicContext);
+
   // state internal
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
@@ -489,11 +491,18 @@ const Balance: React.FC<BalanceProps> = () => {
         simulateAmount = toAmount(fromAmount, newToToken.decimals).toString();
       }
 
-      // TODO: hardcode relayer fee
-      let relayerAmount = '100000';
-      if (from.chainId === '0x01') relayerAmount = '1000000';
-      if (from.chainId === '0x2b6653dc') relayerAmount = '800000';
-      if (from.chainId === 'noble-1') relayerAmount = '300000';
+      let relayerFee = {
+        relayerAmount: DEFAULT_RELAYER_FEE,
+        relayerDecimals: RELAYER_DECIMAL
+      };
+
+      if (!from.cosmosBased) {
+        const { relayer_fees: relayerFees } = feeConfig;
+        const findRelayerFee = relayerFees.find(
+          (relayer) => relayer.prefix === from.prefix || relayer.prefix === newToToken.prefix
+        );
+        if (findRelayerFee) relayerFee.relayerAmount = findRelayerFee.amount;
+      }
 
       const universalSwapHandler = new UniversalSwapHandler(
         {
@@ -501,10 +510,7 @@ const Balance: React.FC<BalanceProps> = () => {
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
-          relayerFee: {
-            relayerAmount: relayerAmount,
-            relayerDecimals: 6
-          },
+          relayerFee,
           userSlippage: 0,
           amounts: amountsBalance,
           simulateAmount
@@ -513,7 +519,10 @@ const Balance: React.FC<BalanceProps> = () => {
           cosmosWallet: window.Keplr,
           evmWallet: new Metamask(window.tronWebDapp),
           swapOptions: {
-            isIbcWasm: isAllowIBCWasm(from, newToToken)
+            isAlphaSmartRouter: isAllowAlphaSmartRouter(from, newToToken, false),
+            isIbcWasm: isAllowIBCWasm(from, newToToken, false),
+            isSourceReceiverTest: true,
+            ibcInfoTestMode: true
           }
         }
       );

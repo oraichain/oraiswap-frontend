@@ -26,8 +26,9 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
 
   const [isAIRoute] = useConfigReducer('AIRoute');
-  const useAlphaSmartRoute = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
-  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
+  const useAlphaSmartRoute = isAllowAlphaSmartRouter(originalFromToken, originalToToken, isAIRoute);
+  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken, isAIRoute);
+
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const protocols = useIbcWasm ? ['Oraidex', 'OraidexV3'] : undefined;
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(

@@ -18,7 +18,8 @@ import {
   OSMOSIS_ORAICHAIN_DENOM,
   USDC_CONTRACT,
   BigDecimal,
-  toAmount
+  toAmount,
+  TON_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -364,20 +365,29 @@ export const getDisableSwap = ({
 };
 
 // smart router osmosis
-export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
-  const notAllowChainId = ['Neutaro-1'];
-  if (notAllowChainId.includes(fromToken.chainId) || notAllowChainId.includes(toToken.chainId)) return false;
-  if (isAllowIBCWasm(fromToken, toToken)) return true;
-  // Case FromToken is Cosmos -> ToToken is Cosmos
-  if (fromToken.cosmosBased && toToken.cosmosBased) return true;
+export const isAllowAlphaSmartRouter = (fromToken, toToken, isAIRoute) => {
+  const isOraichain = fromToken.chainId === 'Oraichain';
+  // const notAllowChainId = ['Neutaro-1'];
+  const allowTokenTon = [fromToken.contractAddress, fromToken.denom, toToken.contractAddress, toToken.denom]
+    .filter(Boolean)
+    .includes(TON_ORAICHAIN_DENOM);
+
+  if (allowTokenTon) return true;
+  // if (notAllowChainId.includes(fromToken.chainId) || notAllowChainId.includes(toToken.chainId)) return false;
+  if (isOraichain && !toToken.cosmosBased) return false;
+  if (isOraichain) return isAIRoute;
+
+  if (fromToken.cosmosBased && toToken.cosmosBased) return isAIRoute;
+  if (fromToken.cosmosBased && !toToken.cosmosBased) return true;
+  if (!fromToken.cosmosBased) return true;
   return false;
 };
 
-export const isAllowIBCWasm = (fromToken, toToken) => {
-  // Case FromToken is Evm -> ToToken is Cosmos
-  if (!fromToken.cosmosBased && toToken.cosmosBased) return true;
-  if (!fromToken.cosmosBased && !toToken.cosmosBased && fromToken.chaiId !== toToken.chaiId) return true;
-  if (fromToken.chainId === 'noble-1') return true;
+export const isAllowIBCWasm = (fromToken, toToken, isAIRoute) => {
+  if (fromToken.cosmosBased && toToken.cosmosBased) return !isAIRoute;
+  if (fromToken.cosmosBased && !toToken.cosmosBased) return true;
+
+  if (!fromToken.cosmosBased) return true;
   return false;
 };
 

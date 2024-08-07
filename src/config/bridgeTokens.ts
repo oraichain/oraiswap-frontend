@@ -1,6 +1,6 @@
 import flatten from 'lodash/flatten';
 import uniqBy from 'lodash/uniqBy';
-import { chainInfos } from './chainInfos';
+import { chainInfos, oraichainNetwork } from './chainInfos';
 import {
   CustomChainInfo,
   INJECTIVE_ORAICHAIN_DENOM,
@@ -8,9 +8,9 @@ import {
   MILKYBSC_ORAICHAIN_DENOM,
   TokenItemType,
   KWT_BSC_CONTRACT,
-  MILKY_BSC_CONTRACT,
+  MILKY_BSC_CONTRACT
   // chainInfos,
-  oraichainNetwork
+  // oraichainNetwork
 } from '@oraichain/oraidex-common';
 import { bitcoinChainId } from 'helper/constants';
 

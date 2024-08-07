@@ -76,10 +76,9 @@ import useCalculateDataSwap, { SIMULATE_INIT_AMOUNT } from './hooks/useCalculate
 import { useFillToken } from './hooks/useFillToken';
 import useHandleEffectTokenChange from './hooks/useHandleEffectTokenChange';
 import styles from './index.module.scss';
+import { RELAYER_DECIMAL } from 'helper/constants';
 
 const cx = cn.bind(styles);
-// TODO: hardcode decimal relayerFee
-const RELAYER_DECIMAL = 6;
 
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
@@ -176,15 +175,8 @@ const SwapComponent: React.FC<{
   const fromTokenBalance = getTokenBalance(originalFromToken, amounts, subAmountFrom);
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
-  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
-  let useAlphaSmartRouter = useIbcWasm || (isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute);
-  if (
-    [originalFromToken.contractAddress, originalFromToken.denom, originalToToken.contractAddress, originalToToken.denom]
-      .filter(Boolean)
-      .includes(TON_ORAICHAIN_DENOM)
-  ) {
-    useAlphaSmartRouter = true;
-  }
+  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken, isAIRoute);
+  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken, isAIRoute);
 
   const settingRef = useRef();
   const smartRouteRef = useRef();
@@ -319,7 +311,9 @@ const SwapComponent: React.FC<{
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
           isAlphaSmartRouter: useAlphaSmartRouter,
-          isIbcWasm: useIbcWasm
+          isIbcWasm: useIbcWasm,
+          isSourceReceiverTest: true,
+          ibcInfoTestMode: true
         }
       });
 
@@ -607,9 +601,7 @@ const SwapComponent: React.FC<{
               <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
-              {isAllowAlphaSmartRouter(originalFromToken, originalToToken) && (
-                <AIRouteSwitch isLoading={isPreviousSimulate} />
-              )}
+              <AIRouteSwitch isLoading={isPreviousSimulate} />
               {generateRatioComp()}
             </div>
           </div>
