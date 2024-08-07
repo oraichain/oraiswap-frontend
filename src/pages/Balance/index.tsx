@@ -78,6 +78,8 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
+import { TonChainId } from 'context/ton-provider';
+import useTonBridgeHandler from './hooks/useTonBridgeHandler';
 
 interface BalanceProps {}
 
@@ -105,8 +107,10 @@ const Balance: React.FC<BalanceProps> = () => {
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const [tonAddress] = useConfigReducer('tonAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
+  const { handleBridgeFromOraichain, handleBridgeFromTon } = useTonBridgeHandler({ token: from });
 
   const ref = useRef(null);
   //@ts-ignore
@@ -218,7 +222,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress });
+      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress, tonAddress });
     } catch (err) {
       console.log({ err });
     } finally {
@@ -296,7 +300,7 @@ const Balance: React.FC<BalanceProps> = () => {
           customLink: `/bitcoin-dashboard?tab=pending_deposits`
         });
         setTimeout(async () => {
-          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress: btcAddr });
+          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress: btcAddr, tonAddress });
         }, 5000);
         return;
       }
@@ -354,6 +358,28 @@ const Balance: React.FC<BalanceProps> = () => {
         chainName: from.chainId
       });
     }
+  };
+
+  const checkTransferTon = async (fromAmount: number) => {
+    const isTontoOraichain = from.chainId === (TonChainId as any) && to.chainId === 'Oraichain';
+    const isOraichainToTON = from.chainId === 'Oraichain' && to.chainId === TonChainId;
+    if (isTontoOraichain || isOraichainToTON) {
+      handleTransferTon({
+        isTonToOraichain: isTontoOraichain,
+        transferAmount: fromAmount
+      });
+
+      return true;
+    }
+  };
+
+  const handleTransferTon = async ({ isTonToOraichain, transferAmount }) => {
+    const tonAddress = window.Ton.account?.address;
+    if (!tonAddress) throw Error('Not found your ton address!');
+    if (isTonToOraichain) {
+      return await handleBridgeFromTon(transferAmount);
+    }
+    return await handleBridgeFromOraichain(transferAmount);
   };
 
   const checkTransferBtc = async (fromAmount: number) => {
@@ -426,6 +452,12 @@ const Balance: React.FC<BalanceProps> = () => {
       displayToast(TToastType.TX_BROADCASTING);
       let result: DeliverTxResponse | string | any;
 
+      // check transfer TON <=> ORAICHAIN
+      const isTonBridge = await checkTransferTon(fromAmount);
+      if (isTonBridge) {
+        return;
+      }
+
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
         await checkTransferKwt(fromAmount);
@@ -451,6 +483,10 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // hardcode case Neutaro-1 & Noble-1
       if (from.chainId === 'Neutaro-1') return await handleTransferIBC(from, newToToken, fromAmount);
+
+      console.log('from', from, to);
+      if (to.chainId === TonChainId) {
+      }
 
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
@@ -629,6 +665,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
                 const isBtcToken = t.chainId === bitcoinChainId && t?.coinGeckoId === 'bitcoin';
                 const TokenItemELement: React.FC<TokenItemProps> = isBtcToken ? TokenItemBtc : TokenItem;
+
                 return (
                   <div key={t.denom}>
                     {!isOwallet && !isMobile() && isBtcToken && (

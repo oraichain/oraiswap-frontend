@@ -374,7 +374,6 @@ export const transferIbcCustom = async (
 
 export const findDefaultToToken = (from: TokenItemType) => {
   if (!from.bridgeTo) return;
-
   return flattenTokens.find(
     (t) => from.bridgeTo.includes(t.chainId) && from.name.includes(t.name) && from.chainId !== t.chainId
   );

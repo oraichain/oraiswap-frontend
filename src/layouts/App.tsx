@@ -26,15 +26,17 @@ import './index.scss';
 import Menu from './Menu';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
-import { TonProvider } from 'context/ton-provider';
+import { useTonConnectUI } from '@tonconnect/ui-react';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
+  const [, setTonAddress] = useConfigReducer('tonAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setBtcAddress] = useConfigReducer('btcAddress');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
+  const [tonConnectUI] = useTonConnectUI();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
@@ -46,6 +48,11 @@ const App = () => {
   const dispatch = useDispatch();
 
   useTronEventListener();
+
+  // init TON
+  useEffect(() => {
+    window.Ton = tonConnectUI;
+  }, [tonConnectUI]);
 
   // TODO: polyfill evm, tron, need refactor
   useEffect(() => {
@@ -205,6 +212,7 @@ const App = () => {
     return tronAddress;
   };
 
+  // TODO: owallet not support TON. need to update in next time
   const keplrHandler = async () => {
     try {
       polyfillForMobileMode();
@@ -232,17 +240,15 @@ const App = () => {
 
   return (
     <ThemeProvider>
-      <TonProvider>
-        <div className={`app ${theme}`}>
-          <Menu />
-          <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-          {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
-          <div className="main">
-            <Sidebar />
-            <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
-          </div>
+      <div className={`app ${theme}`}>
+        <Menu />
+        <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
+        {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
+        <div className="main">
+          <Sidebar />
+          <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
         </div>
-      </TonProvider>
+      </div>
     </ThemeProvider>
   );
 };

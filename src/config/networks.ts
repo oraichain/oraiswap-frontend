@@ -15,8 +15,10 @@ import {
   CW20_STAKING_CONTRACT,
   AMM_V3_CONTRACT
 } from '@oraichain/oraidex-common';
+import { CW_TON_BRIDGE, TOKEN_FACTORY } from 'context/ton-provider';
 
-export const network: CustomChainInfo & NetworkConfig & { pool_v3: string } = {
+export const network: CustomChainInfo &
+  NetworkConfig & { pool_v3: string; CW_TON_BRIDGE: string; TOKEN_FACTORY: string } = {
   ...oraichainNetwork,
   prefix: oraichainNetwork.bech32Config.bech32PrefixAccAddr,
   denom: 'orai',
@@ -34,5 +36,7 @@ export const network: CustomChainInfo & NetworkConfig & { pool_v3: string } = {
   staking_oraix: CW20_STAKING_CONTRACT,
   multicall: MULTICALL_CONTRACT,
   explorer: 'https://scan.orai.io',
-  pool_v3: AMM_V3_CONTRACT
+  pool_v3: AMM_V3_CONTRACT,
+  CW_TON_BRIDGE: CW_TON_BRIDGE,
+  TOKEN_FACTORY: TOKEN_FACTORY
 };

@@ -21,6 +21,7 @@ import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
 import loadWasm from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
 import { Client, cacheExchange, fetchExchange, Provider as UrqlProvider } from 'urql';
+import { TonProvider } from 'context/ton-provider';
 
 // const client = new Client({
 //   url: 'http://10.10.20.72:3000/',
@@ -76,7 +77,9 @@ const initApp = async () => {
           <Router>
             <ScrollToTop />
             <QueryClientProvider client={queryClient}>
-              <App />
+              <TonProvider>
+                <App />
+              </TonProvider>
             </QueryClientProvider>
           </Router>
           <ToastContext.Consumer>

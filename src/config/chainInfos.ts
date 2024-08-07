@@ -77,14 +77,19 @@ import {
   NEUTARO_ORAICHAIN_DENOM,
   OCH_CONTRACT,
   OCH_ETH_CONTRACT,
-  ORAIX_ETH_CONTRACT
+  ORAIX_ETH_CONTRACT,
+  TON_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
+
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
 import { bitcoinChainId } from 'helper/constants';
 import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
 import { listOsmosisToken } from './alphaNetwwork';
 import { TON_SCAN, TonChainId } from 'context/ton-provider';
+
+export const TON_ZERO_ADDRESS = 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c';
+export const USDT_TON_CONTRACT = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
 
 const [otherChainTokens, oraichainTokens] = tokens;
 type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
@@ -138,20 +143,20 @@ export const bitcoinMainnet: CustomChainInfo = {
   }
 };
 export const tonNetworkMainnet: CustomChainInfo = {
-  rest: 'https://blockstream.info/api',
-  rpc: 'https://blockstream.info/api',
+  rest: 'https://toncenter.com/api/v2/jsonRPC',
+  rpc: 'https://toncenter.com/api/v2/jsonRPC',
   chainId: TonChainId,
   chainName: 'Ton',
   bip44: {
-    coinType: 0
+    coinType: 607
   },
-  coinType: 0,
+  coinType: 607,
   Icon: TonIcon,
   IconLight: TonIcon,
   stakeCurrency: {
     coinDenom: 'TON',
     coinMinimalDenom: 'ton',
-    coinDecimals: 8,
+    coinDecimals: 9,
     coinGeckoId: 'the-open-network',
     coinImageUrl: 'https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png'
   },
@@ -161,17 +166,30 @@ export const tonNetworkMainnet: CustomChainInfo = {
     {
       coinDenom: 'TON',
       coinMinimalDenom: 'ton',
-      coinDecimals: 8,
+      coinDecimals: 9,
       bridgeTo: ['Oraichain'],
-      prefixToken: 'ton',
-      Icon: BTCIcon,
-      coinGeckoId: 'ton',
+      prefixToken: 'ton20_',
+      contractAddress: TON_ZERO_ADDRESS,
+      denom: 'ton',
+      Icon: TonIcon,
+      coinGeckoId: 'the-open-network',
       coinImageUrl: 'https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png',
       gasPriceStep: {
         low: 0,
         average: 0,
         high: 0
       }
+    },
+    {
+      coinDenom: 'USDT',
+      coinMinimalDenom: 'ton20_usdt',
+      coinDecimals: 6,
+      Icon: UsdtIcon,
+      bridgeTo: ['Oraichain'],
+      contractAddress: USDT_TON_CONTRACT,
+      prefixToken: 'ton20_',
+      denom: 'ton20_usdt',
+      coinGeckoId: 'tether'
     }
   ],
   get feeCurrencies() {
@@ -518,7 +536,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'usdt',
       type: 'cw20',
       contractAddress: USDT_CONTRACT,
-      bridgeTo: ['0x38', '0x2b6653dc', '0x01'],
+      bridgeTo: ['0x38', '0x2b6653dc', '0x01', TonChainId],
       coinDecimals: 6,
       Icon: UsdtIcon
     },
@@ -669,6 +687,14 @@ export const oraichainNetwork: CustomChainInfo = {
       Icon: BTCIcon,
       IconLight: BTCIcon,
       coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
+    },
+    {
+      coinDenom: 'TON',
+      coinMinimalDenom: TON_ORAICHAIN_DENOM,
+      coinDecimals: 9,
+      bridgeTo: [TonChainId],
+      coinGeckoId: 'the-open-network',
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png'
     }
     // {
     //   coinDenom: 'ATOM-CW20',
@@ -742,6 +768,7 @@ export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
   bitcoinNetwork,
+  tonNetworkMainnet,
   {
     rpc: 'https://bridge-v2.rpc.orai.io',
     rest: 'https://bridge-v2.lcd.orai.io',

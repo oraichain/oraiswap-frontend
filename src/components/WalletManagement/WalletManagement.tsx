@@ -22,6 +22,7 @@ export const WalletManagement: FC<{}> = () => {
   const [theme] = useConfigReducer('theme');
   const [oraiAddress] = useConfigReducer('address');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const [tonAddress] = useConfigReducer('tonAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
@@ -88,7 +89,7 @@ export const WalletManagement: FC<{}> = () => {
 
   // load balance every time change address
   useEffect(() => {
-    const addresses = { oraiAddress, tronAddress, metamaskAddress, btcAddress };
+    const addresses = { oraiAddress, tronAddress, metamaskAddress, btcAddress, tonAddress };
     const filteredAddresses = {};
 
     for (const key in addresses) {
@@ -100,7 +101,7 @@ export const WalletManagement: FC<{}> = () => {
       loadTokenAmounts(filteredAddresses);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
+  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress, tonAddress]);
 
   // reset balance when disconnect
   useEffect(() => {
