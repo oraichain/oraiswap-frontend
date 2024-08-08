@@ -1,31 +1,26 @@
-import styles from './index.module.scss';
-import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
+import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as AddIcon } from 'assets/icons/Add.svg';
+import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
-import { Button } from 'components/Button';
-import { useNavigate, useParams } from 'react-router-dom';
-import classNames from 'classnames';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import useTheme from 'hooks/useTheme';
-import { useEffect, useState } from 'react';
-import { formatNumberKMB, numberWithCommas } from 'helper/format';
-import PositionItem from '../PositionItem';
-import SingletonOraiswapV3, {
-  fetchPoolAprInfo,
-  PoolAprInfo,
-  poolKeyToString,
-  stringToPoolKey
-} from 'libs/contractSingleton';
-import { toDisplay } from '@oraichain/oraidex-common';
-import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { convertPosition } from 'pages/Pool-V3/helpers/helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import LoadingBox from 'components/LoadingBox';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
-import { getFeeClaimData } from '../PositionList';
+import classNames from 'classnames';
+import { Button } from 'components/Button';
+import LoadingBox from 'components/LoadingBox';
+import { formatNumberKMB, numberWithCommas } from 'helper/format';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useTheme from 'hooks/useTheme';
+import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString, stringToPoolKey } from 'libs/contractSingleton';
+import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
+import { convertPosition } from 'pages/Pool-V3/helpers/helper';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getFeeClaimData } from 'rest/graphClient';
+import PositionItem from '../PositionItem';
+import styles from './index.module.scss';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');

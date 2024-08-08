@@ -1,20 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import loader from 'assets/gif/loading.gif';
-import useStyles from './styles';
 import { Grid, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { EmptyPlaceholder } from '../EmptyPlaceholder/EmptyPlaceholder';
-
-import Volume from '../Volume/Volume';
-import Liquidity from '../Liquidity/Liquidity';
-import VolumeBar from '../volumeBar/VolumeBar';
-import TokensList from '../TokensList/TokensList';
-import PoolList from '../PoolList/PoolList';
-import useGetStatistic from '../hooks/useGetStatistic';
+import useStyles from './styles';
 import LoadingBox from 'components/LoadingBox';
+import Liquidity from '../Liquidity/Liquidity';
+import PoolList from '../PoolList/PoolList';
+import TokensList from '../TokensList/TokensList';
+import Volume from '../Volume/Volume';
+import useGetStatistic from '../hooks/useGetStatistic';
+import VolumeBar from '../volumeBar/VolumeBar';
 
 export const WrappedStats: React.FC = () => {
   const { classes } = useStyles();
-  const [isLoadingStats, setLoading] = useState(false);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [stats, setStats] = useState({
     volume24: {
       value: 0,
@@ -47,13 +45,13 @@ export const WrappedStats: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
+      setIsLoadingStats(true);
       const data = await getStats();
 
       if (data) {
         setStats(data);
       }
-      setLoading(false);
+      setIsLoadingStats(false);
     })();
   }, []);
 

@@ -1,13 +1,12 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import classNames from 'classnames';
-import { useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import useTheme from 'hooks/useTheme';
+import React, { useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PoolList from './components/PoolList';
 import PositionList from './components/PositionList';
-import styles from './index.module.scss';
-import { Link } from 'react-router-dom';
 import WrappedStats from './components/Statistics/WrappedStats/WrappedStats';
-import useTheme from 'hooks/useTheme';
-import { isMobile } from '@walletconnect/browser-utils';
+import styles from './index.module.scss';
 
 export enum PoolV3PageType {
   POOL = 'pools',
@@ -15,23 +14,23 @@ export enum PoolV3PageType {
   STAT = 'stats'
 }
 
-const listTab = [PoolV3PageType.POOL, PoolV3PageType.POSITION, PoolV3PageType.STAT];
-const listTabRender = [
-  { id: PoolV3PageType.POOL, value: 'Pools' },
-  { id: PoolV3PageType.POSITION, value: 'Your Liquidity Positions' },
-  { id: PoolV3PageType.STAT, value: 'Stats' }
-];
-
-const PageContent = {
-  [PoolV3PageType.POOL]: PoolList,
-  [PoolV3PageType.POSITION]: PositionList,
-  [PoolV3PageType.STAT]: WrappedStats
+type TabRender = {
+  id: PoolV3PageType;
+  value: string;
+  content: React.FC;
 };
+
+const listTab = Object.values(PoolV3PageType);
+const listTabRender: TabRender[] = [
+  { id: PoolV3PageType.POOL, value: 'Pools', content: PoolList },
+  { id: PoolV3PageType.POSITION, value: 'Your Liquidity Positions', content: PositionList },
+  { id: PoolV3PageType.STAT, value: 'Stats', content: WrappedStats }
+];
 
 const PoolV3 = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  let [searchParams, setSearchParams] = useSearchParams();
+  let [searchParams] = useSearchParams();
   const type = searchParams.get('type') as PoolV3PageType;
   const mobileMode = isMobile();
 
@@ -39,9 +38,10 @@ const PoolV3 = () => {
     if (!listTab.includes(type)) {
       navigate(`/pools-v3?type=${PoolV3PageType.POOL}`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
-  const Content = PageContent[type || PoolV3PageType.POOL];
+  const Content = listTabRender.find((tab) => tab.id === type)?.content ?? PoolList;
 
   return (
     <div className={classNames(styles.poolV3, 'small_container')}>
@@ -59,12 +59,7 @@ const PoolV3 = () => {
             );
           })}
         </div>
-
-        {/* <Link className={styles.swapBtn} to={`/pools-v3/swap`}>
-          Swap
-        </Link> */}
       </div>
-
       <div className={classNames(styles.content, styles[theme], styles[type])}>{Content && <Content />}</div>
     </div>
   );
