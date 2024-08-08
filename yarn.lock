@@ -4554,7 +4554,7 @@
     react-use "^17.4.0"
     react-use-websocket "^4.5.0"
 
-"@oraichain/oraidex-common@^1.0.91":
+"@oraichain/oraidex-common@^1.0.91", "@oraichain/oraidex-common@latest":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.2.tgz#4ff2dfe226a2bd417f6e59e24f66b211328bb282"
   integrity sha512-U+XAHnwoghiC73j+i9z2TKNM/zgaOqLYJdek9CfVLhzke3p8lpFArpwiBp1S3eU+IXhYfqfHL2Ej2Y1s7bfeXg==
@@ -4591,6 +4591,11 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.47.tgz#2e9df9900d38ebf3741f98f02b531a9671554726"
   integrity sha512-VkMYwyo6vG8En/GICZ+J8YfSuRJpBIK6ppEifuvbeGLUmiLrlA1TsMdqs2rIa1UJQNvEVO3mXodiSXr4V2IDLg==
 
+"@oraichain/oraidex-contracts-sdk@^1.0.48":
+  version "1.0.48"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.48.tgz#5abe789c5fea1e809a9395f12249e838e2c9c6be"
+  integrity sha512-NFJfDwjLBXlAg+F5aIUs/20r3s3n6xw80ivelMBr16y5IIvGNqiSKYZQ5YOHvMaXnwyBcpf89HLd4p0OIXc5Mg==
+
 "@oraichain/oraidex-universal-swap@1.0.96":
   version "1.0.96"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.96.tgz#d4c6c3da7f22d4f63706cf2780dfbf686850de10"
@@ -4602,6 +4607,11 @@
     ethers "^5.0.15"
     tronweb "5.3.2"
     ts-protoc-gen "^0.15.0"
+
+"@oraichain/oraiswap-v3-wasm@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3-wasm/-/oraiswap-v3-wasm-0.1.0.tgz#aff12c614635ad2c4343ef62d8497e41d52408f4"
+  integrity sha512-87YMqhBVgVJoX5BM+AeGc13I0dTR/hIHg6sIh+j9M/T0OecaCZR4O3h+CiaBKrK9Eej0gccv9zI02FwjAggAfw==
 
 "@oraichain/wasm-json-toolkit@^1.0.24":
   version "1.0.24"
@@ -14905,6 +14915,16 @@ ora@^5.4.1:
     log-symbols "^4.1.0"
     strip-ansi "^6.0.0"
     wcwidth "^1.0.1"
+
+oraiswap-v3-test@0.1.5-beta10:
+  version "0.1.5-beta10"
+  resolved "https://registry.yarnpkg.com/oraiswap-v3-test/-/oraiswap-v3-test-0.1.5-beta10.tgz#512d90264724013433b148deaf5cb13cc0985aed"
+  integrity sha512-tqQWb2XazwbwGGQQSGPFGxKyttDgGitx21DUq43qa8TsbM1iN35lbxETSU7bQmbZrwwUKT7iDFtkmhUptQBcww==
+  dependencies:
+    "@cosmjs/cosmwasm-stargate" "^0.31.0"
+    "@oraichain/oraidex-common" latest
+    "@oraichain/oraidex-contracts-sdk" "^1.0.48"
+    "@oraichain/oraiswap-v3-wasm" "^0.1.0"
 
 os-browserify@^0.3.0:
   version "0.3.0"

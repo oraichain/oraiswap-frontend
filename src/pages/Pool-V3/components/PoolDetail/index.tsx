@@ -62,6 +62,7 @@ const PoolV3Detail = () => {
     (async () => {
       try {
         const poolKey = stringToPoolKey(poolId);
+        console.log('poolKey', poolKey);
         const pool = await SingletonOraiswapV3.getPool(poolKey);
         const isLight = theme === 'light';
         const fmtPool = formatPoolData(pool, isLight);
