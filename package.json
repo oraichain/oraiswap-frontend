@@ -95,7 +95,8 @@
     "stream-http": "^3.2.0",
     "ts-jest": "^29.1.1",
     "typed-scss-modules": "^7.1.4",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "oraiswap-v3-test": "0.1.5-beta10"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
