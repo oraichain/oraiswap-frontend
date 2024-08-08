@@ -9,6 +9,8 @@ import TokensList from '../TokensList/TokensList';
 import Volume from '../Volume/Volume';
 import useGetStatistic from '../hooks/useGetStatistic';
 import VolumeBar from '../volumeBar/VolumeBar';
+import { getPoolDayDataV3 } from 'rest/graphClient';
+import { useGetPoolDayData } from './useGetPoolDayData';
 
 export const WrappedStats: React.FC = () => {
   const { classes } = useStyles();
@@ -32,15 +34,20 @@ export const WrappedStats: React.FC = () => {
     liquidityPlot: []
   });
   const { getStats } = useGetStatistic();
+  const { liquidityPlotData, volumePlotData, isLoadingPoolsDayData, volume24h, tvl24h, fees24h } = useGetPoolDayData();
+
+  useEffect(() => {
+    getPoolDayDataV3();
+  }, []);
 
   const {
-    volume24: volume24h,
-    tvl24: tvl24h,
-    fees24: fees24h,
+    // volume24: volume24h,
+    // tvl24: tvl24h,
+    // fees24: fees24h,
     tokensData,
-    poolsData,
-    volumePlot: volumePlotData,
-    liquidityPlot: liquidityPlotData
+    poolsData
+    // volumePlot: volumePlotData,
+    // liquidityPlot: liquidityPlotData
   } = stats;
 
   useEffect(() => {
@@ -58,6 +65,8 @@ export const WrappedStats: React.FC = () => {
   // isLoadingStats ? (
   //   <img src={loader} className={classes.loading} alt="Loading" />
   // ) :
+  console.log({ volumePlotData, liquidityPlotData });
+
   return (
     <Grid container className={classes.wrapper} direction="column">
       <LoadingBox loading={isLoadingStats} styles={{ minHeight: '60vh', height: 'fit-content' }}>
