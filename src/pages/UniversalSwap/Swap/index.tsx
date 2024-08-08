@@ -34,7 +34,14 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
 import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
-import { assert, getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import {
+  assert,
+  getSpecialCoingecko,
+  getTransactionUrl,
+  handleCheckAddress,
+  handleErrorTransaction,
+  networks
+} from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
@@ -177,6 +184,8 @@ const SwapComponent: React.FC<{
 
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken, isAIRoute);
   const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken, isAIRoute);
+
+  console.log({ useAlphaSmartRouter, useIbcWasm });
 
   const settingRef = useRef();
   const smartRouteRef = useRef();
@@ -393,10 +402,23 @@ const SwapComponent: React.FC<{
   };
 
   const unSupportSimulateToken = ['bnb', 'bep20_wbnb', 'eth', TON_ORAICHAIN_DENOM];
-  const supportedChain =
-    originalFromToken.denom === TON_ORAICHAIN_DENOM || originalToToken.denom === TON_ORAICHAIN_DENOM
-      ? chainInfos.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId)
-      : undefined;
+  const supportedChainFunc = () => {
+    if (unSupportSimulateToken.includes(originalFromToken?.denom)) {
+      return ['Oraichain'];
+    }
+
+    const isOraichainDenom = [originalFromToken.denom, originalToToken.denom].includes(TON_ORAICHAIN_DENOM);
+    if (isOraichainDenom) {
+      return networks.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId);
+    }
+
+    if (!originalFromToken.cosmosBased) {
+      return networks.filter((chainInfo) => chainInfo.chainId !== 'injective-1').map((chain) => chain.chainId);
+    }
+    return [];
+  };
+
+  const supportedChain = supportedChainFunc();
 
   const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
