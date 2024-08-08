@@ -23,7 +23,7 @@ type TabRender = {
 const listTab = Object.values(PoolV3PageType);
 const listTabRender: TabRender[] = [
   { id: PoolV3PageType.POOL, value: 'Pools', content: PoolList },
-  { id: PoolV3PageType.POSITION, value: 'Your Liquidity Positions', content: PositionList },
+  { id: PoolV3PageType.POSITION, value: 'My positions', content: PositionList },
   { id: PoolV3PageType.STAT, value: 'Stats', content: WrappedStats }
 ];
 

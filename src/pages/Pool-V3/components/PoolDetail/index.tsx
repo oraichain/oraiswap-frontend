@@ -21,6 +21,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getFeeClaimData } from 'rest/graphClient';
 import PositionItem from '../PositionItem';
 import styles from './index.module.scss';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
@@ -57,6 +58,8 @@ const PoolV3Detail = () => {
     total: totalLiquidity,
     allocation: {}
   });
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
 
   useEffect(() => {
     (async () => {
@@ -80,7 +83,7 @@ const PoolV3Detail = () => {
 
   useEffect(() => {
     const getAPRInfo = async () => {
-      const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools);
+      const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools, feeDailyData);
       setAprInfo({
         ...aprInfo,
         [poolKeyString]: res[poolKeyString]
@@ -232,7 +235,12 @@ const PoolV3Detail = () => {
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>
-              <p>{numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100)}%</p>
+              <p>
+                {numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100, undefined, {
+                  maximumFractionDigits: 2
+                })}
+                %
+              </p>
             </div>
             <div className={styles.item}>
               <span className={styles.label}>
@@ -242,18 +250,22 @@ const PoolV3Detail = () => {
               <p>
                 {!aprInfo[poolKeyString]?.incentivesApr
                   ? '-- '
-                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr * 100)}%`}
+                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr * 100, undefined, {
+                      maximumFractionDigits: 2
+                    })}%`}
               </p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
-              <p className={styles.total}>{numberWithCommas((aprInfo[poolKeyString]?.apr || 0) * 100)}%</p>
+              <p className={styles.total}>
+                {numberWithCommas((aprInfo[poolKeyString]?.apr || 0) * 100, undefined, { maximumFractionDigits: 2 })}%
+              </p>
             </div>
           </div>
         </div>
       </div>
       <div className={styles.positions}>
-        {<h1>Your Liquidity Positions ({dataPosition?.length ?? 0})</h1>}
+        {<h1>My positions ({dataPosition?.length ?? 0})</h1>}
         <LoadingBox loading={loading} styles={{ height: '30vh' }}>
           <div className={styles.list}>
             {dataPosition.length

@@ -36,6 +36,7 @@ import { oraichainTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -86,6 +87,10 @@ const PositionItem = ({ position, setStatusRemove }) => {
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );
 
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  console.log('yesterdayIndex', yesterdayIndex);
+  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
+
   useOnClickOutside(ref, () => {
     setCollapse(false);
   });
@@ -103,7 +108,8 @@ const PositionItem = ({ position, setStatusRemove }) => {
         prices,
         position.tokenXLiqInUsd,
         position.tokenYLiqInUsd,
-        statusRange
+        statusRange,
+        feeDailyData
       );
       setAprInfo(res);
     };
@@ -227,7 +233,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
           <div className={styles.item}>
             <p>APR</p>
             <span className={classNames(styles.value, styles.apr)}>
-              {numberWithCommas(aprInfo.total * 100)}%&nbsp;
+              {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%&nbsp;
               <TooltipIcon
                 className={styles.tooltipWrapper}
                 placement="top"
@@ -238,18 +244,24 @@ const PositionItem = ({ position, setStatusRemove }) => {
                   <div className={classNames(styles.tooltip, styles[theme])}>
                     <div className={styles.itemInfo}>
                       <span>Swap fee</span>
-                      <span className={styles.value}>{numberWithCommas(aprInfo.swapFee * 100)}%</span>
+                      <span className={styles.value}>
+                        {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                     <div className={styles.itemInfo}>
                       <span>
                         Incentives Boost&nbsp;
                         <IconBoots />
                       </span>
-                      <span className={styles.value}>{numberWithCommas(aprInfo.incentive * 100)}%</span>
+                      <span className={styles.value}>
+                        {numberWithCommas(aprInfo.incentive * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                     <div className={styles.itemInfo}>
                       <span>Total APR</span>
-                      <span className={styles.totalApr}>{numberWithCommas(aprInfo.total * 100)}%</span>
+                      <span className={styles.totalApr}>
+                        {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                   </div>
                 }

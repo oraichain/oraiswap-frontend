@@ -23,6 +23,8 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import axios from 'axios';
 import { oraichainTokens } from 'config/bridgeTokens';
 import LoadingBox from 'components/LoadingBox';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { toFixedIfNecessary } from 'helper/format';
 
 const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
@@ -38,6 +40,8 @@ const PoolList = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000));
+  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
 
   useEffect(() => {
     (async () => {
@@ -87,7 +91,7 @@ const PoolList = () => {
     const getAPRInfo = async () => {
       const poolKeys = dataPool.map((pool) => parsePoolKeyString(pool.poolKey));
 
-      const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools);
+      const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools, feeDailyData);
       setAprInfo(res);
     };
     if (dataPool.length && prices && liquidityPools) {
@@ -467,7 +471,9 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       </td>
       <td>
         <div className={styles.apr}>
-          <span className={styles.amount}>{numberWithCommas((aprInfo.apr ?? 0) * 100)}%</span>
+          <span className={styles.amount}>
+            {numberWithCommas(toFixedIfNecessary(((aprInfo.apr ?? 0) * 100).toString(), 2))}%
+          </span>
           <TooltipIcon
             className={styles.tooltipWrapper}
             placement="top"
@@ -478,18 +484,24 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
               <div className={classNames(styles.tooltip, styles[theme])}>
                 <div className={styles.itemInfo}>
                   <span>Swap fee</span>
-                  <span className={styles.value}>{numberWithCommas((aprInfo.swapFee ?? 0) * 100)}%</span>
+                  <span className={styles.value}>
+                    {numberWithCommas(toFixedIfNecessary((aprInfo.swapFee ?? 0 * 100).toString(), 2))}%
+                  </span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>
                     Incentives Boost&nbsp;
                     <IconBoots />
                   </span>
-                  <span className={styles.value}>{numberWithCommas((aprInfo.incentivesApr ?? 0) * 100)}%</span>
+                  <span className={styles.value}>
+                    {numberWithCommas(toFixedIfNecessary(((aprInfo.incentivesApr ?? 0) * 100).toString(), 2))}%
+                  </span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>Total APR</span>
-                  <span className={styles.totalApr}>{numberWithCommas((aprInfo.apr ?? 0) * 100)}%</span>
+                  <span className={styles.totalApr}>
+                    {numberWithCommas(toFixedIfNecessary(((aprInfo.apr ?? 0) * 100).toString(), 2))}%
+                  </span>
                 </div>
               </div>
             }

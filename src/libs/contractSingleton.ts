@@ -38,6 +38,7 @@ import { CoinGeckoId } from '@oraichain/oraidex-common';
 import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { calculateTokenAmounts } from 'pages/Pool-V3/helpers/helper';
+import { getFeeDailyData } from 'rest/graphClient';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
   { fee: 100000000, tick_spacing: 1 },
@@ -225,6 +226,7 @@ export default class SingletonOraiswapV3 {
     upperTick: number,
     xToY: boolean
   ): Promise<ArrayOfTupleOfUint16AndUint64> {
+    await this.loadCosmwasmClient();
     const tickmaps = await this._handler.tickMap(poolKey, lowerTick, upperTick, xToY);
     return tickmaps;
   }
@@ -267,7 +269,7 @@ export default class SingletonOraiswapV3 {
   }
 
   public static async getIncentivesPosition(positionIndex: number, ownerId: string): Promise<ArrayOfAsset> {
-    console.log({ positionIndex, ownerId });
+    await this.loadHandler();
     return await this._handler.positionIncentives(positionIndex, ownerId);
   }
 
@@ -286,6 +288,7 @@ export default class SingletonOraiswapV3 {
   }
 
   public static async getAllPosition(address: string): Promise<ArrayOfPosition> {
+    await this.loadHandler();
     const position = await this._handler.getPositions(address);
     return position;
   }
@@ -341,6 +344,7 @@ export default class SingletonOraiswapV3 {
 
   public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
     const ticks: number[] = [];
+    await this.loadHandler();
 
     for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
       for (let i = 0; i < 64; i++) {
@@ -377,6 +381,7 @@ export default class SingletonOraiswapV3 {
     const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
     const tokenY = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_y);
 
+    await this.loadHandler();
     const res = await this._handler.getPairLiquidityValues(pool);
     const tvlX = res.liquidityX;
     const tvlY = res.liquidityY;
@@ -418,6 +423,7 @@ export default class SingletonOraiswapV3 {
       poolList[poolKeyToString(pool.pool_key)] = pool;
     });
 
+    await this.loadHandler();
     const allPosition = await this._handler.allPositions();
 
     for (const position of allPosition) {
@@ -449,6 +455,7 @@ export default class SingletonOraiswapV3 {
     prices: CoinGeckoPrices<string>
   ): Promise<Record<string, number>> => {
     const poolLiquidities: Record<string, number> = {};
+    await this.loadHandler();
 
     for (const pool of pools) {
       const poolKey = pool.pool_key;
@@ -637,10 +644,10 @@ export async function fetchPositionAprInfo(
   prices: CoinGeckoPrices<CoinGeckoId>,
   tokenXLiquidityInUsd: number,
   tokenYLiquidityInUsd: number,
-  isInRange: boolean
+  isInRange: boolean,
+  feeAndLiquidityInfo: PoolFeeAndLiquidityDaily[]
 ): Promise<PositionAprInfo> {
-  const feeAndLiquidityInfo = await axios.get<PoolFeeAndLiquidityDaily[]>('pool-v3/fee', {});
-  const avgFeeAPRs = feeAndLiquidityInfo.data.map((pool) => {
+  const avgFeeAPRs = feeAndLiquidityInfo.map((pool) => {
     const feeAPR = (pool.feeDaily * 365) / pool.liquidityDaily;
     return {
       poolKey: pool.poolKey,
@@ -692,10 +699,10 @@ export type PoolAprInfo = {
 export async function fetchPoolAprInfo(
   poolKeys: PoolKey[],
   prices: CoinGeckoPrices<CoinGeckoId>,
-  poolLiquidities: Record<string, number>
+  poolLiquidities: Record<string, number>,
+  feeAndLiquidityInfo: PoolFeeAndLiquidityDaily[]
 ): Promise<Record<string, PoolAprInfo>> {
-  const feeAndLiquidityInfo = await axios.get<PoolFeeAndLiquidityDaily[]>('pool-v3/fee', {});
-  const avgFeeAPRs = feeAndLiquidityInfo.data.map((pool) => {
+  const avgFeeAPRs = feeAndLiquidityInfo.map((pool) => {
     const feeAPR = (pool.feeDaily * 365) / pool.liquidityDaily;
     return {
       poolKey: pool.poolKey,

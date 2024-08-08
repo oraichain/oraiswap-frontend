@@ -17,8 +17,7 @@ export const getFeeClaimData = async (address: string) => {
                 principalAmountY
                 fees {
                   nodes {
-                    amountXInUSD
-                    amountYInUSD
+                    amountInUSD
                     amountX
                     amountY
                     claimFeeIncentiveTokens {
@@ -43,6 +42,35 @@ export const getFeeClaimData = async (address: string) => {
       `;
     const result = await graphqlClient.request<any>(document);
     return result.query.positions.nodes || [];
+  } catch (error) {
+    console.log('error', error);
+    return [];
+  }
+};
+
+export type FeeDailyData = {
+  poolId: string;
+  tvlUSD: number;
+  feesInUSD: number;
+};
+
+export const getFeeDailyData = async (dayIndex: number): Promise<FeeDailyData[]> => {
+  try {
+    const document = gql`
+      {
+        query {
+          poolDayData(filter: { dayIndex: { equalTo: ${dayIndex} } }) {
+            nodes {
+              poolId
+              tvlUSD
+              feesInUSD
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.query.poolDayData.nodes || [];
   } catch (error) {
     console.log('error', error);
     return [];

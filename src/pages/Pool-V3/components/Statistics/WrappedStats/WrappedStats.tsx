@@ -46,6 +46,9 @@ export const WrappedStats: React.FC = () => {
   useEffect(() => {
     (async () => {
       setIsLoadingStats(true);
+
+      
+
       const data = await getStats();
 
       if (data) {

@@ -20,7 +20,6 @@ const PositionList = () => {
 
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [feeClaimData, setFeeClaimData] = useState([]);
   const [statusRemove, setStatusRemove] = useState<boolean>(undefined);
 
   useEffect(() => {
