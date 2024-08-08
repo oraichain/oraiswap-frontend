@@ -6,7 +6,8 @@ import {
   OsmoToken,
   AtomToken,
   InjectiveToken,
-  ChainIdEnum
+  ChainIdEnum,
+  TON_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
@@ -610,6 +611,13 @@ export const oraichainNetwork: CustomChainInfo = {
       Icon: BTCIcon,
       IconLight: BTCIcon,
       coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
+    },
+    {
+      coinDenom: 'TON',
+      coinMinimalDenom: TON_ORAICHAIN_DENOM,
+      coinDecimals: 9,
+      coinGeckoId: 'the-open-network',
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png?1696517498'
     }
     // {
     //   coinDenom: 'ATOM-CW20',
