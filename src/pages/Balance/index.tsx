@@ -81,6 +81,8 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 
 interface BalanceProps {}
 
+export const isMaintainBridge = false;
+
 const Balance: React.FC<BalanceProps> = () => {
   // hook
   const [searchParams] = useSearchParams();
@@ -548,7 +550,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   return (
     <Content nonBackground>
-      <div className={styles.wrapper}>
+      <div className={classNames(styles.wrapper, { [styles.isMaintainBridge]: isMaintainBridge })}>
         {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
         <StuckOraib remainingOraib={remainingOraib} handleMove={handleMoveOraib2Orai} loading={moveOraib2OraiLoading} />
         <div className={styles.header}>

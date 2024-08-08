@@ -19,8 +19,6 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
-import loadWasm from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
-import { Client, cacheExchange, fetchExchange, Provider as UrqlProvider } from 'urql';
 
 // const client = new Client({
 //   url: 'http://10.10.20.72:3000/',
@@ -96,41 +94,4 @@ const initApp = async () => {
   }
 };
 
-export interface WasmInfo {
-  imports: {
-    from: string;
-    names: string[];
-  }[];
-  exports: string[];
-}
-
-export async function parseWasm(wasmFilePath: string): Promise<WasmInfo> {
-  try {
-    const wasmBinary = await fetch(wasmFilePath)
-      .then((res) => res.arrayBuffer())
-      .then((buf) => buf);
-
-    console.log('wasmBinary', wasmBinary);
-    // const wasmBinary = await fs.promises.readFile(wasmFilePath);
-    const wasmModule = await WebAssembly.compile(wasmBinary);
-    const imports = Object.entries(
-      WebAssembly.Module.imports(wasmModule).reduce(
-        (result, item) => ({
-          ...result,
-          [item.module]: [...(result[item.module] || []), item.name]
-        }),
-        {} as Record<string, string[]>
-      )
-    ).map(([from, names]) => ({ from, names }));
-
-    const exports = WebAssembly.Module.exports(wasmModule).map((item) => item.name);
-
-    return { imports, exports };
-  } catch (e) {
-    throw new Error(`Failed to parse WASM file: ${e.message}`);
-  }
-}
-
-loadWasm().then(() => {
-  initApp();
-});
+initApp();
