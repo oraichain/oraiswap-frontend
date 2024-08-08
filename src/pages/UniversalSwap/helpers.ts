@@ -377,7 +377,7 @@ export const isAllowAlphaSmartRouter = (fromToken, toToken, isAIRoute) => {
   if (isOraichain && !toToken.cosmosBased) return false;
   if (isOraichain) return isAIRoute;
 
-  if (fromToken.cosmosBased && toToken.cosmosBased) return isAIRoute;
+  if (fromToken.cosmosBased && toToken.cosmosBased) return true;
   if (fromToken.cosmosBased && !toToken.cosmosBased) return true;
   if (!fromToken.cosmosBased) return true;
   return false;
