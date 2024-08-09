@@ -40,7 +40,8 @@ const PoolList = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000));
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
 
   useEffect(() => {
@@ -48,7 +49,7 @@ const PoolList = () => {
       try {
         setLoading(true);
         const pools = await SingletonOraiswapV3.getPools();
-
+        console.log('pools', pools);
         const fmtPools = (pools || [])
           .map((p) => {
             const isLight = theme === 'light';
@@ -472,7 +473,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       <td>
         <div className={styles.apr}>
           <span className={styles.amount}>
-            {numberWithCommas(toFixedIfNecessary(((aprInfo.apr ?? 0) * 100).toString(), 2))}%
+            {numberWithCommas(aprInfo.apr * 100, undefined,  { maximumFractionDigits: 2 })}%
           </span>
           <TooltipIcon
             className={styles.tooltipWrapper}
@@ -485,7 +486,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
                 <div className={styles.itemInfo}>
                   <span>Swap fee</span>
                   <span className={styles.value}>
-                    {numberWithCommas(toFixedIfNecessary((aprInfo.swapFee ?? 0 * 100).toString(), 2))}%
+                    {numberWithCommas(aprInfo.swapFee * 100, undefined,  { maximumFractionDigits: 2 })}%
                   </span>
                 </div>
                 <div className={styles.itemInfo}>
@@ -494,13 +495,13 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
                     <IconBoots />
                   </span>
                   <span className={styles.value}>
-                    {numberWithCommas(toFixedIfNecessary(((aprInfo.incentivesApr ?? 0) * 100).toString(), 2))}%
+                    {numberWithCommas(aprInfo.incentivesApr * 100, undefined,  { maximumFractionDigits: 2 })}%
                   </span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>Total APR</span>
                   <span className={styles.totalApr}>
-                    {numberWithCommas(toFixedIfNecessary(((aprInfo.apr ?? 0) * 100).toString(), 2))}%
+                    {numberWithCommas(aprInfo.apr * 100, undefined,  { maximumFractionDigits: 2 })}%
                   </span>
                 </div>
               </div>

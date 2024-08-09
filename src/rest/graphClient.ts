@@ -48,6 +48,49 @@ export const getFeeClaimData = async (address: string) => {
   }
 };
 
+export type PoolDayDataV3 = {
+  keys: string[];
+  sum: {
+    tvlUSD: number;
+    volumeInUSD: number;
+    feesInUSD: number;
+  };
+};
+
+export type PoolDayDataV3Raw = {
+  query: {
+    poolDayData: {
+      groupedAggregates: PoolDayDataV3[];
+    };
+  };
+};
+
+export const getPoolDayDataV3 = async () => {
+  try {
+    const document = gql`
+      {
+        query {
+          poolDayData {
+            groupedAggregates(groupBy: DAY_INDEX) {
+              keys
+              sum {
+                tvlUSD
+                volumeInUSD
+                feesInUSD
+              }
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<PoolDayDataV3Raw>(document);
+    return result.query.poolDayData.groupedAggregates || [];
+  } catch (error) {
+    console.log('error getPoolDayDataV3', error);
+    return [];
+  }
+};
+
 export type FeeDailyData = {
   poolId: string;
   tvlUSD: number;
@@ -63,6 +106,7 @@ export const getFeeDailyData = async (dayIndex: number): Promise<FeeDailyData[]>
             nodes {
               poolId
               tvlUSD
+              volumeInUSD
               feesInUSD
             }
           }
@@ -72,7 +116,7 @@ export const getFeeDailyData = async (dayIndex: number): Promise<FeeDailyData[]>
     const result = await graphqlClient.request<any>(document);
     return result.query.poolDayData.nodes || [];
   } catch (error) {
-    console.log('error', error);
+    console.log('error getPoolDayDataV3', error);
     return [];
   }
 };
