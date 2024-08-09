@@ -1,6 +1,6 @@
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import { TokenItemType, toDisplay, BigDecimal } from '@oraichain/oraidex-common';
+import { TokenItemType, BigDecimal } from '@oraichain/oraidex-common';
 import { PriceInfo } from '../CreatePosition';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { numberWithCommas } from 'helper/format';

@@ -1,4 +1,4 @@
-import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { toDisplay } from '@oraichain/oraidex-common';
 import Loading from 'assets/gif/loading.gif';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
@@ -9,22 +9,17 @@ import SearchLightSvg from 'assets/images/search-light-svg.svg';
 import SearchSvg from 'assets/images/search-svg.svg';
 import classNames from 'classnames';
 import { TooltipIcon } from 'components/Tooltip';
-import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3, { fetchPoolAprInfo, PoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
-import { getCosmWasmClient } from 'libs/cosmjs';
+import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
 import { formatPoolData, parsePoolKeyString } from 'pages/Pool-V3/helpers/format';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
-import axios from 'axios';
-import { oraichainTokens } from 'config/bridgeTokens';
 import LoadingBox from 'components/LoadingBox';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
-import { toFixedIfNecessary } from 'helper/format';
 import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
 
 const PoolList = () => {

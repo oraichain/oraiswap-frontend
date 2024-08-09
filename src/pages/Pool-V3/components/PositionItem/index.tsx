@@ -21,7 +21,6 @@ import {
   getConvertedPosition,
   getTick,
   initialXtoY,
-  showPrefix,
   tickerToAddress
 } from 'pages/Pool-V3/helpers/helper';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -37,12 +36,6 @@ import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
-
-const shorterPrefixConfig: PrefixConfig = {
-  B: 1000000000,
-  M: 1000000,
-  K: 1000
-};
 
 const PositionItem = ({ position, setStatusRemove }) => {
   const theme = useTheme();

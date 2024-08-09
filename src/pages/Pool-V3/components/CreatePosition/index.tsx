@@ -6,12 +6,10 @@ import {
   TokenAmount
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
-import { ReactComponent as TooltipIc } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
 import classNames from 'classnames';
-import { TooltipIcon } from 'components/Tooltip';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
@@ -79,7 +77,6 @@ const CreatePosition = () => {
     startPrice: 1.0
   });
   const [isOpen, setIsOpen] = useState(false);
-  const [openTooltip, setOpenTooltip] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const [typeChart, setTypeChart] = useState(TYPE_CHART.CONTINUOUS);
   const [focusId, setFocusId] = useState<'from' | 'to' | null>(null);
