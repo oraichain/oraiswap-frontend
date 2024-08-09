@@ -34,7 +34,7 @@ export const WrappedStats: React.FC = () => {
     liquidityPlot: []
   });
   const { getStats } = useGetStatistic();
-  const { liquidityPlotData, volumePlotData, isLoadingPoolsDayData, volume24h, tvl24h, fees24h } = useGetPoolDayData();
+  const { liquidityPlotData, volumePlotData, volume24h, tvl24h, fees24h } = useGetPoolDayData();
 
   useEffect(() => {
     getPoolDayDataV3();
@@ -53,8 +53,6 @@ export const WrappedStats: React.FC = () => {
   useEffect(() => {
     (async () => {
       setIsLoadingStats(true);
-
-      
 
       const data = await getStats();
 
