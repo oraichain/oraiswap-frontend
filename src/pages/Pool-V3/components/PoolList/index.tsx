@@ -75,29 +75,23 @@ const PoolList = () => {
   }, [liquidityPools]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        if (dataPool.length && poolLiquidities) {
-          setLiquidityPools(poolLiquidities);
-          setVolumnePools(
-            Object.keys(poolVolume).map((poolAddress) => {
-              return {
-                apy: 0,
-                poolAddress,
-                fee: 0,
-                volume24: poolVolume[poolAddress],
-                tokenX: null,
-                tokenY: null,
-                tvl: null
-              };
-            })
-          );
-        }
-      } catch (error) {
-        console.log('error: get liquidities', error);
-      }
-    })();
-  }, [dataPool, poolLiquidities]);
+    if (dataPool.length && poolLiquidities) {
+      setLiquidityPools(poolLiquidities);
+      setVolumnePools(
+        Object.keys(poolVolume).map((poolAddress) => {
+          return {
+            apy: 0,
+            poolAddress,
+            fee: 0,
+            volume24: poolVolume[poolAddress],
+            tokenX: null,
+            tokenY: null,
+            tvl: null
+          };
+        })
+      );
+    }
+  }, [dataPool?.length, Object.values(poolLiquidities).length]);
 
   useEffect(() => {
     const getAPRInfo = async () => {
