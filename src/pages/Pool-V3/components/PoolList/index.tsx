@@ -257,7 +257,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       </td>
       <td className={styles.textRight}>
         <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
-          {liquidity ? formatDisplayUsdt(liquidity) : <img src={Loading} alt="loading" width={30} height={30} />}
+          {liquidity ? formatDisplayUsdt(liquidity) : (liquidity === 0 ? formatDisplayUsdt(0) : <img src={Loading} alt="loading" width={30} height={30} />)}
         </span>
       </td>
       <td className={styles.textRight}>

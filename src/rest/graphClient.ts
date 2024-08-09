@@ -216,7 +216,7 @@ export const getPoolPositionsInfo = async (): Promise<PoolPositionsInfo[]> => {
       }
     `;
     const result = await graphqlClient.request<any>(document);
-    console.log({ result });
+    // console.log({ result });
     return result.query.pools.nodes || [];
   } catch (error) {
     console.log('error getPoolPositionsInfo', error);
