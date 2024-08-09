@@ -496,13 +496,12 @@ const Balance: React.FC<BalanceProps> = () => {
         relayerDecimals: RELAYER_DECIMAL
       };
 
-      if (!from.cosmosBased) {
-        const { relayer_fees: relayerFees } = feeConfig;
-        const findRelayerFee = relayerFees.find(
-          (relayer) => relayer.prefix === from.prefix || relayer.prefix === newToToken.prefix
-        );
-        if (findRelayerFee) relayerFee.relayerAmount = findRelayerFee.amount;
-      }
+      const { relayer_fees: relayerFees } = feeConfig;
+      const findRelayerFee = relayerFees.find(
+        (relayer) => relayer.prefix === from.prefix || relayer.prefix === newToToken.prefix
+      );
+
+      if (findRelayerFee) relayerFee.relayerAmount = findRelayerFee.amount;
 
       const universalSwapHandler = new UniversalSwapHandler(
         {
