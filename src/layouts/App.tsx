@@ -58,7 +58,22 @@ const App = () => {
     }
   }, [walletByNetworks, window.tronWeb, window.tronLink, ethOwallet]);
 
-  //Public API that will echo messages sent to it back to the client
+  useEffect(() => {
+    const win = window as any;
+    if (typeof win.Featurebase !== 'function') {
+      win.Featurebase = function () {
+        (win.Featurebase.q = win.Featurebase.q || []).push(arguments);
+      };
+    }
+    win.Featurebase('initialize_feedback_widget', {
+      organization: 'oraidex',
+      theme: 'light',
+      placement: 'right',
+      email: 'hau.nv@orai.io',
+      name: 'hajua'
+    });
+  }, [theme]);
+
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
     {
@@ -232,6 +247,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
+        {/* <button data-featurebase-feedback>Open Widget</button> */}
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
         {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
