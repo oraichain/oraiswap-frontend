@@ -520,9 +520,7 @@ const Balance: React.FC<BalanceProps> = () => {
           evmWallet: new Metamask(window.tronWebDapp),
           swapOptions: {
             isAlphaSmartRouter: isAllowAlphaSmartRouter(from, newToToken, false),
-            isIbcWasm: isAllowIBCWasm(from, newToToken, false),
-            isSourceReceiverTest: true,
-            ibcInfoTestMode: true
+            isIbcWasm: isAllowIBCWasm(from, newToToken, false)
           }
         }
       );
