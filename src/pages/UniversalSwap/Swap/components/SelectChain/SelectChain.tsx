@@ -77,7 +77,9 @@ export default function SelectChain({
               .filter(
                 (net) => !isAllowChainId(net.chainId) && (!filterChainId.length || filterChainId.includes(net.chainId))
               )
-              .filter((n) => !isMaintainBridge || (isMaintainBridge && n.chainId === 'Oraichain'))
+              .filter(
+                (n) => !isMaintainBridge || (isMaintainBridge && n.networkType === 'cosmos' && n.chainId !== 'noble-1')
+              )
               .map((n) => {
                 const subAmounts = Object.fromEntries(
                   Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === n.chainId)

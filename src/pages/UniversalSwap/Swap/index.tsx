@@ -408,6 +408,13 @@ const SwapComponent: React.FC<{
       return networks.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId);
     }
 
+    if (originalFromToken.chainId === 'injective-1') {
+      if (!isAIRoute) {
+        return networks.filter((chainInfo) => chainInfo.chainId === 'Oraichain').map((chain) => chain.chainId);
+      }
+      return networks.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId);
+    }
+
     if (!originalFromToken.cosmosBased) {
       return networks.filter((chainInfo) => chainInfo.chainId !== 'injective-1').map((chain) => chain.chainId);
     }
