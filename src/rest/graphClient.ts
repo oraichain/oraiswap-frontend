@@ -120,3 +120,44 @@ export const getFeeDailyData = async (dayIndex: number): Promise<FeeDailyData[]>
     return [];
   }
 };
+
+export type PoolLiquidityAndVolume = {
+  id: string;
+  totalValueLockedInUSD: number;
+  poolDayData: {
+    aggregates: {
+      sum: {
+        feesInUSD: number;
+        volumeInUSD: number;
+      };
+    };
+  };
+};
+
+export const getPoolsLiquidityAndVolume = async (dayIndex: number): Promise<PoolLiquidityAndVolume[]> => {
+  try {
+    const document = gql`
+      query {
+        pools {
+          nodes {
+            id
+            totalValueLockedInUSD
+            poolDayData(filter: { dayIndex: { equalTo: ${dayIndex} } }) {
+              aggregates {
+                sum {
+                  feesInUSD
+                  volumeInUSD
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.pools.nodes || [];
+  } catch (error) {
+    console.log('error getPoolsLiquidityAndVolume', error);
+    return [];
+  }
+};

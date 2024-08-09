@@ -88,7 +88,6 @@ const PositionItem = ({ position, setStatusRemove }) => {
   );
 
   const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
-  console.log('yesterdayIndex', yesterdayIndex);
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
 
   useOnClickOutside(ref, () => {
@@ -122,7 +121,6 @@ const PositionItem = ({ position, setStatusRemove }) => {
     if (!openCollapse) return;
     (async () => {
       const { pool_key, lower_tick_index, upper_tick_index } = position;
-      console.log('position', position);
       const [lowerTickData, upperTickData, incentives] = await Promise.all([
         SingletonOraiswapV3.getTicks(lower_tick_index, pool_key),
         SingletonOraiswapV3.getTicks(upper_tick_index, pool_key),

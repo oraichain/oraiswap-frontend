@@ -25,6 +25,7 @@ import { oraichainTokens } from 'config/bridgeTokens';
 import LoadingBox from 'components/LoadingBox';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { toFixedIfNecessary } from 'helper/format';
+import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
 
 const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
@@ -43,13 +44,13 @@ const PoolList = () => {
   const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
 
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
+  const { poolLiquidities, poolVolume, refetchPoolLiqAndVol } = useGetPoolLiqAndVol(yesterdayIndex);
 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         const pools = await SingletonOraiswapV3.getPools();
-        console.log('pools', pools);
         const fmtPools = (pools || [])
           .map((p) => {
             const isLight = theme === 'light';
@@ -79,8 +80,18 @@ const PoolList = () => {
     (async () => {
       try {
         if (dataPool.length) {
-          const liquidityByPools = await SingletonOraiswapV3.getPoolLiquidities(dataPool, prices);
-          setLiquidityPools(liquidityByPools);
+          setLiquidityPools(poolLiquidities);
+          setVolumnePools(Object.keys(poolVolume).map((poolAddress) => {
+            return {
+              apy: 0,
+              poolAddress,
+              fee: 0,
+              volume24: poolVolume[poolAddress],
+              tokenX: null,
+              tokenY: null,
+              tvl: null  
+            }
+          }));
         }
       } catch (error) {
         console.log('error: get liquidities', error);
@@ -99,214 +110,6 @@ const PoolList = () => {
       getAPRInfo();
     }
   }, [dataPool, prices, liquidityPools]);
-
-  useEffect(() => {
-    const fetchStatusAmmV3 = async () => {
-      try {
-        const res = await axios.get('/pool-v3/status', { baseURL: 'https://api-staging.oraidex.io/v1' });
-        return res.data;
-      } catch (error) {
-        return [];
-      }
-    };
-
-    fetchStatusAmmV3().then(async (data) => {
-      const pools = await SingletonOraiswapV3.getPools();
-      const allPoolsData = pools.map((pool) => {
-        return {
-          tokenX: pool.pool_key.token_x,
-          tokenY: pool.pool_key.token_y,
-          fee: BigInt(pool.pool_key.fee_tier.fee),
-          poolKey: poolKeyToString(pool.pool_key)
-        };
-      });
-      const poolsDataObject: Record<
-        string,
-        {
-          tokenX: string;
-          tokenY: string;
-          fee: bigint;
-          poolKey: string;
-        }
-      > = {};
-      allPoolsData.forEach((pool) => {
-        poolsDataObject[pool.poolKey.toString()] = pool;
-      });
-
-      // let allTokens = oraichainTokens.reduce((acc, cur) => {
-      //   return { ...acc, [cur.contractAddress || cur.denom]: cur };
-      // }, {});
-
-      // const unknownTokens = new Set<string>();
-      // allPoolsData.forEach((pool) => {
-      //   if (!allTokens[pool.tokenX.toString()]) {
-      //     unknownTokens.add(pool.tokenX);
-      //   }
-
-      //   if (!allTokens[pool.tokenY.toString()]) {
-      //     unknownTokens.add(pool.tokenY);
-      //   }
-      // });
-
-      // const tokenInfos = await SingletonOraiswapV3.getTokensInfo([...unknownTokens]);
-      // // yield* put(poolsActions.addTokens(newTokens))
-
-      // const preparedTokens: Record<string, any> = {};
-      // Object.entries(allTokens).forEach(([key, val]) => {
-      //   // @ts-ignore
-      //   if (typeof val.coinGeckoId !== 'undefined') {
-      //     preparedTokens[key] = val as Required<any>;
-      //   }
-      // });
-
-      // let tokensPricesData: Record<string, any> = {};
-
-      // const volume24 = {
-      //   value: 0,
-      //   change: 0
-      // };
-      // const tvl24 = {
-      //   value: 0,
-      //   change: 0
-      // };
-      // const fees24 = {
-      //   value: 0,
-      //   change: 0
-      // };
-
-      // const tokensDataObject: Record<string, any> = {};
-      let poolsData: {
-        poolAddress: string;
-        tokenX: string;
-        tokenY: string;
-        fee: number;
-        volume24: number;
-        tvl: number;
-        apy: number;
-      }[] = [];
-      // const volumeForTimestamps: Record<string, number> = {};
-      // const liquidityForTimestamps: Record<string, number> = {};
-      // const feesForTimestamps: Record<string, number> = {};
-
-      const lastTimestamp = Math.max(
-        ...Object.values(data)
-          .filter((snaps: any) => snaps.length > 0)
-          .map((snaps: any) => +snaps[snaps.length - 1].timestamp)
-      );
-
-      Object.entries(data).forEach(([address, snapshots]) => {
-        //   if (!poolsDataObject[address]) {
-        //     return;
-        //   }
-        //   const tokenXId = preparedTokens?.[poolsDataObject[address].tokenX.toString()]?.coingeckoId ?? '';
-        //   const tokenYId = preparedTokens?.[poolsDataObject[address].tokenY.toString()]?.coingeckoId ?? '';
-        //   if (!tokensDataObject[poolsDataObject[address].tokenX.toString()]) {
-        //     tokensDataObject[poolsDataObject[address].tokenX.toString()] = {
-        //       address: poolsDataObject[address].tokenX,
-        //       price: tokensPricesData?.[tokenXId]?.price ?? 0,
-        //       volume24: 0,
-        //       tvl: 0,
-        //       priceChange: 0
-        //     };
-        //   }
-        //   if (!tokensDataObject[poolsDataObject[address].tokenY.toString()]) {
-        //     tokensDataObject[poolsDataObject[address].tokenY.toString()] = {
-        //       address: poolsDataObject[address].tokenY,
-        //       price: tokensPricesData?.[tokenYId]?.price ?? 0,
-        //       volume24: 0,
-        //       tvl: 0,
-        //       priceChange: 0
-        //     };
-        //   }
-        // @ts-ignore
-        if (!snapshots.length) {
-          poolsData.push({
-            volume24: 0,
-            tvl: 0,
-            tokenX: poolsDataObject[address].tokenX,
-            tokenY: poolsDataObject[address].tokenY,
-            // TODO: hard code decimals
-            fee: Number(poolsDataObject[address].fee),
-            apy: 0, // TODO: calculate apy
-            poolAddress: address
-          });
-          return;
-        }
-        //   const tokenX = allTokens[poolsDataObject[address].tokenX.toString()];
-        //   const tokenY = allTokens[poolsDataObject[address].tokenY.toString()];
-        //@ts-ignore
-        const lastSnapshot = snapshots[snapshots.length - 1];
-        poolsData.push({
-          volume24:
-            lastSnapshot.timestamp === lastTimestamp
-              ? lastSnapshot.volumeX.usdValue24 + lastSnapshot.volumeY.usdValue24
-              : 0,
-          tvl:
-            lastSnapshot.timestamp === lastTimestamp
-              ? lastSnapshot.liquidityX.usdValue24 + lastSnapshot.liquidityY.usdValue24
-              : 0,
-          tokenX: poolsDataObject[address]?.tokenX,
-          tokenY: poolsDataObject[address]?.tokenY,
-          fee: Number(poolsDataObject[address]?.fee),
-          apy: 0, // TODO: calculate apy
-          poolAddress: address
-        });
-        //   // @ts-ignore
-        //   snapshots.slice(-30).forEach((snapshot) => {
-        //     const timestamp = snapshot.timestamp.toString();
-        //     if (!volumeForTimestamps[timestamp]) {
-        //       volumeForTimestamps[timestamp] = 0;
-        //     }
-        //     if (!liquidityForTimestamps[timestamp]) {
-        //       liquidityForTimestamps[timestamp] = 0;
-        //     }
-        //     if (!feesForTimestamps[timestamp]) {
-        //       feesForTimestamps[timestamp] = 0;
-        //     }
-        //     volumeForTimestamps[timestamp] += snapshot.volumeX.usdValue24 + snapshot.volumeY.usdValue24;
-        //     liquidityForTimestamps[timestamp] += snapshot.liquidityX.usdValue24 + snapshot.liquidityY.usdValue24;
-        //     feesForTimestamps[timestamp] += snapshot.feeX.usdValue24 + snapshot.feeY.usdValue24;
-        //   });
-      });
-
-      // const volumePlot: any[] = Object.entries(volumeForTimestamps)
-      //   .map(([timestamp, value]) => ({
-      //     timestamp: +timestamp,
-      //     value
-      //   }))
-      //   .sort((a, b) => a.timestamp - b.timestamp);
-      // const liquidityPlot: any[] = Object.entries(liquidityForTimestamps)
-      //   .map(([timestamp, value]) => ({
-      //     timestamp: +timestamp,
-      //     value
-      //   }))
-      //   .sort((a, b) => a.timestamp - b.timestamp);
-      // const feePlot: any[] = Object.entries(feesForTimestamps)
-      //   .map(([timestamp, value]) => ({
-      //     timestamp: +timestamp,
-      //     value
-      //   }))
-      //   .sort((a, b) => a.timestamp - b.timestamp);
-
-      const tiersToOmit = [0.001, 0.003];
-
-      poolsData = poolsData.filter((pool) => !tiersToOmit.includes(pool.fee));
-
-      // volume24.value = volumePlot.length ? volumePlot[volumePlot.length - 1].value : 0;
-      // tvl24.value = liquidityPlot.length ? liquidityPlot[liquidityPlot.length - 1].value : 0;
-      // fees24.value = feePlot.length ? feePlot[feePlot.length - 1].value : 0;
-
-      // const prevVolume24 = volumePlot.length > 1 ? volumePlot[volumePlot.length - 2].value : 0;
-      // const prevTvl24 = liquidityPlot.length > 1 ? liquidityPlot[liquidityPlot.length - 2].value : 0;
-      // const prevFees24 = feePlot.length > 1 ? feePlot[feePlot.length - 2].value : 0;
-
-      // volume24.change = ((volume24.value - prevVolume24) / prevVolume24) * 100;
-      // tvl24.change = ((tvl24.value - prevTvl24) / prevTvl24) * 100;
-      // fees24.change = ((fees24.value - prevFees24) / prevFees24) * 100;
-
-      setVolumnePools(poolsData);
-    });
-  }, []);
 
   return (
     <div className={styles.poolList}>
