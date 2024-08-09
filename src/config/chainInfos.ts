@@ -6,8 +6,7 @@ import {
   OsmoToken,
   AtomToken,
   InjectiveToken,
-  ChainIdEnum,
-  TON_ORAICHAIN_DENOM
+  ChainIdEnum
 } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
