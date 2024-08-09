@@ -82,7 +82,7 @@ import { isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/hel
 
 interface BalanceProps {}
 
-export const isMaintainBridge = true;
+export const isMaintainBridge = false;
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
