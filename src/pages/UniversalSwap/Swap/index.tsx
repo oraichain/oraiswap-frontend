@@ -10,7 +10,7 @@ import {
   toAmount,
   toDisplay,
   TON_ORAICHAIN_DENOM,
-  chainInfos
+  evmChains
 } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
@@ -185,8 +185,6 @@ const SwapComponent: React.FC<{
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken, isAIRoute);
   const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken, isAIRoute);
 
-  console.log({ useAlphaSmartRouter, useIbcWasm });
-
   const settingRef = useRef();
   const smartRouteRef = useRef();
 
@@ -320,9 +318,7 @@ const SwapComponent: React.FC<{
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
           isAlphaSmartRouter: useAlphaSmartRouter,
-          isIbcWasm: useIbcWasm,
-          isSourceReceiverTest: true,
-          ibcInfoTestMode: true
+          isIbcWasm: useIbcWasm
         }
       });
 
@@ -623,7 +619,9 @@ const SwapComponent: React.FC<{
               <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
-              <AIRouteSwitch isLoading={isPreviousSimulate} />
+              {originalFromToken.cosmosBased && originalToToken.cosmosBased && useAlphaSmartRouter && (
+                <AIRouteSwitch isLoading={isPreviousSimulate} />
+              )}
               {generateRatioComp()}
             </div>
           </div>
