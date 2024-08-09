@@ -34,8 +34,9 @@ import { getCosmWasmClient } from 'libs/cosmjs';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal } from '@oraichain/oraidex-common';
+import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 
 const shorterPrefixConfig: PrefixConfig = {
   B: 1000000000,
@@ -58,7 +59,9 @@ const PositionItem = ({ position, setStatusRemove }) => {
     totalEarn,
     totalEarnIncentiveUsd = 0,
     tokenXUsd = 0,
-    tokenYUsd = 0
+    tokenYUsd = 0,
+    tokenYDecimal,
+    tokenXDecimal
   } = position || {};
 
   const { earnX = 0, earnY = 0, earnIncentive = null } = totalEarn || {};
@@ -84,6 +87,9 @@ const PositionItem = ({ position, setStatusRemove }) => {
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );
 
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
+
   useOnClickOutside(ref, () => {
     setCollapse(false);
   });
@@ -101,7 +107,8 @@ const PositionItem = ({ position, setStatusRemove }) => {
         prices,
         position.tokenXLiqInUsd,
         position.tokenYLiqInUsd,
-        statusRange
+        statusRange,
+        feeDailyData
       );
       setAprInfo(res);
     };
@@ -117,7 +124,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
       const [lowerTickData, upperTickData, incentives] = await Promise.all([
         SingletonOraiswapV3.getTicks(lower_tick_index, pool_key),
         SingletonOraiswapV3.getTicks(upper_tick_index, pool_key),
-        SingletonOraiswapV3.getIncentivesPosition(position, address)
+        SingletonOraiswapV3.getIncentivesPosition(position.id, address)
       ]);
 
       const tokenIncentive = incentives.reduce((acc, cur) => {
@@ -171,15 +178,12 @@ const PositionItem = ({ position, setStatusRemove }) => {
       const totalIncentiveUsd = Object.entries(incentives).reduce((acc: number, [tokenAddress, amount]) => {
         const token = oraichainTokens.find((e) => [e.contractAddress, e.denom].includes(tokenAddress));
 
-        console.log('first', [tokenAddress, amount, token]);
         const usd = toDisplay(amount.toString()) * cachePrices[token.coinGeckoId];
 
         acc = new BigDecimal(acc || 0).add(usd).toNumber();
 
         return acc;
       }, 0);
-
-      console.log('totalIncentiveUsd', totalIncentiveUsd);
 
       return [x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd];
     }
@@ -227,7 +231,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
           <div className={styles.item}>
             <p>APR</p>
             <span className={classNames(styles.value, styles.apr)}>
-              {numberWithCommas(aprInfo.total * 100)}%&nbsp;
+              {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%&nbsp;
               <TooltipIcon
                 className={styles.tooltipWrapper}
                 placement="top"
@@ -238,18 +242,24 @@ const PositionItem = ({ position, setStatusRemove }) => {
                   <div className={classNames(styles.tooltip, styles[theme])}>
                     <div className={styles.itemInfo}>
                       <span>Swap fee</span>
-                      <span className={styles.value}>{numberWithCommas(aprInfo.swapFee * 100)}%</span>
+                      <span className={styles.value}>
+                        {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                     <div className={styles.itemInfo}>
                       <span>
                         Incentives Boost&nbsp;
                         <IconBoots />
                       </span>
-                      <span className={styles.value}>{numberWithCommas(aprInfo.incentive * 100)}%</span>
+                      <span className={styles.value}>
+                        {numberWithCommas(aprInfo.incentive * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                     <div className={styles.itemInfo}>
                       <span>Total APR</span>
-                      <span className={styles.totalApr}>{numberWithCommas(aprInfo.total * 100)}%</span>
+                      <span className={styles.totalApr}>
+                        {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                   </div>
                 }
@@ -303,8 +313,11 @@ const PositionItem = ({ position, setStatusRemove }) => {
                   {!principalAmountX || !principalAmountY
                     ? '--'
                     : formatDisplayUsdt(
-                        new BigDecimal(toDisplay(principalAmountX || 0) * tokenXUsd)
-                          .add(toDisplay(principalAmountY || 0) * tokenYUsd)
+                        new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal))
+                          .mul(tokenXUsd)
+                          .add(
+                            new BigDecimal(toDisplay((principalAmountY || 0).toString(), tokenYDecimal)).mul(tokenYUsd)
+                          )
                           .toNumber(),
                         6,
                         6
@@ -314,14 +327,18 @@ const PositionItem = ({ position, setStatusRemove }) => {
                   <position.tokenXIcon />
                   {!principalAmountX
                     ? '--'
-                    : numberWithCommas(toDisplay(principalAmountX || 0), undefined, { maximumFractionDigits: 6 })}{' '}
+                    : numberWithCommas(toDisplay(principalAmountX || 0, tokenXDecimal), undefined, {
+                        maximumFractionDigits: 6
+                      })}{' '}
                   {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
                   {!principalAmountY
                     ? '--'
-                    : numberWithCommas(toDisplay(principalAmountY || 0), undefined, { maximumFractionDigits: 6 })}{' '}
+                    : numberWithCommas(toDisplay(principalAmountY || 0, tokenYDecimal), undefined, {
+                        maximumFractionDigits: 6
+                      })}{' '}
                   {position?.tokenY.name}
                 </span>
               </div>
@@ -385,25 +402,27 @@ const PositionItem = ({ position, setStatusRemove }) => {
             <h4>Total Reward Earned</h4>
             <div className={styles.itemRow}>
               <span className={styles.usd}>
-                {!earnX || !earnY
-                  ? '--'
-                  : formatDisplayUsdt(
-                      new BigDecimal(toDisplay(earnX || 0) * tokenXUsd)
-                        .add(toDisplay(earnY || 0) * tokenYUsd)
-                        .add(totalEarnIncentiveUsd)
-                        .toNumber(),
-                      6,
-                      6
-                    )}
+                {formatDisplayUsdt(
+                  new BigDecimal(toDisplay((earnX || 0).toString(), tokenXDecimal) * tokenXUsd)
+                    .add(toDisplay((earnY || 0).toString(), tokenYDecimal) * tokenYUsd)
+                    .add(totalEarnIncentiveUsd)
+                    .toNumber(),
+                  6,
+                  6
+                )}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
-                {!earnX ? '--' : numberWithCommas(toDisplay(earnX), undefined, { maximumFractionDigits: 6 })}{' '}
+                {numberWithCommas(toDisplay((earnX || 0).toString(), tokenXDecimal), undefined, {
+                  maximumFractionDigits: 6
+                })}{' '}
                 {position?.tokenX.name}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenYIcon />
-                {!earnY ? '--' : numberWithCommas(toDisplay(earnY), undefined, { maximumFractionDigits: 6 })}{' '}
+                {numberWithCommas(toDisplay((earnY || 0).toString(), tokenYDecimal), undefined, {
+                  maximumFractionDigits: 6
+                })}{' '}
                 {position?.tokenY.name}
               </span>
             </div>
@@ -418,7 +437,10 @@ const PositionItem = ({ position, setStatusRemove }) => {
                     <span className={classNames(styles.token, styles[theme])}></span>
                     <span className={classNames(styles.token, styles[theme])}>
                       {theme === 'light' ? <token.IconLight /> : <token.Icon />}
-                      {!amount || !Number(amount) ? '--' : toDisplay(amount.toString())} {token?.name}
+                      {!amount || !Number(amount)
+                        ? '--'
+                        : toDisplay(amount.toString(), token.decimals || CW20_DECIMALS)}{' '}
+                      {token?.name}
                     </span>
                   </div>
                 );

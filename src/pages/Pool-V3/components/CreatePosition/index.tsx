@@ -23,7 +23,7 @@ import {
   getMaxTick,
   getMinTick,
   Price
-} from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+} from 'oraiswap-v3-test';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NewPositionNoPool from '../NewPositionNoPool';

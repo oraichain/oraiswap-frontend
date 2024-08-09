@@ -13,7 +13,7 @@ import useTheme from 'hooks/useTheme';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import { InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
-import { calculateSqrtPrice, newPoolKey } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+import { calculateSqrtPrice, newPoolKey } from 'oraiswap-v3-test';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';

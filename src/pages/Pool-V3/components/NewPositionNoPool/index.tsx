@@ -8,7 +8,7 @@ import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import { ReactComponent as MinusIcon } from 'assets/icons/minus.svg';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
 import classNames from 'classnames';
-import { getMaxTick, getMinTick, Price } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+import { getMaxTick, getMinTick, Price } from 'oraiswap-v3-test';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   calcPrice,
