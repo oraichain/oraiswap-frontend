@@ -29,7 +29,6 @@ const PoolList = () => {
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
   const [openTooltip, setOpenTooltip] = useState(false);
-  const [cachePrices] = useConfigReducer('coingecko');
 
   const theme = useTheme();
 
@@ -78,25 +77,27 @@ const PoolList = () => {
   useEffect(() => {
     (async () => {
       try {
-        if (dataPool.length) {
+        if (dataPool.length && poolLiquidities) {
           setLiquidityPools(poolLiquidities);
-          setVolumnePools(Object.keys(poolVolume).map((poolAddress) => {
-            return {
-              apy: 0,
-              poolAddress,
-              fee: 0,
-              volume24: poolVolume[poolAddress],
-              tokenX: null,
-              tokenY: null,
-              tvl: null  
-            }
-          }));
+          setVolumnePools(
+            Object.keys(poolVolume).map((poolAddress) => {
+              return {
+                apy: 0,
+                poolAddress,
+                fee: 0,
+                volume24: poolVolume[poolAddress],
+                tokenX: null,
+                tokenY: null,
+                tvl: null
+              };
+            })
+          );
         }
       } catch (error) {
         console.log('error: get liquidities', error);
       }
     })();
-  }, [dataPool]);
+  }, [dataPool, poolLiquidities]);
 
   useEffect(() => {
     const getAPRInfo = async () => {
@@ -262,11 +263,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       </td>
       <td className={styles.textRight}>
         <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
-          {liquidity === 0 || liquidity ? (
-            formatDisplayUsdt(liquidity)
-          ) : (
-            <img src={Loading} alt="loading" width={30} height={30} />
-          )}
+          {liquidity ? formatDisplayUsdt(liquidity) : <img src={Loading} alt="loading" width={30} height={30} />}
         </span>
       </td>
       <td className={styles.textRight}>
@@ -275,7 +272,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       <td>
         <div className={styles.apr}>
           <span className={styles.amount}>
-            {numberWithCommas(aprInfo.apr * 100, undefined,  { maximumFractionDigits: 2 })}%
+            {numberWithCommas(aprInfo.apr * 100, undefined, { maximumFractionDigits: 2 })}%
           </span>
           <TooltipIcon
             className={styles.tooltipWrapper}
@@ -288,7 +285,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
                 <div className={styles.itemInfo}>
                   <span>Swap fee</span>
                   <span className={styles.value}>
-                    {numberWithCommas(aprInfo.swapFee * 100, undefined,  { maximumFractionDigits: 2 })}%
+                    {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 2 })}%
                   </span>
                 </div>
                 <div className={styles.itemInfo}>
@@ -297,13 +294,13 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
                     <IconBoots />
                   </span>
                   <span className={styles.value}>
-                    {numberWithCommas(aprInfo.incentivesApr * 100, undefined,  { maximumFractionDigits: 2 })}%
+                    {numberWithCommas(aprInfo.incentivesApr * 100, undefined, { maximumFractionDigits: 2 })}%
                   </span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>Total APR</span>
                   <span className={styles.totalApr}>
-                    {numberWithCommas(aprInfo.apr * 100, undefined,  { maximumFractionDigits: 2 })}%
+                    {numberWithCommas(aprInfo.apr * 100, undefined, { maximumFractionDigits: 2 })}%
                   </span>
                 </div>
               </div>
