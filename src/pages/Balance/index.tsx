@@ -81,7 +81,7 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 
 interface BalanceProps {}
 
-export const isMaintainBridge = false;
+export const isMaintainBridge = true;
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
