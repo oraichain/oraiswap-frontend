@@ -21,6 +21,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import LoadingBox from 'components/LoadingBox';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
+import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
 
 const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
@@ -28,6 +29,7 @@ const PoolList = () => {
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
   const [openTooltip, setOpenTooltip] = useState(false);
+  const [cachePrices] = useConfigReducer('coingecko');
 
   const theme = useTheme();
 
@@ -38,8 +40,10 @@ const PoolList = () => {
   const [dataPool, setDataPool] = useState([...Array(0)]);
   const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
 
-  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
-  const { poolLiquidities, poolVolume, refetchPoolLiqAndVol } = useGetPoolLiqAndVol(yesterdayIndex);
+  const { feeDailyData } = useGetFeeDailyData(yesterdayIndex);
+  const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol(yesterdayIndex);
+  const { poolPositionInfo } = useGetPoolPositionInfo(prices);
+  // console.log({ poolPositionInfo });
 
   useEffect(() => {
     (async () => {
@@ -98,13 +102,13 @@ const PoolList = () => {
     const getAPRInfo = async () => {
       const poolKeys = dataPool.map((pool) => parsePoolKeyString(pool.poolKey));
 
-      const res = await fetchPoolAprInfo(poolKeys, prices, liquidityPools, feeDailyData);
+      const res = await fetchPoolAprInfo(poolKeys, prices, poolPositionInfo, feeDailyData);
       setAprInfo(res);
     };
-    if (dataPool.length && prices && liquidityPools) {
+    if (dataPool.length && prices && poolPositionInfo) {
       getAPRInfo();
     }
-  }, [dataPool, prices, liquidityPools]);
+  }, [dataPool, prices, poolPositionInfo]);
 
   return (
     <div className={styles.poolList}>

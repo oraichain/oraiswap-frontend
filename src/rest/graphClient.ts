@@ -161,3 +161,65 @@ export const getPoolsLiquidityAndVolume = async (dayIndex: number): Promise<Pool
     return [];
   }
 };
+
+export type PositionInfo = {
+  liquidity: string;
+  tickLower: number;
+  tickUpper: number;
+};
+
+export type PoolPositionsInfo = {
+  id: string;
+  currentTick: number;
+  sqrtPrice: string;
+  tokenX: {
+    coingeckoId: string;
+    decimals: number;
+  };
+  tokenY: {
+    coingeckoId: string;
+    decimals: number;
+  };
+  positions: {
+    nodes: PositionInfo[];    
+  };
+};
+
+export const getPoolPositionsInfo = async (): Promise<PoolPositionsInfo[]> => {
+  try {
+    const document = gql`
+      {
+        query {
+          pools {
+            nodes {
+              id
+              currentTick
+              sqrtPrice
+              tokenX {
+                coingeckoId
+                decimals
+              }
+              tokenY {
+                coingeckoId
+                decimals
+              }
+              positions(filter: { status: { equalTo: true } }) {
+                nodes {
+                  liquidity
+                  tickLower
+                  tickUpper
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    console.log({ result });
+    return result.query.pools.nodes || [];
+  } catch (error) {
+    console.log('error getPoolPositionsInfo', error);
+    return [];
+  }
+};

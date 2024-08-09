@@ -663,9 +663,9 @@ export async function fetchPositionAprInfo(
 
   if (!isInRange) {
     return {
-      swapFee: feeAPR ? feeAPR : 0,
+      swapFee: feeAPR ?? 0,
       incentive: sumIncentivesApr,
-      total: feeAPR
+      total: feeAPR ?? 0
     };
   }
 
@@ -683,9 +683,9 @@ export async function fetchPositionAprInfo(
   }
 
   return {
-    swapFee: feeAPR ? feeAPR : 0,
+    swapFee: feeAPR ?? 0,
     incentive: sumIncentivesApr,
-    total: sumIncentivesApr + (feeAPR ? feeAPR : 0)
+    total: sumIncentivesApr + (feeAPR ?? 0)
   };
 }
 
@@ -724,16 +724,16 @@ export async function fetchPoolAprInfo(
       const rewardInUsd = prices[token.coinGeckoId];
       const totalPoolLiquidity = poolLiquidities[poolKeyToString(poolKey)];
       const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
-      if (totalPoolLiquidity) sumIncentivesApr += rewardPerYear / (totalPoolLiquidity * 0.25);
+      if (totalPoolLiquidity) sumIncentivesApr += rewardPerYear / totalPoolLiquidity;
     }
 
     poolAprs[poolKeyToString(poolKey)] = {
-      apr: sumIncentivesApr + (feeAPR ? feeAPR : 0),
+      apr: sumIncentivesApr + (feeAPR ?? 0),
       incentives: incentives.map((incentive) => {
         const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
         return token.denom.toUpperCase();
       }),
-      swapFee: feeAPR ? feeAPR : 0,
+      swapFee: feeAPR ?? 0,
       incentivesApr: sumIncentivesApr
     };
   }

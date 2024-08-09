@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { PoolFeeAndLiquidityDaily } from 'libs/contractSingleton';
-import { FeeDailyData, getFeeDailyData, getPoolsLiquidityAndVolume, PoolLiquidityAndVolume } from 'rest/graphClient';
+import { getPoolsLiquidityAndVolume, PoolLiquidityAndVolume } from 'rest/graphClient';
 
 export const useGetPoolLiqAndVol = (dayIndex: number) => {
   const { data, refetch: refetchPoolLiqAndVol } = useQuery<PoolLiquidityAndVolume[]>(
