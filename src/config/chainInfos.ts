@@ -78,7 +78,8 @@ import {
   NEUTARO_ORAICHAIN_DENOM,
   OCH_CONTRACT,
   OCH_ETH_CONTRACT,
-  ORAIX_ETH_CONTRACT
+  ORAIX_ETH_CONTRACT,
+  TON_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
