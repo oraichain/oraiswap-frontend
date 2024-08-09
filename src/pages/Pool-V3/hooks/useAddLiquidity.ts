@@ -1,7 +1,6 @@
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import {
   approveListToken,
-  approveToken,
   calculateTokenAmountsWithSlippage,
   createPoolTx,
   createPositionTx,
@@ -11,7 +10,7 @@ import {
   isNativeToken
 } from '../helpers/helper';
 
-import { newPoolKey } from '../packages/wasm/oraiswap_v3_wasm';
+import { newPoolKey } from '@oraichain/oraiswap-v3';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { network } from 'config/networks';
 

@@ -1,6 +1,6 @@
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import { TokenItemType, toDisplay, BigDecimal } from '@oraichain/oraidex-common';
+import { TokenItemType, BigDecimal } from '@oraichain/oraidex-common';
 import { PriceInfo } from '../CreatePosition';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { numberWithCommas } from 'helper/format';
@@ -8,7 +8,7 @@ import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import { ReactComponent as MinusIcon } from 'assets/icons/minus.svg';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
 import classNames from 'classnames';
-import { getMaxTick, getMinTick, Price } from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+import { getMaxTick, getMinTick, Price } from '@oraichain/oraiswap-v3';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   calcPrice,

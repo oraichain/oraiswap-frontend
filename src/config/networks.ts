@@ -16,7 +16,7 @@ import {
   AMM_V3_CONTRACT
 } from '@oraichain/oraidex-common';
 
-export const network: CustomChainInfo & NetworkConfig & { pool_v3: string } = {
+export const network: CustomChainInfo & NetworkConfig & { pool_v3: string; indexer_v3: string } = {
   ...oraichainNetwork,
   prefix: oraichainNetwork.bech32Config.bech32PrefixAccAddr,
   denom: 'orai',
@@ -34,5 +34,6 @@ export const network: CustomChainInfo & NetworkConfig & { pool_v3: string } = {
   staking_oraix: CW20_STAKING_CONTRACT,
   multicall: MULTICALL_CONTRACT,
   explorer: 'https://scan.orai.io',
-  pool_v3: AMM_V3_CONTRACT
+  pool_v3: AMM_V3_CONTRACT,
+  indexer_v3: 'https://staging-ammv3-indexer.oraidex.io/'
 };

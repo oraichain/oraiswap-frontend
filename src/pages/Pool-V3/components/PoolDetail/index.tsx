@@ -1,31 +1,27 @@
-import styles from './index.module.scss';
-import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
+import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as AddIcon } from 'assets/icons/Add.svg';
+import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
-import { Button } from 'components/Button';
-import { useNavigate, useParams } from 'react-router-dom';
-import classNames from 'classnames';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import useTheme from 'hooks/useTheme';
-import { useEffect, useState } from 'react';
-import { formatNumberKMB, numberWithCommas } from 'helper/format';
-import PositionItem from '../PositionItem';
-import SingletonOraiswapV3, {
-  fetchPoolAprInfo,
-  PoolAprInfo,
-  poolKeyToString,
-  stringToPoolKey
-} from 'libs/contractSingleton';
-import { toDisplay } from '@oraichain/oraidex-common';
-import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { convertPosition } from 'pages/Pool-V3/helpers/helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import LoadingBox from 'components/LoadingBox';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
-import { getFeeClaimData } from '../PositionList';
+import classNames from 'classnames';
+import { Button } from 'components/Button';
+import LoadingBox from 'components/LoadingBox';
+import { formatNumberKMB, numberWithCommas } from 'helper/format';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useTheme from 'hooks/useTheme';
+import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString, stringToPoolKey } from 'libs/contractSingleton';
+import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
+import { convertPosition } from 'pages/Pool-V3/helpers/helper';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getFeeClaimData } from 'rest/graphClient';
+import PositionItem from '../PositionItem';
+import styles from './index.module.scss';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
@@ -62,11 +58,14 @@ const PoolV3Detail = () => {
     total: totalLiquidity,
     allocation: {}
   });
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
 
   useEffect(() => {
     (async () => {
       try {
         const poolKey = stringToPoolKey(poolId);
+        console.log('poolKey', poolKey);
         const pool = await SingletonOraiswapV3.getPool(poolKey);
         const isLight = theme === 'light';
         const fmtPool = formatPoolData(pool, isLight);
@@ -84,7 +83,7 @@ const PoolV3Detail = () => {
 
   useEffect(() => {
     const getAPRInfo = async () => {
-      const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools);
+      const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools, feeDailyData);
       setAprInfo({
         ...aprInfo,
         [poolKeyString]: res[poolKeyString]
@@ -236,7 +235,12 @@ const PoolV3Detail = () => {
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>
-              <p>{numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100)}%</p>
+              <p>
+                {numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100, undefined, {
+                  maximumFractionDigits: 2
+                })}
+                %
+              </p>
             </div>
             <div className={styles.item}>
               <span className={styles.label}>
@@ -246,18 +250,22 @@ const PoolV3Detail = () => {
               <p>
                 {!aprInfo[poolKeyString]?.incentivesApr
                   ? '-- '
-                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr * 100)}%`}
+                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr * 100, undefined, {
+                      maximumFractionDigits: 2
+                    })}%`}
               </p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
-              <p className={styles.total}>{numberWithCommas((aprInfo[poolKeyString]?.apr || 0) * 100)}%</p>
+              <p className={styles.total}>
+                {numberWithCommas((aprInfo[poolKeyString]?.apr || 0) * 100, undefined, { maximumFractionDigits: 2 })}%
+              </p>
             </div>
           </div>
         </div>
       </div>
       <div className={styles.positions}>
-        {<h1>Your Liquidity Positions ({dataPosition?.length ?? 0})</h1>}
+        {<h1>My positions ({dataPosition?.length ?? 0})</h1>}
         <LoadingBox loading={loading} styles={{ height: '30vh' }}>
           <div className={styles.list}>
             {dataPosition.length
