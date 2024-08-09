@@ -21,7 +21,7 @@ import {
   getMaxTick,
   getMinTick,
   Price
-} from 'oraiswap-v3-test';
+} from '@oraichain/oraiswap-v3';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NewPositionNoPool from '../NewPositionNoPool';

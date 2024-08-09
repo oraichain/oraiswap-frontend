@@ -10,7 +10,7 @@ import {
   Tick,
   Liquidity,
   getPriceScale
-} from 'oraiswap-v3-test';
+} from '@oraichain/oraiswap-v3';
 import { TokenItemType } from '@oraichain/oraidex-common';
 import SingletonOraiswapV3, { Token } from 'libs/contractSingleton';
 import { PlotTickData } from './PriceRangePlot';

@@ -11,7 +11,7 @@ import {
   getLiquidityTicksLimit,
   getMaxTickmapQuerySize,
   OraiswapV3Handler
-} from 'oraiswap-v3-test';
+} from '@oraichain/oraiswap-v3';
 import { network } from 'config/networks';
 import {
   AssetInfo,
@@ -204,7 +204,7 @@ export default class SingletonOraiswapV3 {
 
   public static async loadCosmwasmClient() {
     if (!this._cosmwasmClient) {
-      this._cosmwasmClient = await CosmWasmClient.connect(network.rpc);;
+      this._cosmwasmClient = await CosmWasmClient.connect(network.rpc);
     }
   }
 

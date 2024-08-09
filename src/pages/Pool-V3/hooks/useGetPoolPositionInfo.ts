@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { AmountDeltaResult, calculateAmountDelta, calculateSqrtPrice } from 'oraiswap-v3-test';
+import { AmountDeltaResult, calculateAmountDelta, calculateSqrtPrice } from '@oraichain/oraiswap-v3';
 import { getPoolPositionsInfo, PoolPositionsInfo } from 'rest/graphClient';
 
 export const useGetPoolPositionInfo = (prices: CoinGeckoPrices<string>) => {
@@ -17,7 +17,8 @@ export const useGetPoolPositionInfo = (prices: CoinGeckoPrices<string>) => {
   const poolPositionInfo: Record<string, number> = {};
   data.forEach((item) => {
     const inRangePositions = item.positions.nodes.filter(
-      (position) => Number(position.tickLower) <= Number(item.currentTick) && Number(position.tickUpper) >= Number(item.currentTick)
+      (position) =>
+        Number(position.tickLower) <= Number(item.currentTick) && Number(position.tickUpper) >= Number(item.currentTick)
     );
     let tokenXPrice = prices[item.tokenX.coingeckoId] ?? 0;
     let tokenYPrice = prices[item.tokenY.coingeckoId] ?? 0;

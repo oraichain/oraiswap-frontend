@@ -16,7 +16,7 @@ import {
   getSqrtPriceDenominator,
   getTickAtSqrtPrice,
   calculateFee as wasmCalculateFee
-} from 'oraiswap-v3-test';
+} from '@oraichain/oraiswap-v3';
 import { getIconPoolData } from './format';
 import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
