@@ -10,7 +10,8 @@ import {
   getChunkSize,
   getLiquidityTicksLimit,
   getMaxTickmapQuerySize,
-  OraiswapV3Handler
+  OraiswapV3Handler,
+  parsePoolKey
 } from '@oraichain/oraiswap-v3';
 import { network } from 'config/networks';
 import {
@@ -38,7 +39,7 @@ import { CoinGeckoId } from '@oraichain/oraidex-common';
 import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { calculateTokenAmounts } from 'pages/Pool-V3/helpers/helper';
-import { getFeeDailyData } from 'rest/graphClient';
+import { getFeeDailyData, getPools } from 'rest/graphClient';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
   { fee: 100000000, tick_spacing: 1 },
@@ -265,7 +266,37 @@ export default class SingletonOraiswapV3 {
 
   public static async getPools(): Promise<PoolWithPoolKey[]> {
     await this.loadHandler();
-    return await this._handler.getPools();
+    try {
+      return await this._handler.getPools();
+    } catch (error) {
+      const pools = await getPools();
+      return pools.map((pool) => {
+        const poolKey = parsePoolKey(pool.id);
+        return {
+          pool_key: {
+            token_x: poolKey.token_x,
+            token_y: poolKey.token_y,
+            fee_tier: {
+              fee: poolKey.fee_tier.fee,
+              tick_spacing: poolKey.fee_tier.tick_spacing
+            }
+          },
+          pool: {
+            liquidity: pool.liquidity,
+            sqrt_price: calculateSqrtPrice(pool.currentTick),
+            current_tick_index: pool.currentTick,
+            fee_growth_global_x: "0",
+            fee_growth_global_y: "0",
+            fee_protocol_token_x: "0",
+            fee_protocol_token_y: "0",
+            fee_receiver: "",
+            last_timestamp: Date.now(),
+            start_timestamp: 0,
+            incentives: []
+          }
+        };
+      });
+    }
   }
 
   public static async getIncentivesPosition(positionIndex: number, ownerId: string): Promise<ArrayOfAsset> {
@@ -413,42 +444,42 @@ export default class SingletonOraiswapV3 {
     };
   };
 
-  public static async queryPosition(): Promise<PositionInfo[]> {
-    const positionInfo: PositionInfo[] = [];
+  // public static async queryPosition(): Promise<PositionInfo[]> {
+  //   const positionInfo: PositionInfo[] = [];
 
-    const allPools: PoolWithPoolKey[] = await this.getPools();
+  //   const allPools: PoolWithPoolKey[] = await this.getPools();
 
-    const poolList: Record<string, PoolWithPoolKey> = {};
-    allPools.forEach((pool) => {
-      poolList[poolKeyToString(pool.pool_key)] = pool;
-    });
+  //   const poolList: Record<string, PoolWithPoolKey> = {};
+  //   allPools.forEach((pool) => {
+  //     poolList[poolKeyToString(pool.pool_key)] = pool;
+  //   });
 
-    await this.loadHandler();
-    const allPosition = await this._handler.allPositions();
+  //   await this.loadHandler();
+  //   const allPosition = await this._handler.allPositions();
 
-    for (const position of allPosition) {
-      const positionData = position;
-      const poolKey = position.pool_key;
-      const res = calculateTokenAmounts(poolList[poolKeyToString(poolKey)].pool as any, position as any);
+  //   for (const position of allPosition) {
+  //     const positionData = position;
+  //     const poolKey = position.pool_key;
+  //     const res = calculateTokenAmounts(poolList[poolKeyToString(poolKey)].pool as any, position as any);
 
-      const positionInfoData: PositionInfo = {
-        id: `${poolKeyToString(poolKey)}-${positionData.token_id}`,
-        tokenId: positionData.token_id,
-        poolId: poolKeyToString(poolKey),
-        status: true,
-        liquidity: BigInt(positionData.liquidity).toString(),
-        tickLower: positionData.lower_tick_index.toString(),
-        tickUpper: positionData.upper_tick_index.toString(),
-        principalAmountX: res.x.toString(),
-        principalAmountY: res.y.toString(),
-        createdAt: BigInt(Date.now()).toString()
-      };
+  //     const positionInfoData: PositionInfo = {
+  //       id: `${poolKeyToString(poolKey)}-${positionData.token_id}`,
+  //       tokenId: positionData.token_id,
+  //       poolId: poolKeyToString(poolKey),
+  //       status: true,
+  //       liquidity: BigInt(positionData.liquidity).toString(),
+  //       tickLower: positionData.lower_tick_index.toString(),
+  //       tickUpper: positionData.upper_tick_index.toString(),
+  //       principalAmountX: res.x.toString(),
+  //       principalAmountY: res.y.toString(),
+  //       createdAt: BigInt(Date.now()).toString()
+  //     };
 
-      positionInfo.push(positionInfoData);
-    }
+  //     positionInfo.push(positionInfoData);
+  //   }
 
-    return positionInfo;
-  }
+  //   return positionInfo;
+  // }
 
   public static getPoolLiquidities = async (
     pools: PoolWithPoolKey[],
@@ -663,9 +694,9 @@ export async function fetchPositionAprInfo(
 
   if (!isInRange) {
     return {
-      swapFee: feeAPR ?? 0,
+      swapFee: feeAPR ? feeAPR : 0,
       incentive: sumIncentivesApr,
-      total: feeAPR ?? 0
+      total: feeAPR ? feeAPR : 0
     };
   }
 
@@ -683,9 +714,9 @@ export async function fetchPositionAprInfo(
   }
 
   return {
-    swapFee: feeAPR ?? 0,
+    swapFee: feeAPR ? feeAPR : 0,
     incentive: sumIncentivesApr,
-    total: sumIncentivesApr + (feeAPR ?? 0)
+    total: sumIncentivesApr + (feeAPR ? feeAPR : 0)
   };
 }
 
@@ -728,12 +759,12 @@ export async function fetchPoolAprInfo(
     }
 
     poolAprs[poolKeyToString(poolKey)] = {
-      apr: sumIncentivesApr + (feeAPR ?? 0),
+      apr: sumIncentivesApr + (feeAPR ? feeAPR : 0),
       incentives: incentives.map((incentive) => {
         const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
         return token.denom.toUpperCase();
       }),
-      swapFee: feeAPR ?? 0,
+      swapFee: feeAPR ? feeAPR : 0,
       incentivesApr: sumIncentivesApr
     };
   }

@@ -181,7 +181,7 @@ export type PoolPositionsInfo = {
     decimals: number;
   };
   positions: {
-    nodes: PositionInfo[];    
+    nodes: PositionInfo[];
   };
 };
 
@@ -220,6 +220,35 @@ export const getPoolPositionsInfo = async (): Promise<PoolPositionsInfo[]> => {
     return result.query.pools.nodes || [];
   } catch (error) {
     console.log('error getPoolPositionsInfo', error);
+    return [];
+  }
+};
+
+export type Pool = {
+  id: string;
+  currentTick: number;
+  liquidity: string;
+};
+
+export const getPools = async (): Promise<Pool[]> => {
+  try {
+    const document = gql`
+      {
+        query {
+          pools {
+            nodes {
+              id
+              currentTick
+              liquidity
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.query.pools.nodes || [];
+  } catch (error) {
+    console.log('error getPools', error);
     return [];
   }
 };
