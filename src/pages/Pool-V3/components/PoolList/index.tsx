@@ -100,10 +100,10 @@ const PoolList = () => {
       const res = await fetchPoolAprInfo(poolKeys, prices, poolPositionInfo, feeDailyData);
       setAprInfo(res);
     };
-    if (dataPool.length && prices && poolPositionInfo.length) {
+    if (dataPool.length && prices && Object.keys(poolPositionInfo).length) {
       getAPRInfo();
     }
-  }, [dataPool.length, prices, poolPositionInfo.length]);
+  }, [dataPool, prices, Object.keys(poolPositionInfo).length]);
 
   return (
     <div className={styles.poolList}>
