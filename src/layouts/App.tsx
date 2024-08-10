@@ -63,8 +63,12 @@ const App = () => {
   useEffect(() => {
     const loadSingleton = async () => {
       if (address) {
-        const cosmWasmClient = await getCosmWasmClient({ chainId: network.chainId });
-        SingletonOraiswapV3.load(cosmWasmClient.client, address);
+        try {
+          const { client } = await getCosmWasmClient({ chainId: network.chainId });
+          SingletonOraiswapV3.load(client, address);
+        } catch (error) {
+          console.error('Error loading OraiswapV3 singleton:', error);
+        }
       }
     };
 

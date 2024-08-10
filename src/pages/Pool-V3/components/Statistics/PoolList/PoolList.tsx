@@ -70,9 +70,9 @@ const PoolList: React.FC<PoolListInterface> = ({ data }) => {
   const paginator = (currentPage: number) => {
     const page = currentPage || 1;
     const perPage = 10;
-    const offest = (page - 1) * perPage;
+    const offset = (page - 1) * perPage;
 
-    return sortedData.slice(offest).slice(0, perPage);
+    return sortedData.slice(offset).slice(0, perPage);
   };
 
   const pages = Math.ceil(data.length / 10);
