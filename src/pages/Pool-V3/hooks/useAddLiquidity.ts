@@ -34,10 +34,10 @@ const useAddLiquidity = () => {
       let listTokenApprove = [];
       if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
       if (!isNativeToken(token_y)) listTokenApprove.push(token_y);
-
-      const msg = genMsgAllowance(listTokenApprove);
-
-      await approveListToken(msg, walletAddress);
+      if (listTokenApprove.length > 0) {
+        const msg = genMsgAllowance(listTokenApprove); 
+        await approveListToken(msg, walletAddress);
+      }
 
       const poolKey = newPoolKey(token_x, token_y, fee_tier);
 
