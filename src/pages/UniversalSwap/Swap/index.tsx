@@ -303,7 +303,13 @@ const SwapComponent: React.FC<{
           // @ts-ignore
           averageRatio?.amount && new BigDecimal(averageRatio.amount).div(SIMULATE_INIT_AMOUNT).toString(),
         relayerFee: relayerFeeUniversal,
-        alphaSmartRoutes
+        alphaSmartRoutes,
+        affiliates: [
+          {
+            address: 'orai1h8rg7zknhxmffp3ut5ztsn8zcaytckfemdkp8n',
+            basis_points_fee: '25'
+          }
+        ]
       };
 
       const compileSwapData = isCustomRecipient
