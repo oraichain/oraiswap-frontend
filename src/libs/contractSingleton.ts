@@ -9,29 +9,28 @@ import {
   calculateSqrtPrice,
   getChunkSize,
   getLiquidityTicksLimit,
-  getMaxTickmapQuerySize
-} from '../pages/Pool-V3/packages/wasm';
-// import {
-//   CHUNK_SIZE,
-//   LIQUIDITY_TICKS_LIMIT,
-//   MAX_TICKMAP_QUERY_SIZE,
-//   TokenDataOnChain,
-//   getCoingeckoTokenPriceV2,
-//   parse,
-//   poolKeyToString
-//   // parse
-// } from '@store/consts/utils';
+  getMaxTickmapQuerySize,
+  OraiswapV3Handler,
+  parsePoolKey
+} from '@oraichain/oraiswap-v3';
 import { network } from 'config/networks';
-import { AssetInfo, OraiswapTokenClient, OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import {
+  AssetInfo,
+  OraiswapTokenClient,
+  OraiswapTokenQueryClient,
+  OraiswapV3Client,
+  OraiswapV3QueryClient
+} from '@oraichain/oraidex-contracts-sdk';
 import {
   ArrayOfAsset,
+  ArrayOfPosition,
   ArrayOfTupleOfUint16AndUint64,
   FeeTier,
   PoolWithPoolKey,
-  Position
+  Position,
+  Tick
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { ArrayOfPosition, Pool, Tick } from 'pages/Pool-V3/packages/sdk/OraiswapV3.types';
 import { TokenDataOnChain } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import Axios from 'axios';
 import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions';
@@ -39,9 +38,8 @@ import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD, toDisplay } from '@oraichain/o
 import { CoinGeckoId } from '@oraichain/oraidex-common';
 import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import { oraichainTokens } from 'config/bridgeTokens';
-import { OraiswapV3Client, OraiswapV3QueryClient } from 'pages/Pool-V3/packages/sdk';
 import { calculateTokenAmounts } from 'pages/Pool-V3/helpers/helper';
-// import { defaultState } from '@store/reducers/connection';
+import { getFeeDailyData, getPools } from 'rest/graphClient';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
   { fee: 100000000, tick_spacing: 1 },
@@ -106,24 +104,9 @@ const isObject = (value: any): boolean => {
   return typeof value === 'object' && value !== null;
 };
 
-// export let CHUNK_SIZE = getChunkSize();
-// export let LIQUIDITY_TICKS_LIMIT = getLiquidityTicksLimit();
-// export let MAX_TICKMAP_QUERY_SIZE = getMaxTickmapQuerySize();
-
-export const loadChunkSize = () => {
-  const chunkSize = getChunkSize();
-  return chunkSize;
-};
-
-export const loadLiquidityTicksLimit = () => {
-  const liquidityTicksLimit = getLiquidityTicksLimit();
-  return liquidityTicksLimit;
-};
-
-export const loadMaxTickmapQuerySize = () => {
-  const maxTickmapQuerySize = getMaxTickmapQuerySize();
-  return maxTickmapQuerySize;
-};
+export const CHUNK_SIZE = getChunkSize();
+export const LIQUIDITY_TICKS_LIMIT = getLiquidityTicksLimit();
+export const MAX_TICKMAP_QUERY_SIZE = getMaxTickmapQuerySize();
 
 export const poolKeyToString = (poolKey: PoolKey): string => {
   return poolKey.token_x + '-' + poolKey.token_y + '-' + poolKey.fee_tier.fee + '-' + poolKey.fee_tier.tick_spacing;
@@ -193,50 +176,48 @@ export interface PositionInfo {
   createdAt: string;
 }
 
+// this should be moved to redux
 export default class SingletonOraiswapV3 {
-  private static _tokens: { [key: string]: OraiswapTokenClient } = {};
-  private static _nativeTokens: { [key: string]: string } = {};
   private static _dex: OraiswapV3Client;
-  private static _dexQuerier: OraiswapV3QueryClient;
-
-  private constructor() {}
+  private static _cosmwasmClient: CosmWasmClient;
+  private static _handler: OraiswapV3Handler;
+  private static _sender: string;
 
   public static get dex() {
     return this._dex;
   }
 
-  public static get dexQuerier() {
-    return this._dexQuerier;
-  }
-
-  public static get tokens() {
-    return this._tokens;
-  }
-
-  public static get nativeTokens() {
-    return this._nativeTokens;
-  }
+  private constructor() {}
 
   public static async load(signingClient: SigningCosmWasmClient, sender: string) {
-    if (!this.dex) {
+    if (!this._cosmwasmClient) {
+      this._cosmwasmClient = await CosmWasmClient.connect(network.rpc);
+    }
+    if (!this._dex) {
       this._dex = new OraiswapV3Client(signingClient, sender, defaultState.dexAddress);
     }
-    const client = await CosmWasmClient.connect(network.rpc);
-    this._dexQuerier = new OraiswapV3QueryClient(client, defaultState.dexAddress);
+    if (this._sender !== sender) {
+      this._sender = sender;
+      this._dex = new OraiswapV3Client(signingClient, sender, defaultState.dexAddress);
+    }
+    this.loadHandler();
   }
 
-  public static async loadCw20(sender: string, contractAddress: string) {
-    this._tokens[contractAddress] = new OraiswapTokenClient(this._dex.client, sender, contractAddress);
+  public static async loadCosmwasmClient() {
+    if (!this._cosmwasmClient) {
+      this._cosmwasmClient = await CosmWasmClient.connect(network.rpc);
+    }
   }
 
-  public static async loadNative(tokenDenom: string) {
-    this._nativeTokens[tokenDenom] = tokenDenom;
+  public static async loadHandler() {
+    await this.loadCosmwasmClient();
+    if (!this._handler) {
+      this._handler = new OraiswapV3Handler(this._cosmwasmClient);
+    }
   }
 
   public static async queryBalance(address: string, tokenDenom: string = 'orai') {
-    if (!address) return '0';
-    const client = await CosmWasmClient.connect(network.rpc);
-    const { amount } = await client.getBalance(address, tokenDenom);
+    const { amount } = await this._cosmwasmClient.getBalance(address, tokenDenom);
     return amount;
   }
 
@@ -246,20 +227,12 @@ export default class SingletonOraiswapV3 {
     upperTick: number,
     xToY: boolean
   ): Promise<ArrayOfTupleOfUint16AndUint64> {
-    const client = await CosmWasmClient.connect(network.rpc);
-    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-
-    const tickmaps = await queryClient.tickMap({
-      lowerTickIndex: lowerTick,
-      upperTickIndex: upperTick,
-      xToY,
-      poolKey
-    });
+    await this.loadCosmwasmClient();
+    const tickmaps = await this._handler.tickMap(poolKey, lowerTick, upperTick, xToY);
     return tickmaps;
   }
 
   public static async getTokensInfo(tokens: string[], address?: string): Promise<TokenDataOnChain[]> {
-    const client = await CosmWasmClient.connect(network.rpc);
     return await Promise.all(
       tokens.map(async (token) => {
         if (token.includes('ibc') || token == 'orai') {
@@ -273,7 +246,7 @@ export default class SingletonOraiswapV3 {
           };
         }
 
-        const queryClient = new OraiswapTokenQueryClient(client, token);
+        const queryClient = new OraiswapTokenQueryClient(this._cosmwasmClient, token);
         const balance = address ? await queryClient.balance({ address: address }) : { balance: '0' };
         const tokenInfo = await queryClient.tokenInfo();
         const symbol = tokenInfo.symbol;
@@ -292,49 +265,62 @@ export default class SingletonOraiswapV3 {
   }
 
   public static async getPools(): Promise<PoolWithPoolKey[]> {
-    const client = await CosmWasmClient.connect(network.rpc);
-    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-    return await queryClient.pools({});
+    await this.loadHandler();
+    try {
+      return await this._handler.getPools();
+    } catch (error) {
+      const pools = await getPools();
+      return pools.map((pool) => {
+        const poolKey = parsePoolKey(pool.id);
+        return {
+          pool_key: {
+            token_x: poolKey.token_x,
+            token_y: poolKey.token_y,
+            fee_tier: {
+              fee: poolKey.fee_tier.fee,
+              tick_spacing: poolKey.fee_tier.tick_spacing
+            }
+          },
+          pool: {
+            liquidity: pool.liquidity,
+            sqrt_price: calculateSqrtPrice(pool.currentTick),
+            current_tick_index: pool.currentTick,
+            fee_growth_global_x: "0",
+            fee_growth_global_y: "0",
+            fee_protocol_token_x: "0",
+            fee_protocol_token_y: "0",
+            fee_receiver: "",
+            last_timestamp: Date.now(),
+            start_timestamp: 0,
+            incentives: []
+          }
+        };
+      });
+    }
   }
 
-  public static async getIncentivesPosition(position, ownerId: string): Promise<ArrayOfAsset> {
-    const client = await CosmWasmClient.connect(network.rpc);
-    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-    return await queryClient.positionIncentives({ index: position.id, ownerId });
+  public static async getIncentivesPosition(positionIndex: number, ownerId: string): Promise<ArrayOfAsset> {
+    await this.loadHandler();
+    return await this._handler.positionIncentives(positionIndex, ownerId);
   }
 
-  public static async getTicks(index, key): Promise<Tick> {
-    const client = await CosmWasmClient.connect(network.rpc);
-    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-    return await queryClient.tick({ index, key });
+  public static async getTicks(tickIndex: number, poolKey: PoolKey): Promise<Tick> {
+    return await this._handler.getTick(poolKey, tickIndex);
   }
 
   public static async getPool(poolKey: PoolKey): Promise<PoolWithPoolKey> {
     try {
-      const client = await CosmWasmClient.connect(network.rpc);
-      const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-      const pool = await queryClient.pool({
-        feeTier: poolKey.fee_tier,
-        token0: poolKey.token_x,
-        token1: poolKey.token_y
-      });
-      return {
-        pool: pool,
-        pool_key: poolKey
-      };
+      await this.loadHandler();
+      const pool = await this._handler.getPool(poolKey);
+      return pool;
     } catch (error) {
       return null;
     }
   }
 
-  public static async getAllPosition(address: string, limit?: number, offset?: number): Promise<ArrayOfPosition> {
-    const client = await CosmWasmClient.connect(network.rpc);
-    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-    const position = await queryClient.positions({
-      ownerId: address,
-      limit,
-      offset
-    });
+  public static async getAllPosition(address: string): Promise<ArrayOfPosition> {
+    await this.loadHandler();
+    const position = await this._handler.getPositions(address);
     return position;
   }
 
@@ -347,12 +333,11 @@ export default class SingletonOraiswapV3 {
     const promises = [];
     const tickSpacing = poolKey.fee_tier.tick_spacing;
     assert(tickSpacing <= 100);
-
-    assert(loadMaxTickmapQuerySize() > 3);
-    assert(loadChunkSize() * 2 > tickSpacing);
+    assert(MAX_TICKMAP_QUERY_SIZE > 3);
+    assert(CHUNK_SIZE * 2 > tickSpacing);
     // move back 1 chunk since the range is inclusive
     // then move back additional 2 chunks to ensure that adding tickspacing won't exceed the query limit
-    const jump = (loadMaxTickmapQuerySize() - 3) * loadChunkSize();
+    const jump = (MAX_TICKMAP_QUERY_SIZE - 3) * CHUNK_SIZE;
 
     while (lowerTick <= maxTick) {
       let nextTick = lowerTick + jump;
@@ -390,6 +375,7 @@ export default class SingletonOraiswapV3 {
 
   public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
     const ticks: number[] = [];
+    await this.loadHandler();
 
     for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
       for (let i = 0; i < 64; i++) {
@@ -400,12 +386,7 @@ export default class SingletonOraiswapV3 {
       }
     }
 
-    const client = await CosmWasmClient.connect(network.rpc);
-    const querier = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-    const liquidityTicks = await querier.liquidityTicks({
-      poolKey,
-      tickIndexes: ticks
-    });
+    const liquidityTicks = await this._handler.liquidityTicks(poolKey, ticks);
     const convertedLiquidityTicks: LiquidityTick[] = liquidityTicks.map((tickData: any) => {
       return {
         index: tickData.index,
@@ -418,30 +399,23 @@ export default class SingletonOraiswapV3 {
   }
 
   public static approveToken = async (token: string, amount: bigint, address: string) => {
-    const tokenClient = new OraiswapTokenClient(this.dex.client, address, token);
+    const tokenClient = new OraiswapTokenClient(this._dex.client, address, token);
 
     return await tokenClient.increaseAllowance({
       amount: amount.toString(),
-      spender: this.dex.contractAddress
+      spender: this._dex.contractAddress
     });
   };
 
   public static getLiquidityByPool = async (pool: PoolWithPoolKey, prices: CoinGeckoPrices<string>): Promise<any> => {
-    const allPosition = await SingletonOraiswapV3.queryPosition();
-
     const poolKey = pool.pool_key;
-    const poolData = pool.pool;
     const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
     const tokenY = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_y);
 
-    let tvlX = 0n;
-    let tvlY = 0n;
-    allPosition.forEach((position) => {
-      if (position.poolId === poolKeyToString(poolKey)) {
-        tvlX += BigInt(position.principalAmountX);
-        tvlY += BigInt(position.principalAmountY);
-      }
-    });
+    await this.loadHandler();
+    const res = await this._handler.getPairLiquidityValues(pool);
+    const tvlX = res.liquidityX;
+    const tvlY = res.liquidityY;
 
     const xUsd = (prices[tokenX.coinGeckoId] * Number(tvlX)) / 10 ** tokenX.decimals;
     const yUsd = (prices[tokenY.coinGeckoId] * Number(tvlY)) / 10 ** tokenY.decimals;
@@ -470,65 +444,58 @@ export default class SingletonOraiswapV3 {
     };
   };
 
-  public static async queryPosition(): Promise<PositionInfo[]> {
-    const positionInfo: PositionInfo[] = [];
+  // public static async queryPosition(): Promise<PositionInfo[]> {
+  //   const positionInfo: PositionInfo[] = [];
 
-    const allPools: PoolWithPoolKey[] = await this.getPools();
+  //   const allPools: PoolWithPoolKey[] = await this.getPools();
 
-    const poolList: Record<string, PoolWithPoolKey> = {};
-    allPools.forEach((pool) => {
-      poolList[poolKeyToString(pool.pool_key)] = pool;
-    });
+  //   const poolList: Record<string, PoolWithPoolKey> = {};
+  //   allPools.forEach((pool) => {
+  //     poolList[poolKeyToString(pool.pool_key)] = pool;
+  //   });
 
-    const client = await CosmWasmClient.connect(network.rpc);
-    const queryClient = new OraiswapV3QueryClient(client, defaultState.dexAddress);
-    const allPosition = await queryClient.allPosition({});
+  //   await this.loadHandler();
+  //   const allPosition = await this._handler.allPositions();
 
-    for (const position of allPosition) {
-      const positionData = position;
-      const poolKey = position.pool_key;
-      const res = calculateTokenAmounts(poolList[poolKeyToString(poolKey)].pool as any, position as any);
+  //   for (const position of allPosition) {
+  //     const positionData = position;
+  //     const poolKey = position.pool_key;
+  //     const res = calculateTokenAmounts(poolList[poolKeyToString(poolKey)].pool as any, position as any);
 
-      const positionInfoData: PositionInfo = {
-        id: `${poolKeyToString(poolKey)}-${positionData.token_id}`,
-        tokenId: positionData.token_id,
-        poolId: poolKeyToString(poolKey),
-        status: true,
-        liquidity: BigInt(positionData.liquidity).toString(),
-        tickLower: positionData.lower_tick_index.toString(),
-        tickUpper: positionData.upper_tick_index.toString(),
-        principalAmountX: res.x.toString(),
-        principalAmountY: res.y.toString(),
-        createdAt: BigInt(Date.now()).toString()
-      };
+  //     const positionInfoData: PositionInfo = {
+  //       id: `${poolKeyToString(poolKey)}-${positionData.token_id}`,
+  //       tokenId: positionData.token_id,
+  //       poolId: poolKeyToString(poolKey),
+  //       status: true,
+  //       liquidity: BigInt(positionData.liquidity).toString(),
+  //       tickLower: positionData.lower_tick_index.toString(),
+  //       tickUpper: positionData.upper_tick_index.toString(),
+  //       principalAmountX: res.x.toString(),
+  //       principalAmountY: res.y.toString(),
+  //       createdAt: BigInt(Date.now()).toString()
+  //     };
 
-      positionInfo.push(positionInfoData);
-    }
+  //     positionInfo.push(positionInfoData);
+  //   }
 
-    return positionInfo;
-  }
+  //   return positionInfo;
+  // }
 
   public static getPoolLiquidities = async (
     pools: PoolWithPoolKey[],
     prices: CoinGeckoPrices<string>
   ): Promise<Record<string, number>> => {
     const poolLiquidities: Record<string, number> = {};
-    const allPosition = await SingletonOraiswapV3.queryPosition();
+    await this.loadHandler();
 
     for (const pool of pools) {
       const poolKey = pool.pool_key;
-      const poolData = pool.pool;
       const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
       const tokenY = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_y);
 
-      let tvlX = 0n;
-      let tvlY = 0n;
-      allPosition.forEach((position) => {
-        if (position.poolId === poolKeyToString(poolKey)) {
-          tvlX += BigInt(position.principalAmountX);
-          tvlY += BigInt(position.principalAmountY);
-        }
-      });
+      const res = await this._handler.getPairLiquidityValues(pool);
+      const tvlX = res.liquidityX;
+      const tvlY = res.liquidityY;
 
       const tvlLockedUSD =
         (prices[tokenX.coinGeckoId] * Number(tvlX)) / 10 ** tokenX.decimals +
@@ -541,93 +508,7 @@ export default class SingletonOraiswapV3 {
   };
 
   public static getTotalLiquidityValue = async (): Promise<number> => {
-    const pools = await this._dexQuerier.pools({}); // get pools from state
-
-    const totalLiquidity = await Promise.all(
-      pools.map(async (pool) => {
-        const tickmap = await this.getFullTickmap(pool.pool_key);
-
-        const liquidityTicks = await this.getAllLiquidityTicks(pool.pool_key, tickmap);
-
-        // console.log({ liquidityTicks });
-
-        const tickIndexes: number[] = [];
-        for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
-          for (let bit = 0; bit < loadChunkSize(); bit++) {
-            const checkedBit = chunk & (1n << BigInt(bit));
-            if (checkedBit) {
-              const tickIndex = positionToTick(Number(chunkIndex), bit, pool.pool_key.fee_tier.tick_spacing);
-              tickIndexes.push(tickIndex);
-            }
-          }
-        }
-
-        const tickArray: VirtualRange[] = [];
-
-        for (let i = 0; i < tickIndexes.length - 1; i++) {
-          tickArray.push({
-            lowerTick: tickIndexes[i],
-            upperTick: tickIndexes[i + 1]
-          });
-        }
-
-        const posTest: PositionTest[] = calculateLiquidityForRanges(liquidityTicks, tickArray);
-
-        const res = await calculateLiquidityForPair(posTest, BigInt(pool.pool.sqrt_price));
-
-        return [
-          { address: pool.pool_key.token_x, balance: res.liquidityX },
-          { address: pool.pool_key.token_y, balance: res.liquidityY }
-        ];
-      })
-    );
-
-    const flattenArray = totalLiquidity.flat(1);
-
-    // get all tokens and remove duplicate
-    const tokens = flattenArray
-      .map((item) => item.address)
-      .filter((value, index, self) => self.indexOf(value) === index);
-
-    // get token info
-    const tokenInfos = await Promise.all(
-      tokens.map(async (token) => {
-        if (oraichainTokens.filter((item) => extractAddress(item) === token).length > 0) {
-          const info = oraichainTokens.filter((item) => extractAddress(item) === token)[0];
-          return {
-            info,
-            price: {
-              price: 0
-            }
-          };
-          // return { info, price: await getCoingeckoTokenPriceV2(info.coingeckoId) };
-        }
-      })
-    );
-
-    // console.log({ tokenInfos });
-
-    const tokenWithLiquidities = tokens.map((token) => {
-      const liquidity = flattenArray
-        .filter((item) => item.address === token)
-        .reduce((acc, item) => acc + item.balance, 0n);
-      return { address: token, balance: liquidity };
-    });
-
-    // tokenWithUSDValue
-    const tokenWithUSDValue = tokenWithLiquidities.map((token) => {
-      const tokenInfo = tokenInfos.filter((item) => extractAddress(item.info) === token.address)[0];
-      return {
-        address: token.address,
-        usdValue: (Number(token.balance) / 10 ** 6) * tokenInfo.price.price
-      };
-    });
-
-    // console.log({ tokenWithUSDValue });
-
-    const totalValue = tokenWithUSDValue.reduce((acc, item) => acc + item.usdValue, 0);
-
-    return totalValue;
+    return 1;
   };
 }
 
@@ -794,10 +675,10 @@ export async function fetchPositionAprInfo(
   prices: CoinGeckoPrices<CoinGeckoId>,
   tokenXLiquidityInUsd: number,
   tokenYLiquidityInUsd: number,
-  isInRange: boolean
+  isInRange: boolean,
+  feeAndLiquidityInfo: PoolFeeAndLiquidityDaily[]
 ): Promise<PositionAprInfo> {
-  const feeAndLiquidityInfo = await axios.get<PoolFeeAndLiquidityDaily[]>('pool-v3/fee', {});
-  const avgFeeAPRs = feeAndLiquidityInfo.data.map((pool) => {
+  const avgFeeAPRs = feeAndLiquidityInfo.map((pool) => {
     const feeAPR = (pool.feeDaily * 365) / pool.liquidityDaily;
     return {
       poolKey: pool.poolKey,
@@ -815,7 +696,7 @@ export async function fetchPositionAprInfo(
     return {
       swapFee: feeAPR ? feeAPR : 0,
       incentive: sumIncentivesApr,
-      total: feeAPR
+      total: feeAPR ? feeAPR : 0
     };
   }
 
@@ -849,10 +730,10 @@ export type PoolAprInfo = {
 export async function fetchPoolAprInfo(
   poolKeys: PoolKey[],
   prices: CoinGeckoPrices<CoinGeckoId>,
-  poolLiquidities: Record<string, number>
+  poolLiquidities: Record<string, number>,
+  feeAndLiquidityInfo: PoolFeeAndLiquidityDaily[]
 ): Promise<Record<string, PoolAprInfo>> {
-  const feeAndLiquidityInfo = await axios.get<PoolFeeAndLiquidityDaily[]>('pool-v3/fee', {});
-  const avgFeeAPRs = feeAndLiquidityInfo.data.map((pool) => {
+  const avgFeeAPRs = feeAndLiquidityInfo.map((pool) => {
     const feeAPR = (pool.feeDaily * 365) / pool.liquidityDaily;
     return {
       poolKey: pool.poolKey,
@@ -874,7 +755,7 @@ export async function fetchPoolAprInfo(
       const rewardInUsd = prices[token.coinGeckoId];
       const totalPoolLiquidity = poolLiquidities[poolKeyToString(poolKey)];
       const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
-      if (totalPoolLiquidity) sumIncentivesApr += rewardPerYear / (totalPoolLiquidity * 0.25);
+      if (totalPoolLiquidity) sumIncentivesApr += rewardPerYear / totalPoolLiquidity;
     }
 
     poolAprs[poolKeyToString(poolKey)] = {

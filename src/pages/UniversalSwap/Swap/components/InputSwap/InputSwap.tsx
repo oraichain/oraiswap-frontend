@@ -8,13 +8,9 @@ import styles from './InputSwap.module.scss';
 import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import { Themes } from 'context/theme-context';
 import { numberWithCommas } from 'pages/Pools/helpers';
+import { AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP } from 'helper/constants';
 
 const cx = cn.bind(styles);
-
-export const AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP: [number, string, string][] = [
-  [0.5, '50%', 'half'],
-  [1, '100%', 'max']
-];
 
 interface InputSwapProps {
   setIsSelectToken: (value: boolean) => void;

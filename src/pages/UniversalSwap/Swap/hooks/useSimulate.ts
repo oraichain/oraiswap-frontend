@@ -23,15 +23,15 @@ export const useSimulate = (
   initAmount?: number,
   simulateOption?: {
     useAlphaSmartRoute?: boolean;
-    useSmartRoute?: boolean;
-  },
-  isAIRoute?: boolean
+    useIbcWasm?: boolean;
+    isAIRoute?: boolean;
+    protocols?: string[];
+  }
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
   const debouncedFromAmount = useDebounce(fromAmountToken, 800);
-
   const { data: simulateData, isPreviousData: isPreviousSimulate } = useQuery(
-    [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount, isAIRoute],
+    [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount, simulateOption?.isAIRoute],
     () => {
       return UniversalSwapHelper.handleSimulateSwap({
         originalFromInfo: originalFromTokenInfo,
@@ -39,12 +39,13 @@ export const useSimulate = (
         originalAmount: debouncedFromAmount,
         routerClient,
         routerOption: {
-          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute
+          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute,
+          useIbcWasm: simulateOption?.useIbcWasm
         },
-        optionRouter: {
+        routerConfig: {
           url: 'https://osor.oraidex.io',
           path: '/smart-router/alpha-router',
-          protocol: ['Oraidex', 'OraidexV3', 'Osmosis']
+          protocols: simulateOption?.protocols ?? ['Oraidex', 'OraidexV3', 'Osmosis']
         }
       });
     },

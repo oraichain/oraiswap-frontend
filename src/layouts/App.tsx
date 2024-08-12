@@ -26,6 +26,8 @@ import './index.scss';
 import Menu from './Menu';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
+import { getCosmWasmClient } from 'libs/cosmjs';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -59,6 +61,21 @@ const App = () => {
   }, [walletByNetworks, window.tronWeb, window.tronLink, ethOwallet]);
 
   useEffect(() => {
+    const loadSingleton = async () => {
+      if (address) {
+        try {
+          const { client } = await getCosmWasmClient({ chainId: network.chainId });
+          SingletonOraiswapV3.load(client, address);
+        } catch (error) {
+          console.error('Error loading OraiswapV3 singleton:', error);
+        }
+      }
+    };
+
+    loadSingleton();
+  }, [address]);
+
+  useEffect(() => {
     const win = window as any;
     if (typeof win.Featurebase !== 'function') {
       win.Featurebase = function () {
@@ -74,6 +91,7 @@ const App = () => {
     });
   }, [theme]);
 
+  //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
     {

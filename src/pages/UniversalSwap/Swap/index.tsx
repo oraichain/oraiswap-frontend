@@ -10,7 +10,7 @@ import {
   toAmount,
   toDisplay,
   TON_ORAICHAIN_DENOM,
-  chainInfos
+  evmChains
 } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
@@ -34,7 +34,14 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
 import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
-import { assert, getSpecialCoingecko, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import {
+  assert,
+  getSpecialCoingecko,
+  getTransactionUrl,
+  handleCheckAddress,
+  handleErrorTransaction,
+  networks
+} from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
@@ -53,6 +60,7 @@ import {
   getTokenBalance,
   getTokenInfo,
   isAllowAlphaSmartRouter,
+  isAllowIBCWasm,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
 import React, { useRef, useState } from 'react';
@@ -75,10 +83,9 @@ import useCalculateDataSwap, { SIMULATE_INIT_AMOUNT } from './hooks/useCalculate
 import { useFillToken } from './hooks/useFillToken';
 import useHandleEffectTokenChange from './hooks/useHandleEffectTokenChange';
 import styles from './index.module.scss';
+import { RELAYER_DECIMAL } from 'helper/constants';
 
 const cx = cn.bind(styles);
-// TODO: hardcode decimal relayerFee
-const RELAYER_DECIMAL = 6;
 
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
@@ -175,14 +182,8 @@ const SwapComponent: React.FC<{
   const fromTokenBalance = getTokenBalance(originalFromToken, amounts, subAmountFrom);
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
-  let useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
-  if (
-    [originalFromToken.contractAddress, originalFromToken.denom, originalToToken.contractAddress, originalToToken.denom]
-      .filter(Boolean)
-      .includes(TON_ORAICHAIN_DENOM)
-  ) {
-    useAlphaSmartRouter = true;
-  }
+  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken, isAIRoute);
+  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken, isAIRoute);
 
   const settingRef = useRef();
   const smartRouteRef = useRef();
@@ -296,6 +297,7 @@ const SwapComponent: React.FC<{
         fromAmount: fromAmountToken,
         simulateAmount,
         userSlippage,
+        bridgeFee: 1,
         amounts: amountsBalance,
         simulatePrice:
           // @ts-ignore
@@ -316,7 +318,8 @@ const SwapComponent: React.FC<{
         cosmosWallet: window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
-          isAlphaSmartRouter: useAlphaSmartRouter
+          isAlphaSmartRouter: useAlphaSmartRouter,
+          isIbcWasm: useIbcWasm
         }
       });
 
@@ -396,10 +399,30 @@ const SwapComponent: React.FC<{
   };
 
   const unSupportSimulateToken = ['bnb', 'bep20_wbnb', 'eth', TON_ORAICHAIN_DENOM];
-  const supportedChain =
-    originalFromToken.denom === TON_ORAICHAIN_DENOM || originalToToken.denom === TON_ORAICHAIN_DENOM
-      ? chainInfos.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId)
-      : undefined;
+  const supportedChainFunc = () => {
+    if (unSupportSimulateToken.includes(originalFromToken?.denom)) {
+      return ['Oraichain'];
+    }
+
+    const isOraichainDenom = [originalFromToken.denom, originalToToken.denom].includes(TON_ORAICHAIN_DENOM);
+    if (isOraichainDenom) {
+      return networks.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId);
+    }
+
+    if (originalFromToken.chainId === 'injective-1') {
+      if (!isAIRoute) {
+        return networks.filter((chainInfo) => chainInfo.chainId === 'Oraichain').map((chain) => chain.chainId);
+      }
+      return networks.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId);
+    }
+
+    if (!originalFromToken.cosmosBased) {
+      return networks.filter((chainInfo) => chainInfo.chainId !== 'injective-1').map((chain) => chain.chainId);
+    }
+    return [];
+  };
+
+  const supportedChain = supportedChainFunc();
 
   const handleChangeToken = (token: TokenItemType, type) => {
     const isFrom = type === 'from';
@@ -589,7 +612,7 @@ const SwapComponent: React.FC<{
                 usdPrice={usdPriceShowFrom}
               />
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
-              {!fromTokenFee && !toTokenFee && isWarningSlippage && (
+              {!fromTokenFee && !toTokenFee && !isAIRoute && isWarningSlippage && (
                 <div className={cx('impact-warning')}>
                   <WarningIcon />
                   <div className={cx('title')}>
@@ -604,7 +627,7 @@ const SwapComponent: React.FC<{
               <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
-              {isAllowAlphaSmartRouter(originalFromToken, originalToToken) && (
+              {originalFromToken.cosmosBased && originalToToken.cosmosBased && (
                 <AIRouteSwitch isLoading={isPreviousSimulate} />
               )}
               {generateRatioComp()}

@@ -6,7 +6,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { getAverageRatio, getRemoteDenom, isAllowAlphaSmartRouter } from 'pages/UniversalSwap/helpers';
+import { getAverageRatio, getRemoteDenom, isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
 import { fetchTokenInfos } from 'rest/api';
 import { useSimulate } from './useSimulate';
 import { useSwapFee } from './useSwapFee';
@@ -26,9 +26,11 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
 
   const [isAIRoute] = useConfigReducer('AIRoute');
-  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken) && isAIRoute;
-  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+  const useAlphaSmartRoute = isAllowAlphaSmartRouter(originalFromToken, originalToToken, isAIRoute);
+  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken, isAIRoute);
 
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+  const protocols = useIbcWasm ? ['Oraidex', 'OraidexV3'] : undefined;
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
     originalFromToken,
     originalToToken
@@ -48,9 +50,11 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
       routerClient,
       null,
       {
-        useAlphaSmartRoute: useAlphaSmartRouter
-      },
-      isAIRoute
+        useAlphaSmartRoute,
+        useIbcWasm,
+        isAIRoute,
+        protocols
+      }
     );
 
   const { simulateData: averageSimulateData } = useSimulate(
@@ -62,9 +66,11 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     routerClient,
     SIMULATE_INIT_AMOUNT,
     {
-      useAlphaSmartRoute: useAlphaSmartRouter
-    },
-    isAIRoute
+      useAlphaSmartRoute,
+      useIbcWasm,
+      isAIRoute,
+      protocols
+    }
   );
 
   const fromAmountTokenBalance =

@@ -41,7 +41,7 @@ import {
   handleErrorTransaction,
   networks
 } from 'helper';
-import { bitcoinChainId } from 'helper/constants';
+import { DEFAULT_RELAYER_FEE, RELAYER_DECIMAL, bitcoinChainId } from 'helper/constants';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -78,6 +78,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
+import { isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
 
 interface BalanceProps {}
 
@@ -89,7 +90,9 @@ const Balance: React.FC<BalanceProps> = () => {
   const tokenUrl = searchParams.get('token');
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
   const nomic = useContext(NomicContext);
+
   // state internal
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
@@ -488,16 +491,38 @@ const Balance: React.FC<BalanceProps> = () => {
         simulateAmount = toAmount(fromAmount, newToToken.decimals).toString();
       }
 
+      let relayerFee = {
+        relayerAmount: DEFAULT_RELAYER_FEE,
+        relayerDecimals: RELAYER_DECIMAL
+      };
+
+      const { relayer_fees: relayerFees } = feeConfig;
+      const findRelayerFee = relayerFees.find(
+        (relayer) => relayer.prefix === from.prefix || relayer.prefix === newToToken.prefix
+      );
+
+      if (findRelayerFee) relayerFee.relayerAmount = findRelayerFee.amount;
+
       const universalSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
+          relayerFee,
+          userSlippage: 0,
+          bridgeFee: 1,
           amounts: amountsBalance,
           simulateAmount
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
+        {
+          cosmosWallet: window.Keplr,
+          evmWallet: new Metamask(window.tronWebDapp),
+          swapOptions: {
+            isAlphaSmartRouter: isAllowAlphaSmartRouter(from, newToToken, false),
+            isIbcWasm: isAllowIBCWasm(from, newToToken, false)
+          }
+        }
       );
 
       result = await universalSwapHandler.processUniversalSwap();
