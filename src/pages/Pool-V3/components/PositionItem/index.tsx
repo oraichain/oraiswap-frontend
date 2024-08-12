@@ -36,6 +36,7 @@ import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 
 const PositionItem = ({ position, setStatusRemove }) => {
   const theme = useTheme();
@@ -82,6 +83,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
 
   const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
+  const { poolList } = useGetPoolList();
 
   useOnClickOutside(ref, () => {
     setCollapse(false);
@@ -96,6 +98,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
   useEffect(() => {
     const getAPRInfo = async () => {
       const res = await fetchPositionAprInfo(
+        poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key)),
         position,
         prices,
         position.tokenXLiqInUsd,
@@ -108,17 +111,24 @@ const PositionItem = ({ position, setStatusRemove }) => {
     if (statusRange && position.tokenXLiqInUsd && position.tokenYLiqInUsd && prices && position) {
       getAPRInfo();
     }
-  }, [statusRange, prices, position]);
+  }, [statusRange, prices, position, poolList]);
 
   useEffect(() => {
     if (!openCollapse) return;
     (async () => {
       const { pool_key, lower_tick_index, upper_tick_index } = position;
-      const [lowerTickData, upperTickData, incentives] = await Promise.all([
-        SingletonOraiswapV3.getTicks(lower_tick_index, pool_key),
-        SingletonOraiswapV3.getTicks(upper_tick_index, pool_key),
-        SingletonOraiswapV3.getIncentivesPosition(position.id, address)
-      ]);
+
+      const {
+        lowerTickData,
+        upperTickData,
+        incentivesData: incentives
+      } = await SingletonOraiswapV3.getTicksAndIncentivesInfo(
+        lower_tick_index,
+        upper_tick_index,
+        position.id,
+        address,
+        pool_key
+      );
 
       const tokenIncentive = incentives.reduce((acc, cur) => {
         const tokenAttr = parseAssetInfo(cur.info);
@@ -140,11 +150,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
 
   useEffect(() => {
     (async () => {
-      const { pool } = await SingletonOraiswapV3.getPool({
-        fee_tier: position.pool_key.fee_tier,
-        token_x: position.pool_key.token_x,
-        token_y: position.pool_key.token_y
-      });
+      const { pool } = poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key));
       const { lower_tick_index, upper_tick_index } = position;
       setStatusRange(pool.current_tick_index >= lower_tick_index && pool.current_tick_index <= upper_tick_index);
     })();

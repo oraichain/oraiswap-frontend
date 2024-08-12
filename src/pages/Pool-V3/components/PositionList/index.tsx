@@ -9,6 +9,8 @@ import { useEffect, useState } from 'react';
 import { getFeeClaimData } from 'rest/graphClient';
 import PositionItem from '../PositionItem';
 import styles from './index.module.scss';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 
 const PositionList = () => {
   const theme = useTheme();
@@ -21,6 +23,8 @@ const PositionList = () => {
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusRemove, setStatusRemove] = useState<boolean>(undefined);
+  const { positions } = useGetPositions(address);
+  const { poolList } = useGetPoolList();
 
   useEffect(() => {
     (async () => {
@@ -28,15 +32,11 @@ const PositionList = () => {
         setLoading(true);
         if (!address) return setDataPosition([]);
 
-        const [positions, poolsData, feeClaimData] = await Promise.all([
-          SingletonOraiswapV3.getAllPosition(address),
-          SingletonOraiswapV3.getPools(),
-          getFeeClaimData(address)
-        ]);
+        const feeClaimData= await getFeeClaimData(address)
 
         const positionsMap = convertPosition({
           positions: positions.map((po, ind) => ({ ...po, ind })),
-          poolsData,
+          poolsData: poolList,
           cachePrices,
           address,
           isLight,
@@ -53,7 +53,7 @@ const PositionList = () => {
     })();
 
     return () => {};
-  }, [address, statusRemove]);
+  }, [address, poolList, positions]);
 
   return (
     <div className={styles.positionList}>

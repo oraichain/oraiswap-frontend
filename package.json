@@ -101,7 +101,7 @@
     "ts-jest": "^29.1.1",
     "typed-scss-modules": "^7.1.4",
     "typescript": "^5.1.6",
-    "@oraichain/oraiswap-v3": "0.1.5"
+    "oraiswap-v3-test": "^0.1.6-beta1"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",

@@ -10,7 +10,7 @@ import {
   Tick,
   Liquidity,
   getPriceScale
-} from '@oraichain/oraiswap-v3';
+} from 'oraiswap-v3-test';
 import { TokenItemType } from '@oraichain/oraidex-common';
 import SingletonOraiswapV3, { Token } from 'libs/contractSingleton';
 import { PlotTickData } from './PriceRangePlot';
@@ -457,11 +457,9 @@ export const getTokenDataByAddresses = async (tokens: string[], address?: string
 
 export async function handleGetCurrentPlotTicks({ poolKey, isXtoY, xDecimal, yDecimal }): Promise<PlotTickData[]> {
   try {
-    console.log('poolKey', poolKey);
     const allTickmaps = await SingletonOraiswapV3.getFullTickmap(poolKey);
 
     const rawTicks = await SingletonOraiswapV3.getAllLiquidityTicks(poolKey, allTickmaps);
-    console.log('rawTicks', rawTicks);
     if (rawTicks.length === 0) {
       const data = createPlaceholderLiquidityPlot(isXtoY, 0, poolKey.fee_tier.tick_spacing, xDecimal, yDecimal);
       return data;

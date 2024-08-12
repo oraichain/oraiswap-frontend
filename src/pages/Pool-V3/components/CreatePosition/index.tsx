@@ -14,14 +14,7 @@ import { oraichainTokens } from 'config/bridgeTokens';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
-import {
-  calculateSqrtPrice,
-  getLiquidityByX,
-  getLiquidityByY,
-  getMaxTick,
-  getMinTick,
-  Price
-} from '@oraichain/oraiswap-v3';
+import { calculateSqrtPrice, getLiquidityByX, getLiquidityByY, getMaxTick, getMinTick, Price } from 'oraiswap-v3-test';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NewPositionNoPool from '../NewPositionNoPool';
@@ -542,10 +535,6 @@ const CreatePosition = () => {
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
-    console.log('mid', {
-      index: convertedMid,
-      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
-    });
 
     setMidPrice({
       index: convertedMid,
@@ -623,8 +612,6 @@ const CreatePosition = () => {
         });
 
         setLiquidityData(ticksData);
-
-        console.log({ ticksData });
       };
 
       if (isPoolExist && notInitPoolKey) {
