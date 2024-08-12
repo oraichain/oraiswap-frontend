@@ -511,6 +511,7 @@ const Balance: React.FC<BalanceProps> = () => {
           fromAmount,
           relayerFee,
           userSlippage: 0,
+          bridgeFee: 1,
           amounts: amountsBalance,
           simulateAmount
         },

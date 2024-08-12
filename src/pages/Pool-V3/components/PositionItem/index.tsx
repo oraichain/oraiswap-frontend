@@ -152,6 +152,9 @@ const PositionItem = ({ position, setStatusRemove }) => {
     return () => {};
   }, []);
 
+  const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
+  const earnYDisplay = toDisplay((earnY || 0).toString(), tokenYDecimal);
+
   const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd, incentivesUSD] = useMemo(() => {
     if (isClaimSuccess) return [0, 0, 0, 0, 0];
     if (position?.poolData && openCollapse && tick.lowerTick && tick.lowerTick && incentives) {
@@ -395,25 +398,18 @@ const PositionItem = ({ position, setStatusRemove }) => {
             <h4>Total Reward Earned</h4>
             <div className={styles.itemRow}>
               <span className={styles.usd}>
-                {formatDisplayUsdt(
-                  new BigDecimal(toDisplay((earnX || 0).toString(), tokenXDecimal) * tokenXUsd)
-                    .add(toDisplay((earnY || 0).toString(), tokenYDecimal) * tokenYUsd)
-                    .add(totalEarnIncentiveUsd)
-                    .toNumber(),
-                  6,
-                  6
-                )}
+                {formatDisplayUsdt(earnXDisplay * tokenXUsd + earnYDisplay * tokenYUsd + totalEarnIncentiveUsd, 6, 6)}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
-                {numberWithCommas(toDisplay((earnX || 0).toString(), tokenXDecimal), undefined, {
+                {numberWithCommas(earnXDisplay, undefined, {
                   maximumFractionDigits: 6
                 })}{' '}
                 {position?.tokenX.name}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenYIcon />
-                {numberWithCommas(toDisplay((earnY || 0).toString(), tokenYDecimal), undefined, {
+                {numberWithCommas(earnYDisplay, undefined, {
                   maximumFractionDigits: 6
                 })}{' '}
                 {position?.tokenY.name}

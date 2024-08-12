@@ -297,6 +297,7 @@ const SwapComponent: React.FC<{
         fromAmount: fromAmountToken,
         simulateAmount,
         userSlippage,
+        bridgeFee: 1,
         amounts: amountsBalance,
         simulatePrice:
           // @ts-ignore
@@ -626,7 +627,7 @@ const SwapComponent: React.FC<{
               <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
-              {originalFromToken.cosmosBased && originalToToken.cosmosBased && useAlphaSmartRouter && (
+              {originalFromToken.cosmosBased && originalToToken.cosmosBased && (
                 <AIRouteSwitch isLoading={isPreviousSimulate} />
               )}
               {generateRatioComp()}
