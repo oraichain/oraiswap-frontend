@@ -4628,16 +4628,6 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3-wasm/-/oraiswap-v3-wasm-0.1.0.tgz#aff12c614635ad2c4343ef62d8497e41d52408f4"
   integrity sha512-87YMqhBVgVJoX5BM+AeGc13I0dTR/hIHg6sIh+j9M/T0OecaCZR4O3h+CiaBKrK9Eej0gccv9zI02FwjAggAfw==
 
-"@oraichain/oraiswap-v3@0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.5.tgz#e833fc2ebc1b40dca81d32004900e4fe7d56ea01"
-  integrity sha512-tXRmXpx/sqZOJETzyY3c22/j8sr+JxfxHcJ/TF/vxDQGLw6EpxiAGhAcJjxLerOUqOJD4u0/mi85xk7GALXk/w==
-  dependencies:
-    "@cosmjs/cosmwasm-stargate" "^0.31.0"
-    "@oraichain/oraidex-common" latest
-    "@oraichain/oraidex-contracts-sdk" "^1.0.48"
-    "@oraichain/oraiswap-v3-wasm" "^0.1.0"
-
 "@oraichain/wasm-json-toolkit@^1.0.24":
   version "1.0.24"
   resolved "https://registry.yarnpkg.com/@oraichain/wasm-json-toolkit/-/wasm-json-toolkit-1.0.24.tgz#e9a431560e8e946fbb7ec257e5f13d9320ffd23a"
@@ -14940,6 +14930,16 @@ ora@^5.4.1:
     log-symbols "^4.1.0"
     strip-ansi "^6.0.0"
     wcwidth "^1.0.1"
+
+oraiswap-v3-test@^0.1.6-beta1:
+  version "0.1.6-beta1"
+  resolved "https://registry.yarnpkg.com/oraiswap-v3-test/-/oraiswap-v3-test-0.1.6-beta1.tgz#3314ba268a00bfc569172208620c239c27c5d439"
+  integrity sha512-O3FCTF1iposB2HoFNJxYY4B2sXcsIisLKsSsgprG7L9aQnBdxx24ADhjR2xlcE1ix0fsbjcak4N1bgKCOSmoCw==
+  dependencies:
+    "@cosmjs/cosmwasm-stargate" "^0.31.0"
+    "@oraichain/oraidex-common" latest
+    "@oraichain/oraidex-contracts-sdk" "^1.0.48"
+    "@oraichain/oraiswap-v3-wasm" "^0.1.0"
 
 os-browserify@^0.3.0:
   version "0.3.0"

@@ -22,6 +22,7 @@ import LoadingBox from 'components/LoadingBox';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
 import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 
 const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
@@ -42,14 +43,13 @@ const PoolList = () => {
   const { feeDailyData } = useGetFeeDailyData(yesterdayIndex);
   const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol(yesterdayIndex);
   const { poolPositionInfo } = useGetPoolPositionInfo(prices);
-  // console.log({ poolPositionInfo });
+  const { poolList } = useGetPoolList();
 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const pools = await SingletonOraiswapV3.getPools();
-        const fmtPools = (pools || [])
+        const fmtPools = (poolList || [])
           .map((p) => {
             const isLight = theme === 'light';
             return formatPoolData(p, isLight);
@@ -65,7 +65,7 @@ const PoolList = () => {
     })();
 
     return () => {};
-  }, [theme]);
+  }, [theme, poolList]);
 
   const totalLiquidity = useMemo(() => {
     if (liquidityPools && Object.values(liquidityPools).length) {
@@ -95,9 +95,7 @@ const PoolList = () => {
 
   useEffect(() => {
     const getAPRInfo = async () => {
-      const poolKeys = dataPool.map((pool) => parsePoolKeyString(pool.poolKey));
-
-      const res = await fetchPoolAprInfo(poolKeys, prices, poolPositionInfo, feeDailyData);
+      const res = await fetchPoolAprInfo(dataPool, prices, poolPositionInfo, feeDailyData);
       setAprInfo(res);
     };
     if (dataPool.length && prices && Object.keys(poolPositionInfo).length) {

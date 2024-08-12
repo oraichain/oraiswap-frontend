@@ -22,6 +22,9 @@ import { getFeeClaimData } from 'rest/graphClient';
 import PositionItem from '../PositionItem';
 import styles from './index.module.scss';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
@@ -60,16 +63,17 @@ const PoolV3Detail = () => {
   });
   const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
+  const { allPosition } = useGetAllPositions();
+  const { positions: userPositions } = useGetPositions(address); 
+  const { poolList } = useGetPoolList();
 
   useEffect(() => {
     (async () => {
       try {
-        const poolKey = stringToPoolKey(poolId);
-        console.log('poolKey', poolKey);
-        const pool = await SingletonOraiswapV3.getPool(poolKey);
+        const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
         const isLight = theme === 'light';
         const fmtPool = formatPoolData(pool, isLight);
-        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, prices);
+        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, prices, allPosition);
 
         setLiquidity(liquidity);
         setPoolDetail(fmtPool);
@@ -77,13 +81,13 @@ const PoolV3Detail = () => {
         console.log('error: get pool detail', error);
       }
     })();
-  }, [poolId]);
+  }, [poolId, allPosition, poolList, poolKeyString, prices, theme]);
 
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
 
   useEffect(() => {
     const getAPRInfo = async () => {
-      const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools, feeDailyData);
+      const res = await fetchPoolAprInfo([poolDetail], prices, liquidityPools, feeDailyData);
       setAprInfo({
         ...aprInfo,
         [poolKeyString]: res[poolKeyString]
@@ -92,7 +96,7 @@ const PoolV3Detail = () => {
     if (poolDetail && prices && Object.values(liquidityPools).length && poolDetail.poolKey === poolKeyString) {
       getAPRInfo();
     }
-  }, [poolDetail, prices, liquidityPools]);
+  }, [poolDetail, prices, liquidityPools, feeDailyData, poolKeyString, aprInfo, setAprInfo]); 
 
   const { spread, pool_key } = poolDetail || {};
   const { allocation, total } = liquidity;
@@ -113,17 +117,13 @@ const PoolV3Detail = () => {
         if (!address) return setDataPosition([]);
         if (!pool_key) return;
         setLoading(true);
-        const [positions, poolsData, feeClaimData] = await Promise.all([
-          SingletonOraiswapV3.getAllPosition(address),
-          SingletonOraiswapV3.getPools(),
-          getFeeClaimData(address)
-        ]);
+        const feeClaimData = await getFeeClaimData(address)
 
         const positionsMap = convertPosition({
-          positions: positions
+          positions: userPositions
             .map((po, ind) => ({ ...po, ind }))
             .filter((pos) => poolKeyToString(pos.pool_key) === poolKeyToString(pool_key)),
-          poolsData,
+          poolsData: poolList,
           cachePrices,
           address,
           isLight,
@@ -140,7 +140,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [poolDetail, address, statusRemove]);
+  }, [address, statusRemove, userPositions, poolList]);
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>

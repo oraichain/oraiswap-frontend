@@ -10,7 +10,7 @@ import {
   isNativeToken
 } from '../helpers/helper';
 
-import { newPoolKey } from '@oraichain/oraiswap-v3';
+import { newPoolKey } from 'oraiswap-v3-test';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { network } from 'config/networks';
 
@@ -35,7 +35,7 @@ const useAddLiquidity = () => {
       if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
       if (!isNativeToken(token_y)) listTokenApprove.push(token_y);
       if (listTokenApprove.length > 0) {
-        const msg = genMsgAllowance(listTokenApprove); 
+        const msg = genMsgAllowance(listTokenApprove);
         await approveListToken(msg, walletAddress);
       }
 

@@ -13,7 +13,7 @@ import useTheme from 'hooks/useTheme';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import { InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
-import { calculateSqrtPrice, newPoolKey } from '@oraichain/oraiswap-v3';
+import { calculateSqrtPrice, newPoolKey } from 'oraiswap-v3-test';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -132,8 +132,6 @@ const TokenForm = ({
         Math.max(Number(left), Number(right)),
         isXtoY
       ) === PositionTokenBlock.B;
-
-    console.log({ fromBlocked, toBlocked, left, right });
 
     setIsFromBlocked(fromBlocked);
     setIsToBlocked(toBlocked);

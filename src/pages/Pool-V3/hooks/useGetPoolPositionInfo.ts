@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { AmountDeltaResult, calculateAmountDelta, calculateSqrtPrice } from '@oraichain/oraiswap-v3';
+import { AmountDeltaResult, calculateAmountDelta, calculateSqrtPrice } from 'oraiswap-v3-test';
 import { getPoolPositionsInfo, PoolPositionsInfo } from 'rest/graphClient';
 
 export const useGetPoolPositionInfo = (prices: CoinGeckoPrices<string>) => {
