@@ -81,8 +81,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );
 
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
-  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
+  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { poolList } = useGetPoolList();
 
   useOnClickOutside(ref, () => {

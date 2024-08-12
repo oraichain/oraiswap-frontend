@@ -38,10 +38,8 @@ const PoolList = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
-
-  const { feeDailyData } = useGetFeeDailyData(yesterdayIndex);
-  const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol(yesterdayIndex);
+  const { feeDailyData } = useGetFeeDailyData();
+  const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol();
   const { poolPositionInfo } = useGetPoolPositionInfo(prices);
   const { poolList } = useGetPoolList();
 

@@ -503,7 +503,8 @@ export default class SingletonOraiswapV3 {
 
   public static async getAllPosition(): Promise<Position[]> {
     await this.loadHandler();
-    return await this._handler.allPositions();
+    const positions = await this._handler.allPositions();
+    return positions;
   }
 
   // public static async queryPosition(): Promise<PositionInfo[]> {
