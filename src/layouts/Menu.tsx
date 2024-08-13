@@ -16,6 +16,8 @@ import { ReactComponent as SupportIcon } from 'assets/icons/ic_support.svg';
 import { ReactComponent as TelegramIcon } from 'assets/icons/ic_telegram.svg';
 import { ReactComponent as TwitterIcon } from 'assets/icons/ic_twitter.svg';
 import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalswap.svg';
+import { ReactComponent as FeedBackIcon } from 'assets/icons/iconoir_chat-lines.svg';
+
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
@@ -85,26 +87,30 @@ const Menu: React.FC = () => {
           )}
         </a>
       );
-    return (
-      <Link
-        to={to}
-        onClick={() => {
-          setOpen(!open);
-          onClick(to);
-        }}
-        className={classNames(
-          styles.menu_item,
-          {
-            [styles.active]:
-              !otherActive &&
-              ((link?.includes(to) && link?.length === to?.length) || (link === '/' && to === '/universalswap'))
-          },
-          styles[theme],
-          styles.spin
-        )}
-      >
+
+    const getButtonClasses = () =>
+      classNames(
+        styles.menu_item,
+        {
+          [styles.active]:
+            !otherActive &&
+            ((link?.includes(to) && link?.length === to?.length) || (link === '/' && to === '/universalswap'))
+        },
+        styles[theme],
+        styles.spin
+      );
+
+    const getTextClasses = () => classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme]);
+
+    const handleClick = () => {
+      setOpen(!open);
+      if (title !== 'Feedback') onClick(to);
+    };
+
+    const renderContent = () => (
+      <>
         {Icon}
-        <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
+        <span className={getTextClasses()}>
           {title}
           {to === '/pools-v3' && (
             <span className={classNames(styles.suffix)}>
@@ -112,6 +118,16 @@ const Menu: React.FC = () => {
             </span>
           )}
         </span>
+      </>
+    );
+
+    return title === 'Feedback' ? (
+      <button onClick={handleClick} className={getButtonClasses()} data-featurebase-feedback>
+        {renderContent()}
+      </button>
+    ) : (
+      <Link to={to} onClick={handleClick} className={getButtonClasses()}>
+        {renderContent()}
       </Link>
     );
   };
@@ -144,6 +160,7 @@ const Menu: React.FC = () => {
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}
       {!isBeta && renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, true, <OraidexBetaIcon />)}
+      {renderLink('', 'Feedback', setLink, false, <FeedBackIcon />)}
       <div className={styles.divider}></div>
       {renderLink('https://orderbook.oraidex.io', 'Order Book', () => {}, true, <OrderbookIcon />)}
       {renderLink('https://futures.oraidex.io', 'Futures Trading', () => {}, true, <FuturesIcon />)}
