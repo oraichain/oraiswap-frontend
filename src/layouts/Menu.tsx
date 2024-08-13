@@ -160,7 +160,6 @@ const Menu: React.FC = () => {
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}
       {!isBeta && renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, true, <OraidexBetaIcon />)}
-      {renderLink('', 'Feedback', setLink, false, <FeedBackIcon />)}
       <div className={styles.divider}></div>
       {renderLink('https://orderbook.oraidex.io', 'Order Book', () => {}, true, <OrderbookIcon />)}
       {renderLink('https://futures.oraidex.io', 'Futures Trading', () => {}, true, <FuturesIcon />)}
@@ -193,6 +192,7 @@ const Menu: React.FC = () => {
         false,
         <KadoIcon />
       )}
+      {renderLink('', 'Feedback', setLink, false, <FeedBackIcon />)}
     </div>
   );
 
