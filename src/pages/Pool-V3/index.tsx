@@ -5,13 +5,11 @@ import React, { useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PoolList from './components/PoolList';
 import PositionList from './components/PositionList';
-import WrappedStats from './components/Statistics/WrappedStats/WrappedStats';
 import styles from './index.module.scss';
 
 export enum PoolV3PageType {
   POOL = 'pools',
   POSITION = 'positions',
-  // STAT = 'stats'
 }
 
 type TabRender = {
@@ -24,7 +22,6 @@ const listTab = Object.values(PoolV3PageType);
 const listTabRender: TabRender[] = [
   { id: PoolV3PageType.POOL, value: 'Pools', content: PoolList },
   { id: PoolV3PageType.POSITION, value: 'My positions', content: PositionList },
-  // { id: PoolV3PageType.STAT, value: 'Stats', content: WrappedStats }
 ];
 
 const PoolV3 = () => {
