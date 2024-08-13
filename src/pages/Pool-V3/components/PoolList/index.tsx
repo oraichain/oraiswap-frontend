@@ -1,10 +1,12 @@
-import { toDisplay } from '@oraichain/oraidex-common';
+import { toDisplay, BigDecimal } from '@oraichain/oraidex-common';
 import Loading from 'assets/gif/loading.gif';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
+import { ReactComponent as SortDownIcon } from 'assets/icons/down_icon.svg';
+import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
 import SearchLightSvg from 'assets/images/search-light-svg.svg';
 import SearchSvg from 'assets/images/search-svg.svg';
 import classNames from 'classnames';
@@ -22,6 +24,14 @@ import LoadingBox from 'components/LoadingBox';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
 import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
+import { CoefficientBySort, SortType } from 'components/Table';
+
+export enum PoolColumnHeader {
+  POOL_NAME = 'Pool name',
+  LIQUIDITY = 'Liquidity',
+  VOLUME = 'Volume (24h)',
+  APR = 'Apr'
+}
 
 const PoolList = () => {
   const { data: prices } = useCoinGeckoPrices();
@@ -29,6 +39,10 @@ const PoolList = () => {
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
   const [openTooltip, setOpenTooltip] = useState(false);
+
+  const [sort, setSort] = useState<Record<PoolColumnHeader, SortType>>({
+    [PoolColumnHeader.LIQUIDITY]: SortType.DESC
+  } as Record<PoolColumnHeader, SortType>);
 
   const theme = useTheme();
 
@@ -42,7 +56,6 @@ const PoolList = () => {
   const { feeDailyData } = useGetFeeDailyData(yesterdayIndex);
   const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol(yesterdayIndex);
   const { poolPositionInfo } = useGetPoolPositionInfo(prices);
-  // console.log({ poolPositionInfo });
 
   useEffect(() => {
     (async () => {
@@ -55,7 +68,6 @@ const PoolList = () => {
             return formatPoolData(p, isLight);
           })
           .filter((e) => e.isValid);
-        // .sort((a, b) => Number(b.pool.liquidity) - Number(a.pool.liquidity));
         setDataPool(fmtPools);
       } catch (error) {
         console.log('error: get pools', error);
@@ -90,6 +102,9 @@ const PoolList = () => {
           };
         })
       );
+      sortDataSource({
+        [PoolColumnHeader.LIQUIDITY]: SortType.DESC
+      } as any);
     }
   }, [dataPool?.length, Object.values(poolLiquidities).length]);
 
@@ -104,6 +119,74 @@ const PoolList = () => {
       getAPRInfo();
     }
   }, [dataPool, prices, Object.keys(poolPositionInfo).length]);
+
+  const [sortField, sortOrder] = Object.entries(sort)[0];
+
+  const handleClickSort = (sortField: PoolColumnHeader) => {
+    let newSort = { [sortField]: SortType.DESC } as Record<PoolColumnHeader, SortType>;
+
+    if (sort[sortField] === SortType.DESC) {
+      newSort = { [sortField]: SortType.ASC } as Record<PoolColumnHeader, SortType>;
+      setSort(newSort);
+      sortDataSource(newSort);
+      return;
+    }
+
+    setSort(newSort);
+    sortDataSource(newSort);
+  };
+
+  const sortDataSource = (sort: Record<PoolColumnHeader, SortType>) => {
+    const [sortField, sortOrder] = Object.entries(sort)[0];
+
+    const sortedData = dataPool
+      .filter((p) => {
+        if (!search) return true;
+
+        const { tokenXinfo, tokenYinfo } = p;
+
+        return (
+          (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
+          (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
+        );
+      })
+      // .sort((a, b) => (liquidityPools?.[b?.poolKey] || 0) - (liquidityPools?.[a?.poolKey] || 0))
+      .map((item) => {
+        let volumn = 0;
+        if (item?.poolKey) {
+          const findPool = volumnePools && volumnePools.find((vo) => vo.poolAddress === item?.poolKey);
+          if (findPool) volumn = findPool.volume24;
+        }
+
+        return {
+          ...item,
+          volumn
+        };
+      })
+      .sort((a, b) => {
+        switch (sortField) {
+          case PoolColumnHeader.LIQUIDITY:
+            return new BigDecimal(CoefficientBySort[sortOrder])
+              .mul((liquidityPools?.[a?.poolKey] || 0) - (liquidityPools?.[b?.poolKey] || 0))
+              .toNumber();
+          case PoolColumnHeader.POOL_NAME:
+            return CoefficientBySort[sortOrder] * (a?.tokenXinfo?.name || '').localeCompare(b.tokenXinfo?.name || '');
+          case PoolColumnHeader.VOLUME:
+            return new BigDecimal(CoefficientBySort[sortOrder]).mul(a.volumn - b.volumn).toNumber();
+          case PoolColumnHeader.APR:
+            return new BigDecimal(CoefficientBySort[sortOrder])
+              .mul((aprInfo?.[a?.poolKey].apr || 0) - (aprInfo?.[b?.poolKey].apr || 0))
+              .toNumber();
+
+          default:
+            return 0;
+        }
+      });
+
+    setDataPool(sortedData);
+
+    return sortedData;
+  };
 
   return (
     <div className={styles.poolList}>
@@ -141,14 +224,34 @@ const PoolList = () => {
               <table>
                 <thead>
                   <tr>
-                    <th style={{ width: '40%' }}>Pool name</th>
-                    <th style={{ width: '15%' }} className={styles.textRight}>
+                    <th style={{ width: '40%' }} onClick={() => handleClickSort(PoolColumnHeader.POOL_NAME)}>
+                      Pool name
+                      {sortField === PoolColumnHeader.POOL_NAME &&
+                        (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
+                    </th>
+                    <th
+                      style={{ width: '15%' }}
+                      className={styles.textRight}
+                      onClick={() => handleClickSort(PoolColumnHeader.LIQUIDITY)}
+                    >
                       Liquidity
+                      {sortField === PoolColumnHeader.LIQUIDITY &&
+                        (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
                     </th>
-                    <th style={{ width: '15%' }} className={styles.textRight}>
+                    <th
+                      style={{ width: '15%' }}
+                      className={styles.textRight}
+                      onClick={() => handleClickSort(PoolColumnHeader.VOLUME)}
+                    >
                       Volume (24H)
+                      {sortField === PoolColumnHeader.VOLUME &&
+                        (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
                     </th>
-                    <th style={{ width: '15%' }} className={classNames(styles.textRight, styles.aprHeader)}>
+                    <th
+                      style={{ width: '15%' }}
+                      className={classNames(styles.textRight, styles.aprHeader)}
+                      onClick={() => handleClickSort(PoolColumnHeader.APR)}
+                    >
                       APR
                       <TooltipIcon
                         className={styles.tooltipWrapper}
@@ -171,48 +274,32 @@ const PoolList = () => {
                           </div>
                         }
                       />
+                      {sortField === PoolColumnHeader.APR &&
+                        (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
                     </th>
                     <th style={{ width: '15%' }}></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dataPool
-                    .filter((p) => {
-                      if (!search) return true;
-
-                      const { tokenXinfo, tokenYinfo } = p;
-
-                      return (
-                        (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
-                        (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
-                      );
-                    })
-                    .sort((a, b) => (liquidityPools?.[b?.poolKey] || 0) - (liquidityPools?.[a?.poolKey] || 0))
-                    .map((item, index) => {
-                      let volumn = 0;
-                      if (item?.poolKey) {
-                        const findPool = volumnePools && volumnePools.find((vo) => vo.poolAddress === item?.poolKey);
-                        if (findPool) volumn = findPool.volume24;
-                      }
-
-                      return (
-                        <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                          <PoolItemTData
-                            item={item}
-                            theme={theme}
-                            volumn={volumn}
-                            liquidity={liquidityPools?.[item?.poolKey]}
-                            aprInfo={{
-                              apr: 0,
-                              incentives: [],
-                              swapFee: 0,
-                              incentivesApr: 0,
-                              ...aprInfo?.[item?.poolKey]
-                            }}
-                          />
-                        </tr>
-                      );
-                    })}
+                  {dataPool.map((item, index) => {
+                    return (
+                      <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
+                        <PoolItemTData
+                          item={item}
+                          theme={theme}
+                          volumn={item.volumn || 0}
+                          liquidity={liquidityPools?.[item?.poolKey]}
+                          aprInfo={{
+                            apr: 0,
+                            incentives: [],
+                            swapFee: 0,
+                            incentivesApr: 0,
+                            ...aprInfo?.[item?.poolKey]
+                          }}
+                        />
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -257,7 +344,13 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       </td>
       <td className={styles.textRight}>
         <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
-          {liquidity ? formatDisplayUsdt(liquidity) : (liquidity === 0 ? formatDisplayUsdt(0) : <img src={Loading} alt="loading" width={30} height={30} />)}
+          {liquidity ? (
+            formatDisplayUsdt(liquidity)
+          ) : liquidity === 0 ? (
+            formatDisplayUsdt(0)
+          ) : (
+            <img src={Loading} alt="loading" width={30} height={30} />
+          )}
         </span>
       </td>
       <td className={styles.textRight}>

@@ -39,7 +39,7 @@ export const ClassByAlign = {
   [AlignType.CENTER]: styles.justify_center
 };
 
-const CoefficientBySort = {
+export const CoefficientBySort = {
   [SortType.ASC]: 1,
   [SortType.DESC]: -1
 };
