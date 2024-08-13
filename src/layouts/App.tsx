@@ -83,11 +83,9 @@ const App = () => {
       };
     }
     win.Featurebase('initialize_feedback_widget', {
-      organization: 'oraidex',
+      organization: 'defi',
       theme: 'light',
-      placement: 'right',
-      email: 'hau.nv@orai.io',
-      name: 'hajua'
+      placement: 'right'
     });
   }, [theme]);
 
