@@ -286,7 +286,7 @@ const PoolV3Detail = () => {
               ? dataPosition.map((position, index) => {
                   return (
                     <div className={styles.positionWrapper} key={`pos-${index}`}>
-                      <PositionItem position={position} setStatusRemove={setStatusRemove} />
+                      <PositionItem position={position} />
                     </div>
                   );
                 })
