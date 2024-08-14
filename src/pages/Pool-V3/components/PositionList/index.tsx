@@ -3,7 +3,6 @@ import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import LoadingBox from 'components/LoadingBox';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { convertPosition } from 'pages/Pool-V3/helpers/helper';
 import { useEffect, useState } from 'react';
 import { getFeeClaimData } from 'rest/graphClient';
@@ -28,8 +27,14 @@ const PositionList = () => {
     (async () => {
       try {
         setLoading(true);
-        if (!(address && positions.length && poolList.length)) return setDataPosition([]);
-        const feeClaimData= await getFeeClaimData(address)
+        if (!(address && positions.length && poolList.length)) {
+          setDataPosition([]);
+          if (address) {
+            setLoading(false);
+          }
+          return;
+        }
+        const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
           positions: positions.map((po, ind) => ({ ...po, ind })),
@@ -43,7 +48,8 @@ const PositionList = () => {
         setDataPosition(positionsMap);
         setLoading(false);
       } catch (error) {
-        console.log({ error });
+        console.error('Failed to fetch data:', error);
+        setLoading(false);
       }
     })();
 
@@ -61,7 +67,7 @@ const PositionList = () => {
                 </div>
               );
             })
-          : !(loading) && (
+          : !loading && (
               <div className={styles.nodata}>
                 {theme === 'light' ? <NoData /> : <NoDataDark />}
                 <span>No Positions!</span>
