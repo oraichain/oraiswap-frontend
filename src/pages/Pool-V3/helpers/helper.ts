@@ -492,7 +492,6 @@ export const convertPosition = ({
   cachePrices: CoinGeckoPrices<CoinGeckoId>;
   feeClaimData: PositionsNode[];
 }) => {
-  console.log({ feeClaimData });
   const fmtFeeClaim = formatClaimFeeData(feeClaimData);
 
   const fmtData = positions

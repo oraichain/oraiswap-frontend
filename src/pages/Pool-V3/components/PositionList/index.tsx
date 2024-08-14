@@ -24,7 +24,6 @@ const PositionList = () => {
   const [loading, setLoading] = useState(true);
   const { positions } = useGetPositions(address);
   const { poolList } = useGetPoolList();
-  console.log({ loading });
   useEffect(() => {
     (async () => {
       try {

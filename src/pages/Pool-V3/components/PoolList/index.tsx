@@ -53,10 +53,9 @@ const PoolList = () => {
             return formatPoolData(p, isLight);
           })
           .filter((e) => e.isValid);
-        // .sort((a, b) => Number(b.pool.liquidity) - Number(a.pool.liquidity));
         setDataPool(fmtPools);
       } catch (error) {
-        console.log('error: get pools', error);
+        console.log('error: SingletonOraiswapV3 getPools', error);
       } finally {
         setLoading(false);
       }
@@ -101,16 +100,32 @@ const PoolList = () => {
     }
   }, [dataPool, prices, Object.keys(poolPositionInfo).length]);
 
+  const totalVolume24h = dataPool.reduce((volume, curr) => {
+    const findPool = volumnePools?.find((vo) => vo.poolAddress === curr?.poolKey);
+    if (findPool) volume += findPool.volume24;
+    return volume;
+  }, 0);
+
   return (
     <div className={styles.poolList}>
       <div className={styles.headerTable}>
-        <div className={styles.total}>
-          <p>Total liquidity</p>
-          {totalLiquidity === 0 || totalLiquidity ? (
-            <h1>{formatDisplayUsdt(Number(totalLiquidity) || 0)}</h1>
-          ) : (
-            <img src={Loading} alt="loading" width={32} height={32} />
-          )}
+        <div className={styles.headerInfo}>
+          <div className={styles.total}>
+            <p>Total liquidity</p>
+            {totalLiquidity === 0 || totalLiquidity ? (
+              <h1>{formatDisplayUsdt(Number(totalLiquidity) || 0)}</h1>
+            ) : (
+              <img src={Loading} alt="loading" width={32} height={32} />
+            )}
+          </div>
+          <div className={styles.total}>
+            <p>24H volume</p>
+            {totalVolume24h === 0 || totalVolume24h ? (
+              <h1>{formatDisplayUsdt(Number(totalVolume24h))}</h1>
+            ) : (
+              <img src={Loading} alt="loading" width={32} height={32} />
+            )}
+          </div>
         </div>
         <div className={styles.search}>
           <input
@@ -173,10 +188,10 @@ const PoolList = () => {
                 </thead>
                 <tbody>
                   {dataPool
-                    .filter((p) => {
+                    .filter((pool) => {
                       if (!search) return true;
 
-                      const { tokenXinfo, tokenYinfo } = p;
+                      const { tokenXinfo, tokenYinfo } = pool;
 
                       return (
                         (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
@@ -253,7 +268,13 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       </td>
       <td className={styles.textRight}>
         <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
-          {liquidity ? formatDisplayUsdt(liquidity) : (liquidity === 0 ? formatDisplayUsdt(0) : <img src={Loading} alt="loading" width={30} height={30} />)}
+          {liquidity ? (
+            formatDisplayUsdt(liquidity)
+          ) : liquidity === 0 ? (
+            formatDisplayUsdt(0)
+          ) : (
+            <img src={Loading} alt="loading" width={30} height={30} />
+          )}
         </span>
       </td>
       <td className={styles.textRight}>

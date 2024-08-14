@@ -131,7 +131,6 @@ const PositionItem = ({ position }) => {
         address,
         pool_key
       );
-      console.log({ lowerTickData, upperTickData, incentives });
 
       const tokenIncentive = incentives.reduce((acc, cur) => {
         const tokenAttr = parseAssetInfo(cur.info);
@@ -163,7 +162,6 @@ const PositionItem = ({ position }) => {
 
   const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
   const earnYDisplay = toDisplay((earnY || 0).toString(), tokenYDecimal);
-  console.log('totalEarn', totalEarn, earnXDisplay, tokenXUsd, earnYDisplay, tokenYUsd, totalEarnIncentiveUsd);
 
   const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd, incentivesUSD] = useMemo(() => {
     if (isClaimSuccess) return [0, 0, 0, 0, 0];
@@ -183,7 +181,6 @@ const PositionItem = ({ position }) => {
 
       const totalIncentiveUsd = Object.entries(incentives).reduce((acc, [tokenAddress, amount]) => {
         const token = oraichainTokens.find((e) => [e.contractAddress, e.denom].includes(tokenAddress));
-        console.log({ amount });
         acc.add(
           new BigDecimal(amount)
             .mul(new BigDecimal(10).pow(token.decimals || CW20_DECIMALS))
@@ -193,7 +190,6 @@ const PositionItem = ({ position }) => {
         return acc;
       }, new BigDecimal(0));
 
-      console.log({ x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd: totalIncentiveUsd.toNumber() });
       return [x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd.toNumber()];
     }
 
