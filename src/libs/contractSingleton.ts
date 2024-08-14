@@ -1,4 +1,4 @@
-import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { CosmWasmClient, fromBinary, SigningCosmWasmClient, toBinary } from '@cosmjs/cosmwasm-stargate';
 import {
   Tickmap,
   getMaxTick,
@@ -26,6 +26,7 @@ import {
   ArrayOfPosition,
   ArrayOfTupleOfUint16AndUint64,
   FeeTier,
+  Pool,
   PoolWithPoolKey,
   Position,
   Tick
@@ -40,6 +41,7 @@ import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRang
 import { oraichainTokens } from 'config/bridgeTokens';
 import { calculateTokenAmounts } from 'pages/Pool-V3/helpers/helper';
 import { getFeeDailyData, getPools } from 'rest/graphClient';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
   { fee: 100000000, tick_spacing: 1 },
@@ -285,11 +287,11 @@ export default class SingletonOraiswapV3 {
             liquidity: pool.liquidity,
             sqrt_price: calculateSqrtPrice(pool.currentTick),
             current_tick_index: pool.currentTick,
-            fee_growth_global_x: "0",
-            fee_growth_global_y: "0",
-            fee_protocol_token_x: "0",
-            fee_protocol_token_y: "0",
-            fee_receiver: "",
+            fee_growth_global_x: '0',
+            fee_growth_global_y: '0',
+            fee_protocol_token_x: '0',
+            fee_protocol_token_y: '0',
+            fee_receiver: '',
             last_timestamp: Date.now(),
             start_timestamp: 0,
             incentives: []
@@ -318,7 +320,7 @@ export default class SingletonOraiswapV3 {
     }
   }
 
-  public static async getAllPosition(address: string): Promise<ArrayOfPosition> {
+  public static async getPosition(address: string): Promise<ArrayOfPosition> {
     await this.loadHandler();
     const position = await this._handler.getPositions(address);
     return position;
@@ -407,13 +409,74 @@ export default class SingletonOraiswapV3 {
     });
   };
 
-  public static getLiquidityByPool = async (pool: PoolWithPoolKey, prices: CoinGeckoPrices<string>): Promise<any> => {
+  public static getTicksAndIncentivesInfo = async (
+    lowerTick: number,
+    upperTick: number,
+    positionIndex: number,
+    user: string,
+    poolKey: PoolKey
+  ) => {
+    try {
+      await this.loadCosmwasmClient();
+      const multicallClient = new MulticallQueryClient(this._cosmwasmClient, network.multicall);
+      const res = await multicallClient.aggregate({
+        queries: [
+          {
+            address: network.pool_v3,
+            data: toBinary({
+              tick: {
+                index: lowerTick,
+                key: poolKey
+              }
+            })
+          },
+          {
+            address: network.pool_v3,
+            data: toBinary({
+              tick: {
+                index: upperTick,
+                key: poolKey
+              }
+            })
+          },
+          {
+            address: network.pool_v3,
+            data: toBinary({
+              position_incentives: {
+                index: positionIndex,
+                owner_id: user
+              }
+            })
+          }
+        ]
+      });
+
+      const lowerTickData = fromBinary(res.return_data[0].data);
+      const upperTickData = fromBinary(res.return_data[1].data);
+      const incentivesData = fromBinary(res.return_data[2].data);
+
+      return {
+        lowerTickData,
+        upperTickData,
+        incentivesData
+      };
+    } catch (error) {
+      console.log('error', error);
+      return null;
+    }
+  };
+
+  public static getLiquidityByPool = async (
+    pool: PoolWithPoolKey,
+    prices: CoinGeckoPrices<string>,
+    positions: Position[]
+  ): Promise<any> => {
     const poolKey = pool.pool_key;
     const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
     const tokenY = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_y);
 
     await this.loadHandler();
-    const res = await this._handler.getPairLiquidityValues(pool);
+    const res = await this._handler.getPairLiquidityValues(pool, positions);
     const tvlX = res.liquidityX;
     const tvlY = res.liquidityY;
 
@@ -443,6 +506,12 @@ export default class SingletonOraiswapV3 {
       allocation
     };
   };
+
+  public static async getAllPosition(): Promise<Position[]> {
+    await this.loadHandler();
+    const positions = await this._handler.allPositions();
+    return positions;
+  }
 
   // public static async queryPosition(): Promise<PositionInfo[]> {
   //   const positionInfo: PositionInfo[] = [];
@@ -671,6 +740,7 @@ function parseAssetInfo(assetInfo: AssetInfo): string {
 }
 
 export async function fetchPositionAprInfo(
+  pool: PoolWithPoolKey,
   position: Position,
   prices: CoinGeckoPrices<CoinGeckoId>,
   tokenXLiquidityInUsd: number,
@@ -687,8 +757,11 @@ export async function fetchPositionAprInfo(
   });
   const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(position.pool_key))?.feeAPR;
 
-  const poolInfo = await SingletonOraiswapV3.getPool(position.pool_key);
-  const incentives = poolInfo.pool.incentives;
+  if (pool.pool.incentives === undefined) {
+    const poolInfo = await SingletonOraiswapV3.getPool(position.pool_key);
+    pool.pool.incentives = poolInfo.pool.incentives;
+  }
+  const incentives = pool.pool.incentives;
 
   let sumIncentivesApr = 0;
 
@@ -704,7 +777,7 @@ export async function fetchPositionAprInfo(
     const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
     const rewardsPerSec = incentive.reward_per_sec;
     const rewardInUsd = prices[token.coinGeckoId];
-    const currentLiquidity = poolInfo.pool.liquidity;
+    const currentLiquidity = pool.pool.liquidity;
     const positionLiquidity = position.liquidity;
     const totalPositionLiquidity = tokenXLiquidityInUsd + tokenYLiquidityInUsd;
     const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
@@ -712,7 +785,6 @@ export async function fetchPositionAprInfo(
     sumIncentivesApr +=
       (Number(positionLiquidity) * rewardPerYear) / (Number(currentLiquidity) * totalPositionLiquidity);
   }
-
   return {
     swapFee: feeAPR ? feeAPR : 0,
     incentive: sumIncentivesApr,
@@ -728,7 +800,7 @@ export type PoolAprInfo = {
 };
 
 export async function fetchPoolAprInfo(
-  poolKeys: PoolKey[],
+  pools: PoolWithPoolKey[],
   prices: CoinGeckoPrices<CoinGeckoId>,
   poolLiquidities: Record<string, number>,
   feeAndLiquidityInfo: PoolFeeAndLiquidityDaily[]
@@ -742,23 +814,26 @@ export async function fetchPoolAprInfo(
   });
 
   const poolAprs: Record<string, PoolAprInfo> = {};
-  for (const poolKey of poolKeys) {
-    const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(poolKey))?.feeAPR;
+  for (const { pool, pool_key } of pools) {
+    const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(pool_key))?.feeAPR;
 
-    const poolInfo = await SingletonOraiswapV3.getPool(poolKey);
-    const incentives = poolInfo.pool.incentives;
+    if (pool.incentives === undefined) {
+      const poolInfo = await SingletonOraiswapV3.getPool(pool_key);
+      pool.incentives = poolInfo.pool.incentives;
+    }
+    const incentives = pool.incentives;
 
     let sumIncentivesApr = 0;
     for (const incentive of incentives) {
       const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
       const rewardsPerSec = incentive.reward_per_sec;
       const rewardInUsd = prices[token.coinGeckoId];
-      const totalPoolLiquidity = poolLiquidities[poolKeyToString(poolKey)];
+      const totalPoolLiquidity = poolLiquidities[poolKeyToString(pool_key)];
       const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
       if (totalPoolLiquidity) sumIncentivesApr += rewardPerYear / totalPoolLiquidity;
     }
 
-    poolAprs[poolKeyToString(poolKey)] = {
+    poolAprs[poolKeyToString(pool_key)] = {
       apr: sumIncentivesApr + (feeAPR ? feeAPR : 0),
       incentives: incentives.map((incentive) => {
         const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));

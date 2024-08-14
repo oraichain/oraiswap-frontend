@@ -9,33 +9,39 @@ export const getFeeClaimData = async (address: string) => {
     const document = gql`
         {
           query {
-            positions(filter: { ownerId: { equalTo: "${address}" } }) {
-              nodes {
-                id
-                poolId
-                principalAmountX
-                principalAmountY
-                fees {
-                  nodes {
-                    amountInUSD
-                    amountX
-                    amountY
-                    claimFeeIncentiveTokens {
-                      nodes {
-                        id
-                        tokenId
-                        token {
-                          id
-                          denom
-                          name
-                          logo
-                        }
-                        rewardAmount
-                      }
-                    }
-                  }
+            positions(
+                filter: {
+                    ownerId: { equalTo: "${address}" }
+                    status: { equalTo: true }
                 }
-              }
+            ) {
+                nodes {
+                    id
+                    poolId
+                    status
+                    principalAmountX
+                    principalAmountY
+                    fees {
+                        nodes {
+                            amountInUSD
+                            amountX
+                            amountY
+                            claimFeeIncentiveTokens {
+                                nodes {
+                                    id
+                                    tokenId
+                                    token {
+                                        id
+                                        denom
+                                        name
+                                        logo
+                                    }
+                                    rewardAmount
+                                }
+                            }
+                        }
+                    }
+                }
             }
           }
         }
@@ -97,12 +103,13 @@ export type FeeDailyData = {
   feesInUSD: number;
 };
 
-export const getFeeDailyData = async (dayIndex: number): Promise<FeeDailyData[]> => {
+export const getFeeDailyData = async (): Promise<FeeDailyData[]> => {
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
   try {
     const document = gql`
       {
         query {
-          poolDayData(filter: { dayIndex: { equalTo: ${dayIndex} } }) {
+          poolDayData(filter: { dayIndex: { equalTo: ${yesterdayIndex} } }) {
             nodes {
               poolId
               tvlUSD
@@ -134,7 +141,8 @@ export type PoolLiquidityAndVolume = {
   };
 };
 
-export const getPoolsLiquidityAndVolume = async (dayIndex: number): Promise<PoolLiquidityAndVolume[]> => {
+export const getPoolsLiquidityAndVolume = async (): Promise<PoolLiquidityAndVolume[]> => {
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
   try {
     const document = gql`
       query {
@@ -142,7 +150,7 @@ export const getPoolsLiquidityAndVolume = async (dayIndex: number): Promise<Pool
           nodes {
             id
             totalValueLockedInUSD
-            poolDayData(filter: { dayIndex: { equalTo: ${dayIndex} } }) {
+            poolDayData(filter: { dayIndex: { equalTo: ${yesterdayIndex} } }) {
               aggregates {
                 sum {
                   feesInUSD
@@ -250,5 +258,61 @@ export const getPools = async (): Promise<Pool[]> => {
   } catch (error) {
     console.log('error getPools', error);
     return [];
+  }
+};
+
+export type PoolDetail = {
+  id: string;
+  tokenX: {
+    id: string;
+    decimals: number;
+    coingeckoId: string;
+  };
+  tokenY: {
+    id: string;
+    decimals: number;
+    coingeckoId: string;
+  };
+  totalValueLockedTokenX: string;
+  totalValueLockedTokenY: string;
+  totalValueLockedInUSD: string;
+};
+
+export const getPoolDetail = async (poolId: string): Promise<PoolDetail> => {
+  try {
+    const document = gql`
+      {
+        query {
+          pools(
+            filter: {
+              id: { equalTo: "${poolId}" }
+            }
+            first: 1
+          ) {
+            nodes {
+              id
+              tokenX {
+                id
+                decimals
+                coingeckoId
+              }
+              tokenY {
+                id
+                decimals
+                coingeckoId
+              }
+              totalValueLockedTokenX
+              totalValueLockedTokenY
+              totalValueLockedInUSD
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.query.pools.nodes[0] || null;
+  } catch (error) {
+    console.log('error getPoolDetail', error);
+    return null;
   }
 };

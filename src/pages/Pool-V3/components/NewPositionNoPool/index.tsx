@@ -71,8 +71,6 @@ const NewPositionNoPool = ({
       toToken.decimals
     );
 
-    console.log('tickIndex', tickIndex);
-
     onChangeMidPrice(BigInt(tickIndex));
   }, [midPriceInput]);
 

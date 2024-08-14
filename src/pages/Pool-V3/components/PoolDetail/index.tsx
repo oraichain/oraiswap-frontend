@@ -22,6 +22,10 @@ import { getFeeClaimData } from 'rest/graphClient';
 import PositionItem from '../PositionItem';
 import styles from './index.module.scss';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import { useGetPoolDetail } from 'pages/Pool-V3/hooks/useGetPoolDetail';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
@@ -58,41 +62,59 @@ const PoolV3Detail = () => {
     total: totalLiquidity,
     allocation: {}
   });
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
-  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData(yesterdayIndex);
+
+  const { feeDailyData } = useGetFeeDailyData();
+  const { allPosition } = useGetAllPositions();
+  const { positions: userPositions } = useGetPositions(address);
+  const { poolList } = useGetPoolList();
+  const { liquidityDistribution } = useGetPoolDetail(poolKeyString, prices);
 
   useEffect(() => {
     (async () => {
       try {
-        const poolKey = stringToPoolKey(poolId);
-        console.log('poolKey', poolKey);
-        const pool = await SingletonOraiswapV3.getPool(poolKey);
-        const isLight = theme === 'light';
-        const fmtPool = formatPoolData(pool, isLight);
-        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, prices);
+        if (liquidityDistribution !== null) {
+          setLiquidity(liquidityDistribution);
+        }
+      } catch (error) {
+        const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
+        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, prices, allPosition);
 
         setLiquidity(liquidity);
-        setPoolDetail(fmtPool);
-      } catch (error) {
         console.log('error: get pool detail', error);
+      } finally {
+        if (poolList.length === 0) {
+          return;
+        }
+        const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
+        const isLight = theme === 'light';
+        const fmtPool = formatPoolData(pool, isLight);
+        setPoolDetail(fmtPool);
       }
     })();
-  }, [poolId]);
+  }, [poolId, allPosition, poolList, theme, prices, poolKeyString, liquidityDistribution]);
 
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
 
   useEffect(() => {
     const getAPRInfo = async () => {
-      const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools, feeDailyData);
+      const res = await fetchPoolAprInfo(
+        [poolDetail],
+        prices,
+        {
+          [poolKeyString]: liquidity.total
+        },
+        feeDailyData
+      );
       setAprInfo({
         ...aprInfo,
         [poolKeyString]: res[poolKeyString]
       });
     };
-    if (poolDetail && prices && Object.values(liquidityPools).length && poolDetail.poolKey === poolKeyString) {
+
+    if (poolDetail && prices && liquidity && poolDetail.poolKey === poolKeyString) {
       getAPRInfo();
     }
-  }, [poolDetail, prices, liquidityPools]);
+  }, [liquidity, feeDailyData, poolDetail, prices, poolKeyString]);
 
   const { spread, pool_key } = poolDetail || {};
   const { allocation, total } = liquidity;
@@ -109,30 +131,24 @@ const PoolV3Detail = () => {
   useEffect(() => {
     (async () => {
       try {
-        setLoading(false);
-        if (!address) return setDataPosition([]);
-        if (!pool_key) return;
         setLoading(true);
-        const [positions, poolsData, feeClaimData] = await Promise.all([
-          SingletonOraiswapV3.getAllPosition(address),
-          SingletonOraiswapV3.getPools(),
-          getFeeClaimData(address)
-        ]);
+        if (!address) return setDataPosition([]);
+
+        const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
-          positions: positions
-            .map((po, ind) => ({ ...po, ind }))
-            .filter((pos) => poolKeyToString(pos.pool_key) === poolKeyToString(pool_key)),
-          poolsData,
+          positions: userPositions.map((po, ind) => ({ ...po, ind })),
+          poolsData: poolList,
           cachePrices,
           address,
           isLight,
           feeClaimData
         });
+        const filteredPositions = positionsMap.filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString);
 
-        setDataPosition(positionsMap);
+        setDataPosition(filteredPositions);
       } catch (error) {
-        console.log('error call position', error);
+        console.log({ error });
       } finally {
         setLoading(false);
         setStatusRemove(false);
@@ -140,7 +156,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [poolDetail, address, statusRemove]);
+  }, [address, poolList, userPositions]);
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -272,7 +288,7 @@ const PoolV3Detail = () => {
               ? dataPosition.map((position, index) => {
                   return (
                     <div className={styles.positionWrapper} key={`pos-${index}`}>
-                      <PositionItem position={position} setStatusRemove={setStatusRemove} />
+                      <PositionItem position={position} />
                     </div>
                   );
                 })

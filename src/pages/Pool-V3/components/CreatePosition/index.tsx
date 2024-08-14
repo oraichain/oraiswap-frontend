@@ -542,10 +542,6 @@ const CreatePosition = () => {
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
-    console.log('mid', {
-      index: convertedMid,
-      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
-    });
 
     setMidPrice({
       index: convertedMid,
@@ -623,8 +619,6 @@ const CreatePosition = () => {
         });
 
         setLiquidityData(ticksData);
-
-        console.log({ ticksData });
       };
 
       if (isPoolExist && notInitPoolKey) {
