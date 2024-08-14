@@ -21,17 +21,15 @@ const PositionList = () => {
   const [address] = useConfigReducer('address');
 
   const [dataPosition, setDataPosition] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [statusRemove, setStatusRemove] = useState<boolean>(undefined);
+  const [loading, setLoading] = useState(true);
   const { positions } = useGetPositions(address);
   const { poolList } = useGetPoolList();
-
+  console.log({ loading });
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        if (!address) return setDataPosition([]);
-
+        if (!(address && positions.length && poolList.length)) return setDataPosition([]);
         const feeClaimData= await getFeeClaimData(address)
 
         const positionsMap = convertPosition({
@@ -44,16 +42,14 @@ const PositionList = () => {
         });
 
         setDataPosition(positionsMap);
+        setLoading(false);
       } catch (error) {
         console.log({ error });
-      } finally {
-        setLoading(false);
-        setStatusRemove(false);
       }
     })();
 
     return () => {};
-  }, [address, poolList, positions]);
+  }, [address, poolList, positions, isLight]);
 
   return (
     <div className={styles.positionList}>
@@ -62,11 +58,11 @@ const PositionList = () => {
           ? dataPosition.map((position, key) => {
               return (
                 <div className={styles.item} key={`position-list-item-${key}`}>
-                  <PositionItem position={position} setStatusRemove={setStatusRemove} />
+                  <PositionItem position={position} />
                 </div>
               );
             })
-          : !loading && (
+          : !(loading) && (
               <div className={styles.nodata}>
                 {theme === 'light' ? <NoData /> : <NoDataDark />}
                 <span>No Positions!</span>

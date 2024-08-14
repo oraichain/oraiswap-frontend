@@ -37,8 +37,10 @@ import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal, CW20_DECIMALS } f
 import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
+import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 
-const PositionItem = ({ position, setStatusRemove }) => {
+const PositionItem = ({ position }) => {
   const theme = useTheme();
   const ref = useRef();
   const { data: prices } = useCoinGeckoPrices();
@@ -82,6 +84,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
   );
 
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
+  const { refetchPositions } = useGetPositions(address);
   const { poolList } = useGetPoolList();
 
   useOnClickOutside(ref, () => {
@@ -110,7 +113,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
     if (statusRange && position.tokenXLiqInUsd && position.tokenYLiqInUsd && prices && position) {
       getAPRInfo();
     }
-  }, [statusRange, prices, position, poolList]);
+  }, [statusRange, prices, position, poolList, feeDailyData]);
 
   useEffect(() => {
     if (!openCollapse) return;
@@ -128,6 +131,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
         address,
         pool_key
       );
+      console.log({ lowerTickData, upperTickData, incentives });
 
       const tokenIncentive = incentives.reduce((acc, cur) => {
         const tokenAttr = parseAssetInfo(cur.info);
@@ -159,6 +163,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
 
   const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
   const earnYDisplay = toDisplay((earnY || 0).toString(), tokenYDecimal);
+  console.log('totalEarn', totalEarn, earnXDisplay, tokenXUsd, earnYDisplay, tokenYUsd, totalEarnIncentiveUsd);
 
   const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd, incentivesUSD] = useMemo(() => {
     if (isClaimSuccess) return [0, 0, 0, 0, 0];
@@ -176,21 +181,24 @@ const PositionItem = ({ position, setStatusRemove }) => {
       const x_usd = x_claim * cachePrices[position.tokenX.coinGeckoId];
       const y_usd = y_claim * cachePrices[position.tokenY.coinGeckoId];
 
-      const totalIncentiveUsd = Object.entries(incentives).reduce((acc: number, [tokenAddress, amount]) => {
+      const totalIncentiveUsd = Object.entries(incentives).reduce((acc, [tokenAddress, amount]) => {
         const token = oraichainTokens.find((e) => [e.contractAddress, e.denom].includes(tokenAddress));
-
-        const usd = toDisplay(amount.toString()) * cachePrices[token.coinGeckoId];
-
-        acc = new BigDecimal(acc || 0).add(usd).toNumber();
+        console.log({ amount });
+        acc.add(
+          new BigDecimal(amount)
+            .mul(new BigDecimal(10).pow(token.decimals || CW20_DECIMALS))
+            .mul(cachePrices[token.coinGeckoId])
+        );
 
         return acc;
-      }, 0);
+      }, new BigDecimal(0));
 
-      return [x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd];
+      console.log({ x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd: totalIncentiveUsd.toNumber() });
+      return [x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd.toNumber()];
     }
 
     return [0, 0, 0, 0, 0];
-  }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess]);
+  }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess, incentives, cachePrices]);
 
   return (
     <div ref={ref} className={styles.positionItem}>
@@ -358,11 +366,11 @@ const PositionItem = ({ position, setStatusRemove }) => {
                     });
 
                     if (transactionHash) {
-                      setStatusRemove(true);
                       setCollapse(false);
                       displayToast(TToastType.TX_SUCCESSFUL, {
                         customLink: getTransactionUrl(network.chainId, transactionHash)
                       });
+                      refetchPositions();
                     }
                   } catch (error) {
                     console.log({ error });

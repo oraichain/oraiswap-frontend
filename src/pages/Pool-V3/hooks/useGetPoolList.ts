@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 
 export const useGetPoolList = () => {
-  const { data: poolList, refetch: refetchPoolList } = useQuery<PoolWithPoolKey[]>(
+  const { data: poolList, refetch: refetchPoolList, isLoading: isLoadingGetPoolList } = useQuery<PoolWithPoolKey[]>(
     ['pool-v3-pools'],
     () => getPoolList(),
     {
@@ -15,6 +15,7 @@ export const useGetPoolList = () => {
 
   return {
     poolList,
+    isLoadingGetPoolList,
     refetchPoolList
   };
 };

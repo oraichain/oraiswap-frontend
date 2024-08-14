@@ -12,6 +12,7 @@ import {
   TokenAmounts,
   calculateAmountDelta,
   calculateSqrtPrice,
+  extractAddress,
   getPercentageDenominator,
   getSqrtPriceDenominator,
   getTickAtSqrtPrice,
@@ -437,35 +438,30 @@ export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
   const fmtFeeClaimData = feeClaimData.reduce((acc, cur) => {
     const { principalAmountX, principalAmountY, id, fees } = cur || {};
 
-    const totalEarn = (fees.nodes || []).reduce(
-      (total, fee) => {
-        total.earnX = new BigDecimal(total.earnX).add(fee.amountX).toNumber();
-        total.earnY = new BigDecimal(total.earnY).add(fee.amountY).toNumber();
-        total.earnIncentive = fee.claimFeeIncentiveTokens.nodes.reduce((acc, currentFee) => {
-          if (!acc[currentFee.tokenId]?.amount) {
-            acc[currentFee.tokenId] = {
-              amount: 0,
-              token: oraichainTokensWithIcon.find(
-                (tk) => tk.contractAddress === currentFee.tokenId || tk.denom === currentFee.tokenId
-              )
-            };
-          }
+    const totalEarn = {
+      earnX: 0,
+      earnY: 0,
+      earnIncentive: {}
+    };
+    
+    fees.nodes.forEach((fee) => {
+      totalEarn.earnX = new BigDecimal(totalEarn.earnX).add(fee.amountX).toNumber();
+      totalEarn.earnY = new BigDecimal(totalEarn.earnY).add(fee.amountY).toNumber();
+      fee.claimFeeIncentiveTokens.nodes.forEach((incentiveClaimed) => {
+        if (!totalEarn.earnIncentive[incentiveClaimed.tokenId]?.amount) {
+          totalEarn.earnIncentive[incentiveClaimed.tokenId] = {
+            amount: 0,
+            token: oraichainTokensWithIcon.find(
+              (tk) => extractAddress(tk) === incentiveClaimed.tokenId
+            )
+          };
+        }
 
-          acc[currentFee.tokenId].amount = new BigDecimal(acc[currentFee.tokenId]?.amount || 0)
-            .add(currentFee.rewardAmount)
-            .toNumber();
-
-          return acc;
-        }, {});
-
-        return total;
-      },
-      {
-        earnX: 0,
-        earnY: 0,
-        earnIncentive: {}
-      }
-    );
+        totalEarn.earnIncentive[incentiveClaimed.tokenId].amount = new BigDecimal(totalEarn.earnIncentive[incentiveClaimed.tokenId]?.amount || 0)
+          .add(incentiveClaimed.rewardAmount)
+          .toNumber();
+      })
+    })
 
     acc[id] = {
       principalAmountX,
@@ -496,6 +492,7 @@ export const convertPosition = ({
   cachePrices: CoinGeckoPrices<CoinGeckoId>;
   feeClaimData: PositionsNode[];
 }) => {
+  console.log({ feeClaimData });
   const fmtFeeClaim = formatClaimFeeData(feeClaimData);
 
   const fmtData = positions
@@ -576,19 +573,23 @@ export const convertPosition = ({
         }
       };
 
-      const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: number, cur) => {
+      const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: BigDecimal, cur) => {
         const { amount = '0', token } = cur as {
           amount: string;
           token: TokenItemType;
         };
 
-        const usd =
-          toDisplay(amount.toString(), token.decimals || CW20_DECIMALS) * Number(cachePrices[token?.coinGeckoId] || 0);
+        // const usd =
+        //   toDisplay(amount.toString(), token.decimals || CW20_DECIMALS) * Number(cachePrices[token?.coinGeckoId] || 0);
 
-        acc = new BigDecimal(acc || 0).add(usd).toNumber();
+        acc.add(
+          new BigDecimal(amount)
+            .mul(new BigDecimal(10).pow(token?.decimals || CW20_DECIMALS))
+            .mul(cachePrices[token.coinGeckoId])
+        );
 
         return acc;
-      }, 0);
+      }, new BigDecimal(0));
 
       const tokenYDecimal = tokenYinfo.decimals || CW20_DECIMALS;
       const tokenXDecimal = tokenXinfo.decimals || CW20_DECIMALS;
@@ -627,7 +628,7 @@ export const convertPosition = ({
         principalAmountX,
         principalAmountY,
         totalEarn,
-        totalEarnIncentiveUsd
+        totalEarnIncentiveUsd: (totalEarnIncentiveUsd as BigDecimal).toNumber()
       };
     })
     .filter(Boolean);
