@@ -17,7 +17,7 @@ import {
   getSqrtPriceDenominator,
   getTickAtSqrtPrice,
   calculateFee as wasmCalculateFee
-} from 'oraiswap-v3-test';
+} from '@oraichain/oraiswap-v3';
 import { getIconPoolData } from './format';
 import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
@@ -443,7 +443,7 @@ export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
       earnY: 0,
       earnIncentive: {}
     };
-    
+
     fees.nodes.forEach((fee) => {
       totalEarn.earnX = new BigDecimal(totalEarn.earnX).add(fee.amountX).toNumber();
       totalEarn.earnY = new BigDecimal(totalEarn.earnY).add(fee.amountY).toNumber();
@@ -451,17 +451,17 @@ export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
         if (!totalEarn.earnIncentive[incentiveClaimed.tokenId]?.amount) {
           totalEarn.earnIncentive[incentiveClaimed.tokenId] = {
             amount: 0,
-            token: oraichainTokensWithIcon.find(
-              (tk) => extractAddress(tk) === incentiveClaimed.tokenId
-            )
+            token: oraichainTokensWithIcon.find((tk) => extractAddress(tk) === incentiveClaimed.tokenId)
           };
         }
 
-        totalEarn.earnIncentive[incentiveClaimed.tokenId].amount = new BigDecimal(totalEarn.earnIncentive[incentiveClaimed.tokenId]?.amount || 0)
+        totalEarn.earnIncentive[incentiveClaimed.tokenId].amount = new BigDecimal(
+          totalEarn.earnIncentive[incentiveClaimed.tokenId]?.amount || 0
+        )
           .add(incentiveClaimed.rewardAmount)
           .toNumber();
-      })
-    })
+      });
+    });
 
     acc[id] = {
       principalAmountX,
