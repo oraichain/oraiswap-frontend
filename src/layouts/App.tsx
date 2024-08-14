@@ -75,6 +75,20 @@ const App = () => {
     loadSingleton();
   }, [address]);
 
+  useEffect(() => {
+    const win = window as any;
+    if (typeof win.Featurebase !== 'function') {
+      win.Featurebase = function () {
+        (win.Featurebase.q = win.Featurebase.q || []).push(arguments);
+      };
+    }
+    win.Featurebase('initialize_feedback_widget', {
+      organization: 'defi',
+      theme: 'light',
+      placement: 'right'
+    });
+  }, [theme]);
+
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
@@ -249,6 +263,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
+        {/* <button data-featurebase-feedback>Open Widget</button> */}
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
         {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
