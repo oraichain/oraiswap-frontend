@@ -9,33 +9,39 @@ export const getFeeClaimData = async (address: string) => {
     const document = gql`
         {
           query {
-            positions(filter: { ownerId: { equalTo: "${address}" } }) {
-              nodes {
-                id
-                poolId
-                principalAmountX
-                principalAmountY
-                fees {
-                  nodes {
-                    amountInUSD
-                    amountX
-                    amountY
-                    claimFeeIncentiveTokens {
-                      nodes {
-                        id
-                        tokenId
-                        token {
-                          id
-                          denom
-                          name
-                          logo
-                        }
-                        rewardAmount
-                      }
-                    }
-                  }
+            positions(
+                filter: {
+                    ownerId: { equalTo: "${address}" }
+                    status: { equalTo: true }
                 }
-              }
+            ) {
+                nodes {
+                    id
+                    poolId
+                    status
+                    principalAmountX
+                    principalAmountY
+                    fees {
+                        nodes {
+                            amountInUSD
+                            amountX
+                            amountY
+                            claimFeeIncentiveTokens {
+                                nodes {
+                                    id
+                                    tokenId
+                                    token {
+                                        id
+                                        denom
+                                        name
+                                        logo
+                                    }
+                                    rewardAmount
+                                }
+                            }
+                        }
+                    }
+                }
             }
           }
         }

@@ -82,7 +82,9 @@ const PoolV3Detail = () => {
         setLiquidity(liquidity);
         console.log('error: get pool detail', error);
       } finally {
-        if (poolList.length === 0) return;
+        if (poolList.length === 0) {
+          return;
+        }
         const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
         const isLight = theme === 'light';
         const fmtPool = formatPoolData(pool, isLight);
@@ -286,7 +288,7 @@ const PoolV3Detail = () => {
               ? dataPosition.map((position, index) => {
                   return (
                     <div className={styles.positionWrapper} key={`pos-${index}`}>
-                      <PositionItem position={position} setStatusRemove={setStatusRemove} />
+                      <PositionItem position={position} />
                     </div>
                   );
                 })

@@ -19,16 +19,20 @@ export type LiquidityDistribution = {
 // const xUsd = (prices[tokenX.coinGeckoId] * Number(tvlX)) / 10 ** tokenX.decimals;
 // toDisplay(tvlX, tokenX.decimals)
 
-export const useGetPoolDetail = (poodKey: string, prices: CoinGeckoPrices<string>) => {
+export const useGetPoolDetail = (poolKey: string, prices: CoinGeckoPrices<string>) => {
   const [liquidityDistribution, setLiquidityDistribution] = useState<LiquidityDistribution>({
     total: 0,
     allocation: {}
   });
-  const { data, refetch: refetchPoolDetail } = useQuery<PoolDetail>(['pool-v3-detail'], () => getPoolDetail(poodKey), {
+  const { data, refetch: refetchPoolDetail } = useQuery<PoolDetail>(['pool-v3-detail'], () => getPoolDetail(poolKey), {
     refetchOnWindowFocus: true,
     placeholderData: null,
     cacheTime: 5 * 60 * 1000
   });
+
+  const calculateUsdValue = (amount: number, price: number, decimals: number) => {
+    return (price * amount) / 10 ** decimals;
+  };
 
   useEffect(() => {
     if (data === null) return;
@@ -39,12 +43,12 @@ export const useGetPoolDetail = (poodKey: string, prices: CoinGeckoPrices<string
         [data.tokenX.id]: {
           address: data.id,
           balance: toDisplay(data.totalValueLockedTokenX, data.tokenX.decimals),
-          usdValue: (prices[data.tokenX.coingeckoId] * Number(data.totalValueLockedTokenX)) / 10 ** data.tokenX.decimals
+          usdValue: calculateUsdValue(Number(data.totalValueLockedTokenX), prices[data.tokenX.coingeckoId], data.tokenX.decimals)
         },
         [data.tokenY.id]: {
           address: data.id,
           balance: toDisplay(data.totalValueLockedTokenY, data.tokenY.decimals),
-          usdValue: (prices[data.tokenY.coingeckoId] * Number(data.totalValueLockedTokenY)) / 10 ** data.tokenY.decimals
+          usdValue: calculateUsdValue(Number(data.totalValueLockedTokenY), prices[data.tokenY.coingeckoId], data.tokenY.decimals)
         }
       }
     };

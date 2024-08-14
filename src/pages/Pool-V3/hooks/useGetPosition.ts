@@ -20,11 +20,11 @@ export const useGetPositions = (address: string) => {
 };
 
 const getPositions = async (address: string): Promise<Position[]> => {
-    try {
-        const positions = await SingletonOraiswapV3.getPosition(address);
-        return positions;
-    } catch (error) {
-        console.log('error getAllPositions', error);
-        return [];
-    }
-}
+  try {
+    const positions = await SingletonOraiswapV3.getPosition(address);
+    return positions;
+  } catch (error) {
+    console.error('Failed to fetch all positions:', error);
+    return [];
+  }
+};

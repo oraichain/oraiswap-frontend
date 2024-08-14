@@ -70,6 +70,7 @@
     "@oraichain/common-contracts-build": "1.0.35",
     "@oraichain/cw-simulate": "^2.8.75",
     "@oraichain/oraidex-contracts-build": "^1.0.22",
+    "@oraichain/oraiswap-v3": "0.1.6",
     "@sentry/webpack-plugin": "^2.10.3",
     "@types/classnames": "^2.2.10",
     "@types/jest": "^29.5.10",
@@ -95,8 +96,7 @@
     "stream-http": "^3.2.0",
     "ts-jest": "^29.1.1",
     "typed-scss-modules": "^7.1.4",
-    "typescript": "^5.1.6",
-    "oraiswap-v3-test": "^0.1.6-beta1"
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
