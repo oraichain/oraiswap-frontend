@@ -36,6 +36,11 @@
         line-height: 120%; /* 28.8px */
       }
     }
+    .right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
     .search {
       width: 258px;
@@ -392,9 +397,9 @@
   // gap: 4px;
 
   svg {
-    vertical-align: middle;
+    vertical-align: unset !important;
     margin-left: 4px;
-    transform: translateY(4px);
+    transform: translateY(3px);
 
     path {
       @include theme {

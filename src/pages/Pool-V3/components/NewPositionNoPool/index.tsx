@@ -26,7 +26,8 @@ const NewPositionNoPool = ({
   tickSpacing,
   isXtoY,
   onChangeRange,
-  midPrice
+  midPrice,
+  showOnCreatePool
 }: {
   fromToken: TokenItemType;
   toToken: TokenItemType;
@@ -37,6 +38,7 @@ const NewPositionNoPool = ({
   isXtoY: boolean;
   onChangeRange: (left: number, right: number) => void;
   midPrice: number;
+  showOnCreatePool?: boolean;
 }) => {
   const { data: prices } = useCoinGeckoPrices();
   const currentPrice = new BigDecimal(prices[fromToken?.coinGeckoId] || 0)
@@ -60,8 +62,6 @@ const NewPositionNoPool = ({
     calcPrice(Number(priceInfo.startPrice), isXtoY, fromToken.decimals, toToken.decimals).toString()
   );
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     const tickIndex = getTickAtSqrtPriceFromBalance(
       +midPriceInput,
@@ -70,8 +70,6 @@ const NewPositionNoPool = ({
       fromToken.decimals,
       toToken.decimals
     );
-
-    console.log('tickIndex', tickIndex);
 
     onChangeMidPrice(BigInt(tickIndex));
   }, [midPriceInput]);
@@ -133,23 +131,14 @@ const NewPositionNoPool = ({
     return toMaxNumericPlaces(validatedMidPrice, 5);
   };
 
-  // useEffect(() => {
-  //   if (currentPairReversed !== null) {
-  //     const validatedMidPrice = validateMidPriceInput((1 / +midPriceInput).toString());
-
-  //     setMidPriceInput(validatedMidPrice);
-  //     changeRangeHandler(rightRange, leftRange);
-  //   }
-  // }, [currentPairReversed]);
-
   const price = useMemo(() => {
     return calcPrice(midPrice, isXtoY, fromToken.decimals, toToken.decimals);
   }, [midPrice, isXtoY, fromToken.decimals, toToken.decimals]);
 
   return (
     <div className={styles.newPositionNoPool}>
-      <h1>Starting price</h1>
-      <div className={styles.warning}>
+      {!showOnCreatePool && <h1>Starting price</h1>}
+      <div className={classNames(styles.warning, { [styles.warningOnCreatePool]: showOnCreatePool })}>
         <div>
           <WarningIcon />
         </div>
@@ -158,7 +147,8 @@ const NewPositionNoPool = ({
           tokens.
         </span>
       </div>
-      <div className={styles.price}>
+
+      <div className={classNames(styles.price, { [styles.showOnCreatePool]: showOnCreatePool })}>
         <span>{fromToken.name} starting price</span>
 
         <div className={styles.input}>
@@ -188,17 +178,19 @@ const NewPositionNoPool = ({
         </div>
       </div>
 
-      <h1>Set Price Range</h1>
+      {!showOnCreatePool && <h1>Set Price Range</h1>}
 
-      <div className={styles.currentPrice}>
-        <span>Current Price</span>
-        <div className={styles.value}>
-          <h2>{numberWithCommas(currentPrice, undefined, { maximumFractionDigits: 6 })}</h2>
-          <span>
-            {toToken.name.toUpperCase()} / {fromToken.name.toUpperCase()}
-          </span>
+      {!showOnCreatePool && (
+        <div className={styles.currentPrice}>
+          <span>Current Price</span>
+          <div className={styles.value}>
+            <h2>{numberWithCommas(currentPrice, undefined, { maximumFractionDigits: 6 })}</h2>
+            <span>
+              {toToken.name.toUpperCase()} / {fromToken.name.toUpperCase()}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className={styles.range}>
         <div className={styles.item}>
@@ -218,11 +210,9 @@ const NewPositionNoPool = ({
                 onChange={() => {}}
                 isAllowed={(values) => {
                   const { floatValue } = values;
-                  // allow !floatValue to let user can clear their input
                   return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
                 }}
                 onValueChange={({ floatValue }) => {
-                  // setPriceInfo && setPriceInfo({ ...priceInfo, minPrice: floatValue });
                   onLeftInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
@@ -238,7 +228,9 @@ const NewPositionNoPool = ({
                   changeRangeHandler(newLeft, rightRange);
                 }}
               />
-              <div className={styles.symbol}>{fromToken.name.toUpperCase()}</div>
+              <div className={styles.symbol}>
+                {toToken.name.toUpperCase()} / {fromToken.name.toUpperCase()}
+              </div>
             </div>
             <div className={styles.btnGroup}>
               <div
@@ -265,12 +257,14 @@ const NewPositionNoPool = ({
               </div>
             </div>
           </div>
-          <div className={styles.percent}>
-            <p>Min Current Price:</p>
-            <span className={classNames(styles.value, { [styles.positive]: false })}>
-              {(((+leftInput - price) / price) * 100).toLocaleString(undefined, { maximumFractionDigits: 3 })}%
-            </span>
-          </div>
+          {!showOnCreatePool && (
+            <div className={styles.percent}>
+              <p>Min Current Price:</p>
+              <span className={classNames(styles.value, { [styles.positive]: false })}>
+                {(((+leftInput - price) / price) * 100).toLocaleString(undefined, { maximumFractionDigits: 3 })}%
+              </span>
+            </div>
+          )}
         </div>
         <div className={styles.item}>
           <div className={styles.form}>
@@ -285,15 +279,12 @@ const NewPositionNoPool = ({
                 disabled={false}
                 type="text"
                 value={rightInputRounded}
-                // value={rightInput}
                 onChange={() => {}}
                 isAllowed={(values) => {
                   const { floatValue } = values;
-                  // allow !floatValue to let user can clear their input
                   return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
                 }}
                 onValueChange={({ floatValue }) => {
-                  // setPriceInfo && setPriceInfo({ ...priceInfo, maxPrice: floatValue });
                   onRightInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
@@ -310,7 +301,9 @@ const NewPositionNoPool = ({
                   changeRangeHandler(leftRange, newRight);
                 }}
               />
-              <div className={styles.symbol}>{toToken.name.toUpperCase()}</div>
+              <div className={styles.symbol}>
+                {toToken.name.toUpperCase()} / {fromToken.name.toUpperCase()}
+              </div>
             </div>
             <div className={styles.btnGroup}>
               <div
@@ -337,16 +330,18 @@ const NewPositionNoPool = ({
               </div>
             </div>
           </div>
-          <div className={styles.percent}>
-            <p>Max Current Price:</p>
-            <span className={classNames(styles.value, { [styles.positive]: true })}>
-              {numberWithCommas(((+rightInput - price) / price) * 100, undefined, { maximumFractionDigits: 3 })}%
-            </span>
-          </div>
+          {!showOnCreatePool && (
+            <div className={styles.percent}>
+              <p>Max Current Price:</p>
+              <span className={classNames(styles.value, { [styles.positive]: true })}>
+                {numberWithCommas(((+rightInput - price) / price) * 100, undefined, { maximumFractionDigits: 3 })}%
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className={styles.actions}>
+      <div className={classNames(styles.actions, { [styles.actionOnCreatePool]: showOnCreatePool })}>
         <button onClick={resetRange}>Reset range</button>
         <button
           onClick={() => {

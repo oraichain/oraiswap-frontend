@@ -25,6 +25,7 @@ import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
 import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
 import { CoefficientBySort, SortType } from 'components/Table';
+import CreateNewPool from '../CreateNewPool';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -199,22 +200,25 @@ const PoolList = () => {
             <img src={Loading} alt="loading" width={32} height={32} />
           )}
         </div>
-        <div className={styles.search}>
-          <input
-            type="text"
-            placeholder="Search pool"
-            value={search}
-            onChange={(e) => {
-              e.preventDefault();
-              setSearch(e.target.value);
-            }}
-            style={{
-              paddingLeft: 40,
-              backgroundImage: `url(${bgUrl})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: '16px center'
-            }}
-          />
+        <div className={styles.right}>
+          <div className={styles.search}>
+            <input
+              type="text"
+              placeholder="Search pool"
+              value={search}
+              onChange={(e) => {
+                e.preventDefault();
+                setSearch(e.target.value);
+              }}
+              style={{
+                paddingLeft: 40,
+                backgroundImage: `url(${bgUrl})`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: '16px center'
+              }}
+            />
+          </div>
+          <CreateNewPool pools={dataPool} />
         </div>
       </div>
       <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}>

@@ -41,6 +41,7 @@ export interface IPriceRangePlot {
   coverOnLoading?: boolean;
   hasError?: boolean;
   reloadHandler: () => void;
+  showOnCreatePool?: boolean;
 }
 
 export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
@@ -64,35 +65,10 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
   isDiscrete = false,
   coverOnLoading = false,
   hasError = false,
-  reloadHandler
+  reloadHandler,
+  showOnCreatePool
 }) => {
-  // console.log({
-  //   data,
-  //   leftRange,
-  //   rightRange,
-  //   midPrice,
-  //   onChangeRange,
-  //   style,
-  //   className,
-  //   disabled,
-  //   plotMin,
-  //   plotMax,
-  //   zoomMinus,
-  //   zoomPlus,
-  //   loading,
-  //   isXtoY,
-  //   xDecimal,
-  //   yDecimal,
-  //   tickSpacing,
-  //   isDiscrete,
-  //   coverOnLoading,
-  //   hasError,
-  //   reloadHandler
-  // });
-  // const { classes } = useStyles();
-
-  // const isSmDown = useMediaQuery(theme.breakpoints.down('sm'))
-
+  console.log('render', leftRange, rightRange, midPrice);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const maxVal = useMemo(() => {
@@ -160,7 +136,7 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
   }, [disabled, leftRange, data, plotMin, plotMax, pointsOmitter]);
 
   const currentRange = useMemo(() => {
-    if (!data.length) return;
+    if (!data.length) return [];
     if (disabled) {
       const outMinData: Array<{ x: number; y: number }> = data.filter((tick) => tick.x < Math.max(plotMin, data[0].x));
       const outMaxData: Array<{ x: number; y: number }> = data.filter(
@@ -364,7 +340,7 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
     disabled
   );
 
-  if (data.length === 0) {
+  if (data.length === 0 && !showOnCreatePool) {
     return (
       <div className={styles.container}>
         <div className={styles.cover}>
