@@ -53,7 +53,7 @@ export const useSimulate = (
       });
     },
     {
-      keepPreviousData: false,
+      keepPreviousData: true,
       refetchInterval: 15000,
       staleTime: 1000,
       enabled,

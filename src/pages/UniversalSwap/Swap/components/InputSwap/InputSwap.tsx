@@ -123,7 +123,8 @@ export default function InputSwapV4({
           </div>
         </div>
         <div className={cx('box-input')}>
-          <div className={cx('input')}>
+          <div className={styles.input}>
+            {loadingSimulate && <div className={styles.mask} />}
             <NumberFormat
               placeholder="0"
               thousandSeparator
