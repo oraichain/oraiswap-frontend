@@ -10,6 +10,7 @@ import { getAverageRatio, getRemoteDenom, isAllowAlphaSmartRouter, isAllowIBCWas
 import { fetchTokenInfos } from 'rest/api';
 import { useSimulate } from './useSimulate';
 import { useSwapFee } from './useSwapFee';
+import { useEffect, useState } from 'react';
 
 export const SIMULATE_INIT_AMOUNT = 1;
 
@@ -35,6 +36,8 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     originalFromToken,
     originalToToken
   );
+
+  const [isAvgSimulate, setIsAvgSimulate] = useState<boolean>(false);
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -69,9 +72,15 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
       useAlphaSmartRoute,
       useIbcWasm,
       isAIRoute,
-      protocols
+      protocols,
+      isAvgSimulate
     }
   );
+
+  useEffect(() => {
+    if (isAvgSimulate || !averageSimulateData) return;
+    if (!isAvgSimulate && averageSimulateData) setIsAvgSimulate(true);
+  }, [averageSimulateData]);
 
   const fromAmountTokenBalance =
     fromTokenInfoData &&
