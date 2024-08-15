@@ -229,7 +229,7 @@ export default class SingletonOraiswapV3 {
     upperTick: number,
     xToY: boolean
   ): Promise<ArrayOfTupleOfUint16AndUint64> {
-    await this.loadCosmwasmClient();
+    await this.loadHandler();
     const tickmaps = await this._handler.tickMap(poolKey, lowerTick, upperTick, xToY);
     return tickmaps;
   }
@@ -375,29 +375,45 @@ export default class SingletonOraiswapV3 {
     return { bitmap: storedTickmap };
   }
 
-  public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
-    const ticks: number[] = [];
+  // simulate how much incentive reward user can have in 1 seconds 
+  public static async simulateIncentiveReward(owner: string, positionIndex: number): Promise<Record<string, number>> {
     await this.loadHandler();
+    const incentiveSimulations: Record<string, number> = {};
+    const rewardBefore = await this._handler.positionIncentives(positionIndex, owner);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const rewardAfter = await this._handler.positionIncentives(positionIndex, owner);
+    rewardAfter.forEach((reward) => {
+      const token = parseAssetInfo(reward.info);
+      const before = rewardBefore.find((r) => parseAssetInfo(r.info) === token);
+      const rewardAmount = BigInt(reward.amount) - BigInt(before.amount);
+      incentiveSimulations[token] = Number(rewardAmount);
+    });
 
+    return incentiveSimulations;
+  }
+
+  public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
+    const tickIndexes: number[] = [];
+    await this.loadHandler();
     for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
-      for (let i = 0; i < 64; i++) {
-        if ((chunk & (1n << BigInt(i))) != 0n) {
-          const tickIndex = positionToTick(Number(chunkIndex), i, poolKey.fee_tier.tick_spacing);
-          ticks.push(Number(tickIndex.toString()));
+      for (let bit = 0; bit < CHUNK_SIZE; bit++) {
+        const checkedBit = chunk & (1n << BigInt(bit));
+        if (checkedBit) {
+          const tickIndex = positionToTick(Number(chunkIndex), bit, poolKey.fee_tier.tick_spacing);
+          tickIndexes.push(tickIndex);
         }
       }
     }
+    console.log('tickIndexes', tickIndexes);
+    const tickLimit = LIQUIDITY_TICKS_LIMIT;
+    const promises: Promise<LiquidityTick[]>[] = [];
 
-    const liquidityTicks = await this._handler.liquidityTicks(poolKey, ticks);
-    const convertedLiquidityTicks: LiquidityTick[] = liquidityTicks.map((tickData: any) => {
-      return {
-        index: tickData.index,
-        liquidity_change: BigInt(tickData.liquidity_change),
-        sign: tickData.sign
-      };
-    });
+    for (let i = 0; i < tickIndexes.length; i += tickLimit) {
+      promises.push(this._handler.liquidityTicks(poolKey, tickIndexes.slice(i, i + tickLimit).map(Number)).then(parse));
+    }
 
-    return convertedLiquidityTicks;
+    const tickResults = await Promise.all(promises);
+    return tickResults.flat(1);
   }
 
   public static approveToken = async (token: string, amount: bigint, address: string) => {

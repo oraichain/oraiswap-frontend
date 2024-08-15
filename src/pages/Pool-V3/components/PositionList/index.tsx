@@ -27,11 +27,12 @@ const PositionList = () => {
     (async () => {
       try {
         setLoading(true);
-        if (!(address && positions.length && poolList.length)) {
+        if (!address) {
+          setLoading(false);
           setDataPosition([]);
-          if (address) {
-            setLoading(false);
-          }
+          return;
+        }
+        if (!(positions.length && poolList.length)) {
           return;
         }
         const feeClaimData = await getFeeClaimData(address);

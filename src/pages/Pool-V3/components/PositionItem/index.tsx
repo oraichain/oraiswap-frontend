@@ -39,6 +39,7 @@ import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
+import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();
@@ -86,6 +87,7 @@ const PositionItem = ({ position }) => {
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
   const { poolList } = useGetPoolList();
+  const { simulation } = useGetIncentiveSimulate(address, position.id);
 
   useOnClickOutside(ref, () => {
     setCollapse(false);
@@ -159,6 +161,24 @@ const PositionItem = ({ position }) => {
 
     return () => {};
   }, []);
+
+  useEffect(() => {
+    if (Object.keys(simulation).length > 0 && openCollapse && incentives) {
+      const intervalId = setInterval(() => {
+        console.log({ incentives });
+        const newIncentives: Record<string, number> = {};
+        for (const [key, value] of Object.entries(simulation)) {
+          newIncentives[key] = value + (incentives[key] || 0);
+        }
+        setIncentives(newIncentives);
+      }, 2000);
+
+      // Cleanup function to clear the interval
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [simulation, openCollapse, incentives]);
 
   const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
   const earnYDisplay = toDisplay((earnY || 0).toString(), tokenYDecimal);
