@@ -16,6 +16,7 @@ import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import {
   calculateSqrtPrice,
+  extractAddress,
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
@@ -610,12 +611,14 @@ const CreatePosition = () => {
     try {
       const fetchTickData = async () => {
         setLoading(true);
-
+        console.log({ notInitPoolKey, isXtoY, tokenFrom, tokenTo });
+        const tokenX = extractAddress(tokenFrom) === notInitPoolKey.token_x ? tokenFrom : tokenTo;
+        const tokenY = extractAddress(tokenTo) === notInitPoolKey.token_y ? tokenTo : tokenFrom;
         const ticksData = await handleGetCurrentPlotTicks({
           poolKey: notInitPoolKey,
           isXtoY: isXtoY,
-          xDecimal: tokenFrom.decimals,
-          yDecimal: tokenTo.decimals
+          xDecimal: tokenX.decimals,
+          yDecimal: tokenY.decimals
         });
 
         setLiquidityData(ticksData);
