@@ -568,23 +568,20 @@ export const convertPosition = ({
         }
       };
 
-      const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: BigDecimal, cur) => {
-        const { amount = '0', token } = cur as {
-          amount: string;
-          token: TokenItemType;
-        };
+      let totalEarnIncentiveUsd = new BigDecimal(0);
 
-        // const usd =
-        //   toDisplay(amount.toString(), token.decimals || CW20_DECIMALS) * Number(cachePrices[token?.coinGeckoId] || 0);
-
-        acc.add(
-          new BigDecimal(amount)
-            .mul(new BigDecimal(10).pow(token?.decimals || CW20_DECIMALS))
-            .mul(cachePrices[token.coinGeckoId])
-        );
-
-        return acc;
-      }, new BigDecimal(0));
+      totalEarn.earnIncentive &&
+        Object.values(totalEarn.earnIncentive).forEach((incentive) => {
+          const { amount = 0, token } = incentive as {
+            amount: number;
+            token: TokenItemType;
+          };
+          totalEarnIncentiveUsd = totalEarnIncentiveUsd.add(
+            new BigDecimal(amount)
+              .mul(cachePrices[token.coinGeckoId])
+              .div(new BigDecimal(10).pow(token?.decimals || CW20_DECIMALS))
+          );
+        });
 
       const tokenYDecimal = tokenYinfo.decimals || CW20_DECIMALS;
       const tokenXDecimal = tokenXinfo.decimals || CW20_DECIMALS;

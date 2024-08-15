@@ -20,16 +20,20 @@ const useAddLiquidity = () => {
 
     const { token_x, token_y, fee_tier } = poolKeyData;
 
+    console.log('data', {data});
+
     try {
-      const [xAmountWithSlippage, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
-        fee_tier.tick_spacing,
-        spotSqrtPrice,
-        liquidityDelta,
-        lowerTick,
-        upperTick,
-        Number(slippageTolerance),
-        true
-      );
+      // let [xAmountWithSlippage, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
+      //   fee_tier.tick_spacing,
+      //   spotSqrtPrice,
+      //   liquidityDelta,
+      //   lowerTick,
+      //   upperTick,
+      //   Number(slippageTolerance),
+      //   false
+      // );
+
+      const [xAmountWithSlippage, yAmountWithSlippage] = [data.tokenXAmount, data.tokenYAmount];
 
       let listTokenApprove = [];
       if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
@@ -96,15 +100,15 @@ const useAddLiquidity = () => {
     try {
       const txs = [];
 
-      const [xAmountWithSlippage, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
-        fee_tier.tick_spacing,
-        spotSqrtPrice,
-        liquidityDelta,
-        lowerTick,
-        upperTick,
-        Number(slippageTolerance),
-        true
-      );
+      // const [xAmountWithSlippage, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
+      //   fee_tier.tick_spacing,
+      //   spotSqrtPrice,
+      //   liquidityDelta,
+      //   lowerTick,
+      //   upperTick,
+      //   Number(slippageTolerance),
+      //   true
+      // );
 
       let listTokenApprove = [];
       if (!isNativeToken(token_x)) listTokenApprove.push(token_x);

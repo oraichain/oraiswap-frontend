@@ -39,6 +39,8 @@ import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
+import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
+import { extractAddress } from '@oraichain/oraiswap-v3';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();
@@ -86,6 +88,7 @@ const PositionItem = ({ position }) => {
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
   const { poolList } = useGetPoolList();
+  const { simulation } = useGetIncentiveSimulate(address, position.id);
 
   useOnClickOutside(ref, () => {
     setCollapse(false);
@@ -160,6 +163,21 @@ const PositionItem = ({ position }) => {
     return () => {};
   }, []);
 
+  useEffect(() => {
+    if (Object.keys(simulation).length > 0 && openCollapse && incentives) {
+      const intervalId = setInterval(() => {
+        const newIncentives: Record<string, number> = {};
+        for (const [key, value] of Object.entries(simulation)) {
+          newIncentives[key] = value + (incentives[key] || 0);
+        }
+        setIncentives(newIncentives);
+      }, 2000);
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [openCollapse, incentives, simulation]);
+
   const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
   const earnYDisplay = toDisplay((earnY || 0).toString(), tokenYDecimal);
 
@@ -179,16 +197,15 @@ const PositionItem = ({ position }) => {
       const x_usd = x_claim * cachePrices[position.tokenX.coinGeckoId];
       const y_usd = y_claim * cachePrices[position.tokenY.coinGeckoId];
 
-      const totalIncentiveUsd = Object.entries(incentives).reduce((acc, [tokenAddress, amount]) => {
-        const token = oraichainTokens.find((e) => [e.contractAddress, e.denom].includes(tokenAddress));
-        acc.add(
-          new BigDecimal(amount)
-            .mul(new BigDecimal(10).pow(token.decimals || CW20_DECIMALS))
+      let totalIncentiveUsd = new BigDecimal(0);
+      Object.keys(incentives).forEach((address) => {
+        const token = oraichainTokens.find((e) => address === extractAddress(e));
+        totalIncentiveUsd = totalIncentiveUsd.add(
+          new BigDecimal(incentives[address])
             .mul(cachePrices[token.coinGeckoId])
+            .div(new BigDecimal(10).pow(token.decimals || CW20_DECIMALS))
         );
-
-        return acc;
-      }, new BigDecimal(0));
+      });
 
       return [x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd.toNumber()];
     }
@@ -496,6 +513,7 @@ const PositionItem = ({ position }) => {
                       displayToast(TToastType.TX_SUCCESSFUL, {
                         customLink: getTransactionUrl(network.chainId, transactionHash)
                       });
+                      refetchPositions();
                     }
                   } catch (error) {
                     console.log({ error });

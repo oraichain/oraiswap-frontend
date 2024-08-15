@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 
 export const useGetPositions = (address: string) => {
-  const { data: positions, refetch: refetchPositions } = useQuery<Position[]>(
+  const { data: positions, refetch: refetchPositions, isFetching: isFetchingPositions } = useQuery<Position[]>(
     ['pool-v3-positions', address],
     () => getPositions(address),
     {
@@ -15,6 +15,7 @@ export const useGetPositions = (address: string) => {
 
   return {
     positions,
+    isFetchingPositions,
     refetchPositions
   };
 };
