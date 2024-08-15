@@ -205,7 +205,7 @@ const PoolV3Detail = () => {
               <h1>{formatDisplayUsdt(total || 0)}</h1>
               {/* <span className={classNames(styles.percent, { [styles.positive]: true })}>
               {true ? '+' : '-'}
-              {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 2 })}%
+              {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 1 })}%
             </span> */}
             </div>
             <div className={styles.box}>
@@ -213,7 +213,7 @@ const PoolV3Detail = () => {
               <h1>{formatDisplayUsdt(volumn24h)}</h1>
               {/* <span className={classNames(styles.percent, { [styles.positive]: false })}>
               {false ? '+' : '-'}
-              {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 2 })}%
+              {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 1 })}%
             </span> */}
             </div>
           </div>
@@ -253,7 +253,7 @@ const PoolV3Detail = () => {
               <span>Swap Fee</span>
               <p>
                 {numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100, undefined, {
-                  maximumFractionDigits: 2
+                  maximumFractionDigits: 1
                 })}
                 %
               </p>
@@ -268,12 +268,12 @@ const PoolV3Detail = () => {
                   ? '-- '
                   : aprInfo[poolKeyString]?.incentivesApr.min === aprInfo[poolKeyString]?.incentivesApr.max
                   ? `${numberWithCommas(aprInfo[poolKeyString].incentivesApr.min * 100, undefined, {
-                      maximumFractionDigits: 2
+                      maximumFractionDigits: 1
                     })}`
                   : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr.min * 100, undefined, {
-                      maximumFractionDigits: 2
+                      maximumFractionDigits: 1
                     })} - ${numberWithCommas(aprInfo[poolKeyString].incentivesApr.max * 100, undefined, {
-                      maximumFractionDigits: 2
+                      maximumFractionDigits: 1
                     })}%`}
               </p>
             </div>
@@ -282,12 +282,12 @@ const PoolV3Detail = () => {
               <p className={styles.total}>
                 {aprInfo[poolKeyString]?.apr.min === aprInfo[poolKeyString]?.apr.max
                   ? `${numberWithCommas(aprInfo[poolKeyString]?.apr.min * 100, undefined, {
-                      maximumFractionDigits: 2
+                      maximumFractionDigits: 1
                     })}`
                   : `${numberWithCommas(aprInfo[poolKeyString]?.apr.min * 100, undefined, {
-                      maximumFractionDigits: 2
+                      maximumFractionDigits: 1
                     })} - ${numberWithCommas(aprInfo[poolKeyString]?.apr.max * 100, undefined, {
-                      maximumFractionDigits: 2
+                      maximumFractionDigits: 1
                     })}`}
                 % %
               </p>
