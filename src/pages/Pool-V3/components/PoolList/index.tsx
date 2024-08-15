@@ -375,7 +375,12 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       <td>
         <div className={styles.apr}>
           <span className={styles.amount}>
-            {numberWithCommas(aprInfo.apr * 100, undefined, { maximumFractionDigits: 2 })}%
+            {aprInfo.apr.min === aprInfo.apr.max
+              ? `${numberWithCommas(aprInfo.apr.min * 100, undefined, { maximumFractionDigits: 2 })}`
+              : `${numberWithCommas(aprInfo.apr.min * 100, undefined, {
+                  maximumFractionDigits: 2
+                })} - ${numberWithCommas(aprInfo.apr.max * 100, undefined, { maximumFractionDigits: 2 })}`}
+            %
           </span>
           <TooltipIcon
             className={styles.tooltipWrapper}
@@ -397,13 +402,25 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
                     <IconBoots />
                   </span>
                   <span className={styles.value}>
-                    {numberWithCommas(aprInfo.incentivesApr * 100, undefined, { maximumFractionDigits: 2 })}%
+                    {aprInfo.incentivesApr.min === aprInfo.incentivesApr.max
+                      ? `${numberWithCommas(aprInfo.incentivesApr.min * 100, undefined, { maximumFractionDigits: 2 })}`
+                      : `${numberWithCommas(aprInfo.incentivesApr.min * 100, undefined, {
+                          maximumFractionDigits: 2
+                        })} - ${numberWithCommas(aprInfo.incentivesApr.max * 100, undefined, {
+                          maximumFractionDigits: 2
+                        })}`}
+                    %
                   </span>
                 </div>
                 <div className={styles.itemInfo}>
                   <span>Total APR</span>
                   <span className={styles.totalApr}>
-                    {numberWithCommas(aprInfo.apr * 100, undefined, { maximumFractionDigits: 2 })}%
+                    {aprInfo.apr.min === aprInfo.apr.max
+                      ? `${numberWithCommas(aprInfo.apr.min * 100, undefined, { maximumFractionDigits: 2 })}`
+                      : `${numberWithCommas(aprInfo.apr.min * 100, undefined, {
+                          maximumFractionDigits: 2
+                        })} - ${numberWithCommas(aprInfo.apr.max * 100, undefined, { maximumFractionDigits: 2 })}`}
+                    %
                   </span>
                 </div>
               </div>

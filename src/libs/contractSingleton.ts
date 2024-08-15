@@ -375,7 +375,7 @@ export default class SingletonOraiswapV3 {
     return { bitmap: storedTickmap };
   }
 
-  // simulate how much incentive reward user can have in 1 seconds 
+  // simulate how much incentive reward user can have in 1 seconds
   public static async simulateIncentiveReward(owner: string, positionIndex: number): Promise<Record<string, number>> {
     await this.loadHandler();
     const incentiveSimulations: Record<string, number> = {};
@@ -389,7 +389,8 @@ export default class SingletonOraiswapV3 {
       const token = parseAssetInfo(reward.info);
       const before = rewardBefore.find((r) => parseAssetInfo(r.info) === token);
       const rewardAmount = BigInt(reward.amount) - BigInt(before.amount);
-      incentiveSimulations[token] = Math.round(Number(rewardAmount) / timeDiff) < 0 ? 0 : Math.round(Number(rewardAmount) / timeDiff);
+      incentiveSimulations[token] =
+        Math.round(Number(rewardAmount) / timeDiff) < 0 ? 0 : Math.round(Number(rewardAmount) / timeDiff);
     });
 
     return incentiveSimulations;
@@ -800,7 +801,6 @@ export async function fetchPositionAprInfo(
     const positionLiquidity = position.liquidity;
     const totalPositionLiquidity = tokenXLiquidityInUsd + tokenYLiquidityInUsd;
     const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
-
     sumIncentivesApr +=
       (Number(positionLiquidity) * rewardPerYear) / (Number(currentLiquidity) * totalPositionLiquidity);
   }
@@ -811,11 +811,56 @@ export async function fetchPositionAprInfo(
   };
 }
 
+export function simulateAprPosition(
+  pool: Pool,
+  prices: CoinGeckoPrices<string>,
+  totalLiquidity: number
+) {
+  const incentives = pool.incentives;
+
+  // calculate APR for the best, position liquidity is 10% of total liquidity
+  let sumMaxIncentivesApr = 0;
+  const positionLiquidity = (Number(pool.liquidity) * 30) / 100;
+  const totalPositionLiquidity = totalLiquidity * 1 / 100;
+  for(const incentive of incentives) {
+    const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
+    const rewardsPerSec = incentive.reward_per_sec;
+    const rewardInUsd = prices[token.coinGeckoId];
+    const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
+    const apr = (positionLiquidity * rewardPerYear) / (totalPositionLiquidity * Number(pool.liquidity));
+    sumMaxIncentivesApr += apr;
+  }
+
+  // calculate APR for the worst, position liquidity is 2% of total liquidity
+  let sumMinIncentivesApr = 0;
+  const positionLiquidity2 = (Number(pool.liquidity) * 2) / 100;
+  const totalPositionLiquidity2 = totalLiquidity * 5 / 100;
+  for(const incentive of incentives) {
+    const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
+    const rewardsPerSec = incentive.reward_per_sec;
+    const rewardInUsd = prices[token.coinGeckoId];
+    const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
+    const apr = (positionLiquidity2 * rewardPerYear) / (totalPositionLiquidity2 * Number(pool.liquidity));
+    sumMinIncentivesApr += apr;
+  }
+
+  return {
+    min: sumMinIncentivesApr,
+    max: sumMaxIncentivesApr
+  };
+}
+
 export type PoolAprInfo = {
-  apr: number;
+  apr: {
+    min: number;
+    max: number;
+  };
   incentives: string[];
   swapFee: number;
-  incentivesApr: number;
+  incentivesApr: {
+    min: number;
+    max: number;
+  };
 };
 
 export async function fetchPoolAprInfo(
@@ -840,26 +885,23 @@ export async function fetchPoolAprInfo(
       const poolInfo = await SingletonOraiswapV3.getPool(pool_key);
       pool.incentives = poolInfo.pool.incentives;
     }
-    const incentives = pool.incentives;
-
-    let sumIncentivesApr = 0;
-    for (const incentive of incentives) {
-      const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
-      const rewardsPerSec = incentive.reward_per_sec;
-      const rewardInUsd = prices[token.coinGeckoId];
-      const totalPoolLiquidity = poolLiquidities[poolKeyToString(pool_key)];
-      const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
-      if (totalPoolLiquidity) sumIncentivesApr += rewardPerYear / totalPoolLiquidity;
-    }
+    
+    const res = simulateAprPosition(pool, prices, poolLiquidities[poolKeyToString(pool_key)])
 
     poolAprs[poolKeyToString(pool_key)] = {
-      apr: sumIncentivesApr + (feeAPR ? feeAPR : 0),
-      incentives: incentives.map((incentive) => {
+      apr: {
+        min: res.min + (feeAPR ? feeAPR : 0),
+        max: res.max + (feeAPR ? feeAPR : 0),
+      },
+      incentives: pool.incentives.map((incentive) => {
         const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
         return token.denom.toUpperCase();
       }),
       swapFee: feeAPR ? feeAPR : 0,
-      incentivesApr: sumIncentivesApr
+      incentivesApr: {
+        min: res.min,
+        max: res.max
+      }
     };
   }
 

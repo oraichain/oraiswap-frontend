@@ -649,6 +649,7 @@ const CreatePosition = () => {
     }
   }, [poolInfo, isXtoY, tokenFrom, tokenTo]);
 
+  // render add new pool or new position liquidity 
   const renderPriceSection = isPoolExist ? (
     <div className={styles.priceSectionExisted}>
       <div className={styles.wrapper}>
@@ -834,6 +835,15 @@ const CreatePosition = () => {
       midPrice={midPrice.index}
     />
   );
+
+  /* add liquidity depends on
+  tick range: left, right
+  pool key: tokenFrom, tokenTo, fee
+  liquidity delta: liquidity 
+  mid sqrt price: pool exist ? poolData.pool.sqrt_price : calculateSqrtPrice(midPrice.index)
+  token amount: fromAmount, toAmount
+  init pool: !isPoolExist -> ok
+*/
 
   return (
     <div className={classNames('small_container', styles.createPosition)}>
