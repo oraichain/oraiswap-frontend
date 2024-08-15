@@ -1,31 +1,32 @@
-import { toDisplay, BigDecimal } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
 import Loading from 'assets/gif/loading.gif';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
+import { ReactComponent as SortDownIcon } from 'assets/icons/down_icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
+import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
-import { ReactComponent as SortDownIcon } from 'assets/icons/down_icon.svg';
-import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
 import SearchLightSvg from 'assets/images/search-light-svg.svg';
 import SearchSvg from 'assets/images/search-svg.svg';
 import classNames from 'classnames';
+import LoadingBox from 'components/LoadingBox';
+import { CoefficientBySort, SortType } from 'components/Table';
 import { TooltipIcon } from 'components/Tooltip';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
-import { formatPoolData, parsePoolKeyString } from 'pages/Pool-V3/helpers/format';
+import { fetchPoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
+import { formatPoolData } from 'pages/Pool-V3/helpers/format';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './index.module.scss';
-import useConfigReducer from 'hooks/useConfigReducer';
-import LoadingBox from 'components/LoadingBox';
-import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
-import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
-import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
-import { CoefficientBySort, SortType } from 'components/Table';
 import CreateNewPool from '../CreateNewPool';
+import styles from './index.module.scss';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -52,18 +53,16 @@ const PoolList = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
-
-  const { feeDailyData } = useGetFeeDailyData(yesterdayIndex);
-  const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol(yesterdayIndex);
+  const { feeDailyData } = useGetFeeDailyData();
+  const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol();
   const { poolPositionInfo } = useGetPoolPositionInfo(prices);
+  const { poolList } = useGetPoolList();
 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const pools = await SingletonOraiswapV3.getPools();
-        const fmtPools = (pools || [])
+        const fmtPools = (poolList || [])
           .map((p) => {
             const isLight = theme === 'light';
             return formatPoolData(p, isLight);
@@ -71,14 +70,14 @@ const PoolList = () => {
           .filter((e) => e.isValid);
         setDataPool(fmtPools);
       } catch (error) {
-        console.log('error: get pools', error);
+        console.log('error: SingletonOraiswapV3 getPools', error);
       } finally {
         setLoading(false);
       }
     })();
 
     return () => {};
-  }, [theme]);
+  }, [theme, poolList]);
 
   const totalLiquidity = useMemo(() => {
     if (liquidityPools && Object.values(liquidityPools).length) {
@@ -111,9 +110,7 @@ const PoolList = () => {
 
   useEffect(() => {
     const getAPRInfo = async () => {
-      const poolKeys = dataPool.map((pool) => parsePoolKeyString(pool.poolKey));
-
-      const res = await fetchPoolAprInfo(poolKeys, prices, poolPositionInfo, feeDailyData);
+      const res = await fetchPoolAprInfo(dataPool, prices, poolPositionInfo, feeDailyData);
       setAprInfo(res);
     };
     if (dataPool.length && prices && Object.keys(poolPositionInfo).length) {
@@ -188,17 +185,32 @@ const PoolList = () => {
 
     return sortedData;
   };
+  const totalVolume24h = dataPool.reduce((volume, curr) => {
+    const findPool = volumnePools?.find((vo) => vo.poolAddress === curr?.poolKey);
+    if (findPool) volume += findPool.volume24;
+    return volume;
+  }, 0);
 
   return (
     <div className={styles.poolList}>
       <div className={styles.headerTable}>
-        <div className={styles.total}>
-          <p>Total liquidity</p>
-          {totalLiquidity === 0 || totalLiquidity ? (
-            <h1>{formatDisplayUsdt(Number(totalLiquidity) || 0)}</h1>
-          ) : (
-            <img src={Loading} alt="loading" width={32} height={32} />
-          )}
+        <div className={styles.headerInfo}>
+          <div className={styles.total}>
+            <p>Total liquidity</p>
+            {totalLiquidity === 0 || totalLiquidity ? (
+              <h1>{formatDisplayUsdt(Number(totalLiquidity) || 0)}</h1>
+            ) : (
+              <img src={Loading} alt="loading" width={32} height={32} />
+            )}
+          </div>
+          <div className={styles.total}>
+            <p>24H volume</p>
+            {totalVolume24h === 0 || totalVolume24h ? (
+              <h1>{formatDisplayUsdt(Number(totalVolume24h))}</h1>
+            ) : (
+              <img src={Loading} alt="loading" width={32} height={32} />
+            )}
+          </div>
         </div>
         <div className={styles.right}>
           <div className={styles.search}>

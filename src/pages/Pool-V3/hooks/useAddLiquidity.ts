@@ -35,7 +35,7 @@ const useAddLiquidity = () => {
       if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
       if (!isNativeToken(token_y)) listTokenApprove.push(token_y);
       if (listTokenApprove.length > 0) {
-        const msg = genMsgAllowance(listTokenApprove); 
+        const msg = genMsgAllowance(listTokenApprove);
         await approveListToken(msg, walletAddress);
       }
 

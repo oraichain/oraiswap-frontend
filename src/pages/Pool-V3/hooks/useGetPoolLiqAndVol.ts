@@ -1,10 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { getPoolsLiquidityAndVolume, PoolLiquidityAndVolume } from 'rest/graphClient';
 
-export const useGetPoolLiqAndVol = (dayIndex: number) => {
+export const useGetPoolLiqAndVol = () => {
+  const [poolLiquidities, setPoolLiquidities] = useState<Record<string, number>>({});
+  const [poolVolume, setPoolVolume] = useState<Record<string, number>>({});
+
   const { data, refetch: refetchPoolLiqAndVol } = useQuery<PoolLiquidityAndVolume[]>(
     ['pool-v3-liquidty-volume-daily'],
-    () => getPoolsLiquidityAndVolume(dayIndex),
+    () => getPoolsLiquidityAndVolume(),
     {
       refetchOnWindowFocus: true,
       placeholderData: [],
@@ -12,12 +16,19 @@ export const useGetPoolLiqAndVol = (dayIndex: number) => {
     }
   );
 
-  const poolLiquidities: Record<string, number> = {};
-  const poolVolume: Record<string, number> = {};
-  data.forEach((item) => {
-    poolLiquidities[item.id] = item.totalValueLockedInUSD;
-    poolVolume[item.id] = item.poolDayData.aggregates.sum.volumeInUSD;
-  });
+  useEffect(() => {
+    if (data.length === 0) return;
+    data.forEach((item) => {
+      setPoolLiquidities((prevState) => ({
+        ...prevState,
+        [item.id]: item.totalValueLockedInUSD
+      }));
+      setPoolVolume((prevState) => ({
+        ...prevState,
+        [item.id]: item.poolDayData.aggregates.sum.volumeInUSD
+      }));
+    });
+  }, [data]);
 
   return {
     poolLiquidities,
