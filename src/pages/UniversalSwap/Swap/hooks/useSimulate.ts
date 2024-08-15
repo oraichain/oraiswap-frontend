@@ -26,10 +26,13 @@ export const useSimulate = (
     useIbcWasm?: boolean;
     isAIRoute?: boolean;
     protocols?: string[];
+    isAvgSimulate?: boolean;
   }
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
   const debouncedFromAmount = useDebounce(fromAmountToken, 800);
+  let enabled = !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0;
+  if (simulateOption.isAvgSimulate) enabled = false;
   const { data: simulateData, isPreviousData: isPreviousSimulate } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount, simulateOption?.isAIRoute],
     () => {
@@ -50,10 +53,13 @@ export const useSimulate = (
       });
     },
     {
-      keepPreviousData: true,
+      keepPreviousData: false,
       refetchInterval: 15000,
       staleTime: 1000,
-      enabled: !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0
+      enabled,
+      onError: (error) => {
+        console.log('isAvgSimulate:', simulateOption?.isAvgSimulate, 'error when simulate: ', error);
+      }
     }
   );
 

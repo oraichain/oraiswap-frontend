@@ -448,16 +448,12 @@ export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
       totalEarn.earnX = new BigDecimal(totalEarn.earnX).add(fee.amountX).toNumber();
       totalEarn.earnY = new BigDecimal(totalEarn.earnY).add(fee.amountY).toNumber();
       fee.claimFeeIncentiveTokens.nodes.forEach((incentiveClaimed) => {
-        if (!totalEarn.earnIncentive[incentiveClaimed.tokenId]?.amount) {
-          totalEarn.earnIncentive[incentiveClaimed.tokenId] = {
-            amount: 0,
-            token: oraichainTokensWithIcon.find((tk) => extractAddress(tk) === incentiveClaimed.tokenId)
-          };
-        }
-
-        totalEarn.earnIncentive[incentiveClaimed.tokenId].amount = new BigDecimal(
-          totalEarn.earnIncentive[incentiveClaimed.tokenId]?.amount || 0
-        )
+        const tokenId = incentiveClaimed.tokenId;
+        totalEarn.earnIncentive[tokenId] = totalEarn.earnIncentive[tokenId] || {
+          amount: 0,
+          token: oraichainTokensWithIcon.find((tk) => extractAddress(tk) === tokenId)
+        };
+        totalEarn.earnIncentive[tokenId].amount = new BigDecimal(totalEarn.earnIncentive[tokenId].amount)
           .add(incentiveClaimed.rewardAmount)
           .toNumber();
       });
