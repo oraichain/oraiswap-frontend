@@ -21,6 +21,11 @@
       display: flex;
       align-items: center;
       gap: 40px;
+
+      flex-wrap: wrap;
+      @include small-mobile {
+        gap: 12px;
+      }
     }
 
     .total {
@@ -122,7 +127,6 @@
     }
 
     table {
-
       /* required css to make the rows rounded */
       thead {
         white-space: nowrap;
