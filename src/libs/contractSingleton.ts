@@ -379,14 +379,17 @@ export default class SingletonOraiswapV3 {
   public static async simulateIncentiveReward(owner: string, positionIndex: number): Promise<Record<string, number>> {
     await this.loadHandler();
     const incentiveSimulations: Record<string, number> = {};
+    const startTime = Date.now();
     const rewardBefore = await this._handler.positionIncentives(positionIndex, owner);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     const rewardAfter = await this._handler.positionIncentives(positionIndex, owner);
+    const endTime = Date.now();
+    const timeDiff = (endTime - startTime) / 1000;
     rewardAfter.forEach((reward) => {
       const token = parseAssetInfo(reward.info);
       const before = rewardBefore.find((r) => parseAssetInfo(r.info) === token);
       const rewardAmount = BigInt(reward.amount) - BigInt(before.amount);
-      incentiveSimulations[token] = Number(rewardAmount);
+      incentiveSimulations[token] = Math.round(Number(rewardAmount) / timeDiff) < 0 ? 0 : Math.round(Number(rewardAmount) / timeDiff);
     });
 
     return incentiveSimulations;

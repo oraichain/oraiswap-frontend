@@ -8,6 +8,7 @@ export const useGetIncentiveSimulate = (owner: string, positionIndex: number) =>
     {
       refetchOnWindowFocus: true,
       placeholderData: {},
+      cacheTime: 5 * 1000
     }
   );
 
