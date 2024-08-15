@@ -173,7 +173,7 @@ const PoolList = () => {
             return new BigDecimal(CoefficientBySort[sortOrder]).mul(a.volumn - b.volumn).toNumber();
           case PoolColumnHeader.APR:
             return new BigDecimal(CoefficientBySort[sortOrder])
-              .mul((aprInfo?.[a?.poolKey].apr || 0) - (aprInfo?.[b?.poolKey].apr || 0))
+              .mul((aprInfo?.[a?.poolKey].apr.max || 0) - (aprInfo?.[b?.poolKey].apr.max || 0))
               .toNumber();
 
           default:
