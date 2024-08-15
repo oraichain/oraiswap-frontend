@@ -109,16 +109,16 @@ export const Handle: React.FC<HandleProps> = ({
         <MinHandle
           height={height}
           x={!isReversed() ? currentPosition - 37 : currentPosition}
-          fill={disabled ? '#494949' : '#7e5cc5'} // Brush Color origin EF84F5
-          textColor={disabled ? '#A9B6BF' : '#efefef'} // MIN MAX text color
+          fill={disabled ? '#494949' : '#AEE67F'} // 7e5cc5 // Brush Color origin EF84F5
+          textColor={disabled ? '#A9B6BF' : '#1B1C1A'} // efefef // MIN MAX text color
           isReversed={isReversed()}
         />
       ) : (
         <MaxHandle
           height={height}
           x={!isReversed() ? currentPosition : currentPosition - 37}
-          fill={disabled ? '#494949' : '#7e5cc5'}
-          textColor={disabled ? '#A9B6BF' : '#efefef'}
+          fill={disabled ? '#494949' : '#AEE67F'} // 7e5cc5
+          textColor={disabled ? '#A9B6BF' : '#1B1C1A'} // efefef
           isReversed={isReversed()}
         />
       )}

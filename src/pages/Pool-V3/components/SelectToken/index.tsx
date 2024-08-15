@@ -20,11 +20,13 @@ import styles from './index.module.scss';
 const SelectToken = ({
   token,
   handleChangeToken,
-  otherTokenDenom
+  otherTokenDenom,
+  customClassButton
 }: {
   token: TokenItemType;
   handleChangeToken: (token) => void;
   otherTokenDenom?: string;
+  customClassButton?: string;
 }) => {
   const theme = useTheme();
   const [textSearch, setTextSearch] = useState('');
@@ -52,7 +54,7 @@ const SelectToken = ({
 
   return (
     <div className={styles.selectToken}>
-      <div className={styles.btn} onClick={() => setIsOpen(true)}>
+      <div className={classNames(styles.btn, customClassButton)} onClick={() => setIsOpen(true)}>
         <span className={styles.name}>
           {TokenIcon ? (
             <>

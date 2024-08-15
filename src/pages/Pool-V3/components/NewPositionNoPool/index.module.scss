@@ -23,6 +23,11 @@
 
     border-radius: 8px;
 
+    &.warningOnCreatePool {
+      margin-top: 0;
+      display: none;
+    }
+
     @include theme {
       border: 1px solid theme-get('warning-text-default');
       background: theme-get('warning-surface-default-subtle');
@@ -49,6 +54,10 @@
     }
 
     margin-bottom: 32px;
+
+    &.showOnCreatePool {
+      margin-bottom: 12px;
+    }
 
     font-size: 13px;
     font-weight: 400;
@@ -247,6 +256,11 @@
     @include small-mobile {
       flex-direction: column;
       gap: 8px;
+    }
+
+    &.actionOnCreatePool {
+      margin-top: 12px;
+      margin-bottom: 8px;
     }
 
     button {
