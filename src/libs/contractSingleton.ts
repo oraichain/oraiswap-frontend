@@ -803,8 +803,6 @@ export async function fetchPositionAprInfo(
     const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
     sumIncentivesApr +=
       (Number(positionLiquidity) * rewardPerYear) / (Number(currentLiquidity) * totalPositionLiquidity);
-    
-    console.log({positionLiquidity, rewardPerYear, currentLiquidity, totalPositionLiquidity})
   }
   return {
     swapFee: feeAPR ? feeAPR : 0,
@@ -824,7 +822,6 @@ export function simulateAprPosition(
   let sumMaxIncentivesApr = 0;
   const positionLiquidity = (Number(pool.liquidity) * 30) / 100;
   const totalPositionLiquidity = totalLiquidity * 1 / 100;
-  console.log({positionLiquidity, totalPositionLiquidity})
   for(const incentive of incentives) {
     const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
     const rewardsPerSec = incentive.reward_per_sec;
