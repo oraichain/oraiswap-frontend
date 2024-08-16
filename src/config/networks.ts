@@ -34,6 +34,6 @@ export const network: CustomChainInfo & NetworkConfig & { pool_v3: string; index
   staking_oraix: CW20_STAKING_CONTRACT,
   multicall: MULTICALL_CONTRACT,
   explorer: 'https://scan.orai.io',
-  pool_v3: AMM_V3_CONTRACT,
+  pool_v3: 'orai1g52phpmx56qrcagcwqtfnwxxyta9u72jjxf5nrzxal5ehz4ujxhsffvj3e',
   indexer_v3: 'https://staging-ammv3-indexer.oraidex.io/'
 };
