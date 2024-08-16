@@ -353,6 +353,7 @@ const TokenForm = ({
                 const lowerTick = Math.min(left, right);
                 const upperTick = Math.max(left, right);
                 const poolKey: PoolKey = newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), fee);
+                // console.log({ fromAmount, fromAmount2: toAmountFn(fromAmount || 0, tokenFrom.decimals || 6) });
                 await addLiquidity({
                   poolKeyData: poolKey,
                   lowerTick: lowerTick,
@@ -360,8 +361,14 @@ const TokenForm = ({
                   liquidityDelta: liquidity,
                   spotSqrtPrice: isPoolExist ? BigInt(poolData.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
                   slippageTolerance: BigInt(slippage),
-                  tokenXAmount: poolKey.token_x === extractAddress(tokenFrom) ? toAmountFn(fromAmount || 0, tokenFrom.decimals || 6) : toAmountFn(toAmount || 0, tokenTo.decimals || 6),
-                  tokenYAmount: poolKey.token_y === extractAddress(tokenFrom) ? toAmountFn(fromAmount || 0, tokenFrom.decimals || 6) : toAmountFn(toAmount || 0, tokenTo.decimals || 6),
+                  tokenXAmount:
+                    poolKey.token_x === extractAddress(tokenFrom)
+                      ? BigInt(Math.round(Number(fromAmount) * 10 ** (tokenFrom.decimals || 6)))
+                      : BigInt(Math.round(Number(toAmount) * 10 ** (tokenTo.decimals || 6))),
+                  tokenYAmount:
+                    poolKey.token_y === extractAddress(tokenFrom)
+                      ? BigInt(Math.round(Number(fromAmount) * 10 ** (tokenFrom.decimals || 6)))
+                      : BigInt(Math.round(Number(toAmount) * 10 ** (tokenTo.decimals || 6))),
                   initPool: !isPoolExist
                 });
               }}
@@ -376,4 +383,3 @@ const TokenForm = ({
 };
 
 export default TokenForm;
-
