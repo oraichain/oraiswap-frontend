@@ -35,9 +35,12 @@ const useAddLiquidity = () => {
 
       const [xAmountWithSlippage, yAmountWithSlippage] = [data.tokenXAmount, data.tokenYAmount];
 
-      let listTokenApprove = [];
-      if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
-      if (!isNativeToken(token_y)) listTokenApprove.push(token_y);
+      let listTokenApprove: {
+        token: string;
+        amount: bigint;
+      }[] = [];
+      if (!isNativeToken(token_x)) listTokenApprove.push({ token: token_x, amount: xAmountWithSlippage });
+      if (!isNativeToken(token_y)) listTokenApprove.push({ token: token_y, amount: yAmountWithSlippage });
       if (listTokenApprove.length > 0) {
         const msg = genMsgAllowance(listTokenApprove);
         await approveListToken(msg, walletAddress);
@@ -110,9 +113,12 @@ const useAddLiquidity = () => {
       //   true
       // );
 
-      let listTokenApprove = [];
-      if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
-      if (!isNativeToken(token_y)) listTokenApprove.push(token_y);
+      let listTokenApprove: {
+        token: string;
+        amount: bigint;
+      }[] = [];
+      if (!isNativeToken(token_x)) listTokenApprove.push({ token: token_x, amount: tokenXAmount });
+      if (!isNativeToken(token_y)) listTokenApprove.push({ token: token_y, amount: tokenYAmount });
 
       const msg = genMsgAllowance(listTokenApprove);
 

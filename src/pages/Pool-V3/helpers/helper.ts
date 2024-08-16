@@ -326,15 +326,18 @@ export const approveListToken = async (msg: any, address: string): Promise<strin
   return result.transactionHash;
 };
 
-export const genMsgAllowance = (datas: string[]) => {
-  const MAX_ALLOWANCE_AMOUNT = '18446744073709551615';
+export const genMsgAllowance = (datas: {
+  token: string;
+  amount: bigint;
+}[]) => {
+  // const MAX_ALLOWANCE_AMOUNT = '18446744073709551615';
   const spender = network.pool_v3;
 
   return datas.map((data) => ({
-    contractAddress: data,
+    contractAddress: data.token,
     msg: {
       increase_allowance: {
-        amount: MAX_ALLOWANCE_AMOUNT,
+        amount: data.amount.toString(),
         spender
       }
     }
@@ -396,6 +399,7 @@ export const createPositionWithNativeTx = async (
   initialAmountY: bigint,
   address: string
 ): Promise<string> => {
+  console.log({ initialAmountX, initialAmountY });
   const slippageLimitLower = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), false);
   const slippageLimitUpper = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), true);
 
