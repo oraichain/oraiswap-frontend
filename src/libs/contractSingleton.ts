@@ -214,7 +214,7 @@ export default class SingletonOraiswapV3 {
   public static async loadHandler() {
     await this.loadCosmwasmClient();
     if (!this._handler) {
-      this._handler = new OraiswapV3Handler(this._cosmwasmClient);
+      this._handler = new OraiswapV3Handler(this._cosmwasmClient, network.pool_v3);
     }
   }
 
