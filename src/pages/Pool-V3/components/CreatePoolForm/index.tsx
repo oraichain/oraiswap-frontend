@@ -12,6 +12,7 @@ import {
   getMaxTick,
   getMinTick,
   newPoolKey,
+  poolKeyToString,
   Price
 } from '@oraichain/oraiswap-v3';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
@@ -49,6 +50,7 @@ import {
   trimLeadingZeros
 } from '../PriceRangePlot/utils';
 import styles from './index.module.scss';
+import { useNavigate } from 'react-router-dom';
 
 export type PriceInfo = {
   startPrice: number;
@@ -61,7 +63,8 @@ export enum TYPE_CHART {
   DISCRETE
 }
 
-const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage }) => {
+const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onCloseModal }) => {
+  const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const [walletAddress] = useConfigReducer('address');
@@ -69,6 +72,7 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage }) => 
   const [priceInfo, setPriceInfo] = useState<PriceInfo>({
     startPrice: 1.0
   });
+
   const loadOraichainToken = useLoadOraichainTokens();
   const [focusId, setFocusId] = useState<'from' | 'to' | null>(null);
 
@@ -87,8 +91,8 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage }) => 
   const [, setLeftInput] = useState('');
   const [, setRightInput] = useState('');
 
-  const [leftInputRounded, setLeftInputRounded] = useState('');
-  const [rightInputRounded, setRightInputRounded] = useState('');
+  const [, setLeftInputRounded] = useState('');
+  const [, setRightInputRounded] = useState('');
 
   const [plotMin, setPlotMin] = useState(0);
   const [plotMax, setPlotMax] = useState(1);
@@ -662,6 +666,8 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage }) => 
         });
         handleSuccessAdd();
         loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
+        onCloseModal();
+        navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
       },
       (e) => {
         displayToast(TToastType.TX_FAILED, {
@@ -880,8 +886,10 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage }) => 
               onClick={async () => {
                 const lowerTick = Math.min(leftRange, rightRange);
                 const upperTick = Math.max(leftRange, rightRange);
+                const poolKeyData = newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), feeTier);
+
                 await addLiquidity({
-                  poolKeyData: newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), feeTier),
+                  poolKeyData,
                   lowerTick: lowerTick,
                   upperTick: upperTick,
                   liquidityDelta: liquidityRef.current,
