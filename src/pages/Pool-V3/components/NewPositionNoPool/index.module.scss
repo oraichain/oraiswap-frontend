@@ -40,6 +40,38 @@
     letter-spacing: 0.012px;
   }
 
+  .currentPriceOnCreatePool {
+    display: flex;
+    padding-bottom: 12px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+
+    color: var(--Colors-Neutral-Text-text-token-name, #f7f7f7);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 150%; /* 21px */
+
+    margin-bottom: 12px;
+
+    @include theme {
+      color: theme-get('colors-neutral-text-text-token-name');
+    }
+
+    .titlePrice {
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 150%;
+      letter-spacing: 0.013px;
+    }
+  }
+
   .price {
     display: flex;
     padding: 12px 16px 12px 12px;

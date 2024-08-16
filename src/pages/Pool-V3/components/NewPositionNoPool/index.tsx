@@ -148,6 +148,16 @@ const NewPositionNoPool = ({
         </span>
       </div>
 
+      {showOnCreatePool && (
+        <div className={styles.currentPriceOnCreatePool}>
+          <p className={styles.titlePrice}>Current price</p>
+          <p>
+            1 {fromToken.name} = {numberWithCommas(currentPrice, undefined, { maximumFractionDigits: 6 })}{' '}
+            {toToken.name}
+          </p>
+        </div>
+      )}
+
       <div className={classNames(styles.price, { [styles.showOnCreatePool]: showOnCreatePool })}>
         <span>{fromToken.name} starting price</span>
 
@@ -180,15 +190,17 @@ const NewPositionNoPool = ({
 
       {!showOnCreatePool && <h1>Set Price Range</h1>}
 
-      <div className={styles.currentPrice}>
-        <span>Current Price</span>
-        <div className={styles.value}>
-          <h2>{numberWithCommas(currentPrice, undefined, { maximumFractionDigits: 6 })}</h2>
-          <span>
-            {toToken.name.toUpperCase()} / {fromToken.name.toUpperCase()}
-          </span>
+      {!showOnCreatePool && (
+        <div className={styles.currentPrice}>
+          <span>Current Price</span>
+          <div className={styles.value}>
+            <h2>{numberWithCommas(currentPrice, undefined, { maximumFractionDigits: 6 })}</h2>
+            <span>
+              {toToken.name.toUpperCase()} / {fromToken.name.toUpperCase()}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className={styles.range}>
         <div className={styles.item}>
