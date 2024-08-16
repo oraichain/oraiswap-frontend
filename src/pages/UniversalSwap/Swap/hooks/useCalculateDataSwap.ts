@@ -78,8 +78,8 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   );
 
   useEffect(() => {
-    if (isAvgSimulate || !averageSimulateData) return;
-    if (!isAvgSimulate && averageSimulateData) setIsAvgSimulate(true);
+    if (isAvgSimulate || !averageSimulateData?.amount) return;
+    if (!isAvgSimulate && !!averageSimulateData?.amount) setIsAvgSimulate(true);
   }, [averageSimulateData]);
 
   const fromAmountTokenBalance =
