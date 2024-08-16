@@ -404,13 +404,14 @@ export const createPositionWithNativeTx = async (
 
   const fund: Coin[] = [];
 
-  if (isNativeToken(token_x)) {
+  if (isNativeToken(token_x) && initialAmountX > 0n) {
     fund.push({ denom: token_x, amount: initialAmountX.toString() });
   }
 
-  if (isNativeToken(token_y)) {
+  if (isNativeToken(token_y) && initialAmountY > 0n) {
     fund.push({ denom: token_y, amount: initialAmountY.toString() });
   }
+  console.log({ fund });
 
   if (SingletonOraiswapV3.dex.sender !== address) {
     SingletonOraiswapV3.load(SingletonOraiswapV3.dex.client, address);

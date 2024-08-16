@@ -215,7 +215,7 @@ export default class SingletonOraiswapV3 {
   public static async loadHandler() {
     await this.loadCosmwasmClient();
     if (!this._handler) {
-      this._handler = new OraiswapV3Handler(this._cosmwasmClient);
+      this._handler = new OraiswapV3Handler(this._cosmwasmClient, network.pool_v3);
     }
   }
 
@@ -272,6 +272,7 @@ export default class SingletonOraiswapV3 {
     try {
       return await this._handler.getPools();
     } catch (error) {
+      console.log('error', error);
       const pools = await getPools();
       return pools.map((pool) => {
         const poolKey = parsePoolKey(pool.id);
@@ -409,7 +410,6 @@ export default class SingletonOraiswapV3 {
         }
       }
     }
-    console.log('tickIndexes', tickIndexes);
     const tickLimit = LIQUIDITY_TICKS_LIMIT;
     const promises: Promise<LiquidityTick[]>[] = [];
 

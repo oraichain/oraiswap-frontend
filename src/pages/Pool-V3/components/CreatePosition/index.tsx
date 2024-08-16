@@ -94,12 +94,15 @@ const CreatePosition = () => {
   const [leftRange, setLeftRange] = useState(getMinTick(notInitPoolKey.fee_tier.tick_spacing));
   const [rightRange, setRightRange] = useState(getMaxTick(notInitPoolKey.fee_tier.tick_spacing));
 
+  // for showing
   const [leftInput, setLeftInput] = useState('');
   const [rightInput, setRightInput] = useState('');
 
+  // for showing 
   const [leftInputRounded, setLeftInputRounded] = useState('');
   const [rightInputRounded, setRightInputRounded] = useState('');
 
+  // range of chart
   const [plotMin, setPlotMin] = useState(0);
   const [plotMax, setPlotMax] = useState(1);
 
@@ -207,10 +210,14 @@ const CreatePosition = () => {
     }
   };
 
+  // from left range to right range to get ticks inside range
   const getTicksInsideRange = (left: number, right: number, isXtoY: boolean) => {
+    // get max tick for this pool
     const leftMax = isXtoY
       ? getMinTick(notInitPoolKey.fee_tier.tick_spacing)
       : getMaxTick(notInitPoolKey.fee_tier.tick_spacing);
+
+    // get min tick for this pool
     const rightMax = isXtoY
       ? getMaxTick(notInitPoolKey.fee_tier.tick_spacing)
       : getMinTick(notInitPoolKey.fee_tier.tick_spacing);
@@ -249,27 +256,24 @@ const CreatePosition = () => {
     setRightInputRounded(val);
   };
 
+  // when change the range of the plot -> change the value of the input amount
   const onChangeRange = (left: number, right: number) => {
     let leftRange: number;
     let rightRange: number;
 
-    if (positionOpeningMethod === 'range') {
+    // if (positionOpeningMethod === 'range') {
       const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
       leftRange = leftInRange;
       rightRange = rightInRange;
-    } else {
-      leftRange = left;
-      rightRange = right;
-    }
-    leftRange = left;
-    rightRange = right;
-
-    setLeftRange(Number(left));
-    setRightRange(Number(right));
+    // } else {
+    //   leftRange = left;
+    //   rightRange = right;
+    // }
+    // leftRange = left;
+    // rightRange = right;
 
     if (tokenFrom && (isXtoY ? rightRange > midPrice.index : rightRange < midPrice.index)) {
       const deposit = amountFrom;
-      // console.log({ deposit, leftRange, rightRange });
       const amount = getOtherTokenAmount(
         convertBalanceToBigint(deposit, tokenFrom.decimals).toString(),
         Number(leftRange),
@@ -302,17 +306,18 @@ const CreatePosition = () => {
   };
 
   const changeRangeHandler = (left: number, right: number) => {
+    console.log("change range!");
     let leftRange: number;
     let rightRange: number;
 
-    if (positionOpeningMethod === 'range') {
+    // if (positionOpeningMethod === 'range') {
       const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
       leftRange = leftInRange;
       rightRange = rightInRange;
-    } else {
-      leftRange = left;
-      rightRange = right;
-    }
+    // } else {
+    //   leftRange = left;
+    //   rightRange = right;
+    // }
 
     setLeftRange(Number(leftRange));
     setRightRange(Number(rightRange));
@@ -366,30 +371,30 @@ const CreatePosition = () => {
     }
   };
 
-  const reversePlot = () => {
-    changeRangeHandler(rightRange, leftRange);
-    if (plotMin > 0) {
-      const pom = 1 / plotMin;
-      setPlotMin(1 / plotMax);
-      setPlotMax(pom);
-    } else {
-      const initSideDist = Math.abs(
-        midPrice.x -
-          calcPrice(
-            Math.max(
-              getMinTick(notInitPoolKey.fee_tier.tick_spacing),
-              midPrice.index - notInitPoolKey.fee_tier.tick_spacing * 15
-            ),
-            isXtoY,
-            tokenFrom.decimals,
-            tokenTo.decimals
-          )
-      );
+  // const reversePlot = () => {
+  //   changeRangeHandler(rightRange, leftRange);
+  //   if (plotMin > 0) {
+  //     const pom = 1 / plotMin;
+  //     setPlotMin(1 / plotMax);
+  //     setPlotMax(pom);
+  //   } else {
+  //     const initSideDist = Math.abs(
+  //       midPrice.x -
+  //         calcPrice(
+  //           Math.max(
+  //             getMinTick(notInitPoolKey.fee_tier.tick_spacing),
+  //             midPrice.index - notInitPoolKey.fee_tier.tick_spacing * 15
+  //           ),
+  //           isXtoY,
+  //           tokenFrom.decimals,
+  //           tokenTo.decimals
+  //         )
+  //     );
 
-      setPlotMin(midPrice.x - initSideDist);
-      setPlotMax(midPrice.x + initSideDist);
-    }
-  };
+  //     setPlotMin(midPrice.x - initSideDist);
+  //     setPlotMax(midPrice.x + initSideDist);
+  //   }
+  // };
 
   const autoZoomHandler = (left: number, right: number, canZoomCloser: boolean = false) => {
     const leftX = calcPrice(left, isXtoY, tokenFrom.decimals, tokenTo.decimals);
@@ -611,7 +616,6 @@ const CreatePosition = () => {
     try {
       const fetchTickData = async () => {
         setLoading(true);
-        console.log({ notInitPoolKey, isXtoY, tokenFrom, tokenTo });
         const tokenX = extractAddress(tokenFrom) === notInitPoolKey.token_x ? tokenFrom : tokenTo;
         const tokenY = extractAddress(tokenTo) === notInitPoolKey.token_y ? tokenTo : tokenFrom;
         const ticksData = await handleGetCurrentPlotTicks({
