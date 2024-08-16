@@ -109,6 +109,7 @@ const CreateNewPool = ({ pools }: { pools: PoolWithPoolKey[] }) => {
               tokenTo={tokenTo}
               feeTier={fee}
               poolData={pools}
+              onCloseModal={onCloseModal}
             />
           ) : (
             <div className={styles.content}>
