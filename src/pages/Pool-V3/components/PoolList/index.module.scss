@@ -21,6 +21,11 @@
       display: flex;
       align-items: center;
       gap: 40px;
+
+      flex-wrap: wrap;
+      @include small-mobile {
+        gap: 12px;
+      }
     }
 
     .total {
@@ -45,6 +50,11 @@
         line-height: 120%;
         /* 28.8px */
       }
+    }
+    .right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .search {
@@ -117,10 +127,14 @@
     }
 
     table {
-
       /* required css to make the rows rounded */
       thead {
         white-space: nowrap;
+        cursor: pointer;
+
+        svg {
+          vertical-align: bottom;
+        }
 
         th:first-child {
           border-top-left-radius: 24px;
@@ -128,6 +142,7 @@
 
         th:last-child {
           border-top-right-radius: 24px;
+          cursor: auto;
         }
 
         border-bottom: 1px solid;
@@ -418,9 +433,9 @@
   // gap: 4px;
 
   svg {
-    vertical-align: middle;
+    vertical-align: unset !important;
     margin-left: 4px;
-    transform: translateY(4px);
+    transform: translateY(3px);
 
     path {
       @include theme {
