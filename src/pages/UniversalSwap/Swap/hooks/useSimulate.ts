@@ -32,7 +32,7 @@ export const useSimulate = (
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
   const debouncedFromAmount = useDebounce(fromAmountToken, 800);
   let enabled = !!fromTokenInfoData && !!toTokenInfoData && !!debouncedFromAmount && fromAmountToken > 0;
-  if (simulateOption.isAvgSimulate) enabled = false;
+  if (simulateOption?.isAvgSimulate) enabled = false;
   const { data: simulateData, isPreviousData: isPreviousSimulate } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount, simulateOption?.isAIRoute],
     () => {
