@@ -148,6 +148,16 @@ const NewPositionNoPool = ({
         </span>
       </div>
 
+      {showOnCreatePool && (
+        <div className={styles.currentPriceOnCreatePool}>
+          <p className={styles.titlePrice}>Current price</p>
+          <p>
+            1 {fromToken.name} = {numberWithCommas(currentPrice, undefined, { maximumFractionDigits: 6 })}{' '}
+            {toToken.name}
+          </p>
+        </div>
+      )}
+
       <div className={classNames(styles.price, { [styles.showOnCreatePool]: showOnCreatePool })}>
         <span>{fromToken.name} starting price</span>
 
@@ -257,14 +267,12 @@ const NewPositionNoPool = ({
               </div>
             </div>
           </div>
-          {!showOnCreatePool && (
-            <div className={styles.percent}>
-              <p>Min Current Price:</p>
-              <span className={classNames(styles.value, { [styles.positive]: false })}>
-                {(((+leftInput - price) / price) * 100).toLocaleString(undefined, { maximumFractionDigits: 3 })}%
-              </span>
-            </div>
-          )}
+          <div className={styles.percent}>
+            <p>Min Current Price:</p>
+            <span className={classNames(styles.value, { [styles.positive]: false })}>
+              {(((+leftInput - price) / price) * 100).toLocaleString(undefined, { maximumFractionDigits: 3 })}%
+            </span>
+          </div>
         </div>
         <div className={styles.item}>
           <div className={styles.form}>
@@ -330,14 +338,12 @@ const NewPositionNoPool = ({
               </div>
             </div>
           </div>
-          {!showOnCreatePool && (
-            <div className={styles.percent}>
-              <p>Max Current Price:</p>
-              <span className={classNames(styles.value, { [styles.positive]: true })}>
-                {numberWithCommas(((+rightInput - price) / price) * 100, undefined, { maximumFractionDigits: 3 })}%
-              </span>
-            </div>
-          )}
+          <div className={styles.percent}>
+            <p>Max Current Price:</p>
+            <span className={classNames(styles.value, { [styles.positive]: true })}>
+              {numberWithCommas(((+rightInput - price) / price) * 100, undefined, { maximumFractionDigits: 3 })}%
+            </span>
+          </div>
         </div>
       </div>
 

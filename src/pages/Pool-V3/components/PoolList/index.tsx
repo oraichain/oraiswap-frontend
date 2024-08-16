@@ -138,16 +138,6 @@ const PoolList = () => {
     const [sortField, sortOrder] = Object.entries(sort)[0];
 
     const sortedData = dataPool
-      .filter((p) => {
-        if (!search) return true;
-
-        const { tokenXinfo, tokenYinfo } = p;
-
-        return (
-          (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
-          (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
-        );
-      })
       // .sort((a, b) => (liquidityPools?.[b?.poolKey] || 0) - (liquidityPools?.[a?.poolKey] || 0))
       .map((item) => {
         let volumn = 0;
@@ -297,25 +287,36 @@ const PoolList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dataPool.map((item, index) => {
-                    return (
-                      <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                        <PoolItemTData
-                          item={item}
-                          theme={theme}
-                          volumn={item.volumn || 0}
-                          liquidity={liquidityPools?.[item?.poolKey]}
-                          aprInfo={{
-                            apr: 0,
-                            incentives: [],
-                            swapFee: 0,
-                            incentivesApr: 0,
-                            ...aprInfo?.[item?.poolKey]
-                          }}
-                        />
-                      </tr>
-                    );
-                  })}
+                  {dataPool
+                    .filter((p) => {
+                      if (!search) return true;
+
+                      const { tokenXinfo, tokenYinfo } = p;
+
+                      return (
+                        (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
+                        (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
+                      );
+                    })
+                    .map((item, index) => {
+                      return (
+                        <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
+                          <PoolItemTData
+                            item={item}
+                            theme={theme}
+                            volumn={item.volumn || 0}
+                            liquidity={liquidityPools?.[item?.poolKey]}
+                            aprInfo={{
+                              apr: 0,
+                              incentives: [],
+                              swapFee: 0,
+                              incentivesApr: 0,
+                              ...aprInfo?.[item?.poolKey]
+                            }}
+                          />
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>
