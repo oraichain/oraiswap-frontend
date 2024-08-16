@@ -410,7 +410,6 @@ export default class SingletonOraiswapV3 {
         }
       }
     }
-    console.log('tickIndexes', tickIndexes);
     const tickLimit = LIQUIDITY_TICKS_LIMIT;
     const promises: Promise<LiquidityTick[]>[] = [];
 
