@@ -55,7 +55,7 @@ export const formatPoolData = (p: PoolWithPoolKey, isLight: boolean = false) => 
     spread,
     tokenXinfo,
     tokenYinfo,
-    poolKey: poolKeyToString(p.pool_key),
+    poolKey: p?.pool_key ? poolKeyToString(p.pool_key) : '',
     isValid: tokenXinfo && tokenYinfo
   };
 };
