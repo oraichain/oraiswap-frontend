@@ -515,7 +515,7 @@ const SwapComponent: React.FC<{
       simulateData?.displayAmount &&
       averageRatio?.displayAmount &&
       useAlphaSmartRouter &&
-      averageSimulateData.displayAmount
+      averageSimulateData?.displayAmount
     ) {
       const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
         .div(debouncedFromAmount)
