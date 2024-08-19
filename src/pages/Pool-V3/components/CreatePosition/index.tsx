@@ -306,7 +306,7 @@ const CreatePosition = () => {
   };
 
   const changeRangeHandler = (left: number, right: number) => {
-    console.log("change range!");
+    // console.log("change range!");
     let leftRange: number;
     let rightRange: number;
 

@@ -7,10 +7,12 @@ import {
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import {
   calculateSqrtPrice,
+  extractAddress,
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
   getMinTick,
+  isTokenX,
   newPoolKey,
   poolKeyToString,
   Price
@@ -30,7 +32,7 @@ import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { calcYPerXPriceBySqrtPrice, InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
@@ -43,6 +45,7 @@ import {
   determinePositionTokenBlock,
   extractDenom,
   getConcentrationArray,
+  getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
   PositionTokenBlock,
   printBigint,
@@ -63,7 +66,16 @@ export enum TYPE_CHART {
   DISCRETE
 }
 
-const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onCloseModal }) => {
+interface CreatePoolFormProps {
+  tokenFrom: TokenItemType;
+  tokenTo: TokenItemType;
+  feeTier: FeeTier;
+  poolData: any; // Replace with appropriate type
+  slippage: number;
+  onCloseModal: () => void;
+}
+
+const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onCloseModal }) => {
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
@@ -101,9 +113,20 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
 
   const [poolInfo, setPoolInfo] = useState<PoolWithPoolKey>();
 
-  const [midPrice, setMidPrice] = useState<TickPlotPositionData>({
-    index: 0,
-    x: 1
+  const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
+    const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+    const tickIndex = getTickAtSqrtPriceFromBalance(
+      priceInfo.startPrice,
+      feeTier.tick_spacing,
+      isXToY,
+      isXToY ? tokenFrom.decimals : tokenTo.decimals,
+      isXToY ? tokenTo.decimals : tokenFrom.decimals
+    );
+
+    return {
+      index: tickIndex,
+      x: calcPrice(tickIndex, isXToY, tokenFrom.decimals, tokenTo.decimals)
+    };
   });
 
   const isXtoY = useMemo(() => {
@@ -441,9 +464,17 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
         setPoolInfo(pool);
         setNotInitPoolKey(pool.pool_key);
       } else {
+        const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+        const tickIndex = getTickAtSqrtPriceFromBalance(
+          priceInfo.startPrice,
+          feeTier.tick_spacing,
+          isXToY,
+          isXToY ? tokenFrom.decimals : tokenTo.decimals,
+          isXToY ? tokenTo.decimals : tokenFrom.decimals
+        );
         setMidPrice({
-          index: 0,
-          x: 1
+          index: tickIndex,
+          x: calcPrice(tickIndex, isXtoY, tokenFrom.decimals, tokenTo.decimals)
         });
         setNotInitPoolKey({
           fee_tier: fee,
@@ -526,10 +557,6 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
-    console.log('mid', {
-      index: convertedMid,
-      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
-    });
 
     setMidPrice({
       index: convertedMid,
@@ -616,7 +643,7 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
         isXtoY
       ) === PositionTokenBlock.B;
 
-    console.log({ fromBlocked, toBlocked, leftRange, rightRange });
+    // console.log({ fromBlocked, toBlocked, leftRange, rightRange });
 
     setIsFromBlocked(fromBlocked);
     setIsToBlocked(toBlocked);
@@ -657,26 +684,30 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
   const addLiquidity = async (data: InitPositionData) => {
     setLoading(true);
 
-    await handleInitPosition(
-      data,
-      walletAddress,
-      (tx: string) => {
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: getTransactionUrl('Oraichain', tx)
-        });
-        handleSuccessAdd();
-        loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
-        onCloseModal();
-        navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
-      },
-      (e) => {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Add liquidity failed!'
-        });
-      }
-    );
-
-    setLoading(false);
+    try {
+      await handleInitPosition(
+        data,
+        walletAddress,
+        (tx: string) => {
+          displayToast(TToastType.TX_SUCCESSFUL, {
+            customLink: getTransactionUrl('Oraichain', tx)
+          });
+          handleSuccessAdd();
+          loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
+          onCloseModal();
+          navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
+        },
+        (e) => {
+          displayToast(TToastType.TX_FAILED, {
+            message: 'Add liquidity failed!'
+          });
+        }
+      );
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGetTicks = () => {
@@ -692,8 +723,6 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
         });
 
         setLiquidityData(ticksData);
-
-        console.log({ ticksData });
       };
 
       if (isPoolExist && notInitPoolKey) {
@@ -897,8 +926,14 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
                     ? BigInt(poolData.pool?.sqrt_price || 0)
                     : calculateSqrtPrice(midPrice.index),
                   slippageTolerance: BigInt(slippage),
-                  tokenXAmount: toAmount(amountFrom || 0, tokenFrom.decimals || 6),
-                  tokenYAmount: toAmount(amountTo || 0, tokenTo.decimals || 6),
+                  tokenXAmount:
+                    poolKeyData.token_x === extractAddress(tokenFrom)
+                      ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
+                      : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
+                  tokenYAmount:
+                    poolKeyData.token_y === extractAddress(tokenFrom)
+                      ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
+                      : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
                   initPool: !isPoolExist
                 });
               }}
