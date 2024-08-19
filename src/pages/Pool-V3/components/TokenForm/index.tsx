@@ -193,7 +193,7 @@ const TokenForm = ({
       return `Insufficient ${tokenTo.name.toUpperCase()}`;
     }
 
-    if ((!isFromBlocked && +fromAmount === 0) || (!isToBlocked && +toAmount === 0)) {
+    if ((!isFromBlocked && (!fromAmount || +fromAmount === 0)) || (!isToBlocked && (!toAmount || +toAmount === 0))) {
       return 'Liquidity must be greater than 0';
     }
 
