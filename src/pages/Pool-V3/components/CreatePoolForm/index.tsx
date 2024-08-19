@@ -7,6 +7,7 @@ import {
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import {
   calculateSqrtPrice,
+  extractAddress,
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
@@ -897,8 +898,14 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
                     ? BigInt(poolData.pool?.sqrt_price || 0)
                     : calculateSqrtPrice(midPrice.index),
                   slippageTolerance: BigInt(slippage),
-                  tokenXAmount: toAmount(amountFrom || 0, tokenFrom.decimals || 6),
-                  tokenYAmount: toAmount(amountTo || 0, tokenTo.decimals || 6),
+                  tokenXAmount:
+                    poolKeyData.token_x === extractAddress(tokenFrom)
+                      ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
+                      : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
+                  tokenYAmount:
+                    poolKeyData.token_y === extractAddress(tokenFrom)
+                      ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
+                      : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
                   initPool: !isPoolExist
                 });
               }}

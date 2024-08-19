@@ -63,6 +63,7 @@ const NewPositionNoPool = ({
   );
 
   useEffect(() => {
+    console.log('mid price input change:', midPriceInput);
     const tickIndex = getTickAtSqrtPriceFromBalance(
       +midPriceInput,
       tickSpacing,
@@ -70,6 +71,7 @@ const NewPositionNoPool = ({
       fromToken.decimals,
       toToken.decimals
     );
+    console.log('tick index:', tickIndex);
 
     onChangeMidPrice(BigInt(tickIndex));
   }, [midPriceInput]);
@@ -78,6 +80,7 @@ const NewPositionNoPool = ({
     // setLeftInput(toMaxNumericPlaces(+val, 5));
     setLeftInput(val);
     setLeftInputRounded(toMaxNumericPlaces(+val, 5));
+    console.log('setLeftInputValues', toMaxNumericPlaces(+val, 5));
   };
 
   const setRightInputValues = (val: string) => {
@@ -97,6 +100,7 @@ const NewPositionNoPool = ({
   };
 
   const changeRangeHandler = (left: number, right: number) => {
+    console.log('call');
     setLeftRange(left);
     setRightRange(right);
 
@@ -105,19 +109,29 @@ const NewPositionNoPool = ({
 
     setLeftInputValues(leftInput);
     setRightInputValues(rightInput);
+    console.log({ leftInput, rightInput });
 
     onChangeRange(left, right);
   };
 
   const resetRange = () => {
-    changeRangeHandler(tickSpacing * 10 * (isXtoY ? -1 : 1), tickSpacing * 10 * (isXtoY ? 1 : -1));
+    changeRangeHandler(
+      midPrice + tickSpacing * 30 * (isXtoY ? -1 : 1),
+      midPrice + tickSpacing * 30 * (isXtoY ? 1 : -1)
+    );
   };
 
   useEffect(() => {
-    changeRangeHandler(leftRange, rightRange);
+    // changeRangeHandler(leftRange, rightRange);
+    resetRange();
   }, [midPrice]);
 
+  const trimCommas = (val: string) => {
+    return val.replace(/,/g, '');
+  };
+
   const validateMidPriceInput = (midPriceInput: string) => {
+    const value = trimCommas(midPriceInput);
     const minTick = getMinTick(tickSpacing);
     const maxTick = getMaxTick(tickSpacing);
     const minPrice = isXtoY
@@ -126,8 +140,9 @@ const NewPositionNoPool = ({
     const maxPrice = isXtoY
       ? calcPrice(maxTick, isXtoY, fromToken.decimals, toToken.decimals)
       : calcPrice(minTick, isXtoY, fromToken.decimals, toToken.decimals);
-    const numericMidPriceInput = parseFloat(midPriceInput);
+    const numericMidPriceInput = parseFloat(value);
     const validatedMidPrice = Math.min(Math.max(numericMidPriceInput, minPrice), maxPrice);
+    console.log('validatedMidPrice', toMaxNumericPlaces(validatedMidPrice, 5));
     return toMaxNumericPlaces(validatedMidPrice, 5);
   };
 
@@ -181,6 +196,7 @@ const NewPositionNoPool = ({
             //   setPriceInfo && setPriceInfo({ ...priceInfo, startPrice: floatValue });
             // }}
             onBlur={(e) => {
+              // console.log('e.target.value', e.target.value);
               setMidPriceInput(validateMidPriceInput(e.target.value || '0'));
             }}
           />
