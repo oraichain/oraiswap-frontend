@@ -31,7 +31,7 @@ import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { calcYPerXPriceBySqrtPrice, InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
@@ -64,7 +64,16 @@ export enum TYPE_CHART {
   DISCRETE
 }
 
-const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onCloseModal }) => {
+interface CreatePoolFormProps {
+  tokenFrom: TokenItemType;
+  tokenTo: TokenItemType;
+  feeTier: FeeTier;
+  poolData: any; // Replace with appropriate type
+  slippage: number;
+  onCloseModal: () => void;
+}
+
+const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onCloseModal }) => {
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
@@ -527,10 +536,6 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
-    // console.log('mid', {
-    //   index: convertedMid,
-    //   x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
-    // });
 
     setMidPrice({
       index: convertedMid,
@@ -658,26 +663,30 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
   const addLiquidity = async (data: InitPositionData) => {
     setLoading(true);
 
-    await handleInitPosition(
-      data,
-      walletAddress,
-      (tx: string) => {
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: getTransactionUrl('Oraichain', tx)
-        });
-        handleSuccessAdd();
-        loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
-        onCloseModal();
-        navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
-      },
-      (e) => {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Add liquidity failed!'
-        });
-      }
-    );
-
-    setLoading(false);
+    try {
+      await handleInitPosition(
+        data,
+        walletAddress,
+        (tx: string) => {
+          displayToast(TToastType.TX_SUCCESSFUL, {
+            customLink: getTransactionUrl('Oraichain', tx)
+          });
+          handleSuccessAdd();
+          loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
+          onCloseModal();
+          navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
+        },
+        (e) => {
+          displayToast(TToastType.TX_FAILED, {
+            message: 'Add liquidity failed!'
+          });
+        }
+      );
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGetTicks = () => {
@@ -693,8 +702,6 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
         });
 
         setLiquidityData(ticksData);
-
-        // console.log({ ticksData });
       };
 
       if (isPoolExist && notInitPoolKey) {
