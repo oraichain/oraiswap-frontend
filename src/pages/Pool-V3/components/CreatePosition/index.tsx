@@ -21,6 +21,7 @@ import {
   getLiquidityByY,
   getMaxTick,
   getMinTick,
+  isTokenX,
   Price
 } from '@oraichain/oraiswap-v3';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -33,6 +34,7 @@ import {
   calculateConcentrationRange,
   extractDenom,
   getConcentrationArray,
+  getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
   printBigint,
   toMaxNumericPlaces,
@@ -114,9 +116,20 @@ const CreatePosition = () => {
 
   const [currentPrice, setCurrentPrice] = useState(1);
 
-  const [midPrice, setMidPrice] = useState<TickPlotPositionData>({
-    index: 0,
-    x: 1
+  const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
+    const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+    const tickIndex = getTickAtSqrtPriceFromBalance(
+      priceInfo.startPrice,
+      feeTier.tick_spacing,
+      isXToY,
+      isXToY ? tokenFrom.decimals : tokenTo.decimals,
+      isXToY ? tokenTo.decimals : tokenFrom.decimals
+    );
+
+    return {
+      index: tickIndex,
+      x: calcPrice(tickIndex, isXToY, tokenFrom.decimals, tokenTo.decimals)
+    };
   });
 
   const isXtoY = useMemo(() => {
@@ -463,9 +476,17 @@ const CreatePosition = () => {
         setPoolInfo(pool);
         setNotInitPoolKey(pool.pool_key);
       } else {
+        const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+        const tickIndex = getTickAtSqrtPriceFromBalance(
+          priceInfo.startPrice,
+          feeTier.tick_spacing,
+          isXToY,
+          isXToY ? tokenFrom.decimals : tokenTo.decimals,
+          isXToY ? tokenTo.decimals : tokenFrom.decimals
+        );
         setMidPrice({
-          index: 0,
-          x: 1
+          index: tickIndex,
+          x: calcPrice(tickIndex, isXtoY, tokenFrom.decimals, tokenTo.decimals)
         });
         setNotInitPoolKey({
           fee_tier: fee,
