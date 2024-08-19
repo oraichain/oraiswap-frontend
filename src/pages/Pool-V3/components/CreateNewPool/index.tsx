@@ -7,7 +7,7 @@ import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
-import { useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import CreatePoolForm from '../CreatePoolForm';
 import { extractDenom } from '../PriceRangePlot/utils';
 import SelectToken from '../SelectToken';
@@ -38,13 +38,16 @@ const CreateNewPool = ({ pools }: { pools: PoolWithPoolKey[] }) => {
   //   setShowModal(false);
   // });
 
-  const isPoolExisted = (fee: FeeTier) =>
-    (pools || []).find(
-      (p) =>
-        [extractDenom(tokenFrom), extractDenom(tokenTo)].every((e) =>
-          [p.pool_key.token_x, p.pool_key.token_y].includes(e)
-        ) && fee.fee === p.pool_key.fee_tier.fee
-    );
+  const isPoolExisted = useCallback(
+    (fee: FeeTier) =>
+      (pools || []).find(
+        (p) =>
+          [extractDenom(tokenFrom), extractDenom(tokenTo)].every((e) =>
+            [p.pool_key.token_x, p.pool_key.token_y].includes(e)
+          ) && fee.fee === p.pool_key.fee_tier.fee
+      ),
+    [pools, tokenFrom, tokenTo]
+  );
 
   const onCloseModal = () => {
     setShowModal(false);
