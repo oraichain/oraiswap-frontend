@@ -58,18 +58,15 @@ const NewPositionNoPool = ({
   const [leftInputRounded, setLeftInputRounded] = useState((+leftInput).toFixed(12));
   const [rightInputRounded, setRightInputRounded] = useState((+rightInput).toFixed(12));
 
-  const [midPriceInput, setMidPriceInput] = useState(
-    calcPrice(Number(priceInfo.startPrice), isXtoY, fromToken.decimals, toToken.decimals).toString()
-  );
+  const [midPriceInput, setMidPriceInput] = useState(priceInfo.startPrice.toString());
 
   useEffect(() => {
-    // console.log('mid price input change:', midPriceInput);
     const tickIndex = getTickAtSqrtPriceFromBalance(
       +midPriceInput,
       tickSpacing,
       isXtoY,
-      fromToken.decimals,
-      toToken.decimals
+      isXtoY ? fromToken.decimals : toToken.decimals,
+      isXtoY ? toToken.decimals : fromToken.decimals
     );
 
     onChangeMidPrice(BigInt(tickIndex));
@@ -173,7 +170,7 @@ const NewPositionNoPool = ({
             placeholder="0.0"
             thousandSeparator
             className={styles.amount}
-            decimalScale={6}
+            decimalScale={toToken?.decimals || 6}
             disabled={false}
             type="text"
             value={midPriceInput}

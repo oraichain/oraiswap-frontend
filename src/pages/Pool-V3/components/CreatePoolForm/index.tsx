@@ -12,6 +12,7 @@ import {
   getLiquidityByY,
   getMaxTick,
   getMinTick,
+  isTokenX,
   newPoolKey,
   poolKeyToString,
   Price
@@ -44,6 +45,7 @@ import {
   determinePositionTokenBlock,
   extractDenom,
   getConcentrationArray,
+  getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
   PositionTokenBlock,
   printBigint,
@@ -111,9 +113,20 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
 
   const [poolInfo, setPoolInfo] = useState<PoolWithPoolKey>();
 
-  const [midPrice, setMidPrice] = useState<TickPlotPositionData>({
-    index: 0,
-    x: 1
+  const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
+    const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+    const tickIndex = getTickAtSqrtPriceFromBalance(
+      priceInfo.startPrice,
+      feeTier.tick_spacing,
+      isXToY,
+      isXToY ? tokenFrom.decimals : tokenTo.decimals,
+      isXToY ? tokenTo.decimals : tokenFrom.decimals
+    );
+
+    return {
+      index: tickIndex,
+      x: calcPrice(tickIndex, isXToY, tokenFrom.decimals, tokenTo.decimals)
+    };
   });
 
   const isXtoY = useMemo(() => {
@@ -451,9 +464,17 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
         setPoolInfo(pool);
         setNotInitPoolKey(pool.pool_key);
       } else {
+        const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+        const tickIndex = getTickAtSqrtPriceFromBalance(
+          priceInfo.startPrice,
+          feeTier.tick_spacing,
+          isXToY,
+          isXToY ? tokenFrom.decimals : tokenTo.decimals,
+          isXToY ? tokenTo.decimals : tokenFrom.decimals
+        );
         setMidPrice({
-          index: 0,
-          x: 1
+          index: tickIndex,
+          x: calcPrice(tickIndex, isXtoY, tokenFrom.decimals, tokenTo.decimals)
         });
         setNotInitPoolKey({
           fee_tier: fee,
