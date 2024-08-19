@@ -685,7 +685,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
       return `Insufficient ${tokenTo.name.toUpperCase()}`;
     }
 
-    if ((!isFromBlocked && +amountFrom === 0) || (!isToBlocked && +amountTo === 0)) {
+    if ((!isFromBlocked && (!amountFrom || +amountFrom === 0)) || (!isToBlocked && (!amountTo || +amountTo === 0))) {
       return 'Liquidity must be greater than 0';
     }
 
