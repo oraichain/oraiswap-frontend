@@ -51,6 +51,7 @@ const NewPositionNoPool = ({
   const [leftInput, setLeftInput] = useState(
     calcPrice(leftRange, isXtoY, fromToken.decimals, toToken.decimals).toString()
   );
+
   const [rightInput, setRightInput] = useState(
     calcPrice(rightRange, isXtoY, fromToken.decimals, toToken.decimals).toString()
   );
@@ -96,8 +97,11 @@ const NewPositionNoPool = ({
     setLeftRange(left);
     setRightRange(right);
 
-    const leftInput = calcPrice(left, isXtoY, fromToken.decimals, toToken.decimals).toString();
-    const rightInput = calcPrice(right, isXtoY, fromToken.decimals, toToken.decimals).toString();
+    const tokenX = isXtoY ? fromToken : toToken;
+    const tokenY = isXtoY ? toToken : fromToken;
+
+    const leftInput = calcPrice(left, isXtoY, tokenX?.decimals ?? 6, tokenY?.decimals ?? 6).toString();
+    const rightInput = calcPrice(right, isXtoY, tokenX?.decimals ?? 6, tokenY?.decimals ?? 6).toString();
 
     setLeftInputValues(leftInput);
     setRightInputValues(rightInput);
@@ -178,7 +182,17 @@ const NewPositionNoPool = ({
             isAllowed={(values) => {
               const { floatValue } = values;
               // allow !floatValue to let user can clear their input
-              return !floatValue || (floatValue >= 0 && floatValue <= calcPrice(getMaxTick(tickSpacing), isXtoY, fromToken.decimals, toToken.decimals));
+              return (
+                !floatValue ||
+                (floatValue >= 0 &&
+                  floatValue <=
+                    calcPrice(
+                      isXtoY ? getMaxTick(tickSpacing) : getMinTick(tickSpacing),
+                      isXtoY,
+                      fromToken.decimals,
+                      toToken.decimals
+                    ))
+              );
             }}
             // onValueChange={({ floatValue }) => {
             //   setMidPriceInput(validateMidPriceInput((floatValue || 0).toString() || '0'));
@@ -216,7 +230,7 @@ const NewPositionNoPool = ({
                 placeholder="0"
                 thousandSeparator
                 className={styles.amount}
-                decimalScale={fromToken.decimals}
+                decimalScale={6}
                 disabled={false}
                 type="text"
                 value={Number(leftInputRounded) <= 0 ? '0' : leftInputRounded}

@@ -247,7 +247,7 @@ const TokenForm = ({
                 placeholder="0"
                 thousandSeparator
                 className={styles.amount}
-                decimalScale={6}
+                decimalScale={tokenFrom.decimals || 6}
                 disabled={isFromBlocked}
                 type="text"
                 value={fromAmount}
@@ -303,7 +303,7 @@ const TokenForm = ({
                 placeholder="0"
                 thousandSeparator
                 className={styles.amount}
-                decimalScale={6}
+                decimalScale={tokenTo.decimals || 6}
                 disabled={isToBlocked}
                 type="text"
                 value={toAmount}
