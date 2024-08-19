@@ -140,7 +140,9 @@ const NewPositionNoPool = ({
   };
 
   const price = useMemo(() => {
-    return calcPrice(midPrice, isXtoY, fromToken.decimals, toToken.decimals);
+    const tokenXDecimals = isXtoY ? fromToken.decimals : toToken.decimals;
+    const tokenYDecimals = isXtoY ? toToken.decimals : fromToken.decimals;
+    return calcPrice(midPrice, isXtoY, tokenXDecimals, tokenYDecimals);
   }, [midPrice, isXtoY, fromToken.decimals, toToken.decimals]);
 
   return (
@@ -244,15 +246,21 @@ const NewPositionNoPool = ({
                   onLeftInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
+
+                  const tokenXDecimals = isXtoY ? fromToken.decimals : toToken.decimals;
+                  const tokenYDecimals = isXtoY ? toToken.decimals : fromToken.decimals;
+
                   const newLeft = isXtoY
                     ? Math.min(
                         Number(rightRange - tickSpacing),
-                        Number(nearestTickIndex(+leftInput, tickSpacing, isXtoY, fromToken.decimals, toToken.decimals))
+                        Number(nearestTickIndex(+leftInput, tickSpacing, isXtoY, tokenXDecimals, tokenYDecimals))
                       )
                     : Math.max(
                         Number(rightRange + tickSpacing),
-                        Number(nearestTickIndex(+leftInput, tickSpacing, isXtoY, fromToken.decimals, toToken.decimals))
+                        Number(nearestTickIndex(+leftInput, tickSpacing, isXtoY, tokenXDecimals, tokenYDecimals))
                       );
+
+                  
                   changeRangeHandler(newLeft, rightRange);
                 }}
               />
@@ -314,14 +322,18 @@ const NewPositionNoPool = ({
                   onRightInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
+
+                  const tokenXDecimals = isXtoY ? fromToken.decimals : toToken.decimals;
+                  const tokenYDecimals = isXtoY ? toToken.decimals : fromToken.decimals;
+
                   const newRight = isXtoY
                     ? Math.max(
                         Number(leftRange + tickSpacing),
-                        Number(nearestTickIndex(+rightInput, tickSpacing, isXtoY, fromToken.decimals, toToken.decimals))
+                        Number(nearestTickIndex(+rightInput, tickSpacing, isXtoY, tokenXDecimals, tokenYDecimals))
                       )
                     : Math.min(
                         Number(leftRange - tickSpacing),
-                        Number(nearestTickIndex(+rightInput, tickSpacing, isXtoY, fromToken.decimals, toToken.decimals))
+                        Number(nearestTickIndex(+rightInput, tickSpacing, isXtoY, tokenXDecimals, tokenYDecimals))
                       );
 
                   changeRangeHandler(leftRange, newRight);
