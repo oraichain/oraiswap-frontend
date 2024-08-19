@@ -236,7 +236,7 @@ const PoolList = ({ search }) => {
                     >
                       APR
                       <TooltipIcon
-                        className={styles.tooltipWrapper}
+                        className={styles.tooltipWrapperApr}
                         placement="top"
                         visible={openTooltip}
                         icon={<IconInfo />}

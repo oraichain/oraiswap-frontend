@@ -270,6 +270,7 @@
         gap: 6px;
         align-items: center;
         justify-content: flex-end;
+        white-space: nowrap;
 
         @include theme {
           color: theme-get('primary-surface-default-dark-3');
@@ -332,7 +333,8 @@
   line-height: 150%;
 
   display: flex;
-  width: 250px;
+  width: 100vw;
+  max-width: 320px;
   padding: 12px;
   flex-direction: column;
   align-items: center;
@@ -348,7 +350,6 @@
     align-items: center;
     gap: 6px;
     width: 100%;
-    max-width: 200px;
 
     color: var(--Colors-Neutral-Text-body, #979995);
     font-size: 14px;
@@ -404,7 +405,7 @@
   @include mobile {
     font-size: 12px;
     padding: 8px;
-    width: calc(100% - 20px);
+    width: calc(100vw - 20px);
   }
 }
 
@@ -461,4 +462,8 @@
     padding: 8px;
     width: calc(100% - 20px);
   }
+}
+
+.tooltipWrapper {
+  background-color: #232521;
 }
