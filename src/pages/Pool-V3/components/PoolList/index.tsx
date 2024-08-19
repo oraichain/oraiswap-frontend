@@ -177,6 +177,17 @@ const PoolList = ({ search }) => {
     return volume;
   }, 0);
 
+  const filteredPool = dataPool.filter((p) => {
+    if (!search) return true;
+
+    const { tokenXinfo, tokenYinfo } = p;
+
+    return (
+      (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
+      (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
+    );
+  });
+
   return (
     <div className={styles.poolList}>
       <div className={styles.headerTable}>
@@ -201,7 +212,7 @@ const PoolList = ({ search }) => {
       </div>
       <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}>
         <div className={styles.list}>
-          {dataPool?.length > 0 ? (
+          {filteredPool?.length > 0 ? (
             <div className={styles.tableWrapper}>
               <table>
                 <thead>
@@ -263,36 +274,25 @@ const PoolList = ({ search }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dataPool
-                    .filter((p) => {
-                      if (!search) return true;
-
-                      const { tokenXinfo, tokenYinfo } = p;
-
-                      return (
-                        (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
-                        (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
-                      );
-                    })
-                    .map((item, index) => {
-                      return (
-                        <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                          <PoolItemTData
-                            item={item}
-                            theme={theme}
-                            volumn={item.volumn || 0}
-                            liquidity={liquidityPools?.[item?.poolKey]}
-                            aprInfo={{
-                              apr: 0,
-                              incentives: [],
-                              swapFee: 0,
-                              incentivesApr: 0,
-                              ...aprInfo?.[item?.poolKey]
-                            }}
-                          />
-                        </tr>
-                      );
-                    })}
+                  {filteredPool.map((item, index) => {
+                    return (
+                      <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
+                        <PoolItemTData
+                          item={item}
+                          theme={theme}
+                          volumn={item.volumn || 0}
+                          liquidity={liquidityPools?.[item?.poolKey]}
+                          aprInfo={{
+                            apr: 0,
+                            incentives: [],
+                            swapFee: 0,
+                            incentivesApr: 0,
+                            ...aprInfo?.[item?.poolKey]
+                          }}
+                        />
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -300,7 +300,7 @@ const PoolList = ({ search }) => {
             !loading && (
               <div className={styles.nodata}>
                 {theme === 'light' ? <NoData /> : <NoDataDark />}
-                <span>No Pools!</span>
+                <span>{!dataPool.length ? 'No Pools!' : !filteredPool.length && 'No Matched Pools!'}</span>
               </div>
             )
           )}
@@ -337,10 +337,8 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
       </td>
       <td className={styles.textRight}>
         <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
-          {liquidity ? (
+          {liquidity || liquidity === 0 ? (
             formatDisplayUsdt(liquidity)
-          ) : liquidity === 0 ? (
-            formatDisplayUsdt(0)
           ) : (
             <img src={Loading} alt="loading" width={30} height={30} />
           )}

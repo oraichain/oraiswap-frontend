@@ -58,9 +58,7 @@ const NewPositionNoPool = ({
   const [leftInputRounded, setLeftInputRounded] = useState((+leftInput).toFixed(12));
   const [rightInputRounded, setRightInputRounded] = useState((+rightInput).toFixed(12));
 
-  const [midPriceInput, setMidPriceInput] = useState(
-    priceInfo.startPrice.toString()
-  );
+  const [midPriceInput, setMidPriceInput] = useState(priceInfo.startPrice.toString());
 
   useEffect(() => {
     const tickIndex = nearestTickIndex(
@@ -75,13 +73,11 @@ const NewPositionNoPool = ({
   }, [midPriceInput]);
 
   const setLeftInputValues = (val: string) => {
-    // setLeftInput(toMaxNumericPlaces(+val, 5));
     setLeftInput(val);
     setLeftInputRounded(toMaxNumericPlaces(+val, 5));
   };
 
   const setRightInputValues = (val: string) => {
-    // setRightInput(toMaxNumericPlaces(+val, 5));
     setRightInput(val);
     setRightInputRounded(toMaxNumericPlaces(+val, 5));
   };
@@ -117,9 +113,7 @@ const NewPositionNoPool = ({
   };
 
   useEffect(() => {
-    // changeRangeHandler(leftRange, rightRange);
     resetRange();
-    // console.log("call", midPrice);
   }, [midPrice]);
 
   const trimCommas = (val: string) => {
@@ -191,7 +185,6 @@ const NewPositionNoPool = ({
             //   setPriceInfo && setPriceInfo({ ...priceInfo, startPrice: floatValue });
             // }}
             onBlur={(e) => {
-              // console.log('e.target.value', e.target.value);
               setMidPriceInput(validateMidPriceInput(e.target.value || '0'));
             }}
           />
