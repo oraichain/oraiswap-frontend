@@ -12,6 +12,7 @@ import {
   getLiquidityByY,
   getMaxTick,
   getMinTick,
+  isTokenX,
   newPoolKey,
   poolKeyToString,
   Price
@@ -44,6 +45,7 @@ import {
   determinePositionTokenBlock,
   extractDenom,
   getConcentrationArray,
+  getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
   PositionTokenBlock,
   printBigint,
@@ -102,9 +104,20 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
 
   const [poolInfo, setPoolInfo] = useState<PoolWithPoolKey>();
 
-  const [midPrice, setMidPrice] = useState<TickPlotPositionData>({
-    index: 0,
-    x: 1
+  const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
+    const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+    const tickIndex = getTickAtSqrtPriceFromBalance(
+      priceInfo.startPrice,
+      feeTier.tick_spacing,
+      isXToY,
+      isXToY ? tokenFrom.decimals : tokenTo.decimals,
+      isXToY ? tokenTo.decimals : tokenFrom.decimals
+    );
+
+    return {
+      index: tickIndex,
+      x: calcPrice(tickIndex, isXToY, tokenFrom.decimals, tokenTo.decimals)
+    };
   });
 
   const isXtoY = useMemo(() => {
@@ -442,9 +455,17 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
         setPoolInfo(pool);
         setNotInitPoolKey(pool.pool_key);
       } else {
+        const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+        const tickIndex = getTickAtSqrtPriceFromBalance(
+          priceInfo.startPrice,
+          feeTier.tick_spacing,
+          isXToY,
+          isXToY ? tokenFrom.decimals : tokenTo.decimals,
+          isXToY ? tokenTo.decimals : tokenFrom.decimals
+        );
         setMidPrice({
-          index: 0,
-          x: 1
+          index: tickIndex,
+          x: calcPrice(tickIndex, isXtoY, tokenFrom.decimals, tokenTo.decimals)
         });
         setNotInitPoolKey({
           fee_tier: fee,
@@ -527,6 +548,7 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
+    // console.log('call change mid price');
     // console.log('mid', {
     //   index: convertedMid,
     //   x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
