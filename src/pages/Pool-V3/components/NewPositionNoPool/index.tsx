@@ -71,19 +71,16 @@ const NewPositionNoPool = ({
       fromToken.decimals,
       toToken.decimals
     );
-    // console.log('tick index:', tickIndex);
 
     onChangeMidPrice(BigInt(tickIndex));
   }, [midPriceInput]);
 
   const setLeftInputValues = (val: string) => {
-    // setLeftInput(toMaxNumericPlaces(+val, 5));
     setLeftInput(val);
     setLeftInputRounded(toMaxNumericPlaces(+val, 5));
   };
 
   const setRightInputValues = (val: string) => {
-    // setRightInput(toMaxNumericPlaces(+val, 5));
     setRightInput(val);
     setRightInputRounded(toMaxNumericPlaces(+val, 5));
   };
@@ -119,7 +116,6 @@ const NewPositionNoPool = ({
   };
 
   useEffect(() => {
-    // changeRangeHandler(leftRange, rightRange);
     resetRange();
   }, [midPrice]);
 
@@ -192,7 +188,6 @@ const NewPositionNoPool = ({
             //   setPriceInfo && setPriceInfo({ ...priceInfo, startPrice: floatValue });
             // }}
             onBlur={(e) => {
-              // console.log('e.target.value', e.target.value);
               setMidPriceInput(validateMidPriceInput(e.target.value || '0'));
             }}
           />
