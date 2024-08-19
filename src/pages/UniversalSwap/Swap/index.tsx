@@ -213,15 +213,32 @@ const SwapComponent: React.FC<{
   const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
     if (chainId) {
       const isFrom = type === 'from';
+
       // check current token existed on another swap token chain
+      const currentToken = isFrom ? originalToToken : originalFromToken;
       const targetToken = isFrom ? originalFromToken : originalToToken;
       const targetChain = isFrom ? selectChainTo : selectChainFrom;
 
       const checkExistedToken = flattenTokens.find(
-        (flat) => flat?.coinGeckoId === targetToken?.coinGeckoId && flat?.chainId === targetChain
+        (flat) =>
+          flat?.coinGeckoId === targetToken?.coinGeckoId && flat?.chainId === targetChain && flat.decimals !== 18
       );
       // get default token of new chain
-      const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId);
+      const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId && flat.decimals !== 18);
+
+      // check if update chain is the same with target chain and current token same as target token
+      // => get second token of token list of chainId to update token
+      if (chainId === targetChain) {
+        const tokenListOfTargetChain = flattenTokens.filter(
+          (flat) => flat?.chainId === chainId && flat.decimals !== 18
+        );
+
+        if (targetToken?.coinGeckoId === currentToken?.coinGeckoId) {
+          const secondaryToken = tokenListOfTargetChain[1] ?? tokenListOfTargetChain[0];
+          return handleChangeToken(secondaryToken, type);
+        }
+      }
+
       // case new chain === another swap token chain
       // if new tokenInfo(default token of new chain) === from/to Token => check is currentToken existed on new chain
       // if one of all condition is false => handle swap normally
