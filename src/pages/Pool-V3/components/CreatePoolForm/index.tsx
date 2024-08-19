@@ -662,7 +662,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
   }, [isPoolExist, poolData, midPrice, leftRange, rightRange, isXtoY]);
 
   const getButtonMessage = () => {
-    const isInsufficientTo = toAmount && Number(toAmount) > toDisplay(amounts[tokenTo.denom]);
+    const isInsufficientTo = amountTo && Number(amountTo) > toDisplay(amounts[tokenTo.denom]);
     const isInsufficientFrom = amountFrom && Number(amountTo) > toDisplay(amounts[tokenFrom.denom]);
 
     if (!walletAddress) {
