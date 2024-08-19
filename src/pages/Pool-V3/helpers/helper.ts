@@ -321,7 +321,7 @@ export const approveToken = async (token: string, amount: bigint, address: strin
   return result.transactionHash;
 };
 
-export const approveListToken = async (msg: any, address: string): Promise<string> => {
+export const executeMultiple = async (msg: any, address: string): Promise<string> => {
   const result = await SingletonOraiswapV3.dex.client.executeMultiple(address, msg, 'auto');
   return result.transactionHash;
 };
@@ -360,6 +360,22 @@ export const createPoolTx = async (poolKey: PoolKey, initSqrtPrice: string, addr
   ).transactionHash;
 };
 
+export const createPoolMsg = (poolKey: PoolKey, initSqrtPrice: string) => {
+  const initTick = getTickAtSqrtPrice(BigInt(initSqrtPrice), poolKey.fee_tier.tick_spacing);
+  return {
+    contractAddress: network.pool_v3,
+    msg: {
+      create_pool: {
+        fee_tier: poolKey.fee_tier,
+        init_sqrt_price: initSqrtPrice,
+        init_tick: initTick,
+        token_0: poolKey.token_x,
+        token_1: poolKey.token_y
+      }
+    }
+  };
+}
+
 export const createPositionTx = async (
   poolKey: PoolKey,
   lowerTick: number,
@@ -388,6 +404,32 @@ export const createPositionTx = async (
   return res.transactionHash;
 };
 
+export const createPositionMsg = (
+  poolKey: PoolKey,
+  lowerTick: number,
+  upperTick: number,
+  liquidityDelta: bigint,
+  spotSqrtPrice: bigint,
+  slippageTolerance: bigint
+) => {
+  const slippageLimitLower = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), false);
+  const slippageLimitUpper = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), true);
+
+  return {
+    contractAddress: network.pool_v3,
+    msg: {
+      create_position: {
+        pool_key: poolKey,
+        lower_tick: lowerTick,
+        upper_tick: upperTick,
+        liquidity_delta: liquidityDelta.toString(),
+        slippage_limit_lower: slippageLimitLower.toString(),
+        slippage_limit_upper: slippageLimitUpper.toString()
+      }
+    }
+  };
+}
+
 export const createPositionWithNativeTx = async (
   poolKey: PoolKey,
   lowerTick: number,
@@ -399,7 +441,6 @@ export const createPositionWithNativeTx = async (
   initialAmountY: bigint,
   address: string
 ): Promise<string> => {
-  console.log({ initialAmountX, initialAmountY });
   const slippageLimitLower = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), false);
   const slippageLimitUpper = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), true);
 
@@ -415,13 +456,11 @@ export const createPositionWithNativeTx = async (
   if (isNativeToken(token_y) && initialAmountY > 0n) {
     fund.push({ denom: token_y, amount: initialAmountY.toString() });
   }
-  console.log({ fund });
 
   if (SingletonOraiswapV3.dex.sender !== address) {
     SingletonOraiswapV3.load(SingletonOraiswapV3.dex.client, address);
   }
 
-  // console.log({ poolKey, lowerTick, upperTick, liquidityDelta, slippageLimitLower, slippageLimitUpper })
   const res = await SingletonOraiswapV3.dex.createPosition(
     {
       poolKey,
@@ -438,6 +477,48 @@ export const createPositionWithNativeTx = async (
 
   return res.transactionHash;
 };
+
+export const createPositionWithNativeMsg = (
+  poolKey: PoolKey,
+  lowerTick: number,
+  upperTick: number,
+  liquidityDelta: bigint,
+  spotSqrtPrice: bigint,
+  slippageTolerance: bigint,
+  initialAmountX: bigint,
+  initialAmountY: bigint
+) => {
+  const slippageLimitLower = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), false);
+  const slippageLimitUpper = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), true);
+
+  const token_x = poolKey.token_x;
+  const token_y = poolKey.token_y;
+
+  const fund: Coin[] = [];
+
+  if (isNativeToken(token_x) && initialAmountX > 0n) {
+    fund.push({ denom: token_x, amount: initialAmountX.toString() });
+  }
+
+  if (isNativeToken(token_y) && initialAmountY > 0n) {
+    fund.push({ denom: token_y, amount: initialAmountY.toString() });
+  }
+
+  return {
+    contractAddress: network.pool_v3,
+    msg: {
+      create_position: {
+        pool_key: poolKey,
+        lower_tick: lowerTick,
+        upper_tick: upperTick,
+        liquidity_delta: liquidityDelta.toString(),
+        slippage_limit_lower: slippageLimitLower.toString(),
+        slippage_limit_upper: slippageLimitUpper.toString()
+      }
+    },
+    funds: fund
+  };
+}
 
 export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
   const fmtFeeClaimData = feeClaimData.reduce((acc, cur) => {
@@ -533,7 +614,6 @@ export const convertPosition = ({
         const convertedPool = getConvertedPool(positions);
         const convertedPosition = getConvertedPosition(position);
         const res = calculateTokenAmounts(convertedPool, convertedPosition);
-        // console.log({ convertedPool });
         x = res.x;
         y = res.y;
       }
