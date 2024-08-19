@@ -527,10 +527,10 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
-    console.log('mid', {
-      index: convertedMid,
-      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
-    });
+    // console.log('mid', {
+    //   index: convertedMid,
+    //   x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+    // });
 
     setMidPrice({
       index: convertedMid,
@@ -617,7 +617,7 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
         isXtoY
       ) === PositionTokenBlock.B;
 
-    console.log({ fromBlocked, toBlocked, leftRange, rightRange });
+    // console.log({ fromBlocked, toBlocked, leftRange, rightRange });
 
     setIsFromBlocked(fromBlocked);
     setIsToBlocked(toBlocked);
@@ -694,7 +694,7 @@ const CreatePoolForm = ({ tokenFrom, tokenTo, feeTier, poolData, slippage, onClo
 
         setLiquidityData(ticksData);
 
-        console.log({ ticksData });
+        // console.log({ ticksData });
       };
 
       if (isPoolExist && notInitPoolKey) {
