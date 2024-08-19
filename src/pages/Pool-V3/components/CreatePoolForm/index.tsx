@@ -47,6 +47,7 @@ import {
   getConcentrationArray,
   getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
+  nearestTickIndex,
   PositionTokenBlock,
   printBigint,
   toMaxNumericPlaces,
@@ -93,7 +94,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     token_y: tokenTo?.denom || '',
     fee_tier: {
       fee: feeTier.fee,
-      tick_spacing: 1
+      tick_spacing: feeTier.tick_spacing
     }
   });
 
@@ -115,17 +116,21 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
 
   const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
     const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
-    const tickIndex = getTickAtSqrtPriceFromBalance(
+
+    const tokenXDecimals = isXToY ? tokenFrom?.decimals ?? 6 : tokenTo?.decimals ?? 6;
+    const tokenYDecimals = isXToY ? tokenTo?.decimals ?? 6 : tokenFrom?.decimals ?? 6;
+
+    const tickIndex = nearestTickIndex(
       priceInfo.startPrice,
       feeTier.tick_spacing,
       isXToY,
-      isXToY ? tokenFrom.decimals : tokenTo.decimals,
-      isXToY ? tokenTo.decimals : tokenFrom.decimals
+      tokenXDecimals,
+      tokenYDecimals
     );
 
     return {
       index: tickIndex,
-      x: calcPrice(tickIndex, isXToY, tokenFrom.decimals, tokenTo.decimals)
+      x: calcPrice(tickIndex, isXToY, tokenXDecimals, tokenYDecimals)
     };
   });
 
@@ -285,16 +290,16 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     let leftRange: number;
     let rightRange: number;
 
-    if (positionOpeningMethod === 'range') {
-      const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
-      leftRange = leftInRange;
-      rightRange = rightInRange;
-    } else {
-      leftRange = left;
-      rightRange = right;
-    }
-    leftRange = left;
-    rightRange = right;
+    // if (positionOpeningMethod === 'range') {
+    const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
+    leftRange = leftInRange;
+    rightRange = rightInRange;
+    // } else {
+    //   leftRange = left;
+    //   rightRange = right;
+    // }
+    // leftRange = left;
+    // rightRange = right;
 
     setLeftRange(Number(left));
     setRightRange(Number(right));
@@ -317,7 +322,6 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
 
     if (tokenTo && (isXtoY ? leftRange < midPrice.index : leftRange > midPrice.index)) {
       const deposit = amountTo;
-      // console.log({ deposit, leftRange, rightRange });
       const amount = getOtherTokenAmount(
         convertBalanceToBigint((deposit || '0').toString(), tokenTo.decimals).toString(),
         Number(leftRange),
@@ -348,14 +352,19 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     setLeftRange(Number(leftRange));
     setRightRange(Number(rightRange));
 
-    setLeftInputValues(calcPrice(Number(leftRange), isXtoY, tokenFrom.decimals, tokenTo.decimals).toString());
-    setRightInputValues(calcPrice(Number(rightRange), isXtoY, tokenFrom.decimals, tokenTo.decimals).toString());
+    const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+    const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
+
+    setLeftInputValues(calcPrice(Number(leftRange), isXtoY, tokenXDecimals, tokenYDecimals).toString());
+    setRightInputValues(calcPrice(Number(rightRange), isXtoY, tokenXDecimals, tokenYDecimals).toString());
 
     onChangeRange(left, right);
   };
 
   const resetPlot = () => {
     if (positionOpeningMethod === 'range') {
+      const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+      const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
       const initSideDist = Math.abs(
         midPrice.x -
           calcPrice(
@@ -364,8 +373,8 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
               Number(midPrice.index) - notInitPoolKey.fee_tier.tick_spacing * 15
             ),
             isXtoY,
-            tokenFrom.decimals,
-            tokenTo.decimals
+            tokenXDecimals,
+            tokenYDecimals
           )
       );
 
@@ -465,16 +474,18 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
         setNotInitPoolKey(pool.pool_key);
       } else {
         const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
-        const tickIndex = getTickAtSqrtPriceFromBalance(
+        const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+        const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
+        const tickIndex = nearestTickIndex(
           priceInfo.startPrice,
           feeTier.tick_spacing,
           isXToY,
-          isXToY ? tokenFrom.decimals : tokenTo.decimals,
-          isXToY ? tokenTo.decimals : tokenFrom.decimals
+          tokenXDecimals,
+          tokenYDecimals
         );
         setMidPrice({
           index: tickIndex,
-          x: calcPrice(tickIndex, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+          x: calcPrice(tickIndex, isXtoY, tokenXDecimals, tokenYDecimals)
         });
         setNotInitPoolKey({
           fee_tier: fee,
@@ -558,13 +569,16 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
 
+    const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+    const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
+
     setMidPrice({
       index: convertedMid,
-      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+      x: calcPrice(convertedMid, isXtoY, tokenXDecimals, tokenYDecimals)
     });
     setPriceInfo({
       ...priceInfo,
-      startPrice: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+      startPrice: calcPrice(convertedMid, isXtoY, tokenXDecimals, tokenYDecimals)
     });
 
     if (amountFrom && (isXtoY ? rightRange > convertedMid : rightRange < convertedMid)) {
@@ -813,7 +827,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
               placeholder="0"
               thousandSeparator
               className={styles.amount}
-              decimalScale={6}
+              decimalScale={tokenFrom?.decimals || 6}
               disabled={isFromBlocked}
               type="text"
               value={amountFrom}
@@ -883,7 +897,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
               placeholder="0"
               thousandSeparator
               className={styles.amount}
-              decimalScale={6}
+              decimalScale={tokenTo?.decimals || 6}
               disabled={isToBlocked}
               type="text"
               value={amountTo}

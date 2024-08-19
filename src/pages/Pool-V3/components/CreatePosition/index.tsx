@@ -36,6 +36,7 @@ import {
   getConcentrationArray,
   getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
+  nearestTickIndex,
   printBigint,
   toMaxNumericPlaces,
   trimLeadingZeros
@@ -118,17 +119,19 @@ const CreatePosition = () => {
 
   const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
     const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+    const tokenXDecimals = isXToY ? tokenFrom.decimals : tokenTo.decimals;
+    const tokenYDecimals = isXToY ? tokenTo.decimals : tokenFrom.decimals;
     const tickIndex = getTickAtSqrtPriceFromBalance(
       priceInfo.startPrice,
       feeTier.tick_spacing,
       isXToY,
-      isXToY ? tokenFrom.decimals : tokenTo.decimals,
-      isXToY ? tokenTo.decimals : tokenFrom.decimals
+      tokenXDecimals,
+      tokenYDecimals
     );
 
     return {
       index: tickIndex,
-      x: calcPrice(tickIndex, isXToY, tokenFrom.decimals, tokenTo.decimals)
+      x: calcPrice(tickIndex, isXToY, tokenXDecimals, tokenYDecimals)
     };
   });
 
@@ -303,7 +306,6 @@ const CreatePosition = () => {
 
     if (tokenTo && (isXtoY ? leftRange < midPrice.index : leftRange > midPrice.index)) {
       const deposit = amountTo;
-      // console.log({ deposit, leftRange, rightRange });
       const amount = getOtherTokenAmount(
         convertBalanceToBigint(deposit, tokenTo.decimals).toString(),
         Number(leftRange),
@@ -319,7 +321,6 @@ const CreatePosition = () => {
   };
 
   const changeRangeHandler = (left: number, right: number) => {
-    // console.log("change range!");
     let leftRange: number;
     let rightRange: number;
 
@@ -335,14 +336,19 @@ const CreatePosition = () => {
     setLeftRange(Number(leftRange));
     setRightRange(Number(rightRange));
 
-    setLeftInputValues(calcPrice(Number(leftRange), isXtoY, tokenFrom.decimals, tokenTo.decimals).toString());
-    setRightInputValues(calcPrice(Number(rightRange), isXtoY, tokenFrom.decimals, tokenTo.decimals).toString());
+    const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+    const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
+
+    setLeftInputValues(calcPrice(Number(leftRange), isXtoY, tokenXDecimals, tokenYDecimals).toString());
+    setRightInputValues(calcPrice(Number(rightRange), isXtoY, tokenXDecimals, tokenYDecimals).toString());
 
     onChangeRange(left, right);
   };
 
   const resetPlot = () => {
     if (positionOpeningMethod === 'range') {
+      const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+      const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
       const initSideDist = Math.abs(
         midPrice.x -
           calcPrice(
@@ -351,8 +357,8 @@ const CreatePosition = () => {
               Number(midPrice.index) - notInitPoolKey.fee_tier.tick_spacing * 15
             ),
             isXtoY,
-            tokenFrom.decimals,
-            tokenTo.decimals
+            tokenXDecimals,
+            tokenYDecimals
           )
       );
 
@@ -477,16 +483,18 @@ const CreatePosition = () => {
         setNotInitPoolKey(pool.pool_key);
       } else {
         const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
-        const tickIndex = getTickAtSqrtPriceFromBalance(
+        const tokenXDecimals = isXToY ? tokenFrom.decimals : tokenTo.decimals;
+        const tokenYDecimals = isXToY ? tokenTo.decimals : tokenFrom.decimals;
+        const tickIndex = nearestTickIndex(
           priceInfo.startPrice,
           feeTier.tick_spacing,
           isXToY,
-          isXToY ? tokenFrom.decimals : tokenTo.decimals,
-          isXToY ? tokenTo.decimals : tokenFrom.decimals
+          tokenXDecimals,
+          tokenYDecimals
         );
         setMidPrice({
           index: tickIndex,
-          x: calcPrice(tickIndex, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+          x: calcPrice(tickIndex, isXtoY, tokenXDecimals, tokenYDecimals)
         });
         setNotInitPoolKey({
           fee_tier: fee,
@@ -570,13 +578,16 @@ const CreatePosition = () => {
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
 
+    const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+    const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
+
     setMidPrice({
       index: convertedMid,
-      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+      x: calcPrice(convertedMid, isXtoY, tokenXDecimals, tokenYDecimals)
     });
     setPriceInfo({
       ...priceInfo,
-      startPrice: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+      startPrice: calcPrice(convertedMid, isXtoY, tokenXDecimals, tokenYDecimals)
     });
 
     if (amountFrom && (isXtoY ? rightRange > convertedMid : rightRange < convertedMid)) {
