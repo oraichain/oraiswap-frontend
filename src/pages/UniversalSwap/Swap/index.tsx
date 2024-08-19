@@ -219,19 +219,24 @@ const SwapComponent: React.FC<{
       const targetToken = isFrom ? originalFromToken : originalToToken;
       const targetChain = isFrom ? selectChainTo : selectChainFrom;
 
-      const checkExistedToken = flattenTokens.find(
-        (flat) =>
-          flat?.coinGeckoId === targetToken?.coinGeckoId && flat?.chainId === targetChain && flat.decimals !== 18
-      );
+      const checkExistedToken = flattenTokens.find((flat) => {
+        const condition =
+          flat?.coinGeckoId === targetToken?.coinGeckoId && flat?.chainId === targetChain && flat?.chainId;
+        return flat?.chainId === 'Oraichain' ? condition && flat.decimals !== 18 : condition;
+      });
       // get default token of new chain
-      const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId && flat.decimals !== 18);
+      const tokenInfo = flattenTokens.find((flat) => {
+        const condition = flat?.chainId === chainId;
+        return flat?.chainId === 'Oraichain' ? condition && flat.decimals !== 18 : condition;
+      });
 
       // check if update chain is the same with target chain and current token same as target token
       // => get second token of token list of chainId to update token
       if (chainId === targetChain) {
-        const tokenListOfTargetChain = flattenTokens.filter(
-          (flat) => flat?.chainId === chainId && flat.decimals !== 18
-        );
+        const tokenListOfTargetChain = flattenTokens.filter((flat) => {
+          const condition = flat?.chainId === chainId;
+          return flat?.chainId === 'Oraichain' ? condition && flat.decimals !== 18 : condition;
+        });
 
         if (targetToken?.coinGeckoId === currentToken?.coinGeckoId) {
           const secondaryToken = tokenListOfTargetChain[1] ?? tokenListOfTargetChain[0];
