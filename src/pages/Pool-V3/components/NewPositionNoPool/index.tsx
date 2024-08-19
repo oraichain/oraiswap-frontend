@@ -63,22 +63,13 @@ const NewPositionNoPool = ({
   );
 
   useEffect(() => {
-    const tickIndex = getTickAtSqrtPriceFromBalance(
+    const tickIndex = nearestTickIndex(
       +midPriceInput,
       tickSpacing,
       isXtoY,
       isXtoY ? fromToken.decimals : toToken.decimals,
       isXtoY ? toToken.decimals : fromToken.decimals
     );
-    // console.log(
-    //   'change mid price',
-    //   calcPrice(
-    //     Number(tickIndex),
-    //     isXtoY,
-    //     isXtoY ? fromToken.decimals : toToken.decimals,
-    //     isXtoY ? toToken.decimals : fromToken.decimals
-    //   ).toString()
-    // );
 
     onChangeMidPrice(BigInt(tickIndex));
   }, [midPriceInput]);
@@ -193,7 +184,7 @@ const NewPositionNoPool = ({
             isAllowed={(values) => {
               const { floatValue } = values;
               // allow !floatValue to let user can clear their input
-              return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+              return !floatValue || (floatValue >= 0 && floatValue <= calcPrice(getMaxTick(tickSpacing), isXtoY, fromToken.decimals, toToken.decimals));
             }}
             // onValueChange={({ floatValue }) => {
             //   setMidPriceInput(validateMidPriceInput((floatValue || 0).toString() || '0'));
@@ -235,7 +226,7 @@ const NewPositionNoPool = ({
                 decimalScale={fromToken.decimals}
                 disabled={false}
                 type="text"
-                value={leftInputRounded}
+                value={Number(leftInputRounded) <= 0 ? '0' : leftInputRounded}
                 // value={leftInput}
                 onChange={() => {}}
                 isAllowed={(values) => {
@@ -306,7 +297,7 @@ const NewPositionNoPool = ({
                 decimalScale={6}
                 disabled={false}
                 type="text"
-                value={rightInputRounded}
+                value={Number(rightInputRounded) <= 0 ? '0' : rightInputRounded}
                 onChange={() => {}}
                 isAllowed={(values) => {
                   const { floatValue } = values;

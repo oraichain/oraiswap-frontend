@@ -36,6 +36,7 @@ import {
   getConcentrationArray,
   getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
+  nearestTickIndex,
   printBigint,
   toMaxNumericPlaces,
   trimLeadingZeros
@@ -303,7 +304,6 @@ const CreatePosition = () => {
 
     if (tokenTo && (isXtoY ? leftRange < midPrice.index : leftRange > midPrice.index)) {
       const deposit = amountTo;
-      // console.log({ deposit, leftRange, rightRange });
       const amount = getOtherTokenAmount(
         convertBalanceToBigint(deposit, tokenTo.decimals).toString(),
         Number(leftRange),
@@ -319,7 +319,6 @@ const CreatePosition = () => {
   };
 
   const changeRangeHandler = (left: number, right: number) => {
-    // console.log("change range!");
     let leftRange: number;
     let rightRange: number;
 
@@ -477,7 +476,7 @@ const CreatePosition = () => {
         setNotInitPoolKey(pool.pool_key);
       } else {
         const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
-        const tickIndex = getTickAtSqrtPriceFromBalance(
+        const tickIndex = nearestTickIndex(
           priceInfo.startPrice,
           feeTier.tick_spacing,
           isXToY,

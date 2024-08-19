@@ -47,6 +47,7 @@ import {
   getConcentrationArray,
   getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
+  nearestTickIndex,
   PositionTokenBlock,
   printBigint,
   toMaxNumericPlaces,
@@ -93,7 +94,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     token_y: tokenTo?.denom || '',
     fee_tier: {
       fee: feeTier.fee,
-      tick_spacing: 1
+      tick_spacing: feeTier.tick_spacing
     }
   });
 
@@ -115,13 +116,9 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
 
   const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
     const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
-    const tickIndex = getTickAtSqrtPriceFromBalance(
-      priceInfo.startPrice,
-      feeTier.tick_spacing,
-      isXToY,
-      isXToY ? tokenFrom.decimals : tokenTo.decimals,
-      isXToY ? tokenTo.decimals : tokenFrom.decimals
-    );
+
+    const tickIndex = nearestTickIndex(priceInfo.startPrice, feeTier.tick_spacing, isXToY, isXToY ? tokenFrom.decimals : tokenTo.decimals,
+      isXToY ? tokenTo.decimals : tokenFrom.decimals);
 
     return {
       index: tickIndex,
@@ -285,16 +282,16 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     let leftRange: number;
     let rightRange: number;
 
-    if (positionOpeningMethod === 'range') {
+    // if (positionOpeningMethod === 'range') {
       const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
       leftRange = leftInRange;
       rightRange = rightInRange;
-    } else {
-      leftRange = left;
-      rightRange = right;
-    }
-    leftRange = left;
-    rightRange = right;
+    // } else {
+    //   leftRange = left;
+    //   rightRange = right;
+    // }
+    // leftRange = left;
+    // rightRange = right;
 
     setLeftRange(Number(left));
     setRightRange(Number(right));
@@ -317,7 +314,6 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
 
     if (tokenTo && (isXtoY ? leftRange < midPrice.index : leftRange > midPrice.index)) {
       const deposit = amountTo;
-      // console.log({ deposit, leftRange, rightRange });
       const amount = getOtherTokenAmount(
         convertBalanceToBigint((deposit || '0').toString(), tokenTo.decimals).toString(),
         Number(leftRange),
@@ -465,7 +461,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
         setNotInitPoolKey(pool.pool_key);
       } else {
         const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
-        const tickIndex = getTickAtSqrtPriceFromBalance(
+        const tickIndex = nearestTickIndex(
           priceInfo.startPrice,
           feeTier.tick_spacing,
           isXToY,
@@ -642,8 +638,6 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
         Math.max(Number(leftRange), Number(rightRange)),
         isXtoY
       ) === PositionTokenBlock.B;
-
-    // console.log({ fromBlocked, toBlocked, leftRange, rightRange });
 
     setIsFromBlocked(fromBlocked);
     setIsToBlocked(toBlocked);
