@@ -643,8 +643,6 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
         isXtoY
       ) === PositionTokenBlock.B;
 
-    // console.log({ fromBlocked, toBlocked, leftRange, rightRange });
-
     setIsFromBlocked(fromBlocked);
     setIsToBlocked(toBlocked);
   }, [isPoolExist, poolData, midPrice, leftRange, rightRange, isXtoY]);

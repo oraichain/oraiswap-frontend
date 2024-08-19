@@ -124,10 +124,6 @@ const PoolV3Detail = () => {
     allocation[pool_key?.token_y]?.balance || 0
   ];
 
-  // const percentX = !(balanceX && balanceY)
-  //   ? MID_PERCENT
-  //   : new BigDecimal(balanceX).div(new BigDecimal(balanceX).add(balanceY)).mul(100).toNumber();
-
   useEffect(() => {
     (async () => {
       try {
@@ -157,6 +153,21 @@ const PoolV3Detail = () => {
 
     return () => {};
   }, [address, poolList, userPositions]);
+
+  const calcShowApr = (apr: number) =>
+    numberWithCommas(apr * 100, undefined, {
+      maximumFractionDigits: 1
+    });
+
+  const showTotalIncentive = () => {
+    if (!aprInfo[poolKeyString]?.incentivesApr) return '--';
+
+    const { min: incentiveMin, max: incentiveMax } = aprInfo[poolKeyString].incentivesApr || { min: 0, max: 0 };
+
+    return incentiveMin === incentiveMax
+      ? calcShowApr(incentiveMax)
+      : `${calcShowApr(incentiveMin)} - ${calcShowApr(incentiveMax)}`;
+  };
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -263,19 +274,7 @@ const PoolV3Detail = () => {
                 Incentive Boost&nbsp;
                 <IconBoots />
               </span>
-              <p>
-                {!aprInfo[poolKeyString]?.incentivesApr
-                  ? '-- '
-                  : aprInfo[poolKeyString]?.incentivesApr.min === aprInfo[poolKeyString]?.incentivesApr.max
-                  ? `${numberWithCommas(aprInfo[poolKeyString].incentivesApr.min * 100, undefined, {
-                      maximumFractionDigits: 1
-                    })}`
-                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr.min * 100, undefined, {
-                      maximumFractionDigits: 1
-                    })} - ${numberWithCommas(aprInfo[poolKeyString].incentivesApr.max * 100, undefined, {
-                      maximumFractionDigits: 1
-                    })}%`}
-              </p>
+              <p>{showTotalIncentive()}%</p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
@@ -289,7 +288,7 @@ const PoolV3Detail = () => {
                     })} - ${numberWithCommas(aprInfo[poolKeyString]?.apr.max * 100, undefined, {
                       maximumFractionDigits: 1
                     })}`}
-                % %
+                %
               </p>
             </div>
           </div>
@@ -308,12 +307,10 @@ const PoolV3Detail = () => {
                   );
                 })
               : !loading && (
-                  <>
-                    <div className={styles.nodata}>
-                      {theme === 'light' ? <NoData /> : <NoDataDark />}
-                      <span>No Positions!</span>
-                    </div>
-                  </>
+                  <div className={styles.nodata}>
+                    {theme === 'light' ? <NoData /> : <NoDataDark />}
+                    <span>No Positions!</span>
+                  </div>
                 )}
           </div>
         </LoadingBox>
