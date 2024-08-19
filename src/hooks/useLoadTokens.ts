@@ -345,7 +345,7 @@ export function useLoadOraichainTokens(): (oraiAddress: string, specificTokens: 
 }
 
 export const loadOraichainToken = async (dispatch: Dispatch, oraiAddress: string, specificTokens: string[]) => {
-  if (!oraiAddress || !specificTokens?.length) return;
+  if (!oraiAddress) return;
   clearTimeout(timer[oraiAddress]);
 
   timer[oraiAddress] = setTimeout(async () => {

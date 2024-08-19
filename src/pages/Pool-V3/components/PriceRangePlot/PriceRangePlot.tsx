@@ -68,7 +68,6 @@ export const PriceRangePlot: React.FC<IPriceRangePlot> = ({
   reloadHandler,
   showOnCreatePool
 }) => {
-  console.log('render', leftRange, rightRange, midPrice);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const maxVal = useMemo(() => {
