@@ -25,7 +25,6 @@ import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionIn
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CreateNewPool from '../CreateNewPool';
 import styles from './index.module.scss';
 
 export enum PoolColumnHeader {
@@ -35,7 +34,7 @@ export enum PoolColumnHeader {
   APR = 'Apr'
 }
 
-const PoolList = () => {
+const PoolList = ({ search }) => {
   const { data: prices } = useCoinGeckoPrices();
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
@@ -48,10 +47,7 @@ const PoolList = () => {
 
   const theme = useTheme();
 
-  const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
-
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState<string>();
   const [dataPool, setDataPool] = useState([...Array(0)]);
   const { feeDailyData } = useGetFeeDailyData();
   const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol();
@@ -201,26 +197,6 @@ const PoolList = () => {
               <img src={Loading} alt="loading" width={32} height={32} />
             )}
           </div>
-        </div>
-        <div className={styles.right}>
-          <div className={styles.search}>
-            <input
-              type="text"
-              placeholder="Search pool"
-              value={search}
-              onChange={(e) => {
-                e.preventDefault();
-                setSearch(e.target.value);
-              }}
-              style={{
-                paddingLeft: 40,
-                backgroundImage: `url(${bgUrl})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: '16px center'
-              }}
-            />
-          </div>
-          <CreateNewPool pools={dataPool} />
         </div>
       </div>
       <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}>

@@ -1,10 +1,13 @@
-import { isMobile } from '@walletconnect/browser-utils';
+import SearchLightSvg from 'assets/images/search-light-svg.svg';
+import SearchSvg from 'assets/images/search-svg.svg';
 import classNames from 'classnames';
 import useTheme from 'hooks/useTheme';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import CreateNewPool from './components/CreateNewPool';
 import PoolList from './components/PoolList';
 import PositionList from './components/PositionList';
+import { useGetPoolList } from './hooks/useGetPoolList';
 import styles from './index.module.scss';
 
 export enum PoolV3PageType {
@@ -29,7 +32,9 @@ const PoolV3 = () => {
   const navigate = useNavigate();
   let [searchParams] = useSearchParams();
   const type = searchParams.get('type') as PoolV3PageType;
-  const mobileMode = isMobile();
+  const [search, setSearch] = useState<string>();
+  const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
+  const { poolList } = useGetPoolList();
 
   useEffect(() => {
     if (!listTab.includes(type)) {
@@ -56,8 +61,33 @@ const PoolV3 = () => {
             );
           })}
         </div>
+
+        {type === PoolV3PageType.POOL && (
+          <div className={styles.right}>
+            <div className={styles.search}>
+              <input
+                type="text"
+                placeholder="Search pool"
+                value={search}
+                onChange={(e) => {
+                  e.preventDefault();
+                  setSearch(e.target.value);
+                }}
+                style={{
+                  paddingLeft: 40,
+                  backgroundImage: `url(${bgUrl})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: '16px center'
+                }}
+              />
+            </div>
+            <CreateNewPool pools={poolList} />
+          </div>
+        )}
       </div>
-      <div className={classNames(styles.content, styles[theme], styles[type])}>{Content && <Content />}</div>
+      <div className={classNames(styles.content, styles[theme], styles[type])}>
+        {Content && <Content search={search} />}
+      </div>
     </div>
   );
 };
