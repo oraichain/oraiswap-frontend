@@ -21,7 +21,6 @@ import {
   getConvertedPosition,
   getTick,
   initialXtoY,
-  showPrefix,
   tickerToAddress
 } from 'pages/Pool-V3/helpers/helper';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -34,16 +33,14 @@ import { getCosmWasmClient } from 'libs/cosmjs';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal } from '@oraichain/oraidex-common';
+import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
+import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 
-const shorterPrefixConfig: PrefixConfig = {
-  B: 1000000000,
-  M: 1000000,
-  K: 1000
-};
-
-const PositionItem = ({ position, setStatusRemove }) => {
+const PositionItem = ({ position }) => {
   const theme = useTheme();
   const ref = useRef();
   const { data: prices } = useCoinGeckoPrices();
@@ -58,7 +55,9 @@ const PositionItem = ({ position, setStatusRemove }) => {
     totalEarn,
     totalEarnIncentiveUsd = 0,
     tokenXUsd = 0,
-    tokenYUsd = 0
+    tokenYUsd = 0,
+    tokenYDecimal,
+    tokenXDecimal
   } = position || {};
 
   const { earnX = 0, earnY = 0, earnIncentive = null } = totalEarn || {};
@@ -84,6 +83,10 @@ const PositionItem = ({ position, setStatusRemove }) => {
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );
 
+  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
+  const { refetchPositions } = useGetPositions(address);
+  const { poolList } = useGetPoolList();
+
   useOnClickOutside(ref, () => {
     setCollapse(false);
   });
@@ -97,28 +100,37 @@ const PositionItem = ({ position, setStatusRemove }) => {
   useEffect(() => {
     const getAPRInfo = async () => {
       const res = await fetchPositionAprInfo(
+        poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key)),
         position,
         prices,
         position.tokenXLiqInUsd,
         position.tokenYLiqInUsd,
-        statusRange
+        statusRange,
+        feeDailyData
       );
       setAprInfo(res);
     };
     if (statusRange && position.tokenXLiqInUsd && position.tokenYLiqInUsd && prices && position) {
       getAPRInfo();
     }
-  }, [statusRange, prices, position]);
+  }, [statusRange, prices, position, poolList, feeDailyData]);
 
   useEffect(() => {
     if (!openCollapse) return;
     (async () => {
       const { pool_key, lower_tick_index, upper_tick_index } = position;
-      const [lowerTickData, upperTickData, incentives] = await Promise.all([
-        SingletonOraiswapV3.getTicks(lower_tick_index, pool_key),
-        SingletonOraiswapV3.getTicks(upper_tick_index, pool_key),
-        SingletonOraiswapV3.getIncentivesPosition(position, address)
-      ]);
+
+      const {
+        lowerTickData,
+        upperTickData,
+        incentivesData: incentives
+      } = await SingletonOraiswapV3.getTicksAndIncentivesInfo(
+        lower_tick_index,
+        upper_tick_index,
+        position.id,
+        address,
+        pool_key
+      );
 
       const tokenIncentive = incentives.reduce((acc, cur) => {
         const tokenAttr = parseAssetInfo(cur.info);
@@ -140,17 +152,16 @@ const PositionItem = ({ position, setStatusRemove }) => {
 
   useEffect(() => {
     (async () => {
-      const { pool } = await SingletonOraiswapV3.getPool({
-        fee_tier: position.pool_key.fee_tier,
-        token_x: position.pool_key.token_x,
-        token_y: position.pool_key.token_y
-      });
+      const { pool } = poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key));
       const { lower_tick_index, upper_tick_index } = position;
       setStatusRange(pool.current_tick_index >= lower_tick_index && pool.current_tick_index <= upper_tick_index);
     })();
 
     return () => {};
   }, []);
+
+  const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
+  const earnYDisplay = toDisplay((earnY || 0).toString(), tokenYDecimal);
 
   const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd, incentivesUSD] = useMemo(() => {
     if (isClaimSuccess) return [0, 0, 0, 0, 0];
@@ -168,24 +179,22 @@ const PositionItem = ({ position, setStatusRemove }) => {
       const x_usd = x_claim * cachePrices[position.tokenX.coinGeckoId];
       const y_usd = y_claim * cachePrices[position.tokenY.coinGeckoId];
 
-      const totalIncentiveUsd = Object.entries(incentives).reduce((acc: number, [tokenAddress, amount]) => {
+      const totalIncentiveUsd = Object.entries(incentives).reduce((acc, [tokenAddress, amount]) => {
         const token = oraichainTokens.find((e) => [e.contractAddress, e.denom].includes(tokenAddress));
-
-        console.log('first', [tokenAddress, amount, token]);
-        const usd = toDisplay(amount.toString()) * cachePrices[token.coinGeckoId];
-
-        acc = new BigDecimal(acc || 0).add(usd).toNumber();
+        acc.add(
+          new BigDecimal(amount)
+            .mul(new BigDecimal(10).pow(token.decimals || CW20_DECIMALS))
+            .mul(cachePrices[token.coinGeckoId])
+        );
 
         return acc;
-      }, 0);
+      }, new BigDecimal(0));
 
-      console.log('totalIncentiveUsd', totalIncentiveUsd);
-
-      return [x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd];
+      return [x_claim, y_claim, x_usd, y_usd, totalIncentiveUsd.toNumber()];
     }
 
     return [0, 0, 0, 0, 0];
-  }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess]);
+  }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess, incentives, cachePrices]);
 
   return (
     <div ref={ref} className={styles.positionItem}>
@@ -227,7 +236,7 @@ const PositionItem = ({ position, setStatusRemove }) => {
           <div className={styles.item}>
             <p>APR</p>
             <span className={classNames(styles.value, styles.apr)}>
-              {numberWithCommas(aprInfo.total * 100)}%&nbsp;
+              {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%&nbsp;
               <TooltipIcon
                 className={styles.tooltipWrapper}
                 placement="top"
@@ -238,18 +247,24 @@ const PositionItem = ({ position, setStatusRemove }) => {
                   <div className={classNames(styles.tooltip, styles[theme])}>
                     <div className={styles.itemInfo}>
                       <span>Swap fee</span>
-                      <span className={styles.value}>{numberWithCommas(aprInfo.swapFee * 100)}%</span>
+                      <span className={styles.value}>
+                        {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                     <div className={styles.itemInfo}>
                       <span>
                         Incentives Boost&nbsp;
                         <IconBoots />
                       </span>
-                      <span className={styles.value}>{numberWithCommas(aprInfo.incentive * 100)}%</span>
+                      <span className={styles.value}>
+                        {numberWithCommas(aprInfo.incentive * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                     <div className={styles.itemInfo}>
                       <span>Total APR</span>
-                      <span className={styles.totalApr}>{numberWithCommas(aprInfo.total * 100)}%</span>
+                      <span className={styles.totalApr}>
+                        {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%
+                      </span>
                     </div>
                   </div>
                 }
@@ -303,8 +318,11 @@ const PositionItem = ({ position, setStatusRemove }) => {
                   {!principalAmountX || !principalAmountY
                     ? '--'
                     : formatDisplayUsdt(
-                        new BigDecimal(toDisplay(principalAmountX || 0) * tokenXUsd)
-                          .add(toDisplay(principalAmountY || 0) * tokenYUsd)
+                        new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal))
+                          .mul(tokenXUsd)
+                          .add(
+                            new BigDecimal(toDisplay((principalAmountY || 0).toString(), tokenYDecimal)).mul(tokenYUsd)
+                          )
                           .toNumber(),
                         6,
                         6
@@ -314,14 +332,18 @@ const PositionItem = ({ position, setStatusRemove }) => {
                   <position.tokenXIcon />
                   {!principalAmountX
                     ? '--'
-                    : numberWithCommas(toDisplay(principalAmountX || 0), undefined, { maximumFractionDigits: 6 })}{' '}
+                    : numberWithCommas(toDisplay(principalAmountX || 0, tokenXDecimal), undefined, {
+                        maximumFractionDigits: 6
+                      })}{' '}
                   {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
                   {!principalAmountY
                     ? '--'
-                    : numberWithCommas(toDisplay(principalAmountY || 0), undefined, { maximumFractionDigits: 6 })}{' '}
+                    : numberWithCommas(toDisplay(principalAmountY || 0, tokenYDecimal), undefined, {
+                        maximumFractionDigits: 6
+                      })}{' '}
                   {position?.tokenY.name}
                 </span>
               </div>
@@ -340,11 +362,11 @@ const PositionItem = ({ position, setStatusRemove }) => {
                     });
 
                     if (transactionHash) {
-                      setStatusRemove(true);
                       setCollapse(false);
                       displayToast(TToastType.TX_SUCCESSFUL, {
                         customLink: getTransactionUrl(network.chainId, transactionHash)
                       });
+                      refetchPositions();
                     }
                   } catch (error) {
                     console.log({ error });
@@ -385,25 +407,20 @@ const PositionItem = ({ position, setStatusRemove }) => {
             <h4>Total Reward Earned</h4>
             <div className={styles.itemRow}>
               <span className={styles.usd}>
-                {!earnX || !earnY
-                  ? '--'
-                  : formatDisplayUsdt(
-                      new BigDecimal(toDisplay(earnX || 0) * tokenXUsd)
-                        .add(toDisplay(earnY || 0) * tokenYUsd)
-                        .add(totalEarnIncentiveUsd)
-                        .toNumber(),
-                      6,
-                      6
-                    )}
+                {formatDisplayUsdt(earnXDisplay * tokenXUsd + earnYDisplay * tokenYUsd + totalEarnIncentiveUsd, 6, 6)}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenXIcon />
-                {!earnX ? '--' : numberWithCommas(toDisplay(earnX), undefined, { maximumFractionDigits: 6 })}{' '}
+                {numberWithCommas(earnXDisplay, undefined, {
+                  maximumFractionDigits: 6
+                })}{' '}
                 {position?.tokenX.name}
               </span>
               <span className={classNames(styles.token, styles[theme])}>
                 <position.tokenYIcon />
-                {!earnY ? '--' : numberWithCommas(toDisplay(earnY), undefined, { maximumFractionDigits: 6 })}{' '}
+                {numberWithCommas(earnYDisplay, undefined, {
+                  maximumFractionDigits: 6
+                })}{' '}
                 {position?.tokenY.name}
               </span>
             </div>
@@ -418,7 +435,10 @@ const PositionItem = ({ position, setStatusRemove }) => {
                     <span className={classNames(styles.token, styles[theme])}></span>
                     <span className={classNames(styles.token, styles[theme])}>
                       {theme === 'light' ? <token.IconLight /> : <token.Icon />}
-                      {!amount || !Number(amount) ? '--' : toDisplay(amount.toString())} {token?.name}
+                      {!amount || !Number(amount)
+                        ? '--'
+                        : toDisplay(amount.toString(), token.decimals || CW20_DECIMALS)}{' '}
+                      {token?.name}
                     </span>
                   </div>
                 );

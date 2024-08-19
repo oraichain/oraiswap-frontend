@@ -1,7 +1,6 @@
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import {
   approveListToken,
-  approveToken,
   calculateTokenAmountsWithSlippage,
   createPoolTx,
   createPositionTx,
@@ -11,7 +10,7 @@ import {
   isNativeToken
 } from '../helpers/helper';
 
-import { newPoolKey } from '../packages/wasm/oraiswap_v3_wasm';
+import { newPoolKey } from '@oraichain/oraiswap-v3';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { network } from 'config/networks';
 
@@ -35,10 +34,10 @@ const useAddLiquidity = () => {
       let listTokenApprove = [];
       if (!isNativeToken(token_x)) listTokenApprove.push(token_x);
       if (!isNativeToken(token_y)) listTokenApprove.push(token_y);
-
-      const msg = genMsgAllowance(listTokenApprove);
-
-      await approveListToken(msg, walletAddress);
+      if (listTokenApprove.length > 0) {
+        const msg = genMsgAllowance(listTokenApprove);
+        await approveListToken(msg, walletAddress);
+      }
 
       const poolKey = newPoolKey(token_x, token_y, fee_tier);
 

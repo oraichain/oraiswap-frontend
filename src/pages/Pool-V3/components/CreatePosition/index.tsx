@@ -6,12 +6,10 @@ import {
   TokenAmount
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
-import { ReactComponent as TooltipIc } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
 import classNames from 'classnames';
-import { TooltipIcon } from 'components/Tooltip';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
@@ -23,7 +21,7 @@ import {
   getMaxTick,
   getMinTick,
   Price
-} from 'pages/Pool-V3/packages/wasm/oraiswap_v3_wasm';
+} from '@oraichain/oraiswap-v3';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NewPositionNoPool from '../NewPositionNoPool';
@@ -79,7 +77,6 @@ const CreatePosition = () => {
     startPrice: 1.0
   });
   const [isOpen, setIsOpen] = useState(false);
-  const [openTooltip, setOpenTooltip] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const [typeChart, setTypeChart] = useState(TYPE_CHART.CONTINUOUS);
   const [focusId, setFocusId] = useState<'from' | 'to' | null>(null);
@@ -545,10 +542,6 @@ const CreatePosition = () => {
 
   const onChangeMidPrice = (mid: Price) => {
     const convertedMid = Number(mid);
-    console.log('mid', {
-      index: convertedMid,
-      x: calcPrice(convertedMid, isXtoY, tokenFrom.decimals, tokenTo.decimals)
-    });
 
     setMidPrice({
       index: convertedMid,
@@ -626,8 +619,6 @@ const CreatePosition = () => {
         });
 
         setLiquidityData(ticksData);
-
-        console.log({ ticksData });
       };
 
       if (isPoolExist && notInitPoolKey) {

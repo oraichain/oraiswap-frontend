@@ -1,31 +1,31 @@
-import styles from './index.module.scss';
-import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
+import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as AddIcon } from 'assets/icons/Add.svg';
+import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
-import { Button } from 'components/Button';
-import { useNavigate, useParams } from 'react-router-dom';
-import classNames from 'classnames';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import useTheme from 'hooks/useTheme';
-import { useEffect, useState } from 'react';
-import { formatNumberKMB, numberWithCommas } from 'helper/format';
-import PositionItem from '../PositionItem';
-import SingletonOraiswapV3, {
-  fetchPoolAprInfo,
-  PoolAprInfo,
-  poolKeyToString,
-  stringToPoolKey
-} from 'libs/contractSingleton';
-import { toDisplay } from '@oraichain/oraidex-common';
-import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { convertPosition } from 'pages/Pool-V3/helpers/helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import LoadingBox from 'components/LoadingBox';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
-import { getFeeClaimData } from '../PositionList';
+import classNames from 'classnames';
+import { Button } from 'components/Button';
+import LoadingBox from 'components/LoadingBox';
+import { formatNumberKMB, numberWithCommas } from 'helper/format';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useTheme from 'hooks/useTheme';
+import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString, stringToPoolKey } from 'libs/contractSingleton';
+import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
+import { convertPosition } from 'pages/Pool-V3/helpers/helper';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getFeeClaimData } from 'rest/graphClient';
+import PositionItem from '../PositionItem';
+import styles from './index.module.scss';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import { useGetPoolDetail } from 'pages/Pool-V3/hooks/useGetPoolDetail';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
@@ -63,37 +63,58 @@ const PoolV3Detail = () => {
     allocation: {}
   });
 
+  const { feeDailyData } = useGetFeeDailyData();
+  const { allPosition } = useGetAllPositions();
+  const { positions: userPositions } = useGetPositions(address);
+  const { poolList } = useGetPoolList();
+  const { liquidityDistribution } = useGetPoolDetail(poolKeyString, prices);
+
   useEffect(() => {
     (async () => {
       try {
-        const poolKey = stringToPoolKey(poolId);
-        const pool = await SingletonOraiswapV3.getPool(poolKey);
-        const isLight = theme === 'light';
-        const fmtPool = formatPoolData(pool, isLight);
-        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, prices);
+        if (liquidityDistribution !== null) {
+          setLiquidity(liquidityDistribution);
+        }
+      } catch (error) {
+        const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
+        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, prices, allPosition);
 
         setLiquidity(liquidity);
-        setPoolDetail(fmtPool);
-      } catch (error) {
         console.log('error: get pool detail', error);
+      } finally {
+        if (poolList.length === 0) {
+          return;
+        }
+        const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
+        const isLight = theme === 'light';
+        const fmtPool = formatPoolData(pool, isLight);
+        setPoolDetail(fmtPool);
       }
     })();
-  }, [poolId]);
+  }, [poolId, allPosition, poolList, theme, prices, poolKeyString, liquidityDistribution]);
 
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
 
   useEffect(() => {
     const getAPRInfo = async () => {
-      const res = await fetchPoolAprInfo([poolDetail.pool_key], prices, liquidityPools);
+      const res = await fetchPoolAprInfo(
+        [poolDetail],
+        prices,
+        {
+          [poolKeyString]: liquidity.total
+        },
+        feeDailyData
+      );
       setAprInfo({
         ...aprInfo,
         [poolKeyString]: res[poolKeyString]
       });
     };
-    if (poolDetail && prices && Object.values(liquidityPools).length && poolDetail.poolKey === poolKeyString) {
+
+    if (poolDetail && prices && liquidity && poolDetail.poolKey === poolKeyString) {
       getAPRInfo();
     }
-  }, [poolDetail, prices, liquidityPools]);
+  }, [liquidity, feeDailyData, poolDetail, prices, poolKeyString]);
 
   const { spread, pool_key } = poolDetail || {};
   const { allocation, total } = liquidity;
@@ -110,30 +131,24 @@ const PoolV3Detail = () => {
   useEffect(() => {
     (async () => {
       try {
-        setLoading(false);
-        if (!address) return setDataPosition([]);
-        if (!pool_key) return;
         setLoading(true);
-        const [positions, poolsData, feeClaimData] = await Promise.all([
-          SingletonOraiswapV3.getAllPosition(address),
-          SingletonOraiswapV3.getPools(),
-          getFeeClaimData(address)
-        ]);
+        if (!address) return setDataPosition([]);
+
+        const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
-          positions: positions
-            .map((po, ind) => ({ ...po, ind }))
-            .filter((pos) => poolKeyToString(pos.pool_key) === poolKeyToString(pool_key)),
-          poolsData,
+          positions: userPositions.map((po, ind) => ({ ...po, ind })),
+          poolsData: poolList,
           cachePrices,
           address,
           isLight,
           feeClaimData
         });
+        const filteredPositions = positionsMap.filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString);
 
-        setDataPosition(positionsMap);
+        setDataPosition(filteredPositions);
       } catch (error) {
-        console.log('error call position', error);
+        console.log({ error });
       } finally {
         setLoading(false);
         setStatusRemove(false);
@@ -141,7 +156,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [poolDetail, address, statusRemove]);
+  }, [address, poolList, userPositions]);
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -236,7 +251,12 @@ const PoolV3Detail = () => {
             </div>
             <div className={styles.item}>
               <span>Swap Fee</span>
-              <p>{numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100)}%</p>
+              <p>
+                {numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100, undefined, {
+                  maximumFractionDigits: 2
+                })}
+                %
+              </p>
             </div>
             <div className={styles.item}>
               <span className={styles.label}>
@@ -246,25 +266,29 @@ const PoolV3Detail = () => {
               <p>
                 {!aprInfo[poolKeyString]?.incentivesApr
                   ? '-- '
-                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr * 100)}%`}
+                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr * 100, undefined, {
+                      maximumFractionDigits: 2
+                    })}%`}
               </p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
-              <p className={styles.total}>{numberWithCommas((aprInfo[poolKeyString]?.apr || 0) * 100)}%</p>
+              <p className={styles.total}>
+                {numberWithCommas((aprInfo[poolKeyString]?.apr || 0) * 100, undefined, { maximumFractionDigits: 2 })}%
+              </p>
             </div>
           </div>
         </div>
       </div>
       <div className={styles.positions}>
-        {<h1>Your Liquidity Positions ({dataPosition?.length ?? 0})</h1>}
+        {<h1>My positions ({dataPosition?.length ?? 0})</h1>}
         <LoadingBox loading={loading} styles={{ height: '30vh' }}>
           <div className={styles.list}>
             {dataPosition.length
               ? dataPosition.map((position, index) => {
                   return (
                     <div className={styles.positionWrapper} key={`pos-${index}`}>
-                      <PositionItem position={position} setStatusRemove={setStatusRemove} />
+                      <PositionItem position={position} />
                     </div>
                   );
                 })

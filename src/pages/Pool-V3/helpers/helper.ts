@@ -1,5 +1,4 @@
-import { BigDecimal, toDisplay, TokenItemType } from '@oraichain/oraidex-common';
-import { reduce } from 'lodash';
+import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { Coin } from '@cosmjs/proto-signing';
 import { PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { oraichainTokens } from 'config/bridgeTokens';
@@ -13,20 +12,19 @@ import {
   TokenAmounts,
   calculateAmountDelta,
   calculateSqrtPrice,
+  extractAddress,
   getPercentageDenominator,
   getSqrtPriceDenominator,
   getTickAtSqrtPrice,
   calculateFee as wasmCalculateFee
-} from '../packages/wasm/oraiswap_v3_wasm';
+} from '@oraichain/oraiswap-v3';
 import { getIconPoolData } from './format';
 import { network } from 'config/networks';
-import { SwapHop } from '../packages/sdk/OraiswapV3.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
-import { ClaimFee, Position as PositionsNode } from 'gql/graphql';
+import { Position as PositionsNode } from 'gql/graphql';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 
-// export const PERCENTAGE_SCALE = Number(getPercentageScale());
 export interface InitPositionData {
   poolKeyData: PoolKey;
   lowerTick: number;
@@ -143,7 +141,7 @@ export const TokenList = oraichainTokens.reduce((acc, cur) => {
 export const addressTickerMap: { [key: string]: string } = TokenList;
 
 export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, yDecimal: number): number => {
-  const sqrt = +printBigint(calculateSqrtPrice(tickIndex), PRICE_SCALE);
+  const sqrt = +printBigint(calculateSqrtPrice(tickIndex), Number(PRICE_SCALE));
 
   const proportion = sqrt * sqrt;
 
@@ -151,7 +149,7 @@ export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, y
 };
 
 export const calcYPerXPriceBySqrtPrice = (sqrtPrice: bigint, xDecimal: number, yDecimal: number): number => {
-  const sqrt = +printBigint(sqrtPrice, PRICE_SCALE);
+  const sqrt = +printBigint(sqrtPrice, Number(PRICE_SCALE));
 
   const proportion = sqrt * sqrt;
 
@@ -248,7 +246,7 @@ const newtonIteration = (n: bigint, x0: bigint): bigint => {
 
 const sqrt = (value: bigint): bigint => {
   if (value < 0n) {
-    throw 'square root of negative numbers is not supported';
+    throw Error('square root of negative numbers is not supported');
   }
 
   if (value < 2n) {
@@ -438,37 +436,28 @@ export const createPositionWithNativeTx = async (
 
 export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
   const fmtFeeClaimData = feeClaimData.reduce((acc, cur) => {
-    const { principalAmountX, principalAmountY, poolId, id, fees } = cur || {};
+    const { principalAmountX, principalAmountY, id, fees } = cur || {};
 
-    const totalEarn = (fees.nodes || []).reduce(
-      (total, fee) => {
-        total.earnX = new BigDecimal(total.earnX).add(fee.amountX).toNumber();
-        total.earnY = new BigDecimal(total.earnY).add(fee.amountY).toNumber();
-        total.earnIncentive = fee.claimFeeIncentiveTokens.nodes.reduce((acc, currentFee) => {
-          if (!acc[currentFee.tokenId]?.amount) {
-            acc[currentFee.tokenId] = {
-              amount: 0,
-              token: oraichainTokensWithIcon.find(
-                (tk) => tk.contractAddress === currentFee.tokenId || tk.denom === currentFee.tokenId
-              )
-            };
-          }
+    const totalEarn = {
+      earnX: 0,
+      earnY: 0,
+      earnIncentive: {}
+    };
 
-          acc[currentFee.tokenId].amount = new BigDecimal(acc[currentFee.tokenId]?.amount || 0)
-            .add(currentFee.rewardAmount)
-            .toNumber();
-
-          return acc;
-        }, {});
-
-        return total;
-      },
-      {
-        earnX: 0,
-        earnY: 0,
-        earnIncentive: {}
-      }
-    );
+    fees.nodes.forEach((fee) => {
+      totalEarn.earnX = new BigDecimal(totalEarn.earnX).add(fee.amountX).toNumber();
+      totalEarn.earnY = new BigDecimal(totalEarn.earnY).add(fee.amountY).toNumber();
+      fee.claimFeeIncentiveTokens.nodes.forEach((incentiveClaimed) => {
+        const tokenId = incentiveClaimed.tokenId;
+        totalEarn.earnIncentive[tokenId] = totalEarn.earnIncentive[tokenId] || {
+          amount: 0,
+          token: oraichainTokensWithIcon.find((tk) => extractAddress(tk) === tokenId)
+        };
+        totalEarn.earnIncentive[tokenId].amount = new BigDecimal(totalEarn.earnIncentive[tokenId].amount)
+          .add(incentiveClaimed.rewardAmount)
+          .toNumber();
+      });
+    });
 
     acc[id] = {
       principalAmountX,
@@ -479,7 +468,6 @@ export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
     return acc;
   }, {});
 
-  console.log('fmtFeeClaimData', fmtFeeClaimData);
   return fmtFeeClaimData;
 };
 
@@ -502,7 +490,7 @@ export const convertPosition = ({
 }) => {
   const fmtFeeClaim = formatClaimFeeData(feeClaimData);
 
-  return positions
+  const fmtData = positions
     .map((position: Position & { poolData: { pool: Pool }; ind: number; token_id: number }) => {
       const [tokenX, tokenY] = [position?.pool_key.token_x, position?.pool_key.token_y];
       let {
@@ -580,18 +568,26 @@ export const convertPosition = ({
         }
       };
 
-      const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: number, cur) => {
+      const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: BigDecimal, cur) => {
         const { amount = '0', token } = cur as {
           amount: string;
           token: TokenItemType;
         };
 
-        const usd = toDisplay(amount) * (cachePrices[token?.coinGeckoId] || 0);
+        // const usd =
+        //   toDisplay(amount.toString(), token.decimals || CW20_DECIMALS) * Number(cachePrices[token?.coinGeckoId] || 0);
 
-        acc = new BigDecimal(acc || 0).add(usd).toNumber();
+        acc.add(
+          new BigDecimal(amount)
+            .mul(new BigDecimal(10).pow(token?.decimals || CW20_DECIMALS))
+            .mul(cachePrices[token.coinGeckoId])
+        );
 
         return acc;
-      }, 0);
+      }, new BigDecimal(0));
+
+      const tokenYDecimal = tokenYinfo.decimals || CW20_DECIMALS;
+      const tokenXDecimal = tokenXinfo.decimals || CW20_DECIMALS;
 
       return {
         ...position,
@@ -605,6 +601,10 @@ export const convertPosition = ({
         tokenYName: tokenYinfo.name,
         tokenXIcon: tokenXIcon,
         tokenYIcon: tokenYIcon,
+        tokenYinfo,
+        tokenXinfo,
+        tokenYDecimal,
+        tokenXDecimal,
         fee: +printBigint(BigInt(position.pool_key.fee_tier.fee), PERCENTAGE_SCALE - 2),
         min,
         max,
@@ -623,8 +623,9 @@ export const convertPosition = ({
         principalAmountX,
         principalAmountY,
         totalEarn,
-        totalEarnIncentiveUsd
+        totalEarnIncentiveUsd: (totalEarnIncentiveUsd as BigDecimal).toNumber()
       };
     })
     .filter(Boolean);
+  return fmtData;
 };

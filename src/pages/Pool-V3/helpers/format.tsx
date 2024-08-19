@@ -23,6 +23,14 @@ export type PoolWithTokenInfo = PoolWithPoolKey & {
   poolKey: string;
 };
 
+export const getTokenInfo = (address, isLight) => {
+  let Icon = DefaultIcon;
+  const tokenInfo = oraichainTokensWithIcon.find((token) => [token.denom, token.contractAddress].includes(address));
+
+  if (tokenInfo) Icon = isLight ? tokenInfo.IconLight : tokenInfo.Icon;
+  return { Icon, tokenInfo };
+};
+
 export const getIconPoolData = (tokenX, tokenY, isLight) => {
   let [FromTokenIcon, ToTokenIcon] = [DefaultIcon, DefaultIcon];
   const tokenXinfo = oraichainTokensWithIcon.find((token) => [token.denom, token.contractAddress].includes(tokenX));

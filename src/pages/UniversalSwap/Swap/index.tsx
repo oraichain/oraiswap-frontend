@@ -297,6 +297,7 @@ const SwapComponent: React.FC<{
         fromAmount: fromAmountToken,
         simulateAmount,
         userSlippage,
+        bridgeFee: 1,
         amounts: amountsBalance,
         simulatePrice:
           // @ts-ignore
@@ -514,7 +515,7 @@ const SwapComponent: React.FC<{
       simulateData?.displayAmount &&
       averageRatio?.displayAmount &&
       useAlphaSmartRouter &&
-      averageSimulateData.displayAmount
+      averageSimulateData?.displayAmount
     ) {
       const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
         .div(debouncedFromAmount)
@@ -611,7 +612,7 @@ const SwapComponent: React.FC<{
                 usdPrice={usdPriceShowFrom}
               />
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
-              {!fromTokenFee && !toTokenFee && isWarningSlippage && (
+              {!fromTokenFee && !toTokenFee && !isAIRoute && isWarningSlippage && (
                 <div className={cx('impact-warning')}>
                   <WarningIcon />
                   <div className={cx('title')}>
@@ -626,7 +627,7 @@ const SwapComponent: React.FC<{
               <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
-              {originalFromToken.cosmosBased && originalToToken.cosmosBased && useAlphaSmartRouter && (
+              {originalFromToken.cosmosBased && originalToToken.cosmosBased && (
                 <AIRouteSwitch isLoading={isPreviousSimulate} />
               )}
               {generateRatioComp()}
