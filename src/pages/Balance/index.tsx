@@ -461,8 +461,6 @@ const Balance: React.FC<BalanceProps> = () => {
       const cosmosAddress = await handleCheckAddress(from.cosmosBased ? (from.chainId as CosmosChainId) : 'Oraichain');
       const latestEvmAddress = await getLatestEvmAddress(toNetworkChainId);
       let amountsBalance = amounts;
-      let simulateAmount = toAmount(fromAmount).toString();
-
       const { isSpecialFromCoingecko } = getSpecialCoingecko(from.coinGeckoId, newToToken.coinGeckoId);
 
       if (isSpecialFromCoingecko && from.chainId === 'Oraichain') {
@@ -482,13 +480,6 @@ const Balance: React.FC<BalanceProps> = () => {
           [fromTokenInOrai.denom]: nativeAmount?.amount,
           [from.denom]: cw20Amount.balance
         };
-      }
-
-      if (
-        (newToToken.chainId === 'injective-1' && newToToken.coinGeckoId === 'injective-protocol') ||
-        newToToken.chainId === 'kawaii_6886-1'
-      ) {
-        simulateAmount = toAmount(fromAmount, newToToken.decimals).toString();
       }
 
       let relayerFee = {
@@ -513,7 +504,7 @@ const Balance: React.FC<BalanceProps> = () => {
           userSlippage: 0,
           bridgeFee: 1,
           amounts: amountsBalance,
-          simulateAmount
+          simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
         {
           cosmosWallet: window.Keplr,
