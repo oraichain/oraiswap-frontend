@@ -45,7 +45,7 @@ import SlippageSetting from '../SettingSlippage';
 import TokenForm from '../TokenForm';
 import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
-import { calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
+import { calculateTokenAmountsWithSlippage, calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
 import { numberWithCommas } from 'helper/format';
 
 export type PriceInfo = {
@@ -101,7 +101,7 @@ const CreatePosition = () => {
   const [leftInput, setLeftInput] = useState('');
   const [rightInput, setRightInput] = useState('');
 
-  // for showing 
+  // for showing
   const [leftInputRounded, setLeftInputRounded] = useState('');
   const [rightInputRounded, setRightInputRounded] = useState('');
 
@@ -278,9 +278,9 @@ const CreatePosition = () => {
     let rightRange: number;
 
     // if (positionOpeningMethod === 'range') {
-      const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
-      leftRange = leftInRange;
-      rightRange = rightInRange;
+    const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
+    leftRange = leftInRange;
+    rightRange = rightInRange;
     // } else {
     //   leftRange = left;
     //   rightRange = right;
@@ -325,9 +325,9 @@ const CreatePosition = () => {
     let rightRange: number;
 
     // if (positionOpeningMethod === 'range') {
-      const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
-      leftRange = leftInRange;
-      rightRange = rightInRange;
+    const { leftInRange, rightInRange } = getTicksInsideRange(left, right, isXtoY);
+    leftRange = leftInRange;
+    rightRange = rightInRange;
     // } else {
     //   leftRange = left;
     //   rightRange = right;
@@ -508,6 +508,7 @@ const CreatePosition = () => {
   };
 
   const calcAmount = (amount: TokenAmount, left: number, right: number, tokenAddress: string) => {
+    if (!poolInfo) return BigInt(0); 
     if (!tokenFrom || !tokenTo || isNaN(left) || isNaN(right)) {
       return BigInt(0);
     }
@@ -527,11 +528,22 @@ const CreatePosition = () => {
           true
         );
 
+        let [, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
+          poolInfo.pool_key.fee_tier.tick_spacing,
+          BigInt(poolInfo.pool.sqrt_price),
+          positionLiquidity,
+          lowerTick,
+          upperTick,
+          Number(slippage),
+          true
+        );
+        const finalYAmount = yAmountWithSlippage > tokenYAmount ? yAmountWithSlippage : tokenYAmount;
+
         if (isMountedRef.current) {
           liquidityRef.current = positionLiquidity;
         }
 
-        return tokenYAmount;
+        return finalYAmount;
       }
 
       const { amount: tokenXAmount, l: positionLiquidity } = getLiquidityByY(
@@ -542,12 +554,24 @@ const CreatePosition = () => {
         true
       );
 
+      let [xAmountWithSlippage, ] = calculateTokenAmountsWithSlippage(
+        poolInfo.pool_key.fee_tier.tick_spacing,
+        BigInt(poolInfo.pool.sqrt_price),
+        positionLiquidity,
+        lowerTick,
+        upperTick,
+        Number(slippage),
+        true
+      );
+      const finalXAmount = xAmountWithSlippage > tokenXAmount ? xAmountWithSlippage : tokenXAmount;
+
       if (isMountedRef.current) {
         liquidityRef.current = positionLiquidity;
       }
 
-      return tokenXAmount;
+      return finalXAmount;
     } catch (error) {
+      console.log('error', error);
       const result = (byX ? getLiquidityByY : getLiquidityByX)(
         BigInt(amount),
         lowerTick,
@@ -555,23 +579,36 @@ const CreatePosition = () => {
         isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
         true
       );
+
+      let [xAmountWithSlippage, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
+        poolInfo.pool_key.fee_tier.tick_spacing,
+        BigInt(poolInfo.pool.sqrt_price),
+        result.l,
+        lowerTick,
+        upperTick,
+        Number(slippage),
+        true
+      );
+      
+      
       if (isMountedRef.current) {
         liquidityRef.current = result.l;
       }
+      if (byX) {
+        return yAmountWithSlippage > result.amount ? yAmountWithSlippage : result.amount;
+      } else {
+        return xAmountWithSlippage > result.amount ? xAmountWithSlippage : result.amount;
+      }
     }
-
-    return BigInt(0);
   };
 
   const getOtherTokenAmount = (amount: TokenAmount, left: number, right: number, byFirst: boolean) => {
     const [printToken, calcToken] = byFirst ? [tokenTo, tokenFrom] : [tokenFrom, tokenTo];
-
     if (!printToken || !calcToken) {
       return '0.0';
     }
 
-    const result = calcAmount(amount, left, right, extractDenom(calcToken));
-
+    const result = calcAmount(amount, left, right, extractAddress(calcToken));
     return trimLeadingZeros(printBigint(result, printToken.decimals));
   };
 
@@ -685,7 +722,7 @@ const CreatePosition = () => {
     }
   }, [poolInfo, isXtoY, tokenFrom, tokenTo]);
 
-  // render add new pool or new position liquidity 
+  // render add new pool or new position liquidity
   const renderPriceSection = isPoolExist ? (
     <div className={styles.priceSectionExisted}>
       <div className={styles.wrapper}>
