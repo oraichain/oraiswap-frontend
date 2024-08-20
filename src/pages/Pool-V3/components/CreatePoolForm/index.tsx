@@ -29,7 +29,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
-import { calcYPerXPriceBySqrtPrice, InitPositionData } from 'pages/Pool-V3/helpers/helper';
+import { calculateTokenAmountsWithSlippage, calcYPerXPriceBySqrtPrice, InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
@@ -499,6 +499,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
   };
 
   const calcAmount = (amount: TokenAmount, left: number, right: number, tokenAddress: string) => {
+    if (!notInitPoolKey) return BigInt(0); 
     if (!tokenFrom || !tokenTo || isNaN(left) || isNaN(right)) {
       return BigInt(0);
     }
@@ -518,27 +519,50 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
           true
         );
 
+        let [, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
+          notInitPoolKey.fee_tier.tick_spacing,
+          isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+          positionLiquidity,
+          lowerTick,
+          upperTick,
+          Number(slippage),
+          true
+        );
+        const finalYAmount = yAmountWithSlippage > tokenYAmount ? yAmountWithSlippage : tokenYAmount;
+
         if (isMountedRef.current) {
           liquidityRef.current = positionLiquidity;
         }
 
-        return tokenYAmount;
+        return finalYAmount;
       }
 
       const { amount: tokenXAmount, l: positionLiquidity } = getLiquidityByY(
         BigInt(amount),
         lowerTick,
         upperTick,
-        isPoolExist ? BigInt(poolInfo.pool?.sqrt_price) : calculateSqrtPrice(midPrice.index),
+        isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
         true
       );
+
+      let [xAmountWithSlippage, ] = calculateTokenAmountsWithSlippage(
+        notInitPoolKey.fee_tier.tick_spacing,
+        isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+        positionLiquidity,
+        lowerTick,
+        upperTick,
+        Number(slippage),
+        true
+      );
+      const finalXAmount = xAmountWithSlippage > tokenXAmount ? xAmountWithSlippage : tokenXAmount;
 
       if (isMountedRef.current) {
         liquidityRef.current = positionLiquidity;
       }
 
-      return tokenXAmount;
+      return finalXAmount;
     } catch (error) {
+      console.log('error', error);
       const result = (byX ? getLiquidityByY : getLiquidityByX)(
         BigInt(amount),
         lowerTick,
@@ -546,12 +570,27 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
         isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
         true
       );
+
+      let [xAmountWithSlippage, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
+        notInitPoolKey.fee_tier.tick_spacing,
+        isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
+        result.l,
+        lowerTick,
+        upperTick,
+        Number(slippage),
+        true
+      );
+      
+      
       if (isMountedRef.current) {
         liquidityRef.current = result.l;
       }
+      if (byX) {
+        return yAmountWithSlippage > result.amount ? yAmountWithSlippage : result.amount;
+      } else {
+        return xAmountWithSlippage > result.amount ? xAmountWithSlippage : result.amount;
+      }
     }
-
-    return BigInt(0);
   };
 
   const getOtherTokenAmount = (amount: TokenAmount, left: number, right: number, byFirst: boolean) => {
@@ -663,7 +702,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
 
   const getButtonMessage = () => {
     const isInsufficientTo = amountTo && Number(amountTo) > toDisplay(amounts[tokenTo.denom]);
-    const isInsufficientFrom = amountFrom && Number(amountTo) > toDisplay(amounts[tokenFrom.denom]);
+    const isInsufficientFrom = amountFrom && Number(amountFrom) > toDisplay(amounts[tokenFrom.denom]);
 
     if (!walletAddress) {
       return 'Connect wallet';
