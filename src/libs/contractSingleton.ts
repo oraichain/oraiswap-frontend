@@ -12,7 +12,7 @@ import {
   getMaxTickmapQuerySize,
   OraiswapV3Handler,
   parsePoolKey
-} from 'oraiswap-v3-test';
+} from '@oraichain/oraiswap-v3';
 import { network } from 'config/networks';
 import {
   AssetInfo,
@@ -409,14 +409,20 @@ export default class SingletonOraiswapV3 {
     });
   };
 
-  public static getTicksAndIncentivesInfo = async (lowerTick: number, upperTick: number, positionIndex: number, user: string, poolKey: PoolKey) => {
+  public static getTicksAndIncentivesInfo = async (
+    lowerTick: number,
+    upperTick: number,
+    positionIndex: number,
+    user: string,
+    poolKey: PoolKey
+  ) => {
     try {
       await this.loadCosmwasmClient();
       const multicallClient = new MulticallQueryClient(this._cosmwasmClient, network.multicall);
       const res = await multicallClient.aggregate({
         queries: [
           {
-            address: network.pool_v3, 
+            address: network.pool_v3,
             data: toBinary({
               tick: {
                 index: lowerTick,
@@ -425,7 +431,7 @@ export default class SingletonOraiswapV3 {
             })
           },
           {
-            address: network.pool_v3, 
+            address: network.pool_v3,
             data: toBinary({
               tick: {
                 index: upperTick,
@@ -434,7 +440,7 @@ export default class SingletonOraiswapV3 {
             })
           },
           {
-            address: network.pool_v3, 
+            address: network.pool_v3,
             data: toBinary({
               position_incentives: {
                 index: positionIndex,
@@ -503,7 +509,8 @@ export default class SingletonOraiswapV3 {
 
   public static async getAllPosition(): Promise<Position[]> {
     await this.loadHandler();
-    return await this._handler.allPositions();
+    const positions = await this._handler.allPositions();
+    return positions;
   }
 
   // public static async queryPosition(): Promise<PositionInfo[]> {
@@ -835,7 +842,7 @@ export async function fetchPoolAprInfo(
       swapFee: feeAPR ? feeAPR : 0,
       incentivesApr: sumIncentivesApr
     };
-  };
+  }
 
   return poolAprs;
 }

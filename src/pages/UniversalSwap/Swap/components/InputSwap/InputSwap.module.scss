@@ -78,6 +78,27 @@
 
     .input {
       text-align: right;
+      position: relative;
+
+      .mask {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 12px;
+        background: linear-gradient(90deg, #2325211a 33%, #181a17 50%, #2325211a 66%) #232521;
+        background-size: 300% 100%;
+
+        animation: maskInput ease-in-out 1.5s infinite;
+
+        @keyframes maskInput {
+          0% {
+            background-position: right;
+          }
+          100% {
+            background-position: left;
+          }
+        }
+      }
     }
 
     .amount {
@@ -238,7 +259,7 @@
       }
     }
 
-    &>span {
+    & > span {
       text-align: right;
     }
 

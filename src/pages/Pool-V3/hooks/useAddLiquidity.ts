@@ -10,7 +10,7 @@ import {
   isNativeToken
 } from '../helpers/helper';
 
-import { newPoolKey } from 'oraiswap-v3-test';
+import { newPoolKey } from '@oraichain/oraiswap-v3';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { network } from 'config/networks';
 

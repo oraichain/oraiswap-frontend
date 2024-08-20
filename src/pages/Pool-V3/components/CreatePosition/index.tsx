@@ -14,7 +14,14 @@ import { oraichainTokens } from 'config/bridgeTokens';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
-import { calculateSqrtPrice, getLiquidityByX, getLiquidityByY, getMaxTick, getMinTick, Price } from 'oraiswap-v3-test';
+import {
+  calculateSqrtPrice,
+  getLiquidityByX,
+  getLiquidityByY,
+  getMaxTick,
+  getMinTick,
+  Price
+} from '@oraichain/oraiswap-v3';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NewPositionNoPool from '../NewPositionNoPool';

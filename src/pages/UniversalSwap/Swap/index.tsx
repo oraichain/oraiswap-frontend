@@ -213,15 +213,37 @@ const SwapComponent: React.FC<{
   const setTokenDenomFromChain = (chainId: string, type: 'from' | 'to') => {
     if (chainId) {
       const isFrom = type === 'from';
+
       // check current token existed on another swap token chain
+      const currentToken = isFrom ? originalToToken : originalFromToken;
       const targetToken = isFrom ? originalFromToken : originalToToken;
       const targetChain = isFrom ? selectChainTo : selectChainFrom;
 
-      const checkExistedToken = flattenTokens.find(
-        (flat) => flat?.coinGeckoId === targetToken?.coinGeckoId && flat?.chainId === targetChain
-      );
+      const checkExistedToken = flattenTokens.find((flat) => {
+        const condition =
+          flat?.coinGeckoId === targetToken?.coinGeckoId && flat?.chainId === targetChain && flat?.chainId;
+        return flat?.chainId === 'Oraichain' ? condition && flat.decimals !== 18 : condition;
+      });
       // get default token of new chain
-      const tokenInfo = flattenTokens.find((flat) => flat?.chainId === chainId);
+      const tokenInfo = flattenTokens.find((flat) => {
+        const condition = flat?.chainId === chainId;
+        return flat?.chainId === 'Oraichain' ? condition && flat.decimals !== 18 : condition;
+      });
+
+      // check if update chain is the same with target chain and current token same as target token
+      // => get second token of token list of chainId to update token
+      if (chainId === targetChain) {
+        const tokenListOfTargetChain = flattenTokens.filter((flat) => {
+          const condition = flat?.chainId === chainId;
+          return flat?.chainId === 'Oraichain' ? condition && flat.decimals !== 18 : condition;
+        });
+
+        if (targetToken?.coinGeckoId === currentToken?.coinGeckoId) {
+          const secondaryToken = tokenListOfTargetChain[1] ?? tokenListOfTargetChain[0];
+          return handleChangeToken(secondaryToken, type);
+        }
+      }
+
       // case new chain === another swap token chain
       // if new tokenInfo(default token of new chain) === from/to Token => check is currentToken existed on new chain
       // if one of all condition is false => handle swap normally
@@ -280,17 +302,22 @@ const SwapComponent: React.FC<{
         };
       }
 
-      if (
-        (originalToToken.chainId === 'injective-1' && originalToToken.coinGeckoId === 'injective-protocol') ||
-        originalToToken.chainId === 'kawaii_6886-1'
-      ) {
+      const isInjectiveProtocol =
+        originalToToken.chainId === 'injective-1' && originalToToken.coinGeckoId === 'injective-protocol';
+      const isKawaiiChain = originalToToken.chainId === 'kawaii_6886-1';
+      const isDifferentChainAndNotCosmosBased =
+        originalFromToken.chainId !== originalToToken.chainId &&
+        !originalFromToken.cosmosBased &&
+        !originalToToken.cosmosBased;
+
+      if (isInjectiveProtocol || isKawaiiChain || isDifferentChainAndNotCosmosBased) {
         simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = useAlphaSmartRouter && simulateData?.routes;
+      const alphaSmartRoutes = useAlphaSmartRouter ? simulateData?.routes : undefined;
 
-      let initSwapData = {
+      const swapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
         originalFromToken,
         originalToToken,
@@ -299,9 +326,8 @@ const SwapComponent: React.FC<{
         userSlippage,
         bridgeFee: 1,
         amounts: amountsBalance,
-        simulatePrice:
-          // @ts-ignore
-          averageRatio?.amount && new BigDecimal(averageRatio.amount).div(SIMULATE_INIT_AMOUNT).toString(),
+        recipientAddress: isCustomRecipient ? addressTransfer : undefined,
+        simulatePrice: averageRatio?.amount && new BigDecimal(averageRatio.amount).div(SIMULATE_INIT_AMOUNT).toString(),
         relayerFee: relayerFeeUniversal,
         alphaSmartRoutes,
         affiliates: [
@@ -312,15 +338,8 @@ const SwapComponent: React.FC<{
         ]
       };
 
-      const compileSwapData = isCustomRecipient
-        ? {
-            ...initSwapData,
-            recipientAddress: addressTransfer
-          }
-        : initSwapData;
-
       // @ts-ignore
-      const univeralSwapHandler = new UniversalSwapHandler(compileSwapData, {
+      const univeralSwapHandler = new UniversalSwapHandler(swapData, {
         cosmosWallet: window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
@@ -521,7 +540,7 @@ const SwapComponent: React.FC<{
       simulateData?.displayAmount &&
       averageRatio?.displayAmount &&
       useAlphaSmartRouter &&
-      averageSimulateData.displayAmount
+      averageSimulateData?.displayAmount
     ) {
       const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
         .div(debouncedFromAmount)

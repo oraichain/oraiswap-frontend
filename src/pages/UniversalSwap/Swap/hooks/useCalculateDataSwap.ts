@@ -10,6 +10,7 @@ import { getAverageRatio, getRemoteDenom, isAllowAlphaSmartRouter, isAllowIBCWas
 import { fetchTokenInfos } from 'rest/api';
 import { useSimulate } from './useSimulate';
 import { useSwapFee } from './useSwapFee';
+import { useEffect, useState } from 'react';
 
 export const SIMULATE_INIT_AMOUNT = 1;
 
@@ -35,6 +36,12 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     originalFromToken,
     originalToToken
   );
+
+  const [isAvgSimulate, setIsAvgSimulate] = useState({
+    tokenFrom: originalFromToken.coinGeckoId,
+    tokenTo: originalToToken.coinGeckoId,
+    status: false
+  });
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -69,9 +76,34 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
       useAlphaSmartRoute,
       useIbcWasm,
       isAIRoute,
-      protocols
+      protocols,
+      isAvgSimulate: isAvgSimulate.status
     }
   );
+
+  useEffect(() => {
+    const { tokenFrom: currentFrom, tokenTo: currentTo, status: currentStatus } = isAvgSimulate;
+    const { coinGeckoId: fromTokenId } = originalFromToken;
+    const { coinGeckoId: toTokenId } = originalToToken;
+
+    const shouldUpdate = currentFrom !== fromTokenId || currentTo !== toTokenId;
+
+    if (shouldUpdate) {
+      setIsAvgSimulate({
+        tokenFrom: fromTokenId,
+        tokenTo: toTokenId,
+        status: false
+      });
+    }
+
+    if (currentStatus || !averageSimulateData?.amount) return;
+
+    setIsAvgSimulate({
+      tokenFrom: fromTokenId,
+      tokenTo: toTokenId,
+      status: true
+    });
+  }, [averageSimulateData, originalFromToken, originalToToken]);
 
   const fromAmountTokenBalance =
     fromTokenInfoData &&

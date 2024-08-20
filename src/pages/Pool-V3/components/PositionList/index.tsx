@@ -3,7 +3,6 @@ import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import LoadingBox from 'components/LoadingBox';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { convertPosition } from 'pages/Pool-V3/helpers/helper';
 import { useEffect, useState } from 'react';
 import { getFeeClaimData } from 'rest/graphClient';
@@ -21,18 +20,21 @@ const PositionList = () => {
   const [address] = useConfigReducer('address');
 
   const [dataPosition, setDataPosition] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [statusRemove, setStatusRemove] = useState<boolean>(undefined);
+  const [loading, setLoading] = useState(true);
   const { positions } = useGetPositions(address);
   const { poolList } = useGetPoolList();
-
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        if (!address) return setDataPosition([]);
-
-        const feeClaimData= await getFeeClaimData(address)
+        if (!(address && positions.length && poolList.length)) {
+          setDataPosition([]);
+          if (address) {
+            setLoading(false);
+          }
+          return;
+        }
+        const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
           positions: positions.map((po, ind) => ({ ...po, ind })),
@@ -44,16 +46,15 @@ const PositionList = () => {
         });
 
         setDataPosition(positionsMap);
-      } catch (error) {
-        console.log({ error });
-      } finally {
         setLoading(false);
-        setStatusRemove(false);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        setLoading(false);
       }
     })();
 
     return () => {};
-  }, [address, poolList, positions]);
+  }, [address, poolList, positions, isLight]);
 
   return (
     <div className={styles.positionList}>
@@ -62,7 +63,7 @@ const PositionList = () => {
           ? dataPosition.map((position, key) => {
               return (
                 <div className={styles.item} key={`position-list-item-${key}`}>
-                  <PositionItem position={position} setStatusRemove={setStatusRemove} />
+                  <PositionItem position={position} />
                 </div>
               );
             })
