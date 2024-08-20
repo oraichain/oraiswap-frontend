@@ -29,7 +29,11 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
-import { calculateTokenAmountsWithSlippage, calcYPerXPriceBySqrtPrice, InitPositionData } from 'pages/Pool-V3/helpers/helper';
+import {
+  calculateTokenAmountsWithSlippage,
+  calcYPerXPriceBySqrtPrice,
+  InitPositionData
+} from 'pages/Pool-V3/helpers/helper';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
@@ -459,20 +463,43 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     tokenTo: TokenItemType | undefined
   ) => {
     if (fee && tokenFrom && tokenTo) {
-      const denom_x = extractDenom(tokenFrom);
-      const denom_y = extractDenom(tokenTo);
+      const denom_x = extractAddress(tokenFrom);
+      const denom_y = extractAddress(tokenTo);
       const token_x = denom_x < denom_y ? denom_x : denom_y;
       const token_y = denom_x < denom_y ? denom_y : denom_x;
-      const pool = await SingletonOraiswapV3.getPool({
-        fee_tier: fee,
-        token_x: token_x,
-        token_y: token_y
-      });
-      setIsPoolExist(pool !== null);
-      if (pool) {
-        setPoolInfo(pool);
-        setNotInitPoolKey(pool.pool_key);
-      } else {
+      try {
+        const pool = await SingletonOraiswapV3.getPool({
+          fee_tier: fee,
+          token_x: token_x,
+          token_y: token_y
+        });
+        if (pool) {
+          setPoolInfo(pool);
+          setNotInitPoolKey(pool.pool_key);
+        } else {
+          const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+          const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+          const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
+          const tickIndex = nearestTickIndex(
+            priceInfo.startPrice,
+            feeTier.tick_spacing,
+            isXToY,
+            tokenXDecimals,
+            tokenYDecimals
+          );
+          setMidPrice({
+            index: tickIndex,
+            x: calcPrice(tickIndex, isXtoY, tokenXDecimals, tokenYDecimals)
+          });
+          setNotInitPoolKey({
+            fee_tier: fee,
+            token_x: token_x,
+            token_y: token_y
+          });
+        }
+        setIsPoolExist(pool !== null);
+        return;
+      } catch (error) {
         const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
         const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
         const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
@@ -492,14 +519,16 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
           token_x: token_x,
           token_y: token_y
         });
+        setIsPoolExist(false);
       }
       return;
+    } else {
+      setIsPoolExist(false);
     }
-    setIsPoolExist(false);
   };
 
   const calcAmount = (amount: TokenAmount, left: number, right: number, tokenAddress: string) => {
-    if (!notInitPoolKey) return BigInt(0); 
+    if (!notInitPoolKey) return BigInt(0);
     if (!tokenFrom || !tokenTo || isNaN(left) || isNaN(right)) {
       return BigInt(0);
     }
@@ -545,7 +574,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
         true
       );
 
-      let [xAmountWithSlippage, ] = calculateTokenAmountsWithSlippage(
+      let [xAmountWithSlippage] = calculateTokenAmountsWithSlippage(
         notInitPoolKey.fee_tier.tick_spacing,
         isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
         positionLiquidity,
@@ -580,8 +609,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
         Number(slippage),
         true
       );
-      
-      
+
       if (isMountedRef.current) {
         liquidityRef.current = result.l;
       }
