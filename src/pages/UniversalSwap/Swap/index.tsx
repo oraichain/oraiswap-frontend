@@ -302,17 +302,22 @@ const SwapComponent: React.FC<{
         };
       }
 
-      if (
-        (originalToToken.chainId === 'injective-1' && originalToToken.coinGeckoId === 'injective-protocol') ||
-        originalToToken.chainId === 'kawaii_6886-1'
-      ) {
+      const isInjectiveProtocol =
+        originalToToken.chainId === 'injective-1' && originalToToken.coinGeckoId === 'injective-protocol';
+      const isKawaiiChain = originalToToken.chainId === 'kawaii_6886-1';
+      const isDifferentChainAndNotCosmosBased =
+        originalFromToken.chainId !== originalToToken.chainId &&
+        !originalFromToken.cosmosBased &&
+        !originalToToken.cosmosBased;
+
+      if (isInjectiveProtocol || isKawaiiChain || isDifferentChainAndNotCosmosBased) {
         simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = useAlphaSmartRouter && simulateData?.routes;
+      const alphaSmartRoutes = useAlphaSmartRouter ? simulateData?.routes : undefined;
 
-      let initSwapData = {
+      const swapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
         originalFromToken,
         originalToToken,
@@ -321,22 +326,14 @@ const SwapComponent: React.FC<{
         userSlippage,
         bridgeFee: 1,
         amounts: amountsBalance,
-        simulatePrice:
-          // @ts-ignore
-          averageRatio?.amount && new BigDecimal(averageRatio.amount).div(SIMULATE_INIT_AMOUNT).toString(),
+        recipientAddress: isCustomRecipient ? addressTransfer : undefined,
+        simulatePrice: averageRatio?.amount && new BigDecimal(averageRatio.amount).div(SIMULATE_INIT_AMOUNT).toString(),
         relayerFee: relayerFeeUniversal,
         alphaSmartRoutes
       };
 
-      const compileSwapData = isCustomRecipient
-        ? {
-            ...initSwapData,
-            recipientAddress: addressTransfer
-          }
-        : initSwapData;
-
       // @ts-ignore
-      const univeralSwapHandler = new UniversalSwapHandler(compileSwapData, {
+      const univeralSwapHandler = new UniversalSwapHandler(swapData, {
         cosmosWallet: window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
