@@ -20,20 +20,20 @@ const PositionList = () => {
   const [address] = useConfigReducer('address');
 
   const [dataPosition, setDataPosition] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { positions } = useGetPositions(address);
+  const { positions, isFetchingPositions } = useGetPositions(address);
   const { poolList } = useGetPoolList();
   useEffect(() => {
     (async () => {
       try {
-        setLoading(true);
-        if (!(address && positions.length && poolList.length)) {
+        if (!address) {
           setDataPosition([]);
-          if (address) {
-            setLoading(false);
-          }
           return;
         }
+
+        if (!positions.length || !poolList.length || isFetchingPositions) {
+          return;
+        }
+
         const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
@@ -46,19 +46,17 @@ const PositionList = () => {
         });
 
         setDataPosition(positionsMap);
-        setLoading(false);
       } catch (error) {
         console.error('Failed to fetch data:', error);
-        setLoading(false);
       }
     })();
 
     return () => {};
-  }, [address, poolList, positions, isLight]);
+  }, [address, poolList, positions, isLight, isFetchingPositions]);
 
   return (
     <div className={styles.positionList}>
-      <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}>
+      {/* <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}> */}
         {dataPosition.length
           ? dataPosition.map((position, key) => {
               return (
@@ -67,13 +65,13 @@ const PositionList = () => {
                 </div>
               );
             })
-          : !loading && (
+          : (
               <div className={styles.nodata}>
                 {theme === 'light' ? <NoData /> : <NoDataDark />}
                 <span>No Positions!</span>
               </div>
             )}
-      </LoadingBox>
+      {/* </LoadingBox> */}
     </div>
   );
 };

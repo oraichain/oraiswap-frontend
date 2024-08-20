@@ -321,20 +321,23 @@ export const approveToken = async (token: string, amount: bigint, address: strin
   return result.transactionHash;
 };
 
-export const approveListToken = async (msg: any, address: string): Promise<string> => {
+export const executeMultiple = async (msg: any, address: string): Promise<string> => {
   const result = await SingletonOraiswapV3.dex.client.executeMultiple(address, msg, 'auto');
   return result.transactionHash;
 };
 
-export const genMsgAllowance = (datas: string[]) => {
-  const MAX_ALLOWANCE_AMOUNT = '18446744073709551615';
+export const genMsgAllowance = (datas: {
+  token: string;
+  amount: bigint;
+}[]) => {
+  // const MAX_ALLOWANCE_AMOUNT = '18446744073709551615';
   const spender = network.pool_v3;
 
   return datas.map((data) => ({
-    contractAddress: data,
+    contractAddress: data.token,
     msg: {
       increase_allowance: {
-        amount: MAX_ALLOWANCE_AMOUNT,
+        amount: data.amount.toString(),
         spender
       }
     }
@@ -356,6 +359,22 @@ export const createPoolTx = async (poolKey: PoolKey, initSqrtPrice: string, addr
     })
   ).transactionHash;
 };
+
+export const createPoolMsg = (poolKey: PoolKey, initSqrtPrice: string) => {
+  const initTick = getTickAtSqrtPrice(BigInt(initSqrtPrice), poolKey.fee_tier.tick_spacing);
+  return {
+    contractAddress: network.pool_v3,
+    msg: {
+      create_pool: {
+        fee_tier: poolKey.fee_tier,
+        init_sqrt_price: initSqrtPrice,
+        init_tick: initTick,
+        token_0: poolKey.token_x,
+        token_1: poolKey.token_y
+      }
+    }
+  };
+}
 
 export const createPositionTx = async (
   poolKey: PoolKey,
@@ -385,6 +404,32 @@ export const createPositionTx = async (
   return res.transactionHash;
 };
 
+export const createPositionMsg = (
+  poolKey: PoolKey,
+  lowerTick: number,
+  upperTick: number,
+  liquidityDelta: bigint,
+  spotSqrtPrice: bigint,
+  slippageTolerance: bigint
+) => {
+  const slippageLimitLower = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), false);
+  const slippageLimitUpper = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), true);
+
+  return {
+    contractAddress: network.pool_v3,
+    msg: {
+      create_position: {
+        pool_key: poolKey,
+        lower_tick: lowerTick,
+        upper_tick: upperTick,
+        liquidity_delta: liquidityDelta.toString(),
+        slippage_limit_lower: slippageLimitLower.toString(),
+        slippage_limit_upper: slippageLimitUpper.toString()
+      }
+    }
+  };
+}
+
 export const createPositionWithNativeTx = async (
   poolKey: PoolKey,
   lowerTick: number,
@@ -404,11 +449,11 @@ export const createPositionWithNativeTx = async (
 
   const fund: Coin[] = [];
 
-  if (isNativeToken(token_x)) {
+  if (isNativeToken(token_x) && initialAmountX > 0n) {
     fund.push({ denom: token_x, amount: initialAmountX.toString() });
   }
 
-  if (isNativeToken(token_y)) {
+  if (isNativeToken(token_y) && initialAmountY > 0n) {
     fund.push({ denom: token_y, amount: initialAmountY.toString() });
   }
 
@@ -416,7 +461,6 @@ export const createPositionWithNativeTx = async (
     SingletonOraiswapV3.load(SingletonOraiswapV3.dex.client, address);
   }
 
-  // console.log({ poolKey, lowerTick, upperTick, liquidityDelta, slippageLimitLower, slippageLimitUpper })
   const res = await SingletonOraiswapV3.dex.createPosition(
     {
       poolKey,
@@ -433,6 +477,48 @@ export const createPositionWithNativeTx = async (
 
   return res.transactionHash;
 };
+
+export const createPositionWithNativeMsg = (
+  poolKey: PoolKey,
+  lowerTick: number,
+  upperTick: number,
+  liquidityDelta: bigint,
+  spotSqrtPrice: bigint,
+  slippageTolerance: bigint,
+  initialAmountX: bigint,
+  initialAmountY: bigint
+) => {
+  const slippageLimitLower = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), false);
+  const slippageLimitUpper = calculateSqrtPriceAfterSlippage(spotSqrtPrice, Number(slippageTolerance), true);
+
+  const token_x = poolKey.token_x;
+  const token_y = poolKey.token_y;
+
+  const fund: Coin[] = [];
+
+  if (isNativeToken(token_x) && initialAmountX > 0n) {
+    fund.push({ denom: token_x, amount: initialAmountX.toString() });
+  }
+
+  if (isNativeToken(token_y) && initialAmountY > 0n) {
+    fund.push({ denom: token_y, amount: initialAmountY.toString() });
+  }
+
+  return {
+    contractAddress: network.pool_v3,
+    msg: {
+      create_position: {
+        pool_key: poolKey,
+        lower_tick: lowerTick,
+        upper_tick: upperTick,
+        liquidity_delta: liquidityDelta.toString(),
+        slippage_limit_lower: slippageLimitLower.toString(),
+        slippage_limit_upper: slippageLimitUpper.toString()
+      }
+    },
+    funds: fund
+  };
+}
 
 export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
   const fmtFeeClaimData = feeClaimData.reduce((acc, cur) => {
@@ -528,7 +614,6 @@ export const convertPosition = ({
         const convertedPool = getConvertedPool(positions);
         const convertedPosition = getConvertedPosition(position);
         const res = calculateTokenAmounts(convertedPool, convertedPosition);
-        // console.log({ convertedPool });
         x = res.x;
         y = res.y;
       }
@@ -568,23 +653,20 @@ export const convertPosition = ({
         }
       };
 
-      const totalEarnIncentiveUsd = Object.values(totalEarn.earnIncentive).reduce((acc: BigDecimal, cur) => {
-        const { amount = '0', token } = cur as {
-          amount: string;
-          token: TokenItemType;
-        };
+      let totalEarnIncentiveUsd = new BigDecimal(0);
 
-        // const usd =
-        //   toDisplay(amount.toString(), token.decimals || CW20_DECIMALS) * Number(cachePrices[token?.coinGeckoId] || 0);
-
-        acc.add(
-          new BigDecimal(amount)
-            .mul(new BigDecimal(10).pow(token?.decimals || CW20_DECIMALS))
-            .mul(cachePrices[token.coinGeckoId])
-        );
-
-        return acc;
-      }, new BigDecimal(0));
+      totalEarn.earnIncentive &&
+        Object.values(totalEarn.earnIncentive).forEach((incentive) => {
+          const { amount = 0, token } = incentive as {
+            amount: number;
+            token: TokenItemType;
+          };
+          totalEarnIncentiveUsd = totalEarnIncentiveUsd.add(
+            new BigDecimal(amount)
+              .mul(cachePrices[token.coinGeckoId])
+              .div(new BigDecimal(10).pow(token?.decimals || CW20_DECIMALS))
+          );
+        });
 
       const tokenYDecimal = tokenYinfo.decimals || CW20_DECIMALS;
       const tokenXDecimal = tokenXinfo.decimals || CW20_DECIMALS;
