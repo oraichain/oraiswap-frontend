@@ -276,8 +276,6 @@ const SwapComponent: React.FC<{
       };
 
       let amountsBalance = amounts;
-      let simulateAmount = simulateData.amount;
-
       const { isSpecialFromCoingecko } = getSpecialCoingecko(
         originalFromToken.coinGeckoId,
         originalToToken.coinGeckoId
@@ -302,18 +300,6 @@ const SwapComponent: React.FC<{
         };
       }
 
-      const isInjectiveProtocol =
-        originalToToken.chainId === 'injective-1' && originalToToken.coinGeckoId === 'injective-protocol';
-      const isKawaiiChain = originalToToken.chainId === 'kawaii_6886-1';
-      const isDifferentChainAndNotCosmosBased =
-        originalFromToken.chainId !== originalToToken.chainId &&
-        !originalFromToken.cosmosBased &&
-        !originalToToken.cosmosBased;
-
-      if (isInjectiveProtocol || isKawaiiChain || isDifferentChainAndNotCosmosBased) {
-        simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
-      }
-
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
       const alphaSmartRoutes = useAlphaSmartRouter ? simulateData?.routes : undefined;
 
@@ -322,7 +308,7 @@ const SwapComponent: React.FC<{
         originalFromToken,
         originalToToken,
         fromAmount: fromAmountToken,
-        simulateAmount,
+        simulateAmount: toAmount(simulateData.displayAmount, originalToToken.decimals).toString(),
         userSlippage,
         bridgeFee: 1,
         amounts: amountsBalance,
