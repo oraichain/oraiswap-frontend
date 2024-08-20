@@ -146,6 +146,26 @@ const CreatePosition = () => {
   const [amountFrom, setAmountFrom] = useState<string>('');
 
   useEffect(() => {
+    const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+
+    const tokenXDecimals = isXToY ? tokenFrom?.decimals ?? 6 : tokenTo?.decimals ?? 6;
+    const tokenYDecimals = isXToY ? tokenTo?.decimals ?? 6 : tokenFrom?.decimals ?? 6;
+
+    const tickIndex = nearestTickIndex(
+      priceInfo.startPrice,
+      feeTier.tick_spacing,
+      isXToY,
+      tokenXDecimals,
+      tokenYDecimals
+    );
+
+    setMidPrice({
+      index: tickIndex,
+      x: calcPrice(tickIndex, isXToY, tokenXDecimals, tokenYDecimals)
+    });
+  }, [isXtoY]);
+
+  useEffect(() => {
     if (focusId === 'from') {
       setAmountTo(
         getOtherTokenAmount(
@@ -468,23 +488,46 @@ const CreatePosition = () => {
     tokenTo: TokenItemType | undefined
   ) => {
     if (fee && tokenFrom && tokenTo) {
-      const denom_x = extractDenom(tokenFrom);
-      const denom_y = extractDenom(tokenTo);
-      const token_x = denom_x < denom_y ? denom_x : denom_y;
-      const token_y = denom_x < denom_y ? denom_y : denom_x;
-      const pool = await SingletonOraiswapV3.getPool({
-        fee_tier: fee,
-        token_x: token_x,
-        token_y: token_y
-      });
-      setIsPoolExist(pool !== null);
-      if (pool) {
-        setPoolInfo(pool);
-        setNotInitPoolKey(pool.pool_key);
-      } else {
+      const denom_x = extractAddress(tokenFrom);
+      const denom_y = extractAddress(tokenTo);
+      const token_x = isTokenX(denom_x, denom_y) ? denom_x : denom_y;
+      const token_y = isTokenX(denom_x, denom_y) ? denom_y : denom_x;
+      try {
+        const pool = await SingletonOraiswapV3.getPool({
+          fee_tier: fee,
+          token_x: token_x,
+          token_y: token_y
+        });
+        if (pool) {
+          setPoolInfo(pool);
+          setNotInitPoolKey(pool.pool_key);
+        } else {
+          const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+          const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+          const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
+          const tickIndex = nearestTickIndex(
+            priceInfo.startPrice,
+            feeTier.tick_spacing,
+            isXToY,
+            tokenXDecimals,
+            tokenYDecimals
+          );
+          setMidPrice({
+            index: tickIndex,
+            x: calcPrice(tickIndex, isXtoY, tokenXDecimals, tokenYDecimals)
+          });
+          setNotInitPoolKey({
+            fee_tier: fee,
+            token_x: token_x,
+            token_y: token_y
+          });
+        }
+        setIsPoolExist(pool !== null);
+        return;
+      } catch (error) {
         const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
-        const tokenXDecimals = isXToY ? tokenFrom.decimals : tokenTo.decimals;
-        const tokenYDecimals = isXToY ? tokenTo.decimals : tokenFrom.decimals;
+        const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+        const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
         const tickIndex = nearestTickIndex(
           priceInfo.startPrice,
           feeTier.tick_spacing,
@@ -501,14 +544,16 @@ const CreatePosition = () => {
           token_x: token_x,
           token_y: token_y
         });
+        setIsPoolExist(false);
       }
       return;
+    } else {
+      setIsPoolExist(false);
     }
-    setIsPoolExist(false);
   };
 
   const calcAmount = (amount: TokenAmount, left: number, right: number, tokenAddress: string) => {
-    if (!poolInfo) return BigInt(0); 
+    if (!poolInfo) return BigInt(0);
     if (!tokenFrom || !tokenTo || isNaN(left) || isNaN(right)) {
       return BigInt(0);
     }
@@ -554,7 +599,7 @@ const CreatePosition = () => {
         true
       );
 
-      let [xAmountWithSlippage, ] = calculateTokenAmountsWithSlippage(
+      let [xAmountWithSlippage] = calculateTokenAmountsWithSlippage(
         poolInfo.pool_key.fee_tier.tick_spacing,
         BigInt(poolInfo.pool.sqrt_price),
         positionLiquidity,
@@ -589,8 +634,7 @@ const CreatePosition = () => {
         Number(slippage),
         true
       );
-      
-      
+
       if (isMountedRef.current) {
         liquidityRef.current = result.l;
       }
@@ -713,10 +757,13 @@ const CreatePosition = () => {
 
   useEffect(() => {
     if (poolInfo) {
+      const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
+      const tokenYDecimals = isXtoY ? tokenTo.decimals : tokenFrom.decimals;
+
       setMidPrice({
         index: poolInfo.pool.current_tick_index,
         x:
-          calcYPerXPriceBySqrtPrice(BigInt(poolInfo.pool.sqrt_price), tokenFrom.decimals, tokenTo.decimals) **
+          calcYPerXPriceBySqrtPrice(BigInt(poolInfo.pool.sqrt_price), tokenXDecimals, tokenYDecimals) **
           (isXtoY ? 1 : -1)
       });
     }
@@ -784,11 +831,11 @@ const CreatePosition = () => {
             onChangeRange={changeRangeHandler}
             leftRange={{
               index: leftRange,
-              x: calcPrice(leftRange, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+              x: calcPrice(leftRange, isXtoY, isXtoY ? tokenFrom.decimals : tokenTo.decimals,  isXtoY ? tokenTo.decimals : tokenFrom.decimals)
             }}
             rightRange={{
               index: rightRange,
-              x: calcPrice(rightRange, isXtoY, tokenFrom.decimals, tokenTo.decimals)
+              x: calcPrice(rightRange, isXtoY, isXtoY ? tokenFrom.decimals : tokenTo.decimals,  isXtoY ? tokenTo.decimals : tokenFrom.decimals)
             }}
             midPrice={midPrice}
             plotMin={plotMin}
@@ -799,8 +846,8 @@ const CreatePosition = () => {
             coverOnLoading={true}
             isXtoY={isXtoY}
             tickSpacing={notInitPoolKey.fee_tier.tick_spacing}
-            xDecimal={tokenFrom.decimals}
-            yDecimal={tokenTo.decimals}
+            xDecimal={isXtoY ? tokenFrom.decimals : tokenTo.decimals}
+            yDecimal={isXtoY ? tokenTo.decimals : tokenFrom.decimals}
             isDiscrete={isPlotDiscrete}
             // disabled={positionOpeningMethod === 'concentration'}
             disabled={false}
@@ -816,7 +863,7 @@ const CreatePosition = () => {
           </div>
           <div className={styles.currentPriceValue}>
             <p>
-              <p>{numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: 6 })}</p>
+              <p>{numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: 9 })}</p>
               <p className={styles.pair}>
                 {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
               </p>
