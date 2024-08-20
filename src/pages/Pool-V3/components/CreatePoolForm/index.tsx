@@ -1,4 +1,4 @@
-import { BigDecimal, toAmount, toDisplay, TokenItemType } from '@oraichain/oraidex-common';
+import { BigDecimal, toAmount, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import {
   FeeTier,
   PoolKey,
@@ -701,8 +701,10 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
   }, [isPoolExist, poolData, midPrice, leftRange, rightRange, isXtoY]);
 
   const getButtonMessage = () => {
-    const isInsufficientTo = amountTo && Number(amountTo) > toDisplay(amounts[tokenTo.denom]);
-    const isInsufficientFrom = amountFrom && Number(amountFrom) > toDisplay(amounts[tokenFrom.denom]);
+    const isInsufficientTo =
+      amountTo && Number(amountTo) > toDisplay(amounts[tokenTo.denom], tokenTo.decimals || CW20_DECIMALS);
+    const isInsufficientFrom =
+      amountFrom && Number(amountFrom) > toDisplay(amounts[tokenFrom.denom], tokenFrom.decimals || CW20_DECIMALS);
 
     if (!walletAddress) {
       return 'Connect wallet';
