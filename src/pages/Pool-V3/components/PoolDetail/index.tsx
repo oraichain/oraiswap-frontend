@@ -124,10 +124,6 @@ const PoolV3Detail = () => {
     allocation[pool_key?.token_y]?.balance || 0
   ];
 
-  // const percentX = !(balanceX && balanceY)
-  //   ? MID_PERCENT
-  //   : new BigDecimal(balanceX).div(new BigDecimal(balanceX).add(balanceY)).mul(100).toNumber();
-
   useEffect(() => {
     (async () => {
       try {
@@ -157,6 +153,21 @@ const PoolV3Detail = () => {
 
     return () => {};
   }, [address, poolList, userPositions]);
+
+  const calcShowApr = (apr: number) =>
+    numberWithCommas(apr * 100, undefined, {
+      maximumFractionDigits: 1
+    });
+
+  const showTotalIncentive = () => {
+    if (!aprInfo[poolKeyString]?.incentivesApr) return '--';
+
+    const { min: incentiveMin, max: incentiveMax } = aprInfo[poolKeyString].incentivesApr || { min: 0, max: 0 };
+
+    return incentiveMin === incentiveMax
+      ? calcShowApr(incentiveMax)
+      : `${calcShowApr(incentiveMin)} - ${calcShowApr(incentiveMax)}`;
+  };
 
   return (
     <div className={classNames(styles.poolDetail, 'small_container')}>
@@ -205,7 +216,7 @@ const PoolV3Detail = () => {
               <h1>{formatDisplayUsdt(total || 0)}</h1>
               {/* <span className={classNames(styles.percent, { [styles.positive]: true })}>
               {true ? '+' : '-'}
-              {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 2 })}%
+              {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 1 })}%
             </span> */}
             </div>
             <div className={styles.box}>
@@ -213,7 +224,7 @@ const PoolV3Detail = () => {
               <h1>{formatDisplayUsdt(volumn24h)}</h1>
               {/* <span className={classNames(styles.percent, { [styles.positive]: false })}>
               {false ? '+' : '-'}
-              {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 2 })}%
+              {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 1 })}%
             </span> */}
             </div>
           </div>
@@ -253,7 +264,7 @@ const PoolV3Detail = () => {
               <span>Swap Fee</span>
               <p>
                 {numberWithCommas((aprInfo[poolKeyString]?.swapFee || 0) * 100, undefined, {
-                  maximumFractionDigits: 2
+                  maximumFractionDigits: 1
                 })}
                 %
               </p>
@@ -263,18 +274,21 @@ const PoolV3Detail = () => {
                 Incentive Boost&nbsp;
                 <IconBoots />
               </span>
-              <p>
-                {!aprInfo[poolKeyString]?.incentivesApr
-                  ? '-- '
-                  : `${numberWithCommas(aprInfo[poolKeyString].incentivesApr * 100, undefined, {
-                      maximumFractionDigits: 2
-                    })}%`}
-              </p>
+              <p>{showTotalIncentive()}%</p>
             </div>
             <div className={styles.item}>
               <span>Total APR</span>
               <p className={styles.total}>
-                {numberWithCommas((aprInfo[poolKeyString]?.apr || 0) * 100, undefined, { maximumFractionDigits: 2 })}%
+                {aprInfo[poolKeyString]?.apr.min === aprInfo[poolKeyString]?.apr.max
+                  ? `${numberWithCommas(aprInfo[poolKeyString]?.apr.min * 100, undefined, {
+                      maximumFractionDigits: 1
+                    })}`
+                  : `${numberWithCommas(aprInfo[poolKeyString]?.apr.min * 100, undefined, {
+                      maximumFractionDigits: 1
+                    })} - ${numberWithCommas(aprInfo[poolKeyString]?.apr.max * 100, undefined, {
+                      maximumFractionDigits: 1
+                    })}`}
+                %
               </p>
             </div>
           </div>
@@ -293,12 +307,10 @@ const PoolV3Detail = () => {
                   );
                 })
               : !loading && (
-                  <>
-                    <div className={styles.nodata}>
-                      {theme === 'light' ? <NoData /> : <NoDataDark />}
-                      <span>No Positions!</span>
-                    </div>
-                  </>
+                  <div className={styles.nodata}>
+                    {theme === 'light' ? <NoData /> : <NoDataDark />}
+                    <span>No Positions!</span>
+                  </div>
                 )}
           </div>
         </LoadingBox>

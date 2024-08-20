@@ -11,7 +11,8 @@ import {
   getLiquidityTicksLimit,
   getMaxTickmapQuerySize,
   OraiswapV3Handler,
-  parsePoolKey
+  parsePoolKey,
+  calculateAmountDelta
 } from '@oraichain/oraiswap-v3';
 import { network } from 'config/networks';
 import {
@@ -214,7 +215,7 @@ export default class SingletonOraiswapV3 {
   public static async loadHandler() {
     await this.loadCosmwasmClient();
     if (!this._handler) {
-      this._handler = new OraiswapV3Handler(this._cosmwasmClient);
+      this._handler = new OraiswapV3Handler(this._cosmwasmClient, network.pool_v3);
     }
   }
 
@@ -229,7 +230,7 @@ export default class SingletonOraiswapV3 {
     upperTick: number,
     xToY: boolean
   ): Promise<ArrayOfTupleOfUint16AndUint64> {
-    await this.loadCosmwasmClient();
+    await this.loadHandler();
     const tickmaps = await this._handler.tickMap(poolKey, lowerTick, upperTick, xToY);
     return tickmaps;
   }
@@ -271,6 +272,7 @@ export default class SingletonOraiswapV3 {
     try {
       return await this._handler.getPools();
     } catch (error) {
+      console.log('error', error);
       const pools = await getPools();
       return pools.map((pool) => {
         const poolKey = parsePoolKey(pool.id);
@@ -375,29 +377,48 @@ export default class SingletonOraiswapV3 {
     return { bitmap: storedTickmap };
   }
 
-  public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
-    const ticks: number[] = [];
+  // simulate how much incentive reward user can have in 1 seconds
+  public static async simulateIncentiveReward(owner: string, positionIndex: number): Promise<Record<string, number>> {
     await this.loadHandler();
+    const incentiveSimulations: Record<string, number> = {};
+    const startTime = Date.now();
+    const rewardBefore = await this._handler.positionIncentives(positionIndex, owner);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const rewardAfter = await this._handler.positionIncentives(positionIndex, owner);
+    const endTime = Date.now();
+    const timeDiff = (endTime - startTime) / 1000;
+    rewardAfter.forEach((reward) => {
+      const token = parseAssetInfo(reward.info);
+      const before = rewardBefore.find((r) => parseAssetInfo(r.info) === token);
+      const rewardAmount = BigInt(reward.amount) - BigInt(before.amount);
+      incentiveSimulations[token] =
+        Math.round(Number(rewardAmount) / timeDiff) < 0 ? 0 : Math.round(Number(rewardAmount) / timeDiff);
+    });
 
+    return incentiveSimulations;
+  }
+
+  public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
+    const tickIndexes: number[] = [];
+    await this.loadHandler();
     for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
-      for (let i = 0; i < 64; i++) {
-        if ((chunk & (1n << BigInt(i))) != 0n) {
-          const tickIndex = positionToTick(Number(chunkIndex), i, poolKey.fee_tier.tick_spacing);
-          ticks.push(Number(tickIndex.toString()));
+      for (let bit = 0; bit < CHUNK_SIZE; bit++) {
+        const checkedBit = chunk & (1n << BigInt(bit));
+        if (checkedBit) {
+          const tickIndex = positionToTick(Number(chunkIndex), bit, poolKey.fee_tier.tick_spacing);
+          tickIndexes.push(tickIndex);
         }
       }
     }
+    const tickLimit = LIQUIDITY_TICKS_LIMIT;
+    const promises: Promise<LiquidityTick[]>[] = [];
 
-    const liquidityTicks = await this._handler.liquidityTicks(poolKey, ticks);
-    const convertedLiquidityTicks: LiquidityTick[] = liquidityTicks.map((tickData: any) => {
-      return {
-        index: tickData.index,
-        liquidity_change: BigInt(tickData.liquidity_change),
-        sign: tickData.sign
-      };
-    });
+    for (let i = 0; i < tickIndexes.length; i += tickLimit) {
+      promises.push(this._handler.liquidityTicks(poolKey, tickIndexes.slice(i, i + tickLimit).map(Number)).then(parse));
+    }
 
-    return convertedLiquidityTicks;
+    const tickResults = await Promise.all(promises);
+    return tickResults.flat(1);
   }
 
   public static approveToken = async (token: string, amount: bigint, address: string) => {
@@ -781,7 +802,6 @@ export async function fetchPositionAprInfo(
     const positionLiquidity = position.liquidity;
     const totalPositionLiquidity = tokenXLiquidityInUsd + tokenYLiquidityInUsd;
     const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
-
     sumIncentivesApr +=
       (Number(positionLiquidity) * rewardPerYear) / (Number(currentLiquidity) * totalPositionLiquidity);
   }
@@ -792,11 +812,87 @@ export async function fetchPositionAprInfo(
   };
 }
 
+export function simulateAprPosition(
+  pool: Pool,
+  poolKey: PoolKey,
+  prices: CoinGeckoPrices<string>,
+  totalLiquidity: number
+) {
+  const incentives = pool.incentives;
+
+  // calculate APR for the best, position liquidity is 10% of total liquidity
+  let sumMaxIncentivesApr = 0;
+  const positionLiquidity = 10 ** 24;
+  // const totalPositionLiquidity = (totalLiquidity * 0.5) / 100;
+  const tick_spacing = poolKey.fee_tier.tick_spacing;
+
+  const res = calculateAmountDelta(
+    pool.current_tick_index,
+    BigInt(pool.sqrt_price),
+    BigInt(positionLiquidity),
+    false,
+    pool.current_tick_index + tick_spacing,
+    pool.current_tick_index - tick_spacing ? pool.current_tick_index - tick_spacing : 0
+  );
+
+  const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
+  const tokenY = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_y);
+  const positionLiquidityUsdX = ((prices[tokenX.coinGeckoId] ?? 0) * Number(res.x)) / 10 ** tokenX.decimals;
+  const positionLiquidityUsdY = ((prices[tokenY.coinGeckoId] ?? 0) * Number(res.y)) / 10 ** tokenY.decimals;
+  const totalPositionLiquidityUsd = positionLiquidityUsdX + positionLiquidityUsdY;
+
+  for (const incentive of incentives) {
+    const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
+    const rewardsPerSec = incentive.reward_per_sec;
+    const rewardInUsd = prices[token.coinGeckoId];
+    const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
+    const apr = (positionLiquidity * rewardPerYear) / (totalPositionLiquidityUsd * Number(pool.liquidity));
+    sumMaxIncentivesApr += apr;
+  }
+
+  // calculate APR for the worst, position liquidity is 2% of total liquidity
+  let sumMinIncentivesApr = 0;
+  const positionLiquidity2 = 10 ** 24;
+  
+  const res2 = calculateAmountDelta(
+    pool.current_tick_index,
+    BigInt(pool.sqrt_price),
+    BigInt(positionLiquidity2),
+    false,
+    pool.current_tick_index + tick_spacing * 20,
+    pool.current_tick_index - tick_spacing * 20 ? pool.current_tick_index - tick_spacing * 20 : 0
+  );
+
+  const positionLiquidityUsdX2 = ((prices[tokenX.coinGeckoId] ?? 0) * Number(res2.x)) / 10 ** tokenX.decimals;
+  const positionLiquidityUsdY2 = ((prices[tokenY.coinGeckoId] ?? 0) * Number(res2.y)) / 10 ** tokenY.decimals;
+  const totalPositionLiquidityUsd2 = positionLiquidityUsdX2 + positionLiquidityUsdY2;
+
+  for (const incentive of incentives) {
+    const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
+    const rewardsPerSec = incentive.reward_per_sec;
+    const rewardInUsd = prices[token.coinGeckoId];
+    const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
+    const apr = (positionLiquidity2 * rewardPerYear) / (totalPositionLiquidityUsd2 * Number(pool.liquidity));
+    sumMinIncentivesApr += apr;
+  }
+
+  return {
+    min: sumMinIncentivesApr,
+    max: sumMaxIncentivesApr
+  };
+}
+
 export type PoolAprInfo = {
-  apr: number;
+  apr: {
+    min: number;
+    max: number;
+  };
   incentives: string[];
   swapFee: number;
-  incentivesApr: number;
+  incentivesApr: {
+    min: number;
+    max: number;
+  };
 };
 
 export async function fetchPoolAprInfo(
@@ -821,26 +917,23 @@ export async function fetchPoolAprInfo(
       const poolInfo = await SingletonOraiswapV3.getPool(pool_key);
       pool.incentives = poolInfo.pool.incentives;
     }
-    const incentives = pool.incentives;
 
-    let sumIncentivesApr = 0;
-    for (const incentive of incentives) {
-      const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
-      const rewardsPerSec = incentive.reward_per_sec;
-      const rewardInUsd = prices[token.coinGeckoId];
-      const totalPoolLiquidity = poolLiquidities[poolKeyToString(pool_key)];
-      const rewardPerYear = (rewardInUsd * Number(rewardsPerSec) * 86400 * 365) / 10 ** token.decimals;
-      if (totalPoolLiquidity) sumIncentivesApr += rewardPerYear / totalPoolLiquidity;
-    }
+    const res = simulateAprPosition(pool, pool_key, prices, poolLiquidities[poolKeyToString(pool_key)]);
 
     poolAprs[poolKeyToString(pool_key)] = {
-      apr: sumIncentivesApr + (feeAPR ? feeAPR : 0),
-      incentives: incentives.map((incentive) => {
+      apr: {
+        min: res.min + (feeAPR ? feeAPR : 0),
+        max: res.max + (feeAPR ? feeAPR : 0)
+      },
+      incentives: pool.incentives.map((incentive) => {
         const token = oraichainTokens.find((token) => extractAddress(token) === parseAssetInfo(incentive.reward_token));
         return token.denom.toUpperCase();
       }),
       swapFee: feeAPR ? feeAPR : 0,
-      incentivesApr: sumIncentivesApr
+      incentivesApr: {
+        min: res.min,
+        max: res.max
+      }
     };
   }
 

@@ -112,7 +112,7 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const msgs = totalRewardInfoData.reward_infos
-        .filter((rewardInfo) => rewardInfo.pending_reward !== '0')
+        .filter((rewardInfo) => rewardInfo.pending_reward !== '0' || rewardInfo.pending_withdraw?.length > 0)
         .map(
           (rewardInfo) =>
             ({
@@ -142,7 +142,7 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
     }
   };
 
-  const disabledClaimBtn = !totalRewardInfoData?.reward_infos?.some((info) => +info.pending_reward > 0) || claimLoading;
+  const disabledClaimBtn = !totalClaimable || claimLoading;
   return (
     <div className={styles.header}>
       <div className={styles.header_title}>

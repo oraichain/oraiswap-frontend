@@ -1,4 +1,4 @@
-import { toAmount as toAmountFn, toDisplay, TokenItemType } from '@oraichain/oraidex-common';
+import { toAmount as toAmountFn, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ReactComponent as SwitchIcon } from 'assets/icons/ant_swap_light.svg';
 import classNames from 'classnames';
@@ -13,7 +13,7 @@ import useTheme from 'hooks/useTheme';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import { InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
-import { calculateSqrtPrice, newPoolKey } from '@oraichain/oraiswap-v3';
+import { calculateSqrtPrice, extractAddress, newPoolKey, PoolKey } from '@oraichain/oraiswap-v3';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -170,8 +170,10 @@ const TokenForm = ({
   };
 
   const getButtonMessage = () => {
-    const isInsufficientTo = toAmount && Number(toAmount) > toDisplay(amounts[tokenTo.denom]);
-    const isInsufficientFrom = fromAmount && Number(fromAmount) > toDisplay(amounts[tokenFrom.denom]);
+    const isInsufficientTo =
+      toAmount && Number(toAmount) > toDisplay(amounts[tokenTo.denom], tokenTo.decimals || CW20_DECIMALS);
+    const isInsufficientFrom =
+      fromAmount && Number(fromAmount) > toDisplay(amounts[tokenFrom.denom], tokenFrom.decimals || CW20_DECIMALS);
 
     if (!walletAddress) {
       return 'Connect wallet';
@@ -247,7 +249,7 @@ const TokenForm = ({
                 placeholder="0"
                 thousandSeparator
                 className={styles.amount}
-                decimalScale={6}
+                decimalScale={tokenFrom.decimals || 6}
                 disabled={isFromBlocked}
                 type="text"
                 value={fromAmount}
@@ -303,7 +305,7 @@ const TokenForm = ({
                 placeholder="0"
                 thousandSeparator
                 className={styles.amount}
-                decimalScale={6}
+                decimalScale={tokenTo.decimals || 6}
                 disabled={isToBlocked}
                 type="text"
                 value={toAmount}
@@ -352,15 +354,23 @@ const TokenForm = ({
               onClick={async () => {
                 const lowerTick = Math.min(left, right);
                 const upperTick = Math.max(left, right);
+                const poolKey: PoolKey = newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), fee);
+                // console.log({ fromAmount, fromAmount2: toAmountFn(fromAmount || 0, tokenFrom.decimals || 6) });
                 await addLiquidity({
-                  poolKeyData: newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), fee),
+                  poolKeyData: poolKey,
                   lowerTick: lowerTick,
                   upperTick: upperTick,
                   liquidityDelta: liquidity,
                   spotSqrtPrice: isPoolExist ? BigInt(poolData.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
                   slippageTolerance: BigInt(slippage),
-                  tokenXAmount: toAmountFn(fromAmount || 0, tokenFrom.decimals || 6),
-                  tokenYAmount: toAmountFn(toAmount || 0, tokenTo.decimals || 6),
+                  tokenXAmount:
+                    poolKey.token_x === extractAddress(tokenFrom)
+                      ? BigInt(Math.round(Number(fromAmount) * 10 ** (tokenFrom.decimals || 6)))
+                      : BigInt(Math.round(Number(toAmount) * 10 ** (tokenTo.decimals || 6))),
+                  tokenYAmount:
+                    poolKey.token_y === extractAddress(tokenFrom)
+                      ? BigInt(Math.round(Number(fromAmount) * 10 ** (tokenFrom.decimals || 6)))
+                      : BigInt(Math.round(Number(toAmount) * 10 ** (tokenTo.decimals || 6))),
                   initPool: !isPoolExist
                 });
               }}
