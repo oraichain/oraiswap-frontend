@@ -37,7 +37,11 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     originalToToken
   );
 
-  const [isAvgSimulate, setIsAvgSimulate] = useState<boolean>(false);
+  const [isAvgSimulate, setIsAvgSimulate] = useState({
+    tokenFrom: originalFromToken.coinGeckoId,
+    tokenTo: originalToToken.coinGeckoId,
+    status: false
+  });
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -73,14 +77,33 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
       useIbcWasm,
       isAIRoute,
       protocols,
-      isAvgSimulate
+      isAvgSimulate: isAvgSimulate.status
     }
   );
 
   useEffect(() => {
-    if (isAvgSimulate || !averageSimulateData?.amount) return;
-    if (!isAvgSimulate && !!averageSimulateData?.amount) setIsAvgSimulate(true);
-  }, [averageSimulateData]);
+    const { tokenFrom: currentFrom, tokenTo: currentTo, status: currentStatus } = isAvgSimulate;
+    const { coinGeckoId: fromTokenId } = originalFromToken;
+    const { coinGeckoId: toTokenId } = originalToToken;
+
+    const shouldUpdate = currentFrom !== fromTokenId || currentTo !== toTokenId;
+
+    if (shouldUpdate) {
+      setIsAvgSimulate({
+        tokenFrom: fromTokenId,
+        tokenTo: toTokenId,
+        status: false
+      });
+    }
+
+    if (currentStatus || !averageSimulateData?.amount) return;
+
+    setIsAvgSimulate({
+      tokenFrom: fromTokenId,
+      tokenTo: toTokenId,
+      status: true
+    });
+  }, [averageSimulateData, originalFromToken, originalToToken]);
 
   const fromAmountTokenBalance =
     fromTokenInfoData &&

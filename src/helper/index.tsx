@@ -228,7 +228,7 @@ const transferMsgError = (message: string, info?: InfoError) => {
   const network = info?.chainName
     ? [...evmChains, ...cosmosChains].find((evm) => evm.chainId === info.chainName)?.chainName
     : '';
-  if (message.includes('Insufficient funds to redeem voucher'))
+  if (message.includes('Insufficient funds to redeem voucher') || message.includes('checking balance channel ibc'))
     return `Insufficient ${info?.tokenName ?? ''} liquidity on ${network} Bridge`;
   if (message.includes('user rejected transaction')) return `${network} tokens bridging rejected`;
   if (message.includes('Cannot read property'))
