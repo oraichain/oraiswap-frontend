@@ -163,7 +163,7 @@ export default function InputSwapV4({
                 }}
               >
                 {' '}
-                ( {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}% )
+                (-{numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 1 })}%)
               </span>
             )}
           </div>
