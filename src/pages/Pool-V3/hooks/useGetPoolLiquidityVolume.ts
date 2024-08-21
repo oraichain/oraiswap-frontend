@@ -20,22 +20,24 @@ export const useGetPoolLiquidityVolume = (prices: CoinGeckoPrices<string>) => {
 
   useEffect(() => {
     if (data.length === 0 || prices.length === 0) return;
-    console.log("price", prices);
+    console.log('price', prices);
     data.forEach((item) => {
-    //   if (item.poolDayData.nodes.length > 0) {
+      //   if (item.poolDayData.nodes.length > 0) {
 
-    //       console.log(item.poolDayData.nodes[0].volumeTokenX, item.poolDayData.nodes[0].volumeTokenY, prices[item.tokenX.coingeckoId], prices[item.tokenY.coingeckoId]);
-    //     }
+      //       console.log(item.poolDayData.nodes[0].volumeTokenX, item.poolDayData.nodes[0].volumeTokenY, prices[item.tokenX.coingeckoId], prices[item.tokenY.coingeckoId]);
+      //     }
       setPoolLiquidities((prevState) => ({
         ...prevState,
-        [item.id]: item.totalValueLockedInUSD
+        [item.id]:
+          (item.totalValueLockedTokenX / 10 ** item.tokenX.decimals) * prices[item.tokenX.coingeckoId] +
+          (item.totalValueLockedTokenY / 10 ** item.tokenY.decimals) * prices[item.tokenY.coingeckoId]
       }));
       setPoolVolume((prevState) => ({
         ...prevState,
         [item.id]:
           item.poolDayData.nodes.length > 0
-            ? (item.poolDayData.nodes[0].volumeTokenX / (10 ** (item.tokenX.decimals))) * prices[item.tokenX.coingeckoId] +
-              (item.poolDayData.nodes[0].volumeTokenY / (10 ** (item.tokenY.decimals))) * prices[item.tokenY.coingeckoId]
+            ? (item.poolDayData.nodes[0].volumeTokenX / 10 ** item.tokenX.decimals) * prices[item.tokenX.coingeckoId] +
+              (item.poolDayData.nodes[0].volumeTokenY / 10 ** item.tokenY.decimals) * prices[item.tokenY.coingeckoId]
             : 0
       }));
     });

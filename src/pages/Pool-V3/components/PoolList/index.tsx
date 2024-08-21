@@ -36,7 +36,7 @@ export enum PoolColumnHeader {
 }
 
 const PoolList = ({ search }) => {
-  const [price,] = useConfigReducer('coingecko');
+  const [price] = useConfigReducer('coingecko');
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
@@ -51,6 +51,7 @@ const PoolList = ({ search }) => {
   const [loading, setLoading] = useState(false);
   const [dataPool, setDataPool] = useState([...Array(0)]);
   const [totalVolume, setTotalVolume] = useState(0);
+  const [totalLiquidity, setTotalLiquidity] = useState(0);
   const { feeDailyData } = useGetFeeDailyData();
   const { poolList, poolPrice } = useGetPoolList(price);
   // const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol();
@@ -61,6 +62,7 @@ const PoolList = ({ search }) => {
     (async () => {
       try {
         setLoading(true);
+        if (!(poolList.length > 0 && poolPrice)) return setDataPool([]);
         const fmtPools = (poolList || [])
           .map((p) => {
             const isLight = theme === 'light';
@@ -77,35 +79,6 @@ const PoolList = ({ search }) => {
 
     return () => {};
   }, [theme, poolList, poolPrice]);
-
-  const totalLiquidity = useMemo(() => {
-    if (liquidityPools && Object.values(liquidityPools).length) {
-      return Object.values(liquidityPools).reduce((acc, cur) => Number(acc) + Number(cur), 0);
-    }
-    return 0;
-  }, [liquidityPools]);
-
-  useEffect(() => {
-    if (dataPool.length && Object.values(poolLiquidities).length && Object.values(poolVolume).length) {
-      setLiquidityPools(poolLiquidities);
-      setVolumnePools(
-        Object.keys(poolVolume).map((poolAddress) => {
-          return {
-            apy: 0,
-            poolAddress,
-            fee: 0,
-            volume24: poolVolume[poolAddress],
-            tokenX: null,
-            tokenY: null,
-            tvl: null
-          };
-        })
-      );
-      sortDataSource({
-        [PoolColumnHeader.LIQUIDITY]: SortType.DESC
-      } as any);
-    }
-  }, [dataPool?.length, Object.values(poolLiquidities).length, poolPrice.length, Object.values(poolVolume).length]);
 
   useEffect(() => {
     const getAPRInfo = async () => {
@@ -153,9 +126,7 @@ const PoolList = ({ search }) => {
       .sort((a, b) => {
         switch (sortField) {
           case PoolColumnHeader.LIQUIDITY:
-            return new BigDecimal(CoefficientBySort[sortOrder])
-              .mul((liquidityPools?.[a?.poolKey] || 0) - (liquidityPools?.[b?.poolKey] || 0))
-              .toNumber();
+            return Number(CoefficientBySort[sortOrder]) * ((poolLiquidities?.[a?.poolKey] || 0) - (poolLiquidities?.[b?.poolKey] || 0))
           case PoolColumnHeader.POOL_NAME:
             return CoefficientBySort[sortOrder] * (a?.tokenXinfo?.name || '').localeCompare(b.tokenXinfo?.name || '');
           case PoolColumnHeader.VOLUME:
@@ -175,13 +146,41 @@ const PoolList = ({ search }) => {
     return sortedData;
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     if (Object.values(poolVolume).length > 0) {
       const totalVolume24h = Object.values(poolVolume).reduce((acc, cur) => acc + cur, 0);
-      // console.log('totalVolume24h', poolVolume);
       setTotalVolume(totalVolume24h);
+      setVolumnePools(
+        Object.keys(poolVolume).map((poolAddress) => {
+          return {
+            apy: 0,
+            poolAddress,
+            fee: 0,
+            volume24: poolVolume[poolAddress],
+            tokenX: null,
+            tokenY: null,
+            tvl: null
+          };
+        })
+      );
     }
-  }, [poolVolume, dataPool])
+  }, [poolVolume, dataPool]);
+
+  useEffect(() => {
+    if (Object.values(poolLiquidities).length > 0) {
+      const totalLiqudity = Object.values(poolLiquidities).reduce((acc, cur) => acc + cur, 0);
+      setLiquidityPools(poolLiquidities);
+      setTotalLiquidity(totalLiqudity);
+    }
+  }, [poolLiquidities, dataPool]);
+
+  useEffect(() => {
+    if (Object.values(poolLiquidities).length > 0) {
+      sortDataSource({
+        [PoolColumnHeader.LIQUIDITY]: SortType.DESC
+      } as any);
+    }
+  }, [poolLiquidities]);
 
   const filteredPool = dataPool.filter((p) => {
     if (!search) return true;
@@ -286,8 +285,8 @@ const PoolList = ({ search }) => {
                         <PoolItemTData
                           item={item}
                           theme={theme}
-                          volumn={item.volumn || 0}
-                          liquidity={liquidityPools?.[item?.poolKey]}
+                          volume={poolVolume?.[item?.poolKey] ?? 0}
+                          liquidity={poolLiquidities?.[item?.poolKey] ?? 0}
                           aprInfo={{
                             apr: 0,
                             incentives: [],
@@ -316,7 +315,7 @@ const PoolList = ({ search }) => {
   );
 };
 
-const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
+const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
 
@@ -351,7 +350,7 @@ const PoolItemTData = ({ item, theme, liquidity, volumn, aprInfo }) => {
         </span>
       </td>
       <td className={styles.textRight}>
-        <span className={styles.amount}>{formatDisplayUsdt(volumn)}</span>
+        <span className={styles.amount}>{formatDisplayUsdt(volume)}</span>
       </td>
       <td>
         <div className={styles.apr}>

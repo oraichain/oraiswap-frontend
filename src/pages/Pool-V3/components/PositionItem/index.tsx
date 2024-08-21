@@ -48,8 +48,6 @@ const PositionItem = ({ position }) => {
   const { data: price } = useCoinGeckoPrices();
   const navigate = useNavigate();
 
-  console.log('position', position);
-
   const {
     min,
     max,
