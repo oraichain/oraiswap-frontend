@@ -20,7 +20,6 @@ export const useGetPoolLiquidityVolume = (prices: CoinGeckoPrices<string>) => {
 
   useEffect(() => {
     if (data.length === 0 || prices.length === 0) return;
-    console.log('price', prices);
     data.forEach((item) => {
       //   if (item.poolDayData.nodes.length > 0) {
 
