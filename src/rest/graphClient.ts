@@ -4,6 +4,8 @@ import { gql, GraphQLClient } from 'graphql-request';
 export const INDEXER_V3_URL = network.indexer_v3 ?? 'https://staging-ammv3-indexer.oraidex.io/';
 export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
 
+export const ONE_DAY = 24 * 60 * 60 * 1000;
+
 export const getFeeClaimData = async (address: string) => {
   try {
     const document = gql`
@@ -104,7 +106,7 @@ export type FeeDailyData = {
 };
 
 export const getFeeDailyData = async (): Promise<FeeDailyData[]> => {
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
   try {
     const document = gql`
       {
@@ -142,7 +144,7 @@ export type PoolLiquidityAndVolume = {
 };
 
 export const getPoolsLiquidityAndVolume = async (): Promise<PoolLiquidityAndVolume[]> => {
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
   try {
     const document = gql`
       query {
@@ -166,6 +168,64 @@ export const getPoolsLiquidityAndVolume = async (): Promise<PoolLiquidityAndVolu
     return result.pools.nodes || [];
   } catch (error) {
     console.log('error getPoolsLiquidityAndVolume', error);
+    return [];
+  }
+};
+
+export type PoolLiquidityAndVolumeAmount = {
+  id: string;
+  tokenX: {
+    coingeckoId: string;
+    decimals: number;
+  }
+  tokenY: {
+    coingeckoId: string;
+    decimals: number;
+  }
+  totalValueLockedInUSD: number;
+  totalValueLockedTokenX: number;
+  totalValueLockedTokenY: number;
+  poolDayData: {
+    nodes: {
+      volumeTokenX: number;
+      volumeTokenY: number;
+    }[];
+  };
+};
+
+export const getPoolsLiqudityAndVolumeAmount = async (): Promise<PoolLiquidityAndVolumeAmount[]> => {
+  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
+  try {
+    const document = gql`
+      query {
+        pools {
+          nodes {
+            id
+            tokenX {
+                    coingeckoId
+                    decimals
+                }
+                tokenY {
+                    coingeckoId
+                    decimals
+                }
+            totalValueLockedInUSD
+            totalValueLockedTokenX
+            totalValueLockedTokenY
+            poolDayData(filter: { dayIndex: { equalTo: ${yesterdayIndex} } }, distinct: [ID]) {
+              nodes {
+                volumeTokenX
+                volumeTokenY
+              }
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.pools.nodes || [];
+  } catch (error) {
+    console.log('error getPoolsLiqudityAndVolumeAmount', error);
     return [];
   }
 };

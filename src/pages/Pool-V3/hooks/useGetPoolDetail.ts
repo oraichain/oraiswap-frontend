@@ -38,22 +38,31 @@ export const useGetPoolDetail = (poolKey: string, prices: CoinGeckoPrices<string
     if (data === null) return;
 
     const liquidityDistribution: LiquidityDistribution = {
-      total: Number(data.totalValueLockedInUSD),
+      total:
+        (Number(data.totalValueLockedTokenX) / 10 ** data.tokenX.decimals) * prices[data.tokenX.coingeckoId] +
+        (Number(data.totalValueLockedTokenY) / 10 ** data.tokenY.decimals) * prices[data.tokenY.coingeckoId],
       allocation: {
         [data.tokenX.id]: {
           address: data.id,
           balance: toDisplay(data.totalValueLockedTokenX, data.tokenX.decimals),
-          usdValue: calculateUsdValue(Number(data.totalValueLockedTokenX), prices[data.tokenX.coingeckoId], data.tokenX.decimals)
+          usdValue: calculateUsdValue(
+            Number(data.totalValueLockedTokenX),
+            prices[data.tokenX.coingeckoId],
+            data.tokenX.decimals
+          )
         },
         [data.tokenY.id]: {
           address: data.id,
           balance: toDisplay(data.totalValueLockedTokenY, data.tokenY.decimals),
-          usdValue: calculateUsdValue(Number(data.totalValueLockedTokenY), prices[data.tokenY.coingeckoId], data.tokenY.decimals)
+          usdValue: calculateUsdValue(
+            Number(data.totalValueLockedTokenY),
+            prices[data.tokenY.coingeckoId],
+            data.tokenY.decimals
+          )
         }
       }
     };
     setLiquidityDistribution(liquidityDistribution);
-
   }, [data, prices]);
 
   return {

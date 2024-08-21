@@ -21,7 +21,7 @@ const PositionList = () => {
 
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const { positions, isFetchingPositions } = useGetPositions(address);
-  const { poolList } = useGetPoolList();
+  const { poolList, poolPrice } = useGetPoolList(cachePrices);
   useEffect(() => {
     (async () => {
       try {
@@ -39,7 +39,7 @@ const PositionList = () => {
         const positionsMap = convertPosition({
           positions: positions.map((po, ind) => ({ ...po, ind })),
           poolsData: poolList,
-          cachePrices,
+          cachePrices: poolPrice,
           address,
           isLight,
           feeClaimData
@@ -52,7 +52,7 @@ const PositionList = () => {
     })();
 
     return () => {};
-  }, [address, poolList, positions, isLight, isFetchingPositions]);
+  }, [address, poolList, positions, isLight, isFetchingPositions, poolPrice]);
 
   return (
     <div className={styles.positionList}>

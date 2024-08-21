@@ -778,9 +778,9 @@ export async function fetchPositionAprInfo(
   });
   const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(position.pool_key))?.feeAPR;
 
-  if (pool.pool.incentives === undefined) {
+  if (pool === undefined) {
     const poolInfo = await SingletonOraiswapV3.getPool(position.pool_key);
-    pool.pool.incentives = poolInfo.pool.incentives;
+    pool = poolInfo;
   }
   const incentives = pool.pool.incentives;
 
