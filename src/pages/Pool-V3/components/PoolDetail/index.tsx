@@ -115,7 +115,7 @@ const PoolV3Detail = () => {
     if (poolDetail && poolPrice && liquidity && poolDetail.poolKey === poolKeyString) {
       getAPRInfo();
     }
-  }, [liquidity.total, feeDailyData, poolDetail, poolPrice.length, poolKeyString]);
+  }, [liquidity.total, feeDailyData, poolDetail, poolPrice, poolKeyString]);
 
   const { spread, pool_key } = poolDetail || {};
   const { allocation, total } = liquidity;

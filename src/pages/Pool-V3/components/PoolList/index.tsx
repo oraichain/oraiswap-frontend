@@ -88,7 +88,7 @@ const PoolList = ({ search }) => {
     if (dataPool.length && poolPrice && Object.keys(poolPositionInfo).length) {
       getAPRInfo();
     }
-  }, [dataPool, poolPrice, Object.keys(poolPositionInfo).length, poolPrice]);
+  }, [dataPool, Object.keys(poolPositionInfo).length, poolPrice]);
 
   const [sortField, sortOrder] = Object.entries(sort)[0];
 
