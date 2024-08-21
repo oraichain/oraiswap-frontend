@@ -26,6 +26,7 @@ import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
+import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -35,7 +36,7 @@ export enum PoolColumnHeader {
 }
 
 const PoolList = ({ search }) => {
-  const { data: prices } = useCoinGeckoPrices();
+  const [price,] = useConfigReducer('coingecko');
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
@@ -49,10 +50,12 @@ const PoolList = ({ search }) => {
 
   const [loading, setLoading] = useState(false);
   const [dataPool, setDataPool] = useState([...Array(0)]);
+  const [totalVolume, setTotalVolume] = useState(0);
   const { feeDailyData } = useGetFeeDailyData();
-  const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol();
-  const { poolPositionInfo } = useGetPoolPositionInfo(prices);
-  const { poolList } = useGetPoolList();
+  const { poolList, poolPrice } = useGetPoolList(price);
+  // const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol();
+  const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
+  const { poolPositionInfo } = useGetPoolPositionInfo(poolPrice);
 
   useEffect(() => {
     (async () => {
@@ -73,7 +76,7 @@ const PoolList = ({ search }) => {
     })();
 
     return () => {};
-  }, [theme, poolList]);
+  }, [theme, poolList, poolPrice]);
 
   const totalLiquidity = useMemo(() => {
     if (liquidityPools && Object.values(liquidityPools).length) {
@@ -83,7 +86,7 @@ const PoolList = ({ search }) => {
   }, [liquidityPools]);
 
   useEffect(() => {
-    if (dataPool.length && poolLiquidities) {
+    if (dataPool.length && Object.values(poolLiquidities).length && Object.values(poolVolume).length) {
       setLiquidityPools(poolLiquidities);
       setVolumnePools(
         Object.keys(poolVolume).map((poolAddress) => {
@@ -102,17 +105,17 @@ const PoolList = ({ search }) => {
         [PoolColumnHeader.LIQUIDITY]: SortType.DESC
       } as any);
     }
-  }, [dataPool?.length, Object.values(poolLiquidities).length]);
+  }, [dataPool?.length, Object.values(poolLiquidities).length, poolPrice.length, Object.values(poolVolume).length]);
 
   useEffect(() => {
     const getAPRInfo = async () => {
-      const res = await fetchPoolAprInfo(dataPool, prices, poolPositionInfo, feeDailyData);
+      const res = await fetchPoolAprInfo(dataPool, poolPrice, poolPositionInfo, feeDailyData);
       setAprInfo(res);
     };
-    if (dataPool.length && prices && Object.keys(poolPositionInfo).length) {
+    if (dataPool.length && poolPrice && Object.keys(poolPositionInfo).length) {
       getAPRInfo();
     }
-  }, [dataPool, prices, Object.keys(poolPositionInfo).length]);
+  }, [dataPool, poolPrice, Object.keys(poolPositionInfo).length, poolPrice]);
 
   const [sortField, sortOrder] = Object.entries(sort)[0];
 
@@ -171,11 +174,14 @@ const PoolList = ({ search }) => {
 
     return sortedData;
   };
-  const totalVolume24h = dataPool.reduce((volume, curr) => {
-    const findPool = volumnePools?.find((vo) => vo.poolAddress === curr?.poolKey);
-    if (findPool) volume += findPool.volume24;
-    return volume;
-  }, 0);
+
+  useEffect(() => { 
+    if (Object.values(poolVolume).length > 0) {
+      const totalVolume24h = Object.values(poolVolume).reduce((acc, cur) => acc + cur, 0);
+      // console.log('totalVolume24h', poolVolume);
+      setTotalVolume(totalVolume24h);
+    }
+  }, [poolVolume, dataPool])
 
   const filteredPool = dataPool.filter((p) => {
     if (!search) return true;
@@ -202,8 +208,8 @@ const PoolList = ({ search }) => {
           </div>
           <div className={styles.total}>
             <p>24H volume</p>
-            {totalVolume24h === 0 || totalVolume24h ? (
-              <h1>{formatDisplayUsdt(Number(totalVolume24h))}</h1>
+            {totalVolume ? (
+              <h1>{formatDisplayUsdt(Number(totalVolume))}</h1>
             ) : (
               <img src={Loading} alt="loading" width={32} height={32} />
             )}

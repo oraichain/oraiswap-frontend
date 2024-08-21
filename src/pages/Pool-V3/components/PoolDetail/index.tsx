@@ -33,7 +33,6 @@ const PoolV3Detail = () => {
   const [volumnePools] = useConfigReducer('volumnePools');
   const [cachePrices] = useConfigReducer('coingecko');
 
-  const { data: prices } = useCoinGeckoPrices();
   const navigate = useNavigate();
   const theme = useTheme();
   const { poolId } = useParams<{ poolId: string }>();
@@ -66,20 +65,23 @@ const PoolV3Detail = () => {
   const { feeDailyData } = useGetFeeDailyData();
   const { allPosition } = useGetAllPositions();
   const { positions: userPositions } = useGetPositions(address);
-  const { poolList } = useGetPoolList();
-  const { liquidityDistribution } = useGetPoolDetail(poolKeyString, prices);
+  const { poolList, poolPrice } = useGetPoolList(cachePrices);
+  const { liquidityDistribution } = useGetPoolDetail(poolKeyString, poolPrice);
 
   useEffect(() => {
     (async () => {
       try {
+        if (!(poolList.length && allPosition && poolId)) return;
         if (liquidityDistribution !== null) {
           setLiquidity(liquidityDistribution);
+          return;
         }
-      } catch (error) {
+        
         const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
-        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, prices, allPosition);
-
+        const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, poolPrice, allPosition);
+        
         setLiquidity(liquidity);
+      } catch (error) {
         console.log('error: get pool detail', error);
       } finally {
         if (poolList.length === 0) {
@@ -91,7 +93,7 @@ const PoolV3Detail = () => {
         setPoolDetail(fmtPool);
       }
     })();
-  }, [poolId, allPosition, poolList, theme, prices, poolKeyString, liquidityDistribution]);
+  }, [poolId, allPosition, poolList, theme, poolPrice, poolKeyString, liquidityDistribution]);
 
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
 
@@ -99,7 +101,7 @@ const PoolV3Detail = () => {
     const getAPRInfo = async () => {
       const res = await fetchPoolAprInfo(
         [poolDetail],
-        prices,
+        poolPrice,
         {
           [poolKeyString]: liquidity.total
         },
@@ -111,10 +113,10 @@ const PoolV3Detail = () => {
       });
     };
 
-    if (poolDetail && prices && liquidity && poolDetail.poolKey === poolKeyString) {
+    if (poolDetail && poolPrice && liquidity && poolDetail.poolKey === poolKeyString) {
       getAPRInfo();
     }
-  }, [liquidity, feeDailyData, poolDetail, prices, poolKeyString]);
+  }, [liquidity.total, feeDailyData, poolDetail, poolPrice.length, poolKeyString]);
 
   const { spread, pool_key } = poolDetail || {};
   const { allocation, total } = liquidity;
@@ -128,14 +130,14 @@ const PoolV3Detail = () => {
     (async () => {
       try {
         setLoading(true);
-        if (!address) return setDataPosition([]);
-
+        if (!(poolList.length && userPositions.length && poolPrice && address)) return setDataPosition([]);
+        console.log("call position")
         const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
           positions: userPositions.map((po, ind) => ({ ...po, ind })),
           poolsData: poolList,
-          cachePrices,
+          cachePrices: poolPrice,
           address,
           isLight,
           feeClaimData
@@ -152,7 +154,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [address, poolList, userPositions]);
+  }, [address, poolList, userPositions, poolPrice]);
 
   const calcShowApr = (apr: number) =>
     numberWithCommas(apr * 100, undefined, {
