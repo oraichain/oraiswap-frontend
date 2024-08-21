@@ -30,6 +30,7 @@ interface InputSwapProps {
   onChangePercentAmount?: (coff: number) => void;
   theme: Themes;
   loadingSimulate?: boolean;
+  impactWarning?: number;
 }
 
 export default function InputSwapV4({
@@ -49,7 +50,8 @@ export default function InputSwapV4({
   onChangePercentAmount,
   theme,
   coe,
-  loadingSimulate
+  loadingSimulate,
+  impactWarning
 }: InputSwapProps) {
   const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
   const tokenInfo = flattenTokensWithIcon.find((flattenToken) => flattenToken.coinGeckoId === token.coinGeckoId);
@@ -150,7 +152,20 @@ export default function InputSwapV4({
             />
           </div>
           <div className={cx('usd')}>
-            ≈ ${amount ? numberWithCommas(Number(usdPrice) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+            <span>
+              ≈ ${amount ? numberWithCommas(Number(usdPrice) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+            </span>
+            {!!impactWarning && (
+              <span
+                style={{
+                  paddingLeft: 6,
+                  color: impactWarning > 10 ? '#ff5947' : '#fff'
+                }}
+              >
+                {' '}
+                ( {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}% )
+              </span>
+            )}
           </div>
         </div>
       </div>
