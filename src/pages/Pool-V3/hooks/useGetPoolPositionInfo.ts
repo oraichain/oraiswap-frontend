@@ -8,7 +8,7 @@ export const useGetPoolPositionInfo = (prices: CoinGeckoPrices<string>) => {
   const [poolPositionInfo, setPoolPositionInfo] = useState<Record<string, number>>({});
 
   const { data, refetch: refetchPoolPositionInfo } = useQuery<PoolPositionsInfo[]>(
-    ['pool-v3-pool-positions-info'],
+    ['pool-v3-pool-positions-info', prices],
     () => getPoolPositionsInfo(),
     {
       refetchOnWindowFocus: true,

@@ -170,6 +170,64 @@ export const getPoolsLiquidityAndVolume = async (): Promise<PoolLiquidityAndVolu
   }
 };
 
+export type PoolLiquidityAndVolumeAmount = {
+  id: string;
+  tokenX: {
+    coingeckoId: string;
+    decimals: number;
+  }
+  tokenY: {
+    coingeckoId: string;
+    decimals: number;
+  }
+  totalValueLockedInUSD: number;
+  totalValueLockedTokenX: number;
+  totalValueLockedTokenY: number;
+  poolDayData: {
+    nodes: {
+      volumeTokenX: number;
+      volumeTokenY: number;
+    }[];
+  };
+};
+
+export const getPoolsLiqudityAndVolumeAmount = async (): Promise<PoolLiquidityAndVolumeAmount[]> => {
+  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  try {
+    const document = gql`
+      query {
+        pools {
+          nodes {
+            id
+            tokenX {
+                    coingeckoId
+                    decimals
+                }
+                tokenY {
+                    coingeckoId
+                    decimals
+                }
+            totalValueLockedInUSD
+            totalValueLockedTokenX
+            totalValueLockedTokenY
+            poolDayData(filter: { dayIndex: { equalTo: ${yesterdayIndex} } }, distinct: [ID]) {
+              nodes {
+                volumeTokenX
+                volumeTokenY
+              }
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.pools.nodes || [];
+  } catch (error) {
+    console.log('error getPoolsLiqudityAndVolumeAmount', error);
+    return [];
+  }
+};
+
 export type PositionInfo = {
   liquidity: string;
   tickLower: number;

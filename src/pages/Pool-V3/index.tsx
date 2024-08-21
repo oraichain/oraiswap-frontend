@@ -9,6 +9,7 @@ import PoolList from './components/PoolList';
 import PositionList from './components/PositionList';
 import { useGetPoolList } from './hooks/useGetPoolList';
 import styles from './index.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 export enum PoolV3PageType {
   POOL = 'pools',
@@ -29,12 +30,13 @@ const listTabRender: TabRender[] = [
 
 const PoolV3 = () => {
   const theme = useTheme();
+  const [prices,] = useConfigReducer('coingecko');
   const navigate = useNavigate();
   let [searchParams] = useSearchParams();
   const type = searchParams.get('type') as PoolV3PageType;
   const [search, setSearch] = useState<string>();
   const bgUrl = theme === 'light' ? SearchLightSvg : SearchSvg;
-  const { poolList } = useGetPoolList();
+  const { poolList } = useGetPoolList(prices);
 
   useEffect(() => {
     if (!listTab.includes(type)) {

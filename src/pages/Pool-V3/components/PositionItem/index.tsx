@@ -45,8 +45,10 @@ import { extractAddress } from '@oraichain/oraiswap-v3';
 const PositionItem = ({ position }) => {
   const theme = useTheme();
   const ref = useRef();
-  const { data: prices } = useCoinGeckoPrices();
+  const { data: price } = useCoinGeckoPrices();
   const navigate = useNavigate();
+
+  console.log('position', position);
 
   const {
     min,
@@ -67,7 +69,6 @@ const PositionItem = ({ position }) => {
   const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
 
   const [address] = useConfigReducer('address');
-  const [cachePrices] = useConfigReducer('coingecko');
 
   const [openTooltip, setOpenTooltip] = useState(false);
   const [openTooltipApr, setOpenTooltipApr] = useState(false);
@@ -87,7 +88,7 @@ const PositionItem = ({ position }) => {
 
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
-  const { poolList } = useGetPoolList();
+  const { poolList, poolPrice } = useGetPoolList(price);
   const { simulation } = useGetIncentiveSimulate(address, position.id);
 
   useOnClickOutside(ref, () => {
@@ -105,7 +106,7 @@ const PositionItem = ({ position }) => {
       const res = await fetchPositionAprInfo(
         poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key)),
         position,
-        prices,
+        poolPrice,
         position.tokenXLiqInUsd,
         position.tokenYLiqInUsd,
         statusRange,
@@ -113,10 +114,10 @@ const PositionItem = ({ position }) => {
       );
       setAprInfo(res);
     };
-    if (statusRange && position.tokenXLiqInUsd && position.tokenYLiqInUsd && prices && position) {
+    if (statusRange && position.tokenXLiqInUsd && position.tokenYLiqInUsd && poolPrice && position && poolList.length > 0) {
       getAPRInfo();
     }
-  }, [statusRange, prices, position, poolList, feeDailyData]);
+  }, [statusRange, poolPrice, position, poolList, feeDailyData]);
 
   useEffect(() => {
     if (!openCollapse) return;
@@ -151,17 +152,20 @@ const PositionItem = ({ position }) => {
     })();
 
     return () => {};
-  }, [openCollapse]);
+  }, [openCollapse, poolPrice]);
 
   useEffect(() => {
     (async () => {
+      if (poolList.length === 0) return;
+      if (position === undefined) return;
+
       const { pool } = poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key));
       const { lower_tick_index, upper_tick_index } = position;
       setStatusRange(pool.current_tick_index >= lower_tick_index && pool.current_tick_index <= upper_tick_index);
     })();
 
     return () => {};
-  }, []);
+  }, [position, poolList.length]);
 
   useEffect(() => {
     if (Object.keys(simulation).length > 0 && openCollapse && incentives) {
@@ -194,15 +198,15 @@ const PositionItem = ({ position }) => {
       const x_claim = +printBigint(bnX, position.tokenX.decimals);
       const y_claim = +printBigint(bnY, position.tokenY.decimals);
 
-      const x_usd = x_claim * cachePrices[position.tokenX.coinGeckoId];
-      const y_usd = y_claim * cachePrices[position.tokenY.coinGeckoId];
+      const x_usd = x_claim * poolPrice[position.tokenX.coinGeckoId];
+      const y_usd = y_claim * poolPrice[position.tokenY.coinGeckoId];
 
       let totalIncentiveUsd = new BigDecimal(0);
       Object.keys(incentives).forEach((address) => {
         const token = oraichainTokens.find((e) => address === extractAddress(e));
         totalIncentiveUsd = totalIncentiveUsd.add(
           new BigDecimal(incentives[address])
-            .mul(cachePrices[token.coinGeckoId])
+            .mul(poolPrice[token.coinGeckoId])
             .div(new BigDecimal(10).pow(token.decimals || CW20_DECIMALS))
         );
       });
@@ -211,7 +215,7 @@ const PositionItem = ({ position }) => {
     }
 
     return [0, 0, 0, 0, 0];
-  }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess, incentives, cachePrices]);
+  }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess, incentives, poolPrice]);
 
   return (
     <div ref={ref} className={styles.positionItem}>
