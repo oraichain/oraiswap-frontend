@@ -44,7 +44,7 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
       }
     }
     setPrices(newPrice);
-  }, [poolList.length]);
+  }, [poolList]);
 
   return {
     poolList,

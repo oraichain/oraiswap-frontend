@@ -168,7 +168,7 @@ const PositionItem = ({ position }) => {
     })();
 
     return () => {};
-  }, [position, poolList.length]);
+  }, [position, poolList]);
 
   useEffect(() => {
     if (Object.keys(simulation).length > 0 && openCollapse && incentives) {

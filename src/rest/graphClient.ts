@@ -4,6 +4,8 @@ import { gql, GraphQLClient } from 'graphql-request';
 export const INDEXER_V3_URL = network.indexer_v3 ?? 'https://staging-ammv3-indexer.oraidex.io/';
 export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
 
+export const ONE_DAY = 24 * 60 * 60 * 1000;
+
 export const getFeeClaimData = async (address: string) => {
   try {
     const document = gql`
@@ -104,7 +106,7 @@ export type FeeDailyData = {
 };
 
 export const getFeeDailyData = async (): Promise<FeeDailyData[]> => {
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
   try {
     const document = gql`
       {
@@ -142,7 +144,7 @@ export type PoolLiquidityAndVolume = {
 };
 
 export const getPoolsLiquidityAndVolume = async (): Promise<PoolLiquidityAndVolume[]> => {
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
   try {
     const document = gql`
       query {
@@ -192,7 +194,7 @@ export type PoolLiquidityAndVolumeAmount = {
 };
 
 export const getPoolsLiqudityAndVolumeAmount = async (): Promise<PoolLiquidityAndVolumeAmount[]> => {
-  const yesterdayIndex = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) - 1;
+  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
   try {
     const document = gql`
       query {

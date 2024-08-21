@@ -52,7 +52,7 @@ const PositionList = () => {
     })();
 
     return () => {};
-  }, [address, poolList.length, positions, isLight, isFetchingPositions, poolPrice]);
+  }, [address, poolList, positions, isLight, isFetchingPositions, poolPrice]);
 
   return (
     <div className={styles.positionList}>
