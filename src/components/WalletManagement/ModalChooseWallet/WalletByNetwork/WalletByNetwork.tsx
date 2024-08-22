@@ -39,11 +39,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
 
   const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType | 'eip191' | 'sso') => {
     try {
-      // if (walletType === 'sso') {
-      //   const res = await triggerLogin();
-      //   console.log('res', res);
-      //   return;
-      // }
       window.Keplr = new Keplr(walletType);
       setStorageKey('typeWallet', walletType);
       await initClient();
@@ -93,7 +88,15 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setBtcAddress(btcAddress);
   };
 
-  const callbackLoginSSO = () => {
+  const callbackLoginSSO = async () => {
+    const oraiAddr = window.PrivateKeySigner.getWalletAddress();
+    console.log('first', oraiAddr);
+    setOraiAddress(oraiAddr);
+
+    const { listAddressCosmos } = await getListAddressCosmos(oraiAddr, 'sso');
+
+    setCosmosAddress(listAddressCosmos);
+
     setWalletByNetworks({
       ...walletByNetworks,
       cosmos: 'sso'
@@ -103,8 +106,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setConnectStatus('init');
   };
 
-  // const { loginSSO } = useSSO(callbackLoginSSO);
-
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
     try {
       // case connect SSO
@@ -112,10 +113,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
         setConnectStatus('loading');
 
         const res = await triggerLogin();
-        console.log('res', res);
 
         if (res) {
-          callbackLoginSSO();
+          await callbackLoginSSO();
         }
         return;
       }

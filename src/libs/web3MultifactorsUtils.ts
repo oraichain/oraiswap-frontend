@@ -1,27 +1,23 @@
-import type { JsonObject } from '@cosmjs/cosmwasm-stargate';
-import {
-  AccountData,
-  DirectSecp256k1Wallet,
-  DirectSignResponse,
-  OfflineDirectSigner,
-  type Coin
-} from '@cosmjs/proto-signing';
+import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import { toBech32 } from '@cosmjs/encoding';
+import { AccountData, DirectSecp256k1Wallet, OfflineDirectSigner } from '@cosmjs/proto-signing';
+import { NetworkChainId } from '@oraichain/oraidex-common';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-
+import initBLS from '@oraichain/blsdkg';
 import { OraiServiceProvider } from '@oraichain/service-provider-orai';
-import { onlySocialKey } from 'okey';
+import { chainInfos } from 'config/chainInfos';
+import { network } from 'config/networks';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { onlySocialKey } from 'okey';
+import { getCosmWasmClient as getCosmWasmClientOrigin } from './cosmjs';
 
 export const SSO_URL = 'https://sso.orai.io';
-// export const SSO_CALLBACK = 'https://oraidex.io';
-// export const SSO_URL = 'http://localhost:3003';
 export const SSO_CALLBACK = 'http://localhost:3000';
 
 export const initSSO = async () => {
   // Initialization of Service Provider
   try {
-    // initBLS();
+    await initBLS('/blsdkg_bg.wasm');
     await (onlySocialKey.serviceProvider as OraiServiceProvider).init();
   } catch (error) {
     console.error(error);
@@ -39,14 +35,13 @@ export const triggerLogin = async () => {
       verifier: 'tkey-google'
     });
 
-    const offlineSigner = await DirectSecp256k1Wallet.fromKey(Buffer.from(loginResponse?.privateKey, 'hex'), 'orai');
-    const sender = await offlineSigner.getAccounts();
-    console.log({ sender });
-    console.log(offlineSigner);
-    offlineSigner;
-    console.log({ loginResponse });
+    const privateKeySigner = await PrivateKeySigner.createFromPrivateKey(loginResponse?.privateKey);
 
-    return loginResponse;
+    window.PrivateKeySigner = privateKeySigner;
+    const cosmWasmClient = await getCosmWasmClientOrigin({ signer: privateKeySigner, chainId: network.chainId });
+    if (cosmWasmClient?.client) window.client = cosmWasmClient.client;
+
+    return privateKeySigner;
   } catch (error) {
     console.log({ error });
   }
@@ -110,22 +105,6 @@ export enum ActionSSO {
   SSO_EXECUTE_MULTIPLE = 'sso-oraidex-execute-multiple'
 }
 
-export interface ExecuteInstruction {
-  contractAddress: string;
-  msg: JsonObject;
-  funds?: readonly Coin[];
-}
-export interface InputExecuteSSO {
-  chainId: string;
-  contractAddress: string;
-  params: any;
-  fee?: any;
-  funds?: readonly Coin[];
-  gasAmount: Coin;
-  gasLimits?: { exec: number };
-  memo?: string;
-}
-
 // UIModel
 export interface UIHandler {
   dispatch: (action: string, data?: any) => Promise<boolean>;
@@ -141,7 +120,7 @@ export class PrivateKeySigner implements OfflineDirectSigner {
     this.pubkey = accountData.pubkey;
   }
 
-  async createFromPrivateKey(privateKey: string | Buffer | Uint8Array, UIHandler?: UIHandler) {
+  static async createFromPrivateKey(privateKey: string | Buffer | Uint8Array, UIHandler?: UIHandler) {
     let privateKeyBuffer;
     privateKeyBuffer = privateKey;
     if (typeof privateKey === 'string') {
@@ -152,8 +131,28 @@ export class PrivateKeySigner implements OfflineDirectSigner {
     return new PrivateKeySigner(signer, accountData, UIHandler);
   }
 
+  getCosmWasmClient = async () => {
+    try {
+      const cosmWasmClient = await getCosmWasmClientOrigin({ signer: this, chainId: network.chainId });
+      return cosmWasmClient;
+    } catch (error) {
+      console.error('error getCosmwasmClient: ', error);
+    }
+  };
+
+  async getKeplrAddr(chainId?: NetworkChainId): Promise<string | undefined> {
+    chainId = chainId ?? network.chainId;
+    try {
+      const curNetwork = chainInfos.find((chain) => chain.chainId === chainId);
+      const address = window.PrivateKeySigner.getWalletAddress(curNetwork.bech32Config?.bech32PrefixAccAddr || 'orai');
+      return address;
+    } catch (ex) {
+      console.log(ex, chainId);
+    }
+  }
+
   getWalletAddress(prefix: string = 'orai') {
-    return toBech32(prefix, this.pubkey);
+    return toBech32(prefix, rawSecp256k1PubkeyToRawAddress(this.pubkey));
   }
 
   getAccounts() {

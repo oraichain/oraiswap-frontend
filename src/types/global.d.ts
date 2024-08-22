@@ -12,6 +12,7 @@ import { Class } from '@oraichain/common-contracts-sdk/build/CwIcs721Bridge.type
 import Bitcoin, { IBitcoin } from 'libs/bitcoin';
 import OnlySocialKey from '@oraichain/only-social-key';
 import ThresholdKey from '@oraichain/default';
+import { PrivateKeySigner } from 'libs/web3MultifactorsUtils';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -119,6 +120,7 @@ declare global {
     Wallet: Wallet;
     Keplr: Keplr;
     Bitcoin: Bitcoin;
+    PrivateKeySigner: PrivateKeySigner;
     tronWeb: _TronWeb;
     tronLink: TronLink;
     ethereum: MetaMaskEthereumProvider;

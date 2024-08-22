@@ -9,8 +9,6 @@ import Metamask from 'libs/metamask';
 
 import Bitcoin from 'libs/bitcoin';
 import { initSSO } from 'libs/web3MultifactorsUtils';
-import initBLS from '@oraichain/blsdkg';
-initBLS('/blsdkg_bg.wasm');
 
 // polyfill
 Tendermint37Client.detectVersion = () => {};

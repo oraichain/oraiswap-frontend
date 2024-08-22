@@ -165,7 +165,7 @@ export const addNumber = (number1: number, number2: number) => {
 export const handleCheckWallet = async () => {
   const walletType = getWalletByNetworkCosmosFromStorage();
   const keplr = await window.Keplr.getKeplr();
-  if (!keplr && walletType !== 'eip191') {
+  if (!keplr && !['eip191', 'sso'].includes(walletType)) {
     return displayInstallWallet();
   }
 };
@@ -271,7 +271,7 @@ export const setStorageKey = (key = 'typeWallet', value) => {
 };
 
 // TECH DEBT: need to update WalletTypeCosmos add type eip191 to oraidex-common
-export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): WalletCosmosType | 'eip191' => {
+export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): WalletCosmosType | 'eip191' | 'sso' => {
   try {
     if (isMobile()) return 'owallet';
 
@@ -405,7 +405,10 @@ export const getAddressTransfer = async (network: CustomChainInfo, walletByNetwo
       address = await getAddressTransferForEvm(walletByNetworks, network);
     } else if (isConnectSpecificNetwork(walletByNetworks.cosmos)) {
       // walletByNetworks.cosmos ==='sso' ? :
-      address = await window.Keplr.getKeplrAddr(network.chainId);
+      address =
+        walletByNetworks.cosmos === 'sso'
+          ? window.PrivateKeySigner.getWalletAddress(network.bech32Config?.bech32PrefixAccAddr || 'orai')
+          : await window.Keplr.getKeplrAddr(network.chainId);
     }
     return address;
   } catch (error) {
@@ -431,7 +434,7 @@ export const genAddressCosmos = (info, address60, address118) => {
 };
 
 export const getListAddressCosmos = async (oraiAddr, walletType?: WalletCosmosType | 'eip191' | 'sso') => {
-  if (walletType === 'eip191' || walletType === 'sso') {
+  if (walletType === 'eip191') {
     return {
       listAddressCosmos: {
         Oraichain: oraiAddr
@@ -440,6 +443,20 @@ export const getListAddressCosmos = async (oraiAddr, walletType?: WalletCosmosTy
   }
 
   let listAddressCosmos = {};
+  if (walletType === 'sso') {
+    const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
+    for (const info of cosmosNetworks) {
+      if (!info) continue;
+      console.log('cosmosNetworks', info);
+      const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);
+      listAddressCosmos = {
+        ...listAddressCosmos,
+        [info.chainId]: cosmosAddress
+      };
+    }
+    return { listAddressCosmos };
+  }
+
   const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
   for (const info of cosmosNetworks) {
     if (!info) continue;

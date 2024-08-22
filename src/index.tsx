@@ -20,6 +20,7 @@ import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import { initSSO, triggerLogin } from 'libs/web3MultifactorsUtils';
 
 // const client = new Client({
 //   url: 'http://10.10.20.72:3000/',
@@ -89,7 +90,14 @@ const initApp = async () => {
 
   // init cosmwasm client when user connected cosmos wallet
   const walletType = getWalletByNetworkCosmosFromStorage();
+  // await initSSO();
+
   if (walletType) {
+    // if (walletType === 'sso') {
+    //   console.log('95', 95);
+    //   await triggerLogin();
+    //   return;
+    // }
     const cosmWasmClient = await getCosmWasmClient({ chainId: network.chainId });
     if (cosmWasmClient?.client) window.client = cosmWasmClient.client;
   }

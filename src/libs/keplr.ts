@@ -7,6 +7,7 @@ import { chainInfos, OraiBTCBridgeNetwork } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { getAddress, getAddressByEIP191 } from 'helper';
 import { EIP_EIP_STORAGE_KEY_ACC, MetamaskOfflineSigner } from './eip191';
+import { add } from 'lodash';
 
 export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
@@ -33,8 +34,8 @@ export default class Keplr extends CosmosWallet {
         return window.owallet ?? window.keplr;
       case 'keplr':
         return window.keplr;
-      case 'eip191':
       case 'sso':
+      case 'eip191':
       case 'leapSnap':
         return null;
       default:
@@ -134,6 +135,14 @@ export default class Keplr extends CosmosWallet {
           return getAddress(oraiAddress, 'oraib');
         }
         return getAddressByEIP191();
+      }
+
+      if (this.typeWallet === 'sso') {
+        const curNetwork = chainInfos.find((chain) => chain.chainId === chainId);
+        const address = window.PrivateKeySigner.getWalletAddress(
+          curNetwork.bech32Config?.bech32PrefixAccAddr || 'orai'
+        );
+        return address;
       }
 
       const isEnableKeplr = await this.getKeplr();

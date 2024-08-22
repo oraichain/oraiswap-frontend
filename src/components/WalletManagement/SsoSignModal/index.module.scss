@@ -1,0 +1,93 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+@import 'src/styles/variables';
+
+.ml {
+  margin-left: 12px;
+  margin-right: 10px;
+}
+
+.connected_container {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 99px;
+
+  &:hover {
+    @include theme() {
+      background-color: theme-get('neutral-border-border-bold');
+    }
+  }
+
+  padding-right: 8px;
+  padding-left: 8px;
+
+  .wallet_icon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 50%;
+    padding: 7px;
+    border: 1px solid;
+    margin-left: -8px;
+
+    @include theme() {
+      border-color: theme-get('neutral-border-border-bold');
+      background-color: theme-get('neutral-surface-bg-section-2');
+    }
+  }
+
+  & > .wallet_icon:first-child {
+    margin-left: 0;
+  }
+
+  .down_icon {
+    @include medium-desktop {
+      display: none;
+    }
+  }
+
+  .content {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    flex: 1;
+    margin-left: 12px;
+    margin-right: 10px;
+
+    .label-start {
+      font-size: 16px;
+      color: #232521;
+      color: var(--colors-neutral-text-text-btn-default, #163300);
+    }
+
+    .title {
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      color: #494949;
+
+      white-space: nowrap;
+    }
+
+    .money {
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 600;
+      color: #232521;
+    }
+  }
+}
+
+.dark {
+  .content {
+    .title {
+      color: #efefef;
+    }
+
+    .money {
+      color: #f7f7f7;
+    }
+  }
+}

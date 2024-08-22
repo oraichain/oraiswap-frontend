@@ -334,7 +334,16 @@ const SwapComponent: React.FC<{
 
       // @ts-ignore
       const univeralSwapHandler = new UniversalSwapHandler(swapData, {
-        cosmosWallet: window.Keplr,
+        cosmosWallet: walletByNetworks.cosmos === 'sso' ? window.PrivateKeySigner : window.Keplr,
+        evmWallet: new Metamask(window.tronWebDapp),
+        swapOptions: {
+          isAlphaSmartRouter: useAlphaSmartRouter,
+          isIbcWasm: useIbcWasm
+        }
+      });
+
+      console.log('first', swapData, {
+        cosmosWallet: walletByNetworks.cosmos === 'sso' ? window.PrivateKeySigner : window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
           isAlphaSmartRouter: useAlphaSmartRouter,
