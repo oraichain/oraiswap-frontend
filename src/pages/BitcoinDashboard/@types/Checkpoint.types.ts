@@ -33,10 +33,14 @@ export interface WithdrawalFeeInterface {
   withdrawal_fees: number;
 }
 
+export interface CheckpointFeeInterface {
+  checkpoint_fees: number;
+}
+
 export enum CheckpointStatus {
-  Building = 'Building',
-  Signing = 'Signing',
-  Complete = 'Complete'
+  Building = 'building',
+  Signing = 'signing',
+  Complete = 'complete'
 }
 
 export interface SigsetInterface {

@@ -8,7 +8,7 @@ import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
-import { useGetPendingDeposits } from '../../hooks/relayer.hook';
+import { useGetPendingDeposits } from '../../hooks/lcd.hook';
 import { CheckpointStatus, DepositInfo, TransactionParsedInput } from '../../@types';
 import { useEffect } from 'react';
 import { useGetCheckpointData, useGetCheckpointQueue, useGetDepositFee } from 'pages/BitcoinDashboard/hooks';
@@ -162,12 +162,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       sortField: 'amount',
       accessor: (data) => (
         <span>
-          {(
-            toDisplay(BigInt(data.amount || 0), 8) -
-            fee.relayerFee -
-            toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)
-          ).toFixed(6)}{' '}
-          BTC
+          {(data.amount - fee.relayerFee - toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)).toFixed(6)} BTC
         </span>
       )
     },

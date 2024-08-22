@@ -25,12 +25,10 @@ interface ModalProps {
   isOpen: boolean;
   open: () => void;
   close: () => void;
-  handleRecoveryAddress: () => void;
-  addressRecovery: string;
   prices: CoinGeckoPrices<string>;
 }
 
-const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAddress, addressRecovery, prices }) => {
+const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, prices }) => {
   const [theme] = useConfigReducer('theme');
   const { isCopied, setIsCopied } = useCopy();
   const [urlQRCode, setUrlQRCode] = useState(null);
@@ -135,18 +133,6 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
           </div>
           <span>Warning: Register recovery address for automatic refund once original transaction fail.</span>
         </div>
-        {addressRecovery ? (
-          <div className={styles.recovery}>
-            <span>
-              Your recovery BTC Address is:
-              <b> {reduceString(addressRecovery, 10, 10)}</b>
-            </span>
-          </div>
-        ) : (
-          <div className={styles.btn} onClick={handleRecoveryAddress}>
-            <div>Set Recovery Address</div>
-          </div>
-        )}
 
         <div className={styles.btn} onClick={close}>
           <div>Close</div>

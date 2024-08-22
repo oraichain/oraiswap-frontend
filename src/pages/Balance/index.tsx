@@ -109,25 +109,11 @@ const Balance: React.FC<BalanceProps> = () => {
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
-  const [addressRecovery, setAddressRecovery] = useState('');
 
   const ref = useRef(null);
   //@ts-ignore
   const isOwallet = window.owallet?.isOwallet;
-  const getAddress = async () => {
-    try {
-      await nomic.generateAddress();
-      const addressRecovered = await nomic.getRecoveryAddress();
-      setAddressRecovery(addressRecovered);
-    } catch (error) {
-      console.log('🚀 ~ getAddress ~ error:', error);
-    }
-  };
-  useEffect(() => {
-    if (isOwallet) {
-      getAddress();
-    }
-  }, [oraiAddress, isOwallet]);
+
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
   });
@@ -166,45 +152,6 @@ const Balance: React.FC<BalanceProps> = () => {
     setTxHash(result.transactionHash);
   };
 
-  const handleRecoveryAddress = async () => {
-    try {
-      const btcAddr = await window.Bitcoin.getAddress();
-      if (!btcAddr) throw Error('Not found your bitcoin address!');
-      // @ts-ignore-check
-      const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
-
-      if (btcAddr && addressRecovery !== btcAddr && oraiBtcAddress) {
-        const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
-        const signDoc = {
-          account_number: accountInfo?.account?.account_number,
-          chain_id: OraiBtcSubnetChain.chainId,
-          fee: { amount: [{ amount: '0', denom: 'uoraibtc' }], gas: '10000' },
-          memo: '',
-          msgs: [
-            {
-              type: 'nomic/MsgSetRecoveryAddress',
-              value: {
-                recovery_address: btcAddr
-              }
-            }
-          ],
-          sequence: accountInfo?.account?.sequence
-        };
-        const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
-        const tx = makeStdTx(signDoc, signature.signature);
-        const tmClient = await Tendermint37Client.connect(config.rpcUrl);
-
-        const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
-        await getAddress();
-        //@ts-ignore
-        displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
-          message: result?.log
-        });
-      }
-    } catch (error) {
-      handleErrorTransaction(error);
-    }
-  };
   const onClickToken = useCallback(
     (token: TokenItemType) => {
       if (isEqual(from, token)) {
@@ -374,7 +321,6 @@ const Balance: React.FC<BalanceProps> = () => {
     const btcAddr = await window.Bitcoin.getAddress();
     if (!btcAddr) throw Error('Not found your bitcoin address!');
     if (isBTCToOraichain) {
-      await handleRecoveryAddress();
       return handleTransferBTCToOraichain(fromToken, transferAmount, btcAddr);
     }
     return handleTransferOraichainToBTC(fromToken, transferAmount, btcAddr);
@@ -709,8 +655,6 @@ const Balance: React.FC<BalanceProps> = () => {
         <DepositBtcModal
           prices={prices}
           isOpen={isDepositBtcModal}
-          addressRecovery={addressRecovery}
-          handleRecoveryAddress={handleRecoveryAddress}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
         />
