@@ -7,6 +7,7 @@ import { Stargate } from '@injectivelabs/sdk-ts';
 import { network } from 'config/networks';
 import { MetamaskOfflineSigner } from './eip191';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
+import { ActionSSO, SSO_URL, ssoExecute, ssoExecuteMultiple } from './ssoWallet';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
@@ -64,14 +65,29 @@ class CosmJs {
     address: string;
     handleMsg: cosmwasm.ExecuteInstruction;
     funds?: readonly Coin[];
-    gasAmount: Coin;
-    gasLimits?: { exec: number };
     memo?: string;
   }) {
     try {
       const walletType = this.getWalletByFromStorage();
       const keplr = await window.Keplr.getKeplr();
-      if (keplr || (walletType && walletType === 'eip191')) {
+      if (keplr || (walletType && ['eip191', 'sso'].includes(walletType))) {
+        if (walletType === 'sso') {
+          const result = await ssoExecute(
+            {
+              chainId: network.chainId || 'Oraichain',
+              contractAddress: data.address,
+              params: data.handleMsg,
+              funds: data.funds,
+              fee: 'auto',
+              memo: data.memo
+            },
+            ActionSSO.SSO_EXECUTE
+          );
+
+          console.log('result', result);
+          return result;
+        }
+
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.execute(
           data.walletAddr,
@@ -102,7 +118,21 @@ class CosmJs {
     try {
       const walletType = this.getWalletByFromStorage();
       const keplr = await window.Keplr.getKeplr();
-      if (keplr || (walletType && walletType === 'eip191')) {
+      if (keplr || (walletType && ['eip191', 'sso'].includes(walletType))) {
+        if (walletType === 'sso') {
+          const result = await ssoExecuteMultiple(
+            {
+              data: data.msgs,
+              fee: 'auto',
+              memo: data.memo
+            },
+            ActionSSO.SSO_EXECUTE_MULTIPLE
+          );
+
+          console.log('result', result);
+          return result;
+        }
+
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto', data.memo);
         return {

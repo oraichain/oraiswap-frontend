@@ -404,6 +404,7 @@ export const getAddressTransfer = async (network: CustomChainInfo, walletByNetwo
     if (network.networkType === 'evm') {
       address = await getAddressTransferForEvm(walletByNetworks, network);
     } else if (isConnectSpecificNetwork(walletByNetworks.cosmos)) {
+      // walletByNetworks.cosmos ==='sso' ? :
       address = await window.Keplr.getKeplrAddr(network.chainId);
     }
     return address;
@@ -429,8 +430,8 @@ export const genAddressCosmos = (info, address60, address118) => {
   return { cosmosAddress };
 };
 
-export const getListAddressCosmos = async (oraiAddr, walletType?: WalletCosmosType | 'eip191') => {
-  if (walletType === 'eip191') {
+export const getListAddressCosmos = async (oraiAddr, walletType?: WalletCosmosType | 'eip191' | 'sso') => {
+  if (walletType === 'eip191' || walletType === 'sso') {
     return {
       listAddressCosmos: {
         Oraichain: oraiAddr

@@ -98,12 +98,14 @@ export const WalletItem = ({
           className={`${styles.walletItem} ${styles[theme]} ${isActive ? null : styles.disabled}`}
           onClick={handleClickWalletItem}
         >
-          <div className={styles.loadingIcon}>
-            <span>
-              <Lottie animationData={OraiDEXLoadingBlack} />
-            </span>
+          <div className={styles.top}>
+            <div className={styles.loadingIcon}>
+              <span>
+                <Lottie animationData={OraiDEXLoadingBlack} />
+              </span>
+            </div>
+            <div className={styles.walletName}>{wallet.name + (wallet.suffixName || '')}</div>
           </div>
-          <div className={styles.walletName}>{wallet.name + (wallet.suffixName || '')}</div>
           {connectWalletButton}
         </div>
       ) : (
@@ -111,10 +113,12 @@ export const WalletItem = ({
           className={`${styles.walletItem} ${styles[theme]} ${isActive ? null : styles.disabled}`}
           onClick={handleClickWalletItem}
         >
-          <div className={styles.walletIcon}>
-            <wallet.icon />
+          <div className={styles.top}>
+            <div className={styles.walletIcon}>
+              <wallet.icon />
+            </div>
+            <div className={styles.walletName}>{wallet.name + (wallet.suffixName || '')}</div>
           </div>
-          <div className={styles.walletName}>{wallet.name + (wallet.suffixName || '')}</div>
           {connectWalletButton}
         </div>
       )}

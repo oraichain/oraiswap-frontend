@@ -16,8 +16,8 @@ export default class Keplr extends CosmosWallet {
     throw new Error('You have to install Cosmos wallet first if you do not use a mnemonic to sign transactions');
   }
 
-  typeWallet: WalletType | 'eip191';
-  constructor(type: WalletType | 'eip191' = 'keplr') {
+  typeWallet: WalletType | 'eip191' | 'sso';
+  constructor(type: WalletType | 'eip191' | 'sso' = 'keplr') {
     super();
     this.typeWallet = type;
   }
