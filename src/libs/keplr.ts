@@ -34,6 +34,7 @@ export default class Keplr extends CosmosWallet {
       case 'keplr':
         return window.keplr;
       case 'eip191':
+      case 'sso':
       case 'leapSnap':
         return null;
       default:

@@ -38,6 +38,8 @@ const config = {
     rules: [
       {
         test: /\.m?js$/,
+        enforce: 'pre',
+        loader: require.resolve('source-map-loader'),
         resolve: {
           fullySpecified: false // disable the behaviour
         }
