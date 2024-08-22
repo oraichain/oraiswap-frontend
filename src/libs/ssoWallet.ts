@@ -1,5 +1,5 @@
 import type { JsonObject } from '@cosmjs/cosmwasm-stargate';
-import type { Coin } from '@cosmjs/proto-signing';
+import { DirectSecp256k1Wallet, type Coin } from '@cosmjs/proto-signing';
 import type { StdFee } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
@@ -33,7 +33,13 @@ export const triggerLogin = async () => {
       verifier: 'tkey-google'
     });
 
-    console.log(loginResponse);
+    const offlineSigner = await DirectSecp256k1Wallet.fromKey(Buffer.from(loginResponse?.privateKey, 'hex'), 'orai');
+    const sender = await offlineSigner.getAccounts();
+    console.log({ sender });
+    console.log(offlineSigner);
+    offlineSigner;
+    console.log({ loginResponse });
+
     return loginResponse;
   } catch (error) {
     console.log({ error });
