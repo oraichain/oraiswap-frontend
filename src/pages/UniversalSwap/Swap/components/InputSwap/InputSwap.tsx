@@ -31,6 +31,7 @@ interface InputSwapProps {
   theme: Themes;
   loadingSimulate?: boolean;
   impactWarning?: number;
+  aiRouteEnable?: boolean;
 }
 
 export default function InputSwapV4({
@@ -51,7 +52,8 @@ export default function InputSwapV4({
   theme,
   coe,
   loadingSimulate,
-  impactWarning
+  impactWarning,
+  aiRouteEnable
 }: InputSwapProps) {
   const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
   const tokenInfo = flattenTokensWithIcon.find((flattenToken) => flattenToken.coinGeckoId === token.coinGeckoId);
@@ -155,7 +157,7 @@ export default function InputSwapV4({
             <span>
               ≈ ${amount ? numberWithCommas(Number(usdPrice) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
             </span>
-            {!!impactWarning && (
+            {!!impactWarning && Number(impactWarning) > 0 && !aiRouteEnable && (
               <span
                 style={{
                   paddingLeft: 6,

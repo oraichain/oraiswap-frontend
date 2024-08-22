@@ -730,6 +730,7 @@ const SwapComponent: React.FC<{
                 usdPrice={usdPriceShowTo}
                 loadingSimulate={isPreviousSimulate}
                 impactWarning={impactWarning}
+                aiRouteEnable={isAIRoute}
               />
             </div>
           </div>
