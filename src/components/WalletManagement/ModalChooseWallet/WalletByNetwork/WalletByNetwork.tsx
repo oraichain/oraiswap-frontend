@@ -16,6 +16,7 @@ import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
 import useSSO from 'components/SSO/useSSO';
+import { triggerLogin } from 'libs/ssoWallet';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -38,6 +39,11 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
 
   const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType | 'eip191' | 'sso') => {
     try {
+      // if (walletType === 'sso') {
+      //   const res = await triggerLogin();
+      //   console.log('res', res);
+      //   return;
+      // }
       window.Keplr = new Keplr(walletType);
       setStorageKey('typeWallet', walletType);
       await initClient();
@@ -92,21 +98,25 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       ...walletByNetworks,
       cosmos: 'sso'
     });
+
     setCurrentWalletConnecting(null);
     setConnectStatus('init');
   };
 
-  const { loginSSO } = useSSO(callbackLoginSSO);
+  // const { loginSSO } = useSSO(callbackLoginSSO);
 
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
     try {
       // case connect SSO
       if (wallet.nameRegistry === 'sso') {
         setConnectStatus('loading');
-        loginSSO(() => {
-          setCurrentWalletConnecting(null);
-          setConnectStatus('init');
-        });
+
+        const res = await triggerLogin();
+        console.log('res', res);
+
+        if (res) {
+          callbackLoginSSO();
+        }
         return;
       }
 

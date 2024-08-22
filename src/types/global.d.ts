@@ -10,6 +10,8 @@ import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
 import { DuckDb } from 'libs/duckdb';
 import { Class } from '@oraichain/common-contracts-sdk/build/CwIcs721Bridge.types';
 import Bitcoin, { IBitcoin } from 'libs/bitcoin';
+import OnlySocialKey from '@oraichain/only-social-key';
+import ThresholdKey from '@oraichain/default';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -139,6 +141,8 @@ declare global {
     eth_owallet: MetaMaskEthereumProvider;
     tronWeb_owallet: _TronWeb;
     tronLink_owallet: TronLink;
+    tKey: ThresholdKey;
+    onlySocialKey: OnlySocialKey;
   }
 
   declare const APP_SETTINGS: Record<string, any>;

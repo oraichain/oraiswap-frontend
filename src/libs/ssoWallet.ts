@@ -4,10 +4,41 @@ import type { StdFee } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 
+import { OraiServiceProvider } from '@oraichain/service-provider-orai';
+import { onlySocialKey } from 'okey';
+
 export const SSO_URL = 'https://sso.orai.io';
 // export const SSO_CALLBACK = 'https://oraidex.io';
 // export const SSO_URL = 'http://localhost:3003';
 export const SSO_CALLBACK = 'http://localhost:3000';
+
+export const initSSO = async () => {
+  // Initialization of Service Provider
+  try {
+    // initBLS();
+    await (onlySocialKey.serviceProvider as OraiServiceProvider).init();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const triggerLogin = async () => {
+  if (!onlySocialKey) {
+    return;
+  }
+  try {
+    const loginResponse = await (onlySocialKey.serviceProvider as OraiServiceProvider).triggerLogin({
+      typeOfLogin: 'google',
+      clientId: '88022207528-isvvj6icicp9lkgl6ogcpj5eb729iao8.apps.googleusercontent.com',
+      verifier: 'tkey-google'
+    });
+
+    console.log(loginResponse);
+    return loginResponse;
+  } catch (error) {
+    console.log({ error });
+  }
+};
 
 export const popupCenter = ({
   url,
