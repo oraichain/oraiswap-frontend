@@ -366,7 +366,7 @@ export const getDisableSwap = ({
 
 // smart router osmosis
 export const isAllowAlphaSmartRouter = (fromToken, toToken, isAIRoute) => {
-  const isOraichain = fromToken.chainId === 'Oraichain';
+  const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
   // const notAllowChainId = ['Neutaro-1'];
   const allowTokenTon = [fromToken.contractAddress, fromToken.denom, toToken.contractAddress, toToken.denom]
     .filter(Boolean)
@@ -374,8 +374,8 @@ export const isAllowAlphaSmartRouter = (fromToken, toToken, isAIRoute) => {
 
   if (allowTokenTon) return true;
   // if (notAllowChainId.includes(fromToken.chainId) || notAllowChainId.includes(toToken.chainId)) return false;
-  if (isOraichain && !toToken.cosmosBased) return false;
-  if (isOraichain) return isAIRoute;
+  // if (isOraichain && !toToken.cosmosBased) return false;
+  if (fromTokenIsOraichain) return isAIRoute;
 
   if (fromToken.cosmosBased && toToken.cosmosBased) return true;
   if (fromToken.cosmosBased && !toToken.cosmosBased) return true;
