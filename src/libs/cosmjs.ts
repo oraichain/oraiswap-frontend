@@ -14,6 +14,7 @@ const collectWallet = async (chainId: string) => {
   const keplr = await window.Keplr.getKeplr();
   if (keplr) return await keplr.getOfflineSignerAuto(chainId);
   if (window.ethereum) return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
+  // if () return
   throw new Error('You have to install Cosmos wallet first if you do not use a mnemonic to sign transactions');
 };
 

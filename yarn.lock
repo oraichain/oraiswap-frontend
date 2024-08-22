@@ -4383,7 +4383,7 @@
     ts-results "^3.3.0"
     tslib "^2.6.1"
 
-"@oraichain/default@next":
+"@oraichain/default@^2.0.0":
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@oraichain/default/-/default-2.0.5.tgz#d0f8d6051eb09994d23929530be3404d4d4606a6"
   integrity sha512-zNqcqEkYX1FZenFGH/6Qqdv5tSCfgvQiWCoh2IHr6pzQJDHk5tWv1tYYw9Of+jLe4GCa9uc59Vdtgrnb40TE5Q==
@@ -4443,7 +4443,7 @@
     loglevel "^1.8.1"
     web3-utils "^1.8.2"
 
-"@oraichain/only-social-key@next":
+"@oraichain/only-social-key@^2.0.0":
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@oraichain/only-social-key/-/only-social-key-2.0.5.tgz#1aa4053c2d76fc18a78cb785b7dcde2537b2bc02"
   integrity sha512-+NPzwD757RX4UlbwP2dM+NGKjeHT1lR9ViKfgechFtQd+cHkHrQUmeLQ2OvmnS4uCXXWuuuO6QLEq65SSY4GYg==
@@ -4562,7 +4562,7 @@
     "@oraichain/oraidex-contracts-sdk" "^1.0.48"
     "@oraichain/oraiswap-v3-wasm" "^0.1.0"
 
-"@oraichain/security-questions@^2.0.5", "@oraichain/security-questions@next":
+"@oraichain/security-questions@^2.0.0", "@oraichain/security-questions@^2.0.5":
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@oraichain/security-questions/-/security-questions-2.0.5.tgz#1ad6df2c8d858fdfbf2b4bd6e871f5aa987c2c9c"
   integrity sha512-Ov/MUrOQ3ittlS3UX9sV8sCf99RIa8MyYd/5bCxYal2Tdr4JwRkvGoMXRAwISWysCLY6Ml3+f+45qHu7tEeIsg==
@@ -4628,7 +4628,7 @@
   resolved "https://registry.yarnpkg.com/@oraichain/wasm-json-toolkit/-/wasm-json-toolkit-1.0.24.tgz#e9a431560e8e946fbb7ec257e5f13d9320ffd23a"
   integrity sha512-j+8gN3dE3rqaiEUVVblt0dfJrE6RIsSkfqF08ISxRvHkH9Pe9exIOgxpCyd2Qn3liHj27hwth6R0ELw7y3QcLg==
 
-"@oraichain/web-storage@next":
+"@oraichain/web-storage@^2.0.0":
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@oraichain/web-storage/-/web-storage-2.0.5.tgz#b48753ae7a9789ae707a2ccd06c38db896ac6ddf"
   integrity sha512-/s5zagdviMWmtt9biKc4HxPdk3OC6EeEC7JEtHLND2Au6R8jMC/LA+BwI8jifw178cZyR2T0mG11R4djnqiB/w==
