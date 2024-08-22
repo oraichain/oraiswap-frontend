@@ -8,7 +8,7 @@ import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 
 import Bitcoin from 'libs/bitcoin';
-import { initSSO } from 'libs/ssoWallet';
+import { initSSO } from 'libs/web3MultifactorsUtils';
 import initBLS from '@oraichain/blsdkg';
 initBLS();
 

@@ -1,6 +1,6 @@
 import useConfigReducer from 'hooks/useConfigReducer';
 import useWalletReducer from 'hooks/useWalletReducer';
-import { SSO_URL, isJSON, popupCenter } from 'libs/ssoWallet';
+import { SSO_URL, isJSON, popupCenter } from 'libs/web3MultifactorsUtils';
 import { useEffect } from 'react';
 
 const useSSO = (callbackLoginSSO) => {

@@ -7,7 +7,7 @@ import { Stargate } from '@injectivelabs/sdk-ts';
 import { network } from 'config/networks';
 import { MetamaskOfflineSigner } from './eip191';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
-import { ActionSSO, SSO_URL, ssoExecute, ssoExecuteMultiple } from './ssoWallet';
+import { ActionSSO, SSO_URL, ssoExecute, ssoExecuteMultiple } from './web3MultifactorsUtils';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {

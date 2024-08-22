@@ -16,7 +16,7 @@ import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
 import useSSO from 'components/SSO/useSSO';
-import { triggerLogin } from 'libs/ssoWallet';
+import { triggerLogin } from 'libs/web3MultifactorsUtils';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {

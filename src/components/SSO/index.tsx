@@ -1,7 +1,7 @@
 import { Button } from 'components/Button';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useWalletReducer from 'hooks/useWalletReducer';
-import { isJSON, popupCenter, SSO_URL } from 'libs/ssoWallet';
+import { isJSON, popupCenter, SSO_URL } from 'libs/web3MultifactorsUtils';
 import { useEffect } from 'react';
 import styles from './index.module.scss';
 
