@@ -7,10 +7,14 @@ import { Stargate } from '@injectivelabs/sdk-ts';
 import { network } from 'config/networks';
 import { MetamaskOfflineSigner } from './eip191';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
-import { ActionSSO, SSO_URL, ssoExecute, ssoExecuteMultiple } from './web3MultifactorsUtils';
+import { ActionSSO, ssoExecute, ssoExecuteMultiple } from './web3MultifactorsUtils';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
+  console.log('first-window.PrivateKeySigner', window.PrivateKeySigner);
+  if (window.PrivateKeySigner) {
+    return window.PrivateKeySigner.getOfflineSigner(chainId);
+  }
   const keplr = await window.Keplr.getKeplr();
   if (keplr) return await keplr.getOfflineSignerAuto(chainId);
   if (window.ethereum) return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
@@ -23,9 +27,15 @@ const getCosmWasmClient = async (
 ) => {
   try {
     const { chainId, rpc, signer } = config;
+    console.log('first-config', config);
     const wallet = signer ?? (await collectWallet(chainId));
     const defaultAddress = (await wallet.getAccounts())[0];
     const tmClient = await Tendermint37Client.connect(rpc ?? (network.rpc as string));
+
+    console.log('first', wallet, {
+      defaultAddress,
+      tmClient
+    });
     const client = await cosmwasm.SigningCosmWasmClient.createWithSigner(
       tmClient,
       wallet,
@@ -73,23 +83,6 @@ class CosmJs {
       const walletType = this.getWalletByFromStorage();
       const keplr = await window.Keplr.getKeplr();
       if (keplr || (walletType && ['eip191', 'sso'].includes(walletType))) {
-        // if (walletType === 'sso') {
-        //   const result = await ssoExecute(
-        //     {
-        //       chainId: network.chainId || 'Oraichain',
-        //       contractAddress: data.address,
-        //       params: data.handleMsg,
-        //       funds: data.funds,
-        //       fee: 'auto',
-        //       memo: data.memo
-        //     },
-        //     ActionSSO.SSO_EXECUTE
-        //   );
-
-        //   console.log('result', result);
-        //   return result;
-        // }
-
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.execute(
           data.walletAddr,
@@ -121,20 +114,6 @@ class CosmJs {
       const walletType = this.getWalletByFromStorage();
       const keplr = await window.Keplr.getKeplr();
       if (keplr || (walletType && ['eip191', 'sso'].includes(walletType))) {
-        // if (walletType === 'sso') {
-        //   const result = await ssoExecuteMultiple(
-        //     {
-        //       data: data.msgs,
-        //       fee: 'auto',
-        //       memo: data.memo
-        //     },
-        //     ActionSSO.SSO_EXECUTE_MULTIPLE
-        //   );
-
-        //   console.log('result', result);
-        //   return result;
-        // }
-
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto', data.memo);
         return {

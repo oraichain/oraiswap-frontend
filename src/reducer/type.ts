@@ -91,6 +91,24 @@ export interface PoolChartState {
   tabChartSwap: TAB_CHART_SWAP;
 }
 
+export enum UiHandlerStatus {
+  close,
+  open,
+  processing
+}
+
+export enum ConfirmSignStatus {
+  init,
+  rejected,
+  approved
+}
+
+export interface MultifactorState {
+  status: UiHandlerStatus;
+  dataSign: any;
+  confirmSign: ConfirmSignStatus;
+}
+
 export enum AddressManagementStep {
   INIT,
   SELECT,

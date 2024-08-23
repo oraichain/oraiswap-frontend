@@ -1836,7 +1836,7 @@
     "@cosmjs/math" "^0.32.3"
     "@cosmjs/utils" "^0.32.3"
 
-"@cosmjs/cosmwasm-stargate@0.31.3", "@cosmjs/cosmwasm-stargate@^0.31.0":
+"@cosmjs/cosmwasm-stargate@0.31.3", "@cosmjs/cosmwasm-stargate@^0.31.0", "@cosmjs/cosmwasm-stargate@^0.32.1":
   version "0.31.3"
   resolved "https://registry.yarnpkg.com/@cosmjs/cosmwasm-stargate/-/cosmwasm-stargate-0.31.3.tgz#13066822f111832d57c2c5acc9e697ed389713f8"
   integrity sha512-Uv9TmCn3650gdFeZm7SEfUZF3uX3lfJfFhXOk6I2ZLr/FrKximnlb+vwAfZaZnWYvlA7qrKtHIjeRNHvT23zcw==
@@ -1851,22 +1851,6 @@
     "@cosmjs/utils" "^0.31.3"
     cosmjs-types "^0.8.0"
     long "^4.0.0"
-    pako "^2.0.2"
-
-"@cosmjs/cosmwasm-stargate@^0.32.1":
-  version "0.32.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/cosmwasm-stargate/-/cosmwasm-stargate-0.32.3.tgz#26a110a6bb0c15fdeef647e3433bd9553a1acd5f"
-  integrity sha512-pqkt+QsLIPNMTRh9m+igJgIpzXXgn1BxmxfAb9zlC23kvsuzY/12un9M7iAdim1NwKXDFeYw46xC2YkprwQp+g==
-  dependencies:
-    "@cosmjs/amino" "^0.32.3"
-    "@cosmjs/crypto" "^0.32.3"
-    "@cosmjs/encoding" "^0.32.3"
-    "@cosmjs/math" "^0.32.3"
-    "@cosmjs/proto-signing" "^0.32.3"
-    "@cosmjs/stargate" "^0.32.3"
-    "@cosmjs/tendermint-rpc" "^0.32.3"
-    "@cosmjs/utils" "^0.32.3"
-    cosmjs-types "^0.9.0"
     pako "^2.0.2"
 
 "@cosmjs/crypto@0.31.3", "@cosmjs/crypto@^0.31.0", "@cosmjs/crypto@^0.31.3":
@@ -2093,7 +2077,7 @@
     protobufjs "~6.11.3"
     xstream "^11.14.0"
 
-"@cosmjs/stargate@^0.32.1", "@cosmjs/stargate@^0.32.3":
+"@cosmjs/stargate@^0.32.1":
   version "0.32.3"
   resolved "https://registry.yarnpkg.com/@cosmjs/stargate/-/stargate-0.32.3.tgz#5a92b222ada960ebecea72cc9f366370763f4b66"
   integrity sha512-OQWzO9YWKerUinPIxrO1MARbe84XkeXJAW0lyMIjXIEikajuXZ+PwftiKA5yA+8OyditVmHVLtPud6Pjna2s5w==

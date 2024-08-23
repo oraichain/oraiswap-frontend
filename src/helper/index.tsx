@@ -404,11 +404,7 @@ export const getAddressTransfer = async (network: CustomChainInfo, walletByNetwo
     if (network.networkType === 'evm') {
       address = await getAddressTransferForEvm(walletByNetworks, network);
     } else if (isConnectSpecificNetwork(walletByNetworks.cosmos)) {
-      // walletByNetworks.cosmos ==='sso' ? :
-      address =
-        walletByNetworks.cosmos === 'sso'
-          ? window.PrivateKeySigner.getWalletAddress(network.bech32Config?.bech32PrefixAccAddr || 'orai')
-          : await window.Keplr.getKeplrAddr(network.chainId);
+      address = await window.Keplr.getKeplrAddr(network.chainId);
     }
     return address;
   } catch (error) {
@@ -447,7 +443,6 @@ export const getListAddressCosmos = async (oraiAddr, walletType?: WalletCosmosTy
     const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
     for (const info of cosmosNetworks) {
       if (!info) continue;
-      console.log('cosmosNetworks', info);
       const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);
       listAddressCosmos = {
         ...listAddressCosmos,

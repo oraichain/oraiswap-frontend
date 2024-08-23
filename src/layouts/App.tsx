@@ -28,6 +28,7 @@ import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
+import SsoSignModal from 'components/WalletManagement/SsoSignModal';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -263,6 +264,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
+        <SsoSignModal />
         {/* <button data-featurebase-feedback>Open Widget</button> */}
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />

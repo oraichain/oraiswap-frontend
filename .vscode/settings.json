@@ -12,5 +12,6 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "[xml]": {
     "editor.defaultFormatter": "redhat.vscode-xml"
-  }
+  },
+  "cSpell.words": ["Multifactor", "oraichain", "Oraichain"]
 }

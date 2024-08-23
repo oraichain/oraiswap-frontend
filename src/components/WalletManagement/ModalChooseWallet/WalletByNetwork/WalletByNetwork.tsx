@@ -15,8 +15,9 @@ import { useInactiveConnect } from 'hooks/useMetamask';
 import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
-import useSSO from 'components/SSO/useSSO';
 import { triggerLogin } from 'libs/web3MultifactorsUtils';
+import { network } from 'config/networks';
+import useSsoHandler from 'components/WalletManagement/SsoSignModal/useSsoHandler';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -31,6 +32,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
   const connect = useInactiveConnect();
+  const UIHandler = useSsoHandler();
 
   const handleConfirmSwitch = async () => {
     setConnectStatus('loading');
@@ -90,11 +92,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
 
   const callbackLoginSSO = async () => {
     const oraiAddr = window.PrivateKeySigner.getWalletAddress();
-    console.log('first', oraiAddr);
+
     setOraiAddress(oraiAddr);
-
     const { listAddressCosmos } = await getListAddressCosmos(oraiAddr, 'sso');
-
     setCosmosAddress(listAddressCosmos);
 
     setWalletByNetworks({
@@ -112,7 +112,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       if (wallet.nameRegistry === 'sso') {
         setConnectStatus('loading');
 
-        const res = await triggerLogin();
+        const res = await triggerLogin(network.chainId, UIHandler);
 
         if (res) {
           await callbackLoginSSO();
