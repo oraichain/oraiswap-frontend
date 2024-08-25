@@ -1,9 +1,11 @@
+import { toNetwork } from '@oraichain/orai-bitcoin';
 import * as bitcoin from 'bitcoinjs-lib';
+import { btcNetwork } from 'helper/constants';
 
 export const convertScriptPubkeyToBtcAddress = (scriptPubkey: String): String => {
   try {
     const scriptPubKeyBuffer = Buffer.from(scriptPubkey, 'hex');
-    const address = bitcoin.address.fromOutputScript(scriptPubKeyBuffer);
+    const address = bitcoin.address.fromOutputScript(scriptPubKeyBuffer, toNetwork(btcNetwork));
     return address;
   } catch (err) {
     const scriptPubKeyBuffer = Buffer.from(scriptPubkey, 'hex');

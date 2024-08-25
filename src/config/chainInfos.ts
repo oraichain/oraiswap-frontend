@@ -82,7 +82,7 @@ import {
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
-import { bitcoinChainId } from 'helper/constants';
+import { bitcoinChainId, CWBitcoinFactoryDenom } from 'helper/constants';
 import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
 import { listOsmosisToken } from './alphaNetwwork';
 
@@ -135,6 +135,54 @@ export const bitcoinMainnet: CustomChainInfo = {
     name: 'BlockStream',
     txUrl: 'https://blockstream.info/tx/{txHash}',
     accountUrl: 'https://blockstream.info/address/{address}'
+  }
+};
+export const bitcoinTestnet: CustomChainInfo = {
+  rest: 'https://blockstream.info/testnet/api/',
+  rpc: 'https://blockstream.info/testnet/api/',
+  chainId: ChainIdEnum.BitcoinTestnet,
+  chainName: 'Bitcoin Testnet',
+  bip44: {
+    coinType: 0
+  },
+  coinType: 0,
+  Icon: BTCIcon,
+  IconLight: BTCIcon,
+  stakeCurrency: {
+    coinDenom: 'BTC',
+    coinMinimalDenom: 'btc',
+    coinDecimals: 8,
+    coinGeckoId: 'bitcoin',
+    coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+  },
+  bech32Config: defaultBech32Config('bc'),
+  networkType: 'bitcoin',
+  currencies: [
+    {
+      coinDenom: 'BTC',
+      coinMinimalDenom: 'btc',
+      coinDecimals: 8,
+      bridgeTo: ['Oraichain'],
+      prefixToken: 'oraibtc',
+      Icon: BTCIcon,
+      coinGeckoId: 'bitcoin',
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+      gasPriceStep: {
+        low: 0,
+        average: 0,
+        high: 0
+      }
+    }
+  ],
+  get feeCurrencies() {
+    return this.currencies;
+  },
+
+  features: ['isBtc'],
+  txExplorer: {
+    name: 'BlockStream',
+    txUrl: 'https://blockstream.info/testnet/tx/{txHash}',
+    accountUrl: 'https://blockstream.info/testnet/address/{address}'
   }
 };
 export const tokensIcon: TokenIcon[] = [
@@ -262,7 +310,12 @@ export const chainIcons: ChainIcon[] = [
     IconLight: OraiLightIcon
   },
   {
-    chainId: bitcoinChainId,
+    chainId: 'bitcoin',
+    Icon: BTCIcon,
+    IconLight: BTCIcon
+  },
+  {
+    chainId: 'bitcoinTestnet',
     Icon: BTCIcon,
     IconLight: BTCIcon
   },
@@ -603,11 +656,9 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BTC',
       coinGeckoId: 'bitcoin',
-      coinMinimalDenom: 'usat',
-      type: 'cw20',
-      contractAddress: OBTCContractAddress,
+      coinMinimalDenom: CWBitcoinFactoryDenom,
       bridgeTo: [bitcoinChainId],
-      coinDecimals: 6,
+      coinDecimals: 14,
       Icon: BTCIcon,
       IconLight: BTCIcon,
       coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
@@ -690,7 +741,8 @@ const bitcoinNetwork = bitcoinMainnet;
 export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
-  bitcoinNetwork,
+  // bitcoinMainnet,
+  bitcoinTestnet,
   {
     rpc: 'https://bridge-v2.rpc.orai.io',
     rest: 'https://bridge-v2.lcd.orai.io',

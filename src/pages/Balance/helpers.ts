@@ -41,11 +41,8 @@ import { script, opcodes } from 'bitcoinjs-lib';
 import { useQuery } from '@tanstack/react-query';
 import { config } from 'libs/nomic/config';
 import QRCode from 'qrcode';
-import { useEffect, useState } from 'react';
-import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
-import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { BitcoinUnit } from 'bitcoin-units';
-import { bitcoinChainId, bitcoinLcd, btcNetwork } from 'helper/constants';
+import { bitcoinLcd } from 'helper/constants';
 import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
 import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 
@@ -728,6 +725,7 @@ export const fiatToCrypto = ({ amount = 0, exchangeRate = 0 } = {}) => {
 };
 
 export const BTCtoSat = (sat = 0, isDisplayAmount?: boolean) => {
+  console.log({ sat });
   if (!sat) return 0;
   if (isDisplayAmount) return new BitcoinUnit(sat, 'BTC').to('satoshi').getValueAsString();
   return new BitcoinUnit(sat, 'BTC').to('satoshi').getValue();

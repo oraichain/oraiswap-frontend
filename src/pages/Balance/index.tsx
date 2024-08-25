@@ -1,4 +1,4 @@
-import { makeStdTx } from '@cosmjs/amino';
+import { coin, makeStdTx } from '@cosmjs/amino';
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Decimal } from '@cosmjs/math';
 import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
@@ -41,7 +41,15 @@ import {
   handleErrorTransaction,
   networks
 } from 'helper';
-import { DEFAULT_RELAYER_FEE, RELAYER_DECIMAL, bitcoinChainId } from 'helper/constants';
+import {
+  DEFAULT_RELAYER_FEE,
+  RELAYER_DECIMAL,
+  bitcoinChainId,
+  bitcoinLcd,
+  CWBitcoinContractAddress,
+  CWBitcoinFactoryDenom,
+  btcNetwork
+} from 'helper/constants';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -50,9 +58,8 @@ import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Content from 'layouts/Content';
 import Metamask from 'libs/metamask';
-import { config } from 'libs/nomic/config';
 import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
-import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
+import { getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -79,6 +86,9 @@ import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import { isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
+import { CwBitcoinClient } from '@oraichain/bitcoin-bridge-contracts-sdk';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import { CwBitcoinContext } from 'context/cw-bitcoin-context';
 
 interface BalanceProps {}
 
@@ -91,7 +101,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
-  const nomic = useContext(NomicContext);
 
   // state internal
   const [loadingRefresh, setLoadingRefresh] = useState(false);
@@ -109,10 +118,22 @@ const Balance: React.FC<BalanceProps> = () => {
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
+  const cwBitcoinContext = useContext(CwBitcoinContext);
 
   const ref = useRef(null);
   //@ts-ignore
   const isOwallet = window.owallet?.isOwallet;
+
+  useEffect(() => {
+    if (isOwallet) {
+      console.log(from, to);
+      if (from?.chainId == bitcoinChainId && to?.chainId == 'Oraichain') {
+        cwBitcoinContext.generateAddress({
+          address: oraiAddress
+        });
+      }
+    }
+  }, [isOwallet, from, to]);
 
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
@@ -203,8 +224,11 @@ const Balance: React.FC<BalanceProps> = () => {
       message: '',
       transactionFee: feeRate
     });
-    console.log(totalFee, 'totalFee');
-    const { bitcoinAddress: address } = nomic.depositAddress;
+
+    let result = cwBitcoinContext.depositAddress;
+    if (result.code !== 0) return;
+    let address = result.bitcoinAddress;
+
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
     const dataRequest = {
@@ -262,34 +286,20 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
-    const { bitcoinAddress: address } = nomic.depositAddress;
-
-    if (!address) throw Error('Not found Orai BTC Address');
     // @ts-ignore-check
-    const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
-
-    const DEFAULT_TIMEOUT = 60 * 60;
-    const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 6).toString(), 8).atomics.toString());
-    const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
-    if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
     try {
-      const result = await window.client.execute(
-        oraiAddress,
-        OBTCContractAddress,
+      const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 14).toString(), 14).atomics.toString());
+      const amount = Decimal.fromAtomics(amountInput.toString(), 14).toString();
+      let sender = await window.Keplr.getKeplrAddr(fromToken?.chainId);
+      let cwBitcoinClient = new CwBitcoinClient(window.client, sender, CWBitcoinContractAddress);
+
+      const result = await cwBitcoinClient.withdrawToBitcoin(
         {
-          send: {
-            contract: OraichainChain.source.port.split('.')[1],
-            amount,
-            msg: toBinary({
-              local_channel_id: OraichainChain.source.channelId,
-              remote_address: destinationAddress,
-              remote_denom: OraichainChain.source.nBtcIbcDenom,
-              timeout: DEFAULT_TIMEOUT,
-              memo: `withdraw:${btcAddr}`
-            })
-          }
+          btcAddress: btcAddr
         },
-        'auto'
+        'auto',
+        '',
+        [coin(amount, CWBitcoinFactoryDenom)]
       );
 
       processTxResult(

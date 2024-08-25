@@ -4237,6 +4237,11 @@
     "@babel/template" "^7.22.15"
     "@babel/types" "^7.23.3"
 
+"@oraichain/bitcoin-bridge-contracts-sdk@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@oraichain/bitcoin-bridge-contracts-sdk/-/bitcoin-bridge-contracts-sdk-1.1.0.tgz#eecbd19f4ed12f322cd350160fc60b1c5c97dfe6"
+  integrity sha512-fNh9XgBy5cLl5PiyeAxt21U7PBh/vKnup2jalMPelJsKaMYpazjicHiKYehHRubAiFJ2btwz40iVJqVFa8taKg==
+
 "@oraichain/common-contracts-build@1.0.35":
   version "1.0.35"
   resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.35.tgz#049ed62380106820692838d9723e68948bda7f30"
@@ -7323,6 +7328,11 @@ bip66@^1.1.0, bip66@^1.1.5:
   integrity sha512-nemMHz95EmS38a26XbbdxIYj5csHd3RMP3H5bwQknX0WYHF01qhpufP42mLOwVICuH2JmhIhXiWs89MfUGL7Xw==
   dependencies:
     safe-buffer "^5.0.1"
+
+bitcoin-bridge-wasm-sdk@0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/bitcoin-bridge-wasm-sdk/-/bitcoin-bridge-wasm-sdk-0.1.8.tgz#d4ca69268089740ab0e306e9a5dcfb31ff01f19f"
+  integrity sha512-yWXnGpwSTlvjtN62+SjdMhlHVz+fDEnLTh4fpJlZHToUrJEhmmmGePYv+kAX5PObqbbTNgheK0IDUOyJ7su4vw==
 
 bitcoin-core@^4.1.0:
   version "4.2.0"

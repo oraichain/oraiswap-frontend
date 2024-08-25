@@ -69,12 +69,15 @@ export const SelectTokenModal: FC<ModalProps> = ({
               key = network.chainId.toString();
               title = network.chainName;
               const subAmounts = Object.fromEntries(
-                Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === network.chainId)
+                Object.entries(amounts).filter(
+                  ([denom]) => tokenMap[denom] && tokenMap[denom].chainId === network.chainId
+                )
               );
               const totalUsd = getTotalUsd(subAmounts, prices);
               tokenAndChainIcons = chainIcons.find((chainIcon) => chainIcon.chainId === network.chainId);
               balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
             }
+
             const icon =
               tokenAndChainIcons && theme === 'light' ? (
                 <tokenAndChainIcons.IconLight className={cx('logo')} />
