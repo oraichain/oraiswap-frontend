@@ -1,6 +1,7 @@
 import { NetworkChainId } from '@oraichain/oraidex-common';
 import * as duckdb from '@duckdb/duckdb-wasm';
 import { get, set } from 'idb-keyval';
+import duckdbWasmEh from '/duckdb-eh.wasm?url';
 
 export type TransactionHistory = {
   initialTxHash: string;
@@ -60,7 +61,7 @@ export class DuckDb {
         process.env.NODE_ENV === 'development' ? new duckdb.ConsoleLogger() : new duckdb.VoidLogger(),
         new Worker(new URL('@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js', import.meta.url).toString())
       );
-      await db.instantiate(require('@duckdb/duckdb-wasm/dist/duckdb-eh.wasm'));
+      await db.instantiate(duckdbWasmEh);
       const conn = await db.connect();
       DuckDb.instance = new DuckDb(conn, db);
     }

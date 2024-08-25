@@ -11,7 +11,7 @@ const axios = Axios.create({
       threshold: AXIOS_THROTTLE_THRESHOLD
     })
   ),
-  baseURL: process.env.REACT_APP_BASE_API_URL
+  baseURL: 'https://api.oraidex.io'
 });
 
 export default axios;

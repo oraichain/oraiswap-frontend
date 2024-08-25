@@ -38,3 +38,5 @@ public/injected-provider.bundle.js
 # for Yarn 3
 .yarn
 *.scss.d.ts
+
+dist

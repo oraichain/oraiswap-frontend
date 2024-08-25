@@ -8,7 +8,7 @@ import { network } from 'config/networks';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import mixpanel from 'mixpanel-browser';
-import 'polyfill';
+import './polyfill';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
