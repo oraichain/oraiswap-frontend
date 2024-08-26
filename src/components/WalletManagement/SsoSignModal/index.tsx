@@ -21,7 +21,7 @@ const SsoSignModal = () => {
   };
 
   return (
-    <div className={classNames(styles.signModal, { [styles.active]: modalStatus !== UiHandlerStatus.close })}>
+    <div className={classNames(styles.signModal, { [styles.active]: modalStatus === UiHandlerStatus.open })}>
       <div className={styles.overlay}></div>
       <div className={styles.content}>
         <div className={styles.header}>

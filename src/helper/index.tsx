@@ -284,6 +284,18 @@ export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): Walle
   }
 };
 
+// TECH DEBT: need to update WalletTypeCosmos add type eip191 to oraidex-common
+export const getHashKeySSOFromStorage = (key = 'persist:root'): string => {
+  try {
+    const result = localStorage.getItem(key);
+    const parsedResult = JSON.parse(result);
+    const config = JSON.parse(parsedResult.config);
+    return config.hashSsoKey;
+  } catch (error) {
+    console.log('error getWalletByNetworkCosmosFromStorage: ', error);
+  }
+};
+
 export const getWalletByNetworkFromStorage = (key = 'persist:root'): any => {
   try {
     if (isMobile()) return 'owallet';

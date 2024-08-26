@@ -1,19 +1,20 @@
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+import { wasmTypes } from '@cosmjs/cosmwasm-stargate';
 import { toBech32 } from '@cosmjs/encoding';
-import { AccountData, decodeTxRaw, DirectSecp256k1Wallet, OfflineDirectSigner, Registry } from '@cosmjs/proto-signing';
+import { AccountData, DirectSecp256k1Wallet, OfflineDirectSigner, Registry } from '@cosmjs/proto-signing';
+import { defaultRegistryTypes as defaultStargateTypes } from '@cosmjs/stargate';
 import initBLS from '@oraichain/blsdkg';
 import { NetworkChainId } from '@oraichain/oraidex-common';
 import { OraiServiceProvider } from '@oraichain/service-provider-orai';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { SignDoc, TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { Any } from 'cosmjs-types/google/protobuf/any';
 import { onlySocialKey } from 'okey';
+import { ConfirmPassStatus, ConfirmSignStatus } from 'reducer/type';
 import { getCosmWasmClient as getCosmWasmClientOrigin } from './cosmjs';
-import { ConfirmSignStatus, UiHandlerStatus } from 'reducer/type';
-import { wasmTypes } from '@cosmjs/cosmwasm-stargate';
-import { defaultRegistryTypes as defaultStargateTypes } from '@cosmjs/stargate';
+import CryptoJS from 'crypto-js';
+import { getHashKeySSOFromStorage } from 'helper';
 
 export const CONFIG_SOCIAL_KEY = {
   typeOfLogin: 'google' as const,
@@ -31,48 +32,67 @@ export const initSSO = async () => {
   }
 };
 
-export const triggerLogin = async (chainId: string = 'Oraichain', uiHandler?: UIHandler) => {
+export const reinitializeSigner = async (chainId: string | 'orai') => {
+  try {
+    const hashKey = getHashKeySSOFromStorage();
+    const { privateKey, passphrase } = decryptData(hashKey, PP_CACHE_KEY);
+
+    const chain = chainInfos.find((c) => c.chainId === chainId);
+    const prefix = chain?.bech32Config?.bech32PrefixAccAddr || 'orai';
+
+    const privateKeySigner = await PrivateKeySigner.createFromPrivateKey(privateKey, prefix);
+    window.PrivateKeySigner = privateKeySigner;
+
+    return privateKeySigner;
+  } catch (error) {
+    console.log('error', error);
+  }
+};
+
+export const triggerLogin = async (
+  chainId: string = 'Oraichain',
+  passphraseHandler: PassphraseUIHandler,
+  uiHandler?: UIHandler
+) => {
   if (!onlySocialKey) {
     return;
   }
   try {
     const loginResponse = await (onlySocialKey.serviceProvider as OraiServiceProvider).triggerLogin(CONFIG_SOCIAL_KEY);
-    console.log('41-loginResponse', loginResponse);
     const privateKey = loginResponse?.privateKey;
-    console.log('privateKey', privateKey);
     const chain = chainInfos.find((c) => c.chainId === chainId);
     const prefix = chain?.bech32Config?.bech32PrefixAccAddr || 'orai';
 
     const privateKeySigner = await PrivateKeySigner.createFromPrivateKey(privateKey, prefix, uiHandler);
 
     window.PrivateKeySigner = privateKeySigner;
-    const cosmWasmClient = await privateKeySigner.getCosmWasmClient({ chainId });
-    if (cosmWasmClient?.client) window.client = cosmWasmClient.client;
 
-    return privateKeySigner;
+    const { passphrase, confirmed } = ((await passphraseHandler.process()) as any) || {};
+
+    if (passphrase && confirmed === ConfirmPassStatus.approved) {
+      const hashKey = encryptData(passphrase, privateKey, PP_CACHE_KEY);
+
+      const cosmWasmClient = await privateKeySigner.getCosmWasmClient({ chainId });
+      if (cosmWasmClient?.client) window.client = cosmWasmClient.client;
+
+      return { privateKeySigner, hashKey };
+    }
   } catch (error) {
     console.log({ error });
   }
 };
 
-export function isJSON(str: string) {
-  try {
-    JSON.parse(str);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-export enum ActionSSO {
-  SSO_EXECUTE = 'sso-oraidex-execute',
-  SSO_EXECUTE_MULTIPLE = 'sso-oraidex-execute-multiple'
-}
-
 // UIModel
 export interface UIHandler {
   open: (data: any) => void;
   process: (signDoc: any) => Promise<any>;
+  close: () => void;
+}
+
+// UIModel
+export interface PassphraseUIHandler {
+  open: () => void;
+  process: () => Promise<any>;
   close: () => void;
 }
 
@@ -108,15 +128,36 @@ export function storageAvailable(type: 'sessionStorage' | 'localStorage'): boole
   }
 }
 
-const ADAPTER_CACHE_KEY = 'Web3Auth-oraidex-cachedAdapter';
+export const PP_CACHE_KEY = 'Web3Auth-oraidex-pp';
 
 // Switch Wallet Keplr Owallet
-export const getWeb3MultifactorStorageKey = (key = ADAPTER_CACHE_KEY) => {
-  return localStorage.getItem(key);
+export const getWeb3MultifactorStorageKey = (key = PP_CACHE_KEY) => {
+  return sessionStorage.getItem(key);
 };
 
-export const setWeb3MultifactorStorageKey = (key = ADAPTER_CACHE_KEY, value) => {
-  return localStorage.setItem(key, value);
+export const setWeb3MultifactorStorageKey = (key = PP_CACHE_KEY, value) => {
+  return sessionStorage.setItem(key, value);
+};
+
+export const removeWeb3MultifactorStorageKey = (key = PP_CACHE_KEY) => {
+  return sessionStorage.removeItem(key);
+};
+
+export const encryptData = (passphrase: string, privateKey: string, secretKey: string): string => {
+  const data = JSON.stringify({ passphrase, privateKey });
+  const encrypted = CryptoJS.AES.encrypt(data, secretKey).toString();
+  return encrypted;
+};
+
+export const decryptData = (hashKey: string, secretKey: string): { passphrase: string; privateKey: string } | null => {
+  try {
+    const bytes = CryptoJS.AES.decrypt(hashKey, secretKey);
+    const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+    return JSON.parse(decryptedData);
+  } catch (error) {
+    console.error('Decryption error:', error);
+    return null;
+  }
 };
 
 export class PrivateKeySigner implements OfflineDirectSigner {
@@ -125,25 +166,18 @@ export class PrivateKeySigner implements OfflineDirectSigner {
   private privKey: Uint8Array;
   private signer: OfflineDirectSigner;
   private registry: Registry;
-  public cachedAdapter: string | null = null;
-  private storage: 'sessionStorage' | 'localStorage' = 'localStorage';
 
   protected constructor(
     privKey: Uint8Array,
     signer: OfflineDirectSigner,
     accountData: AccountData,
-    UIHandler?: UIHandler,
-    cacheOption: 'sessionStorage' | 'localStorage' = 'localStorage'
+    UIHandler?: UIHandler
   ) {
     this.UIHandler = UIHandler;
     this.signer = signer;
     this.pubkey = accountData.pubkey;
     this.privKey = privKey;
     this.registry = new Registry([...defaultStargateTypes, ...wasmTypes]);
-
-    // setup cache option
-    if (cacheOption === 'sessionStorage') this.storage = 'sessionStorage';
-    this.cachedAdapter = storageAvailable(this.storage) ? window[this.storage].getItem(ADAPTER_CACHE_KEY) : null;
   }
 
   static async createFromPrivateKey(privateKey: string | Buffer | Uint8Array, prefix: string, UIHandler?: UIHandler) {
@@ -157,22 +191,12 @@ export class PrivateKeySigner implements OfflineDirectSigner {
     const accountData = (await signer.getAccounts())[0];
     const privSigner = new PrivateKeySigner(privateKeyBuffer, signer, accountData, UIHandler);
 
-    // const { pubkey, getCosmWasmClient, getOfflineSigner, decodeMsg, getWalletAddress, getAccounts, signDirect } =
-    //   privSigner;
-    // return { pubkey, getCosmWasmClient, getOfflineSigner, decodeMsg, getWalletAddress, getAccounts, signDirect };
-
     return privSigner;
   }
 
   setUiHandler = (UIHandler: UIHandler) => {
     this.UIHandler = UIHandler;
   };
-
-  public clearCache() {
-    if (!storageAvailable(this.storage)) return;
-    window[this.storage].removeItem(ADAPTER_CACHE_KEY);
-    this.cachedAdapter = null;
-  }
 
   decodeMsg = (msg: Any) => {
     try {

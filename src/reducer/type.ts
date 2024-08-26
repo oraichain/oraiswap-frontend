@@ -91,6 +91,12 @@ export interface PoolChartState {
   tabChartSwap: TAB_CHART_SWAP;
 }
 
+export enum PassphraseModalStatus {
+  close = 'close',
+  open = 'open',
+  processing = 'processing'
+}
+
 export enum UiHandlerStatus {
   close = 'close',
   open = 'open',
@@ -103,10 +109,19 @@ export enum ConfirmSignStatus {
   approved = 'approved'
 }
 
+export enum ConfirmPassStatus {
+  init = 'init',
+  rejected = 'rejected',
+  approved = 'approved'
+}
+
 export interface MultifactorState {
   status: UiHandlerStatus;
   dataSign: any;
   confirmSign: ConfirmSignStatus;
+  confirmPassphrase: ConfirmPassStatus;
+  passphraseModalStatus: PassphraseModalStatus;
+  passphrase: string | null;
 }
 
 export enum AddressManagementStep {

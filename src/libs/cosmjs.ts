@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice } from '@cosmjs/stargate';
@@ -6,8 +7,15 @@ import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { Stargate } from '@injectivelabs/sdk-ts';
 import { network } from 'config/networks';
 import { MetamaskOfflineSigner } from './eip191';
-import { getWalletByNetworkCosmosFromStorage } from 'helper';
-import { ActionSSO, initSSO, ssoExecute, ssoExecuteMultiple, triggerLogin } from './web3MultifactorsUtils';
+import { getHashKeySSOFromStorage, getWalletByNetworkCosmosFromStorage } from 'helper';
+import {
+  decryptData,
+  initSSO,
+  PP_CACHE_KEY,
+  PrivateKeySigner,
+  reinitializeSigner,
+  triggerLogin
+} from './web3MultifactorsUtils';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
@@ -18,21 +26,10 @@ const collectWallet = async (chainId: string) => {
     if (window.PrivateKeySigner) {
       return window.PrivateKeySigner.getOfflineSigner(chainId);
     } else {
-      await initSSO();
-      const signer = await triggerLogin(chainId);
-
-      //   if (!signer) {
-
-      // const result = localStorage.getItem('persist:root');
-      // const parsedResult = JSON.parse(result);
-      // const wallet = JSON.parse(parsedResult.wallet);
-      //  wallet.walletsByNetwork.cosmos = null;
-
-      //  setStorageKey
-      //   }
-      return signer;
+      return await reinitializeSigner(chainId);
     }
   }
+
   const keplr = await window.Keplr.getKeplr();
   if (keplr) return await keplr.getOfflineSignerAuto(chainId);
   if (window.ethereum) return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);

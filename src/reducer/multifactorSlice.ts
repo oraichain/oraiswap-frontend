@@ -1,11 +1,14 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { ConfirmSignStatus, MultifactorState, UiHandlerStatus } from './type';
+import { ConfirmSignStatus, MultifactorState, UiHandlerStatus, ConfirmPassStatus, PassphraseModalStatus } from './type';
 
 const initialState: MultifactorState = {
   status: UiHandlerStatus.close,
   dataSign: null,
-  confirmSign: ConfirmSignStatus.init
+  confirmSign: ConfirmSignStatus.init,
+  confirmPassphrase: ConfirmPassStatus.init,
+  passphraseModalStatus: PassphraseModalStatus.close,
+  passphrase: null
 };
 
 export const multifactorSlice = createSlice({
