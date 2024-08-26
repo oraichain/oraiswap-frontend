@@ -26,9 +26,8 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
   const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
 
-  const [isAIRoute] = useConfigReducer('AIRoute');
-  const useAlphaSmartRoute = isAllowAlphaSmartRouter(originalFromToken, originalToToken, isAIRoute);
-  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken, isAIRoute);
+  const useAlphaSmartRoute = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
+  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
 
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const protocols = useIbcWasm ? ['Oraidex', 'OraidexV3'] : undefined;
@@ -59,7 +58,6 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
       {
         useAlphaSmartRoute,
         useIbcWasm,
-        isAIRoute,
         protocols
       }
     );
@@ -75,7 +73,6 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     {
       useAlphaSmartRoute,
       useIbcWasm,
-      isAIRoute,
       protocols,
       isAvgSimulate: isAvgSimulate.status
     }

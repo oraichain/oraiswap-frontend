@@ -130,6 +130,15 @@
 
       .impact {
         padding-left: 6px;
+        &-ten {
+          color: #ec7871 !important;
+        }
+
+        &-five {
+          @include theme() {
+            color: #c68e00 !important;
+          }
+        }
       }
     }
   }

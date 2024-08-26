@@ -370,13 +370,13 @@
 
     .title {
       span {
-        color: $error-color;
+        color: $warning-10-color;
       }
     }
 
     svg {
       path {
-        stroke: $error-color;
+        stroke: $warning-10-color;
       }
     }
   }
@@ -531,6 +531,27 @@
         height: 20px;
       }
     }
+  }
+}
+
+.priceImpact {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 16px;
+  margin-top: 6px;
+  cursor: pointer;
+
+  @include theme() {
+    background-color: $warning-10-color;
+    color: $white;
+  }
+
+  border-radius: 8px;
+  font-size: 14px;
+
+  @include small-mobile() {
+    font-size: 13px;
   }
 }
 
@@ -1026,7 +1047,6 @@
           }
         }
       }
-
     }
   }
 }

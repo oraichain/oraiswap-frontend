@@ -364,27 +364,28 @@ export const getDisableSwap = ({
   return { disabledSwapBtn, disableMsg };
 };
 
-// smart router osmosis
-export const isAllowAlphaSmartRouter = (fromToken, toToken, isAIRoute) => {
-  const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
-  const allowTokenTon = [fromToken.contractAddress, fromToken.denom, toToken.contractAddress, toToken.denom]
-    .filter(Boolean)
-    .includes(TON_ORAICHAIN_DENOM);
-  if (allowTokenTon) return true;
-  if (fromTokenIsOraichain && !toToken.cosmosBased) return true;
-  if (fromTokenIsOraichain) return isAIRoute;
+export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
   return true;
 };
 
-export const isAllowIBCWasm = (fromToken, toToken, isAIRoute) => {
+export const isAllowIBCWasm = (fromToken, toToken) => {
   const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
+  const fromTokenIsCosmos = fromToken.cosmosBased;
+  const fromTokenIsEvm = !fromToken.cosmosBased;
+
+  // Oraichain -> Evm
   if (fromTokenIsOraichain && !toToken.cosmosBased) return true;
+  // Oraichain -> Cosmos
   if (fromTokenIsOraichain) return false;
-  if (fromToken.cosmosBased) {
-    if (toToken.cosmosBased) return !isAIRoute;
-    return true;
-  }
-  if (!fromToken.cosmosBased) return true;
+
+  // Evm -> Other
+  if (fromTokenIsEvm) return true;
+
+  // Cosmos -> Evm
+  if (fromTokenIsCosmos && !toToken.cosmosBased) return true;
+  // Cosmos -> Other
+  if (fromTokenIsCosmos) return false;
+
   return false;
 };
 

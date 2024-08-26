@@ -7,7 +7,7 @@ import { TokenInfo } from 'types/token';
 import styles from './InputSwap.module.scss';
 import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import { Themes } from 'context/theme-context';
-import { numberWithCommas } from 'pages/Pools/helpers';
+import { isNegative, numberWithCommas } from 'pages/Pools/helpers';
 import { AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP } from 'helper/constants';
 
 const cx = cn.bind(styles);
@@ -153,14 +153,14 @@ export default function InputSwap({
           </div>
           <div className={cx('usd')}>
             <span>
-              ≈ ${amount ? numberWithCommas(Number(usdPrice) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+              ≈ ${amount ? numberWithCommas(Number(usdPrice) || 0, undefined, { maximumFractionDigits: 3 }) : 0}
             </span>
-            {!!impactWarning && Number(impactWarning) > 0 && (
+            {!!impactWarning && !isNegative(impactWarning) && (
               <span
-                className={styles.impact}
-                style={{
-                  color: impactWarning > 10 ? '#ff5947' : impactWarning > 5 ? '#c68e00' : '#fff'
-                }}
+                className={cx(
+                  'impact',
+                  `${impactWarning > 10 ? 'impact-ten' : impactWarning > 5 ? 'impact-five' : ''}`
+                )}
               >
                 (-{numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 1 })}%)
               </span>
