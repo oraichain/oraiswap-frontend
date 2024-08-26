@@ -27,7 +27,6 @@ import LogoFullImgLightBeta from 'assets/images/OraiDEX_logo_light.svg';
 
 import PoolV3Lottie from 'assets/lottie/poolv3-beta.json';
 import classNames from 'classnames';
-import SSO from 'components/SSO';
 import TooltipContainer from 'components/WalletManagement/TooltipContainer';
 import { WalletManagement } from 'components/WalletManagement/WalletManagement';
 import { ThemeContext } from 'context/theme-context';
