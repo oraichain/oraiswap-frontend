@@ -651,9 +651,9 @@ const SwapComponent: React.FC<{
               <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
-              {originalFromToken.cosmosBased && originalToToken.cosmosBased && (
+              {/* {originalFromToken.cosmosBased && originalToToken.cosmosBased && (
                 <AIRouteSwitch isLoading={isPreviousSimulate} />
-              )}
+              )} */}
               {generateRatioComp()}
             </div>
           </div>

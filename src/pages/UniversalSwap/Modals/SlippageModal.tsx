@@ -39,14 +39,14 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible, isB
         <div className={cx('ai-label')}>
           <div className={cx('label')}>Enable AI Smart Route</div>
           <div className={cx('btn-switch')}>
-            <ToggleSwitch
+            {/* <ToggleSwitch
               small={true}
               id="toggle-ai-mode"
               checked={isAIRoute}
               onChange={() => {
                 setIsAIRoute(!isAIRoute);
               }}
-            />
+            /> */}
           </div>
         </div>
         <div className={cx('ai-description')}>Use AI to find the best return route for your order</div>
