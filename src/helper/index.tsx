@@ -440,7 +440,10 @@ export const getListAddressCosmos = async (oraiAddr, walletType?: WalletCosmosTy
 
   let listAddressCosmos = {};
   if (walletType === 'sso') {
-    const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
+    const kwtAddress = getAddress(
+      await window.PrivateKeySigner.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
+      'oraie'
+    );
     for (const info of cosmosNetworks) {
       if (!info) continue;
       const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);

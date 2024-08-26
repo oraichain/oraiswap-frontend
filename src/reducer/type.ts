@@ -92,15 +92,15 @@ export interface PoolChartState {
 }
 
 export enum UiHandlerStatus {
-  close,
-  open,
-  processing
+  close = 'close',
+  open = 'open',
+  processing = 'processing'
 }
 
 export enum ConfirmSignStatus {
-  init,
-  rejected,
-  approved
+  init = 'init',
+  rejected = 'rejected',
+  approved = 'approved'
 }
 
 export interface MultifactorState {

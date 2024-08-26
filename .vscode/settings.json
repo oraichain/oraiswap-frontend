@@ -13,5 +13,5 @@
   "[xml]": {
     "editor.defaultFormatter": "redhat.vscode-xml"
   },
-  "cSpell.words": ["Multifactor", "oraichain", "Oraichain"]
+  "cSpell.words": ["Multifactor", "oraichain", "oraidex"]
 }

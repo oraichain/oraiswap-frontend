@@ -116,6 +116,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
 
         if (res) {
           await callbackLoginSSO();
+        } else {
+          setCurrentWalletConnecting(null);
+          setConnectStatus('init');
         }
         return;
       }

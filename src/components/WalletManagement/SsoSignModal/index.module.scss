@@ -78,6 +78,24 @@
 
     .dataContent {
       padding: 20px;
+
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+
+      .json {
+        height: 100vh;
+        max-height: 250px;
+        overflow: auto;
+
+        &::-webkit-scrollbar {
+          height: 4px;
+        }
+
+        & > div {
+          border-radius: 8px;
+        }
+      }
     }
 
     .btnGroup {

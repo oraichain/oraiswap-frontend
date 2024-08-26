@@ -29,6 +29,8 @@ import Sidebar from './Sidebar';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import SsoSignModal from 'components/WalletManagement/SsoSignModal';
+import useSsoHandler from 'components/WalletManagement/SsoSignModal/useSsoHandler';
+import { triggerLogin } from 'libs/web3MultifactorsUtils';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -44,10 +46,16 @@ const App = () => {
   const mobileMode = isMobile();
   const { tron, evm } = walletByNetworks;
   const ethOwallet = window.eth_owallet;
+  const uiHandler = useSsoHandler();
 
   const dispatch = useDispatch();
 
   useTronEventListener();
+
+  // useEffect(() => {
+  //   console.log('56', 56);
+  //   triggerLogin(network.chainId, uiHandler);
+  // }, []);
 
   // TODO: polyfill evm, tron, need refactor
   useEffect(() => {

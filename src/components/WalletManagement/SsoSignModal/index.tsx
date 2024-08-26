@@ -5,11 +5,14 @@ import Loader from 'components/Loader';
 import useMultifactorReducer from 'hooks/useMultifactorReducer';
 import { ConfirmSignStatus, UiHandlerStatus } from 'reducer/type';
 import styles from './index.module.scss';
+import ReactJson from 'react-json-view';
+import useTheme from 'hooks/useTheme';
 
 const SsoSignModal = () => {
   const [, setConfirmSignStatus] = useMultifactorReducer('confirmSign');
   const [modalStatus, setModalStatus] = useMultifactorReducer('status');
   const [dataSign, setDataSign] = useMultifactorReducer('dataSign');
+  const theme = useTheme();
 
   const rejectTx = () => {
     setConfirmSignStatus(ConfirmSignStatus.rejected);
@@ -31,7 +34,23 @@ const SsoSignModal = () => {
         <div className={styles.dataContent}>
           Data:
           <br />
-          <div>{JSON.stringify(dataSign || '')}</div>
+          <br />
+          {/* <div>{JSON.stringify(dataSign || '')}</div> */}
+          <div className={styles.json}>
+            {!dataSign ? (
+              <p style={{ textAlign: 'center' }}>No data sign</p>
+            ) : (
+              <ReactJson
+                enableClipboard={false}
+                groupArraysAfterLength={10}
+                displayDataTypes={false}
+                displayObjectSize
+                collapseStringsAfterLength={20}
+                src={dataSign}
+                theme={theme === 'light' ? 'bright:inverted' : 'google'} // railscasts
+              />
+            )}
+          </div>
         </div>
 
         <div className={styles.btnGroup}>

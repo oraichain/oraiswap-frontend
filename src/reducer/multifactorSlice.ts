@@ -8,7 +8,7 @@ const initialState: MultifactorState = {
   confirmSign: ConfirmSignStatus.init
 };
 
-const multifactorSlice = createSlice({
+export const multifactorSlice = createSlice({
   name: 'multifactorSlice',
   initialState,
   reducers: {

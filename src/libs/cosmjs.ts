@@ -7,13 +7,31 @@ import { Stargate } from '@injectivelabs/sdk-ts';
 import { network } from 'config/networks';
 import { MetamaskOfflineSigner } from './eip191';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
-import { ActionSSO, ssoExecute, ssoExecuteMultiple } from './web3MultifactorsUtils';
+import { ActionSSO, initSSO, ssoExecute, ssoExecuteMultiple, triggerLogin } from './web3MultifactorsUtils';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
-  console.log('first-window.PrivateKeySigner', window.PrivateKeySigner);
-  if (window.PrivateKeySigner) {
-    return window.PrivateKeySigner.getOfflineSigner(chainId);
+  // init cosmwasm client when user connected cosmos wallet
+  const walletType = getWalletByNetworkCosmosFromStorage();
+
+  if (window.PrivateKeySigner || walletType === 'sso') {
+    if (window.PrivateKeySigner) {
+      return window.PrivateKeySigner.getOfflineSigner(chainId);
+    } else {
+      await initSSO();
+      const signer = await triggerLogin(chainId);
+
+      //   if (!signer) {
+
+      // const result = localStorage.getItem('persist:root');
+      // const parsedResult = JSON.parse(result);
+      // const wallet = JSON.parse(parsedResult.wallet);
+      //  wallet.walletsByNetwork.cosmos = null;
+
+      //  setStorageKey
+      //   }
+      return signer;
+    }
   }
   const keplr = await window.Keplr.getKeplr();
   if (keplr) return await keplr.getOfflineSignerAuto(chainId);
@@ -27,15 +45,10 @@ const getCosmWasmClient = async (
 ) => {
   try {
     const { chainId, rpc, signer } = config;
-    console.log('first-config', config);
+
     const wallet = signer ?? (await collectWallet(chainId));
     const defaultAddress = (await wallet.getAccounts())[0];
     const tmClient = await Tendermint37Client.connect(rpc ?? (network.rpc as string));
-
-    console.log('first', wallet, {
-      defaultAddress,
-      tmClient
-    });
     const client = await cosmwasm.SigningCosmWasmClient.createWithSigner(
       tmClient,
       wallet,

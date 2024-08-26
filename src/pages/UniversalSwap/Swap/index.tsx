@@ -342,15 +342,6 @@ const SwapComponent: React.FC<{
         }
       });
 
-      console.log('first', swapData, {
-        cosmosWallet: walletByNetworks.cosmos === 'sso' ? window.PrivateKeySigner : window.Keplr,
-        evmWallet: new Metamask(window.tronWebDapp),
-        swapOptions: {
-          isAlphaSmartRouter: useAlphaSmartRouter,
-          isIbcWasm: useIbcWasm
-        }
-      });
-
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {

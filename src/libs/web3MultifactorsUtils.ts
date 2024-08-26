@@ -27,7 +27,7 @@ export const initSSO = async () => {
     await initBLS('/blsdkg_bg.wasm');
     await (onlySocialKey.serviceProvider as OraiServiceProvider).init();
   } catch (error) {
-    console.error(error);
+    console.error('init sso error:', error);
   }
 };
 
@@ -37,8 +37,9 @@ export const triggerLogin = async (chainId: string = 'Oraichain', uiHandler?: UI
   }
   try {
     const loginResponse = await (onlySocialKey.serviceProvider as OraiServiceProvider).triggerLogin(CONFIG_SOCIAL_KEY);
-
+    console.log('41-loginResponse', loginResponse);
     const privateKey = loginResponse?.privateKey;
+    console.log('privateKey', privateKey);
     const chain = chainInfos.find((c) => c.chainId === chainId);
     const prefix = chain?.bech32Config?.bech32PrefixAccAddr || 'orai';
 
@@ -75,23 +76,74 @@ export interface UIHandler {
   close: () => void;
 }
 
+export function storageAvailable(type: 'sessionStorage' | 'localStorage'): boolean {
+  let storageExists = false;
+  let storageLength = 0;
+  let storage: Storage;
+  try {
+    storage = window[type];
+    storageExists = true;
+    storageLength = storage.length;
+    const x = '__storage_test__';
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  } catch (error: unknown) {
+    const _error = error as DOMException;
+    return !!(
+      _error &&
+      // everything except Firefox
+      (_error.code === 22 ||
+        // Firefox
+        _error.code === 1014 ||
+        // test name field too, because code might not be present
+        // everything except Firefox
+        _error.name === 'QuotaExceededError' ||
+        // Firefox
+        _error.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+      // acknowledge QuotaExceededError only if there's something already stored
+      storageExists &&
+      storageLength !== 0
+    );
+  }
+}
+
+const ADAPTER_CACHE_KEY = 'Web3Auth-oraidex-cachedAdapter';
+
+// Switch Wallet Keplr Owallet
+export const getWeb3MultifactorStorageKey = (key = ADAPTER_CACHE_KEY) => {
+  return localStorage.getItem(key);
+};
+
+export const setWeb3MultifactorStorageKey = (key = ADAPTER_CACHE_KEY, value) => {
+  return localStorage.setItem(key, value);
+};
+
 export class PrivateKeySigner implements OfflineDirectSigner {
   private UIHandler: UIHandler;
   public pubkey: Uint8Array;
   private privKey: Uint8Array;
   private signer: OfflineDirectSigner;
   private registry: Registry;
+  public cachedAdapter: string | null = null;
+  private storage: 'sessionStorage' | 'localStorage' = 'localStorage';
+
   protected constructor(
     privKey: Uint8Array,
     signer: OfflineDirectSigner,
     accountData: AccountData,
-    UIHandler?: UIHandler
+    UIHandler?: UIHandler,
+    cacheOption: 'sessionStorage' | 'localStorage' = 'localStorage'
   ) {
     this.UIHandler = UIHandler;
     this.signer = signer;
     this.pubkey = accountData.pubkey;
     this.privKey = privKey;
     this.registry = new Registry([...defaultStargateTypes, ...wasmTypes]);
+
+    // setup cache option
+    if (cacheOption === 'sessionStorage') this.storage = 'sessionStorage';
+    this.cachedAdapter = storageAvailable(this.storage) ? window[this.storage].getItem(ADAPTER_CACHE_KEY) : null;
   }
 
   static async createFromPrivateKey(privateKey: string | Buffer | Uint8Array, prefix: string, UIHandler?: UIHandler) {
@@ -103,7 +155,23 @@ export class PrivateKeySigner implements OfflineDirectSigner {
 
     const signer = await DirectSecp256k1Wallet.fromKey(privateKeyBuffer, prefix);
     const accountData = (await signer.getAccounts())[0];
-    return new PrivateKeySigner(privateKeyBuffer, signer, accountData, UIHandler);
+    const privSigner = new PrivateKeySigner(privateKeyBuffer, signer, accountData, UIHandler);
+
+    // const { pubkey, getCosmWasmClient, getOfflineSigner, decodeMsg, getWalletAddress, getAccounts, signDirect } =
+    //   privSigner;
+    // return { pubkey, getCosmWasmClient, getOfflineSigner, decodeMsg, getWalletAddress, getAccounts, signDirect };
+
+    return privSigner;
+  }
+
+  setUiHandler = (UIHandler: UIHandler) => {
+    this.UIHandler = UIHandler;
+  };
+
+  public clearCache() {
+    if (!storageAvailable(this.storage)) return;
+    window[this.storage].removeItem(ADAPTER_CACHE_KEY);
+    this.cachedAdapter = null;
   }
 
   decodeMsg = (msg: Any) => {
@@ -112,7 +180,6 @@ export class PrivateKeySigner implements OfflineDirectSigner {
 
       if (decodeMsg.msg) {
         const msgBody = Buffer.from(decodeMsg.msg).toString();
-        console.log('msgBody', msgBody);
         return {
           ...decodeMsg,
           msg: JSON.parse(msgBody)
@@ -172,7 +239,7 @@ export class PrivateKeySigner implements OfflineDirectSigner {
       const bodyBytes = signDoc.bodyBytes;
       // const txBody = this.registry.decodeTxBody(bodyBytes);
       const txBody = TxBody.decode(bodyBytes);
-      const msgs = txBody.messages;
+      const msgs = txBody.messages; // typeUrl, value
       const fmtMsg = msgs.map((msg) => {
         return this.decodeMsg(msg);
       });
@@ -181,15 +248,19 @@ export class PrivateKeySigner implements OfflineDirectSigner {
         const data = await this.UIHandler.process(fmtMsg);
 
         if (data === ConfirmSignStatus.approved) {
-          this.UIHandler.close();
-
           const result = await this.signer.signDirect(signerAddress, signDoc);
+          this.UIHandler.close();
           return result;
         }
+
+        this.UIHandler.close();
+        throw new Error('Transaction was rejected');
       } else {
+        this.UIHandler.close();
         throw new Error('Wallet was not setup');
       }
     } catch (error) {
+      this.UIHandler?.close();
       console.log('Error sign', error);
     }
   }

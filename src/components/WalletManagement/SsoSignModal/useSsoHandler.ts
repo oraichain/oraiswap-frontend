@@ -12,7 +12,7 @@ const useSsoHandler = () => {
   const open = (data: any) => {
     setModalStatus(UiHandlerStatus.open);
     setDataSign(data);
-    // setConfirmSign(ConfirmSignStatus.init);
+    setConfirmSign(ConfirmSignStatus.init);
   };
 
   const process = (data: any) => {
