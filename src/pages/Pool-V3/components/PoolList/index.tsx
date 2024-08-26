@@ -7,26 +7,23 @@ import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
-import SearchLightSvg from 'assets/images/search-light-svg.svg';
-import SearchSvg from 'assets/images/search-svg.svg';
 import classNames from 'classnames';
 import LoadingBox from 'components/LoadingBox';
 import { CoefficientBySort, SortType } from 'components/Table';
 import { TooltipIcon } from 'components/Tooltip';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { fetchPoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
 import { formatPoolData } from 'pages/Pool-V3/helpers/format';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
-import { useGetPoolLiqAndVol } from 'pages/Pool-V3/hooks/useGetPoolLiqAndVol';
+import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
-import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -36,7 +33,7 @@ export enum PoolColumnHeader {
 }
 
 const PoolList = ({ search }) => {
-  const [price] = useConfigReducer('coingecko');
+  const { data: price } = useCoinGeckoPrices();
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
@@ -54,7 +51,6 @@ const PoolList = ({ search }) => {
   const [totalLiquidity, setTotalLiquidity] = useState(0);
   const { feeDailyData } = useGetFeeDailyData();
   const { poolList, poolPrice } = useGetPoolList(price);
-  // const { poolLiquidities, poolVolume } = useGetPoolLiqAndVol();
   const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
   const { poolPositionInfo } = useGetPoolPositionInfo(poolPrice);
 
@@ -126,7 +122,10 @@ const PoolList = ({ search }) => {
       .sort((a, b) => {
         switch (sortField) {
           case PoolColumnHeader.LIQUIDITY:
-            return Number(CoefficientBySort[sortOrder]) * ((poolLiquidities?.[a?.poolKey] || 0) - (poolLiquidities?.[b?.poolKey] || 0))
+            return (
+              Number(CoefficientBySort[sortOrder]) *
+              ((poolLiquidities?.[a?.poolKey] || 0) - (poolLiquidities?.[b?.poolKey] || 0))
+            );
           case PoolColumnHeader.POOL_NAME:
             return CoefficientBySort[sortOrder] * (a?.tokenXinfo?.name || '').localeCompare(b.tokenXinfo?.name || '');
           case PoolColumnHeader.VOLUME:
