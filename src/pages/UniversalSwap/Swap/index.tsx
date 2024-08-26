@@ -84,6 +84,7 @@ import { useFillToken } from './hooks/useFillToken';
 import useHandleEffectTokenChange from './hooks/useHandleEffectTokenChange';
 import styles from './index.module.scss';
 import { RELAYER_DECIMAL } from 'helper/constants';
+import { isNegative } from 'helper/format';
 
 const cx = cn.bind(styles);
 
@@ -528,13 +529,21 @@ const SwapComponent: React.FC<{
 
   function caculateImpactWarning() {
     let impactWarning = 0;
-    const isImpactPrice = !!debouncedFromAmount && !!simulateData?.displayAmount && !!averageRatio?.amount;
-    if (
-      isImpactPrice &&
-      simulateData?.displayAmount &&
-      averageRatio?.displayAmount &&
-      averageSimulateData?.displayAmount
-    ) {
+    if (Number(usdPriceShowFrom) && Number(usdPriceShowTo)) {
+      const calculateImpactPrice = new BigDecimal(usdPriceShowFrom).sub(usdPriceShowTo).toNumber();
+      if (isNegative(calculateImpactPrice)) return impactWarning;
+      return new BigDecimal(calculateImpactPrice).div(usdPriceShowFrom).mul(100).toNumber();
+    }
+
+    const isValidValue = (value) => value && value !== '';
+    const isImpactPrice =
+      isValidValue(debouncedFromAmount) &&
+      isValidValue(simulateData?.displayAmount) &&
+      isValidValue(averageRatio?.amount) &&
+      isValidValue(averageSimulateData?.displayAmount) &&
+      isValidValue(averageRatio?.displayAmount);
+
+    if (isImpactPrice) {
       const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
         .div(debouncedFromAmount)
         .div(averageSimulateData.displayAmount)
@@ -545,6 +554,7 @@ const SwapComponent: React.FC<{
     }
     return impactWarning;
   }
+
   const impactWarning = caculateImpactWarning();
 
   const waringImpactBiggerTen = impactWarning > 10;
@@ -652,7 +662,7 @@ const SwapComponent: React.FC<{
             </div>
           </div>
 
-          {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
+          {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && routersSwapData?.routes.length && (
             <div className={cx('smart', !openRoutes ? 'hidden' : '')}>
               <div className={cx('smart-router')}>
                 {routersSwapData?.routes.map((route, ind) => {
@@ -693,7 +703,7 @@ const SwapComponent: React.FC<{
                     </div>
                   );
                 })}
-                <div className={cx('smart-router-price-impact')}>
+                {/* <div className={cx('smart-router-price-impact')}>
                   <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
                   <div
                     className={cx(
@@ -708,7 +718,7 @@ const SwapComponent: React.FC<{
                       {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
                     </span>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           )}
@@ -730,7 +740,6 @@ const SwapComponent: React.FC<{
                 usdPrice={usdPriceShowTo}
                 loadingSimulate={isPreviousSimulate}
                 impactWarning={impactWarning}
-                aiRouteEnable={isAIRoute}
               />
             </div>
           </div>

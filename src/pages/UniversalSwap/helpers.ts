@@ -367,26 +367,23 @@ export const getDisableSwap = ({
 // smart router osmosis
 export const isAllowAlphaSmartRouter = (fromToken, toToken, isAIRoute) => {
   const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
-  // const notAllowChainId = ['Neutaro-1'];
   const allowTokenTon = [fromToken.contractAddress, fromToken.denom, toToken.contractAddress, toToken.denom]
     .filter(Boolean)
     .includes(TON_ORAICHAIN_DENOM);
-
   if (allowTokenTon) return true;
-  // if (notAllowChainId.includes(fromToken.chainId) || notAllowChainId.includes(toToken.chainId)) return false;
-  // if (isOraichain && !toToken.cosmosBased) return false;
+  if (fromTokenIsOraichain && !toToken.cosmosBased) return true;
   if (fromTokenIsOraichain) return isAIRoute;
-
-  if (fromToken.cosmosBased && toToken.cosmosBased) return true;
-  if (fromToken.cosmosBased && !toToken.cosmosBased) return true;
-  if (!fromToken.cosmosBased) return true;
-  return false;
+  return true;
 };
 
 export const isAllowIBCWasm = (fromToken, toToken, isAIRoute) => {
-  if (fromToken.cosmosBased && toToken.cosmosBased) return !isAIRoute;
-  if (fromToken.cosmosBased && !toToken.cosmosBased) return true;
-
+  const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
+  if (fromTokenIsOraichain && !toToken.cosmosBased) return true;
+  if (fromTokenIsOraichain) return false;
+  if (fromToken.cosmosBased) {
+    if (toToken.cosmosBased) return !isAIRoute;
+    return true;
+  }
   if (!fromToken.cosmosBased) return true;
   return false;
 };

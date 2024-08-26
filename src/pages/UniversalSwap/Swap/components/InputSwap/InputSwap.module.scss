@@ -127,6 +127,10 @@
 
       display: flex;
       justify-content: flex-end;
+
+      .impact {
+        padding-left: 6px;
+      }
     }
   }
 }
