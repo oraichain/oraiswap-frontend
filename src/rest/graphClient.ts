@@ -4,7 +4,9 @@ import { gql, GraphQLClient } from 'graphql-request';
 export const INDEXER_V3_URL = network.indexer_v3 ?? 'https://staging-ammv3-indexer.oraidex.io/';
 export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
 
-export const ONE_DAY = 24 * 60 * 60 * 1000;
+export const HOURS_PER_DAY = 24;
+export const MILIS_PER_HOUR = 60 * 60 * 1000;
+export const MILIS_PER_DAY = HOURS_PER_DAY * MILIS_PER_HOUR;
 
 export const getFeeClaimData = async (address: string) => {
   try {
@@ -106,7 +108,7 @@ export type FeeDailyData = {
 };
 
 export const getFeeDailyData = async (): Promise<FeeDailyData[]> => {
-  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
+  const yesterdayIndex = Math.floor(Date.now() / MILIS_PER_DAY) - 1;
   try {
     const document = gql`
       {
@@ -144,7 +146,7 @@ export type PoolLiquidityAndVolume = {
 };
 
 export const getPoolsLiquidityAndVolume = async (): Promise<PoolLiquidityAndVolume[]> => {
-  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
+  const yesterdayIndex = Math.floor(Date.now() / MILIS_PER_DAY) - 1;
   try {
     const document = gql`
       query {
@@ -177,11 +179,11 @@ export type PoolLiquidityAndVolumeAmount = {
   tokenX: {
     coingeckoId: string;
     decimals: number;
-  }
+  };
   tokenY: {
     coingeckoId: string;
     decimals: number;
-  }
+  };
   totalValueLockedInUSD: number;
   totalValueLockedTokenX: number;
   totalValueLockedTokenY: number;
@@ -194,7 +196,7 @@ export type PoolLiquidityAndVolumeAmount = {
 };
 
 export const getPoolsLiqudityAndVolumeAmount = async (): Promise<PoolLiquidityAndVolumeAmount[]> => {
-  const yesterdayIndex = Math.floor(Date.now() / ONE_DAY) - 1;
+  const yesterdayIndex = Math.floor(Date.now() / MILIS_PER_DAY) - 1;
   try {
     const document = gql`
       query {
@@ -226,6 +228,45 @@ export const getPoolsLiqudityAndVolumeAmount = async (): Promise<PoolLiquidityAn
     return result.pools.nodes || [];
   } catch (error) {
     console.log('error getPoolsLiqudityAndVolumeAmount', error);
+    return [];
+  }
+};
+
+export const getPoolsVolumeByTokenLatest24h = async (): Promise<PoolLiquidityAndVolumeAmount[]> => {
+  const currentHour = Math.floor(Date.now() / MILIS_PER_HOUR);
+  const twentyHourBefore = currentHour - HOURS_PER_DAY;
+  try {
+    const document = gql`
+      query Pools {
+        pools {
+          nodes {
+            id
+            tokenXId
+            tokenYId
+            tokenX {
+              coingeckoId
+              decimals
+            }
+            tokenY {
+              coingeckoId
+              decimals
+            }
+            poolHourData(filter: { hourIndex: { greaterThan: ${twentyHourBefore}, lessThanOrEqualTo: ${currentHour} } }, distinct: [ID]) {
+              aggregates {
+                volume24hByToken: sum {
+                  volumeTokenX
+                  volumeTokenY
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.pools.nodes || [];
+  } catch (error) {
+    console.log('error getPoolsLiqudityAndVolumeAmountHourly', error);
     return [];
   }
 };

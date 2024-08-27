@@ -4,13 +4,12 @@ import {
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
   NetworkChainId,
+  TON_ORAICHAIN_DENOM,
   TRON_DENOM,
   TokenItemType,
   getTokenOnOraichain,
   toAmount,
-  toDisplay,
-  TON_ORAICHAIN_DENOM,
-  evmChains
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as BookIcon } from 'assets/icons/book_icon.svg';
@@ -32,7 +31,7 @@ import LoadingBox from 'components/LoadingBox';
 import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
-import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
+import { chainIcons } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
   assert,
@@ -42,6 +41,7 @@ import {
   handleErrorTransaction,
   networks
 } from 'helper';
+import { RELAYER_DECIMAL } from 'helper/constants';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
@@ -83,7 +83,6 @@ import useCalculateDataSwap, { SIMULATE_INIT_AMOUNT } from './hooks/useCalculate
 import { useFillToken } from './hooks/useFillToken';
 import useHandleEffectTokenChange from './hooks/useHandleEffectTokenChange';
 import styles from './index.module.scss';
-import { RELAYER_DECIMAL } from 'helper/constants';
 import { isNegative } from 'helper/format';
 
 const cx = cn.bind(styles);

@@ -76,7 +76,7 @@ const PoolV3Detail = () => {
           setLiquidity(liquidityDistribution);
           return;
         }
-        
+
         const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
         const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, poolPrice, allPosition);
         setLiquidity(liquidity);
@@ -130,6 +130,7 @@ const PoolV3Detail = () => {
       try {
         setLoading(true);
         if (!(poolList.length && userPositions.length && poolPrice && address)) return setDataPosition([]);
+        if (dataPosition.length) return;
         const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
@@ -152,7 +153,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [address, poolList, userPositions, poolPrice]);
+  }, [address, poolList.length, userPositions, poolPrice]);
 
   const calcShowApr = (apr: number) =>
     numberWithCommas(apr * 100, undefined, {
