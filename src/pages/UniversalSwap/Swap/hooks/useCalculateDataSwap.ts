@@ -6,7 +6,13 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { getAverageRatio, getRemoteDenom, isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
+import {
+  getAverageRatio,
+  getProtocolsSmartRoute,
+  getRemoteDenom,
+  isAllowAlphaSmartRouter,
+  isAllowIBCWasm
+} from 'pages/UniversalSwap/helpers';
 import { fetchTokenInfos } from 'rest/api';
 import { useSimulate } from './useSimulate';
 import { useSwapFee } from './useSwapFee';
@@ -30,7 +36,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
 
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-  const protocols = useIbcWasm ? ['Oraidex', 'OraidexV3'] : undefined;
+  const protocols = getProtocolsSmartRoute(originalFromToken, originalToToken);
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
     originalFromToken,
     originalToToken

@@ -364,7 +364,17 @@ export const getDisableSwap = ({
   return { disabledSwapBtn, disableMsg };
 };
 
+export const getProtocolsSmartRoute = (fromToken, toToken) => {
+  const notAllowChain = ['injective-1', 'Neutaro-1', 'noble-1'];
+  if (notAllowChain.includes(fromToken.chainId) || notAllowChain.includes(toToken.chainId))
+    return ['Oraidex', 'OraidexV3', 'Osmosis'];
+  if (fromToken.cosmosBased && toToken.cosmosBased && fromToken.chainId !== toToken.chainId)
+    return ['Oraidex', 'OraidexV3', 'Osmosis'];
+  return ['Oraidex', 'OraidexV3'];
+};
+
 export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
+  if (fromToken.chainId === 'Neutaro-1' || toToken.chainId === 'Neutaro-1') return false;
   return true;
 };
 
