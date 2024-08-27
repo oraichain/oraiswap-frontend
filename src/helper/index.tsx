@@ -293,7 +293,7 @@ export const getHashKeySSOFromStorage = (key = 'persist:root'): string => {
 
     return config.hashSsoKey;
   } catch (error) {
-    console.log('error getWalletByNetworkCosmosFromStorage: ', error);
+    console.log('error getHashKeySSOFromStorage: ', error);
   }
 };
 
