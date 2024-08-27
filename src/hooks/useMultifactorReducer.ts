@@ -7,7 +7,7 @@ import { updateMultifactorState } from 'reducer/multifactorSlice';
 export default function useMultifactorReducer<StateKey extends keyof MultifactorState>(
   key: StateKey
 ): readonly [MultifactorState[StateKey], (value: MultifactorState[StateKey]) => void] {
-  const value = useSelector((state: RootState) => state.multifactorSlice[key]);
+  const value = useSelector((state: RootState) => state['multifactorSlice'][key]);
   const dispatch = useDispatch();
   const setValue = (newValue: MultifactorState[StateKey]) => {
     dispatch(updateMultifactorState(key, newValue));

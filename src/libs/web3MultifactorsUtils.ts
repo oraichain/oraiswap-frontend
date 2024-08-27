@@ -32,7 +32,7 @@ export const initSSO = async () => {
   }
 };
 
-export const reinitializeSigner = async (chainId: string | 'orai') => {
+export const reinitializeSigner = async (chainId: string | 'orai', uiHandler?: UIHandler) => {
   try {
     const hashKey = getHashKeySSOFromStorage();
     const { privateKey, passphrase } = decryptData(hashKey, PP_CACHE_KEY);
@@ -40,7 +40,7 @@ export const reinitializeSigner = async (chainId: string | 'orai') => {
     const chain = chainInfos.find((c) => c.chainId === chainId);
     const prefix = chain?.bech32Config?.bech32PrefixAccAddr || 'orai';
 
-    const privateKeySigner = await PrivateKeySigner.createFromPrivateKey(privateKey, prefix);
+    const privateKeySigner = await PrivateKeySigner.createFromPrivateKey(privateKey, prefix, uiHandler);
     window.PrivateKeySigner = privateKeySigner;
 
     return privateKeySigner;
@@ -277,10 +277,10 @@ export class PrivateKeySigner implements OfflineDirectSigner {
           return result;
         }
 
-        this.UIHandler.close();
+        this.UIHandler?.close();
         throw new Error('Transaction was rejected');
       } else {
-        this.UIHandler.close();
+        this.UIHandler?.close();
         throw new Error('Wallet was not setup');
       }
     } catch (error) {

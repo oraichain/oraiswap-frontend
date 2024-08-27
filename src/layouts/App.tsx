@@ -59,10 +59,7 @@ const App = () => {
   const uiHandler = useSsoHandler();
   const passphraseHandler = useSsoPassphrase();
   const UIHandler = useSsoHandler();
-  const PassphraseHandler = useSsoPassphrase();
-  const [hashKey, setHashKey] = useConfigReducer('hashSsoKey');
-  const [modalStatus] = useMultifactorReducer('passphraseModalStatus');
-
+  const [, setHashKey] = useConfigReducer('hashSsoKey');
   const dispatch = useDispatch();
 
   useTronEventListener();
@@ -304,7 +301,7 @@ const App = () => {
             const { passphrase: passphraseStored } = decryptData(hashKey, PP_CACHE_KEY);
 
             if (passphraseStored === passphrase) {
-              const signer = await reinitializeSigner(network.chainId);
+              const signer = await reinitializeSigner(network.chainId, UIHandler);
 
               if (!signer) {
                 reinitializeFailed();

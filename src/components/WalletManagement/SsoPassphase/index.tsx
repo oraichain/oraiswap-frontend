@@ -38,12 +38,13 @@ const SsoPassphraseModal = () => {
           <br />
           <div className={styles.inputPass}>
             <input
+              defaultValue={null}
               type="text"
               onChange={(e) => {
                 e.preventDefault();
                 setPassphrase(e.target.value?.trim());
               }}
-              value={passphrase}
+              // value={passphrase}
               role="presentation"
               autoComplete="off"
               required
@@ -62,6 +63,7 @@ const SsoPassphraseModal = () => {
             Cancel
           </Button>
           <Button
+            disabled={!passphrase}
             type="primary-sm"
             onClick={() => {
               setModalStatus(PassphraseModalStatus.close);

@@ -22,11 +22,14 @@ export const multifactorSlice = createSlice({
       prepare(key: string, value: MultifactorState[keyof MultifactorState]) {
         return { payload: key, meta: value };
       }
+    },
+    resetStateSSO: (state) => {
+      state = initialState;
     }
   }
 });
 
 // Action creators are generated for each case reducer function
-export const { updateMultifactorState } = multifactorSlice.actions;
+export const { updateMultifactorState, resetStateSSO } = multifactorSlice.actions;
 
 export default multifactorSlice.reducer;
