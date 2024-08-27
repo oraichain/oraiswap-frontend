@@ -369,8 +369,6 @@ export const getProtocolsSmartRoute = (fromToken, toToken) => {
 };
 
 export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
-  if (fromToken.chainId === 'injective-1' && fromToken.coinGeckoId === 'oraichain-token') return false;
-  if (fromToken.chainId === 'Neutaro-1' || toToken.chainId === 'Neutaro-1') return false;
   return true;
 };
 
@@ -381,7 +379,7 @@ const listAllowSmartRoute = {
     toCoinGeckoIds
   },
   'injective-1-Oraichain': {
-    fromCoinGeckoIds: ['injective-protocol'],
+    fromCoinGeckoIds: ['injective-protocol', 'oraichain-token'],
     toCoinGeckoIds
   },
   'noble-1-Oraichain': {
@@ -397,18 +395,23 @@ const listAllowSmartRoute = {
 export const isAllowIBCWasm = (fromToken, toToken) => {
   const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
   const fromTokenIsCosmos = fromToken.cosmosBased;
-  const toTokenIsCosmos = toToken.cosmosBased;
-  const fromTokenIsEvm = !fromToken.cosmosBased;
 
+  const toTokenIsOraichain = toToken.chainId === 'Oraichain';
+  const toTokenIsCosmos = toToken.cosmosBased;
+
+  // Oraichain -> Oraichain
+  if (fromTokenIsOraichain && toTokenIsOraichain) return false;
   // Oraichain -> Evm
-  if (fromTokenIsOraichain && !toToken.cosmosBased) return true;
+  if (fromTokenIsOraichain && !toTokenIsCosmos) return true;
+  // Evm -> Oraichain
+  if (!fromTokenIsCosmos && toTokenIsOraichain) return true;
   // Oraichain -> Cosmos
-  if (fromTokenIsOraichain) return false;
-  // Evm -> Other
-  if (fromTokenIsEvm) return true;
-  // Cosmos -> Evm
-  if (fromTokenIsCosmos && !toToken.cosmosBased) return true;
-  // Cosmos -> Other
+  if (fromTokenIsOraichain && toTokenIsCosmos) return false;
+  // Cosmos -> EVM
+  if (fromTokenIsCosmos && !toTokenIsCosmos) return true;
+  // EVM -> Cosmos
+  if (!fromTokenIsCosmos && toTokenIsCosmos) return true;
+  // Cosmos -> Cosmos ( Oraichain )
   if (fromTokenIsCosmos && toTokenIsCosmos) {
     const key = [fromToken, toToken].map((e) => e.chainId).join('-');
     const hasTokenUsingSmartRoute =
