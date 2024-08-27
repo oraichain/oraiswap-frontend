@@ -295,12 +295,12 @@ const App = () => {
     (async () => {
       try {
         const passphraseSession = getWeb3MultifactorStorageKey(PP_CACHE_KEY);
+        const hashKey = getHashKeySSOFromStorage();
 
-        if (!passphraseSession) {
+        if (!passphraseSession && hashKey) {
           const { passphrase, confirmed } = ((await passphraseHandler.process()) as any) || {};
 
           if (passphrase && confirmed === ConfirmPassStatus.approved) {
-            const hashKey = getHashKeySSOFromStorage();
             const { passphrase: passphraseStored } = decryptData(hashKey, PP_CACHE_KEY);
 
             if (passphraseStored === passphrase) {

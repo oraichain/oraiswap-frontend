@@ -43,6 +43,7 @@ const SsoPassphraseModal = () => {
                 e.preventDefault();
                 setPassphrase(e.target.value?.trim());
               }}
+              value={passphrase}
               role="presentation"
               autoComplete="off"
               required

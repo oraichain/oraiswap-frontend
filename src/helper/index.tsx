@@ -290,6 +290,7 @@ export const getHashKeySSOFromStorage = (key = 'persist:root'): string => {
     const result = localStorage.getItem(key);
     const parsedResult = JSON.parse(result);
     const config = JSON.parse(parsedResult.config);
+
     return config.hashSsoKey;
   } catch (error) {
     console.log('error getWalletByNetworkCosmosFromStorage: ', error);
