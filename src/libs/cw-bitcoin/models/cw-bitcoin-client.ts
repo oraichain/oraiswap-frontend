@@ -2,7 +2,8 @@ import { DepositSuccess } from '@oraichain/orai-bitcoin';
 import { bitcoinLcd, btcNetwork } from 'helper/constants';
 import { CwBitcoinClientInterface } from './cw-bitcoin-client-interface';
 import { Dest } from '@oraichain/bitcoin-bridge-contracts-sdk/build/CwBitcoin.types';
-import { generateDepositAddress } from '..';
+// import { generateDepositAddress } from '..';
+import { generateDepositAddress } from '@oraichain/bitcoin-bridge-lib-js';
 
 export class CwBitcoinClient implements CwBitcoinClientInterface {
   readonly modifier = BigInt(1e6);
@@ -20,7 +21,6 @@ export class CwBitcoinClient implements CwBitcoinClientInterface {
         network: btcNetwork,
         dest
       } as any;
-      console.log('🚀 ~ NomicClient ~ generateAddress ~ config:', config);
 
       const btcAddressToDeposit = (await generateDepositAddress(config)) as DepositSuccess;
 

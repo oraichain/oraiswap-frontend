@@ -4,6 +4,7 @@ import { Decimal } from '@cosmjs/math';
 import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import {
+  ChainIdEnum,
   CosmosChainId,
   flattenTokens,
   getTokenOnOraichain,
@@ -30,7 +31,6 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { NomicContext } from 'context/nomic-context';
 import {
   assert,
   EVM_CHAIN_ID,
@@ -58,7 +58,6 @@ import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Content from 'layouts/Content';
 import Metamask from 'libs/metamask';
-import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
 import { getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -125,15 +124,13 @@ const Balance: React.FC<BalanceProps> = () => {
   const isOwallet = window.owallet?.isOwallet;
 
   useEffect(() => {
-    if (isOwallet) {
-      console.log(from, to);
-      if (from?.chainId == bitcoinChainId && to?.chainId == 'Oraichain') {
-        cwBitcoinContext.generateAddress({
-          address: oraiAddress
-        });
-      }
+    // TODO: should dynamic generate address when change destination chain.
+    if (oraiAddress) {
+      cwBitcoinContext.generateAddress({
+        address: oraiAddress
+      });
     }
-  }, [isOwallet, from, to]);
+  }, [isOwallet, oraiAddress]);
 
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
@@ -262,7 +259,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     try {
       // @ts-ignore-check
-      const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId, dataRequest);
+      const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId as any, dataRequest);
 
       if (rs?.rawTxHex) {
         setTxHash(rs.rawTxHex);
@@ -314,17 +311,6 @@ const Balance: React.FC<BalanceProps> = () => {
         chainName: from.chainId
       });
     }
-  };
-
-  const checkTransferBtc = async (fromAmount: number) => {
-    const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
-    const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
-    if (isBTCtoOraichain || isOraichainToBTC)
-      return handleTransferBTC({
-        isBTCToOraichain: isBTCtoOraichain,
-        fromToken: from,
-        transferAmount: fromAmount
-      });
   };
 
   const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
@@ -386,13 +372,20 @@ const Balance: React.FC<BalanceProps> = () => {
       let result: DeliverTxResponse | string | any;
 
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
-      if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
+      if (from.chainId === ChainIdEnum.KawaiiCosmos && to.chainId === ChainIdEnum.Oraichain) {
         await checkTransferKwt(fromAmount);
         return;
       }
 
       // [BTC Native] <==> ORAICHAIN
-      await checkTransferBtc(fromAmount);
+      const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === ChainIdEnum.Oraichain;
+      const isOraichainToBTC = from.chainId === ChainIdEnum.Oraichain && to.chainId === bitcoinChainId;
+      if (isBTCtoOraichain || isOraichainToBTC)
+        return handleTransferBTC({
+          isBTCToOraichain: isBTCtoOraichain,
+          fromToken: from,
+          transferAmount: fromAmount
+        });
 
       let newToToken = to;
       if (toNetworkChainId) {
@@ -507,7 +500,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       setMoveOraib2OraiLoading(true);
       const result = await moveOraibToOraichain(remainingOraib);
-      processTxResult(chainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc, result);
+      processTxResult(chainInfos.find((c) => c.chainId === ChainIdEnum.OraiBridge).rpc, result);
     } catch (error) {
       console.log('error move stuck oraib: ', error);
       displayToast(TToastType.TX_FAILED, {

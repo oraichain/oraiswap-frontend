@@ -39,12 +39,11 @@ import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
 import axios from 'rest/request';
 import { script, opcodes } from 'bitcoinjs-lib';
 import { useQuery } from '@tanstack/react-query';
-import { config } from 'libs/nomic/config';
 import QRCode from 'qrcode';
 import { BitcoinUnit } from 'bitcoin-units';
 import { bitcoinLcd } from 'helper/constants';
-import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
 import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
+import { CwBitcoinClient } from 'libs/cw-bitcoin/models/cw-bitcoin-client';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -620,9 +619,12 @@ export const useGetWithdrawlFeesBitcoin = ({
       const { data } = await axios({
         baseURL: bitcoinLcd,
         method: 'get',
-        url: `/bitcoin/withdrawal_fees/${bitcoinAddr}`
+        url: `/api/checkpoint/withdrawal_fee`,
+        params: {
+          address: bitcoinAddr
+        }
       });
-      return data;
+      return data.data;
     } catch (error) {
       console.log({ errorGetWithdrawFeeBTC: error });
       return {
@@ -645,9 +647,9 @@ export const useDepositFeesBitcoin = (enabled: boolean) => {
       const { data } = await axios({
         baseURL: bitcoinLcd,
         method: 'get',
-        url: `/bitcoin/deposit_fees`
+        url: `/api/checkpoint/deposit_fee`
       });
-      return data;
+      return { deposit_fees: data.data };
     } catch (error) {
       console.log({ errorGetDepositFeeBTC: error });
       return {
@@ -673,8 +675,8 @@ export const useGetInfoBtc = () => {
   const { data: infoBTC } = useQuery(
     ['estimate-btc-deposit'],
     async () => {
-      const nomic = new NomicClient();
-      return await nomic.getConfig();
+      const response = await axios(`${bitcoinLcd}/api/bitcoin/config`);
+      return response.data;
     },
     {
       placeholderData: {

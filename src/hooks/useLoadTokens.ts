@@ -8,7 +8,7 @@ import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
 import { generateError } from '../libs/utils';
-import { COSMOS_CHAIN_ID_COMMON } from '@oraichain/oraidex-common';
+import { ChainIdEnum, COSMOS_CHAIN_ID_COMMON } from '@oraichain/oraidex-common';
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
@@ -120,7 +120,7 @@ async function loadTokens(
           dispatch,
           btcAddress,
           // TODO: hardcode check bitcoinTestnet need update later
-          chainInfos.filter((c) => c.chainId == bitcoinChainId)
+          chainInfos.filter((c) => ([ChainIdEnum.Bitcoin, ChainIdEnum.BitcoinTestnet] as any).includes(c.chainId))
         );
       }, 2000);
     }
@@ -289,7 +289,6 @@ async function loadBtcEntries(
 ): Promise<[string, string][]> {
   try {
     const nativeBtc = btcTokens.find((t) => chain.chainId === t.chainId);
-
     const nativeBalance = await loadNativeBtcBalance(address, chain);
     let entries: [string, string][] = [[nativeBtc.denom, nativeBalance.toString()]];
     return entries;
@@ -324,11 +323,11 @@ async function loadBtcAmounts(dispatch: Dispatch, btcAddress: string, chains: Cu
 
 async function loadKawaiiSubnetAmount(dispatch: Dispatch, kwtAddress: string) {
   if (!kwtAddress) return;
-  const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
+  const kawaiiInfo = chainInfos.find((c) => c.chainId === ChainIdEnum.KawaiiCosmos);
   loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);
 
   const kwtSubnetAddress = getEvmAddress(kwtAddress);
-  const kawaiiEvmInfo = chainInfos.find((c) => c.chainId === '0x1ae6');
+  const kawaiiEvmInfo = chainInfos.find((c) => c.chainId === ChainIdEnum.KawaiiEvm);
   let amountDetails = Object.fromEntries(await loadEvmEntries(kwtSubnetAddress, kawaiiEvmInfo));
   // update amounts
   dispatch(updateAmounts(amountDetails));

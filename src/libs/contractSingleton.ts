@@ -853,7 +853,7 @@ export function simulateAprPosition(
   // calculate APR for the worst, position liquidity is 2% of total liquidity
   let sumMinIncentivesApr = 0;
   const positionLiquidity2 = 10 ** 24;
-  
+
   const res2 = calculateAmountDelta(
     pool.current_tick_index,
     BigInt(pool.sqrt_price),

@@ -275,3 +275,52 @@ export const useGetPendingDeposits = (address?: String) => {
   });
   return data;
 };
+
+export interface ConfigResponse {
+  osor_entry_point_contract?: string | null;
+  owner: string;
+  relayer_fee: string;
+  relayer_fee_receiver: string;
+  relayer_fee_token: any;
+  swap_router_contract?: string | null;
+  token_factory_addr: string;
+  token_fee: {
+    denominator: number;
+    nominator: number;
+  };
+  token_fee_receiver: string;
+}
+
+const getContractConfig = async (): Promise<ConfigResponse> => {
+  try {
+    const res = await axios.get('/contract/config', {
+      params: {}
+    });
+    return res.data.data;
+  } catch (e) {
+    console.error('getContractConfig', e);
+    // generate me default object of ConfigResponse
+    return {
+      osor_entry_point_contract: null,
+      owner: '',
+      relayer_fee: '',
+      relayer_fee_receiver: '',
+      relayer_fee_token: {},
+      swap_router_contract: null,
+      token_factory_addr: '',
+      token_fee: {
+        denominator: 1,
+        nominator: 0
+      },
+      token_fee_receiver: ''
+    };
+  }
+};
+
+export const useGetContractConfig = () => {
+  const { data } = useQuery(['cw_bitcoin_contract_config'], () => getContractConfig(), {
+    refetchOnWindowFocus: true,
+    refetchInterval: 10000
+  });
+  return data;
+};

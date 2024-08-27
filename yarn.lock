@@ -4237,10 +4237,18 @@
     "@babel/template" "^7.22.15"
     "@babel/types" "^7.23.3"
 
-"@oraichain/bitcoin-bridge-contracts-sdk@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@oraichain/bitcoin-bridge-contracts-sdk/-/bitcoin-bridge-contracts-sdk-1.1.0.tgz#eecbd19f4ed12f322cd350160fc60b1c5c97dfe6"
-  integrity sha512-fNh9XgBy5cLl5PiyeAxt21U7PBh/vKnup2jalMPelJsKaMYpazjicHiKYehHRubAiFJ2btwz40iVJqVFa8taKg==
+"@oraichain/bitcoin-bridge-contracts-sdk@^1.1.4", "@oraichain/bitcoin-bridge-contracts-sdk@latest":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@oraichain/bitcoin-bridge-contracts-sdk/-/bitcoin-bridge-contracts-sdk-1.1.4.tgz#ddb8fb512c5962b051fd38a869d276a78fe95991"
+  integrity sha512-gxbErmdENrvsu4bmkmi1YVfrAbMdRxvZ2lluodlmxAQZEwlLaESd8WGAQwQ6h5o76UOOuP8trn2r/QHx36siYQ==
+
+"@oraichain/bitcoin-bridge-lib-js@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@oraichain/bitcoin-bridge-lib-js/-/bitcoin-bridge-lib-js-1.1.4.tgz#ede4f736d2c6cf537ff272522d1e4501a46389d6"
+  integrity sha512-cGWUgOpeB0vLkhhAUo1IUJ2G94zFIk1YoLr0XCQ79i7WNEVI+/PR6SjVFhMQaFj2kjgqT7HFsHb9CPWYNAVf8w==
+  dependencies:
+    "@oraichain/bitcoin-bridge-contracts-sdk" latest
+    bitcoinjs-lib "^6.0.1"
 
 "@oraichain/common-contracts-build@1.0.35":
   version "1.0.35"
@@ -7359,7 +7367,7 @@ bitcoin-units@^1.0.0:
   dependencies:
     big.js "^6.1.6"
 
-bitcoinjs-lib@5.2.0, bitcoinjs-lib@^6.1.3:
+bitcoinjs-lib@5.2.0, bitcoinjs-lib@^6.0.1, bitcoinjs-lib@^6.1.3:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/bitcoinjs-lib/-/bitcoinjs-lib-5.2.0.tgz#caf8b5efb04274ded1b67e0706960b93afb9d332"
   integrity sha512-5DcLxGUDejgNBYcieMIUfjORtUeNWl828VWLHJGVKZCb4zIS1oOySTUr0LGmcqJBQgTBz3bGbRQla4FgrdQEIQ==

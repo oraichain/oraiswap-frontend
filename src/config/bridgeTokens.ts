@@ -8,11 +8,11 @@ import {
   MILKYBSC_ORAICHAIN_DENOM,
   TokenItemType,
   KWT_BSC_CONTRACT,
-  MILKY_BSC_CONTRACT
+  MILKY_BSC_CONTRACT,
+  ChainIdEnum
   // chainInfos,
   // oraichainNetwork
 } from '@oraichain/oraidex-common';
-import { bitcoinChainId } from 'helper/constants';
 
 const evmDenomsMap = {
   kwt: [KWTBSC_ORAICHAIN_DENOM],
@@ -53,7 +53,7 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
 const otherChainTokens = flatten(
   chainInfos
     .filter((chainInfo) => {
-      return chainInfo.chainId !== 'Oraichain';
+      return chainInfo.chainId !== ChainIdEnum.Oraichain;
     })
     .map(getTokensFromNetwork)
 );
@@ -88,29 +88,30 @@ export const evmTokens = uniqBy(
   flattenTokens.filter(
     (token) =>
       // !token.contractAddress &&
-      token.denom && !token.cosmosBased && token.coinGeckoId && token.chainId !== 'kawaii_6886-1'
+      token.denom && !token.cosmosBased && token.coinGeckoId && token.chainId !== ChainIdEnum.KawaiiCosmos
   ),
   (c) => c.denom
 );
 export const btcTokens = uniqBy(
-  flattenTokens.filter((token) => token.chainId === bitcoinChainId),
+  flattenTokens.filter((token) => ([ChainIdEnum.Bitcoin, ChainIdEnum.BitcoinTestnet] as any).includes(token.chainId)),
   (c) => c.denom
 );
 
 export const kawaiiTokens = uniqBy(
-  cosmosTokens.filter((token) => token.chainId === 'kawaii_6886-1'),
+  cosmosTokens.filter((token) => token.chainId === ChainIdEnum.KawaiiCosmos),
   (c) => c.denom
 );
 
 const notAllowSwapCoingeckoIds = [];
 // universal swap. Currently we dont support from tokens that are not using the ibc wasm channel
 const notAllowSwapFromChainIds = [
-  '0x1ae6',
-  'kawaii_6886-1',
-  'oraibridge-subnet-2',
+  ChainIdEnum.KawaiiEvm,
+  ChainIdEnum.KawaiiCosmos,
+  ChainIdEnum.OraiBridge,
   'oraibtc-mainnet-1',
   'Neutaro-1',
-  'bitcoin'
+  ChainIdEnum.Bitcoin,
+  ChainIdEnum.BitcoinTestnet
 ];
 const notAllowDenom = Object.values(evmDenomsMap).flat();
 const notAllowBEP20Token = [KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT];
@@ -124,12 +125,13 @@ export const swapFromTokens = flattenTokens.filter((token) => {
 });
 // universal swap. We dont support kwt & milky & injective for simplicity. We also skip OraiBridge tokens because users dont care about them
 const notAllowSwapToChainIds = [
-  '0x1ae6',
-  'kawaii_6886-1',
-  'oraibridge-subnet-2',
+  ChainIdEnum.KawaiiEvm,
+  ChainIdEnum.KawaiiCosmos,
+  ChainIdEnum.OraiBridge,
   'oraibtc-mainnet-1',
   'Neutaro-1',
-  'bitcoin'
+  ChainIdEnum.Bitcoin,
+  ChainIdEnum.BitcoinTestnet
 ];
 export const swapToTokens = flattenTokens.filter((token) => {
   return (

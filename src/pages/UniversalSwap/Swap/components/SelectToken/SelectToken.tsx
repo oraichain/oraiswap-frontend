@@ -123,8 +123,10 @@ export default function SelectToken({
                 });
                 const key = token.denom;
                 let sumAmountDetails: AmountDetails = {};
+
                 // by default, we only display the amount that matches the token denom
                 sumAmountDetails[token.denom] = amounts?.[token.denom];
+
                 let sumAmount: number = toSumDisplay(sumAmountDetails);
                 // if there are sub-denoms, we get sub amounts & calculate sum display of both sub & main amount
                 if (token.evmDenoms) {

@@ -5,7 +5,7 @@ import { network } from 'config/networks';
 import { bitcoinChainId } from 'helper/constants';
 export type BitcoinMode = 'core' | 'extension' | 'mobile-web' | 'walletconnect';
 // import { CosmosChainId, BitcoinWallet } from '@oraichain/oraidex-common';
-type BitcoinChainId = 'bitcoin' | 'bitcoinTestnet';
+type BitcoinChainId = ChainIdEnum.Bitcoin | ChainIdEnum.BitcoinTestnet;
 export interface IBitcoin {
   readonly version: string;
   /**

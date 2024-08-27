@@ -1,5 +1,6 @@
 import {
   BigDecimal,
+  ChainIdEnum,
   // flattenTokens
   NetworkChainId,
   toDisplay,
@@ -29,6 +30,8 @@ import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { calcMaxAmount, useDepositFeesBitcoin, useGetWithdrawlFeesBitcoin } from '../helpers';
 import styles from './index.module.scss';
+import { bitcoinChainId } from 'helper/constants';
+import { useGetContractConfig } from 'pages/BitcoinDashboard/hooks';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -98,9 +101,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       setTransferLoading(true);
 
       // if on the same kwt network => we convert between native & erc20 tokens
-      if (token.chainId === 'kawaii_6886-1') {
+      if (token.chainId === ChainIdEnum.KawaiiCosmos) {
         // [KWT, MILKY] from Kawaiiverse => [KWT, MILKY] Oraichain
-        if (toNetworkChainId === 'Oraichain') {
+        if (toNetworkChainId === ChainIdEnum.Oraichain) {
           return await onClickTransfer(convertAmount, toNetworkChainId);
         }
         await convertKwt(convertAmount, token);
@@ -109,7 +112,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
       if (
         evmChains.find((chain) => chain.chainId === token.chainId) ||
-        (token.chainId === 'Oraichain' && toNetworkChainId === 'kawaii_6886-1')
+        (token.chainId === ChainIdEnum.Oraichain && toNetworkChainId === ChainIdEnum.KawaiiCosmos)
       ) {
         await onClickTransfer(convertAmount, toNetworkChainId);
         return;
@@ -139,16 +142,27 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const toTokenFee = useTokenFee(remoteTokenDenomTo);
 
   // bridge fee & relayer fee
-  const bridgeFee = fromTokenFee + toTokenFee;
+  let bridgeFee = fromTokenFee + toTokenFee;
+  let { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
 
-  const isFromOraichainToBitcoin = token.chainId === 'Oraichain' && toNetworkChainId === ('bitcoin' as any);
-  const isFromBitcoinToOraichain = token.chainId === ('bitcoin' as string) && toNetworkChainId === 'Oraichain';
-  const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
+  // bitcoin
+  const contractConfig = useGetContractConfig();
+  const isFromOraichainToBitcoin =
+    token.chainId === ChainIdEnum.Oraichain && toNetworkChainId === (bitcoinChainId as any);
+  const isFromBitcoinToOraichain =
+    token.chainId === (bitcoinChainId as string) && toNetworkChainId === ChainIdEnum.Oraichain;
+  const isBridgeBitcoin = isFromOraichainToBitcoin || isFromBitcoinToOraichain;
   const depositFeeBtc = useDepositFeesBitcoin(isFromBitcoinToOraichain);
   const withdrawalFeeBtc = useGetWithdrawlFeesBitcoin({
     enabled: isFromOraichainToBitcoin,
     bitcoinAddress: addressTransfer
   });
+
+  if (isBridgeBitcoin) {
+    bridgeFee = (contractConfig.token_fee.nominator * 100) / contractConfig.token_fee.denominator;
+    // not support relayer fee yet
+    relayerFeeTokenFee = 0;
+  }
 
   let toDisplayBTCFee = 0;
   if (depositFeeBtc && isFromBitcoinToOraichain) {

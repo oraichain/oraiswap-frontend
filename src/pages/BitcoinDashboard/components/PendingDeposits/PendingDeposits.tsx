@@ -8,7 +8,7 @@ import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
-import { useGetPendingDeposits } from '../../hooks/lcd.hook';
+import { useGetContractConfig, useGetPendingDeposits } from '../../hooks/lcd.hook';
 import { CheckpointStatus, DepositInfo, TransactionParsedInput } from '../../@types';
 import { useEffect } from 'react';
 import { useGetCheckpointData, useGetCheckpointQueue, useGetDepositFee } from 'pages/BitcoinDashboard/hooks';
@@ -38,7 +38,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const mobile = isMobile();
   const [oraichainAddress] = useConfigReducer('address');
-  const fee = useRelayerFeeToken(btcTokens[0], oraichainTokens[19]);
+  const contractConfig = useGetContractConfig();
   const depositFee = useGetDepositFee();
   const fetchedPendingDeposits = useGetPendingDeposits(oraichainAddress);
   const checkpointQueue = useGetCheckpointQueue();
@@ -162,7 +162,12 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       sortField: 'amount',
       accessor: (data) => (
         <span>
-          {(data.amount - fee.relayerFee - toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)).toFixed(6)} BTC
+          {(
+            data.amount -
+            (contractConfig.token_fee.nominator * data.amount) / contractConfig.token_fee.denominator -
+            toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)
+          ).toFixed(6)}{' '}
+          BTC
         </span>
       )
     },

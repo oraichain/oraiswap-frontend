@@ -6,7 +6,8 @@ import {
   OsmoToken,
   AtomToken,
   InjectiveToken,
-  ChainIdEnum
+  ChainIdEnum,
+  BTC_CONTRACT
 } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
@@ -82,8 +83,7 @@ import {
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
-import { bitcoinChainId, CWBitcoinFactoryDenom } from 'helper/constants';
-import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
+import { CWBitcoinFactoryDenom } from 'helper/constants';
 import { listOsmosisToken } from './alphaNetwwork';
 
 const [otherChainTokens, oraichainTokens] = tokens;
@@ -143,9 +143,9 @@ export const bitcoinTestnet: CustomChainInfo = {
   chainId: ChainIdEnum.BitcoinTestnet,
   chainName: 'Bitcoin Testnet',
   bip44: {
-    coinType: 0
+    coinType: 1
   },
-  coinType: 0,
+  coinType: 1,
   Icon: BTCIcon,
   IconLight: BTCIcon,
   stakeCurrency: {
@@ -155,7 +155,7 @@ export const bitcoinTestnet: CustomChainInfo = {
     coinGeckoId: 'bitcoin',
     coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
   },
-  bech32Config: defaultBech32Config('bc'),
+  bech32Config: defaultBech32Config('tb'),
   networkType: 'bitcoin',
   currencies: [
     {
@@ -395,7 +395,11 @@ export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[]
 };
 
 // mapped chain info with icon
-export const chainInfosWithIcon = mapListWithIcon([...customChainInfos, bitcoinMainnet], chainIcons, 'chainId');
+export const chainInfosWithIcon = mapListWithIcon(
+  [...customChainInfos, bitcoinMainnet, bitcoinTestnet],
+  chainIcons,
+  'chainId'
+);
 
 // mapped token with icon
 export const oraichainTokensWithIcon = mapListWithIcon(oraichainTokens, tokensIcon, 'coinGeckoId');
@@ -656,8 +660,20 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BTC',
       coinGeckoId: 'bitcoin',
+      coinMinimalDenom: 'usat',
+      type: 'cw20',
+      contractAddress: BTC_CONTRACT,
+      bridgeTo: [ChainIdEnum.Bitcoin],
+      coinDecimals: 6,
+      Icon: BTCIcon,
+      IconLight: BTCIcon,
+      coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
+    },
+    {
+      coinDenom: 'BTC',
+      coinGeckoId: 'bitcoin',
       coinMinimalDenom: CWBitcoinFactoryDenom,
-      bridgeTo: [bitcoinChainId],
+      bridgeTo: [ChainIdEnum.BitcoinTestnet],
       coinDecimals: 14,
       Icon: BTCIcon,
       IconLight: BTCIcon,
@@ -707,30 +723,7 @@ export const OraiBTCBridgeNetwork = {
   },
   coinType: 118,
   bech32Config: defaultBech32Config('oraibtc'),
-  currencies: [
-    {
-      coinDenom: 'ORAIBTC',
-      coinMinimalDenom: 'uoraibtc',
-      coinDecimals: 6,
-      gasPriceStep: {
-        low: 0,
-        average: 0,
-        high: 0
-      },
-      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
-    },
-    {
-      coinDenom: 'oBTC',
-      coinMinimalDenom: 'usat',
-      coinDecimals: 14,
-      gasPriceStep: {
-        low: 0,
-        average: 0,
-        high: 0
-      },
-      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
-    }
-  ],
+  currencies: [],
 
   get feeCurrencies() {
     return this.currencies;
