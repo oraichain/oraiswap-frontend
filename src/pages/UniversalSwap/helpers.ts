@@ -11,15 +11,9 @@ import {
   TokenItemType,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
-  oraichainTokens,
-  PairAddress,
   NetworkName,
-  ATOM_ORAICHAIN_DENOM,
-  OSMOSIS_ORAICHAIN_DENOM,
-  USDC_CONTRACT,
   BigDecimal,
-  toAmount,
-  TON_ORAICHAIN_DENOM
+  toAmount
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -365,36 +359,64 @@ export const getDisableSwap = ({
 };
 
 export const getProtocolsSmartRoute = (fromToken, toToken) => {
+  const protocols = ['Oraidex', 'OraidexV3'];
   const notAllowChain = ['injective-1', 'Neutaro-1', 'noble-1'];
   if (notAllowChain.includes(fromToken.chainId) || notAllowChain.includes(toToken.chainId))
-    return ['Oraidex', 'OraidexV3', 'Osmosis'];
+    return [...protocols, 'Osmosis'];
   if (fromToken.cosmosBased && toToken.cosmosBased && fromToken.chainId !== toToken.chainId)
-    return ['Oraidex', 'OraidexV3', 'Osmosis'];
-  return ['Oraidex', 'OraidexV3'];
+    return [...protocols, 'Osmosis'];
+  return protocols;
 };
 
 export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
+  if (fromToken.chainId === 'injective-1' && fromToken.coinGeckoId === 'oraichain-token') return false;
   if (fromToken.chainId === 'Neutaro-1' || toToken.chainId === 'Neutaro-1') return false;
   return true;
+};
+
+const toCoinGeckoIds = ['osmosis', 'cosmos', 'oraichain-token', 'usd-coin'];
+const listAllowSmartRoute = {
+  'osmosis-1-Oraichain': {
+    fromCoinGeckoIds: ['osmosis'],
+    toCoinGeckoIds
+  },
+  'injective-1-Oraichain': {
+    fromCoinGeckoIds: ['injective-protocol'],
+    toCoinGeckoIds
+  },
+  'noble-1-Oraichain': {
+    fromCoinGeckoIds: ['usd-coin'],
+    toCoinGeckoIds: [...toCoinGeckoIds, 'injective-protocol']
+  },
+  'cosmoshub-4-Oraichain': {
+    fromCoinGeckoIds: ['cosmos'],
+    toCoinGeckoIds: [...toCoinGeckoIds]
+  }
 };
 
 export const isAllowIBCWasm = (fromToken, toToken) => {
   const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
   const fromTokenIsCosmos = fromToken.cosmosBased;
+  const toTokenIsCosmos = toToken.cosmosBased;
   const fromTokenIsEvm = !fromToken.cosmosBased;
 
   // Oraichain -> Evm
   if (fromTokenIsOraichain && !toToken.cosmosBased) return true;
   // Oraichain -> Cosmos
   if (fromTokenIsOraichain) return false;
-
   // Evm -> Other
   if (fromTokenIsEvm) return true;
-
   // Cosmos -> Evm
   if (fromTokenIsCosmos && !toToken.cosmosBased) return true;
   // Cosmos -> Other
-  if (fromTokenIsCosmos) return false;
+  if (fromTokenIsCosmos && toTokenIsCosmos) {
+    const key = [fromToken, toToken].map((e) => e.chainId).join('-');
+    const hasTokenUsingSmartRoute =
+      listAllowSmartRoute[key]?.fromCoinGeckoIds.includes(fromToken.coinGeckoId) &&
+      listAllowSmartRoute[key]?.toCoinGeckoIds.includes(toToken.coinGeckoId);
+    if (hasTokenUsingSmartRoute) return false;
+    return true;
+  }
 
   return false;
 };
