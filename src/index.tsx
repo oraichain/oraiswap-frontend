@@ -19,7 +19,6 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 // const client = new Client({
 //   url: 'http://10.10.20.72:3000/',
@@ -96,10 +95,5 @@ const initApp = async () => {
     if (cosmWasmClient?.client) window.client = cosmWasmClient.client;
   }
 };
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://cra.link/PWA
-serviceWorkerRegistration.unregister();
 
 initApp();
