@@ -20,9 +20,9 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
   });
 
   useEffect(() => {
-    if (poolList.length === 0) return;
+    if (poolList.length === 0 || Object.keys(coingeckoPrices).length === 0) return;
 
-    const newPrice = { ...prices };
+    const newPrice = { ...coingeckoPrices };
     for (const pool of poolList) {
       const tokenX = oraichainTokens.find((token) => extractAddress(token) === pool.pool_key.token_x);
       const tokenY = oraichainTokens.find((token) => extractAddress(token) === pool.pool_key.token_y);
@@ -43,9 +43,8 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
         }
       }
     }
-    console.log('newPrice', newPrice);
     setPrices(newPrice);
-  }, [poolList.length]);
+  }, [poolList, coingeckoPrices]);
 
   return {
     poolList,

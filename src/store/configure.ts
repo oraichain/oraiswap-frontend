@@ -5,6 +5,7 @@ import pairInfosReduce from '../reducer/pairs';
 import tradingReducer from '../reducer/tradingSlice';
 import walletReducer from '../reducer/wallet';
 import chartReducer from '../reducer/chartSlice';
+import multifactorReducer, { multifactorSlice } from '../reducer/multifactorSlice';
 import AddressBookReducer from '../reducer/addressBook';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
@@ -12,7 +13,8 @@ import { PERSIST_CONFIG_KEY } from './constants';
 
 const rootPersistConfig = {
   key: PERSIST_CONFIG_KEY,
-  storage
+  storage,
+  blacklist: [multifactorSlice.name]
 };
 
 const rootReducer = combineReducers({
@@ -22,7 +24,8 @@ const rootReducer = combineReducers({
   trading: tradingReducer,
   wallet: walletReducer,
   chartSlice: chartReducer,
-  addressBook: AddressBookReducer
+  addressBook: AddressBookReducer,
+  [multifactorSlice.name]: multifactorReducer
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);

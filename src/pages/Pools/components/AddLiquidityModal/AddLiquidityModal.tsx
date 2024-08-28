@@ -33,6 +33,7 @@ import styles from './AddLiquidityModal.module.scss';
 import InputWithOptionPercent from '../InputWithOptionPercent';
 import { TooltipIcon } from 'pages/UniversalSwap/Modals';
 import { SlippageModal } from '../SlippageModal/SlippageModal';
+import useWalletReducer from 'hooks/useWalletReducer';
 
 const cx = cn.bind(styles);
 
@@ -124,6 +125,14 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
       token
     });
 
+    console.log('msg', {
+      address: msg.contractAddress,
+      walletAddr,
+      handleMsg: msg.msg,
+      gasAmount: { denom: ORAI, amount: '0' },
+      funds: msg.funds
+    });
+
     const result = await CosmJs.execute({
       address: msg.contractAddress,
       walletAddr,
@@ -136,10 +145,13 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
     if (result) {
       console.log('in correct result');
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${network.explorer}/txs/${result.transactionHash}`
+        customLink: `${network.explorer}/txs/` //${result.transactionHash}
       });
     }
   };
+
+  const [walletAddress] = useConfigReducer('address');
+  const [walletType] = useWalletReducer('walletsByNetwork');
 
   const handleAddLiquidity = async (amount1: bigint, amount2: bigint) => {
     if (!pairInfoData) return;
@@ -147,12 +159,15 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      const oraiAddress = await handleCheckAddress('Oraichain');
+      const oraiAddress = walletType.cosmos === 'sso' ? walletAddress : await handleCheckAddress('Oraichain');
 
-      if (token1AllowanceToPair < amount1) {
-        await increaseAllowance('9'.repeat(30), token1!.contractAddress!, oraiAddress);
-        refetchToken1Allowance();
-      }
+      console.log('oraiAddress', oraiAddress);
+      // if (token1AllowanceToPair < amount1) {
+      await increaseAllowance('9'.repeat(30), token1!.contractAddress!, oraiAddress);
+      refetchToken1Allowance();
+      // }
+
+      console.log('161', 161);
       if (token2AllowanceToPair < amount2) {
         await increaseAllowance('9'.repeat(30), token2!.contractAddress!, oraiAddress);
         refetchToken2Allowance();

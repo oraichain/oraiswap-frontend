@@ -8,6 +8,7 @@ import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 
 import Bitcoin from 'libs/bitcoin';
+import { initSSO } from 'libs/web3MultifactorsUtils';
 
 // polyfill
 Tendermint37Client.detectVersion = () => {};
@@ -20,6 +21,8 @@ Tendermint37Client.prototype.status = function () {
     }
   };
 };
+
+initSSO();
 
 // inject global
 window.TronWeb = require('tronweb');

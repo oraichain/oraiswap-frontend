@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice } from '@cosmjs/stargate';
@@ -6,10 +7,29 @@ import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { Stargate } from '@injectivelabs/sdk-ts';
 import { network } from 'config/networks';
 import { MetamaskOfflineSigner } from './eip191';
-import { getWalletByNetworkCosmosFromStorage } from 'helper';
+import { getHashKeySSOFromStorage, getWalletByNetworkCosmosFromStorage } from 'helper';
+import {
+  decryptData,
+  initSSO,
+  PP_CACHE_KEY,
+  PrivateKeySigner,
+  reinitializeSigner,
+  triggerLogin
+} from './web3MultifactorsUtils';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
+  // init cosmwasm client when user connected cosmos wallet
+  const walletType = getWalletByNetworkCosmosFromStorage();
+
+  if (window.PrivateKeySigner || walletType === 'sso') {
+    if (window.PrivateKeySigner) {
+      return window.PrivateKeySigner.getOfflineSigner(chainId);
+    } else {
+      return await reinitializeSigner(chainId);
+    }
+  }
+
   const keplr = await window.Keplr.getKeplr();
   if (keplr) return await keplr.getOfflineSignerAuto(chainId);
   if (window.ethereum) return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
@@ -22,6 +42,7 @@ const getCosmWasmClient = async (
 ) => {
   try {
     const { chainId, rpc, signer } = config;
+
     const wallet = signer ?? (await collectWallet(chainId));
     const defaultAddress = (await wallet.getAccounts())[0];
     const tmClient = await Tendermint37Client.connect(rpc ?? (network.rpc as string));
@@ -71,7 +92,7 @@ class CosmJs {
     try {
       const walletType = this.getWalletByFromStorage();
       const keplr = await window.Keplr.getKeplr();
-      if (keplr || (walletType && walletType === 'eip191')) {
+      if (keplr || (walletType && ['eip191', 'sso'].includes(walletType))) {
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.execute(
           data.walletAddr,
@@ -102,7 +123,7 @@ class CosmJs {
     try {
       const walletType = this.getWalletByFromStorage();
       const keplr = await window.Keplr.getKeplr();
-      if (keplr || (walletType && walletType === 'eip191')) {
+      if (keplr || (walletType && ['eip191', 'sso'].includes(walletType))) {
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto', data.memo);
         return {

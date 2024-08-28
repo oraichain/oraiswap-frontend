@@ -26,12 +26,13 @@ import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPoolDetail } from 'pages/Pool-V3/hooks/useGetPoolDetail';
+import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
-  const [liquidityPools] = useConfigReducer('liquidityPools');
-  const [volumnePools] = useConfigReducer('volumnePools');
   const [cachePrices] = useConfigReducer('coingecko');
+  const { poolList, poolPrice } = useGetPoolList(cachePrices);
+  const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -50,8 +51,8 @@ const PoolV3Detail = () => {
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
 
   const { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo } = getIconPoolData(tokenX, tokenY, isLight);
-  const totalLiquidity = liquidityPools?.[poolId] ?? 0;
-  const volumn24h = (volumnePools && volumnePools.find((vo) => vo.poolAddress === poolId))?.volume24 ?? 0;
+  const totalLiquidity = poolLiquidities?.[poolId] ?? 0;
+  const volumn24h = poolVolume?.[poolId] ?? 0;
 
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,7 +66,6 @@ const PoolV3Detail = () => {
   const { feeDailyData } = useGetFeeDailyData();
   const { allPosition } = useGetAllPositions();
   const { positions: userPositions } = useGetPositions(address);
-  const { poolList, poolPrice } = useGetPoolList(cachePrices);
   const { liquidityDistribution } = useGetPoolDetail(poolKeyString, poolPrice);
 
   useEffect(() => {
@@ -76,10 +76,9 @@ const PoolV3Detail = () => {
           setLiquidity(liquidityDistribution);
           return;
         }
-        
+
         const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
         const liquidity = await SingletonOraiswapV3.getLiquidityByPool(pool, poolPrice, allPosition);
-        
         setLiquidity(liquidity);
       } catch (error) {
         console.log('error: get pool detail', error);
@@ -116,7 +115,7 @@ const PoolV3Detail = () => {
     if (poolDetail && poolPrice && liquidity && poolDetail.poolKey === poolKeyString) {
       getAPRInfo();
     }
-  }, [liquidity.total, feeDailyData, poolDetail, poolPrice.length, poolKeyString]);
+  }, [liquidity.total, feeDailyData, poolDetail, poolPrice, poolKeyString]);
 
   const { spread, pool_key } = poolDetail || {};
   const { allocation, total } = liquidity;
@@ -131,7 +130,7 @@ const PoolV3Detail = () => {
       try {
         setLoading(true);
         if (!(poolList.length && userPositions.length && poolPrice && address)) return setDataPosition([]);
-        console.log("call position")
+        if (dataPosition.length) return;
         const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
@@ -154,7 +153,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [address, poolList, userPositions, poolPrice]);
+  }, [address, poolList.length, userPositions, poolPrice]);
 
   const calcShowApr = (apr: number) =>
     numberWithCommas(apr * 100, undefined, {
@@ -215,7 +214,7 @@ const PoolV3Detail = () => {
           <div className={styles.tvl}>
             <div className={styles.box}>
               <p>Liquidity</p>
-              <h1>{formatDisplayUsdt(total || 0)}</h1>
+              <h1>{formatDisplayUsdt(totalLiquidity || 0)}</h1>
               {/* <span className={classNames(styles.percent, { [styles.positive]: true })}>
               {true ? '+' : '-'}
               {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 1 })}%
@@ -223,7 +222,7 @@ const PoolV3Detail = () => {
             </div>
             <div className={styles.box}>
               <p>Volume (24H)</p>
-              <h1>{formatDisplayUsdt(volumn24h)}</h1>
+              <h1>{Number.isNaN(volumn24h) ? 0 : formatDisplayUsdt(volumn24h)}</h1>
               {/* <span className={classNames(styles.percent, { [styles.positive]: false })}>
               {false ? '+' : '-'}
               {numberWithCommas(2.07767, undefined, { maximumFractionDigits: 1 })}%

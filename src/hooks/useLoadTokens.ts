@@ -81,10 +81,19 @@ async function loadTokens(
           ]);
         }, 2000);
       } else {
-        const kawaiiAddress = getAddress(
-          await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
-          'oraie'
-        );
+        let kawaiiAddress;
+        if (walletType === 'sso') {
+          kawaiiAddress = getAddress(
+            await window.PrivateKeySigner?.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
+            'oraie'
+          );
+        } else {
+          kawaiiAddress = getAddress(
+            await window.Keplr?.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
+            'oraie'
+          );
+        }
+
         timer[oraiAddress] = setTimeout(async () => {
           await Promise.all([
             loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),

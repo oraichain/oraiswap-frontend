@@ -4,14 +4,19 @@ import {
   WEBSOCKET_RECONNECT_INTERVAL
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import SsoPassphraseModal from 'components/WalletManagement/SsoPassphase';
+import SsoSignModal from 'components/WalletManagement/SsoSignModal';
+import useSsoHandler from 'components/WalletManagement/SsoSignModal/useSsoHandler';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { getListAddressCosmos, interfaceRequestTron } from 'helper';
+import { getHashKeySSOFromStorage, getListAddressCosmos, interfaceRequestTron } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useWalletReducer from 'hooks/useWalletReducer';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
+import { getCosmWasmClient } from 'libs/cosmjs';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
@@ -26,8 +31,16 @@ import './index.scss';
 import Menu from './Menu';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
-import { getCosmWasmClient } from 'libs/cosmjs';
+import {
+  decryptData,
+  getWeb3MultifactorStorageKey,
+  PP_CACHE_KEY,
+  reinitializeSigner,
+  removeWeb3MultifactorStorageKey
+} from 'libs/web3MultifactorsUtils';
+import useSsoPassphrase from 'components/WalletManagement/SsoPassphase/useSsoPassphrase';
+import { ConfirmPassStatus, PassphraseModalStatus } from 'reducer/type';
+import useMultifactorReducer from 'hooks/useMultifactorReducer';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -38,12 +51,15 @@ const App = () => {
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
-  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
+  const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const mobileMode = isMobile();
   const { tron, evm } = walletByNetworks;
   const ethOwallet = window.eth_owallet;
-
+  const uiHandler = useSsoHandler();
+  const passphraseHandler = useSsoPassphrase();
+  const UIHandler = useSsoHandler();
+  const [, setHashKey] = useConfigReducer('hashSsoKey');
   const dispatch = useDispatch();
 
   useTronEventListener();
@@ -260,9 +276,63 @@ const App = () => {
 
   const [openBanner, setOpenBanner] = useState(false);
 
+  const reinitializeFailed = () => {
+    setWalletByNetworks({
+      ...walletByNetworks,
+      cosmos: null
+    });
+    removeWeb3MultifactorStorageKey();
+    setHashKey(null);
+
+    displayToast(TToastType.TX_FAILED, { message: 'Verify Passphrase Failed!' });
+    return;
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const passphraseSession = getWeb3MultifactorStorageKey(PP_CACHE_KEY);
+        const hashKey = getHashKeySSOFromStorage();
+
+        if (!passphraseSession && hashKey) {
+          const { passphrase, confirmed } = ((await passphraseHandler.process()) as any) || {};
+
+          if (passphrase && confirmed === ConfirmPassStatus.approved) {
+            const { passphrase: passphraseStored } = decryptData(hashKey, PP_CACHE_KEY);
+
+            if (passphraseStored === passphrase) {
+              const signer = await reinitializeSigner(network.chainId, UIHandler);
+
+              if (!signer) {
+                reinitializeFailed();
+              }
+
+              displayToast(TToastType.TX_INFO, { message: 'Connect successfully!' });
+              console.log('Reinitialize Signer successfully!');
+              return signer;
+            } else {
+              reinitializeFailed();
+            }
+          }
+        }
+      } catch (error) {
+        console.log('error', error);
+        reinitializeFailed();
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (window.PrivateKeySigner) {
+      window.PrivateKeySigner.setUiHandler(uiHandler);
+    }
+  }, [window.PrivateKeySigner]);
+
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
+        <SsoSignModal />
+        <SsoPassphraseModal />
         {/* <button data-featurebase-feedback>Open Widget</button> */}
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />

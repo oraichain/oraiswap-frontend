@@ -9,6 +9,10 @@ import useWalletReducer from 'hooks/useWalletReducer';
 import { reduceString } from 'libs/utils';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import { removeWeb3MultifactorStorageKey } from 'libs/web3MultifactorsUtils';
+import useMultifactorReducer from 'hooks/useMultifactorReducer';
+import { useDispatch } from 'react-redux';
+import { resetStateSSO } from 'reducer/multifactorSlice';
 
 const cx = cn.bind(styles);
 
@@ -18,6 +22,7 @@ export const ModalDisconnect: React.FC<{
   setCurrentDisconnectingNetwork: React.Dispatch<React.SetStateAction<NetworkType>>;
 }> = ({ close, currentDisconnectingNetwork }) => {
   const [theme] = useConfigReducer('theme');
+  const dispatch = useDispatch();
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
@@ -60,11 +65,14 @@ export const ModalDisconnect: React.FC<{
     });
     switch (currentDisconnectingNetwork) {
       case 'cosmos':
-       
         setOraiAddress(undefined);
         // TODO: need to refactor later
         if (walletByNetworks.cosmos === 'eip191') {
           localStorage.removeItem('eip191-account');
+        }
+        if (walletByNetworks.cosmos === 'sso') {
+          removeWeb3MultifactorStorageKey();
+          dispatch(resetStateSSO());
         }
         break;
       case 'evm':

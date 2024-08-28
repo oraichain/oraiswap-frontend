@@ -48,8 +48,6 @@ const PositionItem = ({ position }) => {
   const { data: price } = useCoinGeckoPrices();
   const navigate = useNavigate();
 
-  console.log('position', position);
-
   const {
     min,
     max,
@@ -122,33 +120,38 @@ const PositionItem = ({ position }) => {
   useEffect(() => {
     if (!openCollapse) return;
     (async () => {
-      const { pool_key, lower_tick_index, upper_tick_index } = position;
+      try {
 
-      const {
-        lowerTickData,
-        upperTickData,
-        incentivesData: incentives
-      } = await SingletonOraiswapV3.getTicksAndIncentivesInfo(
-        lower_tick_index,
-        upper_tick_index,
-        position.id,
-        address,
-        pool_key
-      );
-
-      const tokenIncentive = incentives.reduce((acc, cur) => {
-        const tokenAttr = parseAssetInfo(cur.info);
-        return {
-          ...acc,
-          [tokenAttr]: Number(acc[tokenAttr] || 0) + Number(cur.amount)
-        };
-      }, {});
-
-      setIncentives(tokenIncentive);
-      setTick({
-        lowerTick: getTick(lowerTickData),
-        upperTick: getTick(upperTickData)
-      });
+        const { pool_key, lower_tick_index, upper_tick_index } = position;
+        
+        const {
+          lowerTickData,
+          upperTickData,
+          incentivesData: incentives
+        } = await SingletonOraiswapV3.getTicksAndIncentivesInfo(
+          lower_tick_index,
+          upper_tick_index,
+          position.id,
+          address,
+          pool_key
+        );
+        
+        const tokenIncentive = incentives.reduce((acc, cur) => {
+          const tokenAttr = parseAssetInfo(cur.info);
+          return {
+            ...acc,
+            [tokenAttr]: Number(acc[tokenAttr] || 0) + Number(cur.amount)
+          };
+        }, {});
+        
+        setIncentives(tokenIncentive);
+        setTick({
+          lowerTick: getTick(lowerTickData),
+          upperTick: getTick(upperTickData)
+        });
+      } catch (error) {
+        console.log("error", error);
+      }
     })();
 
     return () => {};
@@ -161,11 +164,11 @@ const PositionItem = ({ position }) => {
 
       const { pool } = poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key));
       const { lower_tick_index, upper_tick_index } = position;
-      setStatusRange(pool.current_tick_index >= lower_tick_index && pool.current_tick_index <= upper_tick_index);
+      setStatusRange(pool.current_tick_index >= lower_tick_index && pool.current_tick_index < upper_tick_index);
     })();
 
     return () => {};
-  }, [position, poolList.length]);
+  }, [position, poolList]);
 
   useEffect(() => {
     if (Object.keys(simulation).length > 0 && openCollapse && incentives) {
