@@ -19,13 +19,15 @@ const useSsoPassphrase = () => {
         const confirmed = store.getState().multifactorSlice.confirmPassphrase;
         const passphrase = store.getState().multifactorSlice.passphrase;
 
-        if (confirmed !== ConfirmPassStatus.init && passphrase) {
+        if (confirmed !== ConfirmPassStatus.init) {
           if (confirmed === ConfirmPassStatus.approved && passphrase) {
+            unsubscribe();
             resolve({ passphrase, confirmed });
-          } else {
+          } else if (confirmed === ConfirmPassStatus.rejected) {
+            console.log('User rejected!');
+            unsubscribe();
             reject('User rejected!');
           }
-          unsubscribe();
         }
       });
     });
