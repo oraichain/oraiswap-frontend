@@ -36,7 +36,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
 
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-  const protocols = getProtocolsSmartRoute(originalFromToken, originalToToken);
+  const protocols = getProtocolsSmartRoute(originalFromToken, originalToToken, useIbcWasm);
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
     originalFromToken,
     originalToToken

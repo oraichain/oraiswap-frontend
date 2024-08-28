@@ -45,9 +45,11 @@ export const useSimulate = (
           useIbcWasm: simulateOption?.useIbcWasm
         },
         routerConfig: {
-          url: 'https://osor.oraidex.io',
+          // url: 'https://osor.oraidex.io',
+          url: 'https://osor-staging.oraidex.io',
           path: '/smart-router/alpha-router',
-          protocols: simulateOption?.protocols ?? ['Oraidex', 'OraidexV3']
+          protocols: simulateOption?.protocols ?? ['Oraidex', 'OraidexV3'],
+          dontAllowSwapAfter: ['Oraidex', 'OraidexV3']
         }
       });
     },
