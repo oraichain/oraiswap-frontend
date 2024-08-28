@@ -10,16 +10,17 @@ const fallback = {
   fs: false,
   tls: false,
   net: false,
-  os: false,
+  os: require.resolve('os-browserify'),
   url: false,
   path: false,
-  assert: false,
+  assert: require.resolve('assert'),
   querystring: false,
   http: require.resolve('stream-http'),
   crypto: require.resolve('crypto-browserify'),
   stream: require.resolve('stream-browserify'),
   buffer: require.resolve('buffer'),
-  https: require.resolve('https-browserify')
+  https: require.resolve('https-browserify'),
+  zlib: require.resolve('browserify-zlib')
 };
 const fixBabelRules = (config) => {
   // find first loader and use babel.config.js

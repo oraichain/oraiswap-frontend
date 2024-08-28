@@ -1,20 +1,24 @@
 import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
+import useSsoPassphrase from 'components/WalletManagement/SsoPassphase/useSsoPassphrase';
+import useSsoHandler from 'components/WalletManagement/SsoSignModal/useSsoHandler';
+import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
 import type { WalletNetwork, WalletProvider, WalletType } from 'components/WalletManagement/walletConfig';
+import { network } from 'config/networks';
 import { getListAddressCosmos, setStorageKey, switchWalletTron } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useInactiveConnect } from 'hooks/useMetamask';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Keplr from 'libs/keplr';
+import Metamask from 'libs/metamask';
 import { initClient } from 'libs/utils';
+import { triggerLogin } from 'libs/web3MultifactorsUtils';
 import { useState } from 'react';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
-import { useInactiveConnect } from 'hooks/useMetamask';
-import Metamask from 'libs/metamask';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
-import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -28,6 +32,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
+  const UIHandler = useSsoHandler();
+  const PassphraseHandler = useSsoPassphrase();
+  const [hashKey, setHashKey] = useConfigReducer('hashSsoKey');
   const connect = useInactiveConnect();
 
   const handleConfirmSwitch = async () => {
@@ -35,7 +42,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     await handleConnectWalletByNetwork(currentWalletConnecting);
   };
 
-  const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType | 'eip191') => {
+  const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType | 'eip191' | 'sso') => {
     try {
       window.Keplr = new Keplr(walletType);
       setStorageKey('typeWallet', walletType);
@@ -86,8 +93,43 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setBtcAddress(btcAddress);
   };
 
+  const callbackLoginSSO = async (hashKey: string) => {
+    setHashKey(hashKey);
+
+    const oraiAddr = window.PrivateKeySigner.getWalletAddress();
+
+    setOraiAddress(oraiAddr);
+    const { listAddressCosmos } = await getListAddressCosmos(oraiAddr, 'sso');
+    setCosmosAddress(listAddressCosmos);
+
+    setWalletByNetworks({
+      ...walletByNetworks,
+      cosmos: 'sso'
+    });
+
+    setCurrentWalletConnecting(null);
+    setConnectStatus('init');
+  };
+
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
     try {
+      // case connect SSO
+      if (wallet.nameRegistry === 'sso') {
+        setConnectStatus('loading');
+
+        const res = await triggerLogin(network.chainId, PassphraseHandler, UIHandler);
+
+        if (res) {
+          const { hashKey } = res;
+          await callbackLoginSSO(hashKey);
+        } else {
+          setCurrentWalletConnecting(null);
+          setConnectStatus('init');
+        }
+        return;
+      }
+
+      // case connect blockchain Wallet
       setConnectStatus('loading');
       switch (networkType) {
         case 'cosmos':

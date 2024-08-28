@@ -1,0 +1,114 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+@import 'src/styles/variables';
+
+.signModal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @include small-mobile {
+    justify-content: flex-end;
+  }
+
+  visibility: hidden;
+  transition: all 0.5s;
+
+  &.active {
+    visibility: visible;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+
+    background: #000;
+    opacity: 0.75;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 576px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+
+    @include theme {
+      background: theme-get('colors-neutral-surface-bg');
+    }
+
+    .header {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+
+      @include theme {
+        border-bottom: 1px solid theme-get('neutral-border-border-default');
+        color: theme-get('colors-neutral-text-text-token-name');
+      }
+
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 150%;
+
+      svg {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+
+        path {
+          @include theme {
+            fill: theme-get('neutral-9');
+          }
+        }
+
+        &:hover {
+          filter: brightness(1.5);
+        }
+      }
+    }
+
+    .dataContent {
+      padding: 20px;
+
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+
+      .json {
+        height: 100vh;
+        max-height: 250px;
+        overflow: auto;
+
+        &::-webkit-scrollbar {
+          height: 4px;
+        }
+
+        & > div {
+          border-radius: 8px;
+        }
+      }
+    }
+
+    .btnGroup {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 20px;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+}

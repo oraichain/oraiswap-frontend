@@ -21,6 +21,7 @@ export type RewardPoolType = {
 };
 
 export interface ConfigState {
+  hashSsoKey: string | null;
   address: string;
   metamaskAddress: string | null;
   tronAddress: string | null;
@@ -65,6 +66,7 @@ export interface ConfigState {
 }
 
 const initialState: ConfigState = {
+  hashSsoKey: null,
   address: '',
   metamaskAddress: '',
   bannerTime: 0,

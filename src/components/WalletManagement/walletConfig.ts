@@ -1,4 +1,5 @@
 import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common/build/constant';
+import { ReactComponent as GGIcon } from 'assets/icons/google_icon.svg';
 import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
@@ -6,7 +7,7 @@ import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
 import { cosmosNetworksWithIcon, evmNetworksIconWithoutTron, tronNetworksWithIcon, btcNetworksWithIcon } from 'helper';
 
 export type NetworkType = 'cosmos' | 'evm' | 'tron' | 'bitcoin';
-export type WalletType = WalletCosmosType | 'metamask' | 'tronLink' | 'eip191' | 'bitcoin';
+export type WalletType = WalletCosmosType | 'metamask' | 'tronLink' | 'eip191' | 'bitcoin' | 'sso';
 export type WalletNetwork = {
   icon: React.FunctionComponent<
     React.SVGProps<SVGSVGElement> & {
@@ -52,6 +53,12 @@ export const cosmosWallets: WalletNetwork[] = [
     icon: KeplrIcon,
     name: 'Keplr',
     nameRegistry: 'keplr',
+    isActive: true
+  },
+  {
+    icon: GGIcon,
+    name: 'Google',
+    nameRegistry: 'sso',
     isActive: true
   }
 ];
