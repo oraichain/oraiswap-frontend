@@ -358,13 +358,15 @@ export const getDisableSwap = ({
   return { disabledSwapBtn, disableMsg };
 };
 
-export const getProtocolsSmartRoute = (fromToken, toToken) => {
+export const getProtocolsSmartRoute = (fromToken, toToken, useIbcWasm) => {
   const protocols = ['Oraidex', 'OraidexV3'];
-  const notAllowChain = ['injective-1', 'Neutaro-1', 'noble-1'];
-  if (notAllowChain.includes(fromToken.chainId) || notAllowChain.includes(toToken.chainId))
-    return [...protocols, 'Osmosis'];
-  if (fromToken.cosmosBased && toToken.cosmosBased && fromToken.chainId !== toToken.chainId)
-    return [...protocols, 'Osmosis'];
+  if (useIbcWasm) return protocols;
+
+  const allowOsmosisProtocols = ['injective-1', 'Neutaro-1', 'noble-1', 'osmosis-1', 'cosmoshub-4'];
+  const isAllowOsmosisProtocol =
+    allowOsmosisProtocols.includes(fromToken.chainId) || allowOsmosisProtocols.includes(toToken.chainId);
+
+  if (isAllowOsmosisProtocol) return [...protocols, 'Osmosis'];
   return protocols;
 };
 
@@ -379,7 +381,7 @@ const listAllowSmartRoute = {
     toCoinGeckoIds
   },
   'injective-1-Oraichain': {
-    fromCoinGeckoIds: ['injective-protocol', 'oraichain-token'],
+    fromCoinGeckoIds: ['injective-protocol'],
     toCoinGeckoIds
   },
   'noble-1-Oraichain': {
@@ -399,19 +401,16 @@ export const isAllowIBCWasm = (fromToken, toToken) => {
   const toTokenIsOraichain = toToken.chainId === 'Oraichain';
   const toTokenIsCosmos = toToken.cosmosBased;
 
-  // Oraichain -> Oraichain
-  if (fromTokenIsOraichain && toTokenIsOraichain) return false;
-  // Oraichain -> Evm
-  if (fromTokenIsOraichain && !toTokenIsCosmos) return true;
-  // Evm -> Oraichain
-  if (!fromTokenIsCosmos && toTokenIsOraichain) return true;
-  // Oraichain -> Cosmos
-  if (fromTokenIsOraichain && toTokenIsCosmos) return false;
-  // Cosmos -> EVM
-  if (fromTokenIsCosmos && !toTokenIsCosmos) return true;
-  // EVM -> Cosmos
-  if (!fromTokenIsCosmos && toTokenIsCosmos) return true;
-  // Cosmos -> Cosmos ( Oraichain )
+  // Oraichain -> Oraichain or Cosmos
+  if (fromTokenIsOraichain) {
+    if (toToken.chainId == 'Neutaro-1') return true;
+    if (toTokenIsOraichain || toTokenIsCosmos) return false;
+  }
+  // Oraichain or Cosmos -> Evm
+  if ((fromTokenIsOraichain || fromTokenIsCosmos) && !toTokenIsCosmos) return true;
+  // Evm -> Oraichain or Cosmos or EVM
+  if (!fromTokenIsCosmos) return true;
+  // Cosmos -> Cosmos or Oraichain
   if (fromTokenIsCosmos && toTokenIsCosmos) {
     const key = [fromToken, toToken].map((e) => e.chainId).join('-');
     const hasTokenUsingSmartRoute =

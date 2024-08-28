@@ -84,6 +84,7 @@ import { useFillToken } from './hooks/useFillToken';
 import useHandleEffectTokenChange from './hooks/useHandleEffectTokenChange';
 import styles from './index.module.scss';
 import { isNegative } from 'helper/format';
+// import SwapWarningModal from '../Component/SwapWarningModal';
 
 const cx = cn.bind(styles);
 
@@ -123,6 +124,7 @@ const SwapComponent: React.FC<{
   const [openSmartRoute, setOpenSmartRoute] = useState(false);
   const [indSmartRoute, setIndSmartRoute] = useState([0, 0]);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
+  // const [openSwapWarning, setOpenSwapWarning] = useState(false);
 
   // value state
   const [coe, setCoe] = useState(0);
@@ -428,7 +430,7 @@ const SwapComponent: React.FC<{
     }
 
     if (originalFromToken.chainId === 'injective-1') {
-      return networks.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId);
+      return networks.filter((chainInfo) => chainInfo.chainId === 'Oraichain').map((chain) => chain.chainId);
     }
 
     if (!originalFromToken.cosmosBased) {
@@ -820,7 +822,10 @@ const SwapComponent: React.FC<{
             return (
               <button
                 className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
-                onClick={handleSubmit}
+                onClick={() => {
+                  // if (impactWarning > 10) return setOpenSwapWarning(true);
+                  handleSubmit();
+                }}
                 disabled={disabledSwapBtn}
               >
                 {swapLoading && <Loader width={20} height={20} />}
@@ -944,6 +949,16 @@ const SwapComponent: React.FC<{
         openSlippage={() => setOpenSetting(true)}
         closeSlippage={() => setOpenSetting(false)}
       />
+      {/* 
+      <SwapWarningModal
+        onClose={() => setOpenSwapWarning(false)}
+        open={openSwapWarning}
+        onConfirm={() => {
+          setOpenSwapWarning(false);
+          handleSubmit();
+        }}
+        impact={impactWarning}
+      /> */}
     </div>
   );
 };
