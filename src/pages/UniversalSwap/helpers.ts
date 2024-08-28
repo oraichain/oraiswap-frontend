@@ -402,7 +402,10 @@ export const isAllowIBCWasm = (fromToken, toToken) => {
   const toTokenIsCosmos = toToken.cosmosBased;
 
   // Oraichain -> Oraichain or Cosmos
-  if (fromTokenIsOraichain && (toTokenIsOraichain || toTokenIsCosmos)) return false;
+  if (fromTokenIsOraichain) {
+    if (toToken.chainId == 'Neutaro-1') return true;
+    if (toTokenIsOraichain || toTokenIsCosmos) return false;
+  }
   // Oraichain or Cosmos -> Evm
   if ((fromTokenIsOraichain || fromTokenIsCosmos) && !toTokenIsCosmos) return true;
   // Evm -> Oraichain or Cosmos or EVM
