@@ -619,12 +619,14 @@ export const useGetWithdrawlFeesBitcoin = ({
       const { data } = await axios({
         baseURL: bitcoinLcd,
         method: 'get',
-        url: `/api/checkpoint/withdrawal_fee`,
+        url: `/api/checkpoint/withdraw_fee`,
         params: {
           address: bitcoinAddr
         }
       });
-      return data.data;
+      return {
+        withdrawal_fees: data.data
+      };
     } catch (error) {
       console.log({ errorGetWithdrawFeeBTC: error });
       return {

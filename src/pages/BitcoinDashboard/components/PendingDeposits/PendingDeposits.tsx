@@ -164,7 +164,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
         <span>
           {(
             data.amount -
-            (contractConfig.token_fee.nominator * data.amount) / contractConfig.token_fee.denominator -
+            (contractConfig?.token_fee?.nominator * data.amount) / contractConfig?.token_fee?.denominator -
             toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)
           ).toFixed(6)}{' '}
           BTC

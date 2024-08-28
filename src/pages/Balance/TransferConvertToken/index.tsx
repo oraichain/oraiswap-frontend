@@ -159,7 +159,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   });
 
   if (isBridgeBitcoin) {
-    bridgeFee = (contractConfig.token_fee.nominator * 100) / contractConfig.token_fee.denominator;
+    if (contractConfig?.token_fee.denominator != 0) {
+      bridgeFee = (contractConfig?.token_fee.nominator * 100) / contractConfig?.token_fee.denominator;
+    } else {
+      bridgeFee = 0;
+    }
     // not support relayer fee yet
     relayerFeeTokenFee = 0;
   }
@@ -176,7 +180,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   }
 
   let receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee - toDisplayBTCFee : 0;
-
   const renderBridgeFee = () => {
     return (
       <div className={styles.bridgeFee}>

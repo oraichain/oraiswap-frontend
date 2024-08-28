@@ -3,13 +3,13 @@ import { ChainIdEnum } from '@oraichain/oraidex-common';
 export const leapSnapId = 'npm:@leapwallet/metamask-cosmos-snap';
 export const leapWalletType = 'leapSnap';
 
-export const btcNetwork: any = 'testnet'; // "bitcoin" or "testnet"
+export const btcNetwork: any = 'bitcoin'; // "bitcoin" or "testnet"
 
 // TODO: hardcode switch bitcoinTestnet and bitcoin
-export const bitcoinChainId: any = ChainIdEnum.BitcoinTestnet;
+export const bitcoinChainId: any = ChainIdEnum.Bitcoin;
 export const bitcoinLcd = 'http://18.191.171.150:8000';
-export const CWBitcoinContractAddress = 'orai16qnhuc5jpp4h322ju4ass3z05hw2du0e9k5t5knzwcqyjr3rmzrsa8s5ag';
-export const CWBitcoinFactoryDenom = 'factory/orai17hyr3eg92fv34fdnkend48scu32hn26gqxw3hnwkfy904lk9r09qqzty42/XuanDang';
+export const CWBitcoinContractAddress = 'orai18ffp5mu06pg55q9lj5hgkadtzadwfye4jl2pgfskuca84w7dcqjsezlqk2';
+export const CWBitcoinFactoryDenom = 'factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/obtc';
 
 export const AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP: [number, string, string][] = [
   [0.5, '50%', 'half'],

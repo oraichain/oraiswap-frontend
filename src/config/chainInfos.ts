@@ -670,10 +670,10 @@ export const oraichainNetwork: CustomChainInfo = {
       coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
     },
     {
-      coinDenom: 'BTC',
+      coinDenom: 'BTC V2',
       coinGeckoId: 'bitcoin',
       coinMinimalDenom: CWBitcoinFactoryDenom,
-      bridgeTo: [ChainIdEnum.BitcoinTestnet],
+      bridgeTo: [ChainIdEnum.Bitcoin],
       coinDecimals: 14,
       Icon: BTCIcon,
       IconLight: BTCIcon,
@@ -734,8 +734,8 @@ const bitcoinNetwork = bitcoinMainnet;
 export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
-  // bitcoinMainnet,
-  bitcoinTestnet,
+  bitcoinMainnet,
+  // bitcoinTestnet,
   {
     rpc: 'https://bridge-v2.rpc.orai.io',
     rest: 'https://bridge-v2.lcd.orai.io',
