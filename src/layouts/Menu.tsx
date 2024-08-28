@@ -25,17 +25,17 @@ import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import LogoFullImgDarkBeta from 'assets/images/OraiDEX_logo_dark.svg';
 import LogoFullImgLightBeta from 'assets/images/OraiDEX_logo_light.svg';
 
+import PoolV3Lottie from 'assets/lottie/poolv3-beta.json';
 import classNames from 'classnames';
+import TooltipContainer from 'components/WalletManagement/TooltipContainer';
 import { WalletManagement } from 'components/WalletManagement/WalletManagement';
 import { ThemeContext } from 'context/theme-context';
 import useOnClickOutside from 'hooks/useOnClickOutside';
+import Lottie from 'lottie-react';
 import React, { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import BuyOraiModal from './BuyOraiModal';
 import styles from './Menu.module.scss';
-import TooltipContainer from 'components/WalletManagement/TooltipContainer';
-import PoolV3Lottie from 'assets/lottie/poolv3-beta.json';
-import Lottie from 'lottie-react';
 
 const Menu: React.FC = () => {
   const location = useLocation();
@@ -264,6 +264,7 @@ const Menu: React.FC = () => {
             </div>
 
             <div className={styles.divider}></div>
+
             <div className={classNames(styles.connect_wallet_wrapper)}>
               <span>
                 <WalletManagement />

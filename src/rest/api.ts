@@ -462,6 +462,8 @@ function generateContractMessages(
         }
       };
       contractAddr = increaseAllowanceQuery.token;
+
+      console.log('increaseAllowanceQuery', increaseAllowanceQuery);
       break;
     case Type.TRANSFER:
       const transferQuery = params as TransferQuery;
