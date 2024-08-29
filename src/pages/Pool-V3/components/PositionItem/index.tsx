@@ -263,7 +263,7 @@ const PositionItem = ({ position }) => {
             <p>My Liquidity</p>
             <span className={styles.value}>{formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd)}</span>
           </div>
-          <div className={styles.item}>
+          <div className={classNames(styles.item)}>
             <p>APR</p>
             <span className={classNames(styles.value, styles.apr)}>
               {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%&nbsp;
@@ -468,14 +468,16 @@ const PositionItem = ({ position }) => {
                 return (
                   <div className={styles.itemRow} key={'incentEarned-' + i}>
                     <span className={styles.usd}></span>
-                    <span className={classNames(styles.token, styles[theme])}></span>
-                    <span className={classNames(styles.token, styles[theme])}>
-                      {theme === 'light' ? <token.IconLight /> : <token.Icon />}
-                      {!amount || !Number(amount)
-                        ? '--'
-                        : toDisplay(amount.toString(), token.decimals || CW20_DECIMALS)}{' '}
-                      {token?.name}
-                    </span>
+                    <div className={classNames(styles.itemAsset, styles[theme])}>
+                      <span className={classNames(styles.token, styles[theme])}></span>
+                      <span className={classNames(styles.token, styles[theme])}>
+                        {theme === 'light' ? <token.IconLight /> : <token.Icon />}
+                        {!amount || !Number(amount)
+                          ? '--'
+                          : toDisplay(amount.toString(), token.decimals || CW20_DECIMALS)}{' '}
+                        {token?.name}
+                      </span>
+                    </div>
                   </div>
                 );
               })}
