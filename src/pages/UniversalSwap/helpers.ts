@@ -425,7 +425,9 @@ export const isAllowIBCWasm = (fromToken: TokenItemType, toToken: TokenItemType)
   }
   // Oraichain or Cosmos -> Evm
   if ((fromTokenIsOraichain || fromTokenIsCosmos) && !toTokenIsCosmos) return true;
-  // Evm -> Oraichain or Cosmos or EVM
+  // Evm -> EVM
+  if (!fromTokenIsCosmos && !toTokenIsCosmos && toToken.chainId === fromToken.chainId) return false;
+  // Evm -> Oraichain or Cosmos
   if (!fromTokenIsCosmos) return true;
   // Cosmos -> Cosmos or Oraichain
   if (fromTokenIsCosmos && toTokenIsCosmos) {

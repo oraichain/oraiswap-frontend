@@ -263,7 +263,7 @@ const PositionItem = ({ position }) => {
             <p>My Liquidity</p>
             <span className={styles.value}>{formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd)}</span>
           </div>
-          <div className={classNames(styles.item, styles.aprInfo)}>
+          <div className={classNames(styles.item)}>
             <p>APR</p>
             <span className={classNames(styles.value, styles.apr)}>
               {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%&nbsp;
