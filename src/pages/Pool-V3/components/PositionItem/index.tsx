@@ -112,7 +112,14 @@ const PositionItem = ({ position }) => {
       );
       setAprInfo(res);
     };
-    if (statusRange && position.tokenXLiqInUsd && position.tokenYLiqInUsd && poolPrice && position && poolList.length > 0) {
+    if (
+      statusRange &&
+      position.tokenXLiqInUsd &&
+      position.tokenYLiqInUsd &&
+      poolPrice &&
+      position &&
+      poolList.length > 0
+    ) {
       getAPRInfo();
     }
   }, [statusRange, poolPrice, position, poolList, feeDailyData]);
@@ -121,9 +128,8 @@ const PositionItem = ({ position }) => {
     if (!openCollapse) return;
     (async () => {
       try {
-
         const { pool_key, lower_tick_index, upper_tick_index } = position;
-        
+
         const {
           lowerTickData,
           upperTickData,
@@ -135,7 +141,7 @@ const PositionItem = ({ position }) => {
           address,
           pool_key
         );
-        
+
         const tokenIncentive = incentives.reduce((acc, cur) => {
           const tokenAttr = parseAssetInfo(cur.info);
           return {
@@ -143,14 +149,14 @@ const PositionItem = ({ position }) => {
             [tokenAttr]: Number(acc[tokenAttr] || 0) + Number(cur.amount)
           };
         }, {});
-        
+
         setIncentives(tokenIncentive);
         setTick({
           lowerTick: getTick(lowerTickData),
           upperTick: getTick(upperTickData)
         });
       } catch (error) {
-        console.log("error", error);
+        console.log('error', error);
       }
     })();
 
@@ -311,14 +317,16 @@ const PositionItem = ({ position }) => {
               <span className={classNames(styles.usd, { [styles.green]: true, [styles.red]: false })}>
                 {formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd, 6, 6)}
               </span>
-              <span className={classNames(styles.token, styles[theme])}>
-                <position.tokenXIcon />
-                {position.tokenXLiq} {position?.tokenX.name}
-              </span>
-              <span className={classNames(styles.token, styles[theme])}>
-                <position.tokenYIcon />
-                {position.tokenYLiq} {position?.tokenY.name}
-              </span>
+              <div className={classNames(styles.itemAsset, styles[theme])}>
+                <span className={classNames(styles.token, styles[theme])}>
+                  <position.tokenXIcon />
+                  {position.tokenXLiq} {position?.tokenX.name}
+                </span>
+                <span className={classNames(styles.token, styles[theme])}>
+                  <position.tokenYIcon />
+                  {position.tokenYLiq} {position?.tokenY.name}
+                </span>
+              </div>
             </div>
             <div className={styles.divider}></div>
             <div className={styles.row}>
@@ -352,24 +360,26 @@ const PositionItem = ({ position }) => {
                         6
                       )}
                 </span>
-                <span className={classNames(styles.token, styles[theme])}>
-                  <position.tokenXIcon />
-                  {!principalAmountX
-                    ? '--'
-                    : numberWithCommas(toDisplay(principalAmountX || 0, tokenXDecimal), undefined, {
-                        maximumFractionDigits: 6
-                      })}{' '}
-                  {position?.tokenX.name}
-                </span>
-                <span className={classNames(styles.token, styles[theme])}>
-                  <position.tokenYIcon />
-                  {!principalAmountY
-                    ? '--'
-                    : numberWithCommas(toDisplay(principalAmountY || 0, tokenYDecimal), undefined, {
-                        maximumFractionDigits: 6
-                      })}{' '}
-                  {position?.tokenY.name}
-                </span>
+                <div className={classNames(styles.itemAsset, styles[theme])}>
+                  <span className={classNames(styles.token, styles[theme])}>
+                    <position.tokenXIcon />
+                    {!principalAmountX
+                      ? '--'
+                      : numberWithCommas(toDisplay(principalAmountX || 0, tokenXDecimal), undefined, {
+                          maximumFractionDigits: 6
+                        })}{' '}
+                    {position?.tokenX.name}
+                  </span>
+                  <span className={classNames(styles.token, styles[theme])}>
+                    <position.tokenYIcon />
+                    {!principalAmountY
+                      ? '--'
+                      : numberWithCommas(toDisplay(principalAmountY || 0, tokenYDecimal), undefined, {
+                          maximumFractionDigits: 6
+                        })}{' '}
+                    {position?.tokenY.name}
+                  </span>
+                </div>
               </div>
             </div>
             <div className={styles.btnGroup}>
@@ -433,20 +443,22 @@ const PositionItem = ({ position }) => {
               <span className={styles.usd}>
                 {formatDisplayUsdt(earnXDisplay * tokenXUsd + earnYDisplay * tokenYUsd + totalEarnIncentiveUsd, 6, 6)}
               </span>
-              <span className={classNames(styles.token, styles[theme])}>
-                <position.tokenXIcon />
-                {numberWithCommas(earnXDisplay, undefined, {
-                  maximumFractionDigits: 6
-                })}{' '}
-                {position?.tokenX.name}
-              </span>
-              <span className={classNames(styles.token, styles[theme])}>
-                <position.tokenYIcon />
-                {numberWithCommas(earnYDisplay, undefined, {
-                  maximumFractionDigits: 6
-                })}{' '}
-                {position?.tokenY.name}
-              </span>
+              <div className={classNames(styles.itemAsset, styles[theme])}>
+                <span className={classNames(styles.token, styles[theme])}>
+                  <position.tokenXIcon />
+                  {numberWithCommas(earnXDisplay, undefined, {
+                    maximumFractionDigits: 6
+                  })}{' '}
+                  {position?.tokenX.name}
+                </span>
+                <span className={classNames(styles.token, styles[theme])}>
+                  <position.tokenYIcon />
+                  {numberWithCommas(earnYDisplay, undefined, {
+                    maximumFractionDigits: 6
+                  })}{' '}
+                  {position?.tokenY.name}
+                </span>
+              </div>
             </div>
             {earnIncentive && <div style={{ height: 8 }} />}
             {earnIncentive &&
@@ -474,14 +486,16 @@ const PositionItem = ({ position }) => {
                 <span className={styles.usd}>
                   {formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd + incentivesUSD, 6, 6)}
                 </span>
-                <span className={classNames(styles.token, styles[theme])}>
-                  <position.tokenXIcon />
-                  {tokenXClaim} {position?.tokenX.name}
-                </span>
-                <span className={classNames(styles.token, styles[theme])}>
-                  <position.tokenYIcon />
-                  {tokenYClaim} {position?.tokenY.name}
-                </span>
+                <div className={classNames(styles.itemAsset, styles[theme])}>
+                  <span className={classNames(styles.token, styles[theme])}>
+                    <position.tokenXIcon />
+                    {tokenXClaim} {position?.tokenX.name}
+                  </span>
+                  <span className={classNames(styles.token, styles[theme])}>
+                    <position.tokenYIcon />
+                    {tokenYClaim} {position?.tokenY.name}
+                  </span>
+                </div>
               </div>
               {incentives && <div style={{ height: 8 }} />}
               {incentives &&
@@ -493,11 +507,13 @@ const PositionItem = ({ position }) => {
                   return (
                     <div className={styles.itemRow} key={i}>
                       <span className={styles.usd}></span>
-                      <span className={classNames(styles.token, styles[theme])}></span>
-                      <span className={classNames(styles.token, styles[theme])}>
-                        {theme === 'light' ? <tokenIncentive.IconLight /> : <tokenIncentive.Icon />}
-                        {toDisplay(incentives[incent].toString())} {tokenIncentive?.name}
-                      </span>
+                      <div className={classNames(styles.itemAsset, styles[theme])}>
+                        <span className={classNames(styles.token, styles[theme])}></span>
+                        <span className={classNames(styles.token, styles[theme])}>
+                          {theme === 'light' ? <tokenIncentive.IconLight /> : <tokenIncentive.Icon />}
+                          {toDisplay(incentives[incent].toString())} {tokenIncentive?.name}
+                        </span>
+                      </div>
                     </div>
                   );
                 })}

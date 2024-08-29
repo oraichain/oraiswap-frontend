@@ -293,20 +293,28 @@
             }
           }
 
-          .token {
+          .itemAsset {
             display: flex;
-            align-items: center;
-            gap: 6px;
-
-            img,
-            svg {
-              width: 20px;
-              height: 20px;
+            gap: 8px;
+            @include mobile {
+              flex-direction: column;
+              gap: 6px;
             }
+            .token {
+              display: flex;
+              align-items: center;
+              gap: 6px;
 
-            &.light {
-              img {
-                filter: invert(1);
+              img,
+              svg {
+                width: 20px;
+                height: 20px;
+              }
+
+              &.light {
+                img {
+                  filter: invert(1);
+                }
               }
             }
           }

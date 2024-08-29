@@ -547,8 +547,8 @@ export const getTokenInfo = (action, path, assetList) => {
     console.log({ tokenInAction, tokenInChainId, tokenInInfo, tokenOutInfo });
 
     info = {
-      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo?.name : tokenInInfo.symbol,
-      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo?.name : tokenOutInfo.symbol,
+      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo?.name : tokenInInfo?.symbol,
+      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo?.name : tokenOutInfo?.symbol,
       tokenInInfo,
       tokenOutInfo
     };
