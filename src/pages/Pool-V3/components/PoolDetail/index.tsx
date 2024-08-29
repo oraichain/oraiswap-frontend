@@ -153,7 +153,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [address, poolList, userPositions, poolPrice]);
+  }, [address, poolList.length, userPositions, poolPrice]);
 
   const calcShowApr = (apr: number) =>
     numberWithCommas(apr * 100, undefined, {

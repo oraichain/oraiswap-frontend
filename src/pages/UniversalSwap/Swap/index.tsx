@@ -83,6 +83,8 @@ import useCalculateDataSwap, { SIMULATE_INIT_AMOUNT } from './hooks/useCalculate
 import { useFillToken } from './hooks/useFillToken';
 import useHandleEffectTokenChange from './hooks/useHandleEffectTokenChange';
 import styles from './index.module.scss';
+import { isNegative } from 'helper/format';
+// import SwapWarningModal from '../Component/SwapWarningModal';
 
 const cx = cn.bind(styles);
 
@@ -92,7 +94,6 @@ const SwapComponent: React.FC<{
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   // store value
-  const [isAIRoute] = useConfigReducer('AIRoute');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [oraiAddress] = useConfigReducer('address');
@@ -123,6 +124,7 @@ const SwapComponent: React.FC<{
   const [openSmartRoute, setOpenSmartRoute] = useState(false);
   const [indSmartRoute, setIndSmartRoute] = useState([0, 0]);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
+  // const [openSwapWarning, setOpenSwapWarning] = useState(false);
 
   // value state
   const [coe, setCoe] = useState(0);
@@ -181,8 +183,8 @@ const SwapComponent: React.FC<{
   const fromTokenBalance = getTokenBalance(originalFromToken, amounts, subAmountFrom);
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
-  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken, isAIRoute);
-  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken, isAIRoute);
+  const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
+  const useAlphaSmartRouter = isAllowAlphaSmartRouter();
 
   const settingRef = useRef();
   const smartRouteRef = useRef();
@@ -428,10 +430,7 @@ const SwapComponent: React.FC<{
     }
 
     if (originalFromToken.chainId === 'injective-1') {
-      if (!isAIRoute) {
-        return networks.filter((chainInfo) => chainInfo.chainId === 'Oraichain').map((chain) => chain.chainId);
-      }
-      return networks.filter((chainInfo) => chainInfo.networkType === 'cosmos').map((chain) => chain.chainId);
+      return networks.filter((chainInfo) => chainInfo.chainId === 'Oraichain').map((chain) => chain.chainId);
     }
 
     if (!originalFromToken.cosmosBased) {
@@ -527,13 +526,21 @@ const SwapComponent: React.FC<{
 
   function caculateImpactWarning() {
     let impactWarning = 0;
-    const isImpactPrice = !!debouncedFromAmount && !!simulateData?.displayAmount && !!averageRatio?.amount;
-    if (
-      isImpactPrice &&
-      simulateData?.displayAmount &&
-      averageRatio?.displayAmount &&
-      averageSimulateData?.displayAmount
-    ) {
+    if (Number(usdPriceShowFrom) && Number(usdPriceShowTo)) {
+      const calculateImpactPrice = new BigDecimal(usdPriceShowFrom).sub(usdPriceShowTo).toNumber();
+      if (isNegative(calculateImpactPrice)) return impactWarning;
+      return new BigDecimal(calculateImpactPrice).div(usdPriceShowFrom).mul(100).toNumber();
+    }
+
+    const isValidValue = (value) => value && value !== '';
+    const isImpactPrice =
+      isValidValue(debouncedFromAmount) &&
+      isValidValue(simulateData?.displayAmount) &&
+      isValidValue(averageRatio?.amount) &&
+      isValidValue(averageSimulateData?.displayAmount) &&
+      isValidValue(averageRatio?.displayAmount);
+
+    if (isImpactPrice) {
       const calculateImpactPrice = new BigDecimal(simulateData.displayAmount)
         .div(debouncedFromAmount)
         .div(averageSimulateData.displayAmount)
@@ -544,6 +551,7 @@ const SwapComponent: React.FC<{
     }
     return impactWarning;
   }
+
   const impactWarning = caculateImpactWarning();
 
   const waringImpactBiggerTen = impactWarning > 10;
@@ -629,7 +637,7 @@ const SwapComponent: React.FC<{
                 usdPrice={usdPriceShowFrom}
               />
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
-              {!fromTokenFee && !toTokenFee && !isAIRoute && isWarningSlippage && (
+              {!fromTokenFee && !toTokenFee && isWarningSlippage && (
                 <div className={cx('impact-warning')}>
                   <WarningIcon />
                   <div className={cx('title')}>
@@ -644,14 +652,13 @@ const SwapComponent: React.FC<{
               <img src={getSwitchIcon()} onClick={handleRotateSwapDirection} alt="ant" />
             </div>
             <div className={cx('swap-ai-dot')}>
-              {originalFromToken.cosmosBased && originalToToken.cosmosBased && (
+              {/* {originalFromToken.cosmosBased && originalToToken.cosmosBased && (
                 <AIRouteSwitch isLoading={isPreviousSimulate} />
-              )}
+              )} */}
               {generateRatioComp()}
             </div>
           </div>
-
-          {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
+          {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && !!routersSwapData?.routes.length && (
             <div className={cx('smart', !openRoutes ? 'hidden' : '')}>
               <div className={cx('smart-router')}>
                 {routersSwapData?.routes.map((route, ind) => {
@@ -692,7 +699,7 @@ const SwapComponent: React.FC<{
                     </div>
                   );
                 })}
-                <div className={cx('smart-router-price-impact')}>
+                {/* <div className={cx('smart-router-price-impact')}>
                   <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
                   <div
                     className={cx(
@@ -707,11 +714,10 @@ const SwapComponent: React.FC<{
                       {numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 2 })}%
                     </span>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           )}
-
           <div className={cx('to')}>
             <div className={cx('input-wrapper')}>
               <InputSwap
@@ -729,11 +735,14 @@ const SwapComponent: React.FC<{
                 usdPrice={usdPriceShowTo}
                 loadingSimulate={isPreviousSimulate}
                 impactWarning={impactWarning}
-                aiRouteEnable={isAIRoute}
               />
             </div>
           </div>
-
+          {/* {!isPreviousSimulate && impactWarning > 10 && (
+            <div className={cx('priceImpact')}>
+              <div>High price impact! More than {impactWarning}%</div>
+            </div>
+          )} */}
           <div className={cx('recipient')}>
             <InputCommon
               isOnViewPort={currentAddressManagementStep === AddressManagementStep.INIT}
@@ -796,7 +805,6 @@ const SwapComponent: React.FC<{
               </span>
             </div>
           </div>
-
           {(() => {
             const { disabledSwapBtn, disableMsg } = getDisableSwap({
               originalToToken,
@@ -814,7 +822,10 @@ const SwapComponent: React.FC<{
             return (
               <button
                 className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
-                onClick={handleSubmit}
+                onClick={() => {
+                  // if (impactWarning > 10) return setOpenSwapWarning(true);
+                  handleSubmit();
+                }}
                 disabled={disabledSwapBtn}
               >
                 {swapLoading && <Loader width={20} height={20} />}
@@ -938,6 +949,16 @@ const SwapComponent: React.FC<{
         openSlippage={() => setOpenSetting(true)}
         closeSlippage={() => setOpenSetting(false)}
       />
+      {/* 
+      <SwapWarningModal
+        onClose={() => setOpenSwapWarning(false)}
+        open={openSwapWarning}
+        onConfirm={() => {
+          setOpenSwapWarning(false);
+          handleSubmit();
+        }}
+        impact={impactWarning}
+      /> */}
     </div>
   );
 };

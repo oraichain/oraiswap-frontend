@@ -9,9 +9,10 @@ html {
 }
 
 .fb-feedback-widget-feedback-button-container {
-  @include mobile {
-    display: none !important;
-  }
+  display: none !important;
+  // @include mobile {
+  //   display: none !important;
+  // }
 }
 
 .app {

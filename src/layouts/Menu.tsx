@@ -104,7 +104,8 @@ const Menu: React.FC = () => {
 
     const handleClick = () => {
       setOpen(!open);
-      if (title !== 'Feedback') onClick(to);
+      // if (title !== 'Feedback') onClick(to);
+      onClick(to);
     };
 
     const renderContent = () => (
@@ -121,7 +122,7 @@ const Menu: React.FC = () => {
       </>
     );
 
-    return title === 'Feedback' ? (
+    return title === 'Feedbacks' ? (
       <button onClick={handleClick} className={getButtonClasses()} data-featurebase-feedback>
         {renderContent()}
       </button>
@@ -192,7 +193,8 @@ const Menu: React.FC = () => {
         false,
         <KadoIcon />
       )}
-      {renderLink('', 'Feedback', setLink, false, <FeedBackIcon />)}
+      {/* {renderLink('https://defi.featurebase.app/', 'Feedback', setLink, false, <FeedBackIcon />)} */}
+      {renderLink('https://defi.featurebase.app/', 'Feedback', () => {}, true, <FeedBackIcon />, false)}
     </div>
   );
 
@@ -249,6 +251,7 @@ const Menu: React.FC = () => {
                     {renderLink('https://t.me/oraidex', 'Join our Community', () => {}, true, <TelegramIcon />, false)}
                     {renderLink('https://twitter.com/oraidex', 'Twitter', () => {}, true, <TwitterIcon />, false)}
                     {renderLink('https://t.me/SamORAI_bot', 'Contact us', () => {}, true, <SupportIcon />, false)}
+                    {renderLink('https://defi.featurebase.app/', 'Feedback', () => {}, true, <FeedBackIcon />, false)}
                   </div>
                 }
               />

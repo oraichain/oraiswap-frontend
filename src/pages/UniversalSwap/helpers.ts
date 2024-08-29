@@ -11,15 +11,9 @@ import {
   TokenItemType,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
-  oraichainTokens,
-  PairAddress,
   NetworkName,
-  ATOM_ORAICHAIN_DENOM,
-  OSMOSIS_ORAICHAIN_DENOM,
-  USDC_CONTRACT,
   BigDecimal,
-  toAmount,
-  TON_ORAICHAIN_DENOM
+  toAmount
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHelper
@@ -281,8 +275,8 @@ export const getTokenIcon = (token: TokenItemType, theme: string) => {
 };
 
 export const refreshBalances = async (
-  loadingRefresh,
-  setLoadingRefresh,
+  loadingRefresh: boolean,
+  setLoadingRefresh: (boolean) => void,
   { metamaskAddress, tronAddress, oraiAddress },
   callback
 ) => {
@@ -299,7 +293,12 @@ export const refreshBalances = async (
   }
 };
 
-export const getFromToToken = (originalFromToken, originalToToken, fromTokenDenomSwap, toTokenDenomSwap) => {
+export const getFromToToken = (
+  originalFromToken: TokenItemType,
+  originalToToken: TokenItemType,
+  fromTokenDenomSwap: string,
+  toTokenDenomSwap: string
+) => {
   const isEvmSwap = UniversalSwapHelper.isEvmSwappable({
     fromChainId: originalFromToken?.chainId,
     toChainId: originalToToken?.chainId,
@@ -316,11 +315,11 @@ export const getFromToToken = (originalFromToken, originalToToken, fromTokenDeno
   return { fromToken, toToken };
 };
 
-export const getRemoteDenom = (originalToken) => {
+export const getRemoteDenom = (originalToken: TokenItemType) => {
   return originalToken.contractAddress ? originalToken.prefix + originalToken.contractAddress : originalToken.denom;
 };
 
-export const getTokenBalance = (originalToken, amounts, subAmount) => {
+export const getTokenBalance = (originalToken: TokenItemType, amounts: AmountDetails, subAmount: bigint) => {
   return originalToken ? BigInt(amounts[originalToken.denom] ?? '0') + subAmount : BigInt(0);
 };
 
@@ -364,34 +363,89 @@ export const getDisableSwap = ({
   return { disabledSwapBtn, disableMsg };
 };
 
-// smart router osmosis
-export const isAllowAlphaSmartRouter = (fromToken, toToken, isAIRoute) => {
+/**
+ * This function return protocols of smart route
+ * Example: if has chainId is Cosmos at fromToken or toToken then return ['Oraidex', 'OraidexV3','Osmosis']
+ * @param toToken
+ * @param useIbcWasm
+ * @returns string
+ */
+export const getProtocolsSmartRoute = (fromToken: TokenItemType, toToken: TokenItemType, useIbcWasm: boolean) => {
+  const protocols = ['Oraidex', 'OraidexV3'];
+  if (useIbcWasm) return protocols;
+
+  const allowOsmosisProtocols = ['injective-1', 'Neutaro-1', 'noble-1', 'osmosis-1', 'cosmoshub-4'];
+  const isAllowOsmosisProtocol =
+    allowOsmosisProtocols.includes(fromToken.chainId) || allowOsmosisProtocols.includes(toToken.chainId);
+
+  if (isAllowOsmosisProtocol) return [...protocols, 'Osmosis'];
+  return protocols;
+};
+
+export const isAllowAlphaSmartRouter = () => true;
+
+const toCoinGeckoIds = ['osmosis', 'cosmos', 'oraichain-token', 'usd-coin'];
+const listAllowSmartRoute = {
+  'osmosis-1-Oraichain': {
+    fromCoinGeckoIds: ['osmosis'],
+    toCoinGeckoIds
+  },
+  'injective-1-Oraichain': {
+    fromCoinGeckoIds: ['injective-protocol'],
+    toCoinGeckoIds
+  },
+  'noble-1-Oraichain': {
+    fromCoinGeckoIds: ['usd-coin'],
+    toCoinGeckoIds: [...toCoinGeckoIds, 'injective-protocol']
+  },
+  'cosmoshub-4-Oraichain': {
+    fromCoinGeckoIds: ['cosmos'],
+    toCoinGeckoIds: [...toCoinGeckoIds]
+  }
+};
+
+/**
+ * This function check status using ibc wasm
+ * Example:  Oraichain -> Oraichain + Cosmos (false) | Oraichain -> Evm (true) | Evm -> Evm + Oraichain + Cosmos (true) | Cosmos -> Cosmos + Oraichain (false) | Cosmos -> Evm (true)
+ * @param fromToken
+ * @param toToken
+ * @returns boolean
+ */
+export const isAllowIBCWasm = (fromToken: TokenItemType, toToken: TokenItemType) => {
   const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
-  // const notAllowChainId = ['Neutaro-1'];
-  const allowTokenTon = [fromToken.contractAddress, fromToken.denom, toToken.contractAddress, toToken.denom]
-    .filter(Boolean)
-    .includes(TON_ORAICHAIN_DENOM);
+  const fromTokenIsCosmos = fromToken.cosmosBased;
 
-  if (allowTokenTon) return true;
-  // if (notAllowChainId.includes(fromToken.chainId) || notAllowChainId.includes(toToken.chainId)) return false;
-  // if (isOraichain && !toToken.cosmosBased) return false;
-  if (fromTokenIsOraichain) return isAIRoute;
+  const toTokenIsOraichain = toToken.chainId === 'Oraichain';
+  const toTokenIsCosmos = toToken.cosmosBased;
 
-  if (fromToken.cosmosBased && toToken.cosmosBased) return true;
-  if (fromToken.cosmosBased && !toToken.cosmosBased) return true;
-  if (!fromToken.cosmosBased) return true;
+  // Oraichain -> Oraichain or Cosmos
+  if (fromTokenIsOraichain) {
+    if (toToken.chainId == 'Neutaro-1') return true;
+    if (toTokenIsOraichain || toTokenIsCosmos) return false;
+  }
+  // Oraichain or Cosmos -> Evm
+  if ((fromTokenIsOraichain || fromTokenIsCosmos) && !toTokenIsCosmos) return true;
+  // Evm -> Oraichain or Cosmos or EVM
+  if (!fromTokenIsCosmos) return true;
+  // Cosmos -> Cosmos or Oraichain
+  if (fromTokenIsCosmos && toTokenIsCosmos) {
+    const key = [fromToken, toToken].map((e) => e.chainId).join('-');
+    const hasTokenUsingSmartRoute =
+      listAllowSmartRoute[key]?.fromCoinGeckoIds.includes(fromToken.coinGeckoId) &&
+      listAllowSmartRoute[key]?.toCoinGeckoIds.includes(toToken.coinGeckoId);
+    if (hasTokenUsingSmartRoute) return false;
+    return true;
+  }
+
   return false;
 };
 
-export const isAllowIBCWasm = (fromToken, toToken, isAIRoute) => {
-  if (fromToken.cosmosBased && toToken.cosmosBased) return !isAIRoute;
-  if (fromToken.cosmosBased && !toToken.cosmosBased) return true;
-
-  if (!fromToken.cosmosBased) return true;
-  return false;
-};
-
-export const getAverageRatio = (simulateData, averageSimulateData, fromAmountToken, originalFromToken) => {
+export const getAverageRatio = (
+  simulateData: SimulateResponse,
+  averageSimulateData: SimulateResponse,
+  fromAmountToken: number,
+  originalFromToken: TokenItemType
+) => {
   let averageRatio = undefined;
   if (simulateData && fromAmountToken) {
     const displayAmount = new BigDecimal(simulateData.displayAmount).div(fromAmountToken).toNumber();
@@ -405,14 +459,6 @@ export const getAverageRatio = (simulateData, averageSimulateData, fromAmountTok
 
 export const findKeyByValue = (obj, value: string) => Object.keys(obj).find((key) => obj[key] === value);
 
-const findTokenInfo = (token: string, flattenTokens: TokenItemType[]): TokenItemType =>
-  flattenTokens.find((t) => [t.contractAddress?.toUpperCase(), t.denom?.toUpperCase()].includes(token?.toUpperCase()));
-
-const findBaseToken = (coinGeckoId: string, flattenTokensWithIcon: TokenItemType[], isLightMode: boolean): string => {
-  const baseToken = flattenTokensWithIcon.find((token) => token.coinGeckoId === coinGeckoId);
-  return baseToken ? (isLightMode ? baseToken.IconLight : baseToken.Icon) : DefaultIcon;
-};
-
 export const transformSwapInfo = (data) => {
   const transformedData = JSON.parse(JSON.stringify(data));
   transformedData.swapInfo = transformedData.swapInfo.map((swap, index) => {
@@ -420,35 +466,6 @@ export const transformSwapInfo = (data) => {
     return swap;
   });
   return transformedData;
-};
-
-export const processPairInfo = (actionSwap, flattenTokens, flattenTokensWithIcon, isLightMode) => {
-  let [TokenInIcon, TokenOutIcon]: any = [DefaultIcon, DefaultIcon];
-  const infoPair = PAIRS_CHART.find(
-    (pair) => pair.assets.includes(actionSwap.tokenIn) && pair.assets.includes(actionSwap.tokenOut)
-  );
-  const findIndexIn = infoPair.assets.findIndex((fdex) => fdex === actionSwap.tokenOut);
-  const TokenInIconPair = findBaseToken(
-    findTokenInfo(actionSwap.tokenIn, flattenTokens)?.coinGeckoId,
-    flattenTokensWithIcon,
-    isLightMode
-  );
-  const TokenOutIconPair = findBaseToken(
-    findTokenInfo(actionSwap.tokenOut, flattenTokens)?.coinGeckoId,
-    flattenTokensWithIcon,
-    isLightMode
-  );
-
-  if (TokenInIconPair) TokenInIcon = TokenInIconPair;
-
-  if (TokenOutIconPair) TokenOutIcon = TokenOutIconPair;
-
-  const info = {
-    ...infoPair,
-    tokenIn: infoPair.symbols[findIndexIn],
-    tokenOut: infoPair.symbols[findIndexIn ? 0 : 1]
-  };
-  return { info, TokenInIcon, TokenOutIcon };
 };
 
 export const getTokenInfo = (action, path, assetList) => {
@@ -515,8 +532,8 @@ export const getTokenInfo = (action, path, assetList) => {
     console.log({ tokenInAction, tokenInChainId, tokenInInfo, tokenOutInfo });
 
     info = {
-      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo?.name : tokenInInfo.symbol,
-      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo?.name : tokenOutInfo.symbol,
+      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo?.name : tokenInInfo?.symbol,
+      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo?.name : tokenOutInfo?.symbol,
       tokenInInfo,
       tokenOutInfo
     };

@@ -7,7 +7,7 @@ import { TokenInfo } from 'types/token';
 import styles from './InputSwap.module.scss';
 import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import { Themes } from 'context/theme-context';
-import { numberWithCommas } from 'pages/Pools/helpers';
+import { isNegative, numberWithCommas } from 'pages/Pools/helpers';
 import { AMOUNT_BALANCE_ENTRIES_UNIVERSAL_SWAP } from 'helper/constants';
 
 const cx = cn.bind(styles);
@@ -31,10 +31,9 @@ interface InputSwapProps {
   theme: Themes;
   loadingSimulate?: boolean;
   impactWarning?: number;
-  aiRouteEnable?: boolean;
 }
 
-export default function InputSwapV4({
+export default function InputSwap({
   setIsSelectToken,
   setIsSelectChain,
   token,
@@ -52,8 +51,7 @@ export default function InputSwapV4({
   theme,
   coe,
   loadingSimulate,
-  impactWarning,
-  aiRouteEnable
+  impactWarning
 }: InputSwapProps) {
   const chainInfo = chainInfosWithIcon.find((chain) => chain.chainId === selectChain);
   const tokenInfo = flattenTokensWithIcon.find((flattenToken) => flattenToken.coinGeckoId === token.coinGeckoId);
@@ -155,16 +153,15 @@ export default function InputSwapV4({
           </div>
           <div className={cx('usd')}>
             <span>
-              ≈ ${amount ? numberWithCommas(Number(usdPrice) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+              ≈ ${amount ? numberWithCommas(Number(usdPrice) || 0, undefined, { maximumFractionDigits: 3 }) : 0}
             </span>
-            {!!impactWarning && Number(impactWarning) > 0 && !aiRouteEnable && (
+            {!!impactWarning && !isNegative(impactWarning) && (
               <span
-                style={{
-                  paddingLeft: 6,
-                  color: impactWarning > 10 ? '#ff5947' : '#fff'
-                }}
+                className={cx(
+                  'impact',
+                  `${impactWarning > 10 ? 'impact-ten' : impactWarning > 5 ? 'impact-five' : ''}`
+                )}
               >
-                {' '}
                 (-{numberWithCommas(impactWarning, undefined, { minimumFractionDigits: 1 })}%)
               </span>
             )}
