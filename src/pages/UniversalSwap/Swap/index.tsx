@@ -184,7 +184,7 @@ const SwapComponent: React.FC<{
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
-  const useAlphaSmartRouter = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
+  const useAlphaSmartRouter = isAllowAlphaSmartRouter();
 
   const settingRef = useRef();
   const smartRouteRef = useRef();

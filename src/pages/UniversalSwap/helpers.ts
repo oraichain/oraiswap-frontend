@@ -358,6 +358,13 @@ export const getDisableSwap = ({
   return { disabledSwapBtn, disableMsg };
 };
 
+/**
+ * This function return protocols of smart route
+ * Example: if has chainId is Cosmos at fromToken or toToken then return ['Oraidex', 'OraidexV3','Osmosis']
+ * @param toToken
+ * @param useIbcWasm
+ * @returns string
+ */
 export const getProtocolsSmartRoute = (fromToken, toToken, useIbcWasm) => {
   const protocols = ['Oraidex', 'OraidexV3'];
   if (useIbcWasm) return protocols;
@@ -370,9 +377,7 @@ export const getProtocolsSmartRoute = (fromToken, toToken, useIbcWasm) => {
   return protocols;
 };
 
-export const isAllowAlphaSmartRouter = (fromToken, toToken) => {
-  return true;
-};
+export const isAllowAlphaSmartRouter = () => true;
 
 const toCoinGeckoIds = ['osmosis', 'cosmos', 'oraichain-token', 'usd-coin'];
 const listAllowSmartRoute = {
@@ -394,6 +399,13 @@ const listAllowSmartRoute = {
   }
 };
 
+/**
+ * This function check status using ibc wasm
+ * Example:  Oraichain -> Oraichain + Cosmos (false) | Oraichain -> Evm (true) | Evm -> Evm + Oraichain + Cosmos (true) | Cosmos -> Cosmos + Oraichain (false) | Cosmos -> Evm (true)
+ * @param fromToken
+ * @param toToken
+ * @returns boolean
+ */
 export const isAllowIBCWasm = (fromToken, toToken) => {
   const fromTokenIsOraichain = fromToken.chainId === 'Oraichain';
   const fromTokenIsCosmos = fromToken.cosmosBased;

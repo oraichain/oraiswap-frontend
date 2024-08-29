@@ -32,7 +32,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
   const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
 
-  const useAlphaSmartRoute = isAllowAlphaSmartRouter(originalFromToken, originalToToken);
+  const useAlphaSmartRoute = isAllowAlphaSmartRouter();
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
 
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
