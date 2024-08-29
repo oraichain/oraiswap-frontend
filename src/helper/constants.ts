@@ -7,7 +7,7 @@ export const btcNetwork: any = 'bitcoin'; // "bitcoin" or "testnet"
 
 // TODO: hardcode switch bitcoinTestnet and bitcoin
 export const bitcoinChainId: any = ChainIdEnum.Bitcoin;
-export const bitcoinLcd = 'http://18.191.171.150:8000';
+export const bitcoinLcd = 'https://btc.perfogic.store';
 export const CWBitcoinContractAddress = 'orai18ffp5mu06pg55q9lj5hgkadtzadwfye4jl2pgfskuca84w7dcqjsezlqk2';
 export const CWBitcoinFactoryDenom = 'factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/obtc';
 
