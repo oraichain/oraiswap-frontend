@@ -226,6 +226,13 @@ const PositionItem = ({ position }) => {
     return [0, 0, 0, 0, 0];
   }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess, incentives, poolPrice]);
 
+  const currentAsset = position.tokenXLiqInUsd || 0 + position.tokenYLiqInUsd || 0;
+  const principleAsset = new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal))
+    .mul(tokenXUsd)
+    .add(new BigDecimal(toDisplay((principalAmountY || 0).toString(), tokenYDecimal)).mul(tokenYUsd))
+    .toNumber();
+  const isIncreaseAsset = currentAsset >= principleAsset;
+
   return (
     <div ref={ref} className={styles.positionItem}>
       <div className={styles.trigger} onClick={() => setCollapse(!openCollapse)}>
@@ -314,8 +321,10 @@ const PositionItem = ({ position }) => {
           <div className={styles.row}>
             <h4>Current Assets</h4>
             <div className={styles.itemRow}>
-              <span className={classNames(styles.usd, { [styles.green]: true, [styles.red]: false })}>
-                {formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd, 6, 6)}
+              <span
+                className={classNames(styles.usd, { [styles.green]: isIncreaseAsset, [styles.red]: !isIncreaseAsset })}
+              >
+                {formatDisplayUsdt(currentAsset, 6, 6)}
               </span>
               <div className={classNames(styles.itemAsset, styles[theme])}>
                 <span className={classNames(styles.token, styles[theme])}>
@@ -347,18 +356,7 @@ const PositionItem = ({ position }) => {
               </h4>
               <div className={styles.itemRow}>
                 <span className={styles.usd}>
-                  {!principalAmountX || !principalAmountY
-                    ? '--'
-                    : formatDisplayUsdt(
-                        new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal))
-                          .mul(tokenXUsd)
-                          .add(
-                            new BigDecimal(toDisplay((principalAmountY || 0).toString(), tokenYDecimal)).mul(tokenYUsd)
-                          )
-                          .toNumber(),
-                        6,
-                        6
-                      )}
+                  {!principalAmountX || !principalAmountY ? '--' : formatDisplayUsdt(principleAsset, 6, 6)}
                 </span>
                 <div className={classNames(styles.itemAsset, styles[theme])}>
                   <span className={classNames(styles.token, styles[theme])}>
