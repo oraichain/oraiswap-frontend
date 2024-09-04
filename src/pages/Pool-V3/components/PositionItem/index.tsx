@@ -41,6 +41,7 @@ import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { extractAddress } from '@oraichain/oraiswap-v3';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();
@@ -59,7 +60,9 @@ const PositionItem = ({ position }) => {
     tokenXUsd = 0,
     tokenYUsd = 0,
     tokenYDecimal,
-    tokenXDecimal
+    tokenXDecimal,
+    tokenX = {},
+    tokenY = {}
   } = position || {};
 
   const { earnX = 0, earnY = 0, earnIncentive = null } = totalEarn || {};
@@ -84,6 +87,7 @@ const PositionItem = ({ position }) => {
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );
 
+  const loadOraichainToken = useLoadOraichainTokens();
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
   const { poolList, poolPrice } = useGetPoolList(price);
@@ -399,6 +403,7 @@ const PositionItem = ({ position }) => {
                         customLink: getTransactionUrl(network.chainId, transactionHash)
                       });
                       refetchPositions();
+                      loadOraichainToken(address, [tokenY.contractAddress, tokenX.contractAddress].filter(Boolean));
                     }
                   } catch (error) {
                     console.log({ error });
