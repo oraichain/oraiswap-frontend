@@ -198,6 +198,12 @@ const PositionItem = ({ position }) => {
   const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
   const earnYDisplay = toDisplay((earnY || 0).toString(), tokenYDecimal);
 
+  useEffect(() => {
+    if (isClaimSuccess) {
+      setIncentives({});
+    }
+  }, [isClaimSuccess]);
+
   const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd, incentivesUSD] = useMemo(() => {
     if (isClaimSuccess) return [0, 0, 0, 0, 0];
     if (position?.poolData && openCollapse && tick.lowerTick && tick.lowerTick && incentives) {
@@ -230,7 +236,7 @@ const PositionItem = ({ position }) => {
     return [0, 0, 0, 0, 0];
   }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess, incentives, poolPrice]);
 
-  const currentAsset = position.tokenXLiqInUsd || 0 + position.tokenYLiqInUsd || 0;
+  const currentAsset = (position.tokenXLiqInUsd || 0) + (position.tokenYLiqInUsd || 0);
   const principleAsset = new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal))
     .mul(tokenXUsd)
     .add(new BigDecimal(toDisplay((principalAmountY || 0).toString(), tokenYDecimal)).mul(tokenYUsd))
