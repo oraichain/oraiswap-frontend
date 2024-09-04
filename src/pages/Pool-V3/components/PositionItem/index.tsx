@@ -333,11 +333,17 @@ const PositionItem = ({ position }) => {
               <div className={classNames(styles.itemAsset, styles[theme])}>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
-                  {position.tokenXLiq} {position?.tokenX.name}
+                  {numberWithCommas(position.tokenXLiq, undefined, {
+                    maximumFractionDigits: 6
+                  })}{' '}
+                  {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
-                  {position.tokenYLiq} {position?.tokenY.name}
+                  {numberWithCommas(position.tokenYLiq, undefined, {
+                    maximumFractionDigits: 6
+                  })}{' '}
+                  {position?.tokenY.name}
                 </span>
               </div>
             </div>
@@ -391,7 +397,9 @@ const PositionItem = ({ position }) => {
                 onClick={async () => {
                   try {
                     setRemoveLoading(true);
-                    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+                    const { client } = window.client
+                      ? { client: window.client }
+                      : await getCosmWasmClient({ chainId: network.chainId });
                     SingletonOraiswapV3.load(client, address);
                     const { transactionHash } = await SingletonOraiswapV3.dex.removePosition({
                       index: Number(position.id)
@@ -530,7 +538,9 @@ const PositionItem = ({ position }) => {
                 onClick={async () => {
                   try {
                     setClaimLoading(true);
-                    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+                    const { client } = window.client
+                      ? { client: window.client }
+                      : await getCosmWasmClient({ chainId: network.chainId });
                     SingletonOraiswapV3.load(client, address);
                     const { transactionHash } = await SingletonOraiswapV3.dex.claimFee({
                       index: Number(position.id)
