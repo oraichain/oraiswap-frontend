@@ -4396,10 +4396,10 @@
     ethers "^5.0.15"
     tronweb "6.0.0-beta.4"
 
-"@oraichain/oraidex-contracts-build@1.0.37-beta.1":
-  version "1.0.37-beta.1"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.37-beta.1.tgz#beea8be420473a55d4fe228bf52c00c27a915eae"
-  integrity sha512-wjtHT3emS7OAkDU0ZW2rqsdYGy7e96wDqbOUPkT5mKnVUR/59px7mMU+ijISVOjBHx5CfCsiwB5meSvVd2MCiQ==
+"@oraichain/oraidex-contracts-build@1.0.22":
+  version "1.0.22"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.22.tgz#70b765dd8ea3b500a77cc37e6a45ea9d75f0c5c4"
+  integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
 
 "@oraichain/oraidex-contracts-sdk@1.0.51-beta.1", "@oraichain/oraidex-contracts-sdk@^1.0.51-beta.1":
   version "1.0.51-beta.1"
