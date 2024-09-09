@@ -75,6 +75,7 @@ const config = {
     // new webpack.ProvidePlugin({
     //   process: 'process/browser'
     // }),
+    new webpack.ProgressPlugin(),
     new webpack.DllPlugin({
       name: 'vendor_lib',
       path: path.join(vendorPath, `manifest.${vendorHash}.json`)

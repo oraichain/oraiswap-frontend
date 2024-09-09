@@ -41,6 +41,7 @@ import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { extractAddress } from '@oraichain/oraiswap-v3';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();
@@ -59,7 +60,9 @@ const PositionItem = ({ position }) => {
     tokenXUsd = 0,
     tokenYUsd = 0,
     tokenYDecimal,
-    tokenXDecimal
+    tokenXDecimal,
+    tokenX = {},
+    tokenY = {}
   } = position || {};
 
   const { earnX = 0, earnY = 0, earnIncentive = null } = totalEarn || {};
@@ -84,6 +87,7 @@ const PositionItem = ({ position }) => {
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );
 
+  const loadOraichainToken = useLoadOraichainTokens();
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
   const { poolList, poolPrice } = useGetPoolList(price);
@@ -194,6 +198,12 @@ const PositionItem = ({ position }) => {
   const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
   const earnYDisplay = toDisplay((earnY || 0).toString(), tokenYDecimal);
 
+  useEffect(() => {
+    if (isClaimSuccess) {
+      setIncentives({});
+    }
+  }, [isClaimSuccess]);
+
   const [tokenXClaim, tokenYClaim, tokenXClaimInUsd, tokenYClaimInUsd, incentivesUSD] = useMemo(() => {
     if (isClaimSuccess) return [0, 0, 0, 0, 0];
     if (position?.poolData && openCollapse && tick.lowerTick && tick.lowerTick && incentives) {
@@ -225,6 +235,13 @@ const PositionItem = ({ position }) => {
 
     return [0, 0, 0, 0, 0];
   }, [position, tick.lowerTick, tick.upperTick, openCollapse, isClaimSuccess, incentives, poolPrice]);
+
+  const currentAsset = (position.tokenXLiqInUsd || 0) + (position.tokenYLiqInUsd || 0);
+  const principleAsset = new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal))
+    .mul(tokenXUsd)
+    .add(new BigDecimal(toDisplay((principalAmountY || 0).toString(), tokenYDecimal)).mul(tokenYUsd))
+    .toNumber();
+  const isIncreaseAsset = currentAsset >= principleAsset;
 
   return (
     <div ref={ref} className={styles.positionItem}>
@@ -314,17 +331,25 @@ const PositionItem = ({ position }) => {
           <div className={styles.row}>
             <h4>Current Assets</h4>
             <div className={styles.itemRow}>
-              <span className={classNames(styles.usd, { [styles.green]: true, [styles.red]: false })}>
-                {formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd, 6, 6)}
+              <span
+                className={classNames(styles.usd, { [styles.green]: isIncreaseAsset, [styles.red]: !isIncreaseAsset })}
+              >
+                {formatDisplayUsdt(currentAsset, 6, 6)}
               </span>
               <div className={classNames(styles.itemAsset, styles[theme])}>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenXIcon />
-                  {position.tokenXLiq} {position?.tokenX.name}
+                  {numberWithCommas(position.tokenXLiq, undefined, {
+                    maximumFractionDigits: 6
+                  })}{' '}
+                  {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
                   <position.tokenYIcon />
-                  {position.tokenYLiq} {position?.tokenY.name}
+                  {numberWithCommas(position.tokenYLiq, undefined, {
+                    maximumFractionDigits: 6
+                  })}{' '}
+                  {position?.tokenY.name}
                 </span>
               </div>
             </div>
@@ -347,18 +372,7 @@ const PositionItem = ({ position }) => {
               </h4>
               <div className={styles.itemRow}>
                 <span className={styles.usd}>
-                  {!principalAmountX || !principalAmountY
-                    ? '--'
-                    : formatDisplayUsdt(
-                        new BigDecimal(toDisplay((principalAmountX || 0).toString(), tokenXDecimal))
-                          .mul(tokenXUsd)
-                          .add(
-                            new BigDecimal(toDisplay((principalAmountY || 0).toString(), tokenYDecimal)).mul(tokenYUsd)
-                          )
-                          .toNumber(),
-                        6,
-                        6
-                      )}
+                  {!principalAmountX || !principalAmountY ? '--' : formatDisplayUsdt(principleAsset, 6, 6)}
                 </span>
                 <div className={classNames(styles.itemAsset, styles[theme])}>
                   <span className={classNames(styles.token, styles[theme])}>
@@ -389,7 +403,9 @@ const PositionItem = ({ position }) => {
                 onClick={async () => {
                   try {
                     setRemoveLoading(true);
-                    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+                    const { client } = window.client
+                      ? { client: window.client }
+                      : await getCosmWasmClient({ chainId: network.chainId });
                     SingletonOraiswapV3.load(client, address);
                     const { transactionHash } = await SingletonOraiswapV3.dex.removePosition({
                       index: Number(position.id)
@@ -401,6 +417,7 @@ const PositionItem = ({ position }) => {
                         customLink: getTransactionUrl(network.chainId, transactionHash)
                       });
                       refetchPositions();
+                      loadOraichainToken(address, [tokenY.contractAddress, tokenX.contractAddress].filter(Boolean));
                     }
                   } catch (error) {
                     console.log({ error });
@@ -527,7 +544,9 @@ const PositionItem = ({ position }) => {
                 onClick={async () => {
                   try {
                     setClaimLoading(true);
-                    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+                    const { client } = window.client
+                      ? { client: window.client }
+                      : await getCosmWasmClient({ chainId: network.chainId });
                     SingletonOraiswapV3.load(client, address);
                     const { transactionHash } = await SingletonOraiswapV3.dex.claimFee({
                       index: Number(position.id)
