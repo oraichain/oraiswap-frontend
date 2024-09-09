@@ -599,6 +599,73 @@
   }
 }
 
+.dividerOut {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+
+  .bar {
+    flex: 1;
+    border-top: 1px solid #232521;
+  }
+
+  svg {
+    vertical-align: middle;
+  }
+}
+
+.tokenOutput {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  align-self: stretch;
+
+  .item {
+    display: flex;
+    padding: 16px;
+    justify-content: space-between;
+    gap: 8px;
+    flex: 1;
+
+    border-radius: 16px;
+    background: var(--Colors-Neutral-Surface-bg-swap-pair, #232521);
+
+    .info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      color: var(--Colors-Neutral-Text-title, #efefef);
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 150%; /* 27px */
+
+      svg {
+        width: 24px;
+        height: 24px;
+        vertical-align: middle;
+      }
+    }
+
+    .value {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+
+      color: var(--Colors-Neutral-Text-title, #efefef);
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 150%; /* 27px */
+
+      .usd {
+        color: #979995;
+        font-weight: 400;
+      }
+    }
+  }
+}
+
 .btn {
   width: 100%;
   margin-top: 12px;

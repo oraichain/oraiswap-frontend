@@ -70,6 +70,8 @@ import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { network } from 'config/networks';
 import { OraiswapTokenClient, ZapperClient } from '@oraichain/oraidex-contracts-sdk';
 import { Coin } from '@cosmjs/proto-signing';
+import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
+import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 
 export type PriceInfo = {
   startPrice: number;
@@ -1139,6 +1141,39 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 <div className={styles.usd}>
                   ≈ ${amountFrom ? numberWithCommas(Number(fromUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
                 </div>
+              </div>
+            </div>
+          </div>
+          <div className={styles.dividerOut}>
+            <div className={styles.bar}></div>
+            <div>
+              <OutputIcon />
+            </div>
+            <div className={styles.bar}></div>
+          </div>
+          <div className={styles.tokenOutput}>
+            <div className={styles.item}>
+              <div className={styles.info}>
+                <div>
+                  <UsdtIcon />
+                </div>
+                <span>USDT</span>
+              </div>
+              <div className={styles.value}>
+                <span>0</span>
+                <span className={styles.usd}>≈ $0</span>
+              </div>
+            </div>
+            <div className={styles.item}>
+              <div className={styles.info}>
+                <div>
+                  <UsdtIcon />
+                </div>
+                <span>USDT</span>
+              </div>
+              <div className={styles.value}>
+                <span>0</span>
+                <span className={styles.usd}>≈ $0</span>
               </div>
             </div>
           </div>
