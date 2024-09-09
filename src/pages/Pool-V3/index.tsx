@@ -5,6 +5,7 @@ import useTheme from 'hooks/useTheme';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import CreateNewPool from './components/CreateNewPool';
+
 import PoolList from './components/PoolList';
 import PositionList from './components/PositionList';
 import { useGetPoolList } from './hooks/useGetPoolList';

@@ -24,6 +24,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import CreateNewPosition from '../CreateNewPosition';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -408,15 +409,7 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
         </div>
       </td>
       <td className={styles.actions}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/new-position/${encodeURIComponent(poolKeyToString(item.pool_key))}`);
-          }}
-          className={styles.add}
-        >
-          Add Position
-        </button>
+        <CreateNewPosition pool={item} />
       </td>
     </>
   );

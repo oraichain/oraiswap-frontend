@@ -7,12 +7,13 @@ import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CreatePoolForm from '../CreatePoolForm';
 import { extractDenom } from '../PriceRangePlot/utils';
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
 import SlippageSetting from '../SettingSlippage';
+import { newPoolKey, poolKeyToString } from '@oraichain/oraiswap-v3';
 
 export enum STEP_CREATE_POOL {
   SELECT_POOL,
