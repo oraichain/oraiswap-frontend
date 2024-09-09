@@ -5,12 +5,17 @@ import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { executeMultiple } from '../helpers/helper';
 import { TokenItemType } from '@oraichain/oraidex-common';
-import { ZapInLiquidityResponse } from '@oraichain/oraiswap-v3';
+import { ZapInLiquidityResponse, ZapOutLiquidityResponse } from '@oraichain/oraiswap-v3';
 
 export type ZapInData = {
   tokenZap: TokenItemType;
   zapAmount: string;
   zapInResponse: ZapInLiquidityResponse;
+};
+
+export type ZapOutData = {
+  tokenId: number;
+  zapOutResponse: ZapOutLiquidityResponse;
 };
 
 const useZap = () => {
@@ -74,8 +79,51 @@ const useZap = () => {
     }
   };
 
+  const zapOut = async (data: ZapOutData, walletAddress: string, onSuccess: any, onError: any) => {
+    try {
+      const { tokenId, zapOutResponse } = data;
+
+      let msg = [];
+
+      // first approve NFT for ZAP_CONTRACT
+      msg.push({
+        contractAddress: network.pool_v3,
+        msg: {
+          approve: {
+            spender: ZAP_CONTRACT,
+            token_id: tokenId
+          }
+        }
+      });
+
+      // zapOut message
+      msg.push({
+        contractAddress: ZAP_CONTRACT,
+        msg: {
+          zap_out_liquidity: {
+            minimum_receive_x: zapOutResponse.minimumReceiveX,
+            minimum_receive_y: zapOutResponse.minimumReceiveY,
+            operation_from_x: zapOutResponse.operationFromX.length > 0 ? zapOutResponse.operationFromX : undefined,
+            operation_from_y: zapOutResponse.operationFromY.length > 0 ? zapOutResponse.operationFromY : undefined,
+            position_index: zapOutResponse.positionIndex
+          }
+        }
+      });
+
+      const tx = await executeMultiple(msg, walletAddress);
+
+      if (tx) {
+        onSuccess(tx);
+      }
+    } catch (e: any) {
+      console.log('error', e);
+      onError(e);
+    }
+  };
+
   return {
-    zapIn
+    zapIn,
+    zapOut
   };
 };
 

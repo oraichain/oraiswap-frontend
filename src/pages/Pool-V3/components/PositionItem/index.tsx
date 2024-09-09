@@ -41,6 +41,7 @@ import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { extractAddress } from '@oraichain/oraiswap-v3';
+import ZapOut from '../ZapOut';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();
@@ -61,8 +62,6 @@ const PositionItem = ({ position }) => {
     tokenYDecimal,
     tokenXDecimal
   } = position || {};
-
-  console.log('position', position);
 
   const { earnX = 0, earnY = 0, earnIncentive = null } = totalEarn || {};
 
@@ -428,6 +427,7 @@ const PositionItem = ({ position }) => {
               >
                 Add Liquidity
               </Button>
+              <ZapOut position={position} />
             </div>
           </div>
         </div>
