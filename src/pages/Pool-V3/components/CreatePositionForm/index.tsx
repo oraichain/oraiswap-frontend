@@ -72,6 +72,8 @@ import { OraiswapTokenClient, ZapperClient } from '@oraichain/oraidex-contracts-
 import { Coin } from '@cosmjs/proto-signing';
 import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
+import { useDebounce } from 'hooks/useDebounce';
+import useZap from 'pages/Pool-V3/hooks/useZap';
 
 export type PriceInfo = {
   startPrice: number;
@@ -106,6 +108,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [tokenZap, setTokenZap] = useState<TokenItemType>(TOKEN_ZAP);
   const [zapAmount, setZapAmount] = useState<number | string>('');
   const [zapInResponse, setZapInResponse] = useState<ZapInLiquidityResponse>(null);
+  const [simulating, setSimulating] = useState<boolean>(false);
+
+  const debounceZapAmount = useDebounce(zapAmount, 800);
 
   const { data: prices } = useCoinGeckoPrices();
   const { poolList } = useGetPoolList(prices);
@@ -748,6 +753,38 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     return 'Create new pool';
   };
 
+  const { zapIn } = useZap();
+
+  const handleZapIn = async () => {
+    try {
+      if (tokenZap && zapAmount) {
+        setLoading(true);
+        await zapIn(
+          { tokenZap, zapAmount: (BigInt(zapAmount) * BigInt(10 ** tokenZap.decimals)).toString(), zapInResponse },
+          walletAddress,
+          (tx: string) => {
+            displayToast(TToastType.TX_SUCCESSFUL, {
+              customLink: getTransactionUrl('Oraichain', tx)
+            });
+            // handleSuccessAdd();
+            loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
+            onCloseModal();
+            navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(notInitPoolKey))}`);
+          },
+          (e) => {
+            displayToast(TToastType.TX_FAILED, {
+              message: 'Add liquidity failed!'
+            });
+          }
+        );
+      }
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const { handleInitPosition } = useAddLiquidity();
   const addLiquidity = async (data: InitPositionData) => {
     setLoading(true);
@@ -805,6 +842,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   const handleSimulateZapIn = async () => {
     try {
+      setSimulating(true);
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
         devitation: 0.05,
@@ -863,10 +901,20 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       // const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
 
       setZapInResponse(result);
+      setSimulating(false);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
+      console.log('error', error);
+      setSimulating(false);
     }
   };
+
+  useEffect(() => {
+    // console.log("debounceZapAmount", debounceZapAmount);
+    if (Number(zapAmount) > 0 && toggleZapIn) {
+      handleSimulateZapIn();
+    }
+  }, [debounceZapAmount]);
 
   return (
     <div className={styles.createPoolForm}>
@@ -1144,6 +1192,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               </div>
             </div>
           </div>
+          {simulating && (
+            <div>
+              <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
+                Finding best option to zap...
+              </span>
+            </div>
+          )}
           <div className={styles.dividerOut}>
             <div className={styles.bar}></div>
             <div>
@@ -1154,25 +1209,33 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           <div className={styles.tokenOutput}>
             <div className={styles.item}>
               <div className={styles.info}>
-                <div>
-                  <UsdtIcon />
-                </div>
-                <span>USDT</span>
+                <div>{TokenFromIcon}</div>
+                <span>{tokenFrom.name}</span>
               </div>
               <div className={styles.value}>
-                <span>0</span>
+                <span>
+                  {zapInResponse
+                    ? numberWithCommas(Number(zapInResponse.amountX) / 10 ** tokenFrom.decimals, undefined, {
+                        maximumFractionDigits: tokenFrom.decimals
+                      })
+                    : 0}
+                </span>
                 <span className={styles.usd}>≈ $0</span>
               </div>
             </div>
             <div className={styles.item}>
               <div className={styles.info}>
-                <div>
-                  <UsdtIcon />
-                </div>
-                <span>USDT</span>
+                <div>{TokenToIcon}</div>
+                <span>{tokenTo.name}</span>
               </div>
               <div className={styles.value}>
-                <span>0</span>
+                <span>
+                  {zapInResponse
+                    ? numberWithCommas(Number(zapInResponse.amountY) / 10 ** tokenTo.decimals, undefined, {
+                        maximumFractionDigits: tokenTo.decimals
+                      })
+                    : 0}
+                </span>
                 <span className={styles.usd}>≈ $0</span>
               </div>
             </div>
@@ -1323,7 +1386,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         </>
       )}
 
-      {zapInResponse && (
+      {/* {zapInResponse && (
         <div>
           <p>
             {zapInResponse.amountToX} {tokenZap.name} will convert to {zapInResponse.amountX} {tokenFrom.name}
@@ -1332,7 +1395,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             {zapInResponse.amountToY} {tokenZap.name} will convert to {zapInResponse.amountY} {tokenTo.name}
           </p>
         </div>
-      )}
+      )} */}
 
       <div className={styles.btn}>
         {(() => {
@@ -1347,42 +1410,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 const poolKeyData = newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), feeTier);
 
                 if (toggleZapIn) {
-                  const client = SingletonOraiswapV3.dex.client;
-                  if (client) {
-                    const ZAP_CONTRACT = 'orai169rslp3kj37v49py639645khyn70snr26k2y098f2tpqjlgk9dxqwpea05';
-                    const zapper = new ZapperClient(client, walletAddress, ZAP_CONTRACT);
-                    const coins: Coin[] = [];
-                    if (tokenZap.contractAddress) {
-                      const cw20Client = new OraiswapTokenClient(client, walletAddress, tokenZap.contractAddress);
-                      await cw20Client.increaseAllowance({
-                        amount: (BigInt(zapAmount) * BigInt(10 ** tokenZap.decimals)).toString(),
-                        spender: ZAP_CONTRACT
-                      });
-                    } else {
-                      coins.push({
-                        denom: tokenZap.denom,
-                        amount: (BigInt(zapAmount) * BigInt(10 ** tokenZap.decimals)).toString()
-                      });
-                    }
-                    const res = await zapper.zapInLiquidity(
-                      {
-                        amountToX: zapInResponse.amountToX,
-                        amountToY: zapInResponse.amountToY,
-                        assetIn: zapInResponse.assetIn,
-                        poolKey: zapInResponse.poolKey,
-                        tickLowerIndex: zapInResponse.tickLowerIndex,
-                        tickUpperIndex: zapInResponse.tickUpperIndex,
-                        minimumReceiveX: zapInResponse.minimumReceiveX,
-                        minimumReceiveY: zapInResponse.minimumReceiveY,
-                        operationToX: zapInResponse.operationToX.length > 0 ? zapInResponse.operationToX : undefined,
-                        operationToY: zapInResponse.operationToY.length > 0 ? zapInResponse.operationToY : undefined
-                      },
-                      'auto',
-                      undefined,
-                      coins
-                    );
-                    console.log({ res });
-                  }
+                  await handleZapIn();
+                  return;
                 }
 
                 await addLiquidity({
@@ -1410,10 +1439,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             </Button>
           );
         })()}
-
-        <Button type="primary" onClick={handleSimulateZapIn}>
-          Simulate Zap
-        </Button>
       </div>
     </div>
   );

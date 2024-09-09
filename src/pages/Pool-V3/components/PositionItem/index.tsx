@@ -62,6 +62,8 @@ const PositionItem = ({ position }) => {
     tokenXDecimal
   } = position || {};
 
+  console.log('position', position);
+
   const { earnX = 0, earnY = 0, earnIncentive = null } = totalEarn || {};
 
   const IconBoots = theme === 'light' ? BootsIcon : BootsIconDark;
