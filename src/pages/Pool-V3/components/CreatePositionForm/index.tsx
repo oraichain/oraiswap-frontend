@@ -29,7 +29,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
+import SingletonOraiswapV3, { stringToPoolKey } from 'libs/contractSingleton';
 import {
   calculateTokenAmountsWithSlippage,
   calcYPerXPriceBySqrtPrice,
@@ -93,6 +93,7 @@ interface CreatePoolFormProps {
   feeTier: FeeTier;
   poolData: PoolWithPoolKey; // Replace with appropriate type
   slippage: number;
+  showModal: boolean;
   onCloseModal: () => void;
 }
 
@@ -104,6 +105,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   feeTier,
   poolData,
   slippage,
+  showModal,
   onCloseModal
 }) => {
   const [tokenZap, setTokenZap] = useState<TokenItemType>(TOKEN_ZAP);
@@ -130,18 +132,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const loadOraichainToken = useLoadOraichainTokens();
   const [focusId, setFocusId] = useState<'from' | 'to' | 'zapper' | null>(null);
 
-  const [notInitPoolKey, setNotInitPoolKey] = useState<PoolKey>({
-    token_x: tokenFrom?.denom || '',
-    token_y: tokenTo?.denom || '',
-    fee_tier: {
-      fee: feeTier.fee,
-      tick_spacing: feeTier.tick_spacing
-    }
-  });
-  const [oraiAddress] = useConfigReducer('address');
+  const [poolInfo, setPoolInfo] = useState<PoolWithPoolKey>(poolData);
 
-  const [leftRange, setLeftRange] = useState(getMinTick(notInitPoolKey.fee_tier.tick_spacing));
-  const [rightRange, setRightRange] = useState(getMaxTick(notInitPoolKey.fee_tier.tick_spacing));
+  const [leftRange, setLeftRange] = useState(getMinTick(poolData.pool_key.fee_tier.tick_spacing));
+  const [rightRange, setRightRange] = useState(getMaxTick(poolData.pool_key.fee_tier.tick_spacing));
 
   const [leftInputRounded, setLeftInputRounded] = useState('');
   const [rightInputRounded, setRightInputRounded] = useState('');
@@ -153,8 +147,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [plotMax, setPlotMax] = useState(1);
 
   const [isPoolExist, setIsPoolExist] = useState(false);
-
-  const [poolInfo, setPoolInfo] = useState<PoolWithPoolKey>();
 
   const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
     const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
@@ -189,15 +181,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const toUsd = (prices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
 
   const isLightTheme = theme === 'light';
-  const TokenZapIcon =
-    tokenZap &&
-    getIcon({
-      isLightTheme,
-      type: 'token',
-      coinGeckoId: tokenZap.coinGeckoId,
-      width: 30,
-      height: 30
-    });
 
   const TokenFromIcon =
     tokenFrom &&
@@ -256,21 +239,14 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     };
   }, []);
 
-  // useEffect(() => {
-  //   if (tokenZap && zapAmount) {
-  //     console.log(`want to zap ${zapAmount} ${tokenZap.name}`);
-  //   }
-  // }, [zapAmount, tokenZap]);
-
   const concentrationArray = useMemo(
     () =>
-      getConcentrationArray(Number(notInitPoolKey.fee_tier.tick_spacing), 2, Number(midPrice)).sort((a, b) => a - b),
-    [notInitPoolKey.fee_tier.tick_spacing]
+      getConcentrationArray(Number(poolData.pool_key.fee_tier.tick_spacing), 2, Number(midPrice)).sort((a, b) => a - b),
+    [poolData.pool_key.fee_tier.tick_spacing, midPrice]
   );
 
   const liquidityRef = useRef<any>(0n);
 
-  const [_concentrationIndex, setConcentrationIndex] = useState(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [liquidityData, setLiquidityData] = useState<PlotTickData[]>([]);
 
@@ -281,7 +257,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   }, [liquidityData]);
 
   useEffect(() => {
-    // NOTE: call RPC 1 (done)
     checkNoPool(feeTier, tokenFrom, tokenTo);
   }, [feeTier, tokenFrom, tokenTo, isPoolExist, poolList]);
 
@@ -302,7 +277,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       calcTicksAmountInRange(
         Math.max(newMin, 0),
         newMax,
-        Number(notInitPoolKey.fee_tier.tick_spacing),
+        Number(poolData.pool_key.fee_tier.tick_spacing),
         isXtoY,
         tokenFrom.decimals,
         tokenTo.decimals
@@ -315,11 +290,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   const getTicksInsideRange = (left: number, right: number, isXtoY: boolean) => {
     const leftMax = isXtoY
-      ? getMinTick(notInitPoolKey.fee_tier.tick_spacing)
-      : getMaxTick(notInitPoolKey.fee_tier.tick_spacing);
+      ? getMinTick(poolData.pool_key.fee_tier.tick_spacing)
+      : getMaxTick(poolData.pool_key.fee_tier.tick_spacing);
     const rightMax = isXtoY
-      ? getMaxTick(notInitPoolKey.fee_tier.tick_spacing)
-      : getMinTick(notInitPoolKey.fee_tier.tick_spacing);
+      ? getMaxTick(poolData.pool_key.fee_tier.tick_spacing)
+      : getMinTick(poolData.pool_key.fee_tier.tick_spacing);
 
     let leftInRange: number;
     let rightInRange: number;
@@ -428,8 +403,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         midPrice.x -
           calcPrice(
             Math.max(
-              getMinTick(notInitPoolKey.fee_tier.tick_spacing),
-              Number(midPrice.index) - notInitPoolKey.fee_tier.tick_spacing * 15
+              getMinTick(poolData.pool_key.fee_tier.tick_spacing),
+              Number(midPrice.index) - poolData.pool_key.fee_tier.tick_spacing * 15
             ),
             isXtoY,
             tokenXDecimals,
@@ -438,13 +413,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       );
 
       const higherTick = Math.max(
-        Number(getMinTick(Number(notInitPoolKey.fee_tier.tick_spacing))),
-        Number(midPrice.index) - Number(notInitPoolKey.fee_tier.tick_spacing) * 10
+        Number(getMinTick(Number(poolData.pool_key.fee_tier.tick_spacing))),
+        Number(midPrice.index) - Number(poolData.pool_key.fee_tier.tick_spacing) * 10
       );
 
       const lowerTick = Math.min(
-        Number(getMaxTick(Number(notInitPoolKey.fee_tier.tick_spacing))),
-        Number(midPrice.index) + Number(notInitPoolKey.fee_tier.tick_spacing) * 10
+        Number(getMaxTick(Number(poolData.pool_key.fee_tier.tick_spacing))),
+        Number(midPrice.index) + Number(poolData.pool_key.fee_tier.tick_spacing) * 10
       );
 
       changeRangeHandler(isXtoY ? higherTick : lowerTick, isXtoY ? lowerTick : higherTick);
@@ -452,7 +427,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       setPlotMin(midPrice.x - initSideDist);
       setPlotMax(midPrice.x + initSideDist);
     } else {
-      setConcentrationIndex(0);
       const { leftRange, rightRange } = calculateConcentrationRange(
         1,
         concentrationArray[0],
@@ -470,23 +444,23 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     const rightX = calcPrice(right, isXtoY, tokenFrom.decimals, tokenTo.decimals);
 
     const higherLeftIndex = Math.max(
-      getMinTick(notInitPoolKey.fee_tier.tick_spacing),
-      left - notInitPoolKey.fee_tier.tick_spacing * 15
+      getMinTick(poolData.pool_key.fee_tier.tick_spacing),
+      left - poolData.pool_key.fee_tier.tick_spacing * 15
     );
 
     const lowerLeftIndex = Math.min(
-      getMaxTick(notInitPoolKey.fee_tier.tick_spacing),
-      left + notInitPoolKey.fee_tier.tick_spacing * 15
+      getMaxTick(poolData.pool_key.fee_tier.tick_spacing),
+      left + poolData.pool_key.fee_tier.tick_spacing * 15
     );
 
     const lowerRightIndex = Math.min(
-      getMaxTick(notInitPoolKey.fee_tier.tick_spacing),
-      right + notInitPoolKey.fee_tier.tick_spacing * 15
+      getMaxTick(poolData.pool_key.fee_tier.tick_spacing),
+      right + poolData.pool_key.fee_tier.tick_spacing * 15
     );
 
     const higherRightIndex = Math.max(
-      getMinTick(notInitPoolKey.fee_tier.tick_spacing),
-      right - notInitPoolKey.fee_tier.tick_spacing * 15
+      getMinTick(poolData.pool_key.fee_tier.tick_spacing),
+      right - poolData.pool_key.fee_tier.tick_spacing * 15
     );
 
     if (leftX < plotMin || rightX > plotMax || canZoomCloser) {
@@ -523,7 +497,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyToString(poolKey));
         if (pool) {
           setPoolInfo(pool);
-          setNotInitPoolKey(pool.pool_key);
         } else {
           const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
           const tokenXDecimals = isXtoY ? tokenFrom.decimals : tokenTo.decimals;
@@ -539,7 +512,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             index: tickIndex,
             x: calcPrice(tickIndex, isXtoY, tokenXDecimals, tokenYDecimals)
           });
-          setNotInitPoolKey(poolKey);
         }
         setIsPoolExist(pool !== null);
         return;
@@ -558,7 +530,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           index: tickIndex,
           x: calcPrice(tickIndex, isXtoY, tokenXDecimals, tokenYDecimals)
         });
-        setNotInitPoolKey(poolKey);
         setIsPoolExist(false);
       }
       return;
@@ -568,7 +539,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   };
 
   const calcAmount = (amount: TokenAmount, left: number, right: number, tokenAddress: string) => {
-    if (!notInitPoolKey) return BigInt(0);
+    if (!poolData.pool_key) return BigInt(0);
     if (!tokenFrom || !tokenTo || isNaN(left) || isNaN(right)) {
       return BigInt(0);
     }
@@ -589,7 +560,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         );
 
         let [, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
-          notInitPoolKey.fee_tier.tick_spacing,
+          poolData.pool_key.fee_tier.tick_spacing,
           isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
           positionLiquidity,
           lowerTick,
@@ -615,7 +586,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       );
 
       let [xAmountWithSlippage] = calculateTokenAmountsWithSlippage(
-        notInitPoolKey.fee_tier.tick_spacing,
+        poolData.pool_key.fee_tier.tick_spacing,
         isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
         positionLiquidity,
         lowerTick,
@@ -641,7 +612,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       );
 
       let [xAmountWithSlippage, yAmountWithSlippage] = calculateTokenAmountsWithSlippage(
-        notInitPoolKey.fee_tier.tick_spacing,
+        poolData.pool_key.fee_tier.tick_spacing,
         isPoolExist ? BigInt(poolInfo.pool.sqrt_price) : calculateSqrtPrice(midPrice.index),
         result.l,
         lowerTick,
@@ -678,10 +649,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   };
 
   useEffect(() => {
-    if (isPoolExist) {
+    if (isPoolExist && showModal) {
       handleGetTicks();
     }
-  }, [isPoolExist]);
+  }, [isPoolExist, showModal]);
 
   useEffect(() => {
     if (poolInfo) {
@@ -719,39 +690,58 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   }, [isPoolExist, poolData, midPrice, leftRange, rightRange, isXtoY]);
 
   const getButtonMessage = () => {
-    const isInsufficientTo =
-      amountTo && Number(amountTo) > toDisplay(amounts[tokenTo.denom], tokenTo.decimals || CW20_DECIMALS);
-    const isInsufficientFrom =
-      amountFrom && Number(amountFrom) > toDisplay(amounts[tokenFrom.denom], tokenFrom.decimals || CW20_DECIMALS);
-
     if (!walletAddress) {
       return 'Connect wallet';
     }
 
-    if (toggleZapIn && zapInResponse) {
+    if (!toggleZapIn) {
+      const isInsufficientTo =
+        amountTo && Number(amountTo) > toDisplay(amounts[tokenTo.denom], tokenTo.decimals || CW20_DECIMALS);
+      const isInsufficientFrom =
+        amountFrom && Number(amountFrom) > toDisplay(amounts[tokenFrom.denom], tokenFrom.decimals || CW20_DECIMALS);
+
+      if (!tokenFrom || !tokenTo) {
+        return 'Select tokens';
+      }
+
+      if (tokenFrom.denom === tokenTo.denom) {
+        return 'Select different tokens';
+      }
+
+      if (isInsufficientFrom) {
+        return `Insufficient ${tokenFrom.name.toUpperCase()}`;
+      }
+
+      if (isInsufficientTo) {
+        return `Insufficient ${tokenTo.name.toUpperCase()}`;
+      }
+
+      if ((!isFromBlocked && (!amountFrom || +amountFrom === 0)) || (!isToBlocked && (!amountTo || +amountTo === 0))) {
+        return 'Liquidity must be greater than 0';
+      }
+      return 'Create new position';
+    } else {
+      const isInsufficientZap =
+        zapAmount && Number(zapAmount) > toDisplay(amounts[tokenTo.denom], tokenTo.decimals || CW20_DECIMALS);
+
+      if (!tokenZap) {
+        return 'Select token';
+      }
+
+      if (isInsufficientZap) {
+        return `Insufficient ${tokenZap.name.toUpperCase()}`;
+      }
+
+      if (!zapAmount || +zapAmount === 0) {
+        return 'Zap amount must be greater than 0';
+      }
+
+      if (simulating) {
+        return 'Simulating...';
+      }
+
       return 'Zap in';
     }
-
-    if (!tokenFrom || !tokenTo) {
-      return 'Select tokens';
-    }
-
-    if (tokenFrom.denom === tokenTo.denom) {
-      return 'Select different tokens';
-    }
-
-    if (isInsufficientFrom) {
-      return `Insufficient ${tokenFrom.name.toUpperCase()}`;
-    }
-
-    if (isInsufficientTo) {
-      return `Insufficient ${tokenTo.name.toUpperCase()}`;
-    }
-
-    if ((!isFromBlocked && (!amountFrom || +amountFrom === 0)) || (!isToBlocked && (!amountTo || +amountTo === 0))) {
-      return 'Liquidity must be greater than 0';
-    }
-    return 'Create new pool';
   };
 
   const { zapIn } = useZap();
@@ -770,7 +760,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             // handleSuccessAdd();
             loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
             onCloseModal();
-            navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(notInitPoolKey))}`);
+            navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(poolData.pool_key))}`);
           },
           (e) => {
             displayToast(TToastType.TX_FAILED, {
@@ -822,7 +812,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         setLoading(true);
 
         const ticksData = await handleGetCurrentPlotTicks({
-          poolKey: notInitPoolKey,
+          poolKey: poolData.pool_key,
           isXtoY: isXtoY,
           xDecimal: tokenFrom.decimals,
           yDecimal: tokenTo.decimals
@@ -831,7 +821,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         setLiquidityData(ticksData);
       };
 
-      if (isPoolExist && notInitPoolKey) {
+      if (isPoolExist && poolData.pool_key) {
         fetchTickData();
       }
     } catch (error) {
@@ -916,6 +906,12 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       handleSimulateZapIn();
     }
   }, [debounceZapAmount]);
+
+  useEffect(() => {
+    if (Number(zapAmount) > 0 && !zapInResponse && !simulating) {
+      setSimulating(true);
+    }
+  }, [zapAmount]);
 
   return (
     <div className={styles.createPoolForm}>
@@ -1014,7 +1010,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 loading={loading}
                 coverOnLoading={true}
                 isXtoY={isXtoY}
-                tickSpacing={notInitPoolKey.fee_tier.tick_spacing}
+                tickSpacing={poolData.pool_key.fee_tier.tick_spacing}
                 xDecimal={isXtoY ? tokenFrom.decimals : tokenTo.decimals}
                 yDecimal={isXtoY ? tokenTo.decimals : tokenFrom.decimals}
                 isDiscrete={isPlotDiscrete}
@@ -1026,7 +1022,33 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               />
             </div>
 
-            <div className={styles.currentPriceWrapper}>
+            <div className={styles.actions}>
+              <button onClick={resetPlot}>Reset range</button>
+              <button
+                onClick={() => {
+                  const left = isXtoY
+                    ? getMinTick(poolInfo.pool_key.fee_tier.tick_spacing)
+                    : getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing);
+                  const right = isXtoY
+                    ? getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing)
+                    : getMinTick(poolInfo.pool_key.fee_tier.tick_spacing);
+                  changeRangeHandler(left, right);
+                  autoZoomHandler(left, right);
+                }}
+              >
+                Set full range
+              </button>
+            </div>
+
+            <div className={styles.currentPrice}>
+              <p>Current Price:</p>
+              <p>
+                1 {tokenFrom.name} ={' '}
+                {numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: tokenTo.decimals })} {tokenTo.name}
+              </p>
+            </div>
+
+            {/* <div className={styles.currentPriceWrapper}>
               <div className={styles.currentPriceTitle}>
                 <p>Current Price</p>
               </div>
@@ -1038,7 +1060,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   </p>
                 </p>
               </div>
-            </div>
+            </div> */}
 
             <div className={styles.minMaxPriceWrapper}>
               <div className={styles.item}>
@@ -1080,7 +1102,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     </p>
                   </div>
                 </div>
-                <div className={styles.percent}>
+                <div className={classNames(styles.percent, styles.maxCurrentPrice)}>
                   <p>Max Current Price:</p>
                   <span className={classNames(styles.value, { [styles.positive]: true })}>
                     {numberWithCommas(((+rightInput - midPrice.x) / midPrice.x) * 100, undefined, {
@@ -1091,34 +1113,24 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 </div>
               </div>
             </div>
-
-            <div className={styles.actions}>
-              <button onClick={resetPlot}>Reset range</button>
-              <button
-                onClick={() => {
-                  const left = isXtoY
-                    ? getMinTick(poolInfo.pool_key.fee_tier.tick_spacing)
-                    : getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing);
-                  const right = isXtoY
-                    ? getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing)
-                    : getMinTick(poolInfo.pool_key.fee_tier.tick_spacing);
-                  changeRangeHandler(left, right);
-                  autoZoomHandler(left, right);
-                }}
-              >
-                Set full range
-              </button>
-            </div>
           </div>
         </div>
       </div>
 
       <div className={styles.options}>
-        <button onClick={() => setToggleZapIn(true)}>
+        <button
+          className={classNames(styles.btnOption, { [styles.activeBtn]: toggleZapIn })}
+          onClick={() => setToggleZapIn(true)}
+        >
           Zap In
           <span>NEW</span>
         </button>
-        <button onClick={() => setToggleZapIn(false)}>Manual Deposit</button>
+        <button
+          className={classNames(styles.btnOption, { [styles.activeBtn]: !toggleZapIn })}
+          onClick={() => setToggleZapIn(false)}
+        >
+          Manual Deposit
+        </button>
       </div>
 
       {toggleZapIn ? (
@@ -1157,15 +1169,15 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             </div>
             <div className={styles.tokenInfo}>
               {/* <div className={styles.name}> */}
-                <SelectToken 
-                  token={tokenZap}
-                  handleChangeToken={(token) => {
-                    setTokenZap(token);
-                    setZapAmount(0);
-                  }}
-                  otherTokenDenom={tokenZap?.denom}
-                  customClassButton={styles.name}
-                />
+              <SelectToken
+                token={tokenZap}
+                handleChangeToken={(token) => {
+                  setTokenZap(token);
+                  setZapAmount(0);
+                }}
+                otherTokenDenom={tokenZap?.denom}
+                customClassButton={styles.name}
+              />
               {/* </div> */}
               <div className={styles.input}>
                 <NumberFormat
@@ -1405,7 +1417,14 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           return (
             <Button
               type="primary"
-              disabled={false}
+              disabled={
+                loading ||
+                !walletAddress ||
+                !(btnText === 'Zap in' || btnText === 'Create new position') ||
+                isFromBlocked ||
+                isToBlocked
+                // true
+              }
               onClick={async () => {
                 const lowerTick = Math.min(leftRange, rightRange);
                 const upperTick = Math.max(leftRange, rightRange);

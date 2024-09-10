@@ -6,9 +6,9 @@ import { FeeDailyData, getFeeDailyData } from 'rest/graphClient';
 export const useGetFeeDailyData = () => {
   const [feeDailyData, setFeeDailyData] = useState<PoolFeeAndLiquidityDaily[]>([]);
   const { data, refetch: refetchfeeDailyData } = useQuery<FeeDailyData[]>(['pool-v3-fee-daily-data'], getFeeDailyData, {
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     placeholderData: [],
-    cacheTime: 5 * 60 * 1000
+    // cacheTime: 5 * 60 * 1000
   });
 
   useEffect(() => {

@@ -831,11 +831,21 @@ const CreatePosition = () => {
             onChangeRange={changeRangeHandler}
             leftRange={{
               index: leftRange,
-              x: calcPrice(leftRange, isXtoY, isXtoY ? tokenFrom.decimals : tokenTo.decimals,  isXtoY ? tokenTo.decimals : tokenFrom.decimals)
+              x: calcPrice(
+                leftRange,
+                isXtoY,
+                isXtoY ? tokenFrom.decimals : tokenTo.decimals,
+                isXtoY ? tokenTo.decimals : tokenFrom.decimals
+              )
             }}
             rightRange={{
               index: rightRange,
-              x: calcPrice(rightRange, isXtoY, isXtoY ? tokenFrom.decimals : tokenTo.decimals,  isXtoY ? tokenTo.decimals : tokenFrom.decimals)
+              x: calcPrice(
+                rightRange,
+                isXtoY,
+                isXtoY ? tokenFrom.decimals : tokenTo.decimals,
+                isXtoY ? tokenTo.decimals : tokenFrom.decimals
+              )
             }}
             midPrice={midPrice}
             plotMin={plotMin}
