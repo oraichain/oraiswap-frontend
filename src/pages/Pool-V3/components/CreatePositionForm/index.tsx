@@ -74,6 +74,7 @@ import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { useDebounce } from 'hooks/useDebounce';
 import useZap from 'pages/Pool-V3/hooks/useZap';
+import SelectToken from '../SelectToken';
 
 export type PriceInfo = {
   startPrice: number;
@@ -1155,16 +1156,17 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               </div>
             </div>
             <div className={styles.tokenInfo}>
-              <div className={styles.name}>
-                {TokenZapIcon ? (
-                  <>
-                    {TokenZapIcon}
-                    &nbsp;{tokenZap.name}
-                  </>
-                ) : (
-                  'Select Token'
-                )}
-              </div>
+              {/* <div className={styles.name}> */}
+                <SelectToken 
+                  token={tokenZap}
+                  handleChangeToken={(token) => {
+                    setTokenZap(token);
+                    setZapAmount(0);
+                  }}
+                  otherTokenDenom={tokenZap?.denom}
+                  customClassButton={styles.name}
+                />
+              {/* </div> */}
               <div className={styles.input}>
                 <NumberFormat
                   onFocus={() => setFocusId('zapper')}

@@ -26,6 +26,8 @@ import { useDebounce } from 'hooks/useDebounce';
 import useZap from 'pages/Pool-V3/hooks/useZap';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import SelectToken from '../SelectToken';
+import { useNavigate } from 'react-router-dom';
 
 interface ZapOutFormProps {
   position: any;
@@ -42,7 +44,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({ showModal, position, tokenFrom, token
   const { data: geckoPrice } = useCoinGeckoPrices();
   const { poolPrice: prices } = useGetPoolList(geckoPrice);
   const loadOraichainToken = useLoadOraichainTokens();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [walletAddress] = useConfigReducer('address');
 
   const theme = useTheme();
@@ -154,7 +156,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({ showModal, position, tokenFrom, token
             // handleSuccessAdd();
             loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
             onCloseModal();
-            // navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(notInitPoolKey))}`);
+            navigate(`/pools-v3?type=positions}`);
           },
           (e) => {
             displayToast(TToastType.TX_FAILED, {
@@ -210,7 +212,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({ showModal, position, tokenFrom, token
     if (toggleZapOut && showModal) {
       handleSimulateZapOut();
     }
-  }, [showModal]);
+  }, [showModal, tokenZap]);
 
   return (
     <div className={styles.createPoolForm}>
@@ -266,16 +268,14 @@ const ZapOutForm: FC<ZapOutFormProps> = ({ showModal, position, tokenFrom, token
             </p>
           </div>
           <div className={styles.tokenInfo}>
-            <div className={styles.name}>
-              {TokenZapIcon ? (
-                <>
-                  {TokenZapIcon}
-                  &nbsp;{tokenZap.name}
-                </>
-              ) : (
-                'Select Token'
-              )}
-            </div>
+            <SelectToken
+              token={tokenZap}
+              handleChangeToken={(token) => {
+                setTokenZap(token);
+              }}
+              otherTokenDenom={tokenZap?.denom}
+              customClassButton={styles.name}
+            />
             <div className={styles.input}>
               <NumberFormat
                 onFocus={() => setFocusId('zapper')}

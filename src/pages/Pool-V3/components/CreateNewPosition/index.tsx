@@ -46,7 +46,9 @@ const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
       <div className={classNames(styles.modalWrapper, { [styles.activeModal]: showModal })}>
         <div className={styles.contentWrapper} ref={refContent}>
           <div className={styles.header}>
-            <div>Create New Position</div>
+            <div>
+              
+            </div>
             <div className={styles.headerActions}>
               <div className={styles.setting}>
                 <SettingIcon onClick={() => setIsOpen(true)} />

@@ -19,7 +19,7 @@ export type ZapOutData = {
 };
 
 const useZap = () => {
-  const ZAP_CONTRACT = 'orai1tyjh83hq3rxl0rd5upt4tfjjk87x73tv0kaskethjukwknjlq4wsltf7nn';
+  const ZAP_CONTRACT = 'orai1zersemmt4cdwqg8ujx2mzz5cv34puwf7nt7e5ywg954hpscdgtrqu29tu9';
 
   const zapIn = async (data: ZapInData, walletAddress: string, onSuccess: any, onError: any) => {
     try {
