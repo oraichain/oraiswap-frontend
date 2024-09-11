@@ -22,7 +22,7 @@ export const openInNewTab = (url: string): void => {
   if (newWindow) newWindow.opener = null;
 };
 
-const ZapOut = ({ position }: { position: any }) => {
+const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: string]: number } }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [slippage, setSlippage] = useState(1);
@@ -37,7 +37,7 @@ const ZapOut = ({ position }: { position: any }) => {
   return (
     <div className={styles.createNewPool}>
       <div className={styles.btnAdd}>
-        <Button type="primary-sm" onClick={() => setShowModal(true)}>
+        <Button type="third-sm" onClick={() => setShowModal(true)}>
           Remove Position
         </Button>
       </div>
@@ -61,12 +61,13 @@ const ZapOut = ({ position }: { position: any }) => {
             </div>
           </div>
           <ZapOutForm
-          showModal={showModal}
+            showModal={showModal}
             onCloseModal={() => {}}
             slippage={1}
             tokenFrom={position.tokenX}
             tokenTo={position.tokenY}
             position={position}
+            incentives={incentives}
           />
         </div>
       </div>

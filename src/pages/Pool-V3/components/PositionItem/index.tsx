@@ -384,7 +384,7 @@ const PositionItem = ({ position }) => {
               </div>
             </div>
             <div className={styles.btnGroup}>
-              <Button
+              {/* <Button
                 disabled={removeLoading || (!position.tokenXLiqInUsd && !position.tokenYLiqInUsd)}
                 type="third-sm"
                 onClick={async () => {
@@ -418,7 +418,8 @@ const PositionItem = ({ position }) => {
                   </>
                 )}
                 Close Position
-              </Button>
+              </Button> */}
+              <ZapOut position={position} incentives={incentives} />
               <Button
                 type="primary-sm"
                 onClick={() => {
@@ -427,7 +428,6 @@ const PositionItem = ({ position }) => {
               >
                 Add Liquidity
               </Button>
-              <ZapOut position={position} />
             </div>
           </div>
         </div>
@@ -450,7 +450,7 @@ const PositionItem = ({ position }) => {
                   <position.tokenXIcon />
                   {numberWithCommas(earnXDisplay, undefined, {
                     maximumFractionDigits: 6
-                  })}{' '}
+                  })}
                   {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>

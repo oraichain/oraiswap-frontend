@@ -17,6 +17,7 @@ export const openInNewTab = (url: string): void => {
 
 const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const refContent = useRef();
@@ -71,6 +72,8 @@ const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
                 {TokenToIcon}
               </div>
               <TooltipHover
+                setIsVisible={setIsVisible}
+                isVisible={isVisible}
                 content={
                   <div>
                     <div className={classNames(styles.infoPool, styles[theme])}>
@@ -94,7 +97,7 @@ const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
                     {tokenFrom.name} / {tokenTo.name}
                   </span>
                 }
-              ></TooltipHover>
+              />
 
               <div className={styles.feeInfo}>Fee: {Number(pool.pool_key.fee_tier.fee) / 10 ** 10}%</div>
             </div>
