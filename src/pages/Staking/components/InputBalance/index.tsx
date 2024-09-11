@@ -13,7 +13,12 @@ import { getUsd } from 'libs/utils';
 import { ORAIX_DECIMAL } from 'pages/CoHarvest/constants';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { ORAIX_TOKEN_INFO, STAKE_TAB } from 'pages/Staking/constants';
+import classNames from 'classnames';
 
+export enum UN_STAKE_ENUM {
+  NORMAL,
+  RAPID
+}
 export type InputBalanceType = {
   showLoading?: boolean;
   balance: string;
@@ -21,7 +26,7 @@ export type InputBalanceType = {
   label?: string;
   amount: number;
   setAmount: React.Dispatch<React.SetStateAction<number>>;
-  onSubmit: () => void;
+  onSubmit: (actionType?: UN_STAKE_ENUM) => void;
   loading: boolean;
 };
 
@@ -80,12 +85,14 @@ const InputBalance = ({
           <span className={styles.usd}>{formatDisplayUsdt(amountUSD)}</span>
         </div>
 
-        <div className={`${styles.stakeBtn} ${styles.inDesktop}`}>
-          <Button type="primary" onClick={() => onSubmit()} disabled={disabled}>
-            {loading && <Loader width={22} height={22} />}&nbsp;
-            {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Unstake'}
-          </Button>
-        </div>
+        {type === STAKE_TAB.Stake && (
+          <div className={`${styles.stakeBtn} ${styles.inDesktop}`}>
+            <Button type="primary" onClick={() => onSubmit()} disabled={disabled}>
+              {loading && <Loader width={22} height={22} />}&nbsp;
+              {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Unstake'}
+            </Button>
+          </div>
+        )}
       </div>
       <div className={styles.coeff}>
         {[0.25, 0.5, 0.75, 1].map((e) => {
@@ -110,11 +117,27 @@ const InputBalance = ({
           );
         })}
       </div>
-      <div className={`${styles.stakeBtn} ${styles.inMobile}`}>
-        <Button type="primary" onClick={() => onSubmit()} disabled={disabled}>
+
+      <div
+        className={classNames(styles.stakeBtn, {
+          [styles.inMobile]: type === STAKE_TAB.Stake,
+          [styles.unstakeMode]: type === STAKE_TAB.UnStake
+        })}
+      >
+        <Button
+          type={type === STAKE_TAB.UnStake ? 'secondary' : 'primary'}
+          onClick={() => onSubmit(UN_STAKE_ENUM.NORMAL)}
+          disabled={disabled}
+        >
           {showLoading && loading && <Loader width={22} height={22} />}&nbsp;
           {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Unstake'}
         </Button>
+        {type === STAKE_TAB.UnStake && (
+          <Button type="primary" onClick={() => onSubmit(UN_STAKE_ENUM.RAPID)} disabled={disabled}>
+            {showLoading && loading && <Loader width={22} height={22} />}&nbsp;
+            {isInsufficient ? 'Insufficient' : 'Quick Unstake'}
+          </Button>
+        )}
       </div>
     </div>
   );
