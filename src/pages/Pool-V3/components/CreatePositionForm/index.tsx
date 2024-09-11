@@ -177,6 +177,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   const [amountTo, setAmountTo] = useState<number | string>();
   const [amountFrom, setAmountFrom] = useState<number | string>();
+
   const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(amountFrom || 0)).toFixed(6);
   const toUsd = (prices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
 
