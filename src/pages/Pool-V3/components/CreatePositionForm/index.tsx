@@ -68,13 +68,12 @@ import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { ZapConsumer } from '@oraichain/oraiswap-v3';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { network } from 'config/networks';
-import { OraiswapTokenClient, ZapperClient } from '@oraichain/oraidex-contracts-sdk';
-import { Coin } from '@cosmjs/proto-signing';
 import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { useDebounce } from 'hooks/useDebounce';
 import useZap from 'pages/Pool-V3/hooks/useZap';
 import SelectToken from '../SelectToken';
+import cn from 'classnames/bind';
+import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 
 export type PriceInfo = {
   startPrice: number;
@@ -99,6 +98,8 @@ interface CreatePoolFormProps {
 
 const TOKEN_ZAP = oraichainTokens.find((e) => extractAddress(e) === USDT_CONTRACT);
 
+const cx = cn.bind(styles);
+
 const CreatePositionForm: FC<CreatePoolFormProps> = ({
   tokenFrom,
   tokenTo,
@@ -112,6 +113,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [zapAmount, setZapAmount] = useState<number | string>('');
   const [zapInResponse, setZapInResponse] = useState<ZapInLiquidityResponse>(null);
   const [simulating, setSimulating] = useState<boolean>(false);
+  const [zapImpactPrice, setZapImpactPrice] = useState<number>(0.5);
 
   const debounceZapAmount = useDebounce(zapAmount, 800);
 
@@ -179,6 +181,18 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [amountFrom, setAmountFrom] = useState<number | string>();
   const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(amountFrom || 0)).toFixed(6);
   const toUsd = (prices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
+  const zapUsd = (prices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0)).toFixed(6);
+  const xUsd =
+    zapInResponse &&
+    (prices?.[tokenFrom?.coinGeckoId] * (Number(zapInResponse.amountX || 0) / 10 ** tokenFrom.decimals)).toFixed(6);
+  const yUsd =
+    zapInResponse &&
+    (prices?.[tokenTo?.coinGeckoId] * (Number(zapInResponse.amountY || 0) / 10 ** tokenTo.decimals)).toFixed(6);
+
+  const [swapFee, setSwapFee] = useState<number>(1.5);
+  const [zapFee, setZapFee] = useState<number>(1);
+  const [totalFee, setTotalFee] = useState<number>(1.75);
+  const [matchRate, setMatchRate] = useState<number>(99.5);
 
   const isLightTheme = theme === 'light';
 
@@ -1135,6 +1149,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
       {toggleZapIn ? (
         <div>
+          <div className={styles.introZap}>
+            <IconInfo />
+            <span>
+              Zap In: Instantly swap your chosen token for two pool tokens and provide liquidity to the pool, all in one
+              seamless transaction.
+            </span>
+          </div>
           <div className={classNames(styles.itemInput, { [styles.disabled]: false })}>
             <div className={styles.balance}>
               <p className={styles.bal}>
@@ -1189,7 +1210,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   decimalScale={tokenZap?.decimals || 6}
                   disabled={isFromBlocked}
                   type="text"
-                  value={amountFrom}
+                  value={zapAmount}
                   onChange={() => {}}
                   isAllowed={(values) => {
                     const { floatValue } = values;
@@ -1201,7 +1222,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   }}
                 />
                 <div className={styles.usd}>
-                  ≈ ${amountFrom ? numberWithCommas(Number(fromUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+                  ≈ $
+                  {zapAmount
+                    ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: tokenZap.decimals })
+                    : 0}
                 </div>
               </div>
             </div>
@@ -1234,7 +1258,12 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                       })
                     : 0}
                 </span>
-                <span className={styles.usd}>≈ $0</span>
+                <span className={styles.usd}>
+                  ≈ $
+                  {zapInResponse
+                    ? numberWithCommas(Number(xUsd) || 0, undefined, { maximumFractionDigits: tokenFrom.decimals })
+                    : 0}
+                </span>
               </div>
             </div>
             <div className={styles.item}>
@@ -1250,10 +1279,66 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                       })
                     : 0}
                 </span>
-                <span className={styles.usd}>≈ $0</span>
+                <span className={styles.usd}>
+                  ≈ $
+                  {zapInResponse
+                    ? numberWithCommas(Number(yUsd) || 0, undefined, { maximumFractionDigits: tokenTo.decimals })
+                    : 0}
+                </span>
               </div>
             </div>
           </div>
+          {zapInResponse && (
+            <div className={styles.feeInfoWrapper}>
+              <div className={styles.item}>
+                <div className={styles.info}>
+                  <span>Price Impact</span>
+                </div>
+                <div
+                  className={cx(
+                    'valueImpact',
+                    `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
+                  )}
+                >
+                  <span>{zapImpactPrice}%</span>
+                </div>
+              </div>
+              <div className={styles.item}>
+                <div className={styles.info}>
+                  <span>Swap Fee</span>
+                </div>
+                <div className={styles.value}>
+                  <span>{swapFee} %</span>
+                </div>
+              </div>
+              <div className={styles.item}>
+                <div className={styles.info}>
+                  <span>Zap Fee</span>
+                </div>
+                <div className={styles.value}>
+                  <span>
+                    {zapFee} {tokenZap.name}
+                  </span>
+                </div>
+              </div>
+              <div className={styles.item}>
+                <div className={styles.conclusion}>
+                  <span>Total Fee</span>
+                </div>
+                <div className={styles.value}>
+                  <span>${totalFee}</span>
+                </div>
+              </div>
+              <div className={styles.item}>
+                <div className={styles.conclusion}>
+                  <span>Match Rate</span>
+                </div>
+                <div className={styles.value}>
+                  <span>{matchRate} %</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <>
