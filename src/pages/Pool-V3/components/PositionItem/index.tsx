@@ -427,7 +427,7 @@ const PositionItem = ({ position }) => {
               >
                 Add Liquidity
               </Button>
-              <ZapOut position={position} />
+              <ZapOut position={position} incentives={incentives} />
             </div>
           </div>
         </div>

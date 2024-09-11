@@ -22,7 +22,7 @@ export const openInNewTab = (url: string): void => {
   if (newWindow) newWindow.opener = null;
 };
 
-const ZapOut = ({ position }: { position: any }) => {
+const ZapOut = ({ position, incentives }: { position: any, incentives: { [key: string]: number } }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [slippage, setSlippage] = useState(1);
@@ -67,6 +67,7 @@ const ZapOut = ({ position }: { position: any }) => {
             tokenFrom={position.tokenX}
             tokenTo={position.tokenY}
             position={position}
+            incentives={incentives}
           />
         </div>
       </div>
