@@ -34,10 +34,16 @@ export const useGetTotalLpV3 = (address: string, prices: CoinGeckoPrices<string>
 
   useEffect(() => {
     if (!address || !data?.length) return;
-    console.log({ data });
     const totalLp = data.reduce((acc, cur) => {
-      const priceX = toDisplay(cur.principalAmountX, cur.pool.tokenX.decimals) * prices[cur.pool.tokenX.coingeckoId];
-      const priceY = toDisplay(cur.principalAmountY, cur.pool.tokenY.decimals) * prices[cur.pool.tokenY.coingeckoId];
+      const { tokenX, tokenY } = cur.pool;
+      let priceX = 0;
+      let priceY = 0;
+      if (tokenX?.coingeckoId && tokenX?.decimals) {
+        priceX = toDisplay(cur.principalAmountX, tokenX.decimals) * (prices[tokenX.coingeckoId] || 0);
+      }
+      if (tokenY?.coingeckoId && tokenY?.decimals) {
+        priceY = toDisplay(cur.principalAmountY, tokenY.decimals) * (prices[tokenY.coingeckoId] || 0);
+      }
       return acc + priceX + priceY;
     }, 0);
 
