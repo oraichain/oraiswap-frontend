@@ -5,7 +5,7 @@ import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { executeMultiple } from '../helpers/helper';
 import { TokenItemType } from '@oraichain/oraidex-common';
-import { ZapInLiquidityResponse, ZapOutLiquidityResponse } from '@oraichain/oraiswap-v3';
+import { parseAsset, ZapInLiquidityResponse, ZapOutLiquidityResponse } from '@oraichain/oraiswap-v3';
 
 export type ZapInData = {
   tokenZap: TokenItemType;
@@ -19,7 +19,7 @@ export type ZapOutData = {
 };
 
 const useZap = () => {
-  const ZAP_CONTRACT = 'orai1zersemmt4cdwqg8ujx2mzz5cv34puwf7nt7e5ywg954hpscdgtrqu29tu9';
+  const ZAP_CONTRACT = 'orai10x4g7caa3vvvq0sw9vwqcgq6n2kfdqlh4cj8r2szgnjxhdcg23qs47gtxc';
 
   const zapIn = async (data: ZapInData, walletAddress: string, onSuccess: any, onError: any) => {
     try {
@@ -30,6 +30,7 @@ const useZap = () => {
       // approve
       const coins: Coin[] = [];
       if (tokenZap.contractAddress) {
+        console.log({ tokenZap, zapAmount });
         msg.push({
           contractAddress: tokenZap.contractAddress,
           msg: {
@@ -46,21 +47,30 @@ const useZap = () => {
         });
       }
 
+      console.log({ coins });
+
+      console.log({
+        zap_in_liquidity: {
+          asset_in: parseAsset(tokenZap, zapAmount),
+          minimum_liquidity: zapInResponse.minimumLiquidity.toString(),
+          pool_key: zapInResponse.poolKey,
+          routes: zapInResponse.routes,
+          tick_lower_index: zapInResponse.tickLowerIndex,
+          tick_upper_index: zapInResponse.tickUpperIndex
+        }
+      });
+
       // zapIn message
       msg.push({
         contractAddress: ZAP_CONTRACT,
         msg: {
           zap_in_liquidity: {
-            amount_to_x: zapInResponse.amountToX,
-            amount_to_y: zapInResponse.amountToY,
-            asset_in: zapInResponse.assetIn,
+            asset_in: parseAsset(tokenZap, zapAmount),
+            minimum_liquidity: zapInResponse.minimumLiquidity.toString(),
             pool_key: zapInResponse.poolKey,
+            routes: zapInResponse.routes,
             tick_lower_index: zapInResponse.tickLowerIndex,
-            tick_upper_index: zapInResponse.tickUpperIndex,
-            minimum_receive_x: zapInResponse.minimumReceiveX,
-            minimum_receive_y: zapInResponse.minimumReceiveY,
-            operation_to_x: zapInResponse.operationToX.length > 0 ? zapInResponse.operationToX : undefined,
-            operation_to_y: zapInResponse.operationToY.length > 0 ? zapInResponse.operationToY : undefined
+            tick_upper_index: zapInResponse.tickUpperIndex
           }
         },
         funds: coins
@@ -101,11 +111,8 @@ const useZap = () => {
         contractAddress: ZAP_CONTRACT,
         msg: {
           zap_out_liquidity: {
-            minimum_receive_x: zapOutResponse.minimumReceiveX,
-            minimum_receive_y: zapOutResponse.minimumReceiveY,
-            operation_from_x: zapOutResponse.operationFromX.length > 0 ? zapOutResponse.operationFromX : undefined,
-            operation_from_y: zapOutResponse.operationFromY.length > 0 ? zapOutResponse.operationFromY : undefined,
-            position_index: zapOutResponse.positionIndex
+            position_index: zapOutResponse.positionIndex,
+            routes: zapOutResponse.routes
           }
         }
       });
@@ -122,6 +129,7 @@ const useZap = () => {
   };
 
   return {
+    ZAP_CONTRACT,
     zapIn,
     zapOut
   };

@@ -195,17 +195,16 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
         smartRouteConfig: {
           swapOptions: {
             protocols: ['OraidexV3'],
-            maxSplits: 1
           }
         }
       });
+      console.log(position.token_id)
 
       const res = await zapper.processZapOutPositionLiquidity({
         owner: walletAddress,
         tokenId: position.token_id,
         tokenOut: tokenZap
       });
-      
       console.log('res', res);
 
       setZapOutResponse(res);

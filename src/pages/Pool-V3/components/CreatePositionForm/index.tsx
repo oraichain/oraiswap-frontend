@@ -75,6 +75,8 @@ import SelectToken from '../SelectToken';
 import cn from 'classnames/bind';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import TooltipHover from 'components/TooltipHover';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import { OraiswapV3Client, OraiswapV3QueryClient, ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 export type PriceInfo = {
   startPrice: number;
@@ -762,7 +764,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     }
   };
 
-  const { zapIn } = useZap();
+  const { zapIn, ZAP_CONTRACT } = useZap();
 
   const handleZapIn = async () => {
     try {
@@ -852,21 +854,31 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const handleSimulateZapIn = async () => {
     try {
       setSimulating(true);
+
+      const client = await CosmWasmClient.connect(network.rpc);
+      console.log(await client.getBalance(walletAddress, "orai"));
+      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      const zapFee = await zap.protocolFee();
+      const amountAfterFee = Number(zapAmount) * (1 - Number(zapFee.percent));
+
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        devitation: 0.05,
+        devitation: 0,
         dexV3Address: network.pool_v3,
         multicallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {
-            protocols: ['OraidexV3'],
-            maxSplits: 1
+            protocols: ['OraidexV3']
           }
         }
       });
 
-      const amountIn = Math.round(Number(zapAmount) * 10 ** tokenZap.decimals).toString();
+      const amountIn = Math.round(amountAfterFee * 10 ** tokenZap.decimals).toString();
+      console.log({ amountIn });
+      const amountFee = Math.floor(Number(zapFee.percent) * Number(zapAmount) * 10 ** tokenZap.decimals);
+      
+      setZapFee(amountFee);
       const lowerTick = Math.min(leftRange, rightRange);
       const upperTick = Math.max(leftRange, rightRange);
 
@@ -914,6 +926,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     } catch (error) {
       // console.error(error);
       console.log('error', error);
+      setSimulating(false);
+    } finally {
       setSimulating(false);
     }
   };
@@ -1517,9 +1531,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               disabled={
                 loading ||
                 !walletAddress ||
-                !(btnText === 'Zap in' || btnText === 'Create new position') ||
-                isFromBlocked ||
-                isToBlocked
+                !(btnText === 'Zap in' || btnText === 'Create new position')
                 // true
               }
               onClick={async () => {
