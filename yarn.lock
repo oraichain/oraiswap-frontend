@@ -4401,10 +4401,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.22.tgz#70b765dd8ea3b500a77cc37e6a45ea9d75f0c5c4"
   integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
 
-"@oraichain/oraidex-contracts-sdk@1.0.51-beta.1", "@oraichain/oraidex-contracts-sdk@^1.0.51-beta.1":
-  version "1.0.51-beta.1"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.51-beta.1.tgz#d68e4216f20e6aedac81d520f449285b1bc890ea"
-  integrity sha512-7vQZno1tHHWI6DC/PcKe0+zNT3ffzsY3XOCW8GTBBR8QuqF523D7IRkgK4t4CexGpiHYLCNaCWDR/v9ddCj60g==
+"@oraichain/oraidex-contracts-sdk@1.0.51-beta.2":
+  version "1.0.51-beta.2"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.51-beta.2.tgz#d54b278d02d3664fabe14c5e586e6a3e7b2312cd"
+  integrity sha512-VSbiuvolyhW6a0CIeY/awvDqm1fxfu/+cKD3sTzzr2Fs4vg8dk8M7XrWX7JQQ8gmb0U2HcWHX1pA0kJ8N2JYfQ==
 
 "@oraichain/oraidex-contracts-sdk@^1.0.49":
   version "1.0.49"
@@ -4429,14 +4429,14 @@
     tronweb "5.3.2"
     ts-protoc-gen "^0.15.0"
 
-"@oraichain/oraiswap-v3@0.1.6-beta.8":
-  version "0.1.6-beta.8"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.6-beta.8.tgz#8ba9612c933426746fb8d75db90203dcb688e941"
-  integrity sha512-vq/G8Bph6Un9RdwyCz0QZ2/tdUoYWuAiqv8413sWfilTd0SJXWbRBgYcFoyBRpGV6hodGx+gXFQyEUT4DRi2Cw==
+"@oraichain/oraiswap-v3@0.1.6-beta.11":
+  version "0.1.6-beta.11"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.6-beta.11.tgz#6b23e9aafd0beeaf2f1e5a5db6359e6d2416a7ed"
+  integrity sha512-LS9U7pWq8eaIMxiK63xp2LIHdpV5brwNnfxtQPoEXV4EiPgXjIM/15uYlXYgKf8NkgkhKaOIenx2L5xtu0hvoQ==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
     "@oraichain/oraidex-common" "^1.1.6"
-    "@oraichain/oraidex-contracts-sdk" "^1.0.51-beta.1"
+    "@oraichain/oraidex-contracts-sdk" "1.0.51-beta.2"
 
 "@oraichain/wasm-json-toolkit@^1.0.24":
   version "1.0.24"

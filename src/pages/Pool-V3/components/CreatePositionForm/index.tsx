@@ -1208,7 +1208,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   thousandSeparator
                   className={styles.amount}
                   decimalScale={tokenZap?.decimals || 6}
-                  disabled={isFromBlocked}
+                  disabled={false}
                   type="text"
                   value={zapAmount}
                   onChange={() => {}}
