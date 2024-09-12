@@ -73,7 +73,6 @@
     top: 0;
     left: 0;
 
-    border-radius: 12px;
     background: #000;
 
     width: 100%;
@@ -175,6 +174,58 @@
           // &:hover {
           //   filter: brightness(1.5);
           // }
+        }
+      }
+
+      .infoPool {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        .infoPoolName {
+          @include theme {
+            color: 1px solid theme-get('colors-neutral-text-body-on-row');
+          }
+          font-size: 16px;
+          font-weight: 600;
+          span {
+            border-radius: 6px;
+            width: 26px;
+            height: 24px;
+            font-size: 12px;
+            @include theme {
+              border: 1px solid theme-get('colors-primary-surface-default');
+            }
+            text-align: center;
+            text-transform: uppercase;
+          }
+        }
+        .infoPoolfee {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          span {
+            border-radius: 6px;
+            height: 24px;
+            font-size: 12px;
+            padding: 0 8px;
+            border: 1px solid #494949;
+            text-align: center;
+            text-transform: uppercase;
+          }
+        }
+      }
+
+      .infoMarket {
+        color: #979995;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        span {
+          cursor: pointer;
+          svg {
+            width: 16px;
+            height: 16px;
+          }
         }
       }
 

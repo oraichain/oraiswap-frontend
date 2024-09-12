@@ -8,6 +8,7 @@ import useTheme from 'hooks/useTheme';
 import { useRef, useState } from 'react';
 import CreatePositionForm from '../CreatePositionForm';
 import styles from './index.module.scss';
+import TooltipHover from 'components/TooltipHover';
 
 export const openInNewTab = (url: string): void => {
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
@@ -16,6 +17,7 @@ export const openInNewTab = (url: string): void => {
 
 const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const refContent = useRef();
@@ -69,9 +71,34 @@ const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
                 {TokenFromIcon}
                 {TokenToIcon}
               </div>
-              <span>
-                {tokenFrom.name} / {tokenTo.name}
-              </span>
+              <TooltipHover
+                setIsVisible={setIsVisible}
+                isVisible={isVisible}
+                content={
+                  <div>
+                    <div className={classNames(styles.infoPool, styles[theme])}>
+                      <div className={classNames(styles.infoPoolName)}>
+                        {tokenFrom.name} / {tokenTo.name}
+                        <span>v3</span>
+                      </div>
+                      <div className={styles.infoPoolfee}>
+                        <span>Fee: {Number(pool.pool_key.fee_tier.fee) / 10 ** 10}%</span>
+                      </div>
+                      <div className={styles.infoPoolfee}>
+                        <span>{Number(pool.pool_key.fee_tier.fee) / 10 ** 10}% Spread</span>
+                      </div>
+                    </div>
+                    <div className={classNames(styles.infoMarket)}>Market ID: orai13r0p...00000-100</div>
+                  </div>
+                }
+                position="bottom"
+                children={
+                  <span>
+                    {tokenFrom.name} / {tokenTo.name}
+                  </span>
+                }
+              />
+
               <div className={styles.feeInfo}>Fee: {Number(pool.pool_key.fee_tier.fee) / 10 ** 10}%</div>
             </div>
             <div className={styles.headerActions}>

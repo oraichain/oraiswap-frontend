@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { getIcon, getTransactionUrl } from 'helper';
-import { numberWithCommas } from 'helper/format';
+import { formatDisplayUsdt, numberWithCommas } from 'helper/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
@@ -31,6 +31,7 @@ import { useNavigate } from 'react-router-dom';
 import cn from 'classnames/bind';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
+import TooltipHover from 'components/TooltipHover';
 
 const cx = cn.bind(styles);
 
@@ -64,6 +65,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   const theme = useTheme();
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
+  const [isVisible, setIsVisible] = useState<boolean>(false);
   const [tokenZap, setTokenZap] = useState<TokenItemType>(TOKEN_ZAP);
   const [zapAmount, setZapAmount] = useState<number | string>('');
   const [zapOutResponse, setZapOutResponse] = useState<ZapOutLiquidityResponse>(null);
@@ -150,8 +152,6 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   };
 
   const { zapOut } = useZap();
-
-  // console.log("position", position);
 
   const handleZapOut = async () => {
     try {
@@ -295,7 +295,9 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
               </div>
               <div className={styles.value}>
                 <span>{position.tokenXLiq}</span>
-                <span className={styles.usd}>≈ $0</span>
+                <span className={styles.usd}>
+                  ≈ {formatDisplayUsdt(prices[tokenFrom?.coinGeckoId] * position.tokenXLiq)}
+                </span>
               </div>
             </div>
             <div className={styles.item}>
@@ -305,7 +307,9 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
               </div>
               <div className={styles.value}>
                 <span>{position.tokenYLiq}</span>
-                <span className={styles.usd}>≈ $0</span>
+                <span className={styles.usd}>
+                  ≈ {formatDisplayUsdt(prices[tokenTo?.coinGeckoId] * position.tokenYLiq)}
+                </span>
               </div>
             </div>
           </div>
@@ -340,6 +344,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                 customClassButton={styles.name}
               />
               <div className={styles.input}>
+                {simulating && <div className={styles.mask} />}
                 <NumberFormat
                   onFocus={() => setFocusId('zapper')}
                   onBlur={() => setFocusId(null)}
@@ -378,7 +383,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                     </div>
                     <div className={styles.value}>
                       <span>{e.amount}</span>
-                      <span className={styles.usd}>≈ $0</span>
+                      <span className={styles.usd}>≈ {formatDisplayUsdt(prices[e?.info?.coinGeckoId] * e.amount)}</span>
                     </div>
                   </div>
                 ))}
@@ -410,7 +415,13 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
               </div>
               <div className={styles.item}>
                 <div className={styles.info}>
-                  <span>Zap Fee</span>
+                  <TooltipHover
+                    isVisible={isVisible}
+                    setIsVisible={setIsVisible}
+                    content={<div>The amount of token you'll swap to provide liquidity.</div>}
+                    position="right"
+                    children={<span>Zap Fee</span>}
+                  />
                 </div>
                 <div className={styles.value}>
                   <span>
@@ -444,7 +455,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                   </div>
                   <div className={styles.value}>
                     <span>{e.amount}</span>
-                    <span className={styles.usd}>≈ $0</span>
+                    <span className={styles.usd}>≈ {formatDisplayUsdt(prices[e?.info.coinGeckoId] * e.amount)}</span>
                   </div>
                 </div>
               ))}
@@ -463,7 +474,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                     </div>
                     <div className={styles.value}>
                       <span>{e.amount}</span>
-                      <span className={styles.usd}>≈ $0</span>
+                      <span className={styles.usd}>≈ {formatDisplayUsdt(prices[e?.info.coinGeckoId] * e.amount)}</span>
                     </div>
                   </div>
                 ))}
@@ -480,10 +491,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             <Button
               type="primary"
               disabled={
-                loading ||
-                !walletAddress ||
-                !tokenZap ||
-                !(btnText === 'Zap out' || btnText === 'Remove Position')
+                loading || !walletAddress || !tokenZap || !(btnText === 'Zap out' || btnText === 'Remove Position')
               }
               onClick={async () => {
                 if (toggleZapOut) {
