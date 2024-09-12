@@ -1,27 +1,23 @@
-import React, { useState, ReactNode } from 'react';
+import React, { useState, ReactNode, useRef } from 'react';
 import styles from './index.module.scss';
 
 interface TooltipProps {
   content: ReactNode;
   children: ReactNode;
   position?: 'top' | 'right' | 'bottom' | 'left';
+  isVisible: boolean;
+  setIsVisible: (isVisible: boolean) => void;
 }
 
-const TooltipHover: React.FC<TooltipProps> = ({ content, children, position = 'top' }) => {
-  const [isVisible, setIsVisible] = useState(false);
-
+const TooltipHover: React.FC<TooltipProps> = ({ isVisible, setIsVisible, content, children, position = 'top' }) => {
   return (
-    <div 
+    <div
       className={styles.tooltipContainer}
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
     >
       {children}
-      {!isVisible && (
-        <div className={`${styles.tooltip} ${styles[position]}`}>
-          {content}
-        </div>
-      )}
+      {isVisible && <div className={`${styles.tooltip} ${styles[position]}`}>{content}</div>}
     </div>
   );
 };

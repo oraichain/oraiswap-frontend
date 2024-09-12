@@ -74,6 +74,7 @@ import useZap from 'pages/Pool-V3/hooks/useZap';
 import SelectToken from '../SelectToken';
 import cn from 'classnames/bind';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
+import TooltipHover from 'components/TooltipHover';
 
 export type PriceInfo = {
   startPrice: number;
@@ -130,6 +131,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [typeChart, setTypeChart] = useState(TYPE_CHART.CONTINUOUS);
   const [isPlotDiscrete, setIsPlotDiscrete] = useState(false);
   const [toggleZapIn, setToggleZapIn] = useState(true);
+
+  const [isVisible, setIsVisible] = useState(false);
 
   const loadOraichainToken = useLoadOraichainTokens();
   const [focusId, setFocusId] = useState<'from' | 'to' | 'zapper' | null>(null);
@@ -1252,6 +1255,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 <span>{tokenFrom.name}</span>
               </div>
               <div className={styles.value}>
+                {simulating && <div className={styles.mask} />}
                 <span>
                   {zapInResponse
                     ? numberWithCommas(Number(zapInResponse.amountX) / 10 ** tokenFrom.decimals, undefined, {
@@ -1273,6 +1277,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 <span>{tokenTo.name}</span>
               </div>
               <div className={styles.value}>
+                {simulating && <div className={styles.mask} />}
                 <span>
                   {zapInResponse
                     ? numberWithCommas(Number(zapInResponse.amountY) / 10 ** tokenTo.decimals, undefined, {
@@ -1314,7 +1319,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               </div>
               <div className={styles.item}>
                 <div className={styles.info}>
-                  <span>Zap Fee</span>
+                  <TooltipHover
+                    isVisible={isVisible}
+                    setIsVisible={setIsVisible}
+                    content={<div>The amount of token you'll swap to provide liquidity.</div>}
+                    position="right"
+                    children={<span>Zap Fee</span>}
+                  />
                 </div>
                 <div className={styles.value}>
                   <span>
