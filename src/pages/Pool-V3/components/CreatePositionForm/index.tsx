@@ -739,7 +739,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       return 'Create new position';
     } else {
       const isInsufficientZap =
-        zapAmount && Number(zapAmount) > toDisplay(amounts[tokenTo.denom], tokenTo.decimals || CW20_DECIMALS);
+        zapAmount && Number(zapAmount) > toDisplay(amounts[tokenZap.denom], tokenZap.decimals || CW20_DECIMALS);
 
       if (!tokenZap) {
         return 'Select token';
