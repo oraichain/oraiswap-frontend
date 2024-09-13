@@ -203,7 +203,7 @@ const App = () => {
       if (window.ethereumDapp) {
         if (mobileMode) await window.Metamask.switchNetwork(Networks.bsc);
         metamaskAddress = await window.Metamask.getEthAddress();
-        if (metamaskAddress) setMetamaskAddress(metamaskAddress);
+        setMetamaskAddress(metamaskAddress);
       }
     }
     return metamaskAddress;

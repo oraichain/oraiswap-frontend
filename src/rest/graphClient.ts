@@ -101,6 +101,43 @@ export const getPoolDayDataV3 = async () => {
   }
 };
 
+export const getTotalLpDataV3 = async (address: string) => {
+  try {
+    const document = gql`
+      {
+        query {
+            positions(
+              filter: {
+                  owner: { id: { equalTo: "${address}" } }
+                  status: { equalTo: true }
+              }
+            ) {
+                nodes {
+                    principalAmountX
+                    principalAmountY
+                    pool {
+                        tokenX {
+                            coingeckoId
+                            decimals
+                        }
+                        tokenY {
+                            coingeckoId
+                            decimals
+                        }
+                    }
+                }
+            }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.query.positions.nodes || [];
+  } catch (error) {
+    console.log('error getTotalLpDataV3', error);
+    return [];
+  }
+};
+
 export type FeeDailyData = {
   poolId: string;
   tvlUSD: number;

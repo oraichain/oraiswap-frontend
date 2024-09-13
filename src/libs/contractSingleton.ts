@@ -232,7 +232,7 @@ export default class SingletonOraiswapV3 {
   ): Promise<ArrayOfTupleOfUint16AndUint64> {
     await this.loadHandler();
     const tickmaps = await this._handler.tickMap(poolKey, lowerTick, upperTick, xToY);
-    return tickmaps;
+    return tickmaps as any;
   }
 
   public static async getTokensInfo(tokens: string[], address?: string): Promise<TokenDataOnChain[]> {
@@ -814,7 +814,7 @@ export function simulateAprPosition(
   // calculate APR for the worst, position liquidity is 2% of total liquidity
   let sumMinIncentivesApr = 0;
   const positionLiquidity2 = 10 ** 24;
-  
+
   const res2 = calculateAmountDelta(
     pool.current_tick_index,
     BigInt(pool.sqrt_price),

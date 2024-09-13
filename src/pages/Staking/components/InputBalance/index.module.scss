@@ -123,6 +123,17 @@
         display: block;
       }
     }
+
+    &.unstakeMode {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+
+      button {
+        flex: 1;
+        padding: 12px 4px;
+      }
+    }
   }
 
   .coeff {
