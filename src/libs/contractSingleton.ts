@@ -331,7 +331,6 @@ export default class SingletonOraiswapV3 {
   public static async getFullTickmap(poolKey: PoolKey): Promise<Tickmap> {
     const minTick = getMinTick(poolKey.fee_tier.tick_spacing);
     const maxTick = getMaxTick(poolKey.fee_tier.tick_spacing);
-    await this.loadHandler();
     const tickmap = await this._handler.tickMap(poolKey, minTick, maxTick, true);
     const bitmap = new Map<bigint, bigint>();
     tickmap.forEach((t) => {

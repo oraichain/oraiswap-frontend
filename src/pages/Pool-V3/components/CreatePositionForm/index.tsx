@@ -1,10 +1,15 @@
-import { BigDecimal, toAmount, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import {
-  FeeTier,
-  PoolKey,
-  PoolWithPoolKey,
-  TokenAmount
-} from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+  BigDecimal,
+  CW20_DECIMALS,
+  MULTICALL_CONTRACT,
+  toAmount,
+  toDisplay,
+  TokenItemType,
+  USDT_CONTRACT
+} from '@oraichain/oraidex-common';
+import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import {
   calculateSqrtPrice,
   extractAddress,
@@ -15,21 +20,29 @@ import {
   isTokenX,
   newPoolKey,
   poolKeyToString,
-  Price,
+  ZapConsumer,
   ZapInLiquidityResponse
 } from '@oraichain/oraiswap-v3';
+import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
+import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
+import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
+import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
 import classNames from 'classnames';
+import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { getIcon, getTransactionUrl, handleCheckAddress } from 'helper';
+import TooltipHover from 'components/TooltipHover';
+import { oraichainTokens } from 'config/bridgeTokens';
+import { network } from 'config/networks';
+import { getIcon, getTransactionUrl } from 'helper';
 import { numberWithCommas } from 'helper/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useDebounce } from 'hooks/useDebounce';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3, { stringToPoolKey } from 'libs/contractSingleton';
 import {
   calculateTokenAmountsWithSlippage,
   calcYPerXPriceBySqrtPrice,
@@ -37,11 +50,14 @@ import {
 } from 'pages/Pool-V3/helpers/helper';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import useZap from 'pages/Pool-V3/hooks/useZap';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { RootState } from 'store/configure';
-import NewPositionNoPool from '../NewPositionNoPool';
+import PriceRangePlot, { PlotTickData, TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
 import {
   calcPrice,
   calcTicksAmountInRange,
@@ -49,7 +65,6 @@ import {
   determinePositionTokenBlock,
   extractDenom,
   getConcentrationArray,
-  getTickAtSqrtPriceFromBalance,
   handleGetCurrentPlotTicks,
   nearestTickIndex,
   PositionTokenBlock,
@@ -57,26 +72,8 @@ import {
   toMaxNumericPlaces,
   trimLeadingZeros
 } from '../PriceRangePlot/utils';
-import styles from './index.module.scss';
-import { useNavigate } from 'react-router-dom';
-import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
-import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
-import PriceRangePlot, { PlotTickData, TickPlotPositionData } from '../PriceRangePlot/PriceRangePlot';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { USDT_CONTRACT, MULTICALL_CONTRACT } from '@oraichain/oraidex-common';
-import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
-import { ZapConsumer } from '@oraichain/oraiswap-v3';
-import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { network } from 'config/networks';
-import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
-import { useDebounce } from 'hooks/useDebounce';
-import useZap from 'pages/Pool-V3/hooks/useZap';
 import SelectToken from '../SelectToken';
-import cn from 'classnames/bind';
-import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
-import TooltipHover from 'components/TooltipHover';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import { OraiswapV3Client, OraiswapV3QueryClient, ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import styles from './index.module.scss';
 
 export type PriceInfo = {
   startPrice: number;
@@ -856,7 +853,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       setSimulating(true);
 
       const client = await CosmWasmClient.connect(network.rpc);
-      console.log(await client.getBalance(walletAddress, "orai"));
       const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
       const zapFee = await zap.protocolFee();
       const amountAfterFee = Number(zapAmount) * (1 - Number(zapFee.percent));
@@ -877,7 +873,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const amountIn = Math.round(amountAfterFee * 10 ** tokenZap.decimals).toString();
       console.log({ amountIn });
       const amountFee = Math.floor(Number(zapFee.percent) * Number(zapAmount) * 10 ** tokenZap.decimals);
-      
+
       setZapFee(amountFee);
       const lowerTick = Math.min(leftRange, rightRange);
       const upperTick = Math.max(leftRange, rightRange);
@@ -889,9 +885,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         tokenIn: tokenZap,
         amountIn: amountIn,
         lowerTick,
-        upperTick
+        upperTick,
+        tokenX: tokenFrom,
+        tokenY: tokenTo
       });
-
+      setSwapFee(result.swapFee * 100);
       console.log({ result });
 
       // const swapData = {
@@ -921,6 +919,21 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
       // const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
 
+      const inputUsd = prices?.[tokenZap.coinGeckoId] * Number(amountAfterFee);
+      const outputUsd =
+        prices?.[tokenFrom.coinGeckoId] * (Number(result.amountX) / 10 ** tokenFrom.decimals) +
+        prices?.[tokenTo.coinGeckoId] * (Number(result.amountY) / 10 ** tokenTo.decimals);
+
+      const priceImpact = (Math.abs(inputUsd - outputUsd) / inputUsd) * 100;
+      const matchRate = 100 - priceImpact;
+
+      const swapFeeInUsd = amountAfterFee * result.swapFee * prices?.[tokenZap.coinGeckoId];
+      const zapFeeInUsd = (Number(zapAmount) - amountAfterFee) * prices?.[tokenZap.coinGeckoId];
+      const totalFeeInUsd = swapFeeInUsd + zapFeeInUsd;
+
+      setTotalFee(totalFeeInUsd);
+      setZapImpactPrice(priceImpact);
+      setMatchRate(matchRate);
       setZapInResponse(result);
       setSimulating(false);
     } catch (error) {
@@ -1320,7 +1333,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
                   )}
                 >
-                  <span>{zapImpactPrice}%</span>
+                  <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 })}%</span>
                 </div>
               </div>
               <div className={styles.item}>
@@ -1328,7 +1341,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   <span>Swap Fee</span>
                 </div>
                 <div className={styles.value}>
-                  <span>{swapFee} %</span>
+                  <span>{numberWithCommas(swapFee, undefined, { maximumFractionDigits: 2 })} %</span>
                 </div>
               </div>
               <div className={styles.item}>
@@ -1343,7 +1356,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 </div>
                 <div className={styles.value}>
                   <span>
-                    {zapFee} {tokenZap.name}
+                    {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, { maximumFractionDigits: tokenZap.decimals })}{' '}
+                    {tokenZap.name}
                   </span>
                 </div>
               </div>
@@ -1352,7 +1366,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   <span>Total Fee</span>
                 </div>
                 <div className={styles.value}>
-                  <span>${totalFee}</span>
+                  <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
               <div className={styles.item}>
@@ -1360,7 +1374,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   <span>Match Rate</span>
                 </div>
                 <div className={styles.value}>
-                  <span>{matchRate} %</span>
+                  <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 })} %</span>
                 </div>
               </div>
             </div>
@@ -1529,9 +1543,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             <Button
               type="primary"
               disabled={
-                loading ||
-                !walletAddress ||
-                !(btnText === 'Zap in' || btnText === 'Create new position')
+                loading || !walletAddress || !(btnText === 'Zap in' || btnText === 'Create new position')
                 // true
               }
               onClick={async () => {

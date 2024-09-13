@@ -2,13 +2,13 @@ import { PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/Oraiswap
 import { extractAddress } from '@oraichain/oraiswap-v3';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import classNames from 'classnames';
+import TooltipHover from 'components/TooltipHover';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { getIcon } from 'helper';
 import useTheme from 'hooks/useTheme';
 import { useRef, useState } from 'react';
 import CreatePositionForm from '../CreatePositionForm';
 import styles from './index.module.scss';
-import TooltipHover from 'components/TooltipHover';
 
 export const openInNewTab = (url: string): void => {
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer');

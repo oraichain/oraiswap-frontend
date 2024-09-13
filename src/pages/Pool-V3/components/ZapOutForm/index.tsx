@@ -32,6 +32,7 @@ import cn from 'classnames/bind';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import TooltipHover from 'components/TooltipHover';
+import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);
 
@@ -80,9 +81,11 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   const [amountTo, setAmountTo] = useState<number | string>();
   const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(amountFrom || 0)).toFixed(6);
   const toUsd = (prices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
+  const zapUsd = (prices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0));
 
   const [swapFee, setSwapFee] = useState<number>(1.5);
-  const [zapFee, setZapFee] = useState<number>(1);
+  const [zapFeeX, setZapFeeX] = useState<number>(1);
+  const [zapFeeY, setZapFeeY] = useState<number>(1);
   const [zapImpactPrice, setZapImpactPrice] = useState<number>(0.5);
   const [totalFee, setTotalFee] = useState<number>(1.75);
 
@@ -151,7 +154,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     }
   };
 
-  const { zapOut } = useZap();
+  const { zapOut, ZAP_CONTRACT } = useZap();
 
   const handleZapOut = async () => {
     try {
@@ -186,6 +189,11 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   const handleSimulateZapOut = async () => {
     try {
       setSimulating(true);
+
+      const client = await CosmWasmClient.connect(network.rpc);
+      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      const zapFee = await zap.protocolFee();
+
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
         devitation: 0.05,
@@ -194,11 +202,11 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {
-            protocols: ['OraidexV3'],
+            protocols: ['OraidexV3']
           }
         }
       });
-      console.log(position.token_id)
+      console.log(position.token_id);
 
       const res = await zapper.processZapOutPositionLiquidity({
         owner: walletAddress,
@@ -207,6 +215,29 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       });
       console.log('res', res);
 
+      const inputUsd =
+        position.tokenXLiq * prices[tokenFrom.coinGeckoId] + position.tokenYLiq * prices[tokenTo.coinGeckoId];
+      const outputUsd =
+        (Number(res.amountToX) * prices[tokenZap.coinGeckoId]) / 10 ** tokenZap.decimals +
+        (Number(res.amountToY) * prices[tokenZap.coinGeckoId]) / 10 ** tokenZap.decimals;
+        console.log({inputUsd, outputUsd});
+      const priceImpact = (Math.abs(inputUsd - outputUsd) / inputUsd) * 100;
+
+      const totalAmountOut = Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals;
+
+      const zapFeeX = Number(position.tokenXLiq) * Number(zapFee.percent);
+      const zapFeeY = Number(position.tokenYLiq) * Number(zapFee.percent);
+      const swapFee = res.swapFee * 100;
+      const totalFeeInUsd =
+        zapFeeX * prices[tokenFrom.coinGeckoId] +
+        zapFeeY * prices[tokenTo.coinGeckoId] +
+        totalAmountOut * swapFee * prices[tokenZap.coinGeckoId] / 100;
+
+      setZapImpactPrice(priceImpact);
+      setTotalFee(totalFeeInUsd);
+      setZapFeeX(zapFeeX);
+      setZapFeeY(zapFeeY);
+      setSwapFee(swapFee);
       setZapOutResponse(res);
       setAmountFrom(Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals);
       setSimulating(false);
@@ -365,7 +396,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                   }}
                 />
                 <div className={styles.usd}>
-                  ≈ ${amountFrom ? numberWithCommas(Number(fromUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+                  ≈ ${zapAmount ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
                 </div>
               </div>
             </div>
@@ -401,7 +432,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                     `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
                   )}
                 >
-                  <span>{zapImpactPrice}%</span>
+                  <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 })}%</span>
                 </div>
               </div>
               <div className={styles.item}>
@@ -409,7 +440,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                   <span>Swap Fee</span>
                 </div>
                 <div className={styles.value}>
-                  <span>{swapFee} %</span>
+                  <span>{numberWithCommas(swapFee, undefined, { maximumFractionDigits: 2 })} %</span>
                 </div>
               </div>
               <div className={styles.item}>
@@ -424,7 +455,8 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                 </div>
                 <div className={styles.value}>
                   <span>
-                    {zapFee} {tokenZap.name}
+                    {numberWithCommas(zapFeeX, undefined, { maximumFractionDigits: tokenFrom.decimals })} {TokenFromIcon}{'  '}
+                    {numberWithCommas(zapFeeY, undefined, { maximumFractionDigits: tokenTo.decimals })} {TokenToIcon}
                   </span>
                 </div>
               </div>
@@ -433,7 +465,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                   <span>Total Fee</span>
                 </div>
                 <div className={styles.value}>
-                  <span>${totalFee}</span>
+                  <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
             </div>

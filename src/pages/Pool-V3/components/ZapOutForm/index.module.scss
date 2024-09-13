@@ -545,6 +545,11 @@
       @include theme {
         color: theme-get('neutral-2');
       }
+
+      svg {
+        width: 12px;
+        height: 12px;
+      }
     }
   }
 }
