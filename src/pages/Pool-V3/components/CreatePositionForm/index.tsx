@@ -26,6 +26,7 @@ import {
 } from '@oraichain/oraiswap-v3';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
+import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
 import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
@@ -133,7 +134,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   });
   const [typeChart, setTypeChart] = useState(TYPE_CHART.CONTINUOUS);
   const [isPlotDiscrete, setIsPlotDiscrete] = useState(false);
-  const [toggleZapIn, setToggleZapIn] = useState(true);
+  const [toggleZapIn, setToggleZapIn] = useState(false);
 
   const [isVisible, setIsVisible] = useState(false);
 
@@ -238,13 +239,20 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     }
   }, [amountFrom, focusId]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (zapInResponse) {
+      console.log('zapInResponse', zapInResponse);
       if ([ZapInResult.NoRouteFound, ZapInResult.SomethingWentWrong].includes(zapInResponse.result)) {
         setZapError(zapInResponse.result);
       }
     }
-  }, [zapInResponse])
+    if (simulating) {
+      setZapError(null);
+    }
+    if (tokenZap && zapAmount == 0) {
+      setZapError(null);
+    }
+  }, [zapInResponse, simulating, tokenZap, zapAmount]);
 
   useEffect(() => {
     if (focusId === 'to') {
@@ -675,10 +683,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     return trimLeadingZeros(printBigint(result, printToken.decimals));
   };
 
-  const handleSuccessAdd = async () => {
-    alert('Add success!');
-  };
-
   useEffect(() => {
     if (isPoolExist && showModal) {
       handleGetTicks();
@@ -759,21 +763,16 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         return 'Select token';
       }
 
-      if (isInsufficientZap) {
-        return `Insufficient ${tokenZap.name.toUpperCase()}`;
-      }
-
       if (!zapAmount || +zapAmount === 0) {
         return 'Zap amount must be greater than 0';
       }
 
       if (simulating) {
-        return (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
-            <Loader width={20} height={20} />
-            <div>Fetching pool data</div>
-          </div>
-        );
+        return "Simulating";
+      }
+
+      if (isInsufficientZap) {
+        return `Insufficient ${tokenZap.name.toUpperCase()}`;
       }
 
       return 'Zap in';
@@ -828,7 +827,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           displayToast(TToastType.TX_SUCCESSFUL, {
             customLink: getTransactionUrl('Oraichain', tx)
           });
-          handleSuccessAdd();
+          // handleSuccessAdd();
           loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
           onCloseModal();
           navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
@@ -1291,125 +1290,129 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               </span>
             </div>
           )}
+
           {zapError && (
-            <div>
-              <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
-                Result: {zapError}
+            <div className={styles.errorZap}>
+              <ErrorIcon />
+              <span>
+                No route found to zap, try other tokens or check back later.
               </span>
             </div>
           )}
-          <div className={styles.dividerOut}>
-            <div className={styles.bar}></div>
-            <div>
-              <OutputIcon />
-            </div>
-            <div className={styles.bar}></div>
-          </div>
-          <div className={styles.tokenOutput}>
-            <div className={styles.item}>
-              <div className={styles.info}>
-                <div className={styles.infoIcon}>{TokenFromIcon}</div>
-                <span>{tokenFrom.name}</span>
-              </div>
-              <div className={styles.value}>
-                {simulating && <div className={styles.mask} />}
-                <span>
-                  {zapInResponse
-                    ? numberWithCommas(Number(zapInResponse.amountX) / 10 ** tokenFrom.decimals, undefined, {
-                        maximumFractionDigits: tokenFrom.decimals
-                      })
-                    : 0}
-                </span>
-                <span className={styles.usd}>
-                  ≈ $
-                  {zapInResponse
-                    ? numberWithCommas(Number(xUsd) || 0, undefined, { maximumFractionDigits: tokenFrom.decimals })
-                    : 0}
-                </span>
-              </div>
-            </div>
-            <div className={styles.item}>
-              <div className={styles.info}>
-                <div className={styles.infoIcon}>{TokenToIcon}</div>
-                <span>{tokenTo.name}</span>
-              </div>
-              <div className={styles.value}>
-                {simulating && <div className={styles.mask} />}
-                <span>
-                  {zapInResponse
-                    ? numberWithCommas(Number(zapInResponse.amountY) / 10 ** tokenTo.decimals, undefined, {
-                        maximumFractionDigits: tokenTo.decimals
-                      })
-                    : 0}
-                </span>
-                <span className={styles.usd}>
-                  ≈ $
-                  {zapInResponse
-                    ? numberWithCommas(Number(yUsd) || 0, undefined, { maximumFractionDigits: tokenTo.decimals })
-                    : 0}
-                </span>
-              </div>
-            </div>
-          </div>
-          {zapInResponse && (
-            <div className={styles.feeInfoWrapper}>
-              <div className={styles.item}>
-                <div className={styles.info}>
-                  <span>Price Impact</span>
+          {!zapError && zapInResponse && (
+            <>
+              <div className={styles.dividerOut}>
+                <div className={styles.bar}></div>
+                <div>
+                  <OutputIcon />
                 </div>
-                <div
-                  className={cx(
-                    'valueImpact',
-                    `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
-                  )}
-                >
-                  <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 })}%</span>
+                <div className={styles.bar}></div>
+              </div>
+              <div className={styles.tokenOutput}>
+                <div className={styles.item}>
+                  <div className={styles.info}>
+                    <div className={styles.infoIcon}>{TokenFromIcon}</div>
+                    <span>{tokenFrom.name}</span>
+                  </div>
+                  <div className={styles.value}>
+                    {simulating && <div className={styles.mask} />}
+                    <span>
+                      {zapInResponse
+                        ? numberWithCommas(Number(zapInResponse.amountX) / 10 ** tokenFrom.decimals, undefined, {
+                            maximumFractionDigits: tokenFrom.decimals
+                          })
+                        : 0}
+                    </span>
+                    <span className={styles.usd}>
+                      ≈ $
+                      {zapInResponse
+                        ? numberWithCommas(Number(xUsd) || 0, undefined, { maximumFractionDigits: tokenFrom.decimals })
+                        : 0}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.item}>
+                  <div className={styles.info}>
+                    <div className={styles.infoIcon}>{TokenToIcon}</div>
+                    <span>{tokenTo.name}</span>
+                  </div>
+                  <div className={styles.value}>
+                    {simulating && <div className={styles.mask} />}
+                    <span>
+                      {zapInResponse
+                        ? numberWithCommas(Number(zapInResponse.amountY) / 10 ** tokenTo.decimals, undefined, {
+                            maximumFractionDigits: tokenTo.decimals
+                          })
+                        : 0}
+                    </span>
+                    <span className={styles.usd}>
+                      ≈ $
+                      {zapInResponse
+                        ? numberWithCommas(Number(yUsd) || 0, undefined, { maximumFractionDigits: tokenTo.decimals })
+                        : 0}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className={styles.item}>
-                <div className={styles.info}>
-                  <span>Swap Fee</span>
+              <div className={styles.feeInfoWrapper}>
+                <div className={styles.item}>
+                  <div className={styles.info}>
+                    <span>Price Impact</span>
+                  </div>
+                  <div
+                    className={cx(
+                      'valueImpact',
+                      `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
+                    )}
+                  >
+                    <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 })}%</span>
+                  </div>
                 </div>
-                <div className={styles.value}>
-                  <span>{numberWithCommas(swapFee, undefined, { maximumFractionDigits: 2 })} %</span>
+                <div className={styles.item}>
+                  <div className={styles.info}>
+                    <span>Swap Fee</span>
+                  </div>
+                  <div className={styles.value}>
+                    <span>{numberWithCommas(swapFee, undefined, { maximumFractionDigits: 2 })} %</span>
+                  </div>
+                </div>
+                <div className={styles.item}>
+                  <div className={styles.info}>
+                    <TooltipHover
+                      isVisible={isVisible}
+                      setIsVisible={setIsVisible}
+                      content={<div>The amount of token you'll swap to provide liquidity.</div>}
+                      position="right"
+                      children={<span>Zap Fee</span>}
+                    />
+                  </div>
+                  <div className={styles.value}>
+                    <span>
+                      {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, {
+                        maximumFractionDigits: tokenZap.decimals
+                      })}{' '}
+                      {tokenZap.name}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.item}>
+                  <div className={styles.conclusion}>
+                    <span>Total Fee</span>
+                  </div>
+                  <div className={styles.value}>
+                    <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 4 })}</span>
+                  </div>
+                </div>
+                <div className={styles.item}>
+                  <div className={styles.conclusion}>
+                    <span>Match Rate</span>
+                  </div>
+                  <div className={styles.value}>
+                    <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 })} %</span>
+                  </div>
                 </div>
               </div>
-              <div className={styles.item}>
-                <div className={styles.info}>
-                  <TooltipHover
-                    isVisible={isVisible}
-                    setIsVisible={setIsVisible}
-                    content={<div>The amount of token you'll swap to provide liquidity.</div>}
-                    position="right"
-                    children={<span>Zap Fee</span>}
-                  />
-                </div>
-                <div className={styles.value}>
-                  <span>
-                    {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, {
-                      maximumFractionDigits: tokenZap.decimals
-                    })}{' '}
-                    {tokenZap.name}
-                  </span>
-                </div>
-              </div>
-              <div className={styles.item}>
-                <div className={styles.conclusion}>
-                  <span>Total Fee</span>
-                </div>
-                <div className={styles.value}>
-                  <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-              <div className={styles.item}>
-                <div className={styles.conclusion}>
-                  <span>Match Rate</span>
-                </div>
-                <div className={styles.value}>
-                  <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 })} %</span>
-                </div>
-              </div>
-            </div>
+            </>
           )}
           <div ref={endRef}></div>
         </div>

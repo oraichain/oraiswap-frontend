@@ -85,7 +85,7 @@ const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
                         <span>Fee: {Number(pool.pool_key.fee_tier.fee) / 10 ** 10}%</span>
                       </div>
                       <div className={styles.infoPoolfee}>
-                        <span>{Number(pool.pool_key.fee_tier.fee) / 10 ** 10}% Spread</span>
+                        <span>0.01% Spread</span>
                       </div>
                     </div>
                     <div className={classNames(styles.infoMarket)}>Market ID: orai13r0p...00000-100</div>

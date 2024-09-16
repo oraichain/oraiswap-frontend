@@ -14,7 +14,7 @@
     padding: 16px;
   }
 
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 210px);
   overflow-y: auto;
 }
 
@@ -684,13 +684,35 @@
   font-size: 12px;
   margin-bottom: 16px;
 
-  @include theme {
-    border: 1px solid theme-get('neutral-6');
-  }
+  border: 1px solid rgba(35, 37, 33, 1);
 
   svg {
     width: 40px;
     height: 40px;
+  }
+}
+
+.errorZap {
+  margin-top: 16px;
+  display: flex;
+  padding: 16px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+  border-radius: 12px;
+  justify-content: start;
+  font-weight: 400;
+  font-size: 12px;
+  margin-bottom: 16px;
+  color: rgba(255, 77, 82, 1);
+  border: 1px solid rgba(255, 77, 82, 0.16);
+
+  background-color: rgba(255, 77, 82, 0.08);
+
+  svg {
+    width: 15px;
+    height: 15px;
   }
 }
 

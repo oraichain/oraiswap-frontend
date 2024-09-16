@@ -4429,10 +4429,10 @@
     tronweb "5.3.2"
     ts-protoc-gen "^0.15.0"
 
-"@oraichain/oraiswap-v3@0.1.6-beta.19":
-  version "0.1.6-beta.19"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.6-beta.19.tgz#1bbbd3b61107f0ec44b605b3a08d1dca749abcb0"
-  integrity sha512-iF+TVLH91sh0IO7XDER3wpA8rJqcMGRUFMTGXSlTCOD8bBM61Ah5NjdEbf5TOQlhaUT7qwxeQoL6uwE1mxaRnw==
+"@oraichain/oraiswap-v3@0.1.6-beta.23":
+  version "0.1.6-beta.23"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.6-beta.23.tgz#e4a2ac98401b9f78f9241cf96cabc0bbf167d9b5"
+  integrity sha512-hFy+3mDhvj5s+kSmvaIk1UfQfGI7jgO2jY+YbX0zx5pDuH7dZ/7kLB28wf4P9u2SA5O5MLreajiO9x2UwYbsJQ==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
     "@oraichain/oraidex-common" "^1.1.6"

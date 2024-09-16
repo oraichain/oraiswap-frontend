@@ -16,6 +16,7 @@ import { RootState } from 'store/configure';
 import styles from './index.module.scss';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { USDT_CONTRACT, MULTICALL_CONTRACT } from '@oraichain/oraidex-common';
+import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { ZapConsumer } from '@oraichain/oraiswap-v3';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
@@ -72,7 +73,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   const [zapAmount, setZapAmount] = useState<number | string>('');
   const [zapOutResponse, setZapOutResponse] = useState<ZapOutLiquidityResponse>(null);
   const [simulating, setSimulating] = useState<boolean>(false);
-  const [toggleZapOut, setToggleZapOut] = useState(true);
+  const [toggleZapOut, setToggleZapOut] = useState(false);
   const [zapError, setZapError] = useState<string | null>(null);
 
   const debounceZapAmount = useDebounce(zapAmount, 800);
@@ -261,15 +262,22 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     if (toggleZapOut && showModal) {
       handleSimulateZapOut();
     }
-  }, [showModal, tokenZap]);
+  }, [showModal, tokenZap, toggleZapOut]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (zapOutResponse) {
+      console.log('zapOutResponse', zapOutResponse);
       if (zapOutResponse.result !== ZapOutResult.Success) {
         setZapError(zapOutResponse.result);
       }
     }
-  }, [zapOutResponse])
+    if (simulating) {
+      setZapError(null);
+    }
+    if (tokenZap && simulating) {
+      setZapError(null);
+    }
+  }, [zapOutResponse, simulating, tokenZap, zapAmount]);
 
   const receiveLiquidityTokens: {
     icon: JSX.Element;
@@ -320,7 +328,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           className={classNames(styles.btnOption, { [styles.activeBtn]: toggleZapOut })}
           onClick={() => setToggleZapOut(true)}
         >
-          Zap In
+          Zap Out
           <span>NEW</span>
         </button>
         <button
@@ -363,13 +371,6 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             <div>
               <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
                 <ZappingText text={'Finding best option to zap'} />
-              </span>
-            </div>
-          )}
-          {zapError && (
-            <div>
-              <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
-                Result: {zapError}
               </span>
             </div>
           )}
@@ -419,81 +420,94 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                   }}
                 />
                 <div className={styles.usd}>
-                  ≈ ${zapAmount ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: tokenZap.decimals }) : 0}
+                  ≈ $
+                  {zapAmount
+                    ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: tokenZap.decimals })
+                    : 0}
                 </div>
               </div>
             </div>
           </div>
-          {receiveIncentiveTokens.length > 0 && (
+          {zapError && (
+            <div className={styles.errorZap}>
+              <ErrorIcon />
+              <span>No route found to zap, try other tokens or check back later.</span>
+            </div>
+          )}
+          {!zapError && zapOutResponse && (
             <>
-              <span className={styles.receiveType}>With incentives</span>
-              <div className={styles.receiveToken}>
-                {receiveIncentiveTokens.map((e, i) => (
-                  <div className={styles.item} key={i}>
-                    <div className={styles.info}>
-                      <div>{e.icon}</div>
-                      <span>{e.info.name}</span>
-                    </div>
-                    <div className={styles.value}>
-                      <span>{e.amount}</span>
-                      <span className={styles.usd}>≈ {formatDisplayUsdt(prices[e?.info?.coinGeckoId] * e.amount)}</span>
-                    </div>
+              {receiveIncentiveTokens.length > 0 && (
+                <>
+                  <span className={styles.receiveType}>With incentives</span>
+                  <div className={styles.receiveToken}>
+                    {receiveIncentiveTokens.map((e, i) => (
+                      <div className={styles.item} key={i}>
+                        <div className={styles.info}>
+                          <div>{e.icon}</div>
+                          <span>{e.info.name}</span>
+                        </div>
+                        <div className={styles.value}>
+                          <span>{e.amount}</span>
+                          <span className={styles.usd}>
+                            ≈ {formatDisplayUsdt(prices[e?.info?.coinGeckoId] * e.amount)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </>
+              )}
+              <div className={styles.feeInfoWrapper}>
+                <div className={styles.item}>
+                  <div className={styles.info}>
+                    <span>Price Impact</span>
+                  </div>
+                  <div
+                    className={cx(
+                      'valueImpact',
+                      `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
+                    )}
+                  >
+                    <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 })}%</span>
+                  </div>
+                </div>
+                <div className={styles.item}>
+                  <div className={styles.info}>
+                    <span>Swap Fee</span>
+                  </div>
+                  <div className={styles.value}>
+                    <span>{numberWithCommas(swapFee, undefined, { maximumFractionDigits: 2 })} %</span>
+                  </div>
+                </div>
+                <div className={styles.item}>
+                  <div className={styles.info}>
+                    <TooltipHover
+                      isVisible={isVisible}
+                      setIsVisible={setIsVisible}
+                      content={<div>The amount of token you'll swap to provide liquidity.</div>}
+                      position="right"
+                      children={<span>Zap Fee</span>}
+                    />
+                  </div>
+                  <div className={styles.value}>
+                    <span>
+                      {numberWithCommas(zapFeeX, undefined, { maximumFractionDigits: tokenFrom.decimals })}{' '}
+                      {TokenFromIcon}
+                      {'  '}
+                      {numberWithCommas(zapFeeY, undefined, { maximumFractionDigits: tokenTo.decimals })} {TokenToIcon}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.item}>
+                  <div className={styles.conclusion}>
+                    <span>Total Fee</span>
+                  </div>
+                  <div className={styles.value}>
+                    <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 4 })}</span>
+                  </div>
+                </div>
               </div>
             </>
-          )}
-          {zapOutResponse && (
-            <div className={styles.feeInfoWrapper}>
-              <div className={styles.item}>
-                <div className={styles.info}>
-                  <span>Price Impact</span>
-                </div>
-                <div
-                  className={cx(
-                    'valueImpact',
-                    `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
-                  )}
-                >
-                  <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 })}%</span>
-                </div>
-              </div>
-              <div className={styles.item}>
-                <div className={styles.info}>
-                  <span>Swap Fee</span>
-                </div>
-                <div className={styles.value}>
-                  <span>{numberWithCommas(swapFee, undefined, { maximumFractionDigits: 2 })} %</span>
-                </div>
-              </div>
-              <div className={styles.item}>
-                <div className={styles.info}>
-                  <TooltipHover
-                    isVisible={isVisible}
-                    setIsVisible={setIsVisible}
-                    content={<div>The amount of token you'll swap to provide liquidity.</div>}
-                    position="right"
-                    children={<span>Zap Fee</span>}
-                  />
-                </div>
-                <div className={styles.value}>
-                  <span>
-                    {numberWithCommas(zapFeeX, undefined, { maximumFractionDigits: tokenFrom.decimals })}{' '}
-                    {TokenFromIcon}
-                    {'  '}
-                    {numberWithCommas(zapFeeY, undefined, { maximumFractionDigits: tokenTo.decimals })} {TokenToIcon}
-                  </span>
-                </div>
-              </div>
-              <div className={styles.item}>
-                <div className={styles.conclusion}>
-                  <span>Total Fee</span>
-                </div>
-                <div className={styles.value}>
-                  <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-            </div>
           )}
         </div>
       ) : (
