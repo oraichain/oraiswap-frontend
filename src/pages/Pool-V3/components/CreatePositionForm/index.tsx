@@ -769,7 +769,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       if (tokenZap && zapAmount) {
         setLoading(true);
         await zapIn(
-          { tokenZap, zapAmount: (new BigDecimal(zapAmount, tokenZap.decimals)).mul(10n ** BigInt(tokenZap.decimals)).toString(), zapInResponse },
+          {
+            tokenZap,
+            zapAmount: new BigDecimal(zapAmount, tokenZap.decimals).mul(10n ** BigInt(tokenZap.decimals)).toString(),
+            zapInResponse
+          },
           walletAddress,
           (tx: string) => {
             displayToast(TToastType.TX_SUCCESSFUL, {
@@ -960,7 +964,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     if (Number(zapAmount) > 0 && !zapInResponse && !simulating) {
       setSimulating(true);
     }
-  }, [zapAmount]);
+    if (Number(zapAmount) === 0 || !zapAmount) {
+      console.log('reset');
+      setZapInResponse(null);
+    }
+  }, [zapAmount, debounceZapAmount]);
 
   return (
     <div className={styles.createPoolForm}>
@@ -1346,7 +1354,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 </div>
                 <div className={styles.value}>
                   <span>
-                    {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, { maximumFractionDigits: tokenZap.decimals })}{' '}
+                    {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, {
+                      maximumFractionDigits: tokenZap.decimals
+                    })}{' '}
                     {tokenZap.name}
                   </span>
                 </div>
