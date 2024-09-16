@@ -12,7 +12,8 @@ import {
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   toAmount,
   TokenItemType,
-  tronToEthAddress
+  tronToEthAddress,
+  calculateTimeoutTimestamp
 } from '@oraichain/oraidex-common';
 import { isSupportedNoPoolSwapEvm, UniversalSwapHandler } from '@oraichain/oraidex-universal-swap';
 import { isMobile } from '@walletconnect/browser-utils';
@@ -337,7 +338,7 @@ const Balance: React.FC<BalanceProps> = () => {
               local_channel_id: OraichainChain.source.channelId,
               remote_address: destinationAddress,
               remote_denom: OraichainChain.source.nBtcIbcDenom,
-              timeout: DEFAULT_TIMEOUT,
+              timeout: Number(calculateTimeoutTimestamp(DEFAULT_TIMEOUT)),
               memo: `withdraw:${btcAddr}`
             })
           }
@@ -359,9 +360,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const checkTransferBtc = async (fromAmount: number) => {
-    const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
-    const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
+  const checkTransferBtc = async (fromAmount: number, isBTCtoOraichain: boolean, isOraichainToBTC: boolean) => {
     if (isBTCtoOraichain || isOraichainToBTC)
       return handleTransferBTC({
         isBTCToOraichain: isBTCtoOraichain,
@@ -435,8 +434,11 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
-      // [BTC Native] <==> ORAICHAIN
-      await checkTransferBtc(fromAmount);
+      const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
+      const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
+      if (isBTCtoOraichain || isOraichainToBTC) {
+        return await checkTransferBtc(fromAmount, isBTCtoOraichain, isOraichainToBTC);
+      }
 
       let newToToken = to;
       if (toNetworkChainId) {
