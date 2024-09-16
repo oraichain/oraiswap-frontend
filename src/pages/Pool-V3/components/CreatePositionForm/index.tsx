@@ -871,7 +871,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {
-            protocols: ['OraidexV3']
+            protocols: ['OraidexV3'],
+            maxSplits: 1
           }
         }
       });
