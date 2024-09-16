@@ -1,6 +1,6 @@
 import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress, ZapOutLiquidityResponse } from '@oraichain/oraiswap-v3';
+import { extractAddress, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -72,6 +72,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   const [zapOutResponse, setZapOutResponse] = useState<ZapOutLiquidityResponse>(null);
   const [simulating, setSimulating] = useState<boolean>(false);
   const [toggleZapOut, setToggleZapOut] = useState(true);
+  const [zapError, setZapError] = useState<string | null>(null);
 
   const debounceZapAmount = useDebounce(zapAmount, 800);
 
@@ -260,6 +261,14 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     }
   }, [showModal, tokenZap]);
 
+  useEffect(() => { 
+    if (zapOutResponse) {
+      if (zapOutResponse.result !== ZapOutResult.Success) {
+        setZapError(zapOutResponse.result);
+      }
+    }
+  }, [zapOutResponse])
+
   const receiveLiquidityTokens: {
     icon: JSX.Element;
     info: TokenItemType;
@@ -352,6 +361,13 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             <div>
               <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
                 Finding best option to zap...
+              </span>
+            </div>
+          )}
+          {zapError && (
+            <div>
+              <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
+                Result: {zapError}
               </span>
             </div>
           )}

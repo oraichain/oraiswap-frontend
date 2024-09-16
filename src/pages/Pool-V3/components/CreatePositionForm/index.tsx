@@ -21,7 +21,8 @@ import {
   newPoolKey,
   poolKeyToString,
   ZapConsumer,
-  ZapInLiquidityResponse
+  ZapInLiquidityResponse,
+  ZapInResult
 } from '@oraichain/oraiswap-v3';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
@@ -151,6 +152,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [plotMin, setPlotMin] = useState(0);
   const [plotMax, setPlotMax] = useState(1);
 
+  const [zapError, setZapError] = useState<string | null>(null);
+
   const [isPoolExist, setIsPoolExist] = useState(false);
 
   const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
@@ -232,6 +235,14 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       );
     }
   }, [amountFrom, focusId]);
+
+  useEffect(() => { 
+    if (zapInResponse) {
+      if ([ZapInResult.NoRouteFound, ZapInResult.SomethingWentWrong].includes(zapInResponse.result)) {
+        setZapError(zapInResponse.result);
+      }
+    }
+  }, [zapInResponse])
 
   useEffect(() => {
     if (focusId === 'to') {
@@ -1264,6 +1275,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             <div>
               <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
                 Finding best option to zap...
+              </span>
+            </div>
+          )}
+          {zapError && (
+            <div>
+              <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
+                Result: {zapError}
               </span>
             </div>
           )}
