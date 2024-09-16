@@ -74,6 +74,7 @@ import {
 } from '../PriceRangePlot/utils';
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
+import ZappingText from 'components/Zapping';
 
 export type PriceInfo = {
   startPrice: number;
@@ -114,6 +115,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [zapInResponse, setZapInResponse] = useState<ZapInLiquidityResponse>(null);
   const [simulating, setSimulating] = useState<boolean>(false);
   const [zapImpactPrice, setZapImpactPrice] = useState<number>(0.5);
+
+  const endRef = useRef(null);
 
   const debounceZapAmount = useDebounce(zapAmount, 800);
 
@@ -754,7 +757,12 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       }
 
       if (simulating) {
-        return 'Simulating...';
+        return (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+            <Loader width={20} height={20} />
+            <div>Fetching pool data</div>
+          </div>
+        );
       }
 
       return 'Zap in';
@@ -857,12 +865,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const zapFee = await zap.protocolFee();
       const amountAfterFee = Number(zapAmount) * (1 - Number(zapFee.percent));
 
+      const routerApi = 'https://osor.oraidex.io/smart-router/alpha-router';
       const zapper = new ZapConsumer({
-        client: await CosmWasmClient.connect(network.rpc),
+        client,
         devitation: 0,
         dexV3Address: network.pool_v3,
         multicallAddress: MULTICALL_CONTRACT,
-        routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
+        routerApi,
         smartRouteConfig: {
           swapOptions: {
             protocols: ['OraidexV3']
@@ -871,7 +880,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       });
 
       const amountIn = Math.round(amountAfterFee * 10 ** tokenZap.decimals).toString();
-      console.log({ amountIn });
       const amountFee = Math.floor(Number(zapFee.percent) * Number(zapAmount) * 10 ** tokenZap.decimals);
 
       setZapFee(amountFee);
@@ -944,6 +952,12 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       setSimulating(false);
     }
   };
+
+  useEffect(() => {
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [zapInResponse]);
 
   useEffect(() => {
     // console.log("debounceZapAmount", debounceZapAmount);
@@ -1264,7 +1278,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           {simulating && (
             <div>
               <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
-                Finding best option to zap...
+                <ZappingText text={'Finding best option to zap'} />
               </span>
             </div>
           )}
@@ -1278,7 +1292,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           <div className={styles.tokenOutput}>
             <div className={styles.item}>
               <div className={styles.info}>
-                <div>{TokenFromIcon}</div>
+                <div className={styles.infoIcon}>{TokenFromIcon}</div>
                 <span>{tokenFrom.name}</span>
               </div>
               <div className={styles.value}>
@@ -1300,7 +1314,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             </div>
             <div className={styles.item}>
               <div className={styles.info}>
-                <div>{TokenToIcon}</div>
+                <div className={styles.infoIcon}>{TokenToIcon}</div>
                 <span>{tokenTo.name}</span>
               </div>
               <div className={styles.value}>
@@ -1356,7 +1370,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 </div>
                 <div className={styles.value}>
                   <span>
-                    {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, { maximumFractionDigits: tokenZap.decimals })}{' '}
+                    {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, {
+                      maximumFractionDigits: tokenZap.decimals
+                    })}{' '}
                     {tokenZap.name}
                   </span>
                 </div>
@@ -1379,6 +1395,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               </div>
             </div>
           )}
+          <div ref={endRef}></div>
         </div>
       ) : (
         <>
