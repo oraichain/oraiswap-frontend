@@ -33,6 +33,7 @@ import { getCosmWasmClient } from 'libs/cosmjs';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import TooltipHover from 'components/TooltipHover';
 import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import ZappingText from 'components/Zapping';
 
 const cx = cn.bind(styles);
 
@@ -82,7 +83,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   const [amountTo, setAmountTo] = useState<number | string>();
   const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(amountFrom || 0)).toFixed(6);
   const toUsd = (prices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
-  const zapUsd = (prices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0));
+  const zapUsd = prices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0);
 
   const [swapFee, setSwapFee] = useState<number>(1.5);
   const [zapFeeX, setZapFeeX] = useState<number>(1);
@@ -222,10 +223,11 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const outputUsd =
         (Number(res.amountToX) * prices[tokenZap.coinGeckoId]) / 10 ** tokenZap.decimals +
         (Number(res.amountToY) * prices[tokenZap.coinGeckoId]) / 10 ** tokenZap.decimals;
-        console.log({inputUsd, outputUsd});
+      console.log({ inputUsd, outputUsd });
       const priceImpact = (Math.abs(inputUsd - outputUsd) / inputUsd) * 100;
 
-      const totalAmountOut = Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals;
+      const totalAmountOut =
+        Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals;
 
       const zapFeeX = Number(position.tokenXLiq) * Number(zapFee.percent);
       const zapFeeY = Number(position.tokenYLiq) * Number(zapFee.percent);
@@ -233,7 +235,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const totalFeeInUsd =
         zapFeeX * prices[tokenFrom.coinGeckoId] +
         zapFeeY * prices[tokenTo.coinGeckoId] +
-        totalAmountOut * swapFee * prices[tokenZap.coinGeckoId] / 100;
+        (totalAmountOut * swapFee * prices[tokenZap.coinGeckoId]) / 100;
 
       setZapImpactPrice(priceImpact);
       setTotalFee(totalFeeInUsd);
@@ -360,7 +362,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           {simulating && (
             <div>
               <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
-                Finding best option to zap...
+                <ZappingText text={'Finding best option to zap'} />
               </span>
             </div>
           )}
@@ -476,7 +478,9 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                 </div>
                 <div className={styles.value}>
                   <span>
-                    {numberWithCommas(zapFeeX, undefined, { maximumFractionDigits: tokenFrom.decimals })} {TokenFromIcon}{'  '}
+                    {numberWithCommas(zapFeeX, undefined, { maximumFractionDigits: tokenFrom.decimals })}{' '}
+                    {TokenFromIcon}
+                    {'  '}
                     {numberWithCommas(zapFeeY, undefined, { maximumFractionDigits: tokenTo.decimals })} {TokenToIcon}
                   </span>
                 </div>

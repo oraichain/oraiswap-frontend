@@ -720,6 +720,10 @@
       font-weight: 500;
       line-height: 150%; /* 27px */
 
+      .infoIcon {
+        display: flex;
+      }
+
       svg {
         width: 24px;
         height: 24px;
@@ -732,7 +736,7 @@
       flex-direction: column;
       align-items: flex-end;
 
-      width: 50%;
+      width: 60%;
       position: relative;
       color: var(--Colors-Neutral-Text-title, #efefef);
       font-size: 20px;
