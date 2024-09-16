@@ -190,6 +190,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   const handleSimulateZapOut = async () => {
     try {
       setSimulating(true);
+      setLoading(true);
 
       const client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
@@ -247,6 +248,10 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       // console.error(error);
       console.log('error', error);
       setSimulating(false);
+      setLoading(false);
+    } finally {
+      setSimulating(false);
+      setLoading(false);
     }
   };
 
@@ -398,7 +403,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                   }}
                 />
                 <div className={styles.usd}>
-                  ≈ ${zapAmount ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+                  ≈ ${zapAmount ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: tokenZap.decimals }) : 0}
                 </div>
               </div>
             </div>

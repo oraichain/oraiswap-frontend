@@ -776,7 +776,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       if (tokenZap && zapAmount) {
         setLoading(true);
         await zapIn(
-          { tokenZap, zapAmount: (BigInt(zapAmount) * BigInt(10 ** tokenZap.decimals)).toString(), zapInResponse },
+          {
+            tokenZap,
+            zapAmount: new BigDecimal(zapAmount, tokenZap.decimals).mul(10n ** BigInt(tokenZap.decimals)).toString(),
+            zapInResponse
+          },
           walletAddress,
           (tx: string) => {
             displayToast(TToastType.TX_SUCCESSFUL, {
@@ -859,6 +863,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const handleSimulateZapIn = async () => {
     try {
       setSimulating(true);
+      setLoading(true);
 
       const client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
@@ -874,7 +879,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         routerApi,
         smartRouteConfig: {
           swapOptions: {
-            protocols: ['OraidexV3']
+            protocols: ['OraidexV3'],
+            maxSplits: 1
           }
         }
       });
@@ -948,8 +954,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       // console.error(error);
       console.log('error', error);
       setSimulating(false);
+      setLoading(false);
     } finally {
       setSimulating(false);
+      setLoading(false);
     }
   };
 
@@ -970,7 +978,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     if (Number(zapAmount) > 0 && !zapInResponse && !simulating) {
       setSimulating(true);
     }
-  }, [zapAmount]);
+    if (Number(zapAmount) === 0 || !zapAmount) {
+      console.log('reset');
+      setZapInResponse(null);
+    }
+  }, [zapAmount, debounceZapAmount]);
 
   return (
     <div className={styles.createPoolForm}>
@@ -1106,20 +1118,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 {numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: tokenTo.decimals })} {tokenTo.name}
               </p>
             </div>
-
-            {/* <div className={styles.currentPriceWrapper}>
-              <div className={styles.currentPriceTitle}>
-                <p>Current Price</p>
-              </div>
-              <div className={styles.currentPriceValue}>
-                <p>
-                  <p>{numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: 9 })}</p>
-                  <p className={styles.pair}>
-                    {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
-                  </p>
-                </p>
-              </div>
-            </div> */}
 
             <div className={styles.minMaxPriceWrapper}>
               <div className={styles.item}>
@@ -1541,17 +1539,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           </div>
         </>
       )}
-
-      {/* {zapInResponse && (
-        <div>
-          <p>
-            {zapInResponse.amountToX} {tokenZap.name} will convert to {zapInResponse.amountX} {tokenFrom.name}
-          </p>
-          <p>
-            {zapInResponse.amountToY} {tokenZap.name} will convert to {zapInResponse.amountY} {tokenTo.name}
-          </p>
-        </div>
-      )} */}
 
       <div className={styles.btn}>
         {(() => {
