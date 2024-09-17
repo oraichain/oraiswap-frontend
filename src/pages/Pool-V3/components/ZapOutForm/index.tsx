@@ -22,7 +22,6 @@ import { ZapConsumer } from '@oraichain/oraiswap-v3';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { network } from 'config/networks';
 import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { useDebounce } from 'hooks/useDebounce';
 import useZap from 'pages/Pool-V3/hooks/useZap';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -173,7 +172,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             // handleSuccessAdd();
             loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
             onCloseModal();
-            navigate(`/pools-v3?type=positions}`);
+            navigate(`/pools-v3?type=positions`);
           },
           (e) => {
             displayToast(TToastType.TX_FAILED, {
@@ -190,6 +189,8 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   };
 
   const handleSimulateZapOut = async () => {
+    setSimulating(true);
+    setLoading(true);
     let zapFee = 0;
     let client: CosmWasmClient;
     try {
@@ -201,9 +202,6 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     }
 
     try {
-      setSimulating(true);
-      setLoading(true);
-
       // const client = await CosmWasmClient.connect(network.rpc);
       // const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
       // const zapFee = await zap.protocolFee();

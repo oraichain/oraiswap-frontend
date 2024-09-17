@@ -38,7 +38,6 @@ import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
-import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { extractAddress } from '@oraichain/oraiswap-v3';
 import ZapOut from '../ZapOut';

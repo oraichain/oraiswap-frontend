@@ -871,6 +871,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   };
 
   const handleSimulateZapIn = async () => {
+    setSimulating(true);
+    setLoading(true);
     let zapFee = 0;
     let client: CosmWasmClient;
     try {
@@ -884,8 +886,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
 
     try {
-      setSimulating(true);
-      setLoading(true);
 
       // const client = await CosmWasmClient.connect(network.rpc);
       // const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
@@ -994,14 +994,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     if (Number(zapAmount) > 0 && toggleZapIn) {
       handleSimulateZapIn();
     }
-  }, [debounceZapAmount]);
+  }, [debounceZapAmount, leftRange, rightRange]);
 
   useEffect(() => {
     if (Number(zapAmount) > 0 && !zapInResponse && !simulating) {
       setSimulating(true);
     }
     if (Number(zapAmount) === 0 || !zapAmount) {
-      console.log('reset');
       setZapInResponse(null);
     }
   }, [zapAmount, debounceZapAmount]);
