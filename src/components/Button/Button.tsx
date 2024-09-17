@@ -4,7 +4,7 @@ import cn from 'classnames/bind';
 import useTheme from 'hooks/useTheme';
 
 const cx = cn.bind(styles);
-type ButtonType =
+export type ButtonType =
   | 'primary'
   | 'secondary'
   | 'primary-sm'

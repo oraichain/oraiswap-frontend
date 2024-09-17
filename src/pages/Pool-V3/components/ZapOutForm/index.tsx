@@ -338,7 +338,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           onClick={() => setToggleZapOut(true)}
         >
           Zap Out
-          <span>NEW</span>
+          <span>BETA</span>
         </button>
         <button
           className={classNames(styles.btnOption, { [styles.activeBtn]: !toggleZapOut })}
@@ -379,7 +379,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           {simulating && (
             <div>
               <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
-                <ZappingText text={'Finding best option to zap'} />
+                <ZappingText text={'Finding best option to zap'} dot={5} />
               </span>
             </div>
           )}
