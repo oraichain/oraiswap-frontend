@@ -590,6 +590,8 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                     displayToast(TToastType.TX_SUCCESSFUL, {
                       customLink: getTransactionUrl(network.chainId, transactionHash)
                     });
+                    onCloseModal();
+                    // navigate(`/pools-v3?type=positions`);
                   }
                 } catch (error) {
                   console.log({ error });

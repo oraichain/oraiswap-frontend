@@ -446,7 +446,7 @@ const PositionItem = ({ position }) => {
                 Add Liquidity
               </Button> */}
 
-              {position && poolList && (
+              {position && poolList.length > 0 && (
                 <CreateNewPosition
                   btnType={'primary-sm'}
                   btnTitle={'Add Position'}
