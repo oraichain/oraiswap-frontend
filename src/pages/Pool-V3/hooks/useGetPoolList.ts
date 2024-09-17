@@ -14,9 +14,9 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
     refetch: refetchPoolList,
     isLoading: isLoadingGetPoolList
   } = useQuery<PoolWithPoolKey[]>(['pool-v3-pools', coingeckoPrices], () => getPoolList(), {
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     placeholderData: [],
-    cacheTime: 5 * 60 * 1000
+    // cacheTime: 5 * 60 * 1000
   });
 
   useEffect(() => {

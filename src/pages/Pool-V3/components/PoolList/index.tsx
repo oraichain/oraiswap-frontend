@@ -11,9 +11,10 @@ import classNames from 'classnames';
 import LoadingBox from 'components/LoadingBox';
 import { CoefficientBySort, SortType } from 'components/Table';
 import { TooltipIcon } from 'components/Tooltip';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { fetchPoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
+import { fetchPoolAprInfo } from 'libs/contractSingleton';
 import { formatPoolData } from 'pages/Pool-V3/helpers/format';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
@@ -22,8 +23,8 @@ import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionIn
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -408,15 +409,7 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
         </div>
       </td>
       <td className={styles.actions}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/new-position/${encodeURIComponent(poolKeyToString(item.pool_key))}`);
-          }}
-          className={styles.add}
-        >
-          Add Position
-        </button>
+        <CreateNewPosition pool={item} />
       </td>
     </>
   );

@@ -41,6 +41,7 @@ import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { extractAddress } from '@oraichain/oraiswap-v3';
+import ZapOut from '../ZapOut';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 
 const PositionItem = ({ position }) => {
@@ -397,7 +398,7 @@ const PositionItem = ({ position }) => {
               </div>
             </div>
             <div className={styles.btnGroup}>
-              <Button
+              {/* <Button
                 disabled={removeLoading || (!position.tokenXLiqInUsd && !position.tokenYLiqInUsd)}
                 type="third-sm"
                 onClick={async () => {
@@ -434,7 +435,8 @@ const PositionItem = ({ position }) => {
                   </>
                 )}
                 Close Position
-              </Button>
+              </Button> */}
+              <ZapOut position={position} incentives={incentives} />
               <Button
                 type="primary-sm"
                 onClick={() => {
@@ -465,7 +467,7 @@ const PositionItem = ({ position }) => {
                   <position.tokenXIcon />
                   {numberWithCommas(earnXDisplay, undefined, {
                     maximumFractionDigits: 6
-                  })}{' '}
+                  })}
                   {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>

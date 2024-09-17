@@ -59,6 +59,7 @@ import {
 } from '../PriceRangePlot/utils';
 import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 
 export type PriceInfo = {
   startPrice: number;
@@ -791,16 +792,17 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     }
   };
 
+
   const handleGetTicks = () => {
     try {
       const fetchTickData = async () => {
         setLoading(true);
-
+        
         const ticksData = await handleGetCurrentPlotTicks({
           poolKey: notInitPoolKey,
           isXtoY: isXtoY,
           xDecimal: tokenFrom.decimals,
-          yDecimal: tokenTo.decimals
+          yDecimal: tokenTo.decimals,
         });
 
         setLiquidityData(ticksData);

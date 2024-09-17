@@ -7,9 +7,9 @@ export const useGetPositions = (address: string) => {
     ['pool-v3-positions', address],
     () => getPositions(address),
     {
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
       placeholderData: [],
-      cacheTime: 5 * 60 * 1000
+      // cacheTime: 5 * 60 * 1000
     }
   );
 

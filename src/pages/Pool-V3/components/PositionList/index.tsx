@@ -35,7 +35,6 @@ const PositionList = () => {
         }
 
         const feeClaimData = await getFeeClaimData(address);
-
         const positionsMap = convertPosition({
           positions: positions.map((po, ind) => ({ ...po, ind })),
           poolsData: poolList,

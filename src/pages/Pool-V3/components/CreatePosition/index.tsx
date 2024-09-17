@@ -47,6 +47,7 @@ import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import { calculateTokenAmountsWithSlippage, calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
 import { numberWithCommas } from 'helper/format';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 
 export type PriceInfo = {
   startPrice: number;
@@ -725,6 +726,7 @@ const CreatePosition = () => {
     }
   };
 
+
   const handleGetTicks = () => {
     try {
       const fetchTickData = async () => {
@@ -735,7 +737,7 @@ const CreatePosition = () => {
           poolKey: notInitPoolKey,
           isXtoY: isXtoY,
           xDecimal: tokenX.decimals,
-          yDecimal: tokenY.decimals
+          yDecimal: tokenY.decimals,
         });
 
         setLiquidityData(ticksData);
@@ -831,11 +833,21 @@ const CreatePosition = () => {
             onChangeRange={changeRangeHandler}
             leftRange={{
               index: leftRange,
-              x: calcPrice(leftRange, isXtoY, isXtoY ? tokenFrom.decimals : tokenTo.decimals,  isXtoY ? tokenTo.decimals : tokenFrom.decimals)
+              x: calcPrice(
+                leftRange,
+                isXtoY,
+                isXtoY ? tokenFrom.decimals : tokenTo.decimals,
+                isXtoY ? tokenTo.decimals : tokenFrom.decimals
+              )
             }}
             rightRange={{
               index: rightRange,
-              x: calcPrice(rightRange, isXtoY, isXtoY ? tokenFrom.decimals : tokenTo.decimals,  isXtoY ? tokenTo.decimals : tokenFrom.decimals)
+              x: calcPrice(
+                rightRange,
+                isXtoY,
+                isXtoY ? tokenFrom.decimals : tokenTo.decimals,
+                isXtoY ? tokenTo.decimals : tokenFrom.decimals
+              )
             }}
             midPrice={midPrice}
             plotMin={plotMin}

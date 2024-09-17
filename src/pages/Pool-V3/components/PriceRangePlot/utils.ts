@@ -460,6 +460,7 @@ export async function handleGetCurrentPlotTicks({ poolKey, isXtoY, xDecimal, yDe
     const allTickmaps = await SingletonOraiswapV3.getFullTickmap(poolKey);
 
     const rawTicks = await SingletonOraiswapV3.getAllLiquidityTicks(poolKey, allTickmaps);
+    
     if (rawTicks.length === 0) {
       const data = createPlaceholderLiquidityPlot(isXtoY, 0, poolKey.fee_tier.tick_spacing, xDecimal, yDecimal);
       return data;
