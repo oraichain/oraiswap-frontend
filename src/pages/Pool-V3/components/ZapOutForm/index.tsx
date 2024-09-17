@@ -22,7 +22,6 @@ import { ZapConsumer } from '@oraichain/oraiswap-v3';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { network } from 'config/networks';
 import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
-import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { useDebounce } from 'hooks/useDebounce';
 import useZap from 'pages/Pool-V3/hooks/useZap';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -173,7 +172,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             // handleSuccessAdd();
             loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
             onCloseModal();
-            navigate(`/pools-v3?type=positions}`);
+            navigate(`/pools-v3?type=positions`);
           },
           (e) => {
             displayToast(TToastType.TX_FAILED, {
@@ -190,17 +189,26 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   };
 
   const handleSimulateZapOut = async () => {
+    setSimulating(true);
+    setLoading(true);
+    let zapFee = 0;
+    let client: CosmWasmClient;
     try {
-      setSimulating(true);
-      setLoading(true);
-
-      const client = await CosmWasmClient.connect(network.rpc);
+      client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
-      const zapFee = await zap.protocolFee();
+      zapFee = Number((await zap.protocolFee()).percent);
+    } catch (error) {
+      console.log('error', error);
+    }
+
+    try {
+      // const client = await CosmWasmClient.connect(network.rpc);
+      // const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      // const zapFee = await zap.protocolFee();
 
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        devitation: 0.05,
+        devitation: 0,
         dexV3Address: network.pool_v3,
         multicallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
@@ -215,7 +223,8 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const res = await zapper.processZapOutPositionLiquidity({
         owner: walletAddress,
         tokenId: position.token_id,
-        tokenOut: tokenZap
+        tokenOut: tokenZap,
+        zapFee: zapFee
       });
       console.log('res', res);
 
@@ -230,8 +239,8 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const totalAmountOut =
         Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals;
 
-      const zapFeeX = Number(position.tokenXLiq) * Number(zapFee.percent);
-      const zapFeeY = Number(position.tokenYLiq) * Number(zapFee.percent);
+      const zapFeeX = Number(position.tokenXLiq) * zapFee;
+      const zapFeeY = Number(position.tokenYLiq) * zapFee;
       const swapFee = res.swapFee * 100;
       const totalFeeInUsd =
         zapFeeX * prices[tokenFrom.coinGeckoId] +
@@ -329,7 +338,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           onClick={() => setToggleZapOut(true)}
         >
           Zap Out
-          <span>NEW</span>
+          <span>BETA</span>
         </button>
         <button
           className={classNames(styles.btnOption, { [styles.activeBtn]: !toggleZapOut })}
@@ -370,7 +379,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           {simulating && (
             <div>
               <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
-                <ZappingText text={'Finding best option to zap'} />
+                <ZappingText text={'Finding best option to zap'} dot={5} />
               </span>
             </div>
           )}
@@ -581,6 +590,8 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                     displayToast(TToastType.TX_SUCCESSFUL, {
                       customLink: getTransactionUrl(network.chainId, transactionHash)
                     });
+                    onCloseModal();
+                    // navigate(`/pools-v3?type=positions`);
                   }
                 } catch (error) {
                   console.log({ error });

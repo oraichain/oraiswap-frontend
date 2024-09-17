@@ -21,10 +21,11 @@ import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidi
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
+import isEqual from 'lodash/isEqual';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -55,27 +56,38 @@ const PoolList = ({ search }) => {
   const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
   const { poolPositionInfo } = useGetPoolPositionInfo(poolPrice);
 
+  const prevPoolListRef = useRef<any>();
+  const prevPoolPriceRef = useRef<any>();
+
+  const formatPoolDataCallback = useCallback(
+    (p) => {
+      const isLight = theme === 'light';
+      return formatPoolData(p, isLight);
+    },
+    [theme]
+  );
+
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        if (!(poolList.length > 0 && poolPrice)) return setDataPool([]);
-        const fmtPools = (poolList || [])
-          .map((p) => {
-            const isLight = theme === 'light';
-            return formatPoolData(p, isLight);
-          })
-          .filter((e) => e.isValid);
+
+        if (!poolList?.length) return;
+        if (poolList.length > 0 && isEqual(prevPoolListRef.current, poolList)) return;
+        const fmtPools = (poolList || []).map(formatPoolDataCallback).filter((e) => e.isValid);
+
         setDataPool(fmtPools);
       } catch (error) {
         console.log('error: SingletonOraiswapV3 getPools', error);
       } finally {
+        prevPoolListRef.current = poolList ?? [];
+        prevPoolPriceRef.current = poolPrice ?? {};
         setLoading(false);
       }
     })();
 
     return () => {};
-  }, [theme, poolList, poolPrice]);
+  }, [theme, poolList, poolPrice, formatPoolDataCallback]);
 
   useEffect(() => {
     const getAPRInfo = async () => {
@@ -409,7 +421,7 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
         </div>
       </td>
       <td className={styles.actions}>
-        <CreateNewPosition pool={item} />
+        <CreateNewPosition pool={item} className="newPosition" />
       </td>
     </>
   );

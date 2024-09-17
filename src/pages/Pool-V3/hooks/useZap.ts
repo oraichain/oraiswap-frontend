@@ -19,12 +19,12 @@ export type ZapOutData = {
 };
 
 const useZap = () => {
-  const ZAP_CONTRACT = 'orai10x4g7caa3vvvq0sw9vwqcgq6n2kfdqlh4cj8r2szgnjxhdcg23qs47gtxc';
+  const ZAP_CONTRACT = 'orai1r04t5elwku5jh9v2u5jqs0mr4ftfyq7xuspa96almzgvgr04gf7q0duvgj';
 
   const zapIn = async (data: ZapInData, walletAddress: string, onSuccess: any, onError: any) => {
     try {
       const { tokenZap, zapAmount, zapInResponse } = data;
-
+      
       let msg = [];
 
       // approve
@@ -46,7 +46,6 @@ const useZap = () => {
           amount: zapAmount
         });
       }
-
       console.log({ coins });
 
       console.log({
@@ -75,6 +74,8 @@ const useZap = () => {
         },
         funds: coins
       });
+
+      console.log({ msg });
 
       const tx = await executeMultiple(msg, walletAddress);
 

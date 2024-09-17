@@ -59,7 +59,6 @@ import {
 } from '../PriceRangePlot/utils';
 import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
-import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 
 export type PriceInfo = {
   startPrice: number;

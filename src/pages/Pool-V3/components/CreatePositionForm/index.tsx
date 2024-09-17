@@ -768,7 +768,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       }
 
       if (simulating) {
-        return "Simulating";
+        return 'Simulating';
       }
 
       if (isInsufficientZap) {
@@ -871,14 +871,21 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   };
 
   const handleSimulateZapIn = async () => {
+    setSimulating(true);
+    setLoading(true);
+    let zapFee = 0;
+    let client: CosmWasmClient;
     try {
-      setSimulating(true);
-      setLoading(true);
-
-      const client = await CosmWasmClient.connect(network.rpc);
+      client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
-      const zapFee = await zap.protocolFee();
-      const amountAfterFee = Number(zapAmount) * (1 - Number(zapFee.percent));
+      zapFee = Number((await zap.protocolFee()).percent);
+      console.log('zapFee', zapFee);
+    } catch (error) {
+      console.log('error', error);
+    }
+
+    try {
+      const amountAfterFee = Number(zapAmount) * (1 - zapFee);
 
       const routerApi = 'https://osor.oraidex.io/smart-router/alpha-router';
       const zapper = new ZapConsumer({
@@ -896,13 +903,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       });
 
       const amountIn = Math.round(amountAfterFee * 10 ** tokenZap.decimals).toString();
-      const amountFee = Math.floor(Number(zapFee.percent) * Number(zapAmount) * 10 ** tokenZap.decimals);
+      const amountFee = Math.floor(zapFee * Number(zapAmount) * 10 ** tokenZap.decimals);
 
       setZapFee(amountFee);
       const lowerTick = Math.min(leftRange, rightRange);
       const upperTick = Math.max(leftRange, rightRange);
-
-      // console.log({ amountIn, lowerTick, upperTick });
 
       const result = await zapper.processZapInPositionLiquidity({
         poolKey: poolData.pool_key,
@@ -914,35 +919,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         tokenY: tokenTo
       });
       setSwapFee(result.swapFee * 100);
-      console.log({ result });
-
-      // const swapData = {
-      //   sender: { cosmos: oraiAddress },
-      //   originalFromToken,
-      //   originalToToken,
-      //   fromAmount: fromAmountToken,
-      //   simulateAmount,
-      //   userSlippage,
-      //   bridgeFee: 1,
-      //   amounts: amountsBalance,
-      //   recipientAddress: isCustomRecipient ? addressTransfer : undefined,
-      //   simulatePrice: averageRatio?.amount && new BigDecimal(averageRatio.amount).div(SIMULATE_INIT_AMOUNT).toString(),
-      //   relayerFee: relayerFeeUniversal,
-      //   alphaSmartRoutes
-      // };
-
-      // // @ts-ignore
-      // const univeralSwapHandler = new UniversalSwapHandler(swapData, {
-      //   cosmosWallet: window.Keplr,
-      //   evmWallet: new Metamask(window.tronWebDapp),
-      //   swapOptions: {
-      //     isAlphaSmartRouter: useAlphaSmartRouter,
-      //     isIbcWasm: useIbcWasm
-      //   }
-      // });
-
-      // const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
-
       const inputUsd = prices?.[tokenZap.coinGeckoId] * Number(amountAfterFee);
       const outputUsd =
         prices?.[tokenFrom.coinGeckoId] * (Number(result.amountX) / 10 ** tokenFrom.decimals) +
@@ -961,10 +937,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       setZapInResponse(result);
       setSimulating(false);
     } catch (error) {
-      // console.error(error);
       console.log('error', error);
-      setSimulating(false);
-      setLoading(false);
     } finally {
       setSimulating(false);
       setLoading(false);
@@ -982,14 +955,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     if (Number(zapAmount) > 0 && toggleZapIn) {
       handleSimulateZapIn();
     }
-  }, [debounceZapAmount]);
+  }, [debounceZapAmount, leftRange, rightRange]);
 
   useEffect(() => {
     if (Number(zapAmount) > 0 && !zapInResponse && !simulating) {
       setSimulating(true);
     }
     if (Number(zapAmount) === 0 || !zapAmount) {
-      console.log('reset');
       setZapInResponse(null);
     }
   }, [zapAmount, debounceZapAmount]);
@@ -1190,7 +1162,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           onClick={() => setToggleZapIn(true)}
         >
           Zap In
-          <span>NEW</span>
+          <span>BETA</span>
         </button>
         <button
           className={classNames(styles.btnOption, { [styles.activeBtn]: !toggleZapIn })}
@@ -1286,7 +1258,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           {simulating && (
             <div>
               <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
-                <ZappingText text={'Finding best option to zap'} />
+                <ZappingText text={'Finding best option to zap'} dot={5} />
               </span>
             </div>
           )}
@@ -1294,12 +1266,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           {zapError && (
             <div className={styles.errorZap}>
               <ErrorIcon />
-              <span>
-                No route found to zap, try other tokens or check back later.
-              </span>
+              <span>No route found to zap, try other tokens or check back later.</span>
             </div>
           )}
-          {!zapError && zapInResponse && (
+          {!zapError && zapInResponse && !simulating && (
             <>
               <div className={styles.dividerOut}>
                 <div className={styles.bar}></div>
@@ -1319,14 +1289,16 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     <span>
                       {zapInResponse
                         ? numberWithCommas(Number(zapInResponse.amountX) / 10 ** tokenFrom.decimals, undefined, {
-                            maximumFractionDigits: tokenFrom.decimals
+                            maximumFractionDigits: 3
                           })
                         : 0}
                     </span>
                     <span className={styles.usd}>
                       ≈ $
                       {zapInResponse
-                        ? numberWithCommas(Number(xUsd) || 0, undefined, { maximumFractionDigits: tokenFrom.decimals })
+                        ? numberWithCommas(Number(xUsd) || 0, undefined, {
+                            maximumFractionDigits: 3
+                          })
                         : 0}
                     </span>
                   </div>
@@ -1341,15 +1313,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     <span>
                       {zapInResponse
                         ? numberWithCommas(Number(zapInResponse.amountY) / 10 ** tokenTo.decimals, undefined, {
-                            maximumFractionDigits: tokenTo.decimals
+                            maximumFractionDigits: 3
                           })
                         : 0}
                     </span>
                     <span className={styles.usd}>
                       ≈ $
-                      {zapInResponse
-                        ? numberWithCommas(Number(yUsd) || 0, undefined, { maximumFractionDigits: tokenTo.decimals })
-                        : 0}
+                      {zapInResponse ? numberWithCommas(Number(yUsd) || 0, undefined, { maximumFractionDigits: 3 }) : 0}
                     </span>
                   </div>
                 </div>

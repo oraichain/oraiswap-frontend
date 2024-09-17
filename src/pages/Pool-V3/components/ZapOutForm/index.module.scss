@@ -431,20 +431,21 @@
 
     @keyframes greenLighter {
       0% {
-        background-color: #aee67f;
+        transform: scale(1);
+        opacity: 0.7;
       }
       50% {
-        background-color: #aee67f;
-      }
-      51% {
-        background-color: #83c553;
+        transform: scale(1.1);
+        opacity: 1;
       }
       100% {
-        background-color: #91cc67;
+        transform: scale(1);
+        opacity: 0.7;
       }
     }
 
     span {
+      background-color: #aee67f;
       display: flex;
       width: 40px;
       height: 22px;
@@ -468,6 +469,8 @@
       letter-spacing: 0.012px;
       cursor: pointer;
       transition: all ease-in-out 0.3s;
+
+      animation: greenLighter 2s infinite;
     }
   }
 }

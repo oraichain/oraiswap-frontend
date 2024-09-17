@@ -38,11 +38,11 @@ import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
-import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { extractAddress } from '@oraichain/oraiswap-v3';
 import ZapOut from '../ZapOut';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import CreateNewPosition from '../CreateNewPosition';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();
@@ -437,14 +437,22 @@ const PositionItem = ({ position }) => {
                 Close Position
               </Button> */}
               <ZapOut position={position} incentives={incentives} />
-              <Button
+              {/* <Button
                 type="primary-sm"
                 onClick={() => {
                   navigate(`/new-position/${encodeURIComponent(poolKeyToString(position.pool_key))}`);
                 }}
               >
                 Add Liquidity
-              </Button>
+              </Button> */}
+
+              {position && poolList.length > 0 && (
+                <CreateNewPosition
+                  btnType={'primary-sm'}
+                  btnTitle={'Add Position'}
+                  pool={poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key))}
+                />
+              )}
             </div>
           </div>
         </div>

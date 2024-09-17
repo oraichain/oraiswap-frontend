@@ -15,13 +15,14 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
     isLoading: isLoadingGetPoolList
   } = useQuery<PoolWithPoolKey[]>(['pool-v3-pools', coingeckoPrices], () => getPoolList(), {
     refetchOnWindowFocus: false,
-    placeholderData: [],
+    placeholderData: []
     // cacheTime: 5 * 60 * 1000
   });
 
   useEffect(() => {
+    console.log("set pool list again");
     if (poolList.length === 0 || Object.keys(coingeckoPrices).length === 0) return;
-
+    
     const newPrice = { ...coingeckoPrices };
     for (const pool of poolList) {
       const tokenX = oraichainTokens.find((token) => extractAddress(token) === pool.pool_key.token_x);

@@ -47,7 +47,6 @@ import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import { calculateTokenAmountsWithSlippage, calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
 import { numberWithCommas } from 'helper/format';
-import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 
 export type PriceInfo = {
   startPrice: number;

@@ -16,6 +16,8 @@ import SlippageSetting from '../SettingSlippage';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { extractAddress } from '@oraichain/oraiswap-v3';
 import ZapOutForm from '../ZapOutForm';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 export const openInNewTab = (url: string): void => {
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
@@ -23,10 +25,12 @@ export const openInNewTab = (url: string): void => {
 };
 
 const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: string]: number } }) => {
+  const [walletAddress] = useConfigReducer('address');
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const refContent = useRef();
+  const { refetchPositions } = useGetPositions(walletAddress);
 
   // console.log(position);
 
@@ -62,7 +66,10 @@ const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: s
           </div>
           <ZapOutForm
             showModal={showModal}
-            onCloseModal={() => {}}
+            onCloseModal={() => {
+              setShowModal(false);
+              refetchPositions();
+            }}
             slippage={1}
             tokenFrom={position.tokenX}
             tokenTo={position.tokenY}
