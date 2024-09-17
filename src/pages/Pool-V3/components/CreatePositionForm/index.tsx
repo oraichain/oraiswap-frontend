@@ -880,6 +880,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
+      console.log('zapFee', zapFee);
     } catch (error) {
       console.log('error', error);
     }
