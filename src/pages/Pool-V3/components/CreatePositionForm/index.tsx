@@ -871,14 +871,25 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   };
 
   const handleSimulateZapIn = async () => {
+    let zapFee = 0;
+    let client: CosmWasmClient;
+    try {
+      client = await CosmWasmClient.connect(network.rpc);
+      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      zapFee = Number((await zap.protocolFee()).percent);
+    } catch (error) {
+      console.log('error', error);
+    }
+
+
     try {
       setSimulating(true);
       setLoading(true);
 
-      const client = await CosmWasmClient.connect(network.rpc);
-      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
-      const zapFee = await zap.protocolFee();
-      const amountAfterFee = Number(zapAmount) * (1 - Number(zapFee.percent));
+      // const client = await CosmWasmClient.connect(network.rpc);
+      // const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      // const zapFee = await zap.protocolFee();
+      const amountAfterFee = Number(zapAmount) * (1 - zapFee);
 
       const routerApi = 'https://osor.oraidex.io/smart-router/alpha-router';
       const zapper = new ZapConsumer({
@@ -896,7 +907,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       });
 
       const amountIn = Math.round(amountAfterFee * 10 ** tokenZap.decimals).toString();
-      const amountFee = Math.floor(Number(zapFee.percent) * Number(zapAmount) * 10 ** tokenZap.decimals);
+      const amountFee = Math.floor(zapFee * Number(zapAmount) * 10 ** tokenZap.decimals);
 
       setZapFee(amountFee);
       const lowerTick = Math.min(leftRange, rightRange);

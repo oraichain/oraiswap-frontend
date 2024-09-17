@@ -190,13 +190,23 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
   };
 
   const handleSimulateZapOut = async () => {
+    let zapFee = 0;
+    let client: CosmWasmClient;
+    try {
+      client = await CosmWasmClient.connect(network.rpc);
+      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      zapFee = Number((await zap.protocolFee()).percent);
+    } catch (error) {
+      console.log('error', error);
+    }
+
     try {
       setSimulating(true);
       setLoading(true);
 
-      const client = await CosmWasmClient.connect(network.rpc);
-      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
-      const zapFee = await zap.protocolFee();
+      // const client = await CosmWasmClient.connect(network.rpc);
+      // const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      // const zapFee = await zap.protocolFee();
 
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
@@ -230,8 +240,8 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const totalAmountOut =
         Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals;
 
-      const zapFeeX = Number(position.tokenXLiq) * Number(zapFee.percent);
-      const zapFeeY = Number(position.tokenYLiq) * Number(zapFee.percent);
+      const zapFeeX = Number(position.tokenXLiq) * zapFee;
+      const zapFeeY = Number(position.tokenYLiq) * zapFee;
       const swapFee = res.swapFee * 100;
       const totalFeeInUsd =
         zapFeeX * prices[tokenFrom.coinGeckoId] +
