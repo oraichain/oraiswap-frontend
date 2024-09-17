@@ -6,7 +6,7 @@ import TooltipHover from 'components/TooltipHover';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { getIcon } from 'helper';
 import useTheme from 'hooks/useTheme';
-import { useRef, useState } from 'react';
+import { ReactElement, useRef, useState } from 'react';
 import CreatePositionForm from '../CreatePositionForm';
 import styles from './index.module.scss';
 import cn from 'classnames/bind';
@@ -22,12 +22,14 @@ const CreateNewPosition = ({
   pool,
   icon,
   btnTitle = 'New Position',
-  btnType = 'third-sm'
+  btnType = 'third-sm',
+  className = ''
 }: {
   pool: PoolWithPoolKey;
   btnTitle?: string;
   btnType?: ButtonType;
-  icon?: any;
+  icon?: ReactElement;
+  className?: string;
 }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -67,11 +69,13 @@ const CreateNewPosition = ({
   return (
     <div className={classNames(styles.createNewPool, { [styles.activeWrapper]: showModal })}>
       {/* <div className={styles.btnAdd}> */}
-      {/* <button onClick={() => setShowModal(true)} className={cx(styles.add, classNamesBtn)}>
-        {icon} {titleBtn}
-      </button> */}
-      <Button type={btnType} onClick={() => setShowModal(true)}>
-        {icon} <div style={{ width: 4 }} /> {btnTitle}
+      <Button type={btnType} className={className} onClick={() => setShowModal(true)}>
+        {icon && (
+          <>
+            {icon} <div style={{ width: 4 }} />
+          </>
+        )}
+        {btnTitle}
       </Button>
 
       {/* </div> */}

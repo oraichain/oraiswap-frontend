@@ -25,6 +25,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
+import isEqual from 'lodash/isEqual';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -72,7 +73,7 @@ const PoolList = ({ search }) => {
         setLoading(true);
 
         if (!poolList?.length) return;
-        if (poolList.length > 0 && prevPoolListRef.current === poolList) return;
+        if (poolList.length > 0 && isEqual(prevPoolListRef.current, poolList)) return;
         const fmtPools = (poolList || []).map(formatPoolDataCallback).filter((e) => e.isValid);
 
         setDataPool(fmtPools);
@@ -420,7 +421,7 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
         </div>
       </td>
       <td className={styles.actions}>
-        <CreateNewPosition pool={item} />
+        <CreateNewPosition pool={item} className="newPosition" />
       </td>
     </>
   );
