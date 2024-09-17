@@ -210,7 +210,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        devitation: 0.05,
+        devitation: 0,
         dexV3Address: network.pool_v3,
         multicallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
@@ -225,7 +225,8 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const res = await zapper.processZapOutPositionLiquidity({
         owner: walletAddress,
         tokenId: position.token_id,
-        tokenOut: tokenZap
+        tokenOut: tokenZap,
+        zapFee: zapFee
       });
       console.log('res', res);
 
