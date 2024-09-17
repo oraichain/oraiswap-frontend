@@ -159,7 +159,7 @@ const Chart = ({
   const tabChart = useSelector(selectCurrentSwapTabChart);
   const tf = useSelector(selectChartTimeFrame);
 
-  const {  priceChange } = useGetPriceChange({
+  const { priceChange } = useGetPriceChange({
     base_denom: currentPair.info.split('-')[0],
     quote_denom: currentPair.info.split('-')[1],
     tf
@@ -184,9 +184,7 @@ const Chart = ({
       />
       <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
         {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
-        <div
-          className={cx(`chartItem`, hideChart ? 'hidden' : '', tabChart === TAB_CHART_SWAP.TOKEN ? 'activeChart' : '')}
-        >
+        <div className={cx(`chartItem`, hideChart ? 'hidden' : '', 'activeChart')}>
           <ChartUsdPrice
             activeAnimation={hideChart}
             filterDay={filterTimeChartUsd}
@@ -194,26 +192,6 @@ const Chart = ({
             onUpdatePricePercent={setPercentChangeUsd}
             chartTokenType={chartTokenType}
           />
-        </div>
-
-        <div className={cx(`chartItem`, 'tv-chart-container', tabChart === TAB_CHART_SWAP.POOL ? 'activeChart' : '')}>
-          {!priceChange.isError && currentFromToken && currentToToken ? (
-            <TVChartContainer
-              theme={theme}
-              currentPair={currentPair}
-              pairsChart={PAIRS_CHART}
-              setChartTimeFrame={handleChangeChartTimeFrame}
-              baseUrl={process.env.REACT_APP_BASE_API_URL}
-            />
-          ) : (
-            <div className={cx('nodata-wrapper', hideChart ? 'hidden' : '')}>
-              <NoChartData />
-              <div className={cx('nodata-content')}>
-                <p className={cx('nodata-title')}>No data available</p>
-                <p>Please try switching to Simple view</p>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
