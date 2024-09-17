@@ -9,13 +9,26 @@ import useTheme from 'hooks/useTheme';
 import { useRef, useState } from 'react';
 import CreatePositionForm from '../CreatePositionForm';
 import styles from './index.module.scss';
+import cn from 'classnames/bind';
+import { Button, ButtonType } from 'components/Button';
 
+const cx = cn.bind(styles);
 export const openInNewTab = (url: string): void => {
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
   if (newWindow) newWindow.opener = null;
 };
 
-const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
+const CreateNewPosition = ({
+  pool,
+  icon,
+  btnTitle = 'New Position',
+  btnType = 'third-sm'
+}: {
+  pool: PoolWithPoolKey;
+  btnTitle?: string;
+  btnType?: ButtonType;
+  icon?: any;
+}) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -54,9 +67,13 @@ const CreateNewPosition = ({ pool }: { pool: PoolWithPoolKey }) => {
   return (
     <div className={classNames(styles.createNewPool, { [styles.activeWrapper]: showModal })}>
       {/* <div className={styles.btnAdd}> */}
-      <button onClick={() => setShowModal(true)} className={styles.add}>
-        New Position
-      </button>
+      {/* <button onClick={() => setShowModal(true)} className={cx(styles.add, classNamesBtn)}>
+        {icon} {titleBtn}
+      </button> */}
+      <Button type={btnType} onClick={() => setShowModal(true)}>
+        {icon} <div style={{ width: 4 }} /> {btnTitle}
+      </Button>
+
       {/* </div> */}
 
       <div

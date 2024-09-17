@@ -43,6 +43,7 @@ import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimu
 import { extractAddress } from '@oraichain/oraiswap-v3';
 import ZapOut from '../ZapOut';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import CreateNewPosition from '../CreateNewPosition';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();
@@ -437,14 +438,22 @@ const PositionItem = ({ position }) => {
                 Close Position
               </Button> */}
               <ZapOut position={position} incentives={incentives} />
-              <Button
+              {/* <Button
                 type="primary-sm"
                 onClick={() => {
                   navigate(`/new-position/${encodeURIComponent(poolKeyToString(position.pool_key))}`);
                 }}
               >
                 Add Liquidity
-              </Button>
+              </Button> */}
+
+              {position && poolList && (
+                <CreateNewPosition
+                  btnType={'primary-sm'}
+                  btnTitle={'Add Position'}
+                  pool={poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key))}
+                />
+              )}
             </div>
           </div>
         </div>

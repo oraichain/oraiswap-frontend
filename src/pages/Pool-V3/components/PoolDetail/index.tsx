@@ -27,6 +27,7 @@ import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPoolDetail } from 'pages/Pool-V3/hooks/useGetPoolDetail';
 import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
+import CreateNewPosition from '../CreateNewPosition';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
@@ -194,7 +195,10 @@ const PoolV3Detail = () => {
         </div>
 
         <div className={styles.addPosition}>
-          <Button
+          {poolDetail && (
+            <CreateNewPosition icon={<AddIcon />} btnType={'primary-sm'} btnTitle={'Add Position'} pool={poolDetail} />
+          )}
+          {/* <Button
             disabled={!poolDetail}
             onClick={() => {
               navigate(`/new-position/${encodeURIComponent(poolKeyToString(pool_key))}`);
@@ -206,7 +210,7 @@ const PoolV3Detail = () => {
               &nbsp;
             </div>
             Add Position
-          </Button>
+          </Button> */}
         </div>
       </div>
       <div className={styles.detail}>
