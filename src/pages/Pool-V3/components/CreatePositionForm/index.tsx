@@ -873,10 +873,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const handleSimulateZapIn = async () => {
     setSimulating(true);
     setLoading(true);
-<<<<<<< HEAD
-=======
-
->>>>>>> 5c32b150636d690e75c484a345df73382b988673
     let zapFee = 0;
     let client: CosmWasmClient;
     try {
