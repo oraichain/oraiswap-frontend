@@ -893,9 +893,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const routerApi = 'https://osor.oraidex.io/smart-router/alpha-router';
       const zapper = new ZapConsumer({
         client,
-        devitation: 0,
+        deviation: 0,
         dexV3Address: network.pool_v3,
-        multicallAddress: MULTICALL_CONTRACT,
+        multiCallAddress: MULTICALL_CONTRACT,
         routerApi,
         smartRouteConfig: {
           swapOptions: {

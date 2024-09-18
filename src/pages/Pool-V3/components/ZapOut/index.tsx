@@ -66,9 +66,9 @@ const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: s
           </div>
           <ZapOutForm
             showModal={showModal}
-            onCloseModal={() => {
+            onCloseModal={async () => {
               setShowModal(false);
-              refetchPositions();
+              await refetchPositions();
             }}
             slippage={1}
             tokenFrom={position.tokenX}

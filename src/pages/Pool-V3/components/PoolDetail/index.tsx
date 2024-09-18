@@ -130,7 +130,7 @@ const PoolV3Detail = () => {
       try {
         setLoading(true);
         if (!(poolList.length && userPositions.length && poolPrice && address)) return setDataPosition([]);
-        if (dataPosition.length) return;
+        // if (dataPosition.length) return;
         const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
@@ -141,7 +141,7 @@ const PoolV3Detail = () => {
           isLight,
           feeClaimData
         });
-        const filteredPositions = positionsMap.filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString);
+        const filteredPositions = positionsMap.filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString).sort((a, b) => a.token_id - b.token_id);
 
         setDataPosition(filteredPositions);
       } catch (error) {
@@ -153,7 +153,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [address, poolList.length, userPositions, poolPrice]);
+  }, [address, poolList.length, userPositions]);
 
   const calcShowApr = (apr: number) =>
     numberWithCommas(apr * 100, undefined, {

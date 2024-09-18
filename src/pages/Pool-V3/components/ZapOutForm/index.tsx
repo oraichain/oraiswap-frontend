@@ -175,7 +175,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
               [tokenZap.contractAddress, tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean)
             );
             onCloseModal();
-            navigate(`/pools-v3?type=positions`);
+            // navigate(`/pools-v3?type=positions`);
           },
           (e) => {
             displayToast(TToastType.TX_FAILED, {
@@ -211,9 +211,9 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        devitation: 0,
+        deviation: 0,
         dexV3Address: network.pool_v3,
-        multicallAddress: MULTICALL_CONTRACT,
+        multiCallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {
