@@ -77,6 +77,7 @@ import {
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
 import ZappingText from 'components/Zapping';
+import mixpanel from 'mixpanel-browser';
 
 export type PriceInfo = {
   startPrice: number;
@@ -815,6 +816,17 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       console.log('error', error);
     } finally {
       setLoading(false);
+      const logEvent = {
+        address: walletAddress,
+        tokenZap: tokenZap.name,
+        tokenFrom: tokenFrom.name,
+        tokenTo: tokenTo.name,
+        poolData: poolKeyToString(poolData.pool_key),
+        zapAmount,
+        fromUsd,
+        type: 'ZapIn'
+      };
+      mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
     }
   };
 

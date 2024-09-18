@@ -1,6 +1,6 @@
 import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
+import { extractAddress, poolKeyToString, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -34,6 +34,7 @@ import SingletonOraiswapV3 from 'libs/contractSingleton';
 import TooltipHover from 'components/TooltipHover';
 import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import ZappingText from 'components/Zapping';
+import mixpanel from 'mixpanel-browser';
 
 const cx = cn.bind(styles);
 
@@ -188,6 +189,17 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       console.log('error', error);
     } finally {
       setLoading(false);
+      const logEvent = {
+        address: walletAddress,
+        tokenZap: tokenZap.name,
+        tokenFrom: tokenFrom.name,
+        tokenTo: tokenTo.name,
+        poolData: poolKeyToString(position.pool_key),
+        zapAmount,
+        fromUsd,
+        type: 'ZapOut'
+      };
+      mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
     }
   };
 
