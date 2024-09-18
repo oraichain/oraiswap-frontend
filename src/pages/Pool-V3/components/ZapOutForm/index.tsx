@@ -170,7 +170,10 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
               customLink: getTransactionUrl('Oraichain', tx)
             });
             // handleSuccessAdd();
-            loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
+            loadOraichainToken(
+              walletAddress,
+              [tokenZap.contractAddress, tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean)
+            );
             onCloseModal();
             navigate(`/pools-v3?type=positions`);
           },
@@ -570,7 +573,11 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             <Button
               type="primary"
               disabled={
-                loading || !walletAddress || !tokenZap || !(btnText === 'Zap out' || btnText === 'Remove Position')
+                loading ||
+                !walletAddress ||
+                !tokenZap ||
+                !(btnText === 'Zap out' || btnText === 'Remove Position') ||
+                !!zapError
               }
               onClick={async () => {
                 if (toggleZapOut) {
