@@ -25,9 +25,9 @@ export const useGetPoolDetail = (poolKey: string, prices: CoinGeckoPrices<string
     allocation: {}
   });
   const { data, refetch: refetchPoolDetail } = useQuery<PoolDetail>(['pool-v3-detail'], () => getPoolDetail(poolKey), {
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     placeholderData: null,
-    cacheTime: 5 * 60 * 1000
+    // cacheTime: 5 * 60 * 1000
   });
 
   const calculateUsdValue = (amount: number, price: number, decimals: number) => {

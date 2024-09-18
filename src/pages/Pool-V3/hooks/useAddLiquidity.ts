@@ -66,7 +66,7 @@ const useAddLiquidity = () => {
         spotSqrtPrice,
         slippageTolerance,
         xAmountWithSlippage,
-        yAmountWithSlippage,
+        yAmountWithSlippage
       );
 
       msg.push(createPosMsg);
@@ -150,7 +150,7 @@ const useAddLiquidity = () => {
         upperTick,
         liquidityDelta,
         spotSqrtPrice,
-        slippageTolerance,
+        slippageTolerance
       );
       msg.push(createPosTx);
 

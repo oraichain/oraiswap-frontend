@@ -7,9 +7,9 @@ export const useGetAllPositions = () => {
     ['pool-v3-all-position'],
     () => getAllPositions(),
     {
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
       placeholderData: [],
-      cacheTime: 5 * 60 * 1000
+      // cacheTime: 5 * 60 * 1000
     }
   );
 

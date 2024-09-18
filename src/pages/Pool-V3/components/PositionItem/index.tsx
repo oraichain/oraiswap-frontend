@@ -14,7 +14,6 @@ import Loader from 'components/Loader';
 import { useNavigate } from 'react-router-dom';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import {
-  PrefixConfig,
   calculateFee,
   formatNumbers,
   getConvertedPool,
@@ -38,10 +37,11 @@ import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
-import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
 import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { extractAddress } from '@oraichain/oraiswap-v3';
+import ZapOut from '../ZapOut';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import CreateNewPosition from '../CreateNewPosition';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();
@@ -81,13 +81,12 @@ const PositionItem = ({ position }) => {
   const [incentives, setIncentives] = useState<{ [key: string]: number }>();
   const [claimLoading, setClaimLoading] = useState<boolean>(false);
   const [isClaimSuccess, setIsClaimSuccess] = useState<boolean>(false);
-  const [removeLoading, setRemoveLoading] = useState<boolean>(false);
+  const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
   const [statusRange, setStatusRange] = useState(undefined);
   const [xToY, _] = useState<boolean>(
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );
 
-  const loadOraichainToken = useLoadOraichainTokens();
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
   const { poolList, poolPrice } = useGetPoolList(price);
@@ -397,52 +396,22 @@ const PositionItem = ({ position }) => {
               </div>
             </div>
             <div className={styles.btnGroup}>
-              <Button
-                disabled={removeLoading || (!position.tokenXLiqInUsd && !position.tokenYLiqInUsd)}
-                type="third-sm"
-                onClick={async () => {
-                  try {
-                    setRemoveLoading(true);
-                    const { client } = window.client
-                      ? { client: window.client }
-                      : await getCosmWasmClient({ chainId: network.chainId });
-                    SingletonOraiswapV3.load(client, address);
-                    const { transactionHash } = await SingletonOraiswapV3.dex.removePosition({
-                      index: Number(position.id)
-                    });
-
-                    if (transactionHash) {
-                      setCollapse(false);
-                      displayToast(TToastType.TX_SUCCESSFUL, {
-                        customLink: getTransactionUrl(network.chainId, transactionHash)
-                      });
-                      refetchPositions();
-                      loadOraichainToken(address, [tokenY.contractAddress, tokenX.contractAddress].filter(Boolean));
-                    }
-                  } catch (error) {
-                    console.log({ error });
-                    handleErrorTransaction(error);
-                  } finally {
-                    setRemoveLoading(false);
-                  }
-                }}
-              >
-                {removeLoading && (
-                  <>
-                    <Loader width={20} height={20} />
-                    <span style={{ width: 6 }}> </span>
-                  </>
-                )}
-                Close Position
-              </Button>
+              <ZapOut position={position} incentives={incentives} />
               <Button
                 type="primary-sm"
                 onClick={() => {
-                  navigate(`/new-position/${encodeURIComponent(poolKeyToString(position.pool_key))}`);
+                  setIsOpenCreatePosition(true);
                 }}
               >
                 Add Liquidity
               </Button>
+              {position && poolList.length > 0 && (
+                <CreateNewPosition
+                  showModal={isOpenCreatePosition}
+                  setShowModal={setIsOpenCreatePosition}
+                  pool={poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key))}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -465,7 +434,7 @@ const PositionItem = ({ position }) => {
                   <position.tokenXIcon />
                   {numberWithCommas(earnXDisplay, undefined, {
                     maximumFractionDigits: 6
-                  })}{' '}
+                  })}
                   {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>

@@ -239,9 +239,10 @@
           height: 32px;
           padding: 0 12px;
           border-radius: 8px;
+          border: 1px solid #494949;
 
           @include theme {
-            background: theme-get('neutral-6');
+            // background: theme-get('neutral-6');
             color: theme-get('colors-neutral-text-body-on-row');
           }
 

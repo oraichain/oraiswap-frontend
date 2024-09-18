@@ -6,9 +6,9 @@ export const useGetIncentiveSimulate = (owner: string, positionIndex: number) =>
     ['pool-v3-incentive-simulate', owner, positionIndex],
     () => SingletonOraiswapV3.simulateIncentiveReward(owner, positionIndex),
     {
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
       placeholderData: {},
-      cacheTime: 5 * 60 * 1000
+      // cacheTime: 5 * 60 * 1000
     }
   );
 

@@ -329,52 +329,14 @@ export default class SingletonOraiswapV3 {
   }
 
   public static async getFullTickmap(poolKey: PoolKey): Promise<Tickmap> {
+    const minTick = getMinTick(poolKey.fee_tier.tick_spacing);
     const maxTick = getMaxTick(poolKey.fee_tier.tick_spacing);
-    let lowerTick = getMinTick(poolKey.fee_tier.tick_spacing);
-
-    const xToY = false;
-
-    const promises = [];
-    const tickSpacing = poolKey.fee_tier.tick_spacing;
-    assert(tickSpacing <= 100);
-    assert(MAX_TICKMAP_QUERY_SIZE > 3);
-    assert(CHUNK_SIZE * 2 > tickSpacing);
-    // move back 1 chunk since the range is inclusive
-    // then move back additional 2 chunks to ensure that adding tickspacing won't exceed the query limit
-    const jump = (MAX_TICKMAP_QUERY_SIZE - 3) * CHUNK_SIZE;
-
-    while (lowerTick <= maxTick) {
-      let nextTick = lowerTick + jump;
-      const remainder = nextTick % tickSpacing;
-
-      if (remainder > 0) {
-        nextTick += tickSpacing - remainder;
-      } else if (remainder < 0) {
-        nextTick -= remainder;
-      }
-
-      let upperTick = nextTick;
-
-      if (upperTick > maxTick) {
-        upperTick = maxTick;
-      }
-
-      assert(upperTick % tickSpacing === 0);
-      assert(lowerTick % tickSpacing === 0);
-
-      const result = this.getRawTickmap(poolKey, lowerTick, upperTick, xToY).then(
-        (tickmap) => tickmap.map(([a, b]) => [BigInt(a), BigInt(b)]) as [bigint, bigint][]
-      );
-      promises.push(result);
-
-      lowerTick = upperTick + tickSpacing;
-    }
-
-    const fullResult = (await Promise.all(promises)).flat(1);
-
-    const storedTickmap = new Map<bigint, bigint>(fullResult);
-
-    return { bitmap: storedTickmap };
+    const tickmap = await this._handler.tickMap(poolKey, minTick, maxTick, true);
+    const bitmap = new Map<bigint, bigint>();
+    tickmap.forEach((t) => {
+      bitmap.set(BigInt(t[0].toString()), BigInt(t[1].toString()));
+    });
+    return { bitmap };
   }
 
   // simulate how much incentive reward user can have in 1 seconds
@@ -400,25 +362,24 @@ export default class SingletonOraiswapV3 {
 
   public static async getAllLiquidityTicks(poolKey: PoolKey, tickmap: Tickmap): Promise<LiquidityTick[]> {
     const tickIndexes: number[] = [];
-    await this.loadHandler();
     for (const [chunkIndex, chunk] of tickmap.bitmap.entries()) {
       for (let bit = 0; bit < CHUNK_SIZE; bit++) {
         const checkedBit = chunk & (1n << BigInt(bit));
-        if (checkedBit) {
+        if (checkedBit !== 0n) {
           const tickIndex = positionToTick(Number(chunkIndex), bit, poolKey.fee_tier.tick_spacing);
           tickIndexes.push(tickIndex);
         }
       }
     }
-    const tickLimit = LIQUIDITY_TICKS_LIMIT;
-    const promises: Promise<LiquidityTick[]>[] = [];
 
-    for (let i = 0; i < tickIndexes.length; i += tickLimit) {
-      promises.push(this._handler.liquidityTicks(poolKey, tickIndexes.slice(i, i + tickLimit).map(Number)).then(parse));
-    }
+    const tickResults = await this._handler.liquidityTicks(poolKey, tickIndexes);
 
-    const tickResults = await Promise.all(promises);
-    return tickResults.flat(1);
+    return tickResults.map((tick) => {
+      return {
+        ...tick,
+        liquidity_change: BigInt(tick.liquidity_change)
+      };
+    });
   }
 
   public static approveToken = async (token: string, amount: bigint, address: string) => {

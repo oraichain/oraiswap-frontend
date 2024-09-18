@@ -9,7 +9,6 @@ import classNames from 'classnames';
 import { Button } from 'components/Button';
 import LoadingBox from 'components/LoadingBox';
 import { formatNumberKMB, numberWithCommas } from 'helper/format';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString, stringToPoolKey } from 'libs/contractSingleton';
@@ -27,13 +26,14 @@ import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPoolDetail } from 'pages/Pool-V3/hooks/useGetPoolDetail';
 import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
+import CreateNewPosition from '../CreateNewPosition';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
   const [cachePrices] = useConfigReducer('coingecko');
   const { poolList, poolPrice } = useGetPoolList(cachePrices);
   const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
-
+  const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const { poolId } = useParams<{ poolId: string }>();
@@ -130,7 +130,7 @@ const PoolV3Detail = () => {
       try {
         setLoading(true);
         if (!(poolList.length && userPositions.length && poolPrice && address)) return setDataPosition([]);
-        if (dataPosition.length) return;
+        // if (dataPosition.length) return;
         const feeClaimData = await getFeeClaimData(address);
 
         const positionsMap = convertPosition({
@@ -141,7 +141,7 @@ const PoolV3Detail = () => {
           isLight,
           feeClaimData
         });
-        const filteredPositions = positionsMap.filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString);
+        const filteredPositions = positionsMap.filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString).sort((a, b) => a.token_id - b.token_id);
 
         setDataPosition(filteredPositions);
       } catch (error) {
@@ -153,7 +153,7 @@ const PoolV3Detail = () => {
     })();
 
     return () => {};
-  }, [address, poolList.length, userPositions, poolPrice]);
+  }, [address, poolList.length, userPositions]);
 
   const calcShowApr = (apr: number) =>
     numberWithCommas(apr * 100, undefined, {
@@ -197,7 +197,7 @@ const PoolV3Detail = () => {
           <Button
             disabled={!poolDetail}
             onClick={() => {
-              navigate(`/new-position/${encodeURIComponent(poolKeyToString(pool_key))}`);
+              setIsOpenCreatePosition(true);
             }}
             type="primary-sm"
           >
@@ -207,6 +207,13 @@ const PoolV3Detail = () => {
             </div>
             Add Position
           </Button>
+          {isOpenCreatePosition && poolDetail && (
+            <CreateNewPosition
+              showModal={isOpenCreatePosition}
+              setShowModal={setIsOpenCreatePosition}
+              pool={poolDetail}
+            />
+          )}
         </div>
       </div>
       <div className={styles.detail}>

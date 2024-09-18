@@ -11,19 +11,22 @@ import classNames from 'classnames';
 import LoadingBox from 'components/LoadingBox';
 import { CoefficientBySort, SortType } from 'components/Table';
 import { TooltipIcon } from 'components/Tooltip';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { fetchPoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
+import { fetchPoolAprInfo } from 'libs/contractSingleton';
 import { formatPoolData } from 'pages/Pool-V3/helpers/format';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import isEqual from 'lodash/isEqual';
+import { Button } from 'components/Button';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -45,6 +48,9 @@ const PoolList = ({ search }) => {
 
   const theme = useTheme();
 
+  const [currentPool, setCurrentPool] = useState(null);
+  const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [dataPool, setDataPool] = useState([...Array(0)]);
   const [totalVolume, setTotalVolume] = useState(0);
@@ -54,27 +60,38 @@ const PoolList = ({ search }) => {
   const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
   const { poolPositionInfo } = useGetPoolPositionInfo(poolPrice);
 
+  const prevPoolListRef = useRef<any>();
+  const prevPoolPriceRef = useRef<any>();
+
+  const formatPoolDataCallback = useCallback(
+    (p) => {
+      const isLight = theme === 'light';
+      return formatPoolData(p, isLight);
+    },
+    [theme]
+  );
+
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        if (!(poolList.length > 0 && poolPrice)) return setDataPool([]);
-        const fmtPools = (poolList || [])
-          .map((p) => {
-            const isLight = theme === 'light';
-            return formatPoolData(p, isLight);
-          })
-          .filter((e) => e.isValid);
+
+        if (!poolList?.length) return;
+        if (poolList.length > 0 && isEqual(prevPoolListRef.current, poolList)) return;
+        const fmtPools = (poolList || []).map(formatPoolDataCallback).filter((e) => e.isValid);
+
         setDataPool(fmtPools);
       } catch (error) {
         console.log('error: SingletonOraiswapV3 getPools', error);
       } finally {
+        prevPoolListRef.current = poolList ?? [];
+        prevPoolPriceRef.current = poolPrice ?? {};
         setLoading(false);
       }
     })();
 
     return () => {};
-  }, [theme, poolList, poolPrice]);
+  }, [theme, poolList, poolPrice, formatPoolDataCallback]);
 
   useEffect(() => {
     const getAPRInfo = async () => {
@@ -293,11 +310,21 @@ const PoolList = ({ search }) => {
                             incentivesApr: 0,
                             ...aprInfo?.[item?.poolKey]
                           }}
+                          setCurrentPool={setCurrentPool}
+                          setIsOpenCreatePosition={setIsOpenCreatePosition}
                         />
                       </tr>
                     );
                   })}
                 </tbody>
+
+                {isOpenCreatePosition && currentPool && (
+                  <CreateNewPosition
+                    showModal={isOpenCreatePosition}
+                    setShowModal={setIsOpenCreatePosition}
+                    pool={currentPool}
+                  />
+                )}
               </table>
             </div>
           ) : (
@@ -314,7 +341,7 @@ const PoolList = ({ search }) => {
   );
 };
 
-const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
+const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreatePosition, setCurrentPool }) => {
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
 
@@ -407,17 +434,23 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
           />
         </div>
       </td>
+
       <td className={styles.actions}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/new-position/${encodeURIComponent(poolKeyToString(item.pool_key))}`);
+        <Button
+          className="newPosition"
+          type="third-sm"
+          onClick={() => {
+            setIsOpenCreatePosition(true);
+            setCurrentPool(item);
           }}
-          className={styles.add}
         >
           Add Position
-        </button>
+        </Button>
       </td>
+
+      {/* <td className={styles.actions}>
+        <CreateNewPosition pool={item} className="newPosition" />
+      </td> */}
     </>
   );
 };

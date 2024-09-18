@@ -791,16 +791,17 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     }
   };
 
+
   const handleGetTicks = () => {
     try {
       const fetchTickData = async () => {
         setLoading(true);
-
+        
         const ticksData = await handleGetCurrentPlotTicks({
           poolKey: notInitPoolKey,
           isXtoY: isXtoY,
           xDecimal: tokenFrom.decimals,
-          yDecimal: tokenTo.decimals
+          yDecimal: tokenTo.decimals,
         });
 
         setLiquidityData(ticksData);
