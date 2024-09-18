@@ -807,6 +807,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(poolData.pool_key))}`);
           },
           (e) => {
+            console.log({ errorZap: e });
             displayToast(TToastType.TX_FAILED, {
               message: 'Add liquidity failed!'
             });
@@ -825,7 +826,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           tokenTo: tokenTo.name,
           poolData: poolKeyToString(poolData.pool_key),
           zapAmount,
-          fromUsd,
+          zapUsd,
           type: 'ZapIn'
         };
         mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
@@ -908,9 +909,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const routerApi = 'https://osor.oraidex.io/smart-router/alpha-router';
       const zapper = new ZapConsumer({
         client,
-        deviation: 0,
+        devitation: 0,
         dexV3Address: network.pool_v3,
-        multiCallAddress: MULTICALL_CONTRACT,
+        multicallAddress: MULTICALL_CONTRACT,
         routerApi,
         smartRouteConfig: {
           swapOptions: {

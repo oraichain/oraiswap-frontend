@@ -179,6 +179,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             // navigate(`/pools-v3?type=positions`);
           },
           (e) => {
+            console.log({ errorZap: e });
             displayToast(TToastType.TX_FAILED, {
               message: 'Zap Out failed!'
             });
@@ -197,7 +198,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           tokenTo: tokenTo.name,
           poolData: poolKeyToString(position.pool_key),
           zapAmount,
-          fromUsd,
+          zapUsd,
           type: 'ZapOut'
         };
         mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
@@ -225,9 +226,9 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        deviation: 0,
+        devitation: 0,
         dexV3Address: network.pool_v3,
-        multiCallAddress: MULTICALL_CONTRACT,
+        multicallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {
