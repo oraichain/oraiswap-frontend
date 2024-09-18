@@ -179,6 +179,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             // navigate(`/pools-v3?type=positions`);
           },
           (e) => {
+            console.log({ errorZap: e });
             displayToast(TToastType.TX_FAILED, {
               message: 'Zap Out failed!'
             });
@@ -197,7 +198,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           tokenTo: tokenTo.name,
           poolData: poolKeyToString(position.pool_key),
           zapAmount,
-          fromUsd,
+          zapUsd,
           type: 'ZapOut'
         };
         mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
