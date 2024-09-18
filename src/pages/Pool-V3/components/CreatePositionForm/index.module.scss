@@ -299,6 +299,10 @@
         gap: 4px;
         margin-top: 1rem;
 
+        @include mobile {
+          flex-direction: column;
+        }
+
         @include theme {
           color: theme-get('neutral-9');
         }
@@ -719,12 +723,18 @@
 .tokenOutput {
   display: flex;
   align-items: flex-start;
+  @include mobile {
+    flex-direction: column;
+  }
   gap: 12px;
   align-self: stretch;
 
   .item {
     display: flex;
     padding: 16px;
+    @include mobile {
+      width: 100%;
+    }
     justify-content: space-between;
     gap: 8px;
     flex: 1;

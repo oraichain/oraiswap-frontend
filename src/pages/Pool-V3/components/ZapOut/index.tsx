@@ -32,8 +32,6 @@ const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: s
   const refContent = useRef();
   const { refetchPositions } = useGetPositions(walletAddress);
 
-  // console.log(position);
-
   const onCloseModal = () => {
     setShowModal(false);
   };
