@@ -1,4 +1,4 @@
-import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS, ZAPPER_CONTRACT } from '@oraichain/oraidex-common';
 import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { extractAddress, poolKeyToString, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
 import classNames from 'classnames';
@@ -157,7 +157,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     }
   };
 
-  const { zapOut, ZAP_CONTRACT } = useZap();
+  const { zapOut } = useZap();
 
   const handleZapOut = async () => {
     try {
@@ -210,7 +210,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     let client: CosmWasmClient;
     try {
       client = await CosmWasmClient.connect(network.rpc);
-      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
     } catch (error) {
       console.log('error', error);
@@ -218,7 +218,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
     try {
       // const client = await CosmWasmClient.connect(network.rpc);
-      // const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      // const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       // const zapFee = await zap.protocolFee();
 
       const zapper = new ZapConsumer({

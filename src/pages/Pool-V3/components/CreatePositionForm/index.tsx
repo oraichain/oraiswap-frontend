@@ -6,7 +6,8 @@ import {
   toAmount,
   toDisplay,
   TokenItemType,
-  USDT_CONTRACT
+  USDT_CONTRACT,
+  ZAPPER_CONTRACT
 } from '@oraichain/oraidex-common';
 import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
@@ -780,7 +781,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     }
   };
 
-  const { zapIn, ZAP_CONTRACT } = useZap();
+  const { zapIn } = useZap();
 
   const handleZapIn = async () => {
     try {
@@ -892,7 +893,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     let client: CosmWasmClient;
     try {
       client = await CosmWasmClient.connect(network.rpc);
-      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
       console.log('zapFee', zapFee);
     } catch (error) {
