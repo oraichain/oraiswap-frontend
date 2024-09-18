@@ -20,20 +20,14 @@ export const openInNewTab = (url: string): void => {
 
 const CreateNewPosition = ({
   pool,
-  icon,
-  btnTitle = 'New Position',
-  btnType = 'third-sm',
-  className = ''
+  showModal,
+  setShowModal
 }: {
   pool: PoolWithPoolKey;
-  btnTitle?: string;
-  btnType?: ButtonType;
-  icon?: ReactElement;
-  className?: string;
+  showModal?: boolean;
+  setShowModal?: (isModal: boolean) => void;
 }) => {
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const refContent = useRef();
   const theme = useTheme();
@@ -68,18 +62,6 @@ const CreateNewPosition = ({
 
   return (
     <div className={classNames(styles.createNewPool, { [styles.activeWrapper]: showModal })}>
-      {/* <div className={styles.btnAdd}> */}
-      <Button type={btnType} className={className} onClick={() => setShowModal(true)}>
-        {icon && (
-          <>
-            {icon} <div style={{ width: 4 }} />
-          </>
-        )}
-        {btnTitle}
-      </Button>
-
-      {/* </div> */}
-
       <div
         onClick={() => setShowModal(false)}
         className={classNames(styles.overlay, { [styles.activeOverlay]: showModal })}

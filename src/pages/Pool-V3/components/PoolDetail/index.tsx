@@ -9,7 +9,6 @@ import classNames from 'classnames';
 import { Button } from 'components/Button';
 import LoadingBox from 'components/LoadingBox';
 import { formatNumberKMB, numberWithCommas } from 'helper/format';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString, stringToPoolKey } from 'libs/contractSingleton';
@@ -34,7 +33,7 @@ const PoolV3Detail = () => {
   const [cachePrices] = useConfigReducer('coingecko');
   const { poolList, poolPrice } = useGetPoolList(cachePrices);
   const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
-
+  const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const { poolId } = useParams<{ poolId: string }>();
@@ -195,13 +194,10 @@ const PoolV3Detail = () => {
         </div>
 
         <div className={styles.addPosition}>
-          {poolDetail && (
-            <CreateNewPosition icon={<AddIcon />} btnType={'primary-sm'} btnTitle={'Add Position'} pool={poolDetail} />
-          )}
-          {/* <Button
+          <Button
             disabled={!poolDetail}
             onClick={() => {
-              navigate(`/new-position/${encodeURIComponent(poolKeyToString(pool_key))}`);
+              setIsOpenCreatePosition(true);
             }}
             type="primary-sm"
           >
@@ -210,7 +206,14 @@ const PoolV3Detail = () => {
               &nbsp;
             </div>
             Add Position
-          </Button> */}
+          </Button>
+          {isOpenCreatePosition && poolDetail && (
+            <CreateNewPosition
+              showModal={isOpenCreatePosition}
+              setShowModal={setIsOpenCreatePosition}
+              pool={poolDetail}
+            />
+          )}
         </div>
       </div>
       <div className={styles.detail}>
