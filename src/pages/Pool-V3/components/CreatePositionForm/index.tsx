@@ -817,17 +817,19 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       console.log('error', error);
     } finally {
       setLoading(false);
-      const logEvent = {
-        address: walletAddress,
-        tokenZap: tokenZap.name,
-        tokenFrom: tokenFrom.name,
-        tokenTo: tokenTo.name,
-        poolData: poolKeyToString(poolData.pool_key),
-        zapAmount,
-        fromUsd,
-        type: 'ZapIn'
-      };
-      mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
+      if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
+        const logEvent = {
+          address: walletAddress,
+          tokenZap: tokenZap.name,
+          tokenFrom: tokenFrom.name,
+          tokenTo: tokenTo.name,
+          poolData: poolKeyToString(poolData.pool_key),
+          zapAmount,
+          fromUsd,
+          type: 'ZapIn'
+        };
+        mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
+      }
     }
   };
 

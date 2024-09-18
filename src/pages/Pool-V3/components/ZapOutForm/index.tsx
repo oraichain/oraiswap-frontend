@@ -189,17 +189,19 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       console.log('error', error);
     } finally {
       setLoading(false);
-      const logEvent = {
-        address: walletAddress,
-        tokenZap: tokenZap.name,
-        tokenFrom: tokenFrom.name,
-        tokenTo: tokenTo.name,
-        poolData: poolKeyToString(position.pool_key),
-        zapAmount,
-        fromUsd,
-        type: 'ZapOut'
-      };
-      mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
+      if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
+        const logEvent = {
+          address: walletAddress,
+          tokenZap: tokenZap.name,
+          tokenFrom: tokenFrom.name,
+          tokenTo: tokenTo.name,
+          poolData: poolKeyToString(position.pool_key),
+          zapAmount,
+          fromUsd,
+          type: 'ZapOut'
+        };
+        mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
+      }
     }
   };
 
