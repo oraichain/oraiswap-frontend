@@ -223,9 +223,9 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        deviation: 0,
+        devitation: 0,
         dexV3Address: network.pool_v3,
-        multiCallAddress: MULTICALL_CONTRACT,
+        multicallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {
