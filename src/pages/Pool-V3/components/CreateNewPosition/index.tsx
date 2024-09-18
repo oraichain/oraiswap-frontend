@@ -1,16 +1,16 @@
 import { PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress } from '@oraichain/oraiswap-v3';
+import { extractAddress, poolKeyToString } from '@oraichain/oraiswap-v3';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import classNames from 'classnames';
 import TooltipHover from 'components/TooltipHover';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { getIcon } from 'helper';
 import useTheme from 'hooks/useTheme';
-import { ReactElement, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import CreatePositionForm from '../CreatePositionForm';
 import styles from './index.module.scss';
 import cn from 'classnames/bind';
-import { Button, ButtonType } from 'components/Button';
+import { reduceString } from 'libs/utils';
 
 const cx = cn.bind(styles);
 export const openInNewTab = (url: string): void => {
@@ -20,20 +20,14 @@ export const openInNewTab = (url: string): void => {
 
 const CreateNewPosition = ({
   pool,
-  icon,
-  btnTitle = 'New Position',
-  btnType = 'third-sm',
-  className = ''
+  showModal,
+  setShowModal
 }: {
   pool: PoolWithPoolKey;
-  btnTitle?: string;
-  btnType?: ButtonType;
-  icon?: ReactElement;
-  className?: string;
+  showModal?: boolean;
+  setShowModal?: (isModal: boolean) => void;
 }) => {
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const refContent = useRef();
   const theme = useTheme();
@@ -68,18 +62,6 @@ const CreateNewPosition = ({
 
   return (
     <div className={classNames(styles.createNewPool, { [styles.activeWrapper]: showModal })}>
-      {/* <div className={styles.btnAdd}> */}
-      <Button type={btnType} className={className} onClick={() => setShowModal(true)}>
-        {icon && (
-          <>
-            {icon} <div style={{ width: 4 }} />
-          </>
-        )}
-        {btnTitle}
-      </Button>
-
-      {/* </div> */}
-
       <div
         onClick={() => setShowModal(false)}
         className={classNames(styles.overlay, { [styles.activeOverlay]: showModal })}
@@ -109,7 +91,9 @@ const CreateNewPosition = ({
                         <span>0.01% Spread</span>
                       </div>
                     </div>
-                    <div className={classNames(styles.infoMarket)}>Market ID: orai13r0p...00000-100</div>
+                    <div className={classNames(styles.infoMarket)}>
+                      Market ID: {reduceString(poolKeyToString(pool.pool_key), 16, 20)}
+                    </div>
                   </div>
                 }
                 position="bottom"

@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
 import isEqual from 'lodash/isEqual';
+import { Button } from 'components/Button';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -46,6 +47,9 @@ const PoolList = ({ search }) => {
   } as Record<PoolColumnHeader, SortType>);
 
   const theme = useTheme();
+
+  const [currentPool, setCurrentPool] = useState(null);
+  const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [dataPool, setDataPool] = useState([...Array(0)]);
@@ -306,11 +310,21 @@ const PoolList = ({ search }) => {
                             incentivesApr: 0,
                             ...aprInfo?.[item?.poolKey]
                           }}
+                          setCurrentPool={setCurrentPool}
+                          setIsOpenCreatePosition={setIsOpenCreatePosition}
                         />
                       </tr>
                     );
                   })}
                 </tbody>
+
+                {isOpenCreatePosition && currentPool && (
+                  <CreateNewPosition
+                    showModal={isOpenCreatePosition}
+                    setShowModal={setIsOpenCreatePosition}
+                    pool={currentPool}
+                  />
+                )}
               </table>
             </div>
           ) : (
@@ -327,7 +341,7 @@ const PoolList = ({ search }) => {
   );
 };
 
-const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
+const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreatePosition, setCurrentPool }) => {
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
 
@@ -420,9 +434,23 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo }) => {
           />
         </div>
       </td>
+
       <td className={styles.actions}>
-        <CreateNewPosition pool={item} className="newPosition" />
+        <Button
+          className="newPosition"
+          type="third-sm"
+          onClick={() => {
+            setIsOpenCreatePosition(true);
+            setCurrentPool(item);
+          }}
+        >
+          Add Position
+        </Button>
       </td>
+
+      {/* <td className={styles.actions}>
+        <CreateNewPosition pool={item} className="newPosition" />
+      </td> */}
     </>
   );
 };

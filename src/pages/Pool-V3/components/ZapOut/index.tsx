@@ -32,8 +32,6 @@ const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: s
   const refContent = useRef();
   const { refetchPositions } = useGetPositions(walletAddress);
 
-  // console.log(position);
-
   const onCloseModal = () => {
     setShowModal(false);
   };
@@ -66,9 +64,9 @@ const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: s
           </div>
           <ZapOutForm
             showModal={showModal}
-            onCloseModal={() => {
+            onCloseModal={async () => {
               setShowModal(false);
-              refetchPositions();
+              await refetchPositions();
             }}
             slippage={1}
             tokenFrom={position.tokenX}

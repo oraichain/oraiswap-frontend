@@ -14,7 +14,6 @@ import Loader from 'components/Loader';
 import { useNavigate } from 'react-router-dom';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import {
-  PrefixConfig,
   calculateFee,
   formatNumbers,
   getConvertedPool,
@@ -82,13 +81,12 @@ const PositionItem = ({ position }) => {
   const [incentives, setIncentives] = useState<{ [key: string]: number }>();
   const [claimLoading, setClaimLoading] = useState<boolean>(false);
   const [isClaimSuccess, setIsClaimSuccess] = useState<boolean>(false);
-  const [removeLoading, setRemoveLoading] = useState<boolean>(false);
+  const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
   const [statusRange, setStatusRange] = useState(undefined);
   const [xToY, _] = useState<boolean>(
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
   );
 
-  const loadOraichainToken = useLoadOraichainTokens();
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
   const { poolList, poolPrice } = useGetPoolList(price);
@@ -398,58 +396,19 @@ const PositionItem = ({ position }) => {
               </div>
             </div>
             <div className={styles.btnGroup}>
-              {/* <Button
-                disabled={removeLoading || (!position.tokenXLiqInUsd && !position.tokenYLiqInUsd)}
-                type="third-sm"
-                onClick={async () => {
-                  try {
-                    setRemoveLoading(true);
-                    const { client } = window.client
-                      ? { client: window.client }
-                      : await getCosmWasmClient({ chainId: network.chainId });
-                    SingletonOraiswapV3.load(client, address);
-                    const { transactionHash } = await SingletonOraiswapV3.dex.removePosition({
-                      index: Number(position.id)
-                    });
-
-                    if (transactionHash) {
-                      setCollapse(false);
-                      displayToast(TToastType.TX_SUCCESSFUL, {
-                        customLink: getTransactionUrl(network.chainId, transactionHash)
-                      });
-                      refetchPositions();
-                      loadOraichainToken(address, [tokenY.contractAddress, tokenX.contractAddress].filter(Boolean));
-                    }
-                  } catch (error) {
-                    console.log({ error });
-                    handleErrorTransaction(error);
-                  } finally {
-                    setRemoveLoading(false);
-                  }
-                }}
-              >
-                {removeLoading && (
-                  <>
-                    <Loader width={20} height={20} />
-                    <span style={{ width: 6 }}> </span>
-                  </>
-                )}
-                Close Position
-              </Button> */}
               <ZapOut position={position} incentives={incentives} />
-              {/* <Button
+              <Button
                 type="primary-sm"
                 onClick={() => {
-                  navigate(`/new-position/${encodeURIComponent(poolKeyToString(position.pool_key))}`);
+                  setIsOpenCreatePosition(true);
                 }}
               >
                 Add Liquidity
-              </Button> */}
-
+              </Button>
               {position && poolList.length > 0 && (
                 <CreateNewPosition
-                  btnType={'primary-sm'}
-                  btnTitle={'Add Position'}
+                  showModal={isOpenCreatePosition}
+                  setShowModal={setIsOpenCreatePosition}
                   pool={poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key))}
                 />
               )}

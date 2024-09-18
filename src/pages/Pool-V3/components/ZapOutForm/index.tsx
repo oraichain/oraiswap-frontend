@@ -170,9 +170,12 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
               customLink: getTransactionUrl('Oraichain', tx)
             });
             // handleSuccessAdd();
-            loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
+            loadOraichainToken(
+              walletAddress,
+              [tokenZap.contractAddress, tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean)
+            );
             onCloseModal();
-            navigate(`/pools-v3?type=positions`);
+            // navigate(`/pools-v3?type=positions`);
           },
           (e) => {
             displayToast(TToastType.TX_FAILED, {
@@ -208,9 +211,9 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        devitation: 0,
+        deviation: 0,
         dexV3Address: network.pool_v3,
-        multicallAddress: MULTICALL_CONTRACT,
+        multiCallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {
@@ -570,7 +573,11 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             <Button
               type="primary"
               disabled={
-                loading || !walletAddress || !tokenZap || !(btnText === 'Zap out' || btnText === 'Remove Position')
+                loading ||
+                !walletAddress ||
+                !tokenZap ||
+                !(btnText === 'Zap out' || btnText === 'Remove Position') ||
+                !!zapError
               }
               onClick={async () => {
                 if (toggleZapOut) {

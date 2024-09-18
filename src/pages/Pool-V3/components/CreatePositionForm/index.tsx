@@ -797,7 +797,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               customLink: getTransactionUrl('Oraichain', tx)
             });
             // handleSuccessAdd();
-            loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
+            loadOraichainToken(
+              walletAddress,
+              [tokenZap.contractAddress, tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean)
+            );
             onCloseModal();
             navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(poolData.pool_key))}`);
           },
@@ -890,9 +893,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const routerApi = 'https://osor.oraidex.io/smart-router/alpha-router';
       const zapper = new ZapConsumer({
         client,
-        devitation: 0,
+        deviation: 0,
         dexV3Address: network.pool_v3,
-        multicallAddress: MULTICALL_CONTRACT,
+        multiCallAddress: MULTICALL_CONTRACT,
         routerApi,
         smartRouteConfig: {
           swapOptions: {
@@ -1538,7 +1541,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             <Button
               type="primary"
               disabled={
-                loading || !walletAddress || !(btnText === 'Zap in' || btnText === 'Create new position')
+                loading || !walletAddress || !(btnText === 'Zap in' || btnText === 'Create new position') || !!zapError
                 // true
               }
               onClick={async () => {
