@@ -469,8 +469,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       if (isSpecialFromCoingecko && from.chainId === 'Oraichain') {
         const tokenInfo = getTokenOnOraichain(from.coinGeckoId);
-        const IBC_DECIMALS = 18;
-        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
+        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, true);
         const [nativeAmount, cw20Amount] = await Promise.all([
           window.client.getBalance(oraiAddress, fromTokenInOrai.denom),
           window.client.queryContractSmart(tokenInfo.contractAddress, {
@@ -521,8 +520,9 @@ const Balance: React.FC<BalanceProps> = () => {
           cosmosWallet: window.Keplr,
           evmWallet: new Metamask(window.tronWebDapp),
           swapOptions: {
-            isAlphaSmartRouter: isAllowAlphaSmartRouter(),
-            isIbcWasm: isAllowIBCWasm(from, newToToken)
+            // isAlphaSmartRouter: isAllowAlphaSmartRouter(),
+            // isIbcWasm: isAllowIBCWasm(from, newToToken),
+            isCheckBalanceIbc: true
           }
         }
       );

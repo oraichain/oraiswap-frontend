@@ -286,8 +286,7 @@ const SwapComponent: React.FC<{
 
       if (isSpecialFromCoingecko && originalFromToken.chainId === 'Oraichain') {
         const tokenInfo = getTokenOnOraichain(originalFromToken.coinGeckoId);
-        const IBC_DECIMALS = 18;
-        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
+        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, true);
         const [nativeAmount, cw20Amount] = await Promise.all([
           window.client.getBalance(oraiAddress, fromTokenInOrai.denom),
           window.client.queryContractSmart(tokenInfo.contractAddress, {
