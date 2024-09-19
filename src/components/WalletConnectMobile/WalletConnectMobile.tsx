@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import * as encoding from '@walletconnect/encoding';
 import { BigNumber, utils } from 'ethers';
-import { TypedDataField } from '@ethersproject/abstract-signer';
 import { Transaction } from '@ethereumjs/tx';
 import Blockchain from './components/Blockchain';
 // import Banner from "./../components/Banner";
@@ -9,15 +8,13 @@ import Blockchain from './components/Blockchain';
 // import Column from "./../components/Column";
 // import Header from "./../components/Header";
 // import Modal from "./components/Modal";
-import { DEFAULT_MAIN_CHAINS, DEFAULT_TEST_CHAINS } from './constant';
+import { DEFAULT_MAIN_CHAINS } from './constant';
 import {
   AccountAction,
   eip712,
   formatTestTransaction,
-  getLocalStorageTestnetFlag,
   hashPersonalMessage,
   hashTypedDataMessage,
-  setLocaleStorageTestnetFlag,
   verifySignature
 } from './helpers';
 // import RequestModal from "./../modals/RequestModal";
@@ -44,7 +41,6 @@ interface IFormattedRpcResponse {
 }
 
 export const WalletConnectMobile = () => {
-  const [isTestnet, setIsTestnet] = useState(getLocalStorageTestnetFlag());
   const [isRpcRequestPending, setIsRpcRequestPending] = useState(false);
   const [rpcResult, setRpcResult] = useState<IFormattedRpcResponse | null>();
 
@@ -255,13 +251,6 @@ export const WalletConnectMobile = () => {
     }
   };
 
-  // Toggle between displaying testnet or mainnet chains as selection options.
-  const toggleTestnets = () => {
-    const nextIsTestnetState = !isTestnet;
-    setIsTestnet(nextIsTestnetState);
-    setLocaleStorageTestnetFlag(nextIsTestnetState);
-  };
-
   //   // Renders the appropriate model for the given request that is currently in-flight.
   const renderModal = () => {
     switch (modal) {
@@ -307,8 +296,7 @@ export const WalletConnectMobile = () => {
   };
 
   return (
-    <div>
-      asdfasdf
+    <div style={{ marginLeft: 400 }}>
       <div maxWidth={1000} spanHeight>
         <div ping={onPing} disconnect={disconnect} session={session} />
         <div>{isInitializing ? 'Loading...' : renderContent()}</div>

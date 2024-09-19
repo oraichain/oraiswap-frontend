@@ -19,7 +19,8 @@ const fallback = {
   crypto: require.resolve('crypto-browserify'),
   stream: require.resolve('stream-browserify'),
   buffer: require.resolve('buffer'),
-  https: require.resolve('https-browserify')
+  https: require.resolve('https-browserify'),
+  zlib: require.resolve('browserify-zlib')
 };
 const fixBabelRules = (config) => {
   // find first loader and use babel.config.js

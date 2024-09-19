@@ -31,10 +31,3 @@ export enum DEFAULT_EIP_155_EVENTS {
 }
 
 export const DEFAULT_LOGGER = 'debug';
-
-export const DEFAULT_APP_METADATA = {
-  name: 'React App with ethers',
-  description: 'React App for WalletConnect',
-  url: 'https://walletconnect.com/',
-  icons: ['https://avatars.githubusercontent.com/u/37784886']
-};

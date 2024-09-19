@@ -7,7 +7,7 @@ import {
   toDisplay
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
-import WalletConnectProvider from '@walletconnect/ethereum-provider';
+// import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import bech32 from 'bech32';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
@@ -200,17 +200,17 @@ export const initEthereum = async () => {
   // support only https
   if (isMobile() && !window.ethereumDapp && window.location.protocol === 'https:') {
     const bscChain = chainInfos.find((c) => c.chainId === '0x38');
-    const provider = new WalletConnectProvider({
-      chainId: Networks.bsc,
-      storageId: 'metamask',
-      qrcode: true,
-      rpc: { [Networks.bsc]: bscChain.rpc },
-      qrcodeModalOptions: {
-        mobileLinks: ['metamask']
-      }
-    });
-    await provider.enable();
-    (window.ethereumDapp as any) = provider;
+    // const provider = new WalletConnectProvider({
+    //   chainId: Networks.bsc,
+    //   storageId: 'metamask',
+    //   qrcode: true,
+    //   rpc: { [Networks.bsc]: bscChain.rpc },
+    //   qrcodeModalOptions: {
+    //     mobileLinks: ['metamask']
+    //   }
+    // });
+    // await provider.enable();
+    // (window.ethereumDapp as any) = provider;
   }
 };
 

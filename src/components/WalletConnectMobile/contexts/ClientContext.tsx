@@ -102,8 +102,8 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
       }
 
       _client.on('display_uri', async (uri: string) => {
-        console.log('EVENT', 'QR Code Modal open');
-        web3Modal?.openModal({ uri });
+        console.log('EVENT', 'QR Code Modal open', uri);
+        await web3Modal?.openModal({ uri });
       });
 
       // Subscribe to session ping
@@ -146,13 +146,6 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
         relayUrl: DEFAULT_RELAY_URL
       });
 
-      const web3Modal = new Web3Modal({
-        projectId: DEFAULT_PROJECT_ID,
-        walletConnectVersion: 2
-      });
-      web3Modal.openModal();
-      console.log({ web3Modal });
-
       setEthereumProvider(provider);
       setClient(provider.client);
       setWeb3Modal(web3Modal);
@@ -178,8 +171,9 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
       const chainId = caipChainId.split(':').pop();
 
       console.log('Enabling EthereumProvider for chainId: ', chainId);
-      alert('Enabling EthereumProvider for chainId: ' + chainId);
       try {
+        console.log({ ethereumProvider });
+
         const session = await ethereumProvider.connect({
           namespaces: {
             eip155: {
@@ -193,6 +187,7 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
           },
           pairingTopic: pairing?.topic
         });
+
         console.log('here', session);
         alert('sesion ' + JSON.stringify(session));
       } catch (error) {

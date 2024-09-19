@@ -30,11 +30,12 @@
     "@tharsis/proto": "^0.1.17",
     "@tippyjs/react": "^4.2.0",
     "@walletconnect/browser-utils": "^1.8.0",
-    "@walletconnect/ethereum-provider": "^1.7.8",
-    "@walletconnect/sign-client": "^2.16.2",
-    "@walletconnect/types": "^2.16.2",
-    "@walletconnect/universal-provider": "^2.16.2",
-    "@web3modal/standalone": "^2.4.3",
+    "@walletconnect/encoding": "^1.0.2",
+    "@walletconnect/sign-client": "2.10.0",
+    "@walletconnect/types": "2.10.0",
+    "@walletconnect/universal-provider": "2.10.0",
+    "@walletconnect/utils": "2.10.0",
+    "@web3modal/standalone": "2.4.3",
     "axios": "^0.26.1",
     "axios-extensions": "^3.1.3",
     "bech32": "^1.1.4",
@@ -49,6 +50,7 @@
     "lottie-react": "^2.4.0",
     "mixpanel-browser": "^2.49.0",
     "qr-code-styling": "1.6.0-rc.1",
+    "qr-image": "^3.2.0",
     "qrcode": "^1.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -81,6 +83,7 @@
     "@types/jest": "^29.5.10",
     "@types/lodash": "^4.14.182",
     "@types/node": "^18.15.11",
+    "@types/qr-image": "^3.2.5",
     "@types/react": "^18.0.34",
     "@types/react-dom": "^18.0.11",
     "@types/react-modal": "^3.13.1",
@@ -134,7 +137,8 @@
   "resolutions": {
     "bech32": "1.1.4",
     "bitcoinjs-lib": "5.2.0",
-    "axios": "0.26.1"
+    "axios": "0.26.1",
+    "react-error-overlay": "6.0.11"
   },
   "engines": {
     "node": "^18 || ^20"

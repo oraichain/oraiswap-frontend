@@ -73,23 +73,23 @@ window.onunhandledrejection = (err) => {
 const initApp = async () => {
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
-    <ClientContextProvider>
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <ToastProvider>
-            <Router>
-              <ScrollToTop />
-              <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ToastProvider>
+          <Router>
+            <ScrollToTop />
+            <QueryClientProvider client={queryClient}>
+              <ClientContextProvider>
                 <App />
-              </QueryClientProvider>
-            </Router>
-            <ToastContext.Consumer>
-              {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
-            </ToastContext.Consumer>
-          </ToastProvider>
-        </PersistGate>
-      </Provider>
-    </ClientContextProvider>
+              </ClientContextProvider>
+            </QueryClientProvider>
+          </Router>
+          <ToastContext.Consumer>
+            {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
+          </ToastContext.Consumer>
+        </ToastProvider>
+      </PersistGate>
+    </Provider>
   );
 
   // init cosmwasm client when user connected cosmos wallet

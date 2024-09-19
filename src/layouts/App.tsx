@@ -263,9 +263,9 @@ const App = () => {
 
   return (
     <ThemeProvider>
-      <WalletConnectMobile />
       <div className={`app ${theme}`}>
         <Menu />
+        <WalletConnectMobile />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
         <div className="main">
           <Sidebar />
