@@ -28,6 +28,7 @@ import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
+import { WalletConnectMobile } from 'components/WalletConnectMobile';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -262,11 +263,10 @@ const App = () => {
 
   return (
     <ThemeProvider>
+      <WalletConnectMobile />
       <div className={`app ${theme}`}>
-        {/* <button data-featurebase-feedback>Open Widget</button> */}
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
         <div className="main">
           <Sidebar />
           <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>

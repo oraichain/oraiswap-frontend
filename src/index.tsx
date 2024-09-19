@@ -19,6 +19,7 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
+import { ClientContextProvider } from 'components/WalletConnectMobile/contexts/ClientContext';
 
 // const client = new Client({
 //   url: 'http://10.10.20.72:3000/',
@@ -64,26 +65,31 @@ const rpcClient = useHttp ? new HttpClient(network.rpc) : new WebsocketClient(ne
 // @ts-ignore
 window.client = new CosmWasmClient(new Tendermint37Client(rpcClient));
 
+window.onunhandledrejection = (err) => {
+  // handle error
+  console.error('onunhandledrejection: ' + JSON.stringify(err));
+};
+
 const initApp = async () => {
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
-    // <UrqlProvider value={client}>
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ToastProvider>
-          <Router>
-            <ScrollToTop />
-            <QueryClientProvider client={queryClient}>
-              <App />
-            </QueryClientProvider>
-          </Router>
-          <ToastContext.Consumer>
-            {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
-          </ToastContext.Consumer>
-        </ToastProvider>
-      </PersistGate>
-    </Provider>
-    // </UrqlProvider>
+    <ClientContextProvider>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <ToastProvider>
+            <Router>
+              <ScrollToTop />
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
+            </Router>
+            <ToastContext.Consumer>
+              {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
+            </ToastContext.Consumer>
+          </ToastProvider>
+        </PersistGate>
+      </Provider>
+    </ClientContextProvider>
   );
 
   // init cosmwasm client when user connected cosmos wallet
