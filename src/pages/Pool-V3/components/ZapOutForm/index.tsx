@@ -1,6 +1,6 @@
-import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS, ZAPPER_CONTRACT } from '@oraichain/oraidex-common';
 import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
+import { extractAddress, poolKeyToString, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -34,6 +34,7 @@ import SingletonOraiswapV3 from 'libs/contractSingleton';
 import TooltipHover from 'components/TooltipHover';
 import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import ZappingText from 'components/Zapping';
+import mixpanel from 'mixpanel-browser';
 
 const cx = cn.bind(styles);
 
@@ -156,7 +157,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     }
   };
 
-  const { zapOut, ZAP_CONTRACT } = useZap();
+  const { zapOut } = useZap();
 
   const handleZapOut = async () => {
     try {
@@ -178,6 +179,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
             // navigate(`/pools-v3?type=positions`);
           },
           (e) => {
+            console.log({ errorZap: e });
             displayToast(TToastType.TX_FAILED, {
               message: 'Zap Out failed!'
             });
@@ -188,6 +190,19 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       console.log('error', error);
     } finally {
       setLoading(false);
+      if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
+        const logEvent = {
+          address: walletAddress,
+          tokenZap: tokenZap.name,
+          tokenFrom: tokenFrom.name,
+          tokenTo: tokenTo.name,
+          poolData: poolKeyToString(position.pool_key),
+          zapAmount,
+          zapUsd,
+          type: 'ZapOut'
+        };
+        mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
+      }
     }
   };
 
@@ -198,7 +213,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     let client: CosmWasmClient;
     try {
       client = await CosmWasmClient.connect(network.rpc);
-      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
     } catch (error) {
       console.log('error', error);
@@ -206,14 +221,14 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
     try {
       // const client = await CosmWasmClient.connect(network.rpc);
-      // const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      // const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       // const zapFee = await zap.protocolFee();
 
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        deviation: 0,
+        devitation: 0,
         dexV3Address: network.pool_v3,
-        multiCallAddress: MULTICALL_CONTRACT,
+        multicallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {

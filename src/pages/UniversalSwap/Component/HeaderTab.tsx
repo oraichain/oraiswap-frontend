@@ -74,32 +74,11 @@ export const HeaderTab: React.FC<HeaderTabPropsType> = ({
 
       <div className={cx('headerBottom')}>
         {!mobileMode && (
-          <UsdPrice
-            priceUsd={priceUsd}
-            priceChange={priceChange}
-            percentChangeUsd={percentChangeUsd}
-            chartTokenType={chartTokenType}
-          />
+          <UsdPrice priceUsd={priceUsd} percentChangeUsd={percentChangeUsd} chartTokenType={chartTokenType} />
         )}
 
-        {!hideChart && mobileMode && <TypeChartRender />}
         {tab === TAB_CHART_SWAP.TOKEN && !hideChart && (
           <div className={cx('filter_wrapper')}>
-            <div className={cx('filter_day_wrapper')}>
-              {[ChartTokenType.Price, ChartTokenType.Volume].map((type) => {
-                return (
-                  <button
-                    key={'time-key-chart' + type}
-                    className={cx(`filter_day`, type === chartTokenType ? 'active' : '')}
-                    onClick={() => {
-                      setChartTokenType(type);
-                    }}
-                  >
-                    {type}
-                  </button>
-                );
-              })}
-            </div>
             <div className={cx('filter_day_wrapper')}>
               {LIST_FILTER_TIME.map((e) => {
                 return (
@@ -122,77 +101,12 @@ export const HeaderTab: React.FC<HeaderTabPropsType> = ({
   );
 };
 
-export const TypeChartRender = () => {
-  const dispatch = useDispatch();
-  const tab = useSelector(selectCurrentSwapTabChart);
-
-  return (
-    <div className={cx('tabWrapper')}>
-      <button
-        className={cx('tab', tab === TAB_CHART_SWAP.TOKEN ? 'active' : '')}
-        onClick={() => {
-          dispatch(setTabChartSwap(TAB_CHART_SWAP.TOKEN));
-        }}
-      >
-        {TAB_CHART_SWAP.TOKEN}
-      </button>
-      <button
-        className={cx('tab', tab === TAB_CHART_SWAP.POOL ? 'active' : '')}
-        onClick={() => {
-          dispatch(setTabChartSwap(TAB_CHART_SWAP.POOL));
-        }}
-      >
-        {TAB_CHART_SWAP.POOL}
-      </button>
-    </div>
-  );
-};
-
 export const UsdPrice = ({
-  priceChange,
   percentChangeUsd,
   priceUsd,
   chartTokenType
-}: Pick<HeaderTabPropsType, 'priceChange' | 'percentChangeUsd' | 'priceUsd' | 'chartTokenType'>) => {
-  const tab = useSelector(selectCurrentSwapTabChart);
-
-  const { data: prices } = useCoinGeckoPrices();
-  const currentPair = useSelector(selectCurrentToken);
-
-  const [baseContractAddr, quoteContractAddr] = currentPair.info.split('-');
-  const isPairReverseSymbol = reverseSymbolArr.find(
-    (pair) => pair.filter((item) => item.denom === baseContractAddr || item.denom === quoteContractAddr).length === 2
-  );
-  const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
-
-  const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
+}: Pick<HeaderTabPropsType, 'percentChangeUsd' | 'priceUsd' | 'chartTokenType'>) => {
   const isIncrementUsd = percentChangeUsd && Number(percentChangeUsd) > 0;
-
-  const percentPriceChange = calculateFinalPriceChange(
-    !!isPairReverseSymbol,
-    priceChange.price,
-    priceChange.price_change
-  );
-
-  const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
-  const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
-
-  const headerTabAdvance = () => {
-    return priceChange.isError
-      ? null
-      : priceChange.isError && (
-          <div className={cx('bottom')}>
-            <div className={cx('balance')}>
-              {`1 ${baseDenom} ≈ ${
-                isPairReverseSymbol ? (1 / currentPrice || 0).toFixed(6) : currentPrice.toFixed(6)
-              } ${quoteDenom}`}
-            </div>
-            <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
-              {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%
-            </div>
-          </div>
-        );
-  };
 
   const headerTabSimple = () => {
     return (
@@ -209,7 +123,7 @@ export const UsdPrice = ({
     );
   };
 
-  return <div className={cx('priceUsd')}>{tab === TAB_CHART_SWAP.TOKEN ? headerTabSimple() : headerTabAdvance()}</div>;
+  return <div className={cx('priceUsd')}>{headerTabSimple()}</div>;
 };
 
 export const HeaderTop = ({
@@ -289,22 +203,7 @@ export const HeaderTop = ({
           </div>
         )}
         {mobileMode && (
-          <UsdPrice
-            priceUsd={priceUsd}
-            priceChange={priceChange}
-            percentChangeUsd={percentChangeUsd}
-            chartTokenType={chartTokenType}
-          />
-        )}
-      </div>
-
-      <div className={cx('tabEyes')}>
-        {!hideChart && !mobileMode && <TypeChartRender />}
-
-        {showHideChart && (
-          <div className={cx('eyesWrapper')} onClick={() => onClickAction()}>
-            <img className={cx('eyes')} src={hideChart ? ChartImg : HideImg} alt="eyes" />
-          </div>
+          <UsdPrice priceUsd={priceUsd} percentChangeUsd={percentChangeUsd} chartTokenType={chartTokenType} />
         )}
       </div>
     </div>

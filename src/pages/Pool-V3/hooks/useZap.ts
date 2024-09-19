@@ -4,7 +4,7 @@ import { network } from 'config/networks';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { executeMultiple } from '../helpers/helper';
-import { TokenItemType } from '@oraichain/oraidex-common';
+import { TokenItemType, ZAPPER_CONTRACT } from '@oraichain/oraidex-common';
 import { parseAsset, ZapInLiquidityResponse, ZapOutLiquidityResponse } from '@oraichain/oraiswap-v3';
 
 export type ZapInData = {
@@ -19,12 +19,10 @@ export type ZapOutData = {
 };
 
 const useZap = () => {
-  const ZAP_CONTRACT = 'orai1r04t5elwku5jh9v2u5jqs0mr4ftfyq7xuspa96almzgvgr04gf7q0duvgj';
-
   const zapIn = async (data: ZapInData, walletAddress: string, onSuccess: any, onError: any) => {
     try {
       const { tokenZap, zapAmount, zapInResponse } = data;
-      
+
       let msg = [];
 
       // approve
@@ -36,7 +34,7 @@ const useZap = () => {
           msg: {
             increase_allowance: {
               amount: zapAmount,
-              spender: ZAP_CONTRACT
+              spender: ZAPPER_CONTRACT
             }
           }
         });
@@ -61,7 +59,7 @@ const useZap = () => {
 
       // zapIn message
       msg.push({
-        contractAddress: ZAP_CONTRACT,
+        contractAddress: ZAPPER_CONTRACT,
         msg: {
           zap_in_liquidity: {
             asset_in: parseAsset(tokenZap, zapAmount),
@@ -74,8 +72,6 @@ const useZap = () => {
         },
         funds: coins
       });
-
-      console.log({ msg });
 
       const tx = await executeMultiple(msg, walletAddress);
 
@@ -96,12 +92,12 @@ const useZap = () => {
 
       let msg = [];
 
-      // first approve NFT for ZAP_CONTRACT
+      // first approve NFT for ZAPPER_CONTRACT
       msg.push({
         contractAddress: network.pool_v3,
         msg: {
           approve: {
-            spender: ZAP_CONTRACT,
+            spender: ZAPPER_CONTRACT,
             token_id: tokenId
           }
         }
@@ -109,7 +105,7 @@ const useZap = () => {
 
       // zapOut message
       msg.push({
-        contractAddress: ZAP_CONTRACT,
+        contractAddress: ZAPPER_CONTRACT,
         msg: {
           zap_out_liquidity: {
             position_index: zapOutResponse.positionIndex,
@@ -130,7 +126,6 @@ const useZap = () => {
   };
 
   return {
-    ZAP_CONTRACT,
     zapIn,
     zapOut
   };

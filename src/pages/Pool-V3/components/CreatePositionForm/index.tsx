@@ -6,7 +6,8 @@ import {
   toAmount,
   toDisplay,
   TokenItemType,
-  USDT_CONTRACT
+  USDT_CONTRACT,
+  ZAPPER_CONTRACT
 } from '@oraichain/oraidex-common';
 import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
@@ -77,6 +78,7 @@ import {
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
 import ZappingText from 'components/Zapping';
+import mixpanel from 'mixpanel-browser';
 
 export type PriceInfo = {
   startPrice: number;
@@ -779,7 +781,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     }
   };
 
-  const { zapIn, ZAP_CONTRACT } = useZap();
+  const { zapIn } = useZap();
 
   const handleZapIn = async () => {
     try {
@@ -805,6 +807,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(poolData.pool_key))}`);
           },
           (e) => {
+            console.log({ errorZap: e });
             displayToast(TToastType.TX_FAILED, {
               message: 'Add liquidity failed!'
             });
@@ -815,6 +818,19 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       console.log('error', error);
     } finally {
       setLoading(false);
+      if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
+        const logEvent = {
+          address: walletAddress,
+          tokenZap: tokenZap.name,
+          tokenFrom: tokenFrom.name,
+          tokenTo: tokenTo.name,
+          poolData: poolKeyToString(poolData.pool_key),
+          zapAmount,
+          zapUsd,
+          type: 'ZapIn'
+        };
+        mixpanel.track('Zap PoolV3 oraiDEX', logEvent);
+      }
     }
   };
 
@@ -880,7 +896,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     let client: CosmWasmClient;
     try {
       client = await CosmWasmClient.connect(network.rpc);
-      const zap = new ZapperQueryClient(client, ZAP_CONTRACT);
+      const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
       console.log('zapFee', zapFee);
     } catch (error) {
@@ -893,9 +909,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const routerApi = 'https://osor.oraidex.io/smart-router/alpha-router';
       const zapper = new ZapConsumer({
         client,
-        deviation: 0,
+        devitation: 0,
         dexV3Address: network.pool_v3,
-        multiCallAddress: MULTICALL_CONTRACT,
+        multicallAddress: MULTICALL_CONTRACT,
         routerApi,
         smartRouteConfig: {
           swapOptions: {
