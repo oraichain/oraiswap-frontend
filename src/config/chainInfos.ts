@@ -534,9 +534,10 @@ const oraibtcNetwork = {
   ]
 };
 
-export const chainInfosNew = [...customChainInfos, bitcoinNetwork, oraibtcNetwork];
+export const chainInfosWithSdk = [...customChainInfos, bitcoinNetwork, oraibtcNetwork];
+export const chainInfos = mapListWithIcon(chainInfosWithSdk, chainIcons, 'chainId');
 
-export const chainInfos: CustomChainInfo[] = [
+export const chainInfosOld: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
   bitcoinNetwork,
