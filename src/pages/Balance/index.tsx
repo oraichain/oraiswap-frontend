@@ -463,7 +463,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const cosmosAddress = await handleCheckAddress(from.cosmosBased ? (from.chainId as CosmosChainId) : 'Oraichain');
       const latestEvmAddress = await getLatestEvmAddress(toNetworkChainId);
       let amountsBalance = amounts;
-      let simulateAmount = toAmount(fromAmount).toString();
+      let simulateAmount = toAmount(fromAmount, from.decimals).toString();
 
       const { isSpecialFromCoingecko } = getSpecialCoingecko(from.coinGeckoId, newToToken.coinGeckoId);
 

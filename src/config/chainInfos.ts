@@ -508,8 +508,33 @@ export const OraiBTCBridgeNetwork = {
 };
 
 const bitcoinNetwork = bitcoinMainnet;
+const oraibtcNetwork = {
+  rpc: 'https://btc.rpc.orai.io',
+  rest: 'https://btc.lcd.orai.io/',
+  chainId: 'oraibtc-mainnet-1' as any,
+  chainName: 'OraiBTC' as any,
+  networkType: 'cosmos',
+  bip44: {
+    coinType: 118
+  },
+  Icon: BitcoinIcon,
+  IconLight: BitcoinIcon,
+  bech32Config: defaultBech32Config('oraibtc'),
+  feeCurrencies: [OraiBTCToken],
+  currencies: [
+    {
+      coinDenom: 'BTC',
+      coinMinimalDenom: 'uoraibtc',
+      coinDecimals: 6,
+      coinGeckoId: 'bitcoin',
+      bridgeTo: ['Oraichain'],
+      Icon: BitcoinIcon,
+      IconLight: BitcoinIcon
+    }
+  ]
+};
 
-// export const chainInfos: CustomChainInfo[] = [...customChainInfos, bitcoinNetwork];
+export const chainInfosNew = [...customChainInfos, bitcoinNetwork, oraibtcNetwork];
 
 export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
