@@ -1,9 +1,9 @@
 import { PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress, poolKeyToString } from '@oraichain/oraiswap-v3';
+import { poolKeyToString } from '@oraichain/oraiswap-v3';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import classNames from 'classnames';
 import TooltipHover from 'components/TooltipHover';
-import { oraichainTokens } from 'config/bridgeTokens';
+import { oraichainTokens } from '@oraichain/oraidex-common';
 import { getIcon } from 'helper';
 import useTheme from 'hooks/useTheme';
 import { useRef, useState } from 'react';
@@ -11,6 +11,7 @@ import CreatePositionForm from '../CreatePositionForm';
 import styles from './index.module.scss';
 import cn from 'classnames/bind';
 import { reduceString } from 'libs/utils';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
 const cx = cn.bind(styles);
 export const openInNewTab = (url: string): void => {

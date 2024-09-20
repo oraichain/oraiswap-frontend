@@ -3,6 +3,7 @@ import {
   BigDecimal,
   CW20_DECIMALS,
   MULTICALL_CONTRACT,
+  oraichainTokens,
   toAmount,
   toDisplay,
   TokenItemType,
@@ -13,7 +14,6 @@ import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import {
   calculateSqrtPrice,
-  extractAddress,
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
@@ -25,12 +25,11 @@ import {
   RouteNotFoundError,
   SpamTooManyRequestsError,
   ZapConsumer,
-  ZapInLiquidityResponse,
-  ZapInResult
+  ZapInLiquidityResponse
 } from '@oraichain/oraiswap-v3';
+import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
-import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
 import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
@@ -40,7 +39,7 @@ import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TooltipHover from 'components/TooltipHover';
-import { oraichainTokens } from 'config/bridgeTokens';
+import ZappingText from 'components/Zapping';
 import { network } from 'config/networks';
 import { getIcon, getTransactionUrl } from 'helper';
 import { numberWithCommas } from 'helper/format';
@@ -49,11 +48,9 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { useDebounce } from 'hooks/useDebounce';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
-import {
-  calculateTokenAmountsWithSlippage,
-  calcYPerXPriceBySqrtPrice,
-  InitPositionData
-} from 'pages/Pool-V3/helpers/helper';
+import mixpanel from 'mixpanel-browser';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
+import { calculateTokenAmountsWithSlippage, InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
@@ -80,9 +77,7 @@ import {
 } from '../PriceRangePlot/utils';
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
-import ZappingText from 'components/Zapping';
-import mixpanel from 'mixpanel-browser';
-import { set } from 'lodash';
+import { PRICE_SCALE } from 'libs/contractSingleton';
 
 export type PriceInfo = {
   startPrice: number;
@@ -170,6 +165,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
     const tokenXDecimals = isXToY ? tokenFrom?.decimals ?? 6 : tokenTo?.decimals ?? 6;
     const tokenYDecimals = isXToY ? tokenTo?.decimals ?? 6 : tokenFrom?.decimals ?? 6;
+    console.log({ tokenXDecimals, tokenYDecimals });
 
     const tickIndex = nearestTickIndex(
       priceInfo.startPrice,
@@ -178,6 +174,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       tokenXDecimals,
       tokenYDecimals
     );
+    console.log(tickIndex);
 
     return {
       index: tickIndex,
@@ -690,12 +687,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   }, [isPoolExist, showModal]);
 
   useEffect(() => {
+    // TODO:
     if (poolInfo) {
       setMidPrice({
         index: poolInfo.pool.current_tick_index,
-        x:
-          calcYPerXPriceBySqrtPrice(BigInt(poolInfo.pool.sqrt_price), tokenFrom.decimals, tokenTo.decimals) **
-          (isXtoY ? 1 : -1)
+        x: calcPrice(Number(poolInfo.pool.current_tick_index), true, tokenFrom.decimals, tokenTo.decimals)
       });
     }
   }, [poolInfo, isXtoY, tokenFrom, tokenTo]);
@@ -896,7 +892,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-    } catch (error) { }
+    } catch (error) {}
 
     try {
       const amountAfterFee = Number(zapAmount) * (1 - zapFee);
@@ -925,12 +921,12 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
       const result = await zapper.processZapInPositionLiquidity({
         pool: poolData,
-        tokenIn: tokenZap,
+        tokenIn: tokenZap as any,
         amountIn: amountIn,
         lowerTick,
         upperTick,
-        tokenX: tokenFrom,
-        tokenY: tokenTo
+        tokenX: tokenFrom as any,
+        tokenY: tokenTo as any
       });
       setSwapFee(result.swapFee * 100);
       const inputUsd = prices?.[tokenZap.coinGeckoId] * Number(amountAfterFee);
@@ -956,11 +952,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError('The route swap found has no liquidity, can\'t swap');
+        setZapError("The route swap found has no liquidity, can't swap");
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
       }
-
     } finally {
       setSimulating(false);
       setLoading(false);

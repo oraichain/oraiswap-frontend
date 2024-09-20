@@ -36,8 +36,8 @@ export const useSimulate = (
     [queryKey, fromTokenInfoData, toTokenInfoData, debouncedFromAmount],
     () => {
       return UniversalSwapHelper.handleSimulateSwap({
-        originalFromInfo: originalFromTokenInfo,
-        originalToInfo: originalToTokenInfo,
+        originalFromInfo: originalFromTokenInfo as any,
+        originalToInfo: originalToTokenInfo as any,
         originalAmount: debouncedFromAmount,
         routerClient,
         routerOption: {

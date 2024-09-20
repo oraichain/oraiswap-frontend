@@ -4374,10 +4374,32 @@
     react-use "^17.4.0"
     react-use-websocket "^4.5.0"
 
-"@oraichain/oraidex-common@^1.0.91", "@oraichain/oraidex-common@^1.1.6":
+"@oraichain/oraidex-common@^1.0.91":
   version "1.1.8"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.8.tgz#caef2203806dfe3e422cb1876ca2f9db09ba92a3"
   integrity sha512-1GEC1eqeJ4BoT3ytAJgLa50obi2gq0hqPIqxfvxU1PpS1mVMpnxLozrDqmjK/NxG5RTl5BZutGBq/Uu10KbRvQ==
+  dependencies:
+    "@cosmjs/amino" "0.31.3"
+    "@cosmjs/cosmwasm-stargate" "0.31.3"
+    "@cosmjs/crypto" "0.31.3"
+    "@cosmjs/proto-signing" "0.31.3"
+    "@cosmjs/stargate" "0.31.3"
+    "@cosmjs/tendermint-rpc" "0.31.3"
+    "@ethersproject/providers" "^5.0.10"
+    "@injectivelabs/sdk-ts" "1.12.1"
+    "@keplr-wallet/types" "^0.11.38"
+    "@oraichain/oraidex-contracts-sdk" latest
+    axios "1.7.2"
+    axios-extensions "3.1.7"
+    bignumber.js "^9.1.2"
+    cosmjs-types "0.8.0"
+    ethers "^5.0.15"
+    tronweb "6.0.0-beta.4"
+
+"@oraichain/oraidex-common@^1.1.11":
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.11.tgz#d3023d1965210b388d2fd31a8674e29a491ade43"
+  integrity sha512-ikBXrT8PEpx8uVDePiIX0IrW/A0hl61G79JEn9pZ+04StR39nJOx1Aws67hxoqFKYgz8W5sTS9sSDZqwezFEYQ==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"
@@ -4434,13 +4456,13 @@
     tronweb "5.3.2"
     ts-protoc-gen "^0.15.0"
 
-"@oraichain/oraiswap-v3@0.1.12":
-  version "0.1.12"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.12.tgz#f3715448da31be8ddf2d5265fd6a9a25ceeb305d"
-  integrity sha512-GNqyMurlv83PtFNcFR4zmDK6TlPFplCUtsGZrDDe5j3pL5YjgPCeNeU8wfpCPQ6mD1o0WVrVhTW7TmroVH+VPg==
+"@oraichain/oraiswap-v3@0.1.13":
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.13.tgz#72cd04a37f0a5f48f1521d2d5012671cbd4f0d23"
+  integrity sha512-+ERxLfXLULkcoMTESh3Ahh0Tx1ZnMogKFWqqB26F/udUjfKc1oXXoBxaW+IGVbOM9WsETkin1QQzDnLAzgrHIA==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
-    "@oraichain/oraidex-common" "^1.1.6"
+    "@oraichain/oraidex-common" "^1.1.11"
     "@oraichain/oraidex-contracts-sdk" "^1.0.52"
 
 "@oraichain/wasm-json-toolkit@^1.0.24":

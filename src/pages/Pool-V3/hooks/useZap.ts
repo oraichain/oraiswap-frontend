@@ -48,7 +48,7 @@ const useZap = () => {
 
       console.log({
         zap_in_liquidity: {
-          asset_in: parseAsset(tokenZap, zapAmount),
+          asset_in: parseAsset(tokenZap as any, zapAmount),
           minimum_liquidity: zapInResponse.minimumLiquidity.toString(),
           pool_key: zapInResponse.poolKey,
           routes: zapInResponse.routes,
@@ -62,7 +62,7 @@ const useZap = () => {
         contractAddress: ZAPPER_CONTRACT,
         msg: {
           zap_in_liquidity: {
-            asset_in: parseAsset(tokenZap, zapAmount),
+            asset_in: parseAsset(tokenZap as any, zapAmount),
             minimum_liquidity: zapInResponse.minimumLiquidity.toString(),
             pool_key: zapInResponse.poolKey,
             routes: zapInResponse.routes,

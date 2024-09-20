@@ -116,6 +116,8 @@ export const getTickAtSqrtPriceFromBalance = (
   const minTick = getMinTick(spacing);
   const maxTick = getMaxTick(spacing);
 
+  const testPrice = calcPrice(isXtoY ? minTick : maxTick, isXtoY, xDecimal, yDecimal);
+
   const basePrice = Math.max(price, Number(calcPrice(isXtoY ? minTick : maxTick, isXtoY, xDecimal, yDecimal)));
   const primaryUnitsPrice = getPrimaryUnitsPrice(basePrice, isXtoY, Number(xDecimal), Number(yDecimal));
   const tick = Math.round(logBase(primaryUnitsPrice, 1.0001));
@@ -124,6 +126,7 @@ export const getTickAtSqrtPriceFromBalance = (
 };
 
 export const calcPrice = (amountTickIndex: number, isXtoY: boolean, xDecimal: number, yDecimal: number): number => {
+  console.log({ amountTickIndex, isXtoY, xDecimal, yDecimal });
   const price = calcYPerXPriceByTickIndex(amountTickIndex, xDecimal, yDecimal);
 
   return isXtoY ? price : 1 / price;
@@ -133,6 +136,7 @@ export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, y
   const sqrt = +printBigint(calculateSqrtPrice(tickIndex), Number(PRICE_SCALE));
 
   const proportion = sqrt * sqrt;
+  
 
   return proportion / 10 ** (yDecimal - xDecimal);
 };
@@ -172,6 +176,7 @@ export const nearestTickIndex = (
   yDecimal: number
 ) => {
   const tick = getTickAtSqrtPriceFromBalance(price, spacing, isXtoY, xDecimal, yDecimal);
+  // console.log({tick});
 
   return nearestSpacingMultiplicity(tick, spacing);
 };
@@ -250,10 +255,6 @@ export const trimLeadingZeros = (amount: string): string => {
 };
 
 export const extractDenom = (tokenInfo: TokenItemType) => {
-  return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
-};
-
-export const extractAddress = (tokenInfo: TokenItemType) => {
   return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
 };
 
@@ -460,7 +461,7 @@ export async function handleGetCurrentPlotTicks({ poolKey, isXtoY, xDecimal, yDe
     const allTickmaps = await SingletonOraiswapV3.getFullTickmap(poolKey);
 
     const rawTicks = await SingletonOraiswapV3.getAllLiquidityTicks(poolKey, allTickmaps);
-    
+
     if (rawTicks.length === 0) {
       const data = createPlaceholderLiquidityPlot(isXtoY, 0, poolKey.fee_tier.tick_spacing, xDecimal, yDecimal);
       return data;

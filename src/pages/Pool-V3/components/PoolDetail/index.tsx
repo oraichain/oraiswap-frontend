@@ -47,6 +47,7 @@ const PoolV3Detail = () => {
       tick_spacing: Number(tick)
     }
   });
+  console.log(poolKeyString);
   const isLight = theme === 'light';
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
 

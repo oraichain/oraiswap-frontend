@@ -1,40 +1,52 @@
-import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS, ZAPPER_CONTRACT } from '@oraichain/oraidex-common';
-import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress, poolKeyToString, RouteNoLiquidity, RouteNotFoundError, SpamTooManyRequestsError, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import {
+  MULTICALL_CONTRACT,
+  oraichainTokens,
+  toDisplay,
+  TokenItemType,
+  USDT_CONTRACT,
+  ZAPPER_CONTRACT
+} from '@oraichain/oraidex-common';
+import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import {
+  poolKeyToString,
+  RouteNoLiquidity,
+  RouteNotFoundError,
+  SpamTooManyRequestsError,
+  ZapConsumer,
+  ZapOutLiquidityResponse,
+  ZapOutResult
+} from '@oraichain/oraiswap-v3';
+import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
+import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
 import classNames from 'classnames';
+import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import TooltipHover from 'components/TooltipHover';
+import ZappingText from 'components/Zapping';
+import { network } from 'config/networks';
 import { getIcon, getTransactionUrl } from 'helper';
 import { formatDisplayUsdt, numberWithCommas } from 'helper/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useDebounce } from 'hooks/useDebounce';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import mixpanel from 'mixpanel-browser';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import useZap from 'pages/Pool-V3/hooks/useZap';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
-import { RootState } from 'store/configure';
-import styles from './index.module.scss';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { USDT_CONTRACT, MULTICALL_CONTRACT } from '@oraichain/oraidex-common';
-import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
-import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
-import { ZapConsumer } from '@oraichain/oraiswap-v3';
-import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { network } from 'config/networks';
-import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
-import { useDebounce } from 'hooks/useDebounce';
-import useZap from 'pages/Pool-V3/hooks/useZap';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
-import SelectToken from '../SelectToken';
 import { useNavigate } from 'react-router-dom';
-import cn from 'classnames/bind';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
-import TooltipHover from 'components/TooltipHover';
-import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import ZappingText from 'components/Zapping';
-import mixpanel from 'mixpanel-browser';
+import { RootState } from 'store/configure';
+import SelectToken from '../SelectToken';
+import styles from './index.module.scss';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
 const cx = cn.bind(styles);
 
@@ -48,7 +60,7 @@ interface ZapOutFormProps {
   onCloseModal: () => void;
 }
 
-const TOKEN_ZAP = oraichainTokens.find((e) => extractAddress(e) === USDT_CONTRACT);
+const TOKEN_ZAP = oraichainTokens.find((e) => extractAddress(e ) === USDT_CONTRACT);
 
 const ZapOutForm: FC<ZapOutFormProps> = ({
   incentives,
@@ -215,7 +227,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-    } catch (error) { }
+    } catch (error) {}
 
     try {
       const zapper = new ZapConsumer({
@@ -234,7 +246,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const res = await zapper.processZapOutPositionLiquidity({
         owner: walletAddress,
         tokenId: position.token_id,
-        tokenOut: tokenZap,
+        tokenOut: tokenZap as any,
         zapFee: zapFee
       });
 
@@ -271,11 +283,10 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError('The route swap found has no liquidity, can\'t swap');
+        setZapError("The route swap found has no liquidity, can't swap");
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
       }
-
     } finally {
       setSimulating(false);
       setLoading(false);
@@ -330,7 +341,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
   if (incentives) {
     Object.keys(incentives).forEach((key) => {
-      const token = oraichainTokens.find((e) => extractAddress(e) === key);
+      const token = oraichainTokens.find((e) => extractAddress(e ) === key);
       receiveIncentiveTokens.push({
         icon: getIcon({
           isLightTheme,

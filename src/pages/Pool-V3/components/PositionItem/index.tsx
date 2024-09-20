@@ -1,18 +1,32 @@
-import { formatDisplayUsdt, numberWithCommas } from 'helper/format';
-import styles from './index.module.scss';
-import classNames from 'classnames';
-import { TooltipIcon } from 'components/Tooltip';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ReactComponent as RewardIcon } from 'assets/icons/rewardIc.svg';
-import { ReactComponent as LiquidityIcon } from 'assets/icons/liquidity.svg';
+import {
+  BigDecimal,
+  CW20_DECIMALS,
+  oraichainTokens,
+  parseAssetInfo,
+  toDisplay,
+  TokenItemType
+} from '@oraichain/oraidex-common';
+import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
-import useTheme from 'hooks/useTheme';
+import { ReactComponent as LiquidityIcon } from 'assets/icons/liquidity.svg';
+import { ReactComponent as RewardIcon } from 'assets/icons/rewardIc.svg';
+import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
-import { useNavigate } from 'react-router-dom';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { TooltipIcon } from 'components/Tooltip';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
+import { network } from 'config/networks';
+import { getTransactionUrl, handleErrorTransaction } from 'helper';
+import { formatDisplayUsdt, numberWithCommas } from 'helper/format';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
 import useOnClickOutside from 'hooks/useOnClickOutside';
+import useTheme from 'hooks/useTheme';
+import SingletonOraiswapV3, { fetchPositionAprInfo, poolKeyToString, PositionAprInfo } from 'libs/contractSingleton';
+import { getCosmWasmClient } from 'libs/cosmjs';
 import {
   calculateFee,
   formatNumbers,
@@ -22,26 +36,17 @@ import {
   initialXtoY,
   tickerToAddress
 } from 'pages/Pool-V3/helpers/helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { printBigint } from '../PriceRangePlot/utils';
-import { network } from 'config/networks';
-import SingletonOraiswapV3, { fetchPositionAprInfo, poolKeyToString, PositionAprInfo } from 'libs/contractSingleton';
-import { getTransactionUrl, handleErrorTransaction } from 'helper';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { toDisplay, parseAssetInfo, TokenItemType, BigDecimal, CW20_DECIMALS } from '@oraichain/oraidex-common';
-import { Tick } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
-import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
-import { extractAddress } from '@oraichain/oraiswap-v3';
-import ZapOut from '../ZapOut';
-import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CreateNewPosition from '../CreateNewPosition';
+import { printBigint } from '../PriceRangePlot/utils';
+import ZapOut from '../ZapOut';
+import styles from './index.module.scss';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
 const PositionItem = ({ position }) => {
   const theme = useTheme();

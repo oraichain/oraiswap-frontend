@@ -7,7 +7,6 @@ import {
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import {
   calculateSqrtPrice,
-  extractAddress,
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
@@ -59,6 +58,7 @@ import {
 } from '../PriceRangePlot/utils';
 import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
 export type PriceInfo = {
   startPrice: number;
