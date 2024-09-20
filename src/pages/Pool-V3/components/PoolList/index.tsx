@@ -4,6 +4,7 @@ import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.sv
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
 import { ReactComponent as SortDownIcon } from 'assets/icons/down_icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
+import { ReactComponent as AddLPIcon } from 'assets/icons/addLP_ic.svg';
 import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
 import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
@@ -27,6 +28,7 @@ import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
 import isEqual from 'lodash/isEqual';
 import { Button } from 'components/Button';
+import { isMobile } from '@walletconnect/browser-utils';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -41,6 +43,7 @@ const PoolList = ({ search }) => {
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
   const [openTooltip, setOpenTooltip] = useState(false);
+  const mobileMode = isMobile();
 
   const [sort, setSort] = useState<Record<PoolColumnHeader, SortType>>({
     [PoolColumnHeader.LIQUIDITY]: SortType.DESC
@@ -209,6 +212,118 @@ const PoolList = ({ search }) => {
     );
   });
 
+  const renderList = () => {
+    return mobileMode ? (
+      <div className={styles.listMobile}>
+        <div className={styles.header}>List Pools</div>
+        {filteredPool.map((item, index) => {
+          return (
+            <PoolItemDataMobile
+              key={`${index}-item-mobile-${item?.id}`}
+              item={item}
+              theme={theme}
+              volume={poolVolume?.[item?.poolKey] ?? 0}
+              liquidity={poolLiquidities?.[item?.poolKey] ?? 0}
+              aprInfo={{
+                apr: 0,
+                incentives: [],
+                swapFee: 0,
+                incentivesApr: 0,
+                ...aprInfo?.[item?.poolKey]
+              }}
+              setCurrentPool={setCurrentPool}
+              setIsOpenCreatePosition={setIsOpenCreatePosition}
+            />
+          );
+        })}
+      </div>
+    ) : (
+      <div className={styles.tableWrapper}>
+        <table>
+          <thead>
+            <tr>
+              <th style={{ width: '40%' }} onClick={() => handleClickSort(PoolColumnHeader.POOL_NAME)}>
+                Pool name
+                {sortField === PoolColumnHeader.POOL_NAME &&
+                  (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
+              </th>
+              <th
+                style={{ width: '15%' }}
+                className={styles.textRight}
+                onClick={() => handleClickSort(PoolColumnHeader.LIQUIDITY)}
+              >
+                Liquidity
+                {sortField === PoolColumnHeader.LIQUIDITY &&
+                  (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
+              </th>
+              <th
+                style={{ width: '15%' }}
+                className={styles.textRight}
+                onClick={() => handleClickSort(PoolColumnHeader.VOLUME)}
+              >
+                Volume (24H)
+                {sortField === PoolColumnHeader.VOLUME &&
+                  (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
+              </th>
+              <th
+                style={{ width: '15%' }}
+                className={classNames(styles.textRight, styles.aprHeader)}
+                onClick={() => handleClickSort(PoolColumnHeader.APR)}
+              >
+                APR
+                <TooltipIcon
+                  className={styles.tooltipWrapperApr}
+                  placement="top"
+                  visible={openTooltip}
+                  icon={<IconInfo />}
+                  setVisible={setOpenTooltip}
+                  content={
+                    <div className={classNames(styles.tooltipApr, styles[theme])}>
+                      <h3 className={styles.titleApr}>How are APRs calculated?</h3>
+                      <p className={styles.desc}>
+                        All APRs are estimated. They are calculated by taking the average APR for liquidity in the pool.
+                      </p>
+                      <br />
+                      <p className={styles.desc}>
+                        In concentrated pools, most users will receive lower rewards. This is due to positions that are
+                        more concentrated, which capture more of the incentives.
+                      </p>
+                    </div>
+                  }
+                />
+                {sortField === PoolColumnHeader.APR && (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
+              </th>
+              <th style={{ width: '15%' }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredPool.map((item, index) => {
+              return (
+                <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
+                  <PoolItemTData
+                    item={item}
+                    theme={theme}
+                    volume={poolVolume?.[item?.poolKey] ?? 0}
+                    liquidity={poolLiquidities?.[item?.poolKey] ?? 0}
+                    aprInfo={{
+                      apr: 0,
+                      incentives: [],
+                      swapFee: 0,
+                      incentivesApr: 0,
+                      ...aprInfo?.[item?.poolKey]
+                    }}
+                    setCurrentPool={setCurrentPool}
+                    setIsOpenCreatePosition={setIsOpenCreatePosition}
+                  />
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.poolList}>
       <div className={styles.headerTable}>
@@ -233,109 +348,23 @@ const PoolList = ({ search }) => {
       </div>
       <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}>
         <div className={styles.list}>
-          {filteredPool?.length > 0 ? (
-            <div className={styles.tableWrapper}>
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{ width: '40%' }} onClick={() => handleClickSort(PoolColumnHeader.POOL_NAME)}>
-                      Pool name
-                      {sortField === PoolColumnHeader.POOL_NAME &&
-                        (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
-                    </th>
-                    <th
-                      style={{ width: '15%' }}
-                      className={styles.textRight}
-                      onClick={() => handleClickSort(PoolColumnHeader.LIQUIDITY)}
-                    >
-                      Liquidity
-                      {sortField === PoolColumnHeader.LIQUIDITY &&
-                        (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
-                    </th>
-                    <th
-                      style={{ width: '15%' }}
-                      className={styles.textRight}
-                      onClick={() => handleClickSort(PoolColumnHeader.VOLUME)}
-                    >
-                      Volume (24H)
-                      {sortField === PoolColumnHeader.VOLUME &&
-                        (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
-                    </th>
-                    <th
-                      style={{ width: '15%' }}
-                      className={classNames(styles.textRight, styles.aprHeader)}
-                      onClick={() => handleClickSort(PoolColumnHeader.APR)}
-                    >
-                      APR
-                      <TooltipIcon
-                        className={styles.tooltipWrapperApr}
-                        placement="top"
-                        visible={openTooltip}
-                        icon={<IconInfo />}
-                        setVisible={setOpenTooltip}
-                        content={
-                          <div className={classNames(styles.tooltipApr, styles[theme])}>
-                            <h3 className={styles.titleApr}>How are APRs calculated?</h3>
-                            <p className={styles.desc}>
-                              All APRs are estimated. They are calculated by taking the average APR for liquidity in the
-                              pool.
-                            </p>
-                            <br />
-                            <p className={styles.desc}>
-                              In concentrated pools, most users will receive lower rewards. This is due to positions
-                              that are more concentrated, which capture more of the incentives.
-                            </p>
-                          </div>
-                        }
-                      />
-                      {sortField === PoolColumnHeader.APR &&
-                        (sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />)}
-                    </th>
-                    <th style={{ width: '15%' }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPool.map((item, index) => {
-                    return (
-                      <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
-                        <PoolItemTData
-                          item={item}
-                          theme={theme}
-                          volume={poolVolume?.[item?.poolKey] ?? 0}
-                          liquidity={poolLiquidities?.[item?.poolKey] ?? 0}
-                          aprInfo={{
-                            apr: 0,
-                            incentives: [],
-                            swapFee: 0,
-                            incentivesApr: 0,
-                            ...aprInfo?.[item?.poolKey]
-                          }}
-                          setCurrentPool={setCurrentPool}
-                          setIsOpenCreatePosition={setIsOpenCreatePosition}
-                        />
-                      </tr>
-                    );
-                  })}
-                </tbody>
-
-                {isOpenCreatePosition && currentPool && (
-                  <CreateNewPosition
-                    showModal={isOpenCreatePosition}
-                    setShowModal={setIsOpenCreatePosition}
-                    pool={currentPool}
-                  />
-                )}
-              </table>
-            </div>
-          ) : (
-            !loading && (
-              <div className={styles.nodata}>
-                {theme === 'light' ? <NoData /> : <NoDataDark />}
-                <span>{!dataPool.length ? 'No Pools!' : !filteredPool.length && 'No Matched Pools!'}</span>
-              </div>
-            )
-          )}
+          {filteredPool?.length > 0
+            ? renderList()
+            : !loading && (
+                <div className={styles.nodata}>
+                  {theme === 'light' ? <NoData /> : <NoDataDark />}
+                  <span>{!dataPool.length ? 'No Pools!' : !filteredPool.length && 'No Matched Pools!'}</span>
+                </div>
+              )}
         </div>
+
+        {isOpenCreatePosition && currentPool && (
+          <CreateNewPosition
+            showModal={isOpenCreatePosition}
+            setShowModal={setIsOpenCreatePosition}
+            pool={currentPool}
+          />
+        )}
       </LoadingBox>
     </div>
   );
@@ -452,6 +481,123 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreat
         <CreateNewPosition pool={item} className="newPosition" />
       </td> */}
     </>
+  );
+};
+
+const PoolItemDataMobile = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreatePosition, setCurrentPool }) => {
+  const navigate = useNavigate();
+  const [openTooltip, setOpenTooltip] = useState(false);
+
+  const isLight = theme === 'light';
+  const IconBoots = isLight ? BootsIcon : BootsIconDark;
+  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey } = item;
+
+  return (
+    <div className={styles.mobilePoolItem}>
+      <div className={classNames(styles.itemMobile, styles.flexStart)}>
+        <div className={styles.name} onClick={() => navigate(`/pools-v3/${encodeURIComponent(poolKey)}`)}>
+          <div className={styles.info}>
+            <div className={classNames(styles.icons, styles[theme])}>
+              <FromTokenIcon />
+              <ToTokenIcon />
+            </div>
+            <span>
+              {tokenXinfo?.name} / {tokenYinfo?.name}
+            </span>
+          </div>
+
+          <div>
+            <span className={styles.fee}>Fee: {toDisplay(BigInt(feeTier), 10)}%</span>
+          </div>
+        </div>
+        <div
+          title="Add Position"
+          className={classNames('newPosition')}
+          onClick={() => {
+            setIsOpenCreatePosition(true);
+            setCurrentPool(item);
+          }}
+        >
+          <AddLPIcon />
+        </div>
+      </div>
+      <div className={styles.itemMobile}>
+        <div className={styles.label}>Liquidity</div>
+        <div className={styles.textRight}>
+          <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
+            {liquidity || liquidity === 0 ? (
+              formatDisplayUsdt(liquidity)
+            ) : (
+              <img src={Loading} alt="loading" width={30} height={30} />
+            )}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.itemMobile}>
+        <div className={styles.label}>Volume (24H)</div>
+        <div className={styles.textRight}>
+          <span className={styles.amount}>{formatDisplayUsdt(volume)}</span>
+        </div>
+      </div>
+      <div className={styles.itemMobile}>
+        <div className={styles.label}>APR</div>
+        <div className={styles.apr}>
+          <span className={styles.amount}>
+            {aprInfo.apr.min === aprInfo.apr.max
+              ? `${numberWithCommas(aprInfo.apr.min * 100, undefined, { maximumFractionDigits: 1 })}`
+              : `${numberWithCommas(aprInfo.apr.min * 100, undefined, {
+                  maximumFractionDigits: 1
+                })} - ${numberWithCommas(aprInfo.apr.max * 100, undefined, { maximumFractionDigits: 1 })}`}
+            %
+          </span>
+          <TooltipIcon
+            className={styles.tooltipWrapper}
+            placement="top"
+            visible={openTooltip}
+            icon={<IconInfo />}
+            setVisible={setOpenTooltip}
+            content={
+              <div className={classNames(styles.tooltip, styles[theme])}>
+                <div className={styles.itemInfo}>
+                  <span>Swap fee</span>
+                  <span className={styles.value}>
+                    {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 1 })}%
+                  </span>
+                </div>
+                <div className={styles.itemInfo}>
+                  <span>
+                    Incentives Boost&nbsp;
+                    <IconBoots />
+                  </span>
+                  <span className={styles.value}>
+                    {aprInfo.incentivesApr.min === aprInfo.incentivesApr.max
+                      ? `${numberWithCommas(aprInfo.incentivesApr.min * 100, undefined, { maximumFractionDigits: 1 })}`
+                      : `${numberWithCommas(aprInfo.incentivesApr.min * 100, undefined, {
+                          maximumFractionDigits: 1
+                        })} - ${numberWithCommas(aprInfo.incentivesApr.max * 100, undefined, {
+                          maximumFractionDigits: 1
+                        })}`}
+                    %
+                  </span>
+                </div>
+                <div className={styles.itemInfo}>
+                  <span>Total APR</span>
+                  <span className={styles.totalApr}>
+                    {aprInfo.apr.min === aprInfo.apr.max
+                      ? `${numberWithCommas(aprInfo.apr.min * 100, undefined, { maximumFractionDigits: 1 })}`
+                      : `${numberWithCommas(aprInfo.apr.min * 100, undefined, {
+                          maximumFractionDigits: 1
+                        })} - ${numberWithCommas(aprInfo.apr.max * 100, undefined, { maximumFractionDigits: 1 })}`}
+                    %
+                  </span>
+                </div>
+              </div>
+            }
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 
