@@ -4374,29 +4374,7 @@
     react-use "^17.4.0"
     react-use-websocket "^4.5.0"
 
-"@oraichain/oraidex-common@^1.0.91":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.8.tgz#caef2203806dfe3e422cb1876ca2f9db09ba92a3"
-  integrity sha512-1GEC1eqeJ4BoT3ytAJgLa50obi2gq0hqPIqxfvxU1PpS1mVMpnxLozrDqmjK/NxG5RTl5BZutGBq/Uu10KbRvQ==
-  dependencies:
-    "@cosmjs/amino" "0.31.3"
-    "@cosmjs/cosmwasm-stargate" "0.31.3"
-    "@cosmjs/crypto" "0.31.3"
-    "@cosmjs/proto-signing" "0.31.3"
-    "@cosmjs/stargate" "0.31.3"
-    "@cosmjs/tendermint-rpc" "0.31.3"
-    "@ethersproject/providers" "^5.0.10"
-    "@injectivelabs/sdk-ts" "1.12.1"
-    "@keplr-wallet/types" "^0.11.38"
-    "@oraichain/oraidex-contracts-sdk" latest
-    axios "1.7.2"
-    axios-extensions "3.1.7"
-    bignumber.js "^9.1.2"
-    cosmjs-types "0.8.0"
-    ethers "^5.0.15"
-    tronweb "6.0.0-beta.4"
-
-"@oraichain/oraidex-common@^1.1.11":
+"@oraichain/oraidex-common@^1.0.91", "@oraichain/oraidex-common@^1.1.11":
   version "1.1.11"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.11.tgz#d3023d1965210b388d2fd31a8674e29a491ade43"
   integrity sha512-ikBXrT8PEpx8uVDePiIX0IrW/A0hl61G79JEn9pZ+04StR39nJOx1Aws67hxoqFKYgz8W5sTS9sSDZqwezFEYQ==
@@ -4443,10 +4421,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.45.tgz#42dae0fdd9e005f920ba305b987009f791acc365"
   integrity sha512-/nYztdxEX5LQM4DMJQmi9HvZrBVoY3nLAmYqSKZGZ0U1h1SxU7O/o22R3/pQwB+sAJdcibaI8ygC0ov7jC8paA==
 
-"@oraichain/oraidex-universal-swap@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.4.tgz#134019ac5c69d6be5aca58380f982375a94f3d54"
-  integrity sha512-XkJRQWG6n1YYKRFcVGpjRTKS0sU60jgxwJB4lj0SgP5M2Kd1WsBCBj0dw44QxwZMm3Lzw9rufDzNgGWJZMGvAQ==
+"@oraichain/oraidex-universal-swap@1.1.5-beta.3":
+  version "1.1.5-beta.3"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.5-beta.3.tgz#03f0fe4a066aa925706294991a3a161cd7c04cec"
+  integrity sha512-aOtbhgAZBsrS17uXN2gqAwbRrs8fC49AjpQKsHx2yDlrhdmxcoxoZQITrg6R8GsASPU5blsKKOxbx1HEJ1F7Bg==
   dependencies:
     "@oraichain/common" "^1.0.3"
     "@oraichain/oraidex-common" "^1.0.91"
