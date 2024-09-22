@@ -2,6 +2,7 @@ import React, { FC, PropsWithChildren } from 'react';
 
 import { getChainMetadata } from '../chains';
 import { AccountAction, AccountBalances, ChainMetadata, ChainNamespaces, ellipseAddress } from '../helpers';
+import { Button } from 'components/Button';
 
 interface BlockchainProps {
   chainData: ChainNamespaces;
@@ -45,25 +46,20 @@ const Blockchain: FC<PropsWithChildren<BlockchainProps>> = (props: PropsWithChil
 
   return (
     <React.Fragment>
-      <div onClick={() => onClick && onClick(props.chainId)} className={active ? 'active' : ''}>
-        <div>
-          <img src={chain.meta.logo} alt={name} />
-          <p>{name}</p>
-        </div>
-        {!!address && <p>{ellipseAddress(address)}</p>}
+      <div>
+        {!address ? (
+          <Button onClick={() => onClick && onClick(props.chainId)} type="primary-sm">
+            Connect {name}
+          </Button>
+        ) : (
+          <span>{ellipseAddress(address)}</span>
+        )}
         <div>
           {fetching ? (
             <div>Fetching....</div>
           ) : (
             <>
-              {!!address && !!balances && balances[address] ? (
-                <div>
-                  <h6>Balances</h6>
-                  <div>Symbol: ${balances[address].symbol}</div>
-                  {/* <div>Balances: {balances[address]}</div> */}
-                </div>
-              ) : null}
-              {!!actions && actions.length ? (
+              {/* {!!actions && actions.length ? (
                 <div>
                   <h6>Methods</h6>
                   {actions.map((action) => (
@@ -72,7 +68,7 @@ const Blockchain: FC<PropsWithChildren<BlockchainProps>> = (props: PropsWithChil
                     </div>
                   ))}
                 </div>
-              ) : null}
+              ) : null} */}
             </>
           )}
         </div>

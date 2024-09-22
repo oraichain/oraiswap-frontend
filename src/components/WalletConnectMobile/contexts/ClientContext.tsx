@@ -1,14 +1,14 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-
 import { Web3Modal } from '@web3modal/standalone';
 import UniversalProvider from '@walletconnect/universal-provider';
 import { PairingTypes, SessionTypes } from '@walletconnect/types';
 import Client from '@walletconnect/sign-client';
-
 import { DEFAULT_LOGGER, DEFAULT_PROJECT_ID, DEFAULT_RELAY_URL } from '../constant';
 import { providers, utils } from 'ethers';
 import { AccountBalances, ChainNamespaces, getAllChainNamespaces } from '../helpers';
 import { EIP155ChainData } from '../chains/eip155';
+import { useInactiveConnect } from 'hooks/useMetamask';
+import useWalletReducer from 'hooks/useWalletReducer';
 /**
  * Types
  */
@@ -55,6 +55,8 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
   const [chainData, setChainData] = useState<ChainNamespaces>({});
   const [chain, setChain] = useState<string>('');
   const [web3Modal, setWeb3Modal] = useState<Web3Modal>();
+  const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
+  const connectEvm = useInactiveConnect();
 
   const resetApp = () => {
     setPairings([]);
@@ -146,6 +148,14 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
         relayUrl: DEFAULT_RELAY_URL
       });
 
+      const web3Modal = new Web3Modal({
+        projectId: DEFAULT_PROJECT_ID,
+        walletConnectVersion: 2
+      });
+      await import('@web3modal/ui').catch((error) => console.log('import-@web3modal/ui-error', error));
+      web3Modal.publicInitUi();
+
+      window.ethereumDapp = provider;
       setEthereumProvider(provider);
       setClient(provider.client);
       setWeb3Modal(web3Modal);
@@ -170,11 +180,8 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
 
       const chainId = caipChainId.split(':').pop();
 
-      console.log('Enabling EthereumProvider for chainId: ', chainId);
       try {
-        console.log({ ethereumProvider });
-
-        const session = await ethereumProvider.connect({
+        await ethereumProvider.connect({
           namespaces: {
             eip155: {
               methods: ['eth_sendTransaction', 'eth_signTransaction', 'eth_sign', 'personal_sign', 'eth_signTypedData'],
@@ -188,16 +195,17 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
           pairingTopic: pairing?.topic
         });
 
-        console.log('here', session);
-        alert('sesion ' + JSON.stringify(session));
+        await connectEvm(undefined, 'metamask');
+        setWalletByNetworks({
+          ...walletByNetworks,
+          evm: 'metamask'
+        });
       } catch (error) {
         console.log('Error connect: ', error);
-        alert('Error connect: ' + JSON.stringify(error));
       }
 
       createWeb3Provider(ethereumProvider);
       const _accounts = await ethereumProvider.enable();
-      console.log('_accounts', _accounts);
       setAccounts(_accounts);
       setSession(session);
       setChain(caipChainId);

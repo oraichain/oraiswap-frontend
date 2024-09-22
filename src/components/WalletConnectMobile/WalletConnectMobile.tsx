@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { Transaction } from '@ethereumjs/tx';
 import * as encoding from '@walletconnect/encoding';
 import { BigNumber, utils } from 'ethers';
-import { Transaction } from '@ethereumjs/tx';
+import { useState } from 'react';
 import Blockchain from './components/Blockchain';
-// import Banner from "./../components/Banner";
-// import Blockchain from "./../components/Blockchain";
-// import Column from "./../components/Column";
-// import Header from "./../components/Header";
-// import Modal from "./components/Modal";
+import { isMobile } from '@walletconnect/browser-utils';
+import { Button } from 'components/Button';
 import { DEFAULT_MAIN_CHAINS } from './constant';
+import { useWalletConnectClient } from './contexts/ClientContext';
 import {
   AccountAction,
   eip712,
@@ -17,21 +15,8 @@ import {
   hashTypedDataMessage,
   verifySignature
 } from './helpers';
-// import RequestModal from "./../modals/RequestModal";
-// import PingModal from "./../modals/PingModal";
-// import {
-//   SAccounts,
-//   SAccountsContainer,
-//   SButtonContainer,
-//   SContent,
-//   SLanding,
-//   SLayout,
-//   SToggleContainer
-// } from './../components/app';
-import { useWalletConnectClient } from './contexts/ClientContext';
-import { RELAYER_SDK_VERSION as version } from '@walletconnect/core';
-import RequestModal from './modals/RequestModal';
 import PingModal from './modals/PingModal';
+import RequestModal from './modals/RequestModal';
 
 interface IFormattedRpcResponse {
   method: string;
@@ -46,7 +31,6 @@ export const WalletConnectMobile = () => {
 
   const [modal, setModal] = useState('');
 
-  const closeModal = () => setModal('');
   const openPingModal = () => setModal('ping');
   const openRequestModal = () => setModal('request');
 
@@ -64,12 +48,6 @@ export const WalletConnectMobile = () => {
     connect,
     web3Provider
   } = useWalletConnectClient();
-
-  //   useEffect(() => {
-  //     client && connect(DEFAULT_MAIN_CHAINS[0]);
-  //   }, [client]);
-
-  console.log({ accounts, balances });
 
   const verifyEip155MessageSignature = (message: string, signature: string, address: string) =>
     utils.verifyMessage(message, signature).toLowerCase() === address.toLowerCase();
@@ -266,14 +244,14 @@ export const WalletConnectMobile = () => {
   const renderContent = () => {
     const chainOptions = DEFAULT_MAIN_CHAINS;
     return !accounts.length && !Object.keys(balances).length ? (
-      <div style={{ marginTop: 100 }}>
+      <div>
         <h6>Select an Ethereum chain:</h6>
         {chainOptions.map((chainId) => (
           <Blockchain key={chainId} chainId={chainId} chainData={chainData} onClick={connect} />
         ))}
       </div>
     ) : (
-      <div style={{ marginTop: 100 }}>
+      <div>
         <h3>Account</h3>
         <div>
           {accounts.map((account) => {
@@ -296,9 +274,11 @@ export const WalletConnectMobile = () => {
   };
 
   return (
-    <div style={{ marginLeft: 400 }}>
-      <div maxWidth={1000} spanHeight>
-        <div ping={onPing} disconnect={disconnect} session={session} />
+    <div style={{ marginLeft: isMobile() ? 0 : 400, marginTop: 100 }}>
+      <div>
+        <Button type="primary-sm" onClick={disconnect}>
+          Disconnect{' '}
+        </Button>
         <div>{isInitializing ? 'Loading...' : renderContent()}</div>
       </div>
       {/* <Modal show={!!modal} closeModal={closeModal}> */}

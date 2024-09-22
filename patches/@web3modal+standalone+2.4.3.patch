@@ -1,0 +1,42 @@
+diff --git a/node_modules/@web3modal/standalone/dist/_types/src/client.d.ts b/node_modules/@web3modal/standalone/dist/_types/src/client.d.ts
+index 49fc8a0..ae97bbb 100644
+--- a/node_modules/@web3modal/standalone/dist/_types/src/client.d.ts
++++ b/node_modules/@web3modal/standalone/dist/_types/src/client.d.ts
+@@ -11,6 +11,7 @@ export type Web3ModalConfig = Omit<ConfigCtrlState, 'enableStandaloneMode'> & Th
+ export declare class Web3Modal {
+     constructor(config: Web3ModalConfig);
+     private initUi;
++    publicInitUi: () => void;
+     openModal: (options?: import("packages/core/dist/_types/src/controllers/ModalCtrl").OpenOptions | undefined) => Promise<void>;
+     closeModal: () => void;
+     subscribeModal: (callback: (newState: import("packages/core/dist/_types/src/types/controllerTypes").ModalCtrlState) => void) => () => void;
+diff --git a/node_modules/@web3modal/standalone/dist/index.es.js b/node_modules/@web3modal/standalone/dist/index.es.js
+index 013bb5e..e82388d 100644
+--- a/node_modules/@web3modal/standalone/dist/index.es.js
++++ b/node_modules/@web3modal/standalone/dist/index.es.js
+@@ -1 +1,23 @@
+-import{ModalCtrl as r,ThemeCtrl as n,ConfigCtrl as l,OptionsCtrl as s}from"@web3modal/core";var c=Object.defineProperty,i=Object.getOwnPropertySymbols,d=Object.prototype.hasOwnProperty,b=Object.prototype.propertyIsEnumerable,a=(o,e,t)=>e in o?c(o,e,{enumerable:!0,configurable:!0,writable:!0,value:t}):o[e]=t,m=(o,e)=>{for(var t in e||(e={}))d.call(e,t)&&a(o,t,e[t]);if(i)for(var t of i(e))b.call(e,t)&&a(o,t,e[t]);return o};class f{constructor(e){this.openModal=r.open,this.closeModal=r.close,this.subscribeModal=r.subscribe,this.setTheme=n.setThemeConfig,n.setThemeConfig(e),l.setConfig(m({enableStandaloneMode:!0},e)),this.initUi()}async initUi(){if(typeof window<"u"){await import("@web3modal/ui");const e=document.createElement("w3m-modal");document.body.insertAdjacentElement("beforeend",e),s.setIsUiLoaded(!0)}}}export{f as Web3Modal};
++import{ModalCtrl as r,ThemeCtrl as n,ConfigCtrl as l,OptionsCtrl as s}from"@web3modal/core";
++var c=Object.defineProperty,i=Object.getOwnPropertySymbols,d=Object.prototype.hasOwnProperty,
++b=Object.prototype.propertyIsEnumerable,a=(o,e,t)=>e in o?c(o,e,{enumerable:!0,configurable:!0,writable:!0,value:t}):o[e]=t,m=(o,e)=>{for(var t in e||(e={}))d.call(e,t)&&a(o,t,e[t]);if(i)for(var t of i(e))b.call(e,t)&&a(o,t,e[t]);return o};
++class f{constructor(e){this.openModal=r.open,this.closeModal=r.close,this.subscribeModal=r.subscribe,this.setTheme=n.setThemeConfig,n.setThemeConfig(e),l.setConfig(m({enableStandaloneMode:!0},e))
++// this.initUi()
++}
++
++    publicInitUi() {
++        return this.initUi()
++    }
++
++    initUi() {
++        if(typeof window<"u"){
++            // await import("@web3modal/ui").then(() => console.log('import-web3modal-success').catch((error) => console.log('import-web3modal-failed', error)));
++            const e=document.createElement("w3m-modal");
++            document.body.insertAdjacentElement("beforeend",e),
++            s.setIsUiLoaded(!0)
++        }
++    }
++
++    
++}
++export{f as Web3Modal};
+\ No newline at end of file

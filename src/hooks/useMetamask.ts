@@ -5,9 +5,10 @@ import useLoadTokens from './useLoadTokens';
 import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { getAddressByEIP191, getWalletByNetworkFromStorage } from 'helper';
+import useWalletReducer from './useWalletReducer';
 
 const loadAccounts = async (): Promise<string[]> => {
-  if (!window.ethereum) return;
+  if (!window.ethereumDapp) return;
   if (isMobile()) await window.Metamask.switchNetwork(Networks.bsc);
   // passe cointype 60 for ethereum or let it use default param
   let accounts = await window.ethereumDapp.request({
@@ -26,6 +27,7 @@ const loadAccounts = async (): Promise<string[]> => {
 export function useEagerConnect() {
   const loadTokenAmounts = useLoadTokens();
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [, setOraiAddress] = useConfigReducer('address');
   const { pathname } = useLocation();
@@ -35,9 +37,10 @@ export function useEagerConnect() {
   const connect = async (accounts?: string[], currentConnectingEvmWalletType?: string) => {
     try {
       accounts = Array.isArray(accounts) ? accounts : await loadAccounts();
+      alert('acccountne: ' + accounts);
       if (accounts && accounts?.length > 0) {
         const metamaskAddress = ethers.utils.getAddress(accounts[0]);
-
+        alert('metamaskAddress' + metamaskAddress);
         // current connecting evm wallet
         if (currentConnectingEvmWalletType) {
           loadTokenAmounts({ metamaskAddress });
@@ -71,7 +74,9 @@ export function useEagerConnect() {
 
   useEffect(() => {
     // just auto connect metamask in mobile
-    mobileMode && connect();
+
+    // TODO: re-check later, need to create common function to check condition auto-connect in mobile.
+    mobileMode && walletByNetworks.evm !== 'metamask' && connect();
   }, [chainInfo, pathname, mobileMode]);
 
   return connect;

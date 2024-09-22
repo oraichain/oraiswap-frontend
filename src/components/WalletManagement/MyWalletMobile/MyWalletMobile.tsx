@@ -19,6 +19,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from 'store/configure';
 import { ModalDisconnect } from '../ModalDisconnect';
 import styles from './MyWalletMobile.module.scss';
+import { DisconnectButton } from '../DiconnectButton';
 
 export const MyWalletMobile: React.FC<{
   setIsShowMyWallet: (isShow: boolean) => void;
@@ -142,6 +143,12 @@ export const MyWalletMobile: React.FC<{
                   </div>
                 </div>
               </div>
+              {index === 0 && (
+                <DisconnectButton
+                  setIsShowDisconnect={setIsShowDisconnect}
+                  onSetCurrentDisconnectingNetwork={() => setCurrentDisconnectingNetwork(network.typeChain)}
+                />
+              )}
             </div>
           );
         })}

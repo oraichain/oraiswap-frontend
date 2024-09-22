@@ -103,12 +103,6 @@ const App = () => {
           ),
           true
         );
-        // sendJsonMessage(buildWebsocketSendMessage(`coin_received.receiver = '${address}'`), true);
-        // subscribe to MsgSend and MsgTransfer event case
-        // sendJsonMessage(buildWebsocketSendMessage(`coin_spent.spender = '${address}'`, 2), true);
-        // subscribe to cw20 contract transfer & send case
-        // sendJsonMessage(buildWebsocketSendMessage(`wasm.to = '${address}'`, 3), true);
-        // sendJsonMessage(buildWebsocketSendMessage(`wasm.from = '${address}'`, 4), true);
       },
       onClose: () => {
         console.log('unsubscribe all clients');
@@ -165,7 +159,7 @@ const App = () => {
 
   useEffect(() => {
     // just auto connect keplr in mobile mode
-    mobileMode && keplrHandler();
+    mobileMode && evm !== 'metamask' && keplrHandler();
   }, [mobileMode]);
 
   useEffect(() => {

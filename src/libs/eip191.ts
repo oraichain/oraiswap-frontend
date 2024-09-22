@@ -33,14 +33,13 @@ export function getPubkeyFromEthSignatures(rawMsg: Uint8Array, sigResult: string
   const eip191MessagePrefix = toUtf8('\x19Ethereum Signed Message:\n');
   const rawMsgLength = toUtf8(String(rawMsg.length));
 
-  // const publicKey = secp256k1.recoverPublicKey(
-  //   keccak256(new Uint8Array([...eip191MessagePrefix, ...rawMsgLength, ...rawMsg])),
-  //   sig,
-  //   recoveryId,
-  //   true
-  // );
-  return null;
-  // return publicKey;
+  const publicKey = secp256k1.recoverPublicKey(
+    keccak256(new Uint8Array([...eip191MessagePrefix, ...rawMsgLength, ...rawMsg])),
+    sig,
+    recoveryId,
+    true
+  );
+  return publicKey;
 }
 
 export interface IEthProvider {

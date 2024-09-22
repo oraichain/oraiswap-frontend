@@ -264,6 +264,8 @@ const SwapComponent: React.FC<{
 
       setSwapLoading(true);
       displayToast(TToastType.TX_BROADCASTING);
+
+      // TODO: why need to check cosmos address here, if just bridge from evm -> evm?
       const cosmosAddress = await handleCheckAddress(
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
