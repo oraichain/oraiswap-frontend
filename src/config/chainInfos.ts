@@ -1,6 +1,7 @@
 import {
   TokenItemType,
   tokens,
+  oraichainNetwork as customOraichainNetwork,
   chainInfos as customChainInfos,
   OsmoToken,
   AtomToken,
@@ -206,6 +207,13 @@ const KawaiiToken: BridgeAppCurrency = {
 };
 
 export const oraichainNetwork: CustomChainInfo = {
+  ...customOraichainNetwork
+};
+
+/**
+ * @deprecated
+ */
+export const oraichainNetworkOld: CustomChainInfo = {
   rpc: 'https://rpc.orai.io',
   rest: 'https://lcd.orai.io',
   chainId: 'Oraichain',
@@ -428,13 +436,13 @@ export const oraichainNetwork: CustomChainInfo = {
       coinGeckoId: 'pepe',
       coinMinimalDenom: PEPE_ORAICHAIN_DENOM,
       bridgeTo: ['0x38', '0x01'],
-      coinDecimals: 18,
+      coinDecimals: 6,
       coinImageUrl: 'https://assets.coingecko.com/coins/images/29850/standard/pepe-token.jpeg?1696528776'
     },
     {
       coinDenom: 'CAT',
       coinMinimalDenom: CAT_ORAICHAIN_DENOM,
-      coinDecimals: 18,
+      coinDecimals: 6,
       bridgeTo: ['0x38'],
       coinGeckoId: 'simon-s-cat',
       coinImageUrl: "https://assets.coingecko.com/coins/images/39765/standard/Simon's_Cat_Logo.png?1724017505"
@@ -537,6 +545,9 @@ const oraibtcNetwork = {
 export const chainInfosWithSdk = [...customChainInfos, bitcoinNetwork, oraibtcNetwork];
 export const chainInfos = mapListWithIcon(chainInfosWithSdk, chainIcons, 'chainId');
 
+/**
+ * @deprecated
+ */
 export const chainInfosOld: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
