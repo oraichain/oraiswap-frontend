@@ -33,7 +33,10 @@ export const useGetTotalLpV3 = (address: string, prices: CoinGeckoPrices<string>
   );
 
   useEffect(() => {
-    if (!address || !data?.length) return;
+    if (!address || !data?.length) {
+      setTotalLpV3Info(0);
+      return;
+    }
     const totalLp = data.reduce((acc, cur) => {
       const { tokenX, tokenY } = cur.pool;
       let priceX = 0;
