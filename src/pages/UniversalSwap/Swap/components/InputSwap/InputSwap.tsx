@@ -1,5 +1,5 @@
 import { CoinIcon, TokenItemType } from '@oraichain/oraidex-common';
-import ArrowImg from 'assets/icons/arrow_new.svg';
+import ArrowImg from 'assets/icons/arrow_new.svg?react';
 import cn from 'classnames/bind';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';

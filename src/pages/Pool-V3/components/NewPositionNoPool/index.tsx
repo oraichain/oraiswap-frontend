@@ -4,9 +4,9 @@ import { TokenItemType, BigDecimal } from '@oraichain/oraidex-common';
 import { PriceInfo } from '../CreatePosition';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { numberWithCommas } from 'helper/format';
-import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
-import { ReactComponent as MinusIcon } from 'assets/icons/minus.svg';
-import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
+import PlusIcon from 'assets/icons/plus.svg?react';
+import MinusIcon from 'assets/icons/minus.svg?react';
+import WarningIcon from 'assets/icons/warning-fill-ic.svg?react';
 import classNames from 'classnames';
 import { getMaxTick, getMinTick, Price } from '@oraichain/oraiswap-v3';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -246,7 +246,6 @@ const NewPositionNoPool = ({
                   onLeftInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
-
                   const tokenXDecimals = isXtoY ? fromToken.decimals : toToken.decimals;
                   const tokenYDecimals = isXtoY ? toToken.decimals : fromToken.decimals;
 
@@ -260,7 +259,6 @@ const NewPositionNoPool = ({
                         Number(nearestTickIndex(+leftInput, tickSpacing, isXtoY, tokenXDecimals, tokenYDecimals))
                       );
 
-                  
                   changeRangeHandler(newLeft, rightRange);
                 }}
               />
@@ -322,7 +320,6 @@ const NewPositionNoPool = ({
                   onRightInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
-
                   const tokenXDecimals = isXtoY ? fromToken.decimals : toToken.decimals;
                   const tokenYDecimals = isXtoY ? toToken.decimals : fromToken.decimals;
 

@@ -1,5 +1,5 @@
-import SearchLightSvg from 'assets/images/search-light-svg.svg';
-import SearchSvg from 'assets/images/search-svg.svg';
+import SearchLightSvg from 'assets/images/search-light-svg.svg?react';
+import SearchSvg from 'assets/images/search-svg.svg?react';
 import classNames from 'classnames';
 import useTheme from 'hooks/useTheme';
 import React, { useEffect, useState } from 'react';
@@ -31,7 +31,7 @@ const listTabRender: TabRender[] = [
 
 const PoolV3 = () => {
   const theme = useTheme();
-  const [prices,] = useConfigReducer('coingecko');
+  const [prices] = useConfigReducer('coingecko');
   const navigate = useNavigate();
   let [searchParams] = useSearchParams();
   const type = searchParams.get('type') as PoolV3PageType;

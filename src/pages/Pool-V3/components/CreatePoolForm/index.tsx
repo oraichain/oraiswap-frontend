@@ -17,7 +17,7 @@ import {
   poolKeyToString,
   Price
 } from '@oraichain/oraiswap-v3';
-import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
+import WarningIcon from 'assets/icons/warning-fill-ic.svg?react';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -791,17 +791,16 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     }
   };
 
-
   const handleGetTicks = () => {
     try {
       const fetchTickData = async () => {
         setLoading(true);
-        
+
         const ticksData = await handleGetCurrentPlotTicks({
           poolKey: notInitPoolKey,
           isXtoY: isXtoY,
           xDecimal: tokenFrom.decimals,
-          yDecimal: tokenTo.decimals,
+          yDecimal: tokenTo.decimals
         });
 
         setLiquidityData(ticksData);

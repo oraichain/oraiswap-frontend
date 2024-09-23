@@ -1,6 +1,6 @@
 import { TVChartContainer } from '@oraichain/oraidex-common-ui';
 import { isMobile } from '@walletconnect/browser-utils';
-import { ReactComponent as NoChartData } from 'assets/images/nochart_data.svg';
+import NoChartData from 'assets/images/nochart_data.svg?react';
 import cn from 'classnames/bind';
 import { PAIRS_CHART } from 'config/pools';
 import useTheme from 'hooks/useTheme';

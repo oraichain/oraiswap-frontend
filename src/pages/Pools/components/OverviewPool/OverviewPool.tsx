@@ -1,5 +1,5 @@
 import { CW20_DECIMALS } from '@oraichain/oraidex-common';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import DefaultIcon from 'assets/icons/tokens.svg?react';
 import classNames from 'classnames';
 import TokenBalance from 'components/TokenBalance';
 import useTheme from 'hooks/useTheme';

@@ -1,10 +1,10 @@
 import { toDisplay } from '@oraichain/oraidex-common';
-import { ReactComponent as AddIcon } from 'assets/icons/Add.svg';
-import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
-import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
-import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
-import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
-import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
+import AddIcon from 'assets/icons/Add.svg?react';
+import BackIcon from 'assets/icons/back.svg?react';
+import BootsIconDark from 'assets/icons/boost-icon-dark.svg?react';
+import BootsIcon from 'assets/icons/boost-icon.svg?react';
+import NoDataDark from 'assets/images/NoDataPool.svg?react';
+import NoData from 'assets/images/NoDataPoolLight.svg?react';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import LoadingBox from 'components/LoadingBox';
@@ -141,7 +141,9 @@ const PoolV3Detail = () => {
           isLight,
           feeClaimData
         });
-        const filteredPositions = positionsMap.filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString).sort((a, b) => a.token_id - b.token_id);
+        const filteredPositions = positionsMap
+          .filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString)
+          .sort((a, b) => a.token_id - b.token_id);
 
         setDataPosition(filteredPositions);
       } catch (error) {

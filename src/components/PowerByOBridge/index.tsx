@@ -2,8 +2,8 @@ import cn from 'classnames/bind';
 import BlocLoaderDex from 'components/BlocLoaderDex';
 import React, { CSSProperties } from 'react';
 import styles from './index.module.scss';
-import { ReactComponent as ObridgeDarkImg } from 'assets/icons/obridge_full_dark.svg';
-import { ReactComponent as ObridgeLightImg } from 'assets/icons/obridge_full_light.svg';
+import ObridgeDarkImg from 'assets/icons/obridge_full_dark.svg?react';
+import ObridgeLightImg from 'assets/icons/obridge_full_light.svg?react';
 const cx = cn.bind(styles);
 
 const PowerByOBridge: React.FC<{ theme: string }> = ({ theme }) => {

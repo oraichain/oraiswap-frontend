@@ -6,8 +6,8 @@ import Brush from './Brush/Brush';
 import { nearestTickIndex } from './utils';
 import styles from './index.module.scss';
 import loadingGif from 'assets/gif/loading.gif';
-import { ReactComponent as ZoomInIcon } from 'assets/images/zoom-in-icon.svg';
-import { ReactComponent as ZoomOutIcon } from 'assets/images/zoom-out-icon.svg';
+import ZoomInIcon from 'assets/images/zoom-in-icon.svg?react';
+import ZoomOutIcon from 'assets/images/zoom-out-icon.svg?react';
 // import { PlotTickData } from '@store/reducers/positions'
 // import { nearestTickIndex } from '@store/consts/utils'
 

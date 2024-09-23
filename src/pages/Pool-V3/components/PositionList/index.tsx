@@ -1,5 +1,5 @@
-import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
-import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
+import NoDataDark from 'assets/images/NoDataPool.svg?react';
+import NoData from 'assets/images/NoDataPoolLight.svg?react';
 import LoadingBox from 'components/LoadingBox';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
@@ -56,20 +56,20 @@ const PositionList = () => {
   return (
     <div className={styles.positionList}>
       {/* <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}> */}
-        {dataPosition.length
-          ? dataPosition.map((position, key) => {
-              return (
-                <div className={styles.item} key={`position-list-item-${key}`}>
-                  <PositionItem position={position} />
-                </div>
-              );
-            })
-          : (
-              <div className={styles.nodata}>
-                {theme === 'light' ? <NoData /> : <NoDataDark />}
-                <span>No Positions!</span>
-              </div>
-            )}
+      {dataPosition.length ? (
+        dataPosition.map((position, key) => {
+          return (
+            <div className={styles.item} key={`position-list-item-${key}`}>
+              <PositionItem position={position} />
+            </div>
+          );
+        })
+      ) : (
+        <div className={styles.nodata}>
+          {theme === 'light' ? <NoData /> : <NoDataDark />}
+          <span>No Positions!</span>
+        </div>
+      )}
       {/* </LoadingBox> */}
     </div>
   );

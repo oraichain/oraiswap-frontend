@@ -2,6 +2,12 @@
   "compilerOptions": {
     "downlevelIteration": true,
     "target": "esnext",
+    "types": [
+      "node",
+      "jest",
+      "vite-plugin-svgr/client",
+      "vite/client"
+    ],
     "lib": [
       "dom",
       "dom.iterable",

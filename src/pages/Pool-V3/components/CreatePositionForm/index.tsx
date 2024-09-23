@@ -28,12 +28,12 @@ import {
   ZapInLiquidityResponse,
   ZapInResult
 } from '@oraichain/oraiswap-v3';
-import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
-import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
-import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
-import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
-import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
-import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
+import IconInfo from 'assets/icons/infomationIcon.svg?react';
+import WarningIcon from 'assets/icons/warning-fill-ic.svg?react';
+import ErrorIcon from 'assets/icons/error-fill-icon.svg?react';
+import OutputIcon from 'assets/icons/zapOutput-ic.svg?react';
+import Continuous from 'assets/images/continuous.svg?react';
+import Discrete from 'assets/images/discrete.svg?react';
 import classNames from 'classnames';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -816,7 +816,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       console.log('error', error);
     } finally {
       setLoading(false);
-      if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
+      if (import.meta.env.VITE_APP_SENTRY_ENVIRONMENT === 'production') {
         const logEvent = {
           address: walletAddress,
           tokenZap: tokenZap.name,
@@ -896,7 +896,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-    } catch (error) { }
+    } catch (error) {}
 
     try {
       const amountAfterFee = Number(zapAmount) * (1 - zapFee);
@@ -956,11 +956,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError('The route swap found has no liquidity, can\'t swap');
+        setZapError("The route swap found has no liquidity, can't swap");
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
       }
-
     } finally {
       setSimulating(false);
       setLoading(false);

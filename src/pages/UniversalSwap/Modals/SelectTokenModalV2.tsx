@@ -6,10 +6,10 @@ import {
   truncDecimals
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
-import ArrowImg from 'assets/icons/arrow_new.svg';
-import BackImg from 'assets/icons/back.svg';
-import CheckImg from 'assets/icons/check.svg';
-import NetworkImg from 'assets/icons/network.svg';
+import ArrowImg from 'assets/icons/arrow_new.svg?react';
+import BackImg from 'assets/icons/back.svg?react';
+import CheckImg from 'assets/icons/check.svg?react';
+import NetworkImg from 'assets/icons/network.svg?react';
 import cn from 'classnames/bind';
 import SearchInput from 'components/SearchInput';
 import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';

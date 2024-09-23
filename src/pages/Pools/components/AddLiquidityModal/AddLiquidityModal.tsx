@@ -1,6 +1,6 @@
 import { buildMultipleExecuteMessages, ORAI, toAmount, DEFAULT_SLIPPAGE } from '@oraichain/oraidex-common';
-import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
-import ImgPairPath from 'assets/images/pair_path.svg';
+import CloseIcon from 'assets/icons/ic_close_modal.svg?react';
+import ImgPairPath from 'assets/images/pair_path.svg?react';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';

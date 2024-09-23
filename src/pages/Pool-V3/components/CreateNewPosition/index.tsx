@@ -1,6 +1,6 @@
 import { PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { extractAddress, poolKeyToString } from '@oraichain/oraiswap-v3';
-import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import CloseIcon from 'assets/icons/close.svg?react';
 import classNames from 'classnames';
 import TooltipHover from 'components/TooltipHover';
 import { oraichainTokens } from 'config/bridgeTokens';

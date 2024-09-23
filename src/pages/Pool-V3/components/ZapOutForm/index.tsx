@@ -1,6 +1,14 @@
 import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS, ZAPPER_CONTRACT } from '@oraichain/oraidex-common';
 import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress, poolKeyToString, RouteNoLiquidity, RouteNotFoundError, SpamTooManyRequestsError, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
+import {
+  extractAddress,
+  poolKeyToString,
+  RouteNoLiquidity,
+  RouteNotFoundError,
+  SpamTooManyRequestsError,
+  ZapOutLiquidityResponse,
+  ZapOutResult
+} from '@oraichain/oraiswap-v3';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -16,12 +24,12 @@ import { RootState } from 'store/configure';
 import styles from './index.module.scss';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { USDT_CONTRACT, MULTICALL_CONTRACT } from '@oraichain/oraidex-common';
-import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
+import ErrorIcon from 'assets/icons/error-fill-icon.svg?react';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { ZapConsumer } from '@oraichain/oraiswap-v3';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { network } from 'config/networks';
-import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
+import OutputIcon from 'assets/icons/zapOutput-ic.svg?react';
 import { useDebounce } from 'hooks/useDebounce';
 import useZap from 'pages/Pool-V3/hooks/useZap';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -190,7 +198,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       console.log('error', error);
     } finally {
       setLoading(false);
-      if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
+      if (import.meta.env.VITE_APP_SENTRY_ENVIRONMENT === 'production') {
         const logEvent = {
           address: walletAddress,
           tokenZap: tokenZap.name,
@@ -215,7 +223,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-    } catch (error) { }
+    } catch (error) {}
 
     try {
       const zapper = new ZapConsumer({
@@ -271,11 +279,10 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError('The route swap found has no liquidity, can\'t swap');
+        setZapError("The route swap found has no liquidity, can't swap");
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
       }
-
     } finally {
       setSimulating(false);
       setLoading(false);
