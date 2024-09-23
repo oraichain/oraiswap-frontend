@@ -17,7 +17,14 @@ export const initPairSwap = (): [string, string] => {
   const originalFromToken = tokenMap[currentFromDenom];
   const originalToToken = tokenMap[currentToDenom];
 
-  return [originalFromToken?.denom || 'usdt', originalToToken?.denom || 'orai'];
+  const fromDenom = originalFromToken?.denom;
+  const toDenom = originalToToken?.denom;
+
+  if (!fromDenom || !toDenom || fromDenom === toDenom) {
+    return ['usdt', 'orai'];
+  }
+
+  return [fromDenom || 'usdt', toDenom || 'orai'];
 };
 
 // URL: /universalswap?from=orai&to=usdt
@@ -64,7 +71,7 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
     const originalFromToken = tokenMap[fromDenom];
     const originalToToken = tokenMap[toDenom];
 
-    if (originalFromToken && originalToToken) {
+    if (originalFromToken && originalToToken && fromDenom !== toDenom) {
       setSwapTokens([fromDenom, toDenom]);
     } else {
       navigate(pathname);
