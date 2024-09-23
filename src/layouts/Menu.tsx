@@ -19,11 +19,11 @@ import UniversalSwapIcon from 'assets/icons/ic_universalswap.svg?react';
 import FeedBackIcon from 'assets/icons/iconoir_chat-lines.svg?react';
 
 import MenuIcon from 'assets/icons/menu.svg?react';
-import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg?react';
-import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg?react';
+import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
+import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 
-import LogoFullImgDarkBeta from 'assets/images/OraiDEX_logo_dark.svg?react';
-import LogoFullImgLightBeta from 'assets/images/OraiDEX_logo_light.svg?react';
+import LogoFullImgDarkBeta from 'assets/images/OraiDEX_logo_dark.svg';
+import LogoFullImgLightBeta from 'assets/images/OraiDEX_logo_light.svg';
 
 import classNames from 'classnames';
 import { WalletManagement } from 'components/WalletManagement/WalletManagement';

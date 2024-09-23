@@ -1,7 +1,7 @@
 import { CW20_DECIMALS, CoinIcon, getSubAmountDetails, toAmount, toDisplay, tokenMap } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
-import StakeIcon from 'assets/icons/stake.svg?react';
-import WalletIcon from 'assets/icons/wallet-v3.svg?react';
+import StakeIcon from 'assets/icons/stake.svg';
+import WalletIcon from 'assets/icons/wallet-v3.svg';
 import cn from 'classnames/bind';
 import { Table, TableHeaderProps } from 'components/Table';
 import ToggleSwitch from 'components/ToggleSwitch';
@@ -64,6 +64,8 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       balance: formatDisplayUsdt(totalUsd)
     }
   ];
+
+  console.log({ listAsset });
 
   if (!networkFilter || networkFilter === 'Oraichain') {
     listAsset = [

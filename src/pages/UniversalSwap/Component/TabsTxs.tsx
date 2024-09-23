@@ -1,7 +1,7 @@
 import { CoinIcon, CustomChainInfo } from '@oraichain/oraidex-common';
-import ArrowImg from 'assets/icons/arrow_new.svg?react';
-import CheckImg from 'assets/icons/check.svg?react';
-import NetworkImg from 'assets/icons/network.svg?react';
+import ArrowImg from 'assets/icons/arrow_new.svg';
+import CheckImg from 'assets/icons/check.svg';
+import NetworkImg from 'assets/icons/network.svg';
 import cn from 'classnames/bind';
 import { networks } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -62,7 +62,7 @@ const TabsNetwork: React.FC<{
             setNetworkFilter(initNetworkFilter);
             setIsNetwork(false);
           }}
-          icons={<img className={cx('logo')} src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />}
+          icons={<img className={cx('logo')} src={NetworkImg} alt="network" />}
           item={{ chainName: 'All networks' }}
           theme={theme}
           isCheck={networkFilter === 'All networks'}
@@ -175,12 +175,12 @@ export const TabsTxs: React.FC<{
                 <networkFilter.Icon className={cx('logo')} />
               )
             ) : (
-              <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
+              <img src={NetworkImg} alt="network" />
             )}
             <div className={cx('all-network')}>
               <span className={cx(`detail`)}>{networkFilter?.label ?? 'All Networks'}</span>
             </div>
-            <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />
+            <img src={ArrowImg} alt="arrow" />
           </div>
           {isNetwork && (
             <TabsNetwork
