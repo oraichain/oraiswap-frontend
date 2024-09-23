@@ -520,8 +520,8 @@ const Balance: React.FC<BalanceProps> = () => {
           cosmosWallet: window.Keplr,
           evmWallet: new Metamask(window.tronWebDapp),
           swapOptions: {
-            // isAlphaSmartRouter: isAllowAlphaSmartRouter(),
-            // isIbcWasm: isAllowIBCWasm(from, newToToken),
+            isAlphaSmartRouter: isAllowAlphaSmartRouter(),
+            isIbcWasm: isAllowIBCWasm(from, newToToken),
             isCheckBalanceIbc: true
           }
         }
