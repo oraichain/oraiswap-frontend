@@ -29,7 +29,7 @@ import { cosmosNetworks, feeEstimate, getNetworkGasPrice } from 'helper';
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import { OraiswapRouterQueryClient, OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
-import { Long } from 'cosmjs-types/helpers';
+// import { Long } from 'cosmjs-types/helpers';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import CosmJs, { collectWallet, connectWithSigner, getCosmWasmClient } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
@@ -58,21 +58,26 @@ export const transferIBC = async (data: {
   memo?: string;
 }): Promise<DeliverTxResponse> => {
   const { fromToken, fromAddress, toAddress, amount, ibcInfo, memo } = data;
-  const transferMsg: MsgTransfer = {
-    sourcePort: ibcInfo.source,
-    sourceChannel: ibcInfo.channel,
-    token: amount,
-    sender: fromAddress,
-    receiver: toAddress,
-    memo,
-    timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout)),
-    timeoutHeight: undefined
-  };
+  // const transferMsg: MsgTransfer = {
+  //   sourcePort: ibcInfo.source,
+  //   sourceChannel: ibcInfo.channel,
+  //   token: amount,
+  //   sender: fromAddress,
+  //   receiver: toAddress,
+  //   memo,
+  //   // timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout)),
+  //   timeoutTimestamp:
+  //   timeoutHeight: undefined
+  // };
   let feeDenom = fromToken.denom;
   if (fromToken.denom.includes('ibc')) feeDenom = fromToken.prefix;
-  const result = await transferIBCMultiple(fromAddress, fromToken.chainId as CosmosChainId, fromToken.rpc, feeDenom, [
-    transferMsg
-  ]);
+  const result = await transferIBCMultiple(
+    fromAddress,
+    fromToken.chainId as CosmosChainId,
+    fromToken.rpc,
+    feeDenom,
+    []
+  );
   return result;
 };
 

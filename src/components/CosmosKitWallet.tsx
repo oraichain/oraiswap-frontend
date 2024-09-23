@@ -67,10 +67,28 @@ export default function IndexPage() {
   };
 
   return (
-    <div className="min-w-[350px] max-w-[800px] mt-20 mx-auto p-10">
+    <div
+      style={{
+        marginLeft: 400,
+        padding: '2.5rem',
+        marginTop: '5rem',
+        maxWidth: '800px'
+      }}
+    >
       <div>
         <div>
-          <p className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">ChainProvider Test</p>
+          <p
+            style={{
+              fontSize: '2.25rem',
+              lineHeight: '2.5rem',
+              fontWeight: 800,
+              letterSpacing: '-0.025em',
+              scrollMargin: '5rem',
+              '@media (min-width: 1024px)': { fontSize: '3rem', lineHeight: 1 }
+            }}
+          >
+            ChainProvider Test
+          </p>
         </div>
       </div>
       <div className="space-y-5">
