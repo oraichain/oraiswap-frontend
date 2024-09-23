@@ -69,6 +69,7 @@ import {
   extractDenom,
   getConcentrationArray,
   handleGetCurrentPlotTicks,
+  logBase,
   nearestTickIndex,
   PositionTokenBlock,
   printBigint,
@@ -688,6 +689,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   useEffect(() => {
     // TODO:
+    const tick = Math.round(logBase(8 * 10 ** -18, 1.0001));
+    console.log({ tick });
     if (poolInfo) {
       setMidPrice({
         index: poolInfo.pool.current_tick_index,
