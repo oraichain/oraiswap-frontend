@@ -7,7 +7,7 @@ import { chainIcons } from 'config/chainInfos';
 import OraiIcon from 'assets/icons/oraichain.svg?react';
 import IconoirCancel from 'assets/icons/iconoir_cancel.svg?react';
 import { networks } from 'helper';
-import NetworkImg from 'assets/icons/network.svg?react';
+import NetworkImg from 'assets/icons/network.svg';
 import CheckImg from 'assets/icons/check.svg?react';
 import { getTotalUsd } from 'libs/utils';
 import { tokenMap } from 'config/bridgeTokens';
