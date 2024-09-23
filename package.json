@@ -9,7 +9,6 @@
     "@babel/plugin-proposal-import-wasm-source": "^7.24.7",
     "@cosmjs/cosmwasm-stargate": "^0.31.0",
     "@cosmjs/proto-signing": "^0.31.0",
-    "@cosmjs/stargate": "^0.31.0",
     "@cosmjs/tendermint-rpc": "^0.31.0",
     "@duckdb/duckdb-wasm": "1.28.0",
     "@injectivelabs/sdk-ts": "1.12.1",
@@ -58,7 +57,14 @@
     "redux-persist": "^6.0.0",
     "serialize-error": "8.0.0",
     "tronweb": "^5.1.0",
-    "urql": "^4.1.0"
+    "urql": "^4.1.0",
+    "@cosmos-kit/owallet": "^2.11.2",
+    "@cosmos-kit/react": "^2.18.0",
+    "@cosmos-kit/leap": "^2.12.2",
+    "@cosmjs/stargate": ">=0.32.3",
+    "@cosmos-kit/core": "^2.13.1",
+    "@cosmjs/math": "0.32.3",
+    "@cosmos-kit/keplr": "^2.12.2"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",

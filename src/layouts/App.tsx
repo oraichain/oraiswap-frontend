@@ -1,3 +1,5 @@
+import { wallets as keplrWallets } from '@cosmos-kit/keplr';
+import { wallets as leapWallets } from '@cosmos-kit/leap';
 import {
   IBC_WASM_CONTRACT,
   WEBSOCKET_RECONNECT_ATTEMPTS,
@@ -12,6 +14,8 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useWalletReducer from 'hooks/useWalletReducer';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
+import { getCosmWasmClient } from 'libs/cosmjs';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
@@ -26,8 +30,9 @@ import './index.scss';
 import Menu from './Menu';
 import { NoticeBanner } from './NoticeBanner';
 import Sidebar from './Sidebar';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
-import { getCosmWasmClient } from 'libs/cosmjs';
+// Show how to custom modal views
+import { ChainProvider } from '@cosmos-kit/react';
+import IndexPage from 'components/CosmosKitWallet';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -262,16 +267,65 @@ const App = () => {
 
   return (
     <ThemeProvider>
-      <div className={`app ${theme}`}>
-        {/* <button data-featurebase-feedback>Open Widget</button> */}
-        <Menu />
-        <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        {/* {(!bannerTime || Date.now() > bannerTime + 86_400_000) && <FutureCompetition />} */}
-        <div className="main">
-          <Sidebar />
-          <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
+      <ChainProvider
+        chains={['cosmoshub', 'Oraichain']}
+        assetLists={[]}
+        wallets={[...keplrWallets, ...leapWallets]}
+        subscribeConnectEvents={true}
+        defaultNameService={'stargaze'}
+        walletConnectOptions={{
+          signClient: {
+            projectId: 'a8510432ebb71e6948cfd6cde54b70f7',
+            relayUrl: 'wss://relay.walletconnect.org',
+            metadata: {
+              name: 'CosmosKit Example',
+              description: 'CosmosKit test dapp',
+              url: 'https://test.cosmoskit.com/',
+              icons: [
+                'https://raw.githubusercontent.com/cosmology-tech/cosmos-kit/main/packages/docs/public/favicon-96x96.png'
+              ]
+            }
+          }
+        }}
+        // signerOptions={{
+        //   signingStargate: (chain: Chain | ChainName) => {
+        //     const chainName = typeof chain === 'string' ? chain : chain.chain_name;
+        //     switch (chainName) {
+        //       case 'osmosis':
+        //         return {
+        //           // @ts-ignore
+        //           gasPrice: new GasPrice(Decimal.zero(1), 'uosmo')
+        //         };
+        //       default:
+        //         return void 0;
+        //     }
+        //   }
+        // }}
+        logLevel={'DEBUG'}
+        endpointOptions={{
+          isLazy: true,
+          endpoints: {
+            cosmoshub: {
+              rpc: [
+                {
+                  url: 'https://rpc.cosmos.directory/cosmoshub',
+                  headers: {}
+                }
+              ]
+            }
+          }
+        }}
+      >
+        <div className={`app ${theme}`}>
+          <Menu />
+          <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
+          <div className="main">
+            <Sidebar />
+            <IndexPage />
+            <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
+          </div>
         </div>
-      </div>
+      </ChainProvider>
     </ThemeProvider>
   );
 };
