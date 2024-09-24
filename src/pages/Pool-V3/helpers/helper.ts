@@ -98,6 +98,35 @@ export const formatNumbers =
     return num < 0 && threshold ? '-' + formatted : formatted;
   };
 
+export function formatMoney(value: string) {
+  // Loại bỏ ký tự không phải số và ký tự $
+  value = value.replace(/[^0-9.]/g, '');
+
+  // Chỉ cho phép một dấu phẩy
+  const parts = value.split('.');
+  if (parts.length > 2) {
+    value = parts[0] + '.' + parts.slice(1).join('');
+  }
+
+  // Giới hạn số chữ số sau dấu phẩy
+  if (parts[1]) {
+    parts[1] = parts[1].substring(0, 6); // Giới hạn 6 chữ số sau phẩy
+  }
+
+  // Định dạng lại thành số tiền
+  value = parts.join('.');
+
+  // Nếu value rỗng thì gán về $0
+  if (value === '' || value === '.') {
+    value = '$0.00';
+  } else {
+    const numberValue = parseFloat(value).toFixed(6);
+    value = '$' + numberValue;
+  }
+
+  return value;
+}
+
 export const showPrefix = (nr: number, config: PrefixConfig = defaultPrefixConfig): string => {
   const abs = Math.abs(nr);
 
@@ -326,10 +355,12 @@ export const executeMultiple = async (msg: any, address: string): Promise<string
   return result.transactionHash;
 };
 
-export const genMsgAllowance = (datas: {
-  token: string;
-  amount: bigint;
-}[]) => {
+export const genMsgAllowance = (
+  datas: {
+    token: string;
+    amount: bigint;
+  }[]
+) => {
   // const MAX_ALLOWANCE_AMOUNT = '18446744073709551615';
   const spender = network.pool_v3;
 
@@ -374,7 +405,7 @@ export const createPoolMsg = (poolKey: PoolKey, initSqrtPrice: string) => {
       }
     }
   };
-}
+};
 
 export const createPositionTx = async (
   poolKey: PoolKey,
@@ -428,7 +459,7 @@ export const createPositionMsg = (
       }
     }
   };
-}
+};
 
 export const createPositionWithNativeTx = async (
   poolKey: PoolKey,
@@ -518,7 +549,7 @@ export const createPositionWithNativeMsg = (
     },
     funds: fund
   };
-}
+};
 
 export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
   const fmtFeeClaimData = feeClaimData.reduce((acc, cur) => {

@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import {
   calculateFee,
+  formatMoney,
   formatNumbers,
   getConvertedPool,
   getConvertedPosition,
@@ -267,10 +268,16 @@ const PositionItem = ({ position }) => {
           <div className={styles.item}>
             <p>Price Range</p>
             <span className={styles.value}>
-              {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)))}
+              {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)), undefined, {
+                maximumFractionDigits: 6
+              })} */}
+              {formatMoney(`${xToY ? min : 1 / max}`)}
               {/* {showPrefix(xToY ? min : 1 / max, shorterPrefixConfig)} */}
               {' - '}
-              {numberWithCommas(Number(formatNumbers(undefined)(xToY ? max : 1 / min)))}
+              {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? max : 1 / min)), undefined, {
+                maximumFractionDigits: 6
+              })} */}
+              {formatMoney(`${xToY ? max : 1 / min}`)}
               {/* {showPrefix(xToY ? max : 1 / min, shorterPrefixConfig)}  */}{' '}
               {xToY ? position.tokenYName : position.tokenXName} per {xToY ? position.tokenXName : position.tokenYName}
             </span>
@@ -434,7 +441,7 @@ const PositionItem = ({ position }) => {
                   <position.tokenXIcon />
                   {numberWithCommas(earnXDisplay, undefined, {
                     maximumFractionDigits: 6
-                  })}
+                  })}{' '}
                   {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>
