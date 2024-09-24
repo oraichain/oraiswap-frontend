@@ -7,9 +7,7 @@ import {
   AtomToken,
   InjectiveToken,
   ChainIdEnum,
-  PEPE_ORAICHAIN_DENOM,
-  CAT_ORAICHAIN_DENOM,
-  CAT_BSC_CONTRACT,
+  PEPE_ORAICHAIN_EXT_DENOM as PEPE_ORAICHAIN_DENOM,
   PEPE_ETH_CONTRACT,
   PEPE_BSC_CONTRACT
 } from '@oraichain/oraidex-common';
@@ -438,16 +436,7 @@ export const oraichainNetworkOld: CustomChainInfo = {
       bridgeTo: ['0x38', '0x01'],
       coinDecimals: 6,
       coinImageUrl: 'https://assets.coingecko.com/coins/images/29850/standard/pepe-token.jpeg?1696528776'
-    },
-    {
-      coinDenom: 'CAT',
-      coinMinimalDenom: CAT_ORAICHAIN_DENOM,
-      coinDecimals: 6,
-      bridgeTo: ['0x38'],
-      coinGeckoId: 'simon-s-cat',
-      coinImageUrl: "https://assets.coingecko.com/coins/images/39765/standard/Simon's_Cat_Logo.png?1724017505"
     }
-
     // {
     //   coinDenom: 'ATOM-CW20',
     //   coinGeckoId: 'cosmos',
@@ -701,15 +690,6 @@ export const chainInfosOld: CustomChainInfo[] = [
         coinGeckoId: 'pepe',
         prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         coinImageUrl: 'https://assets.coingecko.com/coins/images/29850/standard/pepe-token.jpeg?1696528776'
-      },
-      {
-        coinDenom: 'CAT',
-        coinMinimalDenom: ORAI_BRIDGE_EVM_DENOM_PREFIX + CAT_BSC_CONTRACT,
-        bridgeNetworkIdentifier: '0x38',
-        coinDecimals: 18,
-        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
-        coinGeckoId: 'simon-s-cat',
-        coinImageUrl: "https://assets.coingecko.com/coins/images/39765/standard/Simon's_Cat_Logo.png?1724017505"
       }
     ]
   },
@@ -1188,15 +1168,6 @@ export const chainInfosOld: CustomChainInfo[] = [
         coinGeckoId: 'pepe',
         bridgeTo: ['Oraichain'],
         coinImageUrl: 'https://assets.coingecko.com/coins/images/29850/standard/pepe-token.jpeg?1696528776'
-      },
-      {
-        coinDenom: 'CAT',
-        coinMinimalDenom: 'bep20_cat',
-        contractAddress: CAT_BSC_CONTRACT,
-        coinDecimals: 18,
-        coinGeckoId: 'simon-s-cat',
-        bridgeTo: ['Oraichain'],
-        coinImageUrl: "https://assets.coingecko.com/coins/images/39765/standard/Simon's_Cat_Logo.png?1724017505"
       }
     ]
   },
