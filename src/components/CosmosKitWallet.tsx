@@ -1,16 +1,18 @@
-import { useChain, useWallet } from '@cosmos-kit/react';
+import { useChain, useChains, useWallet } from '@cosmos-kit/react';
 // import { Card, CardContent, CardHeader, CardTitle } from 'components/card';
 // import { ChainWalletCard } from 'components/chain-wallet-card';
 import { useEffect } from 'react';
 import { Button } from './Button';
+import { reduceString } from 'libs/utils';
 
-// const chainNames_1 = ["cosmoshub"];
+const chainNames_1 = ['cosmoshub'];
 // const chainNames_2: string[] = ["cosmoshub"];
 
 // const chainNames_1 = ["osmosis", "cosmoshub"];
 // const chainNames_2 = ["stargaze", "chihuahua"];
 
-const chainNames_1 = ['cosmoshub'];
+// const chainNames_1 = ['celestia'];
+// const chainNames_1 = ['oraichain'];
 // const chainNames_1 = ["migaloo"];
 // const chainNames_2: string[] = ["osmosis"];
 
@@ -18,9 +20,8 @@ const chainNames_1 = ['cosmoshub'];
 const chainNames_2: string[] = [];
 
 export default function IndexPage() {
-  const { username, connect, disconnect, wallet, openView } = useChain(chainNames_1[0]);
+  const { username, connect, disconnect, wallet, openView, address } = useChain(chainNames_1[0]);
   const { status: globalStatus, mainWallet } = useWallet(); // status here is the global wallet status for all activated chains (chain is activated when call useChain)
-
   useEffect(() => {
     const fn = async () => {
       await mainWallet?.connect();
@@ -40,12 +41,12 @@ export default function IndexPage() {
       return (
         <>
           <Button type="primary-sm" onClick={() => openView()}>
-            <div className="flex justify-center items-center space-x-2">
+            <div className="justify-center items-center space-x-2">
               <span className="flex h-2 w-2 translate-y-1 rounded-full bg-green-500 leading-4 mb-2" />
               <span>Connected to: {wallet?.prettyName}</span>
             </div>
           </Button>
-          Account name: {username}
+          <div>Account name: {username}</div>
           <Button
             type="primary-sm"
             onClick={async () => {
@@ -69,40 +70,23 @@ export default function IndexPage() {
   return (
     <div
       style={{
-        marginLeft: 400,
-        padding: '2.5rem',
-        marginTop: '5rem',
-        maxWidth: '800px'
+        padding: '1rem',
+        marginTop: '3rem',
+        maxWidth: '300px'
       }}
     >
       <div>
-        <div>
-          <p
-            style={{
-              fontSize: '2.25rem',
-              lineHeight: '2.5rem',
-              fontWeight: 800,
-              letterSpacing: '-0.025em',
-              scrollMargin: '5rem',
-              '@media (min-width: 1024px)': { fontSize: '3rem', lineHeight: 1 }
-            }}
-          >
-            ChainProvider Test
-          </p>
-        </div>
+        <div>Connect Cosmos mobile wallets:</div>
       </div>
       <div className="space-y-5">
         <div className="flex justify-start space-x-5">{getGlobalbutton()}</div>
 
-        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-          Address div in Modal
-        </h2>
+        <h6 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+          Address: {reduceString(address, 6, 6)}
+        </h6>
         {/* {chainNames_1.map((chainName) => (
           <ChainWalletCard key={chainName} type="address-in-modal" chainName={chainName} />
         ))} */}
-        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-          Address div on Page
-        </h2>
         {/* {chainNames_2.map((chainName) => (
           <ChainWalletCard key={chainName} type="address-on-page" chainName={chainName} />
         ))} */}
