@@ -516,10 +516,6 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreat
           Add Position
         </Button>
       </td>
-
-      {/* <td className={styles.actions}>
-        <CreateNewPosition pool={item} className="newPosition" />
-      </td> */}
     </>
   );
 };

@@ -21,6 +21,9 @@ import {
   isTokenX,
   newPoolKey,
   poolKeyToString,
+  RouteNoLiquidity,
+  RouteNotFoundError,
+  SpamTooManyRequestsError,
   ZapConsumer,
   ZapInLiquidityResponse,
   ZapInResult
@@ -79,6 +82,7 @@ import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
 import ZappingText from 'components/Zapping';
 import mixpanel from 'mixpanel-browser';
+import { set } from 'lodash';
 
 export type PriceInfo = {
   startPrice: number;
@@ -242,12 +246,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   }, [amountFrom, focusId]);
 
   useEffect(() => {
-    if (zapInResponse) {
-      console.log('zapInResponse', zapInResponse);
-      if ([ZapInResult.NoRouteFound, ZapInResult.SomethingWentWrong].includes(zapInResponse.result)) {
-        setZapError(zapInResponse.result);
-      }
-    }
     if (simulating) {
       setZapError(null);
     }
@@ -898,10 +896,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-      console.log('zapFee', zapFee);
-    } catch (error) {
-      console.log('error', error);
-    }
+    } catch (error) { }
 
     try {
       const amountAfterFee = Number(zapAmount) * (1 - zapFee);
@@ -909,9 +904,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const routerApi = 'https://osor.oraidex.io/smart-router/alpha-router';
       const zapper = new ZapConsumer({
         client,
-        devitation: 0,
+        deviation: 0,
         dexV3Address: network.pool_v3,
-        multicallAddress: MULTICALL_CONTRACT,
+        multiCallAddress: MULTICALL_CONTRACT,
         routerApi,
         smartRouteConfig: {
           swapOptions: {
@@ -929,7 +924,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const upperTick = Math.max(leftRange, rightRange);
 
       const result = await zapper.processZapInPositionLiquidity({
-        poolKey: poolData.pool_key,
+        pool: poolData,
         tokenIn: tokenZap,
         amountIn: amountIn,
         lowerTick,
@@ -957,6 +952,15 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       setSimulating(false);
     } catch (error) {
       console.log('error', error);
+
+      if (error instanceof RouteNotFoundError) {
+        setZapError('No route found, try other tokens or other amount');
+      } else if (error instanceof RouteNoLiquidity) {
+        setZapError('The route swap found has no liquidity, can\'t swap');
+      } else if (error instanceof SpamTooManyRequestsError) {
+        setZapError('Too many requests, please try again later, after 1 minute');
+      }
+
     } finally {
       setSimulating(false);
       setLoading(false);
@@ -1285,7 +1289,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           {zapError && (
             <div className={styles.errorZap}>
               <ErrorIcon />
-              <span>No route found to zap, try other tokens or check back later.</span>
+              <span>{zapError}</span>
             </div>
           )}
           {!zapError && zapInResponse && !simulating && (
