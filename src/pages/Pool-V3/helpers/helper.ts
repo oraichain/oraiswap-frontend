@@ -24,6 +24,7 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
 import { Position as PositionsNode } from 'gql/graphql';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
+import { numberWithCommas } from 'helper/format';
 
 export interface InitPositionData {
   poolKeyData: PoolKey;
@@ -98,33 +99,34 @@ export const formatNumbers =
     return num < 0 && threshold ? '-' + formatted : formatted;
   };
 
-export function formatMoney(value: string) {
-  // Loại bỏ ký tự không phải số và ký tự $
-  value = value.replace(/[^0-9.]/g, '');
-
-  // Chỉ cho phép một dấu phẩy
-  const parts = value.split('.');
-  if (parts.length > 2) {
-    value = parts[0] + '.' + parts.slice(1).join('');
+export function formatMoney(num) {
+  if (num === 0) {
+    return num.toString();
   }
 
-  // Giới hạn số chữ số sau dấu phẩy
-  if (parts[1]) {
-    parts[1] = parts[1].substring(0, 6); // Giới hạn 6 chữ số sau phẩy
-  }
+  let numStr = num.toString();
 
-  // Định dạng lại thành số tiền
-  value = parts.join('.');
+  const decimalIndex = numStr.indexOf('.');
 
-  // Nếu value rỗng thì gán về $0
-  if (value === '' || value === '.') {
-    value = '$0.00';
+  if (decimalIndex === -1) return numStr;
+
+  const integerPart = numStr.slice(0, decimalIndex);
+  const decimalPart = numStr.slice(decimalIndex + 1);
+
+  let decimalsToShow;
+  if (num >= 1) {
+    decimalsToShow = 1;
+  } else if (num < 0.0001) {
+    decimalsToShow = 6;
   } else {
-    const numberValue = parseFloat(value).toFixed(6);
-    value = '$' + numberValue;
+    decimalsToShow = 4;
   }
 
-  return value;
+  const formattedDecimalPart = decimalPart.slice(0, decimalsToShow);
+  let stringArr = `.${formattedDecimalPart}`;
+  if (!formattedDecimalPart || formattedDecimalPart === '0') stringArr = '';
+
+  return `${numberWithCommas(Number(integerPart), undefined)}${stringArr}`;
 }
 
 export const showPrefix = (nr: number, config: PrefixConfig = defaultPrefixConfig): string => {
