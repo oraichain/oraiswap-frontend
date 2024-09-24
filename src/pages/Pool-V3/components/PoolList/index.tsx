@@ -160,6 +160,8 @@ const PoolList = ({ search }) => {
         }
       });
 
+    localStorage.setItem('poolList', JSON.stringify(sortedData));
+
     setDataPool(sortedData);
 
     return sortedData;

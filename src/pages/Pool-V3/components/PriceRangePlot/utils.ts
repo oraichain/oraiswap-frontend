@@ -126,7 +126,6 @@ export const getTickAtSqrtPriceFromBalance = (
 };
 
 export const calcPrice = (amountTickIndex: number, isXtoY: boolean, xDecimal: number, yDecimal: number): number => {
-  console.log({ amountTickIndex, isXtoY, xDecimal, yDecimal });
   const price = calcYPerXPriceByTickIndex(amountTickIndex, xDecimal, yDecimal);
 
   return isXtoY ? price : 1 / price;

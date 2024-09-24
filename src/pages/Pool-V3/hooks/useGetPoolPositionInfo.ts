@@ -13,7 +13,7 @@ export const useGetPoolPositionInfo = (prices: CoinGeckoPrices<string>) => {
     {
       refetchOnWindowFocus: false,
       placeholderData: [],
-      // cacheTime: 5 * 60 * 1000
+      // cacheTime: 5 * 60 * 1000,
     }
   );
 
