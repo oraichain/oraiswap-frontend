@@ -150,7 +150,9 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
 
       const web3Modal = new Web3Modal({
         projectId: DEFAULT_PROJECT_ID,
-        walletConnectVersion: 2
+        walletConnectVersion: 2,
+        explorerRecommendedWalletIds: ['c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96'],
+        explorerExcludedWalletIds: 'ALL'
       });
       await import('@web3modal/ui').catch((error) => console.log('import-@web3modal/ui-error', error));
       web3Modal.publicInitUi();
