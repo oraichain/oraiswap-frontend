@@ -125,7 +125,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const debounceZapAmount = useDebounce(zapAmount, 800);
 
   const { data: prices } = useCoinGeckoPrices();
-  const { poolList } = useGetPoolList(prices);
+  const { poolList, poolPrice: extendPrices } = useGetPoolList(prices);
 
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -193,15 +193,15 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [amountTo, setAmountTo] = useState<number | string>();
   const [amountFrom, setAmountFrom] = useState<number | string>();
 
-  const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(amountFrom || 0)).toFixed(6);
-  const toUsd = (prices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
-  const zapUsd = (prices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0)).toFixed(6);
+  const fromUsd = (extendPrices?.[tokenFrom?.coinGeckoId] * Number(amountFrom || 0)).toFixed(6);
+  const toUsd = (extendPrices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
+  const zapUsd = (extendPrices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0)).toFixed(6);
   const xUsd =
     zapInResponse &&
-    (prices?.[tokenFrom?.coinGeckoId] * (Number(zapInResponse.amountX || 0) / 10 ** tokenFrom.decimals)).toFixed(6);
+    (extendPrices?.[tokenFrom?.coinGeckoId] * (Number(zapInResponse.amountX || 0) / 10 ** tokenFrom.decimals)).toFixed(6);
   const yUsd =
     zapInResponse &&
-    (prices?.[tokenTo?.coinGeckoId] * (Number(zapInResponse.amountY || 0) / 10 ** tokenTo.decimals)).toFixed(6);
+    (extendPrices?.[tokenTo?.coinGeckoId] * (Number(zapInResponse.amountY || 0) / 10 ** tokenTo.decimals)).toFixed(6);
 
   const [swapFee, setSwapFee] = useState<number>(1.5);
   const [zapFee, setZapFee] = useState<number>(1);
@@ -932,16 +932,16 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         tokenY: tokenTo as any
       });
       setSwapFee(result.swapFee * 100);
-      const inputUsd = prices?.[tokenZap.coinGeckoId] * Number(amountAfterFee);
+      const inputUsd = extendPrices?.[tokenZap.coinGeckoId] * Number(amountAfterFee);
       const outputUsd =
-        prices?.[tokenFrom.coinGeckoId] * (Number(result.amountX) / 10 ** tokenFrom.decimals) +
-        prices?.[tokenTo.coinGeckoId] * (Number(result.amountY) / 10 ** tokenTo.decimals);
+        extendPrices?.[tokenFrom.coinGeckoId] * (Number(result.amountX) / 10 ** tokenFrom.decimals) +
+        extendPrices?.[tokenTo.coinGeckoId] * (Number(result.amountY) / 10 ** tokenTo.decimals);
 
       const priceImpact = (Math.abs(inputUsd - outputUsd) / inputUsd) * 100;
       const matchRate = 100 - priceImpact;
 
-      const swapFeeInUsd = amountAfterFee * result.swapFee * prices?.[tokenZap.coinGeckoId];
-      const zapFeeInUsd = (Number(zapAmount) - amountAfterFee) * prices?.[tokenZap.coinGeckoId];
+      const swapFeeInUsd = amountAfterFee * result.swapFee * extendPrices?.[tokenZap.coinGeckoId];
+      const zapFeeInUsd = (Number(zapAmount) - amountAfterFee) * extendPrices?.[tokenZap.coinGeckoId];
       const totalFeeInUsd = swapFeeInUsd + zapFeeInUsd;
 
       setTotalFee(totalFeeInUsd);
@@ -1356,7 +1356,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                       `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
                     )}
                   >
-                    <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 })}%</span>
+                    <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 }) ?? 0}%</span>
                   </div>
                 </div>
                 <div className={styles.item}>
@@ -1391,7 +1391,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     <span>Total Fee</span>
                   </div>
                   <div className={styles.value}>
-                    <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 4 })}</span>
+                    <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 4 }) ?? 0}</span>
                   </div>
                 </div>
                 <div className={styles.item}>
@@ -1399,7 +1399,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     <span>Match Rate</span>
                   </div>
                   <div className={styles.value}>
-                    <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 })} %</span>
+                    <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 }) ?? 0} %</span>
                   </div>
                 </div>
               </div>

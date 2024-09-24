@@ -11,6 +11,8 @@ import CreatePositionForm from '../CreatePositionForm';
 import styles from './index.module.scss';
 import cn from 'classnames/bind';
 import { reduceString } from 'libs/utils';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
 const cx = cn.bind(styles);
@@ -32,6 +34,8 @@ const CreateNewPosition = ({
   const [slippage, setSlippage] = useState(1);
   const refContent = useRef();
   const theme = useTheme();
+  const [walletAddress] = useConfigReducer('address');
+  const { refetchPositions } = useGetPositions(walletAddress);
 
   const onCloseModal = () => {
     setShowModal(false);
@@ -124,7 +128,10 @@ const CreateNewPosition = ({
             tokenTo={oraichainTokens.find((e) => extractAddress(e) === pool.pool_key.token_y)}
             feeTier={pool.pool_key.fee_tier}
             poolData={pool}
-            onCloseModal={onCloseModal}
+            onCloseModal={async () => {
+              onCloseModal();
+              await refetchPositions();
+            }}
           />
         </div>
       </div>
