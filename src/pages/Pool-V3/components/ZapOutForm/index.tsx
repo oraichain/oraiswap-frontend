@@ -359,7 +359,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           className={classNames(styles.btnOption, { [styles.activeBtn]: !toggleZapOut })}
           onClick={() => setToggleZapOut(false)}
         >
-          Manual Deposit
+          Manual Withdraw
         </button>
       </div>
 

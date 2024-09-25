@@ -1,5 +1,6 @@
 import { network } from 'config/networks';
 import { gql, GraphQLClient } from 'graphql-request';
+import axios from './request';
 
 export const INDEXER_V3_URL = network.indexer_v3 ?? 'https://staging-ammv3-indexer.oraidex.io/';
 export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
@@ -454,3 +455,13 @@ export const getPoolDetail = async (poolId: string): Promise<PoolDetail> => {
     return null;
   }
 };
+
+export const getPoolDetailFromBackend = async (poolId: string): Promise<PoolDetail> => {
+  try {
+    const res = await axios.get<PoolDetail[]>(`/v1/pool-v3/liquidity`);
+    return res.data.find((pool) => pool.id === poolId) || null;
+  } catch (error) {
+    console.log('error getPoolDetail', error);
+    return null;
+  }
+}
