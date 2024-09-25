@@ -12,6 +12,7 @@ import { toSumDisplay } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import React, { useEffect, useState } from 'react';
 import { getSubAmountDetails } from 'rest/api';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 interface InputSwapProps {
@@ -65,6 +66,8 @@ export default function SelectToken({
   const [textChain, setTextChain] = useState('');
   const [textSearch, setTextSearch] = useState('');
   const isLightTheme = theme === 'light';
+  const [tokenRank = {}] = useConfigReducer('tokenRank');
+
   useEffect(() => {
     if (selectChain && selectChain !== textChain) setTextChain(selectChain);
   }, [selectChain]);
@@ -146,7 +149,12 @@ export default function SelectToken({
                 };
               })
               .sort((a, b) => {
-                return Number(b.usd) - Number(a.usd);
+                const balanceDelta = Number(b.usd) - Number(a.usd);
+
+                if (!balanceDelta) {
+                  return tokenRank[b.coinGeckoId] - tokenRank[a.coinGeckoId];
+                }
+                return balanceDelta;
               })
               .map(({ key, tokenIcon, networkIcon, balance, usd, ...token }) => {
                 return (
