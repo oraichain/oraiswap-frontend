@@ -27,7 +27,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { printBigint } from '../PriceRangePlot/utils';
 import { network } from 'config/networks';
 import SingletonOraiswapV3, { fetchPositionAprInfo, poolKeyToString, PositionAprInfo } from 'libs/contractSingleton';
-import { getTransactionUrl, handleErrorTransaction } from 'helper';
+import { getTransactionUrl, handleErrorTransaction, minimize } from 'helper';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -267,17 +267,27 @@ const PositionItem = ({ position }) => {
         <div className={styles.info}>
           <div className={styles.item}>
             <p>Price Range</p>
+            <span
+              className={styles.value}
+              dangerouslySetInnerHTML={{ __html: `\$${minimize(xToY ? min : 1 / max)}` }}
+            />
+            {' - '}
+            <span
+              className={styles.value}
+              dangerouslySetInnerHTML={{ __html: `\$${minimize(xToY ? max : 1 / min)}` }}
+            />
+
             <span className={styles.value}>
               {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)), undefined, {
                 maximumFractionDigits: 6
               })} */}
-              {formatMoney(`${xToY ? min : 1 / max}`)}
+              {/* {formatMoney(`${xToY ? min : 1 / max}`)} */}
               {/* {showPrefix(xToY ? min : 1 / max, shorterPrefixConfig)} */}
               {' - '}
               {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? max : 1 / min)), undefined, {
                 maximumFractionDigits: 6
               })} */}
-              {formatMoney(`${xToY ? max : 1 / min}`)}
+              {/* {formatMoney(`${xToY ? max : 1 / min}`)} */}
               {/* {showPrefix(xToY ? max : 1 / min, shorterPrefixConfig)}  */}{' '}
               {xToY ? position.tokenYName : position.tokenXName} per {xToY ? position.tokenXName : position.tokenYName}
             </span>
