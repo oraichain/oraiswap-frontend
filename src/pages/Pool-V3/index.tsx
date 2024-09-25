@@ -11,6 +11,7 @@ import PositionList from './components/PositionList';
 import { useGetPoolList } from './hooks/useGetPoolList';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
+import BannerNoticePool from './components/BannerNoticePool';
 
 export enum PoolV3PageType {
   POOL = 'pools',
@@ -31,7 +32,7 @@ const listTabRender: TabRender[] = [
 
 const PoolV3 = () => {
   const theme = useTheme();
-  const [prices,] = useConfigReducer('coingecko');
+  const [prices] = useConfigReducer('coingecko');
   const navigate = useNavigate();
   let [searchParams] = useSearchParams();
   const type = searchParams.get('type') as PoolV3PageType;
@@ -49,49 +50,52 @@ const PoolV3 = () => {
   const Content = listTabRender.find((tab) => tab.id === type)?.content ?? PoolList;
 
   return (
-    <div className={classNames(styles.poolV3, 'small_container')}>
-      <div className={styles.header}>
-        <div className={styles.headerTab}>
-          {listTabRender.map((e) => {
-            return (
-              <Link
-                to={`/pools-v3?type=${e.id}`}
-                key={e.id}
-                className={classNames(styles.item, { [styles.active]: type === e.id })}
-              >
-                {e.value}
-              </Link>
-            );
-          })}
-        </div>
-
-        {type === PoolV3PageType.POOL && (
-          <div className={styles.right}>
-            <div className={styles.search}>
-              <input
-                type="text"
-                placeholder="Search pool"
-                value={search}
-                onChange={(e) => {
-                  e.preventDefault();
-                  setSearch(e.target.value);
-                }}
-                style={{
-                  paddingLeft: 40,
-                  backgroundImage: `url(${bgUrl})`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: '16px center'
-                }}
-              />
-            </div>
-            <CreateNewPool pools={poolList} />
+    <>
+      <BannerNoticePool />
+      <div className={classNames(styles.poolV3, 'small_container')}>
+        <div className={styles.header}>
+          <div className={styles.headerTab}>
+            {listTabRender.map((e) => {
+              return (
+                <Link
+                  to={`/pools-v3?type=${e.id}`}
+                  key={e.id}
+                  className={classNames(styles.item, { [styles.active]: type === e.id })}
+                >
+                  {e.value}
+                </Link>
+              );
+            })}
           </div>
-        )}
+
+          {type === PoolV3PageType.POOL && (
+            <div className={styles.right}>
+              <div className={styles.search}>
+                <input
+                  type="text"
+                  placeholder="Search pool"
+                  value={search}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    setSearch(e.target.value);
+                  }}
+                  style={{
+                    paddingLeft: 40,
+                    backgroundImage: `url(${bgUrl})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: '16px center'
+                  }}
+                />
+              </div>
+              <CreateNewPool pools={poolList} />
+            </div>
+          )}
+        </div>
+        <div className={classNames(styles.content, styles[theme], styles[type])}>
+          {Content && <Content search={search} />}
+        </div>
       </div>
-      <div className={classNames(styles.content, styles[theme], styles[type])}>
-        {Content && <Content search={search} />}
-      </div>
-    </div>
+    </>
   );
 };
 
