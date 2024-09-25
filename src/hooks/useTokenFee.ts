@@ -7,7 +7,10 @@ import {
   toAmount,
   BigDecimal,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-  ORAI_BRIDGE_EVM_DENOM_PREFIX
+  ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  PEPE_ORAICHAIN_EXT_DENOM,
+  PEPE_BSC_CONTRACT,
+  PEPE_ETH_CONTRACT
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { handleSimulateSwap, isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
@@ -59,6 +62,9 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
   const [relayerFeeInOrai, setRelayerFeeInOrai] = useState(0);
   const [relayerFee, setRelayerFeeAmount] = useState(0);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
+  const isFromPepeToken =
+    originalFromToken.contractAddress &&
+    [PEPE_BSC_CONTRACT, PEPE_ETH_CONTRACT].includes(originalFromToken.contractAddress);
 
   const { data: relayerFeeAmount } = useQuery(
     ['simulate-relayer-data', originalFromToken, originalToToken, relayerFeeInOrai],
@@ -77,12 +83,13 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
       });
     },
     {
-      enabled: !!originalFromToken && !!originalToToken && relayerFeeInOrai > 0
+      enabled: !!originalFromToken && !!originalToToken && relayerFeeInOrai > 0 && !isFromPepeToken
     }
   );
 
   // get relayer fee in token, by simulate orai vs to token.
   useEffect(() => {
+    if (isFromPepeToken) return setRelayerFeeAmount(0);
     if (relayerFeeAmount) setRelayerFeeAmount(new BigDecimal(relayerFeeAmount?.displayAmount || 0).toNumber());
   }, [relayerFeeAmount]);
 
