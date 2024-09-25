@@ -587,9 +587,7 @@ const SwapComponent: React.FC<{
             <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
           )}
         </div>
-        {averageSimulateData && !averageSimulateData?.displayAmount && (
-          <div className={styles.routeNotFound}>Route not found!</div>
-        )}
+        {/* {!averageSimulateData?.displayAmount && <div className={styles.routeNotFound}>Route not found!</div>} */}
       </div>
     );
   };
