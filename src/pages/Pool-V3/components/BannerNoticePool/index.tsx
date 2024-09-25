@@ -34,7 +34,7 @@ const BannerNoticePool = () => {
             <UsdcIcon />
           </div>
           <span className={styles.txtContent}>
-            New Listing Alert: <span className={styles.coin}>PEPE/USDC.</span> <Link to={url}>TRADE NOW!</Link> 🚀
+            New Listing Alert: <span className={styles.coin}>PEPE/USDC.</span> <Link to={url}>ADD LP NOW!</Link> 🚀
           </span>
         </div>
       </div>
