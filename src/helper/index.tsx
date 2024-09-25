@@ -29,6 +29,9 @@ import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
 import { WalletsByNetwork } from 'reducer/wallet';
 import { evmChainInfos } from 'config/evmChainInfos';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { numberWithCommas } from './format';
+import { formatMoney } from 'pages/Pool-V3/helpers/helper';
 
 export interface Tokens {
   denom?: string;
@@ -576,20 +579,43 @@ export interface GetIconInterface {
   height?: number;
 }
 
+export const minimize = (priceUsd: number) => {
+  let isNeedSub = false;
+  const replaceItem = priceUsd.toString().replace(/(?<=\.)0+/, (m) => {
+    isNeedSub = m.length > 3;
+    return isNeedSub ? `0<sub>${m.length}</sub>` : m;
+  });
+
+  if (!isNeedSub) return formatMoney(priceUsd);
+
+  const SUB_ELEMENT_LENGTH = 5; // </sub>
+  const DECIMALS_AFTER_SUB_LENGTH = 5;
+  const decimalAfterSub = replaceItem.indexOf('</sub>') + SUB_ELEMENT_LENGTH + DECIMALS_AFTER_SUB_LENGTH;
+  return replaceItem.slice(0, decimalAfterSub);
+};
+
 export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, height }: GetIconInterface) => {
   if (type === 'token') {
     const tokenIcon = flattenTokensWithIcon.find((tokenWithIcon) => tokenWithIcon.coinGeckoId === coinGeckoId);
-    return isLightTheme ? (
-      <tokenIcon.IconLight width={width} height={height} />
-    ) : (
-      <tokenIcon.Icon width={width} height={height} />
-    );
+    if (tokenIcon) {
+      return isLightTheme ? (
+        <tokenIcon.IconLight width={width} height={height} />
+      ) : (
+        <tokenIcon.Icon width={width} height={height} />
+      );
+    }
+
+    return <DefaultIcon />;
   } else {
     const networkIcon = chainIcons.find((chain) => chain.chainId === chainId);
-    return isLightTheme ? (
-      <networkIcon.IconLight width={width} height={height} />
-    ) : (
-      <networkIcon.Icon width={width} height={height} />
-    );
+    if (networkIcon) {
+      return isLightTheme ? (
+        <networkIcon.IconLight width={width} height={height} />
+      ) : (
+        <networkIcon.Icon width={width} height={height} />
+      );
+    }
+
+    return <DefaultIcon />;
   }
 };

@@ -15,20 +15,14 @@ import { ReactComponent as RewardIcon } from 'assets/icons/rewardIc.svg';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { TooltipIcon } from 'components/Tooltip';
-import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { network } from 'config/networks';
-import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { formatDisplayUsdt, numberWithCommas } from 'helper/format';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import useConfigReducer from 'hooks/useConfigReducer';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { fetchPositionAprInfo, poolKeyToString, PositionAprInfo } from 'libs/contractSingleton';
-import { getCosmWasmClient } from 'libs/cosmjs';
 import {
   calculateFee,
+  formatMoney,
   formatNumbers,
   getConvertedPool,
   getConvertedPosition,
@@ -36,6 +30,13 @@ import {
   initialXtoY,
   tickerToAddress
 } from 'pages/Pool-V3/helpers/helper';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { network } from 'config/networks';
+import { getTransactionUrl, handleErrorTransaction, minimize } from 'helper';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
@@ -271,11 +272,27 @@ const PositionItem = ({ position }) => {
         <div className={styles.info}>
           <div className={styles.item}>
             <p>Price Range</p>
+            <span
+              className={styles.value}
+              dangerouslySetInnerHTML={{ __html: `\$${minimize(xToY ? min : 1 / max)}` }}
+            />
+            {' - '}
+            <span
+              className={styles.value}
+              dangerouslySetInnerHTML={{ __html: `\$${minimize(xToY ? max : 1 / min)}` }}
+            />
+
             <span className={styles.value}>
-              {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)))}
+              {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)), undefined, {
+                maximumFractionDigits: 6
+              })} */}
+              {/* {formatMoney(`${xToY ? min : 1 / max}`)} */}
               {/* {showPrefix(xToY ? min : 1 / max, shorterPrefixConfig)} */}
               {' - '}
-              {numberWithCommas(Number(formatNumbers(undefined)(xToY ? max : 1 / min)))}
+              {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? max : 1 / min)), undefined, {
+                maximumFractionDigits: 6
+              })} */}
+              {/* {formatMoney(`${xToY ? max : 1 / min}`)} */}
               {/* {showPrefix(xToY ? max : 1 / min, shorterPrefixConfig)}  */}{' '}
               {xToY ? position.tokenYName : position.tokenXName} per {xToY ? position.tokenXName : position.tokenYName}
             </span>
@@ -439,7 +456,7 @@ const PositionItem = ({ position }) => {
                   <position.tokenXIcon />
                   {numberWithCommas(earnXDisplay, undefined, {
                     maximumFractionDigits: 6
-                  })}
+                  })}{' '}
                   {position?.tokenX.name}
                 </span>
                 <span className={classNames(styles.token, styles[theme])}>

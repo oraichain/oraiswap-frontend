@@ -23,6 +23,7 @@
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
+
       @include small-mobile {
         gap: 12px;
       }
@@ -91,6 +92,10 @@
       gap: 16px;
 
       .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
         @include theme {
           color: theme-get('colors-neutral-text-text-token-name');
         }
@@ -99,6 +104,66 @@
         font-weight: 500;
         line-height: 120%;
         /* 28.8px */
+      }
+
+      .sortMobileWrapper {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+
+        .sortBtn {
+          padding: 2px 4px;
+          border-radius: 4px;
+
+          svg {
+            vertical-align: middle;
+          }
+
+          @include theme {
+            border-color: theme-get('neutral-border-border-default');
+            background: theme-get('neutral-surface-bg-swap');
+          }
+        }
+
+        .labelSort {
+          position: relative;
+          font-weight: 400;
+          font-size: 14px;
+          padding: 0 2px 2px 0px;
+
+          @include theme {
+            // color: theme-get('colors-neutral-text-text-token-name');
+            color: theme-get('neutral-9');
+            border-bottom: 1px solid theme-get('neutral-border-border-default');
+          }
+        }
+
+        .sortList {
+          position: absolute;
+          display: none;
+          flex-direction: column;
+          gap: 4px;
+          border-radius: 4px;
+          padding: 8px;
+
+          width: 150px;
+          right: 0;
+          top: 30px;
+
+          @include theme {
+            border-color: theme-get('neutral-border-border-default');
+            background: theme-get('neutral-surface-bg-swap');
+          }
+
+          &.active {
+            display: flex;
+          }
+
+          .item {
+            padding: 6px 12px;
+            text-align: left;
+          }
+        }
       }
 
       .mobilePoolItem {

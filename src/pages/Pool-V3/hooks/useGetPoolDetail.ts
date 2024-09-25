@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { PoolFeeAndLiquidityDaily } from 'libs/contractSingleton';
 import { useEffect, useState } from 'react';
-import { FeeDailyData, getFeeDailyData, getPoolDetail, PoolDetail } from 'rest/graphClient';
+import { FeeDailyData, getFeeDailyData, getPoolDetail, getPoolDetailFromBackend, PoolDetail } from 'rest/graphClient';
 import { toDisplay } from '@oraichain/oraidex-common';
 
 export type LiquidityDistribution = {
@@ -24,7 +24,7 @@ export const useGetPoolDetail = (poolKey: string, prices: CoinGeckoPrices<string
     total: 0,
     allocation: {}
   });
-  const { data, refetch: refetchPoolDetail } = useQuery<PoolDetail>(['pool-v3-detail'], () => getPoolDetail(poolKey), {
+  const { data, refetch: refetchPoolDetail } = useQuery<PoolDetail>(['pool-v3-detail'], () => getPoolDetailFromBackend(poolKey), {
     refetchOnWindowFocus: false,
     placeholderData: null,
     // cacheTime: 5 * 60 * 1000

@@ -1,4 +1,4 @@
-import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay, PEPE_ORAICHAIN_EXT_DENOM, USDC_CONTRACT } from '@oraichain/oraidex-common';
 import Loading from 'assets/gif/loading.gif';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
@@ -29,6 +29,8 @@ import styles from './index.module.scss';
 import isEqual from 'lodash/isEqual';
 import { Button } from 'components/Button';
 import { isMobile } from '@walletconnect/browser-utils';
+import useOnClickOutside from 'hooks/useOnClickOutside';
+import useTemporaryConfigReducer from 'hooks/useTemporaryConfigReducer';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -39,14 +41,17 @@ export enum PoolColumnHeader {
 
 const PoolList = ({ search }) => {
   const { data: price } = useCoinGeckoPrices();
+  const [isShowPepeOnTop] = useTemporaryConfigReducer('customBanner');
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
   const [openTooltip, setOpenTooltip] = useState(false);
+  const [openSort, setOpenSort] = useState(false);
   const mobileMode = isMobile();
+  const sortRef = useRef();
 
   const [sort, setSort] = useState<Record<PoolColumnHeader, SortType>>({
-    [PoolColumnHeader.LIQUIDITY]: SortType.DESC
+    [PoolColumnHeader.VOLUME]: SortType.DESC
   } as Record<PoolColumnHeader, SortType>);
 
   const theme = useTheme();
@@ -198,7 +203,7 @@ const PoolList = ({ search }) => {
   useEffect(() => {
     if (Object.values(poolLiquidities).length > 0) {
       sortDataSource({
-        [PoolColumnHeader.LIQUIDITY]: SortType.DESC
+        [PoolColumnHeader.VOLUME]: SortType.DESC
       } as any);
     }
   }, [poolLiquidities]);
@@ -214,10 +219,47 @@ const PoolList = ({ search }) => {
     );
   });
 
+  useOnClickOutside(sortRef, () => {
+    setOpenSort(false);
+  });
+
   const renderList = () => {
     return mobileMode ? (
       <div className={styles.listMobile}>
-        <div className={styles.header}>List Pools</div>
+        <div className={styles.header}>
+          <span>List Pools</span>
+
+          <div className={styles.sortMobileWrapper}>
+            <div
+              className={styles.sortBtn}
+              onClick={() => {
+                const [sortField] = Object.entries(sort)[0];
+
+                handleClickSort(sortField as PoolColumnHeader);
+              }}
+            >
+              {sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />}
+            </div>
+            <div className={styles.labelSort} ref={sortRef} onClick={() => setOpenSort(!openSort)}>
+              {sortField}
+              <div className={classNames(styles.sortList, { [styles.active]: openSort })}>
+                {Object.values(PoolColumnHeader).map((item, k) => {
+                  return (
+                    <span
+                      key={`${k}-sort-item-${item}`}
+                      className={styles.item}
+                      onClick={() => {
+                        handleClickSort(item);
+                      }}
+                    >
+                      {item}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
         {filteredPool.map((item, index) => {
           return (
             <PoolItemDataMobile
