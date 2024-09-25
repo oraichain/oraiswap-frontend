@@ -1,10 +1,20 @@
 import { TokenItemType } from '@oraichain/oraidex-common';
 import { OraiswapRouterReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
-import { UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
+import { UniversalSwapHelper, RouterConfigSmartRoute } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
 import { useDebounce } from 'hooks/useDebounce';
+
+export const getRouterConfig = (options?: { path?: string; protocols?: string[]; dontAllowSwapAfter?: string[] }) => {
+  return {
+    url: 'https://osor.oraidex.io',
+    path: options?.path ?? '/smart-router/alpha-router',
+    protocols: options?.protocols ?? ['Oraidex', 'OraidexV3'],
+    dontAllowSwapAfter: options?.dontAllowSwapAfter ?? ['Oraidex', 'OraidexV3']
+  };
+};
+
 /**
  * Simulate ratio between fromToken & toToken
  * @param queryKey
@@ -24,8 +34,10 @@ export const useSimulate = (
   simulateOption?: {
     useAlphaSmartRoute?: boolean;
     useIbcWasm?: boolean;
-    protocols?: string[];
     isAvgSimulate?: boolean;
+    path?: string;
+    protocols?: string[];
+    dontAllowSwapAfter?: string[];
   }
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
@@ -44,12 +56,7 @@ export const useSimulate = (
           useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute,
           useIbcWasm: simulateOption?.useIbcWasm
         },
-        routerConfig: {
-          url: 'https://osor.oraidex.io',
-          path: '/smart-router/alpha-router',
-          protocols: simulateOption?.protocols ?? ['Oraidex', 'OraidexV3'],
-          dontAllowSwapAfter: ['Oraidex', 'OraidexV3']
-        }
+        routerConfig: getRouterConfig(simulateOption)
       });
     },
     {

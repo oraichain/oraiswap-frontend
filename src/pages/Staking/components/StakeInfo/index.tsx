@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react';
 import { generateContractMessages, generateMiningMsgs } from 'rest/api';
 import styles from './index.module.scss';
 import CompoundModal from '../CompoundModal';
+import { getRouterConfig } from 'pages/UniversalSwap/Swap/hooks';
 
 const StakeInfo = () => {
   const [theme] = useConfigReducer('theme');
@@ -53,7 +54,11 @@ const StakeInfo = () => {
         originalFromInfo: USDC_TOKEN_INFO,
         originalToInfo: ORAIX_TOKEN_INFO,
         originalAmount: toDisplay(reward),
-        routerClient
+        routerClient,
+        routerOption: {
+          useIbcWasm: true
+        },
+        routerConfig: getRouterConfig()
       });
 
       setEstOraixSwap(simulateData?.displayAmount || 0);
@@ -106,13 +111,21 @@ const StakeInfo = () => {
           originalFromInfo: USDC_TOKEN_INFO,
           originalToInfo: ORAIX_TOKEN_INFO,
           originalAmount: toDisplay(reward),
-          routerClient
+          routerClient,
+          routerOption: {
+            useIbcWasm: true
+          },
+          routerConfig: getRouterConfig()
         }),
         handleSimulateSwap({
           originalFromInfo: USDC_TOKEN_INFO,
           originalToInfo: ORAIX_TOKEN_INFO,
           originalAmount: 1,
-          routerClient
+          routerClient,
+          routerOption: {
+            useIbcWasm: true
+          },
+          routerConfig: getRouterConfig()
         })
       ]);
 

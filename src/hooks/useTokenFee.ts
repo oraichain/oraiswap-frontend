@@ -13,6 +13,7 @@ import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { handleSimulateSwap, isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import { EVM_CHAIN_ID } from 'helper';
+import { getRouterConfig } from 'pages/UniversalSwap/Swap/hooks';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateFeeConfig } from 'reducer/token';
@@ -68,7 +69,11 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
         originalFromInfo: oraiToken,
         originalToInfo: originalToToken,
         originalAmount: relayerFeeInOrai,
-        routerClient
+        routerClient,
+        routerOption: {
+          useIbcWasm: true
+        },
+        routerConfig: getRouterConfig()
       });
     },
     {
@@ -123,7 +128,11 @@ export const useUsdtToBtc = (amount) => {
         originalFromInfo: originalToToken,
         originalToInfo: originalFromToken,
         originalAmount: amount,
-        routerClient
+        routerClient,
+        routerOption: {
+          useIbcWasm: true
+        },
+        routerConfig: getRouterConfig()
       });
     },
     {
