@@ -4375,9 +4375,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.91", "@oraichain/oraidex-common@^1.1.6":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.8.tgz#caef2203806dfe3e422cb1876ca2f9db09ba92a3"
-  integrity sha512-1GEC1eqeJ4BoT3ytAJgLa50obi2gq0hqPIqxfvxU1PpS1mVMpnxLozrDqmjK/NxG5RTl5BZutGBq/Uu10KbRvQ==
+  version "1.1.18"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.18.tgz#ef06939daabd7adf5023dd52ab39e040f64ca7d1"
+  integrity sha512-igH4pFjEB7q8bPEAJXhYa372kU05ZzxOe6C/vntegu0DUjGCJUmKE6ikCG2svs2VytkmEv2D9env70AFGXePEw==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"
@@ -4421,10 +4421,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.45.tgz#42dae0fdd9e005f920ba305b987009f791acc365"
   integrity sha512-/nYztdxEX5LQM4DMJQmi9HvZrBVoY3nLAmYqSKZGZ0U1h1SxU7O/o22R3/pQwB+sAJdcibaI8ygC0ov7jC8paA==
 
-"@oraichain/oraidex-universal-swap@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.4.tgz#134019ac5c69d6be5aca58380f982375a94f3d54"
-  integrity sha512-XkJRQWG6n1YYKRFcVGpjRTKS0sU60jgxwJB4lj0SgP5M2Kd1WsBCBj0dw44QxwZMm3Lzw9rufDzNgGWJZMGvAQ==
+"@oraichain/oraidex-universal-swap@1.1.9":
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.9.tgz#db90a3682e18435103f803ebf618570bf1465c93"
+  integrity sha512-ozg9PuRcWubuu7VJbMhDKYmvvd1eAoy/qvD93lBOcTwJTA/5+pl/79tkvoP6uvDzcbtfbRDqJHdGvmJVZNlgXQ==
   dependencies:
     "@oraichain/common" "^1.0.3"
     "@oraichain/oraidex-common" "^1.0.91"
@@ -4434,10 +4434,10 @@
     tronweb "5.3.2"
     ts-protoc-gen "^0.15.0"
 
-"@oraichain/oraiswap-v3@0.1.7-beta.2":
-  version "0.1.7-beta.2"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.7-beta.2.tgz#cc9e3c8056895dc54c9b5f722832787d8ccdf869"
-  integrity sha512-bb40bYQnaNv/9r4cmrU6gZn4FrXfvAA3DgwFVn9xWMOV3VkYkpY4rEdjH7P9Ad91/AMcJqbOg1m52A37o36RsA==
+"@oraichain/oraiswap-v3@0.1.12":
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.12.tgz#f3715448da31be8ddf2d5265fd6a9a25ceeb305d"
+  integrity sha512-GNqyMurlv83PtFNcFR4zmDK6TlPFplCUtsGZrDDe5j3pL5YjgPCeNeU8wfpCPQ6mD1o0WVrVhTW7TmroVH+VPg==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
     "@oraichain/oraidex-common" "^1.1.6"

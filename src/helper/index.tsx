@@ -29,6 +29,7 @@ import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
 import { WalletsByNetwork } from 'reducer/wallet';
 import { evmChainInfos } from 'config/evmChainInfos';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 
 export interface Tokens {
   denom?: string;
@@ -579,17 +580,25 @@ export interface GetIconInterface {
 export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, height }: GetIconInterface) => {
   if (type === 'token') {
     const tokenIcon = flattenTokensWithIcon.find((tokenWithIcon) => tokenWithIcon.coinGeckoId === coinGeckoId);
-    return isLightTheme ? (
-      <tokenIcon.IconLight width={width} height={height} />
-    ) : (
-      <tokenIcon.Icon width={width} height={height} />
-    );
+    if (tokenIcon) {
+      return isLightTheme ? (
+        <tokenIcon.IconLight width={width} height={height} />
+      ) : (
+        <tokenIcon.Icon width={width} height={height} />
+      );
+    }
+
+    return <DefaultIcon />;
   } else {
     const networkIcon = chainIcons.find((chain) => chain.chainId === chainId);
-    return isLightTheme ? (
-      <networkIcon.IconLight width={width} height={height} />
-    ) : (
-      <networkIcon.Icon width={width} height={height} />
-    );
+    if (networkIcon) {
+      return isLightTheme ? (
+        <networkIcon.IconLight width={width} height={height} />
+      ) : (
+        <networkIcon.Icon width={width} height={height} />
+      );
+    }
+
+    return <DefaultIcon />;
   }
 };

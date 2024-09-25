@@ -56,7 +56,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 
     dispatch(updateAmounts(amountDetails));
   } catch (ex) {
-    console.trace('errror');
+    // console.trace('errror');
     console.log(ex);
   }
 }

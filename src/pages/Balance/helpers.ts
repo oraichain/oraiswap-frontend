@@ -47,7 +47,6 @@ import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { BitcoinUnit } from 'bitcoin-units';
 import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, bitcoinChainId, bitcoinLcd, btcNetwork } from 'helper/constants';
 import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
-import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -374,7 +373,6 @@ export const transferIbcCustom = async (
 
 export const findDefaultToToken = (from: TokenItemType) => {
   if (!from.bridgeTo) return;
-
   return flattenTokens.find(
     (t) => from.bridgeTo.includes(t.chainId) && from.name.includes(t.name) && from.chainId !== t.chainId
   );

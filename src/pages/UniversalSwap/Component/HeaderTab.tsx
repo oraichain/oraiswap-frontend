@@ -108,10 +108,26 @@ export const UsdPrice = ({
 }: Pick<HeaderTabPropsType, 'percentChangeUsd' | 'priceUsd' | 'chartTokenType'>) => {
   const isIncrementUsd = percentChangeUsd && Number(percentChangeUsd) > 0;
 
+  const minimize = (input: string) => {
+    let isNeedSub = false;
+    const replaceItem = input.replace(/(?<=\.)0+/, (m) => {
+      isNeedSub = m.length > 3;
+      return isNeedSub ? `0<sub>${m.length}</sub>` : m;
+    });
+
+    if (!isNeedSub) return numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 });
+
+    const SUB_ELEMENT_LENGTH = 5; // </sub>
+    const DECIMALS_AFTER_SUB_LENGTH = 5;
+    const decimalAfterSub = replaceItem.indexOf('</sub>') + SUB_ELEMENT_LENGTH + DECIMALS_AFTER_SUB_LENGTH;
+    return replaceItem.slice(0, decimalAfterSub);
+  };
+
   const headerTabSimple = () => {
     return (
       <div>
-        <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+        <span dangerouslySetInnerHTML={{ __html: `\$${!priceUsd ? '--' : minimize(priceUsd.toString())}` }} />
+
         <span
           className={cx('percent', isIncrementUsd ? 'increment' : 'decrement', {
             hidePercent: chartTokenType === ChartTokenType.Volume

@@ -1,6 +1,6 @@
 import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS, ZAPPER_CONTRACT } from '@oraichain/oraidex-common';
 import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress, poolKeyToString, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
+import { extractAddress, poolKeyToString, RouteNoLiquidity, RouteNotFoundError, SpamTooManyRequestsError, ZapOutLiquidityResponse, ZapOutResult } from '@oraichain/oraiswap-v3';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -215,20 +215,14 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-    } catch (error) {
-      console.log('error', error);
-    }
+    } catch (error) { }
 
     try {
-      // const client = await CosmWasmClient.connect(network.rpc);
-      // const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
-      // const zapFee = await zap.protocolFee();
-
       const zapper = new ZapConsumer({
         client: await CosmWasmClient.connect(network.rpc),
-        devitation: 0,
+        deviation: 0,
         dexV3Address: network.pool_v3,
-        multicallAddress: MULTICALL_CONTRACT,
+        multiCallAddress: MULTICALL_CONTRACT,
         routerApi: 'https://osor.oraidex.io/smart-router/alpha-router',
         smartRouteConfig: {
           swapOptions: {
@@ -236,7 +230,6 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           }
         }
       });
-      console.log(position.token_id);
 
       const res = await zapper.processZapOutPositionLiquidity({
         owner: walletAddress,
@@ -244,14 +237,12 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
         tokenOut: tokenZap,
         zapFee: zapFee
       });
-      console.log('res', res);
 
       const inputUsd =
         position.tokenXLiq * prices[tokenFrom.coinGeckoId] + position.tokenYLiq * prices[tokenTo.coinGeckoId];
       const outputUsd =
         (Number(res.amountToX) * prices[tokenZap.coinGeckoId]) / 10 ** tokenZap.decimals +
         (Number(res.amountToY) * prices[tokenZap.coinGeckoId]) / 10 ** tokenZap.decimals;
-      console.log({ inputUsd, outputUsd });
       const priceImpact = (Math.abs(inputUsd - outputUsd) / inputUsd) * 100;
 
       const totalAmountOut =
@@ -276,8 +267,15 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
     } catch (error) {
       // console.error(error);
       console.log('error', error);
-      setSimulating(false);
-      setLoading(false);
+
+      if (error instanceof RouteNotFoundError) {
+        setZapError('No route found, try other tokens or other amount');
+      } else if (error instanceof RouteNoLiquidity) {
+        setZapError('The route swap found has no liquidity, can\'t swap');
+      } else if (error instanceof SpamTooManyRequestsError) {
+        setZapError('Too many requests, please try again later, after 1 minute');
+      }
+
     } finally {
       setSimulating(false);
       setLoading(false);
@@ -293,7 +291,6 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
   useEffect(() => {
     if (zapOutResponse) {
-      console.log('zapOutResponse', zapOutResponse);
       if (zapOutResponse.result !== ZapOutResult.Success) {
         setZapError(zapOutResponse.result);
       }
@@ -458,7 +455,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           {zapError && (
             <div className={styles.errorZap}>
               <ErrorIcon />
-              <span>No route found to zap, try other tokens or check back later.</span>
+              <span>{zapError}</span>
             </div>
           )}
           {!zapError && zapOutResponse && (

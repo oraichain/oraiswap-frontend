@@ -685,6 +685,12 @@
       height: 16px;
     }
   }
+
+  .routeNotFound {
+    color: $warning-10-color;
+    font-size: 13px;
+    text-align: right;
+  }
 }
 
 .swap-btn {

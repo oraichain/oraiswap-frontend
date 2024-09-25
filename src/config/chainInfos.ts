@@ -1,12 +1,15 @@
-// @ts-nocheck
 import {
   TokenItemType,
   tokens,
+  oraichainNetwork as customOraichainNetwork,
   chainInfos as customChainInfos,
   OsmoToken,
   AtomToken,
   InjectiveToken,
-  ChainIdEnum
+  ChainIdEnum,
+  PEPE_ORAICHAIN_EXT_DENOM as PEPE_ORAICHAIN_DENOM,
+  PEPE_ETH_CONTRACT,
+  PEPE_BSC_CONTRACT
 } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
@@ -35,6 +38,7 @@ import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as CelestiaIcon } from 'assets/icons/celestia.svg';
 import { ReactComponent as TonIcon } from 'assets/icons/ton.svg';
+import { ReactComponent as PepeIcon } from 'assets/icons/pepe.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -85,17 +89,20 @@ import { flatten } from 'lodash';
 import { bitcoinChainId } from 'helper/constants';
 import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
 import { listOsmosisToken } from './alphaNetwwork';
+import { chainIconsInfos, tokensIconInfos, mapListWithIcon } from './iconInfos';
+
+export const tokensIcon = tokensIconInfos;
+export const chainIcons = chainIconsInfos;
 
 const [otherChainTokens, oraichainTokens] = tokens;
-type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
-type ChainIcon = Pick<CustomChainInfo, 'chainId' | 'Icon' | 'IconLight'>;
+
 export const bitcoinMainnet: CustomChainInfo = {
   rest: 'https://blockstream.info/api',
   rpc: 'https://blockstream.info/api',
-  chainId: ChainIdEnum.Bitcoin,
-  chainName: 'Bitcoin',
+  chainId: ChainIdEnum.Bitcoin as any,
+  chainName: 'Bitcoin' as any,
   bip44: {
-    coinType: 0
+    coinType: 0 as any
   },
   coinType: 0,
   Icon: BTCIcon,
@@ -108,12 +115,12 @@ export const bitcoinMainnet: CustomChainInfo = {
     coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
   },
   bech32Config: defaultBech32Config('bc'),
-  networkType: 'bitcoin',
+  networkType: 'bitcoin' as any,
   currencies: [
     {
       coinDenom: 'BTC',
       coinMinimalDenom: 'btc',
-      coinDecimals: 8,
+      coinDecimals: 8 as any,
       bridgeTo: ['Oraichain'],
       prefixToken: 'oraibtc',
       Icon: BTCIcon,
@@ -137,213 +144,9 @@ export const bitcoinMainnet: CustomChainInfo = {
     accountUrl: 'https://blockstream.info/address/{address}'
   }
 };
-export const tokensIcon: TokenIcon[] = [
-  {
-    coinGeckoId: 'oraichain-token',
-    Icon: OraiIcon,
-    IconLight: OraiLightIcon
-  },
-  {
-    coinGeckoId: 'usd-coin',
-    Icon: UsdcIcon,
-    IconLight: UsdcIcon
-  },
-  {
-    coinGeckoId: 'bitcoin',
-    Icon: BTCIcon,
-    IconLight: BTCIcon
-  },
-  {
-    coinGeckoId: 'airight',
-    Icon: AiriIcon,
-    IconLight: AiriIcon
-  },
-  {
-    coinGeckoId: 'tether',
-    Icon: UsdtIcon,
-    IconLight: UsdtIcon
-  },
-  {
-    coinGeckoId: 'tron',
-    Icon: TronIcon,
-    IconLight: TronIcon
-  },
-  {
-    coinGeckoId: 'kawaii-islands',
-    Icon: KwtIcon,
-    IconLight: KwtIcon
-  },
-  {
-    coinGeckoId: 'milky-token',
-    Icon: MilkyIcon,
-    IconLight: MilkyIcon
-  },
-  {
-    coinGeckoId: 'osmosis',
-    Icon: OsmoIcon,
-    IconLight: OsmoIcon
-  },
-  {
-    coinGeckoId: 'injective-protocol',
-    Icon: InjIcon,
-    IconLight: InjIcon
-  },
-  {
-    coinGeckoId: 'cosmos',
-    Icon: AtomIcon,
-    IconLight: AtomIcon
-  },
-  {
-    coinGeckoId: 'weth',
-    Icon: EthIcon,
-    IconLight: EthIcon
-  },
-  {
-    coinGeckoId: 'ethereum',
-    Icon: EthIcon,
-    IconLight: EthIcon
-  },
-  {
-    coinGeckoId: 'wbnb',
-    Icon: BnbIcon,
-    IconLight: BnbIcon
-  },
-  {
-    coinGeckoId: 'binancecoin',
-    Icon: BnbIcon,
-    IconLight: BnbIcon
-  },
-  {
-    coinGeckoId: 'oraidex',
-    Icon: OraixIcon,
-    IconLight: OraixLightIcon
-  },
-  {
-    coinGeckoId: 'scorai',
-    Icon: ScOraiIcon,
-    IconLight: ScOraiIcon
-  },
-  {
-    coinGeckoId: 'scatom',
-    Icon: ScAtomIcon,
-    IconLight: ScAtomIcon
-  },
-  {
-    coinGeckoId: 'neutaro',
-    Icon: TimpiIcon,
-    IconLight: TimpiIcon
-  },
-  {
-    coinGeckoId: 'och',
-    Icon: OrchaiIcon,
-    IconLight: OrchaiIcon
-  },
-  {
-    coinGeckoId: 'bitcoin',
-    Icon: BitcoinIcon,
-    IconLight: BitcoinIcon
-  },
-  {
-    coinGeckoId: 'celestia',
-    Icon: CelestiaIcon,
-    IconLight: CelestiaIcon
-  },
-  {
-    coinGeckoId: 'the-open-network',
-    Icon: TonIcon,
-    IconLight: TonIcon
-  }
-];
-
-export const chainIcons: ChainIcon[] = [
-  {
-    chainId: 'Oraichain',
-    Icon: OraiIcon,
-    IconLight: OraiLightIcon
-  },
-  {
-    chainId: bitcoinChainId,
-    Icon: BTCIcon,
-    IconLight: BTCIcon
-  },
-  {
-    chainId: 'kawaii_6886-1',
-    Icon: KwtIcon,
-    IconLight: KwtIcon
-  },
-  {
-    chainId: 'osmosis-1',
-    Icon: OsmoIcon,
-    IconLight: OsmoIcon
-  },
-  {
-    chainId: 'injective-1',
-    Icon: InjIcon,
-    IconLight: InjIcon
-  },
-  {
-    chainId: 'cosmoshub-4',
-    Icon: AtomIcon,
-    IconLight: AtomIcon
-  },
-  {
-    chainId: '0x01',
-    Icon: EthIcon,
-    IconLight: EthIcon
-  },
-  {
-    chainId: '0x2b6653dc',
-    Icon: TronIcon,
-    IconLight: TronIcon
-  },
-  {
-    chainId: '0x38',
-    Icon: BnbIcon,
-    IconLight: BnbIcon
-  },
-  {
-    chainId: '0x1ae6',
-    Icon: KwtIcon,
-    IconLight: KwtIcon
-  },
-  {
-    chainId: 'noble-1',
-    Icon: NobleIcon,
-    IconLight: NobleLightIcon
-  },
-  {
-    chainId: 'Neutaro-1',
-    Icon: NeutaroIcon,
-    IconLight: NeutaroIcon
-  },
-  {
-    chainId: 'oraibtc-mainnet-1',
-    Icon: BitcoinIcon,
-    IconLight: BitcoinIcon
-  }
-];
-export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
-  return list.map((item) => {
-    let Icon = OraiIcon;
-    let IconLight = OraiLightIcon;
-
-    const findedItem = listIcon.find((icon) => icon[key] === item[key]);
-    if (findedItem) {
-      Icon = findedItem.Icon;
-      IconLight = findedItem.IconLight;
-    }
-
-    return {
-      ...item,
-      Icon,
-      IconLight
-    };
-  });
-};
 
 // mapped chain info with icon
 export const chainInfosWithIcon = mapListWithIcon([...customChainInfos, bitcoinMainnet], chainIcons, 'chainId');
-
 // mapped token with icon
 export const oraichainTokensWithIcon = mapListWithIcon(oraichainTokens, tokensIcon, 'coinGeckoId');
 export const otherTokensWithIcon = mapListWithIcon(otherChainTokens, tokensIcon, 'coinGeckoId');
@@ -402,6 +205,13 @@ const KawaiiToken: BridgeAppCurrency = {
 };
 
 export const oraichainNetwork: CustomChainInfo = {
+  ...customOraichainNetwork
+};
+
+/**
+ * @deprecated
+ */
+export const oraichainNetworkOld: CustomChainInfo = {
   rpc: 'https://rpc.orai.io',
   rest: 'https://lcd.orai.io',
   chainId: 'Oraichain',
@@ -618,6 +428,14 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDecimals: 9,
       coinGeckoId: 'the-open-network',
       coinImageUrl: 'https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png?1696517498'
+    },
+    {
+      coinDenom: 'PEPE',
+      coinGeckoId: 'pepe',
+      coinMinimalDenom: PEPE_ORAICHAIN_DENOM,
+      bridgeTo: ['0x38', '0x01'],
+      coinDecimals: 6,
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/29850/standard/pepe-token.jpeg?1696528776'
     }
     // {
     //   coinDenom: 'ATOM-CW20',
@@ -687,7 +505,39 @@ export const OraiBTCBridgeNetwork = {
 };
 
 const bitcoinNetwork = bitcoinMainnet;
-export const chainInfos: CustomChainInfo[] = [
+const oraibtcNetwork = {
+  rpc: 'https://btc.rpc.orai.io',
+  rest: 'https://btc.lcd.orai.io/',
+  chainId: 'oraibtc-mainnet-1' as any,
+  chainName: 'OraiBTC' as any,
+  networkType: 'cosmos',
+  bip44: {
+    coinType: 118
+  },
+  Icon: BitcoinIcon,
+  IconLight: BitcoinIcon,
+  bech32Config: defaultBech32Config('oraibtc'),
+  feeCurrencies: [OraiBTCToken],
+  currencies: [
+    {
+      coinDenom: 'BTC',
+      coinMinimalDenom: 'uoraibtc',
+      coinDecimals: 6,
+      coinGeckoId: 'bitcoin',
+      bridgeTo: ['Oraichain'],
+      Icon: BitcoinIcon,
+      IconLight: BitcoinIcon
+    }
+  ]
+};
+
+export const chainInfosWithSdk = [...customChainInfos, bitcoinNetwork, oraibtcNetwork];
+export const chainInfos = mapListWithIcon(chainInfosWithSdk, chainIcons, 'chainId');
+
+/**
+ * @deprecated
+ */
+export const chainInfosOld: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
   bitcoinNetwork,
@@ -822,6 +672,24 @@ export const chainInfos: CustomChainInfo[] = [
         coinGeckoId: 'oraidex',
         prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         coinImageUrl: 'https://i.ibb.co/VmMJtf7/oraix.png'
+      },
+      {
+        coinDenom: 'PEPE',
+        coinMinimalDenom: ORAI_BRIDGE_EVM_DENOM_PREFIX + PEPE_BSC_CONTRACT,
+        bridgeNetworkIdentifier: '0x38',
+        coinDecimals: 18,
+        coinGeckoId: 'pepe',
+        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
+        coinImageUrl: 'https://assets.coingecko.com/coins/images/29850/standard/pepe-token.jpeg?1696528776'
+      },
+      {
+        coinDenom: 'PEPE',
+        coinMinimalDenom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + PEPE_ETH_CONTRACT,
+        bridgeNetworkIdentifier: '0x01',
+        coinDecimals: 18,
+        coinGeckoId: 'pepe',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        coinImageUrl: 'https://assets.coingecko.com/coins/images/29850/standard/pepe-token.jpeg?1696528776'
       }
     ]
   },
@@ -911,8 +779,8 @@ export const chainInfos: CustomChainInfo[] = [
   {
     rpc: 'https://btc.rpc.orai.io',
     rest: 'https://btc.lcd.orai.io/',
-    chainId: 'oraibtc-mainnet-1',
-    chainName: 'OraiBTC',
+    chainId: 'oraibtc-mainnet-1' as any,
+    chainName: 'OraiBTC' as any,
     networkType: 'cosmos',
     bip44: {
       coinType: 118
@@ -1291,6 +1159,15 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
         Icon: BnbIcon
+      },
+      {
+        coinDenom: 'PEPE',
+        coinMinimalDenom: 'bep20_pepe',
+        contractAddress: PEPE_BSC_CONTRACT,
+        coinDecimals: 18,
+        coinGeckoId: 'pepe',
+        bridgeTo: ['Oraichain'],
+        coinImageUrl: 'https://assets.coingecko.com/coins/images/29850/standard/pepe-token.jpeg?1696528776'
       }
     ]
   },
@@ -1331,4 +1208,4 @@ export const evmChains = chainInfos.filter(
   (c) => c.networkType === 'evm' && c.bip44.coinType === 60 && c.chainId !== '0x1ae6'
 );
 
-export const btcChains = chainInfos.filter((c) => c.networkType === 'bitcoin');
+export const btcChains = chainInfos.filter((c) => c.networkType === ('bitcoin' as any));

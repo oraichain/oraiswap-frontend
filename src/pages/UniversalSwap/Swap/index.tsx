@@ -286,8 +286,7 @@ const SwapComponent: React.FC<{
 
       if (isSpecialFromCoingecko && originalFromToken.chainId === 'Oraichain') {
         const tokenInfo = getTokenOnOraichain(originalFromToken.coinGeckoId);
-        const IBC_DECIMALS = 18;
-        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
+        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, true);
         const [nativeAmount, cw20Amount] = await Promise.all([
           window.client.getBalance(oraiAddress, fromTokenInOrai.denom),
           window.client.queryContractSmart(tokenInfo.contractAddress, {
@@ -560,30 +559,36 @@ const SwapComponent: React.FC<{
   const generateRatioComp = () => {
     const getClassRatio = () => {
       let classRatio = '';
+      if (averageSimulateData && !averageSimulateData?.displayAmount) return classRatio;
       if (waringImpactBiggerFive) classRatio = 'ratio-five';
       if (waringImpactBiggerTen) classRatio = 'ratio-ten';
       return classRatio;
     };
 
     return (
-      <div className={cx('ratio', getClassRatio())} onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}>
-        <span className={cx('text')}>
-          {waringImpactBiggerFive && <WarningIcon />}
-          {`1 ${originalFromToken.name} ≈ ${
-            averageRatio
-              ? numberWithCommas(averageRatio.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
-                  maximumFractionDigits: 6
-                })
-              : averageSimulateData
-              ? numberWithCommas(averageSimulateData?.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
-                  maximumFractionDigits: 6
-                })
-              : '0'
-          }
+      <div>
+        <div className={cx('ratio', getClassRatio())} onClick={() => isRoutersSwapData && setOpenRoutes(!openRoutes)}>
+          <span className={cx('text')}>
+            {waringImpactBiggerFive && <WarningIcon />}
+            {`1 ${originalFromToken.name} ≈ ${
+              averageRatio
+                ? numberWithCommas(averageRatio.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
+                    maximumFractionDigits: 6
+                  })
+                : averageSimulateData
+                ? numberWithCommas(averageSimulateData?.displayAmount / SIMULATE_INIT_AMOUNT, undefined, {
+                    maximumFractionDigits: 6
+                  })
+                : '0'
+            }
       ${originalToToken.name}`}
-        </span>
-        {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && (
-          <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
+          </span>
+          {!!isRoutersSwapData && !isPreviousSimulate && (
+            <img src={!openRoutes ? DownArrowIcon : UpArrowIcon} alt="arrow" />
+          )}
+        </div>
+        {averageSimulateData && !averageSimulateData?.displayAmount && (
+          <div className={styles.routeNotFound}>Route not found!</div>
         )}
       </div>
     );
@@ -658,48 +663,51 @@ const SwapComponent: React.FC<{
               {generateRatioComp()}
             </div>
           </div>
-          {!!isRoutersSwapData && useAlphaSmartRouter && !isPreviousSimulate && !!routersSwapData?.routes.length && (
-            <div className={cx('smart', !openRoutes ? 'hidden' : '')}>
-              <div className={cx('smart-router')}>
-                {routersSwapData?.routes.map((route, ind) => {
-                  const volumn = Math.round(
-                    new BigDecimal(route.returnAmount).div(routersSwapData.amount).mul(100).toNumber()
-                  );
-                  return (
-                    <div key={ind} className={cx('smart-router-item')}>
-                      <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
-                      {route.paths.map((path, i, acc) => {
-                        const { NetworkFromIcon, NetworkToIcon } = getPathInfo(path, chainIcons, assets);
-                        return (
-                          <React.Fragment key={i}>
-                            <div className={cx('smart-router-item-line')}>
-                              <div className={cx('smart-router-item-line-detail')} />
-                            </div>
-                            <div
-                              className={cx('smart-router-item-pool')}
-                              onClick={() => setOpenSmartRoute(!openSmartRoute)}
-                            >
-                              <div
-                                className={cx('smart-router-item-pool-wrap')}
-                                onClick={() => setIndSmartRoute([ind, i])}
-                              >
-                                <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkFromIcon />}</div>
-                                <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
-                              </div>
-                            </div>
-                            {i === acc.length - 1 && (
+          {!!isRoutersSwapData &&
+            !!averageSimulateData?.displayAmount &&
+            !isPreviousSimulate &&
+            !!routersSwapData?.routes.length && (
+              <div className={cx('smart', !openRoutes ? 'hidden' : '')}>
+                <div className={cx('smart-router')}>
+                  {routersSwapData?.routes.map((route, ind) => {
+                    const volumn = Math.round(
+                      new BigDecimal(route.returnAmount).div(routersSwapData.amount).mul(100).toNumber()
+                    );
+                    return (
+                      <div key={ind} className={cx('smart-router-item')}>
+                        <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                        {route.paths.map((path, i, acc) => {
+                          const { NetworkFromIcon, NetworkToIcon } = getPathInfo(path, chainIcons, assets);
+                          return (
+                            <React.Fragment key={i}>
                               <div className={cx('smart-router-item-line')}>
                                 <div className={cx('smart-router-item-line-detail')} />
                               </div>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                      <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
-                    </div>
-                  );
-                })}
-                {/* <div className={cx('smart-router-price-impact')}>
+                              <div
+                                className={cx('smart-router-item-pool')}
+                                onClick={() => setOpenSmartRoute(!openSmartRoute)}
+                              >
+                                <div
+                                  className={cx('smart-router-item-pool-wrap')}
+                                  onClick={() => setIndSmartRoute([ind, i])}
+                                >
+                                  <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkFromIcon />}</div>
+                                  <div className={cx('smart-router-item-pool-wrap-img')}>{<NetworkToIcon />}</div>
+                                </div>
+                              </div>
+                              {i === acc.length - 1 && (
+                                <div className={cx('smart-router-item-line')}>
+                                  <div className={cx('smart-router-item-line-detail')} />
+                                </div>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                        <div className={cx('smart-router-item-volumn')}>{volumn.toFixed(0)}%</div>
+                      </div>
+                    );
+                  })}
+                  {/* <div className={cx('smart-router-price-impact')}>
                   <div className={cx('smart-router-price-impact-title')}>Price Impact:</div>
                   <div
                     className={cx(
@@ -715,9 +723,9 @@ const SwapComponent: React.FC<{
                     </span>
                   </div>
                 </div> */}
+                </div>
               </div>
-            </div>
-          )}
+            )}
           <div className={cx('to')}>
             <div className={cx('input-wrapper')}>
               <InputSwap

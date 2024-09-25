@@ -24,6 +24,7 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
 import { Position as PositionsNode } from 'gql/graphql';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
+import { numberWithCommas } from 'helper/format';
 
 export interface InitPositionData {
   poolKeyData: PoolKey;
@@ -97,6 +98,36 @@ export const formatNumbers =
 
     return num < 0 && threshold ? '-' + formatted : formatted;
   };
+
+export function formatMoney(num) {
+  if (num === 0) {
+    return num.toString();
+  }
+
+  let numStr = num.toString();
+
+  const decimalIndex = numStr.indexOf('.');
+
+  if (decimalIndex === -1) return numStr;
+
+  const integerPart = numStr.slice(0, decimalIndex);
+  const decimalPart = numStr.slice(decimalIndex + 1);
+
+  let decimalsToShow;
+  if (num >= 1) {
+    decimalsToShow = 1;
+  } else if (num < 0.0001) {
+    decimalsToShow = 6;
+  } else {
+    decimalsToShow = 4;
+  }
+
+  const formattedDecimalPart = decimalPart.slice(0, decimalsToShow);
+  let stringArr = `.${formattedDecimalPart}`;
+  if (!formattedDecimalPart || formattedDecimalPart === '0') stringArr = '';
+
+  return `${numberWithCommas(Number(integerPart), undefined)}${stringArr}`;
+}
 
 export const showPrefix = (nr: number, config: PrefixConfig = defaultPrefixConfig): string => {
   const abs = Math.abs(nr);
@@ -326,10 +357,12 @@ export const executeMultiple = async (msg: any, address: string): Promise<string
   return result.transactionHash;
 };
 
-export const genMsgAllowance = (datas: {
-  token: string;
-  amount: bigint;
-}[]) => {
+export const genMsgAllowance = (
+  datas: {
+    token: string;
+    amount: bigint;
+  }[]
+) => {
   // const MAX_ALLOWANCE_AMOUNT = '18446744073709551615';
   const spender = network.pool_v3;
 
@@ -374,7 +407,7 @@ export const createPoolMsg = (poolKey: PoolKey, initSqrtPrice: string) => {
       }
     }
   };
-}
+};
 
 export const createPositionTx = async (
   poolKey: PoolKey,
@@ -428,7 +461,7 @@ export const createPositionMsg = (
       }
     }
   };
-}
+};
 
 export const createPositionWithNativeTx = async (
   poolKey: PoolKey,
@@ -518,7 +551,7 @@ export const createPositionWithNativeMsg = (
     },
     funds: fund
   };
-}
+};
 
 export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
   const fmtFeeClaimData = feeClaimData.reduce((acc, cur) => {
