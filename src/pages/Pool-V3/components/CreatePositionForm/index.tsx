@@ -41,7 +41,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TooltipHover from 'components/TooltipHover';
 import ZappingText from 'components/Zapping';
 import { network } from 'config/networks';
-import { getIcon, getTransactionUrl } from 'helper';
+import { getIcon, getTransactionUrl, minimize } from 'helper';
 import { numberWithCommas } from 'helper/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -196,7 +196,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const zapUsd = (extendPrices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0)).toFixed(6);
   const xUsd =
     zapInResponse &&
-    (extendPrices?.[tokenFrom?.coinGeckoId] * (Number(zapInResponse.amountX || 0) / 10 ** tokenFrom.decimals)).toFixed(6);
+    (extendPrices?.[tokenFrom?.coinGeckoId] * (Number(zapInResponse.amountX || 0) / 10 ** tokenFrom.decimals)).toFixed(
+      6
+    );
   const yUsd =
     zapInResponse &&
     (extendPrices?.[tokenTo?.coinGeckoId] * (Number(zapInResponse.amountY || 0) / 10 ** tokenTo.decimals)).toFixed(6);
@@ -1112,8 +1114,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             <div className={styles.currentPrice}>
               <p>Current Price:</p>
               <p>
-                1 {tokenFrom.name} ={' '}
-                {numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: tokenTo.decimals })} {tokenTo.name}
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `${`1 ${tokenFrom.name} = `}${minimize(midPrice.x)} ${tokenTo.name}`
+                  }}
+                />
               </p>
             </div>
 
