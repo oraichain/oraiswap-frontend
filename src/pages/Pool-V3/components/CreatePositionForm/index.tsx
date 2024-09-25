@@ -122,7 +122,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   const endRef = useRef(null);
 
-  const debounceZapAmount = useDebounce(zapAmount, 800);
+  const debounceZapAmount = useDebounce(zapAmount, 1000);
 
   const { data: prices } = useCoinGeckoPrices();
   const { poolList, poolPrice: extendPrices } = useGetPoolList(prices);
@@ -1353,7 +1353,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   <div
                     className={cx(
                       'valueImpact',
-                      `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
+                      `${zapImpactPrice >= 10 ? 'valueImpact-high' : zapImpactPrice >= 5 ? 'valueImpact-medium' : ''}`
                     )}
                   >
                     <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 }) ?? 0}%</span>
