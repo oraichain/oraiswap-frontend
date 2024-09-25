@@ -1,4 +1,4 @@
-import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay, PEPE_ORAICHAIN_EXT_DENOM, USDC_CONTRACT } from '@oraichain/oraidex-common';
 import Loading from 'assets/gif/loading.gif';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
@@ -30,6 +30,7 @@ import isEqual from 'lodash/isEqual';
 import { Button } from 'components/Button';
 import { isMobile } from '@walletconnect/browser-utils';
 import useOnClickOutside from 'hooks/useOnClickOutside';
+import useTemporaryConfigReducer from 'hooks/useTemporaryConfigReducer';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -40,6 +41,7 @@ export enum PoolColumnHeader {
 
 const PoolList = ({ search }) => {
   const { data: price } = useCoinGeckoPrices();
+  const [isShowPepeOnTop] = useTemporaryConfigReducer('customBanner');
   const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
@@ -49,7 +51,7 @@ const PoolList = ({ search }) => {
   const sortRef = useRef();
 
   const [sort, setSort] = useState<Record<PoolColumnHeader, SortType>>({
-    [PoolColumnHeader.LIQUIDITY]: SortType.DESC
+    [PoolColumnHeader.VOLUME]: SortType.DESC
   } as Record<PoolColumnHeader, SortType>);
 
   const theme = useTheme();
@@ -143,6 +145,19 @@ const PoolList = ({ search }) => {
         };
       })
       .sort((a, b) => {
+        if (isShowPepeOnTop) {
+          const PepePoolKey = `${PEPE_ORAICHAIN_EXT_DENOM}-${USDC_CONTRACT}-3000000000-100`;
+          // const PepePoolKey =
+          //   'factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/extPEPE-orai15un8msx3n5zf9ahlxmfeqd2kwa5wm0nrpxer304m9nd5q6qq0g6sku5pdd-3000000000-100';
+          // FIXME: push pepe/usdc on top
+          if (a.poolKey === PepePoolKey && b.poolKey !== PepePoolKey) {
+            return -1; // Push PepePoolKey elements to the top
+          }
+          if (a.poolKey !== PepePoolKey && b.poolKey === PepePoolKey) {
+            return 1; // Keep non-'a' elements below 'a'
+          }
+        }
+
         switch (sortField) {
           case PoolColumnHeader.LIQUIDITY:
             return (
@@ -199,7 +214,7 @@ const PoolList = ({ search }) => {
   useEffect(() => {
     if (Object.values(poolLiquidities).length > 0) {
       sortDataSource({
-        [PoolColumnHeader.LIQUIDITY]: SortType.DESC
+        [PoolColumnHeader.VOLUME]: SortType.DESC
       } as any);
     }
   }, [poolLiquidities]);

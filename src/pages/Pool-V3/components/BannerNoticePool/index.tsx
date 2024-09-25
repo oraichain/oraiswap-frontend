@@ -6,13 +6,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
 
 import { PEPE_ORAICHAIN_EXT_DENOM, USDC_CONTRACT } from '@oraichain/oraidex-common';
+import useTemporaryConfigReducer from 'hooks/useTemporaryConfigReducer';
 
 const url = `/pools-v3/${encodeURIComponent(PEPE_ORAICHAIN_EXT_DENOM)}-${encodeURIComponent(
   USDC_CONTRACT
 )}-3000000000-100`;
 
 const BannerNoticePool = () => {
-  const [open, setOpen] = useState(true);
+  const [isShowBanner] = useTemporaryConfigReducer('customBanner');
+  const [open, setOpen] = useState(!!isShowBanner);
   const navigate = useNavigate();
 
   if (!open) {
