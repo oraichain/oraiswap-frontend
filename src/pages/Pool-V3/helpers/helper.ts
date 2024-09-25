@@ -179,12 +179,8 @@ export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, y
 
 export const calcYPerXPriceBySqrtPrice = (sqrtPrice: bigint, xDecimal: number, yDecimal: number): number => {
   const sqrt = +printBigint(sqrtPrice, Number(PRICE_SCALE));
-
   const proportion = sqrt * sqrt;
-
-  console.log({proportion})
-
-  return proportion / 10 ** (xDecimal - yDecimal);
+  return proportion / 10 ** (yDecimal - xDecimal);
 };
 
 export const calculateTokenAmounts = (pool: Pool, position: Position): AmountDeltaResult => {

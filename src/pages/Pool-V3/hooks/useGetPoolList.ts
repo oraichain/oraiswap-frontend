@@ -24,7 +24,6 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
   });
 
   useEffect(() => {
-    // console.log("set pool list again");
     if (poolList.length === 0 || Object.keys(coingeckoPrices).length === 0) return;
 
     if (poolList) {

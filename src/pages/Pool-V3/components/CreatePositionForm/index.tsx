@@ -166,7 +166,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
     const tokenXDecimals = isXToY ? tokenFrom?.decimals ?? 6 : tokenTo?.decimals ?? 6;
     const tokenYDecimals = isXToY ? tokenTo?.decimals ?? 6 : tokenFrom?.decimals ?? 6;
-    console.log({ tokenXDecimals, tokenYDecimals });
 
     const tickIndex = nearestTickIndex(
       priceInfo.startPrice,
@@ -175,7 +174,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       tokenXDecimals,
       tokenYDecimals
     );
-    console.log(tickIndex);
 
     return {
       index: tickIndex,
@@ -688,9 +686,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   }, [isPoolExist, showModal]);
 
   useEffect(() => {
-    // TODO:
-    const tick = Math.round(logBase(8 * 10 ** -18, 1.0001));
-    console.log({ tick });
     if (poolInfo) {
       setMidPrice({
         index: poolInfo.pool.current_tick_index,
@@ -924,12 +919,12 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
       const result = await zapper.processZapInPositionLiquidity({
         pool: poolData,
-        tokenIn: tokenZap as any,
+        tokenIn: tokenZap,
         amountIn: amountIn,
         lowerTick,
         upperTick,
-        tokenX: tokenFrom as any,
-        tokenY: tokenTo as any
+        tokenX: tokenFrom,
+        tokenY: tokenTo
       });
       setSwapFee(result.swapFee * 100);
       const inputUsd = extendPrices?.[tokenZap.coinGeckoId] * Number(amountAfterFee);

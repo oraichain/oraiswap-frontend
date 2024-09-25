@@ -175,7 +175,6 @@ export const nearestTickIndex = (
   yDecimal: number
 ) => {
   const tick = getTickAtSqrtPriceFromBalance(price, spacing, isXtoY, xDecimal, yDecimal);
-  // console.log({tick});
 
   return nearestSpacingMultiplicity(tick, spacing);
 };
