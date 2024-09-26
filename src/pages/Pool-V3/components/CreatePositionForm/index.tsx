@@ -3,6 +3,7 @@ import {
   BigDecimal,
   CW20_DECIMALS,
   MULTICALL_CONTRACT,
+  oraichainTokens,
   toAmount,
   toDisplay,
   TokenItemType,
@@ -13,7 +14,6 @@ import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { FeeTier, PoolWithPoolKey, TokenAmount } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import {
   calculateSqrtPrice,
-  extractAddress,
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
@@ -25,12 +25,11 @@ import {
   RouteNotFoundError,
   SpamTooManyRequestsError,
   ZapConsumer,
-  ZapInLiquidityResponse,
-  ZapInResult
+  ZapInLiquidityResponse
 } from '@oraichain/oraiswap-v3';
+import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg';
-import { ReactComponent as ErrorIcon } from 'assets/icons/error-fill-icon.svg';
 import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
@@ -40,20 +39,18 @@ import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TooltipHover from 'components/TooltipHover';
-import { oraichainTokens } from 'config/bridgeTokens';
+import ZappingText from 'components/Zapping';
 import { network } from 'config/networks';
-import { getIcon, getTransactionUrl } from 'helper';
+import { getIcon, getTransactionUrl, minimize } from 'helper';
 import { numberWithCommas } from 'helper/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useDebounce } from 'hooks/useDebounce';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
-import {
-  calculateTokenAmountsWithSlippage,
-  calcYPerXPriceBySqrtPrice,
-  InitPositionData
-} from 'pages/Pool-V3/helpers/helper';
+import mixpanel from 'mixpanel-browser';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
+import { calculateTokenAmountsWithSlippage, InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
@@ -72,6 +69,7 @@ import {
   extractDenom,
   getConcentrationArray,
   handleGetCurrentPlotTicks,
+  logBase,
   nearestTickIndex,
   PositionTokenBlock,
   printBigint,
@@ -80,9 +78,7 @@ import {
 } from '../PriceRangePlot/utils';
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
-import ZappingText from 'components/Zapping';
-import mixpanel from 'mixpanel-browser';
-import { set } from 'lodash';
+import { PRICE_SCALE } from 'libs/contractSingleton';
 
 export type PriceInfo = {
   startPrice: number;
@@ -126,10 +122,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   const endRef = useRef(null);
 
-  const debounceZapAmount = useDebounce(zapAmount, 800);
+  const debounceZapAmount = useDebounce(zapAmount, 1000);
 
   const { data: prices } = useCoinGeckoPrices();
-  const { poolList } = useGetPoolList(prices);
+  const { poolList, poolPrice: extendPrices } = useGetPoolList(prices);
 
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -195,15 +191,24 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [amountTo, setAmountTo] = useState<number | string>();
   const [amountFrom, setAmountFrom] = useState<number | string>();
 
-  const fromUsd = (prices?.[tokenFrom?.coinGeckoId] * Number(amountFrom || 0)).toFixed(6);
-  const toUsd = (prices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
-  const zapUsd = (prices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0)).toFixed(6);
+  const fromUsd = extendPrices?.[tokenFrom?.coinGeckoId]
+    ? (extendPrices[tokenFrom.coinGeckoId] * Number(amountFrom || 0)).toFixed(6)
+    : '0';
+  const toUsd = extendPrices?.[tokenTo?.coinGeckoId]
+    ? (extendPrices[tokenTo.coinGeckoId] * Number(amountTo || 0)).toFixed(6)
+    : '0';
+  const zapUsd = extendPrices?.[tokenZap?.coinGeckoId]
+    ? (extendPrices[tokenZap.coinGeckoId] * Number(zapAmount || 0)).toFixed(6)
+    : '0';
+
   const xUsd =
     zapInResponse &&
-    (prices?.[tokenFrom?.coinGeckoId] * (Number(zapInResponse.amountX || 0) / 10 ** tokenFrom.decimals)).toFixed(6);
+    (extendPrices?.[tokenFrom?.coinGeckoId] * (Number(zapInResponse.amountX || 0) / 10 ** tokenFrom.decimals)).toFixed(
+      6
+    );
   const yUsd =
     zapInResponse &&
-    (prices?.[tokenTo?.coinGeckoId] * (Number(zapInResponse.amountY || 0) / 10 ** tokenTo.decimals)).toFixed(6);
+    (extendPrices?.[tokenTo?.coinGeckoId] * (Number(zapInResponse.amountY || 0) / 10 ** tokenTo.decimals)).toFixed(6);
 
   const [swapFee, setSwapFee] = useState<number>(1.5);
   const [zapFee, setZapFee] = useState<number>(1);
@@ -693,9 +698,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     if (poolInfo) {
       setMidPrice({
         index: poolInfo.pool.current_tick_index,
-        x:
-          calcYPerXPriceBySqrtPrice(BigInt(poolInfo.pool.sqrt_price), tokenFrom.decimals, tokenTo.decimals) **
-          (isXtoY ? 1 : -1)
+        x: calcPrice(Number(poolInfo.pool.current_tick_index), true, tokenFrom.decimals, tokenTo.decimals)
       });
     }
   }, [poolInfo, isXtoY, tokenFrom, tokenTo]);
@@ -896,7 +899,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-    } catch (error) { }
+    } catch (error) {
+      console.error('Error handleSimulateZapIn fee:', error);
+    }
 
     try {
       const amountAfterFee = Number(zapAmount) * (1 - zapFee);
@@ -933,16 +938,16 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
         tokenY: tokenTo
       });
       setSwapFee(result.swapFee * 100);
-      const inputUsd = prices?.[tokenZap.coinGeckoId] * Number(amountAfterFee);
+      const inputUsd = extendPrices?.[tokenZap.coinGeckoId] * Number(amountAfterFee);
       const outputUsd =
-        prices?.[tokenFrom.coinGeckoId] * (Number(result.amountX) / 10 ** tokenFrom.decimals) +
-        prices?.[tokenTo.coinGeckoId] * (Number(result.amountY) / 10 ** tokenTo.decimals);
+        extendPrices?.[tokenFrom.coinGeckoId] * (Number(result.amountX) / 10 ** tokenFrom.decimals) +
+        extendPrices?.[tokenTo.coinGeckoId] * (Number(result.amountY) / 10 ** tokenTo.decimals);
 
       const priceImpact = (Math.abs(inputUsd - outputUsd) / inputUsd) * 100;
       const matchRate = 100 - priceImpact;
 
-      const swapFeeInUsd = amountAfterFee * result.swapFee * prices?.[tokenZap.coinGeckoId];
-      const zapFeeInUsd = (Number(zapAmount) - amountAfterFee) * prices?.[tokenZap.coinGeckoId];
+      const swapFeeInUsd = amountAfterFee * result.swapFee * extendPrices?.[tokenZap.coinGeckoId];
+      const zapFeeInUsd = (Number(zapAmount) - amountAfterFee) * extendPrices?.[tokenZap.coinGeckoId];
       const totalFeeInUsd = swapFeeInUsd + zapFeeInUsd;
 
       setTotalFee(totalFeeInUsd);
@@ -956,11 +961,13 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError('The route swap found has no liquidity, can\'t swap');
+        setZapError('No liquidity found for the swap route. Cannot proceed with the swap.');
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
+      } else {
+        console.error('Unexpected error during zap simulation:', error);
+        setZapError('An unexpected error occurred, please try again later.');
       }
-
     } finally {
       setSimulating(false);
       setLoading(false);
@@ -1119,8 +1126,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             <div className={styles.currentPrice}>
               <p>Current Price:</p>
               <p>
-                1 {tokenFrom.name} ={' '}
-                {numberWithCommas(midPrice.x, undefined, { maximumFractionDigits: tokenTo.decimals })} {tokenTo.name}
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `${`1 ${tokenFrom.name} = `}${minimize(midPrice.x)} ${tokenTo.name}`
+                  }}
+                />
               </p>
             </div>
 
@@ -1355,10 +1365,10 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   <div
                     className={cx(
                       'valueImpact',
-                      `${zapImpactPrice >= 10 ? 'impact-medium' : zapImpactPrice >= 5 ? 'impact-high' : ''}`
+                      `${zapImpactPrice >= 10 ? 'valueImpact-high' : zapImpactPrice >= 5 ? 'valueImpact-medium' : ''}`
                     )}
                   >
-                    <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 })}%</span>
+                    <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 }) ?? 0}%</span>
                   </div>
                 </div>
                 <div className={styles.item}>
@@ -1393,7 +1403,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     <span>Total Fee</span>
                   </div>
                   <div className={styles.value}>
-                    <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 4 })}</span>
+                    <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 4 }) ?? 0}</span>
                   </div>
                 </div>
                 <div className={styles.item}>
@@ -1401,7 +1411,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     <span>Match Rate</span>
                   </div>
                   <div className={styles.value}>
-                    <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 })} %</span>
+                    <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 }) ?? 0} %</span>
                   </div>
                 </div>
               </div>

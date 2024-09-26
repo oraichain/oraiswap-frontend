@@ -1,13 +1,13 @@
 import {
+  BigDecimal,
   NetworkChainId,
+  ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   TokenItemType,
   network,
-  oraichainTokens,
-  toDisplay,
   toAmount,
-  BigDecimal,
-  ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-  ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  // oraichainTokens,
+  toDisplay,
   PEPE_ORAICHAIN_EXT_DENOM,
   PEPE_BSC_CONTRACT,
   PEPE_ETH_CONTRACT
@@ -15,6 +15,7 @@ import {
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { handleSimulateSwap, isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
+import { oraichainTokens } from 'config/bridgeTokens';
 import { EVM_CHAIN_ID } from 'helper';
 import { getRouterConfig } from 'pages/UniversalSwap/Swap/hooks';
 import { useEffect, useState } from 'react';
