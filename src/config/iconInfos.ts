@@ -162,7 +162,7 @@ export const tokensIconInfos: TokenIcon[] = [
     IconLight: CatIcon
   },
   {
-    coinGeckoId: 'hamster-kombat',
+    coinGeckoId: 'hamster-kombat' as any,
     Icon: HmstrIcon,
     IconLight: HmstrIcon
   }
