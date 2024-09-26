@@ -4374,7 +4374,7 @@
     react-use "^17.4.0"
     react-use-websocket "^4.5.0"
 
-"@oraichain/oraidex-common@^1.0.91", "@oraichain/oraidex-common@^1.1.20":
+"@oraichain/oraidex-common@^1.0.91", "@oraichain/oraidex-common@^1.1.21":
   version "1.1.21"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.21.tgz#12c778191146bb05511446e7098795cd45cc59c8"
   integrity sha512-/yxtjTTagTyfCmmnULpt3QfGcSYtRUz6iy/01kvNW/XtKQrCNNAxsotfKmn1LUOTWVkKD1jxvPpcRWeswGgX9g==
@@ -4434,13 +4434,13 @@
     tronweb "5.3.2"
     ts-protoc-gen "^0.15.0"
 
-"@oraichain/oraiswap-v3@0.1.18":
-  version "0.1.18"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.18.tgz#bc551426e1dc8b9095de56f00ea45bffaaf76596"
-  integrity sha512-ZOWr4+IKzfytAMqsZzauijiigy5mnvoLfi0TYbVsOsfCusky61NAsXqwwfsnQ6SizafzLiJLvYtFKYzMt5enww==
+"@oraichain/oraiswap-v3@0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.19.tgz#2e23236d0fa7a56c32c1f2d05278de3c3780b278"
+  integrity sha512-wLdGtzEl9WpxdHZwqiFGH/R5ULAYQlCyk/o6Wjbr7be5+c/efmgCQ/AQ+2klWNVF0K2DP9BkJInXedhlgFcCBg==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
-    "@oraichain/oraidex-common" "^1.1.20"
+    "@oraichain/oraidex-common" "^1.1.21"
     "@oraichain/oraidex-contracts-sdk" "^1.0.52"
 
 "@oraichain/wasm-json-toolkit@^1.0.24":
