@@ -4396,10 +4396,10 @@
     ethers "^5.0.15"
     tronweb "6.0.0-beta.4"
 
-"@oraichain/oraidex-common@^1.1.11":
-  version "1.1.17"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.17.tgz#60e038c8c16a52706f3af2704010980638de1b81"
-  integrity sha512-mYamNz3I87SjYUrU5k/o6ZnZzvH8WaKVRAX02l9+DLwNYOFGC+0QpRzud3VFGJlMeQrBzTuv3TPLEUQZRS9Muw==
+"@oraichain/oraidex-common@^1.1.18":
+  version "1.1.19"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.19.tgz#4aa4a0789ffe151d1cefe3e7c1fd2899dd6c6519"
+  integrity sha512-O4OLU+5fBOZr9Zq6v9veqJ6t1z3/Ez4AUIQTcJ8HN/f+2uc27ZG/V4CQ02BW0Snh2+HydvLpsmIGKPQ3C/RDxw==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"

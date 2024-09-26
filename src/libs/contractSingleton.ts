@@ -39,8 +39,7 @@ import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions'
 import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD, toDisplay } from '@oraichain/oraidex-common';
 import { CoinGeckoId } from '@oraichain/oraidex-common';
 import { oraichainTokens } from '@oraichain/oraidex-common';
-import { calculateTokenAmounts } from 'pages/Pool-V3/helpers/helper';
-import { getFeeDailyData, getPools } from 'rest/graphClient';
+import { getPools } from 'rest/graphClient';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { extractAddress } from 'pages/Pool-V3/helpers/format';
 

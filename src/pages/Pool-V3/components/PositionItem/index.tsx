@@ -38,7 +38,7 @@ import { getCosmWasmClient } from 'libs/cosmjs';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
-import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimuate';
+import { useGetIncentiveSimulate } from 'pages/Pool-V3/hooks/useGetIncentiveSimulate';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -53,7 +53,6 @@ const PositionItem = ({ position }) => {
   const theme = useTheme();
   const ref = useRef();
   const { data: price } = useCoinGeckoPrices();
-  const navigate = useNavigate();
 
   const {
     min,

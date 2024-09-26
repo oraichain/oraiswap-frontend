@@ -246,7 +246,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const res = await zapper.processZapOutPositionLiquidity({
         owner: walletAddress,
         tokenId: position.token_id,
-        tokenOut: tokenZap as any,
+        tokenOut: tokenZap,
         zapFee: zapFee
       });
 
@@ -283,9 +283,12 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError("The route swap found has no liquidity, can't swap");
+        setZapError("No liquidity found for the swap route. Cannot proceed with the swap.");
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
+      } else {
+        console.error('Unexpected error during zap simulation:', error);
+        setZapError('An unexpected error occurred, please try again later.');
       }
     } finally {
       setSimulating(false);

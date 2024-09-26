@@ -15,20 +15,12 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
     isLoading: isLoadingGetPoolList
   } = useQuery<PoolWithPoolKey[]>(['pool-v3-pools', coingeckoPrices], () => getPoolList(), {
     refetchOnWindowFocus: false,
-    // placeholderData: [],
+    placeholderData: [],
     // cacheTime: 5 * 60 * 1000,
-    initialData: () => {
-      const state = localStorage.getItem('poolList');
-      return state ? JSON.parse(state) : [];
-    }
   });
 
   useEffect(() => {
     if (poolList.length === 0 || Object.keys(coingeckoPrices).length === 0) return;
-
-    if (poolList) {
-      localStorage.setItem('poolList', JSON.stringify(poolList));
-    }
 
     const newPrice = { ...coingeckoPrices };
     for (const pool of poolList) {
