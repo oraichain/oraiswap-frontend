@@ -1,11 +1,11 @@
 import { PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { extractAddress } from '@oraichain/oraiswap-v3';
 import { useQuery } from '@tanstack/react-query';
-import { oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import SingletonOraiswapV3 from 'libs/contractSingleton';
 import { useEffect, useState } from 'react';
 import { calcPrice } from '../components/PriceRangePlot/utils';
+import {oraichainTokens} from '@oraichain/oraidex-common';
+import { extractAddress } from '../helpers/format';
 
 export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
   const [prices, setPrices] = useState<CoinGeckoPrices<string>>(coingeckoPrices);
@@ -15,19 +15,17 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
     isLoading: isLoadingGetPoolList
   } = useQuery<PoolWithPoolKey[]>(['pool-v3-pools', coingeckoPrices], () => getPoolList(), {
     refetchOnWindowFocus: false,
-    placeholderData: []
-    // cacheTime: 5 * 60 * 1000
+    placeholderData: [],
+    // cacheTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {
-    // console.log("set pool list again");
     if (poolList.length === 0 || Object.keys(coingeckoPrices).length === 0) return;
 
     const newPrice = { ...coingeckoPrices };
     for (const pool of poolList) {
-      const tokenX = oraichainTokens.find((token) => extractAddress(token) === pool.pool_key.token_x);
-      const tokenY = oraichainTokens.find((token) => extractAddress(token) === pool.pool_key.token_y);
-
+      const tokenX = oraichainTokens.find((token) => extractAddress(token ) === pool.pool_key.token_x);
+      const tokenY = oraichainTokens.find((token) => extractAddress(token ) === pool.pool_key.token_y);
       if (!tokenX || !tokenY) continue;
       if (tokenX && !prices[tokenX.coinGeckoId]) {
         if (prices[tokenY.coinGeckoId]) {
@@ -46,7 +44,7 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
       }
     }
     setPrices(newPrice);
-  }, [poolList, coingeckoPrices]);
+  }, [poolList]);
 
   return {
     poolList,

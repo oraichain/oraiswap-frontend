@@ -10,13 +10,12 @@ import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
 import classNames from 'classnames';
-import { oraichainTokens } from 'config/bridgeTokens';
+import { oraichainTokens } from '@oraichain/oraidex-common';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import {
   calculateSqrtPrice,
-  extractAddress,
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
@@ -47,6 +46,7 @@ import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import { calculateTokenAmountsWithSlippage, calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
 import { numberWithCommas } from 'helper/format';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
 export type PriceInfo = {
   startPrice: number;

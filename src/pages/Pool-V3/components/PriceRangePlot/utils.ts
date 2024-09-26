@@ -133,6 +133,7 @@ export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, y
   const sqrt = +printBigint(calculateSqrtPrice(tickIndex), Number(PRICE_SCALE));
 
   const proportion = sqrt * sqrt;
+  
 
   return proportion / 10 ** (yDecimal - xDecimal);
 };
@@ -250,10 +251,6 @@ export const trimLeadingZeros = (amount: string): string => {
 };
 
 export const extractDenom = (tokenInfo: TokenItemType) => {
-  return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
-};
-
-export const extractAddress = (tokenInfo: TokenItemType) => {
   return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
 };
 
@@ -460,7 +457,7 @@ export async function handleGetCurrentPlotTicks({ poolKey, isXtoY, xDecimal, yDe
     const allTickmaps = await SingletonOraiswapV3.getFullTickmap(poolKey);
 
     const rawTicks = await SingletonOraiswapV3.getAllLiquidityTicks(poolKey, allTickmaps);
-    
+
     if (rawTicks.length === 0) {
       const data = createPlaceholderLiquidityPlot(isXtoY, 0, poolKey.fee_tier.tick_spacing, xDecimal, yDecimal);
       return data;

@@ -1,9 +1,8 @@
+import { TokenItemType } from '@oraichain/oraidex-common';
 import { PoolKey, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { oraichainTokens } from 'config/bridgeTokens';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { poolKeyToString } from 'libs/contractSingleton';
-import { TokenItemType } from '@oraichain/oraidex-common';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 
 export type PoolWithTokenInfo = PoolWithPoolKey & {
   FromTokenIcon: React.FunctionComponent<
@@ -71,3 +70,7 @@ export const parsePoolKeyString = (poolKey: string): PoolKey => {
     token_y: tokenY
   };
 };
+
+export function extractAddress(tokenInfo: TokenItemType) {
+  return tokenInfo.contractAddress ? tokenInfo.contractAddress : tokenInfo.denom;
+}

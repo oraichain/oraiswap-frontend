@@ -44,18 +44,6 @@ const useZap = () => {
           amount: zapAmount
         });
       }
-      console.log({ coins });
-
-      console.log({
-        zap_in_liquidity: {
-          asset_in: parseAsset(tokenZap, zapAmount),
-          minimum_liquidity: zapInResponse.minimumLiquidity.toString(),
-          pool_key: zapInResponse.poolKey,
-          routes: zapInResponse.routes,
-          tick_lower_index: zapInResponse.tickLowerIndex,
-          tick_upper_index: zapInResponse.tickUpperIndex
-        }
-      });
 
       // zapIn message
       msg.push({

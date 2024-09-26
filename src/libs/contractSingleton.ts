@@ -38,11 +38,10 @@ import Axios from 'axios';
 import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions';
 import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD, toDisplay } from '@oraichain/oraidex-common';
 import { CoinGeckoId } from '@oraichain/oraidex-common';
-import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRangePlot/utils';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { calculateTokenAmounts } from 'pages/Pool-V3/helpers/helper';
-import { getFeeDailyData, getPools } from 'rest/graphClient';
+import { oraichainTokens } from '@oraichain/oraidex-common';
+import { getPools } from 'rest/graphClient';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
   { fee: 100000000, tick_spacing: 1 },
@@ -798,8 +797,9 @@ export function simulateAprPosition(
 
   const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
   const tokenY = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_y);
-  const positionLiquidityUsdX = ((prices[tokenX.coinGeckoId] ?? 0) * Number(res.x)) / 10 ** tokenX.decimals;
-  const positionLiquidityUsdY = ((prices[tokenY.coinGeckoId] ?? 0) * Number(res.y)) / 10 ** tokenY.decimals;
+
+  const positionLiquidityUsdX = ((prices[tokenX?.coinGeckoId] ?? 0) * Number(res.x)) / 10 ** tokenX.decimals;
+  const positionLiquidityUsdY = ((prices[tokenY?.coinGeckoId] ?? 0) * Number(res.y)) / 10 ** tokenY.decimals;
   const totalPositionLiquidityUsd = positionLiquidityUsdX + positionLiquidityUsdY;
 
   for (const incentive of incentives) {
