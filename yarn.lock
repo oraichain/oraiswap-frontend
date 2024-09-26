@@ -4375,9 +4375,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.91", "@oraichain/oraidex-common@^1.1.6":
-  version "1.1.18"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.18.tgz#ef06939daabd7adf5023dd52ab39e040f64ca7d1"
-  integrity sha512-igH4pFjEB7q8bPEAJXhYa372kU05ZzxOe6C/vntegu0DUjGCJUmKE6ikCG2svs2VytkmEv2D9env70AFGXePEw==
+  version "1.1.19"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.19.tgz#4aa4a0789ffe151d1cefe3e7c1fd2899dd6c6519"
+  integrity sha512-O4OLU+5fBOZr9Zq6v9veqJ6t1z3/Ez4AUIQTcJ8HN/f+2uc27ZG/V4CQ02BW0Snh2+HydvLpsmIGKPQ3C/RDxw==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"
