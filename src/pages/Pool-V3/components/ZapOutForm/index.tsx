@@ -60,7 +60,7 @@ interface ZapOutFormProps {
   onCloseModal: () => void;
 }
 
-const TOKEN_ZAP = oraichainTokens.find((e) => extractAddress(e ) === USDT_CONTRACT);
+const TOKEN_ZAP = oraichainTokens.find((e) => extractAddress(e) === USDT_CONTRACT);
 
 const ZapOutForm: FC<ZapOutFormProps> = ({
   incentives,
@@ -227,7 +227,9 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-    } catch (error) {}
+    } catch (error) {
+      console.error('Error handleSimulateZapOut fee:', error);
+    }
 
     try {
       const zapper = new ZapConsumer({
@@ -283,7 +285,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError("No liquidity found for the swap route. Cannot proceed with the swap.");
+        setZapError('No liquidity found for the swap route. Cannot proceed with the swap.');
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
       } else {
