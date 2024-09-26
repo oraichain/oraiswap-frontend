@@ -116,8 +116,6 @@ export const getTickAtSqrtPriceFromBalance = (
   const minTick = getMinTick(spacing);
   const maxTick = getMaxTick(spacing);
 
-  const testPrice = calcPrice(isXtoY ? minTick : maxTick, isXtoY, xDecimal, yDecimal);
-
   const basePrice = Math.max(price, Number(calcPrice(isXtoY ? minTick : maxTick, isXtoY, xDecimal, yDecimal)));
   const primaryUnitsPrice = getPrimaryUnitsPrice(basePrice, isXtoY, Number(xDecimal), Number(yDecimal));
   const tick = Math.round(logBase(primaryUnitsPrice, 1.0001));

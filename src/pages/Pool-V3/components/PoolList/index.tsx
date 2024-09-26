@@ -83,7 +83,6 @@ const PoolList = ({ search }) => {
     (async () => {
       try {
         setLoading(true);
-        console.log({ theme, poolList, poolPrice });
         if (!poolList?.length) return;
         if (poolList.length > 0 && isEqual(prevPoolListRef.current, poolList)) return;
         const fmtPools = poolList.map(formatPoolDataCallback).filter((e) => e.isValid);
@@ -92,7 +91,6 @@ const PoolList = ({ search }) => {
         console.log('error: SingletonOraiswapV3 getPools', error);
       } finally {
         prevPoolListRef.current = poolList ?? [];
-        // console.log('prevPoolListRef.current', prevPoolListRef.current);
         prevPoolPriceRef.current = poolPrice ?? {};
         setLoading(false);
       }
