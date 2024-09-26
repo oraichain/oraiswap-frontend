@@ -27,6 +27,7 @@ import { ReactComponent as CelestiaIcon } from 'assets/icons/celestia.svg';
 import { ReactComponent as TonIcon } from 'assets/icons/ton.svg';
 import { ReactComponent as PepeIcon } from 'assets/icons/pepe.svg';
 import { ReactComponent as CatIcon } from 'assets/icons/icon-simoncat.svg';
+import { ReactComponent as HmstrIcon } from 'assets/icons/hmstr.svg';
 
 import { CustomChainInfo, TokenItemType } from '@oraichain/oraidex-common';
 import { bitcoinChainId } from 'helper/constants';
@@ -159,6 +160,11 @@ export const tokensIconInfos: TokenIcon[] = [
     coinGeckoId: 'simon-s-cat',
     Icon: CatIcon,
     IconLight: CatIcon
+  },
+  {
+    coinGeckoId: 'hamster-kombat' as any,
+    Icon: HmstrIcon,
+    IconLight: HmstrIcon
   }
 ];
 
