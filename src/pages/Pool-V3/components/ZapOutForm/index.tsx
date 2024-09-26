@@ -344,7 +344,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
 
   if (incentives) {
     Object.keys(incentives).forEach((key) => {
-      const token = oraichainTokens.find((e) => extractAddress(e ) === key);
+      const token = oraichainTokens.find((e) => extractAddress(e) === key);
       receiveIncentiveTokens.push({
         icon: getIcon({
           isLightTheme,

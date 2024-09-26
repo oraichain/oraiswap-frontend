@@ -191,9 +191,16 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   const [amountTo, setAmountTo] = useState<number | string>();
   const [amountFrom, setAmountFrom] = useState<number | string>();
 
-  const fromUsd = (extendPrices?.[tokenFrom?.coinGeckoId] * Number(amountFrom || 0)).toFixed(6);
-  const toUsd = (extendPrices?.[tokenTo?.coinGeckoId] * Number(amountTo || 0)).toFixed(6);
-  const zapUsd = (extendPrices?.[tokenZap?.coinGeckoId] * Number(zapAmount || 0)).toFixed(6);
+  const fromUsd = extendPrices?.[tokenFrom?.coinGeckoId]
+    ? (extendPrices[tokenFrom.coinGeckoId] * Number(amountFrom || 0)).toFixed(6)
+    : '0';
+  const toUsd = extendPrices?.[tokenTo?.coinGeckoId]
+    ? (extendPrices[tokenTo.coinGeckoId] * Number(amountTo || 0)).toFixed(6)
+    : '0';
+  const zapUsd = extendPrices?.[tokenZap?.coinGeckoId]
+    ? (extendPrices[tokenZap.coinGeckoId] * Number(zapAmount || 0)).toFixed(6)
+    : '0';
+
   const xUsd =
     zapInResponse &&
     (extendPrices?.[tokenFrom?.coinGeckoId] * (Number(zapInResponse.amountX || 0) / 10 ** tokenFrom.decimals)).toFixed(
@@ -952,7 +959,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError("No liquidity found for the swap route. Cannot proceed with the swap.");
+        setZapError('No liquidity found for the swap route. Cannot proceed with the swap.');
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
       } else {
