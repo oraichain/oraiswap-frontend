@@ -152,7 +152,7 @@ export default function SelectToken({
                 const balanceDelta = Number(b.usd) - Number(a.usd);
 
                 if (!balanceDelta) {
-                  return tokenRank[b.coinGeckoId] - tokenRank[a.coinGeckoId];
+                  return (tokenRank[b.coinGeckoId] || 0) - (tokenRank[a.coinGeckoId] || 0);
                 }
                 return balanceDelta;
               })

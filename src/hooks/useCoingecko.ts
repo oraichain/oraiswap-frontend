@@ -72,7 +72,7 @@ export const getCoingeckoPrices = async <T extends CoinGeckoId>(
     // update cached
     for (const key in rawData) {
       prices[key] = rawData[key].usd;
-      ranks[key] = rawData[key].usd_24h_vol;
+      ranks[key] = rawData[key].usd_24h_vol || 0;
     }
   } catch {
     // remain old cache
