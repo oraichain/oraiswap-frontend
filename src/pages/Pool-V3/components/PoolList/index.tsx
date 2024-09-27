@@ -8,6 +8,8 @@ import { ReactComponent as NoDataDark } from 'assets/images/NoDataPool.svg';
 import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import classNames from 'classnames';
 import LoadingBox from 'components/LoadingBox';
+import Pagination from 'components/Pagination';
+import usePagination from 'components/Pagination/usePagination';
 import { CoefficientBySort, SortType } from 'components/Table';
 import { TooltipIcon } from 'components/Tooltip';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -15,17 +17,17 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import useTheme from 'hooks/useTheme';
 import { fetchPoolAprInfo } from 'libs/contractSingleton';
+import { POOL_TYPE } from 'pages/Pool-V3';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import { memo, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
 import PoolItemDataMobile from './PoolItemDataMobile';
 import PoolItemTData from './PoolItemTData';
-import { POOL_TYPE } from 'pages/Pool-V3';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -34,7 +36,7 @@ export enum PoolColumnHeader {
   APR = 'Apr'
 }
 
-const PoolList = ({ search }) => {
+const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYPE }) => {
   const theme = useTheme();
   const { data: price } = useCoinGeckoPrices();
   const [, setLiquidityPools] = useConfigReducer('liquidityPools');
@@ -58,7 +60,7 @@ const PoolList = ({ search }) => {
   const [totalLiquidity, setTotalLiquidity] = useState(0);
   const { feeDailyData } = useGetFeeDailyData();
   const { poolList: dataPool, poolPrice, loading } = useGetPoolList(price);
-  const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
+  const { poolLiquidities, poolVolume, volumeV2, liquidityV2 } = useGetPoolLiquidityVolume(poolPrice);
   const { poolPositionInfo } = useGetPoolPositionInfo(poolPrice);
 
   useEffect(() => {
@@ -86,7 +88,9 @@ const PoolList = ({ search }) => {
   useEffect(() => {
     if (Object.values(poolVolume).length > 0) {
       const totalVolume24h = Object.values(poolVolume).reduce((acc, cur) => acc + cur, 0);
-      setTotalVolume(totalVolume24h);
+
+      const totalAllPoolVol = new BigDecimal(totalVolume24h).add(volumeV2).toNumber();
+      setTotalVolume(totalAllPoolVol);
       setVolumnePools(
         Object.keys(poolVolume).map((poolAddress) => {
           return {
@@ -107,7 +111,8 @@ const PoolList = ({ search }) => {
     if (Object.values(poolLiquidities).length > 0) {
       const totalLiqudity = Object.values(poolLiquidities).reduce((acc, cur) => acc + cur, 0);
       setLiquidityPools(poolLiquidities);
-      setTotalLiquidity(totalLiqudity);
+      const totalAllPoolLiq = new BigDecimal(totalLiqudity).add(liquidityV2).toNumber();
+      setTotalLiquidity(totalAllPoolLiq);
     }
   }, [poolLiquidities, dataPool]);
 
@@ -155,21 +160,30 @@ const PoolList = ({ search }) => {
       }
     })
     .filter((p) => {
-      if (!search) return true;
+      const { tokenXinfo, tokenYinfo, type } = p;
+      let conditions = true;
 
-      const { tokenXinfo, tokenYinfo } = p;
+      if (search) {
+        conditions =
+          conditions &&
+          ((tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
+            (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase())));
+      }
 
-      return (
-        (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
-        (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
-      );
+      if (filterType && filterType !== POOL_TYPE.ALL) {
+        conditions = conditions && type === filterType;
+      }
+
+      return conditions;
     });
+
+  const { setPage, page, handleNext, handlePrev, totalPages, indexOfLastItem, indexOfFirstItem } = usePagination({
+    data: filteredPool
+  });
 
   useOnClickOutside(sortRef, () => {
     setOpenSort(false);
   });
-
-  console.count('render');
 
   const renderList = () => {
     return mobileMode ? (
@@ -208,7 +222,7 @@ const PoolList = ({ search }) => {
             </div>
           </div>
         </div>
-        {filteredPool.map((item, index) => {
+        {filteredPool.slice(indexOfFirstItem, indexOfLastItem).map((item, index) => {
           const { showLiquidity, showVolume, showApr } = item || {};
           return (
             <PoolItemDataMobile
@@ -290,7 +304,7 @@ const PoolList = ({ search }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredPool.map((item, index) => {
+            {filteredPool.slice(indexOfFirstItem, indexOfLastItem).map((item, index) => {
               const { showLiquidity, showVolume, showApr } = item || {};
 
               // const { type, totalLiquidity: liquidityV2, volume24Hour: volumeV2, liquidityAddr, poolKey } = item || {};
@@ -360,6 +374,18 @@ const PoolList = ({ search }) => {
               )}
         </div>
 
+        <div className={styles.paginate}>
+          {totalPages > 1 && (
+            <Pagination
+              totalPages={totalPages}
+              paginate={setPage}
+              currentPage={page}
+              handleNext={handleNext}
+              handlePrev={handlePrev}
+            />
+          )}
+        </div>
+
         {isOpenCreatePosition && currentPool && (
           <CreateNewPosition
             showModal={isOpenCreatePosition}
@@ -372,4 +398,4 @@ const PoolList = ({ search }) => {
   );
 };
 
-export default memo(PoolList);
+export default PoolList;

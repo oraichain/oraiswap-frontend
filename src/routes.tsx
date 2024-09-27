@@ -40,14 +40,15 @@ export default () => (
       <Route path="/bitcoin-dashboard" element={<BitcoinDashboard />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/swap" element={<UniversalSwap />} />
-      <Route path="/pools" element={<Pools />} />
-      <Route path="/pools-v3" element={<PoolsV3 />} />
-      <Route path="/pools-v3/:poolId" element={<PoolV3Detail />} />
+      {/* <Route path="/pools" element={<Pools />} /> */}
+      <Route path="/pools" element={<PoolsV3 />} />
+      <Route path="/pools/v3/:poolId" element={<PoolV3Detail />} />
+      <Route path="/pools/v2/:poolUrl" element={<PoolDetail />} />
       <Route path="/new-position/:item" element={<CreatePosition />} />
       <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/download-owallet" element={<DownloadApp />} />
-      <Route path="/pools/:poolUrl" element={<PoolDetail />} />
+      {/* <Route path="/pools/:poolUrl" element={<PoolDetail />} /> */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Suspense>

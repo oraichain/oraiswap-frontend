@@ -18,19 +18,22 @@ const PoolItemDataMobile = ({ item, theme, liquidity, volume, aprInfo, setIsOpen
 
   const isLight = theme === 'light';
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
-  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey, type } = item;
+  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey, type, url } = item;
 
   return (
     <div className={styles.mobilePoolItem}>
       <div className={classNames(styles.itemMobile, styles.flexStart)}>
-        <div className={styles.name} onClick={() => navigate(`/pools-v3/${encodeURIComponent(poolKey)}`)}>
+        <div className={styles.name} onClick={() => navigate(url)}>
           <div className={styles.info}>
             <div className={classNames(styles.icons, styles[theme])}>
               <FromTokenIcon />
               <ToTokenIcon />
             </div>
-            <span>
+            <span className={styles.title}>
               {tokenXinfo?.name} / {tokenYinfo?.name}
+              <span className={classNames(styles.tag, { [styles.v3]: type === POOL_TYPE.V3 })}>
+                {type === POOL_TYPE.V3 ? 'V3' : 'V2'}
+              </span>
             </span>
           </div>
 

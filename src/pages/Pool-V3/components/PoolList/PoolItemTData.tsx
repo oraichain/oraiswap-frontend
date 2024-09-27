@@ -26,6 +26,7 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreat
     tokenYinfo,
     poolKey,
     type,
+    url,
     totalLiquidity: liquidityV2,
     volume24Hour: volumeV2
   } = item;
@@ -33,13 +34,16 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreat
   return (
     <>
       <td>
-        <div className={styles.name} onClick={() => navigate(`/pools-v3/${encodeURIComponent(poolKey)}`)}>
+        <div className={styles.name} onClick={() => navigate(url)}>
           <div className={classNames(styles.icons, styles[theme])}>
             <FromTokenIcon />
             <ToTokenIcon />
           </div>
-          <span>
+          <span className={styles.title}>
             {tokenXinfo?.name} / {tokenYinfo?.name}
+            <span className={classNames(styles.tag, { [styles.v3]: type === POOL_TYPE.V3 })}>
+              {type === POOL_TYPE.V3 ? 'V3' : 'V2'}
+            </span>
           </span>
 
           {type === POOL_TYPE.V3 && (

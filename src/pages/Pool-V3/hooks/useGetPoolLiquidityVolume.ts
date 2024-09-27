@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { useLiquidityEventChart } from 'pages/Pools/hooks/useLiquidityEventChart';
+import { useVolumeEventChart } from 'pages/Pools/hooks/useVolumeEventChart';
 import { useEffect, useState } from 'react';
+import { FILTER_DAY } from 'reducer/type';
 import {
   getPoolsLiqudityAndVolumeAmount,
   getPoolsVolumeByTokenLatest24h,
@@ -10,6 +13,9 @@ import {
 export const useGetPoolLiquidityVolume = (prices: CoinGeckoPrices<string>) => {
   const [poolLiquidities, setPoolLiquidities] = useState<Record<string, number>>({});
   const [poolVolume, setPoolVolume] = useState<Record<string, number>>({});
+
+  const { currentItem: liquidityV2 = { value: 0 } } = useLiquidityEventChart(FILTER_DAY.DAY) || {};
+  const { currentItem: volumeV2 = { value: 0 } } = useVolumeEventChart(FILTER_DAY.DAY) || {};
 
   const { data, refetch: refetchPoolLiquidityVolume } = useQuery<PoolLiquidityAndVolumeAmount[]>(
     ['pool-v3-liquidty-volume-daily', prices],
@@ -65,6 +71,8 @@ export const useGetPoolLiquidityVolume = (prices: CoinGeckoPrices<string>) => {
   return {
     poolLiquidities,
     poolVolume,
+    volumeV2: volumeV2.value || 0,
+    liquidityV2: liquidityV2.value || 0,
     refetchPoolLiquidityVolume
   };
 };

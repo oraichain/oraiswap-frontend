@@ -725,7 +725,6 @@ const CreatePosition = () => {
     }
   };
 
-
   const handleGetTicks = () => {
     try {
       const fetchTickData = async () => {
@@ -736,7 +735,7 @@ const CreatePosition = () => {
           poolKey: notInitPoolKey,
           isXtoY: isXtoY,
           xDecimal: tokenX.decimals,
-          yDecimal: tokenY.decimals,
+          yDecimal: tokenY.decimals
         });
 
         setLiquidityData(ticksData);
@@ -984,7 +983,7 @@ const CreatePosition = () => {
             className={styles.back}
             onClick={() => {
               // navigate(-1);
-              navigate('/pools-v3');
+              navigate('/pools');
             }}
           >
             <BackIcon />

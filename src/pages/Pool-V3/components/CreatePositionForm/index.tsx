@@ -805,7 +805,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               [tokenZap.contractAddress, tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean)
             );
             onCloseModal();
-            navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(poolData.pool_key))}`);
+            navigate(`/pools/v3/${encodeURIComponent(poolKeyToString(poolData.pool_key))}`);
           },
           (e) => {
             console.log({ errorZap: e });
@@ -850,7 +850,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           // handleSuccessAdd();
           loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
           onCloseModal();
-          navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
+          navigate(`/pools/v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
         },
         (e) => {
           displayToast(TToastType.TX_FAILED, {

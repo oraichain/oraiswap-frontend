@@ -123,11 +123,6 @@ const useGetPoolV2Data = ({ typeFilter }: { typeFilter: KeyFilterPool }) => {
     };
   });
 
-  //   console.log('first', {
-  //     poolTableData,
-  //     pools
-  //   });
-
   return {
     poolTableData,
     pools

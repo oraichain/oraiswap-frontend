@@ -776,7 +776,7 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
           handleSuccessAdd();
           loadOraichainToken(walletAddress, [tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean));
           onCloseModal();
-          navigate(`/pools-v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
+          navigate(`/pools/v3/${encodeURIComponent(poolKeyToString(data.poolKeyData))}`);
         },
         (e) => {
           displayToast(TToastType.TX_FAILED, {
@@ -791,17 +791,16 @@ const CreatePoolForm: FC<CreatePoolFormProps> = ({ tokenFrom, tokenTo, feeTier, 
     }
   };
 
-
   const handleGetTicks = () => {
     try {
       const fetchTickData = async () => {
         setLoading(true);
-        
+
         const ticksData = await handleGetCurrentPlotTicks({
           poolKey: notInitPoolKey,
           isXtoY: isXtoY,
           xDecimal: tokenFrom.decimals,
-          yDecimal: tokenTo.decimals,
+          yDecimal: tokenTo.decimals
         });
 
         setLiquidityData(ticksData);

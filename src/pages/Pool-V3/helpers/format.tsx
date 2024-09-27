@@ -24,6 +24,7 @@ export type PoolWithTokenInfo = PoolWithPoolKey & {
   tokenYinfo: TokenItemType;
   poolKey: string;
   type: POOL_TYPE;
+  url: string;
 };
 
 export const getTokenInfo = (address, isLight) => {
@@ -53,6 +54,7 @@ export const formatPoolData = (p: PoolWithPoolKey | PoolInfoResponse, isLight: b
     ];
 
     const { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo } = getIconPoolData(baseDenom, quoteDenom, isLight);
+
     return {
       ...p,
       isValid: true,
@@ -60,7 +62,8 @@ export const formatPoolData = (p: PoolWithPoolKey | PoolInfoResponse, isLight: b
       FromTokenIcon,
       ToTokenIcon,
       tokenXinfo,
-      tokenYinfo
+      tokenYinfo,
+      url: `/pools/v2/${encodeURIComponent(baseDenom)}_${encodeURIComponent(quoteDenom)}`
     };
   }
 
@@ -69,6 +72,7 @@ export const formatPoolData = (p: PoolWithPoolKey | PoolInfoResponse, isLight: b
   const { FromTokenIcon, ToTokenIcon, tokenXinfo, tokenYinfo } = getIconPoolData(tokenX, tokenY, isLight);
   const spread = p?.pool_key.fee_tier.tick_spacing || 100;
 
+  const poolKey = p?.pool_key ? poolKeyToString(p.pool_key) : '';
   return {
     ...p,
     type: POOL_TYPE.V3,
@@ -78,8 +82,9 @@ export const formatPoolData = (p: PoolWithPoolKey | PoolInfoResponse, isLight: b
     spread,
     tokenXinfo,
     tokenYinfo,
-    poolKey: p?.pool_key ? poolKeyToString(p.pool_key) : '',
-    isValid: tokenXinfo && tokenYinfo
+    poolKey,
+    isValid: tokenXinfo && tokenYinfo,
+    url: `/pools/v3/${encodeURIComponent(poolKey)}`
   };
 };
 

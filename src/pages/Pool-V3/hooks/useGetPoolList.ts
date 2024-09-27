@@ -83,7 +83,6 @@ export const useGetPoolList = (coingeckoPrices: CoinGeckoPrices<string>) => {
     if (poolList.length === 0 || Object.keys(coingeckoPrices).length === 0) return;
 
     const fmtPools = (poolList || []).map(formatPoolDataCallback).filter((e) => e.isValid);
-    console.log('fmtPools', fmtPools);
     setDataPool(fmtPools);
   }, [poolList, coingeckoPrices]);
 

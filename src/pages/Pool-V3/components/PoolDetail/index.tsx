@@ -89,7 +89,7 @@ const PoolV3Detail = () => {
         const pool = poolList.find((p) => poolKeyToString(p.pool_key) === poolKeyString);
         const isLight = theme === 'light';
         const fmtPool = formatPoolData(pool, isLight);
-        setPoolDetail(fmtPool);
+        setPoolDetail(fmtPool as any);
       }
     })();
   }, [poolId, allPosition, poolList, theme, poolPrice, poolKeyString, liquidityDistribution]);
@@ -141,7 +141,9 @@ const PoolV3Detail = () => {
           isLight,
           feeClaimData
         });
-        const filteredPositions = positionsMap.filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString).sort((a, b) => a.token_id - b.token_id);
+        const filteredPositions = positionsMap
+          .filter((pos) => poolKeyToString(pos.pool_key) === poolKeyString)
+          .sort((a, b) => a.token_id - b.token_id);
 
         setDataPosition(filteredPositions);
       } catch (error) {
@@ -174,7 +176,7 @@ const PoolV3Detail = () => {
     <div className={classNames(styles.poolDetail, 'small_container')}>
       <div className={styles.header}>
         <div className={styles.name}>
-          <div className={styles.back} onClick={() => navigate('/pools-v3')}>
+          <div className={styles.back} onClick={() => navigate('/pools')}>
             <BackIcon />
           </div>
           <div className={styles.info}>
