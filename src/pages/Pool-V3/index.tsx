@@ -18,6 +18,12 @@ export enum PoolV3PageType {
   POSITION = 'positions'
 }
 
+export enum POOL_TYPE {
+  ALL = 'All pools',
+  V3 = 'Pool V3',
+  V2 = 'Pool V2'
+}
+
 type TabRender = {
   id: PoolV3PageType;
   value: string;

@@ -42,6 +42,7 @@ import { oraichainTokens } from '@oraichain/oraidex-common';
 import { getPools } from 'rest/graphClient';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { extractAddress } from 'pages/Pool-V3/helpers/format';
+import { PoolInfoResponse } from 'types/pool';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
   { fee: 100000000, tick_spacing: 1 },
@@ -857,7 +858,7 @@ export type PoolAprInfo = {
 };
 
 export async function fetchPoolAprInfo(
-  pools: PoolWithPoolKey[],
+  pools: (PoolWithPoolKey | PoolInfoResponse)[],
   prices: CoinGeckoPrices<CoinGeckoId>,
   poolLiquidities: Record<string, number>,
   feeAndLiquidityInfo: PoolFeeAndLiquidityDaily[]
@@ -871,7 +872,26 @@ export async function fetchPoolAprInfo(
   });
 
   const poolAprs: Record<string, PoolAprInfo> = {};
-  for (const { pool, pool_key } of pools) {
+  for (const item of pools) {
+    if ('liquidityAddr' in item) {
+      const { apr, aprBoost, liquidityAddr } = item;
+
+      poolAprs[liquidityAddr] = {
+        apr: {
+          min: aprBoost || 0,
+          max: aprBoost || 0
+        },
+        incentives: [],
+        swapFee: apr,
+        incentivesApr: {
+          min: 0,
+          max: 0
+        }
+      };
+      continue;
+    }
+
+    const { pool, pool_key } = item;
     const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(pool_key))?.feeAPR;
 
     if (pool.incentives === undefined) {

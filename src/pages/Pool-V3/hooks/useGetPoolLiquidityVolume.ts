@@ -16,7 +16,7 @@ export const useGetPoolLiquidityVolume = (prices: CoinGeckoPrices<string>) => {
     () => getPoolsLiqudityAndVolumeAmount(),
     {
       refetchOnWindowFocus: false,
-      placeholderData: [],
+      placeholderData: []
       // cacheTime: 5 * 60 * 1000
     }
   );
