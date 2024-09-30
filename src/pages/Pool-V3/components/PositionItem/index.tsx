@@ -271,9 +271,9 @@ const PositionItem = ({ position }) => {
         <div className={styles.info}>
           <div className={styles.item}>
             <p>Price Range</p>
-            <div className={styles.value}>{minimize(xToY ? min : 1 / max)}</div>
+            <span className={styles.value}>{minimize((xToY ? min : 1 / max).toString())}</span>
             {' - '}
-            <div className={styles.value}>{minimize(xToY ? max : 1 / min)}</div>
+            <span className={styles.value}>{minimize((xToY ? max : 1 / min).toString())}</span>
 
             <span className={styles.value}>
               {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)), undefined, {
