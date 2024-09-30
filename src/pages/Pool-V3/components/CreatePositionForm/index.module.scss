@@ -240,6 +240,14 @@
           }
         }
       }
+      .price {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        svg {
+          margin-right: 4px;
+        }
+      }
     }
 
     .currentPriceWrapper {

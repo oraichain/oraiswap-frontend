@@ -31,7 +31,6 @@ import { WalletsByNetwork } from 'reducer/wallet';
 import { evmChainInfos } from 'config/evmChainInfos';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { numberWithCommas } from './format';
-import { formatMoney } from 'pages/Pool-V3/helpers/helper';
 
 export interface Tokens {
   denom?: string;
@@ -598,8 +597,24 @@ export const minimize = (priceUsd: string) => {
     return `0.${significantDigits}`;
   }
 
-  return numberWithCommas(Number(priceUsd), undefined, { maximumFractionDigits: 6 });
+  return formatMoney(priceUsd);
 };
+
+export function formatMoney(num) {
+  if (num === 0) return num.toString();
+  let numStr = num.toString();
+  const decimalIndex = numStr.indexOf('.');
+  if (decimalIndex === -1) return numStr;
+  const integerPart = numStr.slice(0, decimalIndex);
+  const decimalPart = numStr.slice(decimalIndex + 1);
+  const decimalsToShow = num >= 1 ? 1 : num < 0.0001 ? 6 : 4;
+
+  const formattedDecimalPart = decimalPart.slice(0, decimalsToShow);
+  let stringArr = `.${formattedDecimalPart}`;
+  if (!formattedDecimalPart || formattedDecimalPart === '0') stringArr = '';
+
+  return `${numberWithCommas(Number(integerPart), undefined)}${stringArr}`;
+}
 
 export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, height }: GetIconInterface) => {
   if (type === 'token') {

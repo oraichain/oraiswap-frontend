@@ -22,7 +22,6 @@ import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { fetchPositionAprInfo, poolKeyToString, PositionAprInfo } from 'libs/contractSingleton';
 import {
   calculateFee,
-  formatMoney,
   formatNumbers,
   getConvertedPool,
   getConvertedPosition,

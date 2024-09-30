@@ -217,25 +217,21 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   const isLightTheme = theme === 'light';
 
-  const TokenFromIcon =
-    tokenFrom &&
-    getIcon({
+  const renderTokenObj = (coinGeckoId, size: number = 30) => {
+    return {
       isLightTheme,
-      type: 'token',
-      coinGeckoId: tokenFrom.coinGeckoId,
-      width: 30,
-      height: 30
-    });
+      type: 'token' as any,
+      coinGeckoId,
+      width: size,
+      height: size
+    };
+  };
 
-  const TokenToIcon =
-    tokenTo &&
-    getIcon({
-      isLightTheme,
-      type: 'token',
-      coinGeckoId: tokenTo.coinGeckoId,
-      width: 30,
-      height: 30
-    });
+  const TokenFromIcon = tokenFrom && getIcon(renderTokenObj(tokenFrom.coinGeckoId));
+  const TokenToIcon = tokenTo && getIcon(renderTokenObj(tokenTo.coinGeckoId));
+
+  const TokenPriceFromIcon = tokenFrom && getIcon(renderTokenObj(tokenFrom.coinGeckoId, 18));
+  const TokenPriceToIcon = tokenTo && getIcon(renderTokenObj(tokenTo.coinGeckoId, 18));
 
   useEffect(() => {
     if (focusId === 'from') {
@@ -1125,11 +1121,15 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
             <div className={styles.currentPrice}>
               <p>Current Price:</p>
-              <p>
-                <div>
-                  1 {tokenFrom.name} = {minimize(midPrice.x.toString())} {tokenTo.name}
+              <div>
+                <div className={styles.price}>
+                  {TokenPriceFromIcon}1 {tokenFrom.name} = {minimize(midPrice.x.toString())} {tokenTo.name}
                 </div>
-              </p>
+
+                <div className={styles.price}>
+                  {TokenPriceToIcon} 1 {tokenTo.name} = {minimize((1 / midPrice.x).toString())} {tokenFrom.name}
+                </div>
+              </div>
             </div>
 
             <div className={styles.minMaxPriceWrapper}>
