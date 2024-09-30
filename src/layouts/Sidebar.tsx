@@ -90,6 +90,7 @@ const Sidebar: React.FC<{}> = React.memo(() => {
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
             {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
+            {renderLink('/bitcoin-dashboard-v2', 'BTC Dashboard V2', setLink, <BtcDashboardIcon />)}
             {!isBeta && renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, <OraidexBetaIcon />, true)}
           </div>
         </div>
