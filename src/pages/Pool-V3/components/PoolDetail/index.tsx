@@ -1,4 +1,5 @@
 import { toDisplay } from '@oraichain/oraidex-common';
+import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as AddIcon } from 'assets/icons/Add.svg';
 import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
 import { ReactComponent as BootsIconDark } from 'assets/icons/boost-icon-dark.svg';
@@ -8,25 +9,27 @@ import { ReactComponent as NoData } from 'assets/images/NoDataPoolLight.svg';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import LoadingBox from 'components/LoadingBox';
+import Tabs from 'components/TabCustom';
 import { formatNumberKMB, numberWithCommas } from 'helper/format';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString, stringToPoolKey } from 'libs/contractSingleton';
+import SingletonOraiswapV3, { fetchPoolAprInfo, poolKeyToString } from 'libs/contractSingleton';
 import { formatPoolData, getIconPoolData, PoolWithTokenInfo } from 'pages/Pool-V3/helpers/format';
 import { convertPosition } from 'pages/Pool-V3/helpers/helper';
+import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { useGetPoolDetail } from 'pages/Pool-V3/hooks/useGetPoolDetail';
+import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getFeeClaimData } from 'rest/graphClient';
-import PositionItem from '../PositionItem';
-import styles from './index.module.scss';
-import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
-import { useGetAllPositions } from 'pages/Pool-V3/hooks/useGetAllPosition';
-import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
-import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
-import { useGetPoolDetail } from 'pages/Pool-V3/hooks/useGetPoolDetail';
-import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
 import CreateNewPosition from '../CreateNewPosition';
+import PositionItem from '../PositionItem';
+import TransactionHistory from '../TransactionHistory';
+import styles from './index.module.scss';
 
 const PoolV3Detail = () => {
   const [address] = useConfigReducer('address');
@@ -35,6 +38,7 @@ const PoolV3Detail = () => {
   const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
   const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
   const navigate = useNavigate();
+  const isMobileMode = isMobile();
   const theme = useTheme();
   const { poolId } = useParams<{ poolId: string }>();
 
@@ -67,6 +71,26 @@ const PoolV3Detail = () => {
   const { allPosition } = useGetAllPositions();
   const { positions: userPositions } = useGetPositions(address);
   const { liquidityDistribution } = useGetPoolDetail(poolKeyString, poolPrice);
+
+  // const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
+  //   const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
+
+  //   const tokenXDecimals = isXToY ? tokenFrom?.decimals ?? 6 : tokenTo?.decimals ?? 6;
+  //   const tokenYDecimals = isXToY ? tokenTo?.decimals ?? 6 : tokenFrom?.decimals ?? 6;
+
+  //   const tickIndex = nearestTickIndex(
+  //     priceInfo.startPrice,
+  //     feeTier.tick_spacing,
+  //     isXToY,
+  //     tokenXDecimals,
+  //     tokenYDecimals
+  //   );
+
+  //   return {
+  //     index: tickIndex,
+  //     x: calcPrice(tickIndex, isXToY, tokenXDecimals, tokenYDecimals)
+  //   };
+  // });
 
   useEffect(() => {
     (async () => {
@@ -194,6 +218,12 @@ const PoolV3Detail = () => {
             {/* <span className={styles.item}>{toDisplay((spread || 0).toString(), 3)}% Spread</span> */}
             <span className={styles.item}>0.01% Spread</span>
           </div>
+
+          {/* <div className={styles.price}>
+            1 {tokenXinfo?.name} = {(priceChange?.price || 0).toFixed(6)} {tokenYinfo?.name}
+            {isMobileMode ? <br /> : '|'}1 {tokenYinfo?.name} = {1 / (priceChange?.price || 1).toFixed(6)}{' '}
+            {tokenXinfo?.name}
+          </div> */}
         </div>
 
         <div className={styles.addPosition}>
@@ -305,26 +335,42 @@ const PoolV3Detail = () => {
           </div>
         </div>
       </div>
-      <div className={styles.positions}>
-        {<h1>My positions ({dataPosition?.length ?? 0})</h1>}
-        <LoadingBox loading={loading} styles={{ height: '30vh' }}>
-          <div className={styles.list}>
-            {dataPosition.length
-              ? dataPosition.map((position, index) => {
-                  return (
-                    <div className={styles.positionWrapper} key={`pos-${index}`}>
-                      <PositionItem position={position} />
-                    </div>
-                  );
-                })
-              : !loading && (
-                  <div className={styles.nodata}>
-                    {theme === 'light' ? <NoData /> : <NoDataDark />}
-                    <span>No Positions!</span>
+
+      <div className={styles.tabs}>
+        <Tabs
+          tabKey="tab"
+          listTabs={[
+            {
+              id: 'LP',
+              value: `My Liquidity (${dataPosition?.length ?? 0})`,
+              content: (
+                <LoadingBox loading={loading} styles={{ height: '30vh' }}>
+                  <div className={styles.list}>
+                    {dataPosition.length
+                      ? dataPosition.map((position, index) => {
+                          return (
+                            <div className={styles.positionWrapper} key={`pos-${index}`}>
+                              <PositionItem position={position} />
+                            </div>
+                          );
+                        })
+                      : !loading && (
+                          <div className={styles.nodata}>
+                            {theme === 'light' ? <NoData /> : <NoDataDark />}
+                            <span>No Positions!</span>
+                          </div>
+                        )}
                   </div>
-                )}
-          </div>
-        </LoadingBox>
+                </LoadingBox>
+              )
+            },
+            {
+              id: 'txs',
+              value: 'Transactions',
+              content: <TransactionHistory baseToken={tokenXinfo} quoteToken={tokenYinfo} />
+            }
+          ]}
+        />
       </div>
     </div>
   );
