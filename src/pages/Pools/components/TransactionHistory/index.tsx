@@ -152,12 +152,12 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
               <table>
                 <thead>
                   <tr>
-                    <th>TX HASH</th>
-                    <th>TIME</th>
-                    <th className={styles.alignRight}>PAY AMOUNT</th>
-                    <th className={styles.alignRight}>RECEIVE AMOUNT</th>
-                    <th className={styles.alignRight}>VALUE</th>
-                    <th className={styles.alignRight}>FEE</th>
+                    <th>Tx Hash</th>
+                    <th>Time</th>
+                    <th className={styles.alignRight}>Pay Amount</th>
+                    <th className={styles.alignRight}>Receive Amount</th>
+                    <th className={styles.alignRight}>Value</th>
+                    <th className={styles.alignRight}>Fee</th>
                     {/* <th>ADDRESS</th> */}
                   </tr>
                 </thead>

@@ -50,6 +50,33 @@
         align-items: center;
         gap: 16px;
 
+        .tag {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 26px;
+          height: 24px;
+          padding: 2px;
+          gap: 10px;
+          border-radius: 6px;
+
+          @include theme {
+            border: 1px solid theme-get('colors-neutral-border-border-bold');
+            color: theme-get('colors-neutral-text-body-on-row');
+          }
+
+          &.v3 {
+            @include theme {
+              border: 1px solid theme-get('primary-surface-default-dark-3');
+              color: theme-get('primary-surface-default-dark-3');
+            }
+          }
+
+          font-size: 12px;
+          font-weight: 500;
+          line-height: 150%; /* 18px */
+        }
+
         .icons {
           display: inline-flex;
 

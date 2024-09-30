@@ -12,8 +12,8 @@
     border: 1px solid;
 
     @include theme {
-      border-color: theme-get('neutral-border-border-bold');
-      background: theme-get('neutral-white');
+      border: 1px solid theme-get('neutral-border-border-default');
+      background: theme-get('neutral-surface-bg-swap');
     }
   }
 
@@ -21,11 +21,11 @@
     margin-bottom: 8px;
 
     @include theme {
-      color: theme-get('sea-stone-200');
+      color: theme-get('neutral-9');
     }
 
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 150%;
     /* 24px */
   }
@@ -53,7 +53,6 @@
   }
 
   table {
-
     /* required css to make the rows rounded */
     thead {
       white-space: nowrap;
@@ -65,18 +64,24 @@
       th:last-child {
         border-top-right-radius: 24px;
       }
+
+      border-bottom: 1px solid;
+
+      @include theme {
+        border-color: theme-get('neutral-border-border-default');
+      }
     }
 
     tbody {
       @include theme {
-        background: theme-get('neutral-6');
+        background: theme-get('neutral-surface-bg-swap');
       }
 
       tr:not(:last-of-type) {
         border-bottom: 1px solid;
 
         @include theme {
-          border-color: theme-get('neutral-border-border-bold');
+          border-color: theme-get('neutral-border-border-default');
         }
       }
 
@@ -90,17 +95,17 @@
     }
 
     th {
-      padding: 10px 24px;
+      padding: 18px 24px;
 
       @include theme {
         color: theme-get('neutral-9');
       }
 
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 400;
-      line-height: 150%;
-      /* 21px */
+      line-height: 100%;
       letter-spacing: 0.1px;
+      text-transform: capitalize;
     }
 
     td {
@@ -115,7 +120,6 @@
       line-height: 100%;
       /* 27px */
     }
-
   }
 
   .hash {
@@ -169,7 +173,7 @@
       color: theme-get('neutral-9');
     }
 
-    &>div {
+    & > div {
       display: flex;
       align-items: center;
       flex-wrap: wrap;

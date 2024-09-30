@@ -223,7 +223,7 @@
 
     @include theme() {
       border: 1px solid theme-get('primary-text-text-link');
-      background-color: theme-get('primary-surface-default-subtle');
+      background-color: theme-get('neutral-surface-bg-swap');
     }
 
     @include mobile() {

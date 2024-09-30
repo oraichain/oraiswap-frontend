@@ -187,6 +187,7 @@ const PoolV3Detail = () => {
             <span>
               {tokenXinfo?.name?.toUpperCase()} / {tokenYinfo?.name?.toUpperCase()}
             </span>
+            <span className={classNames(styles.tag, styles.v3)}>V3</span>
           </div>
           <div className={styles.fee}>
             <span className={styles.item}>Fee: {toDisplay((fee || 0).toString(), 10)}%</span>
@@ -207,7 +208,7 @@ const PoolV3Detail = () => {
               <AddIcon />
               &nbsp;
             </div>
-            Add Position
+            Add LP
           </Button>
           {isOpenCreatePosition && poolDetail && (
             <CreateNewPosition
