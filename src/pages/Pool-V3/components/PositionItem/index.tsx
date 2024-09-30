@@ -271,15 +271,9 @@ const PositionItem = ({ position }) => {
         <div className={styles.info}>
           <div className={styles.item}>
             <p>Price Range</p>
-            <span
-              className={styles.value}
-              dangerouslySetInnerHTML={{ __html: `\$${minimize(xToY ? min : 1 / max)}` }}
-            />
+            <div className={styles.value}>{minimize(xToY ? min : 1 / max)}</div>
             {' - '}
-            <span
-              className={styles.value}
-              dangerouslySetInnerHTML={{ __html: `\$${minimize(xToY ? max : 1 / min)}` }}
-            />
+            <div className={styles.value}>{minimize(xToY ? max : 1 / min)}</div>
 
             <span className={styles.value}>
               {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)), undefined, {
