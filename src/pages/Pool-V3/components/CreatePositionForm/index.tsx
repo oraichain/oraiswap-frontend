@@ -1126,11 +1126,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             <div className={styles.currentPrice}>
               <p>Current Price:</p>
               <p>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: `${`1 ${tokenFrom.name} = `}${minimize(midPrice.x)} ${tokenTo.name}`
-                  }}
-                />
+                <div>
+                  1 {tokenFrom.name} = {minimize(midPrice.x.toString())} {tokenTo.name}
+                </div>
               </p>
             </div>
 
@@ -1142,7 +1140,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   </div>
                   <div className={styles.minMaxPriceValue}>
                     <p>
-                      <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
+                      <p>{minimize(leftInputRounded)}</p>
+                      {/* <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
                       <p className={styles.pair}>
                         {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
                       </p>
@@ -1167,7 +1166,8 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                   </div>
                   <div className={styles.minMaxPriceValue}>
                     <p>
-                      <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
+                      {/* <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
+                      <p>{minimize(rightInputRounded)}</p>
                       <p className={styles.pair}>
                         {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
                       </p>

@@ -579,19 +579,26 @@ export interface GetIconInterface {
   height?: number;
 }
 
-export const minimize = (priceUsd: number) => {
-  let isNeedSub = false;
-  const replaceItem = priceUsd.toString().replace(/(?<=\.)0+/, (m) => {
-    isNeedSub = m.length > 3;
-    return isNeedSub ? `0<sub>${m.length}</sub>` : m;
-  });
+export const minimize = (priceUsd: string) => {
+  const regex = /^0\.0*(\d+)/;
+  const match = priceUsd.match(regex);
+  const getSubscript = (num) => String.fromCharCode(0x2080 + num);
 
-  if (!isNeedSub) return formatMoney(priceUsd);
+  if (match) {
+    const leadingZeros = match[0].length - match[1].length - 2;
+    const significantDigits = match[1].slice(0, leadingZeros > 0 ? 4 : 6);
+    if (leadingZeros > 0) {
+      return (
+        <>
+          0.0<span style={{ fontSize: '1.6em', verticalAlign: 'sub' }}>{getSubscript(leadingZeros)}</span>
+          {significantDigits}
+        </>
+      );
+    }
+    return `0.${significantDigits}`;
+  }
 
-  const SUB_ELEMENT_LENGTH = 5; // </sub>
-  const DECIMALS_AFTER_SUB_LENGTH = 5;
-  const decimalAfterSub = replaceItem.indexOf('</sub>') + SUB_ELEMENT_LENGTH + DECIMALS_AFTER_SUB_LENGTH;
-  return replaceItem.slice(0, decimalAfterSub);
+  return numberWithCommas(Number(priceUsd), undefined, { maximumFractionDigits: 6 });
 };
 
 export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, height }: GetIconInterface) => {
