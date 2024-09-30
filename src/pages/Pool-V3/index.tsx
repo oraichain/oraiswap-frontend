@@ -6,7 +6,7 @@ import useTheme from 'hooks/useTheme';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import CreateNewPool from './components/CreateNewPool';
-
+import Pools from 'pages/Pools';
 import PoolList from './components/PoolList';
 import PositionList from './components/PositionList';
 import { useGetPoolList } from './hooks/useGetPoolList';
@@ -37,7 +37,7 @@ const listTab = Object.values(PoolV3PageType);
 const listTabRender: TabRender[] = [
   { id: PoolV3PageType.POOL, value: 'Pools', content: PoolList },
   { id: PoolV3PageType.POSITION, value: 'Your LPs', content: PositionList },
-  { id: PoolV3PageType.LP_V2, value: 'My Pools (V2)', content: PositionList }
+  { id: PoolV3PageType.LP_V2, value: 'My Pools (V2)', content: Pools }
 ];
 
 const PoolV3 = () => {

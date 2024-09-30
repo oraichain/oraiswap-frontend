@@ -9,10 +9,18 @@
   li {
     margin: 0 5px;
 
+    @include small-mobile {
+      margin: 0 2px;
+    }
+
     button {
       cursor: pointer;
       padding: 4px 12px;
       border-radius: 10px;
+
+      @include small-mobile {
+        padding: 4px 8px;
+      }
 
       @include theme {
         background-color: theme-get('neutral-surface-bg-section-3');

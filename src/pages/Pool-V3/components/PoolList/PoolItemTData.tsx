@@ -6,13 +6,22 @@ import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
 import { TooltipIcon } from 'components/Tooltip';
-import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
 import { POOL_TYPE } from 'pages/Pool-V3';
 
-const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreatePosition, setCurrentPool }) => {
+const PoolItemTData = ({
+  item,
+  theme,
+  liquidity,
+  volume,
+  aprInfo,
+  setIsOpenCreatePosition,
+  setCurrentPool,
+  setPairDenomsDeposit
+}) => {
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
 
@@ -28,7 +37,9 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreat
     type,
     url,
     totalLiquidity: liquidityV2,
-    volume24Hour: volumeV2
+    volume24Hour: volumeV2,
+    firstAssetInfo,
+    secondAssetInfo
   } = item;
 
   return (
@@ -126,12 +137,20 @@ const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreat
         <Button
           className="newPosition"
           type="third-sm"
-          onClick={() => {
-            setIsOpenCreatePosition(true);
-            setCurrentPool(item);
+          onClick={(event) => {
+            if (type === POOL_TYPE.V3) {
+              setIsOpenCreatePosition(true);
+              setCurrentPool(item);
+            } else {
+              event.stopPropagation();
+              setPairDenomsDeposit(
+                `${parseAssetOnlyDenom(JSON.parse(firstAssetInfo))}_${parseAssetOnlyDenom(JSON.parse(secondAssetInfo))}`
+              );
+            }
           }}
         >
-          Add Position
+          {/* {type === POOL_TYPE.V3 ? 'Add Position' : 'Add LP'} */}
+          Add LP
         </Button>
       </td>
     </>

@@ -6,19 +6,39 @@ import { ReactComponent as BootsIcon } from 'assets/icons/boost-icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import classNames from 'classnames';
 import { TooltipIcon } from 'components/Tooltip';
-import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
 import { POOL_TYPE } from 'pages/Pool-V3';
 
-const PoolItemDataMobile = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreatePosition, setCurrentPool }) => {
+const PoolItemDataMobile = ({
+  item,
+  theme,
+  liquidity,
+  volume,
+  aprInfo,
+  setIsOpenCreatePosition,
+  setCurrentPool,
+  setPairDenomsDeposit
+}) => {
   const navigate = useNavigate();
   const [openTooltip, setOpenTooltip] = useState(false);
 
   const isLight = theme === 'light';
   const IconBoots = isLight ? BootsIcon : BootsIconDark;
-  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey, type, url } = item;
+  const {
+    FromTokenIcon,
+    ToTokenIcon,
+    feeTier,
+    tokenXinfo,
+    tokenYinfo,
+    poolKey,
+    type,
+    url,
+    firstAssetInfo,
+    secondAssetInfo
+  } = item;
 
   return (
     <div className={styles.mobilePoolItem}>
@@ -46,9 +66,16 @@ const PoolItemDataMobile = ({ item, theme, liquidity, volume, aprInfo, setIsOpen
         <div
           title="Add Position"
           className={classNames('newPosition')}
-          onClick={() => {
-            setIsOpenCreatePosition(true);
-            setCurrentPool(item);
+          onClick={(event) => {
+            if (type === POOL_TYPE.V3) {
+              setIsOpenCreatePosition(true);
+              setCurrentPool(item);
+            } else {
+              event.stopPropagation();
+              setPairDenomsDeposit(
+                `${parseAssetOnlyDenom(JSON.parse(firstAssetInfo))}_${parseAssetOnlyDenom(JSON.parse(secondAssetInfo))}`
+              );
+            }
           }}
         >
           <AddLPIcon />

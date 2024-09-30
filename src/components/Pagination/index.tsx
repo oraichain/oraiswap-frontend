@@ -10,11 +10,11 @@ const Pagination = ({ totalPages, paginate, currentPage, handleNext, handlePrev 
   } else {
     // For > 5 pages, show ellipsis and adjacent page numbers
     if (currentPage <= 3) {
-      pageNumbers.push(1, 2, 3, 4, '...', totalPages);
+      pageNumbers.push(1, 2, 3, '...', totalPages); // 4
     } else if (currentPage > 3 && currentPage < totalPages - 2) {
-      pageNumbers.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      pageNumbers.push(1, '...', currentPage, currentPage + 1, '...', totalPages); // , currentPage - 1
     } else {
-      pageNumbers.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      pageNumbers.push(1, '...', totalPages - 2, totalPages - 1, totalPages); // , totalPages - 3
     }
   }
 

@@ -28,6 +28,7 @@ import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
 import PoolItemDataMobile from './PoolItemDataMobile';
 import PoolItemTData from './PoolItemTData';
+import { AddLiquidityModal } from 'pages/Pools/components/AddLiquidityModal';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -54,6 +55,7 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
 
   const [currentPool, setCurrentPool] = useState(null);
   const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
+  const [pairDenomsDeposit, setPairDenomsDeposit] = useState('');
 
   // const [dataPool, setDataPool] = useState([...Array(0)]);
   const [totalVolume, setTotalVolume] = useState(0);
@@ -240,6 +242,7 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
               }}
               setCurrentPool={setCurrentPool}
               setIsOpenCreatePosition={setIsOpenCreatePosition}
+              setPairDenomsDeposit={setPairDenomsDeposit}
             />
           );
         })}
@@ -330,6 +333,7 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
                     }}
                     setCurrentPool={setCurrentPool}
                     setIsOpenCreatePosition={setIsOpenCreatePosition}
+                    setPairDenomsDeposit={setPairDenomsDeposit}
                   />
                 </tr>
               );
@@ -391,6 +395,14 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
             showModal={isOpenCreatePosition}
             setShowModal={setIsOpenCreatePosition}
             pool={currentPool}
+          />
+        )}
+
+        {pairDenomsDeposit && (
+          <AddLiquidityModal
+            isOpen={!!pairDenomsDeposit}
+            close={() => setPairDenomsDeposit('')}
+            pairDenoms={pairDenomsDeposit}
           />
         )}
       </LoadingBox>
