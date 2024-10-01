@@ -71,8 +71,11 @@ export const useChartUsdPrice = (
 
   const onChangeRange = async (type: FILTER_TIME_CHART = FILTER_TIME_CHART.DAY) => {
     try {
+      if (!token) return;
       setIsLoading(true);
-      const tokenOnOraichain = oraichainTokens.find((t) => t.coinGeckoId === token && t.decimals === CW20_DECIMALS);
+      // const tokenOnOraichain = oraichainTokens.find((t) => t.coinGeckoId === token && t.decimals === CW20_DECIMALS);
+      const tokenOnOraichain = oraichainTokens.find((t) => t.coinGeckoId === token);
+      if (!tokenOnOraichain) return;
       const tokenDenom = parseTokenInfoRawDenom(tokenOnOraichain);
 
       const data = await getDataPriceMarket(tokenDenom, type);
