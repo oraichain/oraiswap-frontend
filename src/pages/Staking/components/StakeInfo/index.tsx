@@ -106,17 +106,7 @@ const StakeInfo = () => {
         }
       };
 
-      const [simulateData, averageRatioData] = await Promise.all([
-        UniversalSwapHelper.handleSimulateSwap({
-          originalFromInfo: USDC_TOKEN_INFO,
-          originalToInfo: ORAIX_TOKEN_INFO,
-          originalAmount: toDisplay(reward),
-          routerClient,
-          routerOption: {
-            useIbcWasm: true
-          },
-          routerConfig: getRouterConfig()
-        }),
+      const [averageRatioData] = await Promise.all([
         UniversalSwapHelper.handleSimulateSwap({
           originalFromInfo: USDC_TOKEN_INFO,
           originalToInfo: ORAIX_TOKEN_INFO,
