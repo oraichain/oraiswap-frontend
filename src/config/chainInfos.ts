@@ -113,12 +113,26 @@ export const bitcoinMainnet: CustomChainInfo = {
   bech32Config: defaultBech32Config('bc'),
   networkType: 'bitcoin' as any,
   currencies: [
+    // {
+    //   coinDenom: 'BTC',
+    //   coinMinimalDenom: 'btc',
+    //   coinDecimals: 8,
+    //   bridgeTo: ['Oraichain'],
+    //   prefixToken: 'oraibtc',
+    //   Icon: BTCIcon,
+    //   coinGeckoId: 'bitcoin',
+    //   coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+    //   gasPriceStep: {
+    //     low: 0,
+    //     average: 0,
+    //     high: 0
+    //   }
+    // },
     {
-      coinDenom: 'BTC',
+      coinDenom: 'BTC V2',
       coinMinimalDenom: 'btc',
       coinDecimals: 8 as any,
       bridgeTo: ['Oraichain'],
-      prefixToken: 'oraibtc',
       Icon: BTCIcon,
       coinGeckoId: 'bitcoin',
       coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',

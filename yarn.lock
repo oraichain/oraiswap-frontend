@@ -4237,6 +4237,24 @@
     "@babel/template" "^7.22.15"
     "@babel/types" "^7.23.3"
 
+"@oraichain/bitcoin-bridge-contracts-sdk@^1.1.7", "@oraichain/bitcoin-bridge-contracts-sdk@latest":
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/@oraichain/bitcoin-bridge-contracts-sdk/-/bitcoin-bridge-contracts-sdk-1.1.7.tgz#b1a8ba94498fb267f95059e4bcb45e48430808bb"
+  integrity sha512-CKp5mnL9XRm7awPtt5UiYJ6gHTrFpknWsx65SpRw4CpqqKHzLtzJzXLvVwC0f2aPAYUENLJvz2MRkkS4ePR+xQ==
+
+"@oraichain/bitcoin-bridge-lib-js@^1.1.7":
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/@oraichain/bitcoin-bridge-lib-js/-/bitcoin-bridge-lib-js-1.1.7.tgz#bb176a75d71c668c90c96eed126808478b33c265"
+  integrity sha512-DqjGsg1EQUzltU40Fu1XJGwF5gK5QestFLh+0PuyC4qA+d3xcHi6YNeHtixuBuYl1OSlPUdBFsyQOMeYkE1aSg==
+  dependencies:
+    "@oraichain/bitcoin-bridge-contracts-sdk" latest
+    bitcoinjs-lib "^6.0.1"
+
+"@oraichain/blsdkg@^1.2.17":
+  version "1.2.17"
+  resolved "https://registry.yarnpkg.com/@oraichain/blsdkg/-/blsdkg-1.2.17.tgz#c650d9f0bf5577f58a104efa32a80b6e6f2cc9f7"
+  integrity sha512-07BCJyB+PqFfCqwPax2fLIAjBaMcN5CqHJpnxUi0l3/Er5k7kXp5iBlzTTqTrC9/+OjNE6QxQK/Zkfb4Z/phLg==
+
 "@oraichain/common-contracts-build@1.0.35":
   version "1.0.35"
   resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.35.tgz#049ed62380106820692838d9723e68948bda7f30"
@@ -7346,6 +7364,11 @@ bip66@^1.1.0, bip66@^1.1.5:
   dependencies:
     safe-buffer "^5.0.1"
 
+bitcoin-bridge-wasm-sdk@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/bitcoin-bridge-wasm-sdk/-/bitcoin-bridge-wasm-sdk-0.1.8.tgz#d4ca69268089740ab0e306e9a5dcfb31ff01f19f"
+  integrity sha512-yWXnGpwSTlvjtN62+SjdMhlHVz+fDEnLTh4fpJlZHToUrJEhmmmGePYv+kAX5PObqbbTNgheK0IDUOyJ7su4vw==
+
 bitcoin-core@^4.1.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/bitcoin-core/-/bitcoin-core-4.2.0.tgz#61e5e18e8c206cdca31729e7df9cfe8ba0274b12"
@@ -7371,7 +7394,7 @@ bitcoin-units@^1.0.0:
   dependencies:
     big.js "^6.1.6"
 
-bitcoinjs-lib@5.2.0, bitcoinjs-lib@^6.1.3:
+bitcoinjs-lib@5.2.0, bitcoinjs-lib@^6.0.1, bitcoinjs-lib@^6.1.3:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/bitcoinjs-lib/-/bitcoinjs-lib-5.2.0.tgz#caf8b5efb04274ded1b67e0706960b93afb9d332"
   integrity sha512-5DcLxGUDejgNBYcieMIUfjORtUeNWl828VWLHJGVKZCb4zIS1oOySTUr0LGmcqJBQgTBz3bGbRQla4FgrdQEIQ==

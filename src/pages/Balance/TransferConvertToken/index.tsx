@@ -27,8 +27,15 @@ import { reduceString } from 'libs/utils';
 import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { calcMaxAmount, useDepositFeesBitcoin, useGetWithdrawlFeesBitcoin } from '../helpers';
+import {
+  calcMaxAmount,
+  useDepositFeesBitcoin,
+  useDepositFeesBitcoinV2,
+  useGetWithdrawlFeesBitcoin,
+  useGetWithdrawlFeesBitcoinV2
+} from '../helpers';
 import styles from './index.module.scss';
+import { useGetContractConfig } from 'pages/BitcoinDashboardV2/hooks';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -56,6 +63,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [addressTransfer, setAddressTransfer] = useState('');
   const { data: prices } = useCoinGeckoPrices();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
+  const contractConfig = useGetContractConfig();
 
   useEffect(() => {
     if (chainInfo) setConvertAmount([undefined, 0]);
@@ -139,16 +147,34 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const toTokenFee = useTokenFee(remoteTokenDenomTo);
 
   // bridge fee & relayer fee
-  const bridgeFee = fromTokenFee + toTokenFee;
+  let bridgeFee = fromTokenFee + toTokenFee;
 
   const isFromOraichainToBitcoin = token.chainId === 'Oraichain' && toNetworkChainId === ('bitcoin' as any);
   const isFromBitcoinToOraichain = token.chainId === ('bitcoin' as string) && toNetworkChainId === 'Oraichain';
-  const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
-  const depositFeeBtc = useDepositFeesBitcoin(isFromBitcoinToOraichain);
-  const withdrawalFeeBtc = useGetWithdrawlFeesBitcoin({
+  const isV2 = token.name === 'BTC V2';
+  let { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
+  const depositFeeBtcResult = useDepositFeesBitcoin(isFromBitcoinToOraichain);
+  const withdrawalFeeBtcResult = useGetWithdrawlFeesBitcoin({
     enabled: isFromOraichainToBitcoin,
     bitcoinAddress: addressTransfer
   });
+  const depositFeeBtcV2Result = useDepositFeesBitcoinV2(isFromBitcoinToOraichain);
+  const withdrawalFeeBtcV2Result = useGetWithdrawlFeesBitcoinV2({
+    enabled: isFromOraichainToBitcoin,
+    bitcoinAddress: addressTransfer
+  });
+  const depositFeeBtc = isV2 ? depositFeeBtcV2Result : depositFeeBtcResult;
+  const withdrawalFeeBtc = isV2 ? withdrawalFeeBtcV2Result : withdrawalFeeBtcResult;
+
+  if (isV2) {
+    if (contractConfig?.token_fee.denominator != 0) {
+      bridgeFee = (contractConfig?.token_fee.nominator * 100) / contractConfig?.token_fee.denominator;
+    } else {
+      bridgeFee = 0;
+    }
+    // not support relayer fee yet
+    relayerFeeTokenFee = 0;
+  }
 
   let toDisplayBTCFee = 0;
   if (depositFeeBtc && isFromBitcoinToOraichain) {

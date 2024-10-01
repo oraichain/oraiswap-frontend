@@ -8,10 +8,10 @@ import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
-import { useGetPendingDeposits } from '../../hooks/relayer.hook';
+import { useGetContractConfig, useGetPendingDeposits } from '../../hooks/lcd.hook';
 import { CheckpointStatus, DepositInfo, TransactionParsedInput } from '../../@types';
 import { useEffect } from 'react';
-import { useGetCheckpointData, useGetCheckpointQueue, useGetDepositFee } from 'pages/BitcoinDashboard/hooks';
+import { useGetCheckpointData, useGetCheckpointQueue, useGetDepositFee } from 'pages/BitcoinDashboardV2/hooks';
 import { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
 import TransactionsMobile from '../Checkpoint/Transactions/TransactionMobiles/TransactionMobile';
@@ -38,7 +38,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const mobile = isMobile();
   const [oraichainAddress] = useConfigReducer('address');
-  const fee = useRelayerFeeToken(btcTokens[0], oraichainTokens[19]);
+  const contractConfig = useGetContractConfig();
   const depositFee = useGetDepositFee();
   const fetchedPendingDeposits = useGetPendingDeposits(oraichainAddress);
   const checkpointQueue = useGetCheckpointQueue();
@@ -123,6 +123,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
 
     const checkpointInput = checkpointData.transaction.data.input;
     const checkpointPreviousInput = checkpointPreviousData.transaction.data.input;
+    // @ts-ignore
     const isSigningStatus = checkpointPreviousData.status === CheckpointStatus.Signing;
     const pendingDeposits = depositPendingUpdate.filter(
       (item) =>
@@ -163,8 +164,8 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       accessor: (data) => (
         <span>
           {(
-            toDisplay(BigInt(data.amount || 0), 8) -
-            fee.relayerFee -
+            data.amount -
+            (contractConfig?.token_fee?.nominator * data.amount) / contractConfig?.token_fee?.denominator -
             toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)
           ).toFixed(6)}{' '}
           BTC

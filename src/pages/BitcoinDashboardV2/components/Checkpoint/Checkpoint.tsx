@@ -7,11 +7,11 @@ import { useDebounce } from 'hooks/useDebounce';
 import useTheme from 'hooks/useTheme';
 import {
   useGetCheckpointData,
-  useGetCheckpointFeeInfo,
+  useGetCheckpointFee,
   useGetCheckpointQueue,
   useGetDepositFee,
   useGetWithdrawalFee
-} from 'pages/BitcoinDashboard/hooks';
+} from 'pages/BitcoinDashboardV2/hooks';
 import React, { useEffect, useState } from 'react';
 import styles from './Checkpoint.module.scss';
 import { TransactionInput, TransactionOutput } from './Transactions';
@@ -24,29 +24,30 @@ const Checkpoint: React.FC<{}> = ({}) => {
   const checkpointIndex = useDebounce(checkpointInputValue, 500);
   const depositFee = useGetDepositFee(checkpointIndex);
   const withdrawalFee = useGetWithdrawalFee(btcAddress, checkpointIndex);
+  const checkpointFee = useGetCheckpointFee(checkpointIndex);
   const checkpointData = useGetCheckpointData(checkpointIndex);
-  const checkpointFeeInfo = useGetCheckpointFeeInfo();
 
   useEffect(() => {
     (async () => {
       try {
         const btcAddr = btcAddress ?? (await window.Bitcoin.getAddress());
+
         setBtcAddress(btcAddr);
       } catch (e) {}
     })();
   }, []);
 
   const renderNotification = () => {
-    if (checkpointIndex == checkpointQueue?.index) {
-      if (checkpointFeeInfo?.miner_fee > checkpointFeeInfo?.fees_collected) {
+    if (checkpointIndex == checkpointQueue?.index && checkpointFee?.checkpoint_fees) {
+      if (checkpointFee.checkpoint_fees > checkpointData.fee_collected) {
         return (
           <span>{`Predict Hash: ${checkpointData?.transaction.hash}, We need at least ${toDisplay(
-            BigInt(checkpointFeeInfo?.miner_fee - checkpointFeeInfo?.fees_collected || 0),
+            BigInt(checkpointFee.checkpoint_fees - checkpointData.fee_collected || 0),
             8
           )} BTC fee to make this checkpoint executed. (${toDisplay(
-            BigInt(checkpointFeeInfo?.fees_collected || 0),
+            BigInt(checkpointData.fee_collected || 0),
             8
-          )}/${toDisplay(BigInt(checkpointFeeInfo?.miner_fee || 0), 8)} BTC)`}</span>
+          )}/${toDisplay(BigInt(checkpointFee.checkpoint_fees || 0), 8)} BTC)`}</span>
         );
       }
 
@@ -54,9 +55,9 @@ const Checkpoint: React.FC<{}> = ({}) => {
         <span>{`Predict Hash: ${
           checkpointData?.transaction.hash
         }, Enough fee waiting for previous checkpoint to be completed (${toDisplay(
-          BigInt(checkpointFeeInfo?.fees_collected || 0),
+          BigInt(checkpointData?.fee_collected || 0),
           8
-        )}/${toDisplay(BigInt(checkpointFeeInfo?.miner_fee || 0), 8)} BTC)`}</span>
+        )}/${toDisplay(BigInt(checkpointFee.checkpoint_fees || 0), 8)} BTC)`}</span>
       );
     } else {
       return <span>{`Hash: ${checkpointData?.transaction.hash}`}</span>;

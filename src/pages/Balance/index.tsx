@@ -1,4 +1,4 @@
-import { makeStdTx } from '@cosmjs/amino';
+import { coin, makeStdTx } from '@cosmjs/amino';
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Decimal } from '@cosmjs/math';
 import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
@@ -42,7 +42,13 @@ import {
   handleErrorTransaction,
   networks
 } from 'helper';
-import { DEFAULT_RELAYER_FEE, RELAYER_DECIMAL, bitcoinChainId } from 'helper/constants';
+import {
+  CWAppBitcoinContractAddress,
+  CWBitcoinFactoryDenom,
+  DEFAULT_RELAYER_FEE,
+  RELAYER_DECIMAL,
+  bitcoinChainId
+} from 'helper/constants';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -80,6 +86,9 @@ import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import { isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
+import DepositBtcModalV2 from './DepositBtcModalV2';
+import { CwBitcoinContext } from 'context/cw-bitcoin-context';
+import { AppBitcoinClient } from '@oraichain/bitcoin-bridge-contracts-sdk';
 
 interface BalanceProps {}
 
@@ -98,6 +107,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const [isDepositBtcModal, setIsDepositBtcModal] = useState(false);
+  const [isDepositBtcModalV2, setIsDepositBtcModalV2] = useState(false);
   const [, setTxHash] = useState('');
   const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
@@ -111,6 +121,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
+  const cwBitcoinContext = useContext(CwBitcoinContext);
 
   const ref = useRef(null);
   //@ts-ignore
@@ -124,6 +135,15 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log('🚀 ~ getAddress ~ error:', error);
     }
   };
+
+  useEffect(() => {
+    // TODO: should dynamic generate address when change destination chain.
+    if (oraiAddress) {
+      cwBitcoinContext.generateAddress({
+        address: oraiAddress
+      });
+    }
+  }, [isOwallet, oraiAddress]);
   useEffect(() => {
     if (isOwallet) {
       getAddress();
@@ -257,8 +277,9 @@ const Balance: React.FC<BalanceProps> = () => {
       message: '',
       transactionFee: feeRate
     });
-    console.log(totalFee, 'totalFee');
-    const { bitcoinAddress: address } = nomic.depositAddress;
+    const isV2 = fromToken.name === 'BTC V2';
+
+    const { bitcoinAddress: address } = isV2 ? cwBitcoinContext.depositAddress : nomic.depositAddress;
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
     const dataRequest = {
@@ -316,6 +337,39 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
+    if (fromToken.name === 'BTC V2') {
+      // @ts-ignore-check
+      try {
+        const amountInput = BigInt(
+          Decimal.fromUserInput(toAmount(transferAmount, 14).toString(), 14).atomics.toString()
+        );
+        const amount = Decimal.fromAtomics(amountInput.toString(), 14).toString();
+        let sender = await window.Keplr.getKeplrAddr(fromToken?.chainId);
+        let cwBitcoinClient = new AppBitcoinClient(window.client, sender, CWAppBitcoinContractAddress);
+
+        const result = await cwBitcoinClient.withdrawToBitcoin(
+          {
+            btcAddress: btcAddr
+          },
+          'auto',
+          '',
+          [coin(amount, CWBitcoinFactoryDenom)]
+        );
+
+        processTxResult(
+          fromToken.rpc,
+          // @ts-ignore-check
+          result,
+          '/bitcoin-dashboard?tab=pending_withdraws'
+        );
+      } catch (ex) {
+        handleErrorTransaction(ex, {
+          tokenName: from.name,
+          chainName: from.chainId
+        });
+      }
+      return;
+    }
     const { bitcoinAddress: address } = nomic.depositAddress;
 
     if (!address) throw Error('Not found Orai BTC Address');
@@ -373,7 +427,9 @@ const Balance: React.FC<BalanceProps> = () => {
     const btcAddr = await window.Bitcoin.getAddress();
     if (!btcAddr) throw Error('Not found your bitcoin address!');
     if (isBTCToOraichain) {
-      await handleRecoveryAddress();
+      if (fromToken.name !== 'BTC V2') {
+        await handleRecoveryAddress();
+      }
       return handleTransferBTCToOraichain(fromToken, transferAmount, btcAddr);
     }
     return handleTransferOraichainToBTC(fromToken, transferAmount, btcAddr);
@@ -654,7 +710,8 @@ const Balance: React.FC<BalanceProps> = () => {
                   window?.owallet?.isOwallet;
 
                 const isBtcToken = t.chainId === bitcoinChainId && t?.coinGeckoId === 'bitcoin';
-                const TokenItemELement: React.FC<TokenItemProps> = isBtcToken ? TokenItemBtc : TokenItem;
+                const isV2 = false;
+                const TokenItemELement: React.FC<TokenItemProps> = isBtcToken && isV2 ? TokenItemBtc : TokenItem;
                 return (
                   <div key={t.denom}>
                     {!isOwallet && !isMobile() && isBtcToken && (
@@ -723,6 +780,12 @@ const Balance: React.FC<BalanceProps> = () => {
           handleRecoveryAddress={handleRecoveryAddress}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
+        />
+        <DepositBtcModalV2
+          prices={prices}
+          isOpen={isDepositBtcModalV2}
+          open={() => setIsDepositBtcModalV2(true)}
+          close={() => setIsDepositBtcModalV2(false)}
         />
       </div>
     </Content>

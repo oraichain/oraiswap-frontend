@@ -7,9 +7,8 @@ import { PendingDeposits } from './components/PendingDeposits';
 import { Tabs, KeysFilter } from './components/Tabs/Tabs';
 import { useSearchParams } from 'react-router-dom';
 import { PendingWithdraws } from './components/PendingWithdraws';
-import Escrow from './components/Escrow/Escrow';
 
-const BitcoinDashboardV2: React.FC<{}> = () => {
+const BitcoinDashboard: React.FC<{}> = () => {
   const [searchParams, _] = useSearchParams();
   const tab = searchParams.get('tab');
   const renderTabs = () => {
@@ -20,8 +19,6 @@ const BitcoinDashboardV2: React.FC<{}> = () => {
         return <Checkpoint />;
       case KeysFilter.pending_withdraws:
         return <PendingWithdraws />;
-      case KeysFilter.escrow:
-        return <Escrow />;
     }
   };
   return (
@@ -35,4 +32,4 @@ const BitcoinDashboardV2: React.FC<{}> = () => {
   );
 };
 
-export default BitcoinDashboardV2;
+export default BitcoinDashboard;

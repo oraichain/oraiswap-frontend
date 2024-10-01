@@ -3,13 +3,13 @@ import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions'
 import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD } from '@oraichain/oraidex-common';
 import {
   BitcoinConfigInterface,
-  CheckpointData,
-  CheckpointFeeInfoInterface,
+  CheckpointFeeInterface,
   CheckpointParsedData,
   CheckpointQueueInterface,
   CheckpointStatus,
   DepositFeeInterface,
-  EscrowBalanceInterface,
+  DepositInfo,
+  PendingDeposit,
   TotalValueLockedInterface,
   TransactionInput,
   TransactionOutput,
@@ -19,6 +19,7 @@ import {
 } from '../@types';
 import { useQuery } from '@tanstack/react-query';
 import { convertScriptPubkeyToBtcAddress } from '../utils/bitcoin';
+import { bitcoinLcdV2 } from 'helper/constants';
 
 const axios = Axios.create({
   timeout: AXIOS_TIMEOUT,
@@ -29,13 +30,13 @@ const axios = Axios.create({
       threshold: AXIOS_THROTTLE_THRESHOLD
     })
   ),
-  baseURL: 'https://btc.lcd.orai.io'
+  baseURL: `${bitcoinLcdV2}/api`
 });
 
 const getCheckpointQueue = async (): Promise<CheckpointQueueInterface> => {
   try {
     const res = await axios.get('/bitcoin/checkpoint_queue', {});
-    return res.data;
+    return res.data.data;
   } catch (e) {
     console.error('getCheckpointQueue', e);
     return {
@@ -47,7 +48,7 @@ const getCheckpointQueue = async (): Promise<CheckpointQueueInterface> => {
 };
 
 export const useGetCheckpointQueue = () => {
-  const { data } = useQuery(['checkpoint_queue'], getCheckpointQueue, {
+  const { data } = useQuery(['checkpoint_queue_v2'], getCheckpointQueue, {
     refetchOnWindowFocus: true,
     staleTime: 30 * 1000
   });
@@ -59,7 +60,7 @@ const getTotalValueLocked = async (): Promise<TotalValueLockedInterface> => {
     const res = await axios.get('/bitcoin/value_locked', {
       params: {}
     });
-    return res.data;
+    return { value: res.data.data };
   } catch (e) {
     console.error('getTotalValueLocked', e);
     return {
@@ -69,7 +70,7 @@ const getTotalValueLocked = async (): Promise<TotalValueLockedInterface> => {
 };
 
 export const useGetTotalValueLocked = () => {
-  const { data } = useQuery(['value_locked'], () => getTotalValueLocked(), {
+  const { data } = useQuery(['value_locked_v2'], () => getTotalValueLocked(), {
     refetchOnWindowFocus: true,
     staleTime: 30 * 1000
   });
@@ -79,7 +80,7 @@ export const useGetTotalValueLocked = () => {
 const getBitcoinConfig = async (): Promise<BitcoinConfigInterface> => {
   try {
     const res = await axios.get('/bitcoin/config', {});
-    return res.data;
+    return res.data.data;
   } catch (e) {
     console.error('getBitcoinConfig', e);
     return {
@@ -102,7 +103,7 @@ const getBitcoinConfig = async (): Promise<BitcoinConfigInterface> => {
 };
 
 export const useGetBitcoinConfig = () => {
-  const { data } = useQuery(['bitcoin_config'], getBitcoinConfig, {
+  const { data } = useQuery(['bitcoin_config_v2'], getBitcoinConfig, {
     refetchOnWindowFocus: true,
     staleTime: Infinity
   });
@@ -111,12 +112,12 @@ export const useGetBitcoinConfig = () => {
 
 const getDepositFee = async (checkpointIndex?: number): Promise<DepositFeeInterface> => {
   try {
-    const res = await axios.get('/bitcoin/deposit_fees', {
+    const res = await axios.get('/checkpoint/deposit_fee', {
       params: {
         checkpoint_index: checkpointIndex
       }
     });
-    return res.data;
+    return { deposit_fees: res.data.data };
   } catch (e) {
     console.error('getDepositFee', e);
     return {
@@ -126,7 +127,7 @@ const getDepositFee = async (checkpointIndex?: number): Promise<DepositFeeInterf
 };
 
 export const useGetDepositFee = (checkpointIndex?: number) => {
-  const { data } = useQuery(['deposit_fees', checkpointIndex], () => getDepositFee(checkpointIndex), {
+  const { data } = useQuery(['deposit_fee_v2', checkpointIndex], () => getDepositFee(checkpointIndex), {
     refetchOnWindowFocus: true,
     staleTime: 10 * 60 * 1000
   });
@@ -136,14 +137,15 @@ export const useGetDepositFee = (checkpointIndex?: number) => {
 export const useGetWithdrawalFee = (btcAddress: string, checkpointIndex?: number) => {
   const getWithdrawalFee = async (btcAddress: String, checkpointIndex?: number): Promise<WithdrawalFeeInterface> => {
     try {
-      const res = await axios.get(`/bitcoin/withdrawal_fees/${btcAddress}`, {
+      const res = await axios.get(`/checkpoint/withdraw_fee`, {
         params: {
-          checkpoint_index: checkpointIndex
+          address: btcAddress,
+          index: checkpointIndex
         }
       });
-      return res.data;
+      return { withdrawal_fees: res.data.data };
     } catch (e) {
-      console.error('getDepositFee', e);
+      console.error('getWithdrawalFee', e);
       return {
         withdrawal_fees: 0
       };
@@ -151,24 +153,53 @@ export const useGetWithdrawalFee = (btcAddress: string, checkpointIndex?: number
   };
 
   const { data } = useQuery(
-    ['withdrawal_fees', btcAddress, checkpointIndex],
+    ['withdraw_fee_v2', btcAddress, checkpointIndex],
     () => getWithdrawalFee(btcAddress, checkpointIndex),
     {
       refetchOnWindowFocus: true,
-      enabled: !!btcAddress && !!checkpointIndex,
+      enabled: !!btcAddress,
       staleTime: 10 * 60 * 1000
     }
   );
   return data;
 };
 
+export const useGetCheckpointFee = (checkpointIndex?: number) => {
+  const getCheckpointFee = async (checkpointIndex?: number): Promise<CheckpointFeeInterface> => {
+    try {
+      const res = await axios.get(`/checkpoint/checkpoint_fee`, {
+        params: {
+          index: checkpointIndex
+        }
+      });
+      return { checkpoint_fees: res.data.data };
+    } catch (e) {
+      console.error('getCheckpointFee', e);
+      return {
+        checkpoint_fees: 0
+      };
+    }
+  };
+
+  const { data } = useQuery(['checkpoint_fee_v2', checkpointIndex], () => getCheckpointFee(checkpointIndex), {
+    refetchOnWindowFocus: true,
+    enabled: !!checkpointIndex,
+    staleTime: 10 * 60 * 1000
+  });
+  return data;
+};
+
 const getCheckpointData = async (checkpointIndex?: number): Promise<CheckpointParsedData> => {
   try {
-    const res = await axios.get(`/bitcoin/checkpoint/${checkpointIndex}`, {});
+    const res = await axios.get(`/checkpoint`, {
+      params: {
+        index: checkpointIndex
+      }
+    });
     let data = res.data.data;
     let status = data.status;
     // Slice 1 to remove the input of previosu checkpoint
-    data.transaction.data.input = data.transaction.data.input.slice(1).map((item: TransactionInput) => {
+    data.transaction.data.input = data.transaction.data.input.map((item: TransactionInput) => {
       let [txid, vout] = item.previous_output.split(':');
       return {
         txid,
@@ -184,8 +215,10 @@ const getCheckpointData = async (checkpointIndex?: number): Promise<CheckpointPa
           value: item.value
         };
       }) as TransactionParsedOutput;
+
     return data;
   } catch (e) {
+    console.log(e);
     return {
       fee_collected: 0,
       fee_rate: 0,
@@ -211,55 +244,83 @@ const getCheckpointData = async (checkpointIndex?: number): Promise<CheckpointPa
 };
 
 export const useGetCheckpointData = (checkpointIndex?: number) => {
-  const { data } = useQuery(['bitcoin_checkpoint', checkpointIndex], () => getCheckpointData(checkpointIndex), {
+  const { data } = useQuery(['checkpoint_v2', checkpointIndex], () => getCheckpointData(checkpointIndex), {
     refetchOnWindowFocus: true,
     staleTime: 30 * 1000
   });
   return data;
 };
 
-const getCheckpointFeeInfo = async (): Promise<CheckpointFeeInfoInterface> => {
+const getPendingDeposits = async (address?: String): Promise<DepositInfo[]> => {
   try {
-    const res = await axios.get(`/bitcoin/checkpoint_fee_info`, {});
-    return res.data;
-  } catch (e) {
-    console.error('getCheckpointFeeInfo', e);
-    return {
-      fees_collected: 0,
-      miner_fee: 0
-    };
-  }
-};
-
-export const useGetCheckpointFeeInfo = () => {
-  const { data } = useQuery(['checkpoint_fee_info'], getCheckpointFeeInfo, {
-    refetchOnWindowFocus: true,
-    staleTime: 30 * 1000
-  });
-  return data;
-};
-
-const getEscrowBalance = async (address: String): Promise<EscrowBalanceInterface> => {
-  try {
-    const res = await axios.get(`/bitcoin/escrow_address`, {
+    const res = await axios.get('/bitcoin/pending_deposits', {
       params: {
         address
       }
     });
-    return res.data;
+    return res.data.data.map((item: PendingDeposit) => ({
+      confirmations: item.confirmations,
+      ...item.deposit
+    })) as DepositInfo[];
   } catch (e) {
-    console.error('getEscrowBalance', e);
+    console.error('getPendingDeposits', e);
+    return [];
+  }
+};
+
+export const useGetPendingDeposits = (address?: String) => {
+  const { data } = useQuery(['pending_deposits_v2', address], () => getPendingDeposits(address), {
+    refetchOnWindowFocus: true,
+    refetchInterval: 10000
+  });
+  return data;
+};
+
+export interface ConfigResponse {
+  osor_entry_point_contract?: string | null;
+  owner: string;
+  relayer_fee: string;
+  relayer_fee_receiver: string;
+  relayer_fee_token: any;
+  swap_router_contract?: string | null;
+  token_factory_addr: string;
+  token_fee: {
+    denominator: number;
+    nominator: number;
+  };
+  token_fee_receiver: string;
+}
+
+const getContractConfig = async (): Promise<ConfigResponse> => {
+  try {
+    const res = await axios.get('/contract/config', {
+      params: {}
+    });
+    return res.data.data;
+  } catch (e) {
+    console.error('getContractConfig', e);
+    // generate me default object of ConfigResponse
     return {
-      escrow_balance: 0
+      osor_entry_point_contract: null,
+      owner: '',
+      relayer_fee: '',
+      relayer_fee_receiver: '',
+      relayer_fee_token: {},
+      swap_router_contract: null,
+      token_factory_addr: '',
+      token_fee: {
+        denominator: 1,
+        nominator: 0
+      },
+      token_fee_receiver: ''
     };
   }
 };
 
-export const useGetEscrowBalance = (address: String) => {
-  const { data } = useQuery(['get_escrow_balance'], () => getEscrowBalance(address), {
+export const useGetContractConfig = () => {
+  const { data } = useQuery(['cw_bitcoin_contract_config_v2'], () => getContractConfig(), {
     refetchOnWindowFocus: true,
-    staleTime: 30 * 1000,
-    enabled: address !== undefined && address !== null
+    refetchInterval: 10000
   });
   return data;
 };
