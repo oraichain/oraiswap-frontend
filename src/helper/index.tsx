@@ -641,3 +641,18 @@ export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, heigh
     return <DefaultIcon />;
   }
 };
+
+export const getIconToken = ({ isLightTheme, denom, width = 18, height = 18 }) => {
+  const tokenIcon = flattenTokensWithIcon.find((tokenWithIcon) =>
+    [tokenWithIcon.contractAddress, tokenWithIcon.denom].includes(denom)
+  );
+  if (tokenIcon) {
+    return isLightTheme ? (
+      <tokenIcon.IconLight width={width} height={height} />
+    ) : (
+      <tokenIcon.Icon width={width} height={height} />
+    );
+  }
+
+  return <DefaultIcon />;
+};

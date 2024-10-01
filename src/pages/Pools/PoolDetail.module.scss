@@ -3,7 +3,7 @@
 
 .pool_detail {
   max-width: 90%;
-  margin: 40px auto 0;
+  margin: 40px auto 40px;
 
   @media screen and (max-width: 1200px) {
     max-width: 95%;
@@ -118,8 +118,17 @@
       }
 
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 400;
       line-height: 150%; /* 21px */
+
+      .divider {
+        padding: 0 6px;
+        opacity: 0.3;
+
+        @include theme {
+          color: theme-get('neutral-9');
+        }
+      }
 
       svg {
         width: 24px;

@@ -33,11 +33,11 @@ const TransactionHistory = ({
   const baseDenom = baseToken && parseTokenInfoRawDenom(baseToken);
   const quoteDenom = quoteToken && parseTokenInfoRawDenom(quoteToken);
 
-  const { txHistories, isLoading } = useTransactionHistory(poolKey);
+  const { txHistories, isFetched } = useTransactionHistory(poolKey);
 
-  if (isLoading) {
+  if (!isFetched) {
     return (
-      <LoadingBox loading={false} className={styles.loadingDivWrapper}>
+      <LoadingBox loading={true} className={styles.loadingDivWrapper}>
         <div className={styles.loadingDiv}></div>
       </LoadingBox>
     );

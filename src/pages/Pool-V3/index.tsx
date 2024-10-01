@@ -36,8 +36,8 @@ type TabRender = {
 const listTab = Object.values(PoolV3PageType);
 const listTabRender: TabRender[] = [
   { id: PoolV3PageType.POOL, value: 'Pools', content: PoolList },
-  { id: PoolV3PageType.POSITION, value: 'Your LPs', content: PositionList },
-  { id: PoolV3PageType.LP_V2, value: 'My Pools (V2)', content: Pools }
+  { id: PoolV3PageType.POSITION, value: 'My LPs V3', content: PositionList },
+  { id: PoolV3PageType.LP_V2, value: 'My LPs V2', content: Pools }
 ];
 
 const PoolV3 = () => {

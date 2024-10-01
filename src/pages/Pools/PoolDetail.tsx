@@ -29,6 +29,7 @@ import { Button } from 'components/Button';
 import { ReactComponent as AddIcon } from 'assets/icons/Add.svg';
 import { parseAssetOnlyDenom } from './helpers';
 import { AddLiquidityModal } from './components/AddLiquidityModal';
+import { numberWithCommas } from 'helper/format';
 
 const PoolDetail: React.FC = () => {
   const theme = useTheme();
@@ -139,11 +140,10 @@ const PoolDetail: React.FC = () => {
               </div>
             </div>
             <div className={styles.price}>
-              {/* <div>
-              <BaseTokenIcon />
-            </div> */}
-              1 {baseToken?.name} = {(priceChange?.price || 0).toFixed(6)} {quoteToken?.name}
-              {isMobileMode ? <br /> : '|'}1 {quoteToken?.name} = {1 / (priceChange?.price || 1).toFixed(6)}{' '}
+              1 {baseToken?.name} = {numberWithCommas(priceChange?.price || 0, undefined, { maximumFractionDigits: 6 })}{' '}
+              {quoteToken?.name}
+              {isMobileMode ? <br /> : <div className={styles.divider}>|</div>}1 {quoteToken?.name} ={' '}
+              {numberWithCommas(1 / (priceChange?.price || 1), undefined, { maximumFractionDigits: 6 })}{' '}
               {baseToken?.name}
             </div>
           </div>
