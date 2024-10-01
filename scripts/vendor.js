@@ -16,7 +16,7 @@ const path = require('path');
 const fs = require('fs');
 const packageJson = require('../package.json');
 const { fallback } = require('../config-overrides');
-const ignores = ['@oraichain/oraidex-common'];
+const ignores = [];
 const chalk = require('react-dev-utils/chalk');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 
