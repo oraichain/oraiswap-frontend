@@ -367,7 +367,9 @@ const PoolV3Detail = () => {
             {
               id: 'txs',
               value: 'Transactions',
-              content: <TransactionHistory baseToken={tokenXinfo} quoteToken={tokenYinfo} />
+              content: (
+                <TransactionHistory poolKey={poolDetail?.poolKey} baseToken={tokenXinfo} quoteToken={tokenYinfo} />
+              )
             }
           ]}
         />

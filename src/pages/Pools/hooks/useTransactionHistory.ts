@@ -26,6 +26,7 @@ export const getDataSwapHistorical = async (offerDenom: string, askDenom: string
         limit: LIMIT_TXS
       }
     });
+    console.log('res.data', res.data);
     return res.data;
   } catch (e) {
     console.error('getDataSwapHistorical', e);

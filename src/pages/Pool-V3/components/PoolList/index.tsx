@@ -131,7 +131,19 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
       const showLiquidity =
         type === POOL_TYPE.V3 ? poolLiquidities?.[item?.poolKey] : toDisplay(Math.trunc(liquidityV2 || 0).toString());
       const showVolume = type === POOL_TYPE.V3 ? volumeV3 : toDisplay(volumeV2 || 0);
-      const showApr = aprInfo?.[poolKey] || aprInfo?.[liquidityAddr] || {};
+
+      let showApr = aprInfo?.[poolKey] || aprInfo?.[liquidityAddr] || {};
+
+      if (type === POOL_TYPE.V2) {
+        showApr = {
+          ...showApr,
+          apr: {
+            min: showApr['apr']['min'] / 100,
+            max: showApr['apr']['max'] / 100
+          },
+          swapFee: showApr['swapFee'] / 100
+        };
+      }
 
       return {
         ...item,
