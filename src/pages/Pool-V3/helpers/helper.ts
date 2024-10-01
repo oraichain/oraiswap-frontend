@@ -97,36 +97,6 @@ export const formatNumbers =
     return num < 0 && threshold ? '-' + formatted : formatted;
   };
 
-export function formatMoney(num) {
-  if (num === 0) {
-    return num.toString();
-  }
-
-  let numStr = num.toString();
-
-  const decimalIndex = numStr.indexOf('.');
-
-  if (decimalIndex === -1) return numStr;
-
-  const integerPart = numStr.slice(0, decimalIndex);
-  const decimalPart = numStr.slice(decimalIndex + 1);
-
-  let decimalsToShow;
-  if (num >= 1) {
-    decimalsToShow = 1;
-  } else if (num < 0.0001) {
-    decimalsToShow = 6;
-  } else {
-    decimalsToShow = 4;
-  }
-
-  const formattedDecimalPart = decimalPart.slice(0, decimalsToShow);
-  let stringArr = `.${formattedDecimalPart}`;
-  if (!formattedDecimalPart || formattedDecimalPart === '0') stringArr = '';
-
-  return `${numberWithCommas(Number(integerPart), undefined)}${stringArr}`;
-}
-
 export const showPrefix = (nr: number, config: PrefixConfig = defaultPrefixConfig): string => {
   const abs = Math.abs(nr);
 
@@ -197,7 +167,7 @@ export const _calculateTokenAmounts = (pool: Pool, position: Position, sign: boo
     position.lower_tick_index
   );
 };
-// 8e-6 usdt = 1 pepe 
+// 8e-6 usdt = 1 pepe
 
 export const calculateFee = (pool: Pool, position: Position, lowerTick: Tick, upperTick: Tick): TokenAmounts => {
   return wasmCalculateFee(

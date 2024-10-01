@@ -47,6 +47,7 @@ import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import { calculateTokenAmountsWithSlippage, calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
 import { numberWithCommas } from 'helper/format';
 import { extractAddress } from 'pages/Pool-V3/helpers/format';
+import { minimize } from 'helper';
 
 export type PriceInfo = {
   startPrice: number;
@@ -889,7 +890,8 @@ const CreatePosition = () => {
               </div>
               <div className={styles.minMaxPriceValue}>
                 <p>
-                  <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
+                  {/* <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
+                  <p>{minimize(leftInputRounded)}</p>
                   <p className={styles.pair}>
                     {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
                   </p>
@@ -914,7 +916,8 @@ const CreatePosition = () => {
               </div>
               <div className={styles.minMaxPriceValue}>
                 <p>
-                  <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
+                  <p>{minimize(rightInputRounded)}</p>
+                  {/* <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
                   <p className={styles.pair}>
                     {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
                   </p>

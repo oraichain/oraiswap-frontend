@@ -246,7 +246,6 @@ const NewPositionNoPool = ({
                   onLeftInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
-
                   const tokenXDecimals = isXtoY ? fromToken.decimals : toToken.decimals;
                   const tokenYDecimals = isXtoY ? toToken.decimals : fromToken.decimals;
 
@@ -260,7 +259,6 @@ const NewPositionNoPool = ({
                         Number(nearestTickIndex(+leftInput, tickSpacing, isXtoY, tokenXDecimals, tokenYDecimals))
                       );
 
-                  
                   changeRangeHandler(newLeft, rightRange);
                 }}
               />
@@ -322,7 +320,6 @@ const NewPositionNoPool = ({
                   onRightInputChange((floatValue || 0).toString());
                 }}
                 onBlur={() => {
-
                   const tokenXDecimals = isXtoY ? fromToken.decimals : toToken.decimals;
                   const tokenYDecimals = isXtoY ? toToken.decimals : fromToken.decimals;
 

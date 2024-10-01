@@ -1,4 +1,4 @@
-import { CW20_STAKING_CONTRACT, ORAI, calculateMinReceive, toDisplay } from '@oraichain/oraidex-common';
+import { CW20_STAKING_CONTRACT, ORAI, calculateMinReceive, toDisplay, BigDecimal } from '@oraichain/oraidex-common';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
@@ -6,7 +6,7 @@ import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
 
 import { Cw20StakingClient, OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import { Type, handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
+import { Type, UniversalSwapHelper } from '@oraichain/oraidex-universal-swap';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -50,7 +50,7 @@ const StakeInfo = () => {
 
   useEffect(() => {
     (async () => {
-      const simulateData = await handleSimulateSwap({
+      const simulateData = await UniversalSwapHelper.handleSimulateSwap({
         originalFromInfo: USDC_TOKEN_INFO,
         originalToInfo: ORAIX_TOKEN_INFO,
         originalAmount: toDisplay(reward),
@@ -106,18 +106,8 @@ const StakeInfo = () => {
         }
       };
 
-      const [simulateData, averageRatioData] = await Promise.all([
-        handleSimulateSwap({
-          originalFromInfo: USDC_TOKEN_INFO,
-          originalToInfo: ORAIX_TOKEN_INFO,
-          originalAmount: toDisplay(reward),
-          routerClient,
-          routerOption: {
-            useIbcWasm: true
-          },
-          routerConfig: getRouterConfig()
-        }),
-        handleSimulateSwap({
+      const [averageRatioData] = await Promise.all([
+        UniversalSwapHelper.handleSimulateSwap({
           originalFromInfo: USDC_TOKEN_INFO,
           originalToInfo: ORAIX_TOKEN_INFO,
           originalAmount: 1,
@@ -129,7 +119,8 @@ const StakeInfo = () => {
         })
       ]);
 
-      const minimumReceive = calculateMinReceive(averageRatioData.amount, reward, 1, USDC_TOKEN_INFO.decimals);
+      const slippage = 1;
+      const minimumReceive = calculateMinReceive(averageRatioData.amount, reward, slippage, USDC_TOKEN_INFO.decimals);
 
       const msgSwap = generateContractMessages({
         type: Type.SWAP,
@@ -143,7 +134,7 @@ const StakeInfo = () => {
       const msgStake = generateMiningMsgs({
         type: Type.BOND_STAKING_CW20,
         sender: address,
-        amount: simulateData.amount,
+        amount: minimumReceive,
         lpAddress: ORAIX_TOKEN_INFO.contractAddress
       });
 
