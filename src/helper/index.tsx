@@ -602,14 +602,17 @@ export const minimize = (priceUsd: string) => {
 
 export function formatMoney(num) {
   if (num === 0) return num.toString();
+
   let numStr = num.toString();
   const decimalIndex = numStr.indexOf('.');
+
   if (decimalIndex === -1) return numStr;
+
   const integerPart = numStr.slice(0, decimalIndex);
   const decimalPart = numStr.slice(decimalIndex + 1);
-  const decimalsToShow = num >= 1 ? 1 : num < 0.0001 ? 6 : 4;
-
+  const decimalsToShow = num >= 1 ? 3 : num < 0.0001 ? 6 : 4;
   const formattedDecimalPart = decimalPart.slice(0, decimalsToShow);
+
   let stringArr = `.${formattedDecimalPart}`;
   if (!formattedDecimalPart || formattedDecimalPart === '0') stringArr = '';
 
