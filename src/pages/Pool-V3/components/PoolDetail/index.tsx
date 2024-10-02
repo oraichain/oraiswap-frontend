@@ -72,26 +72,6 @@ const PoolV3Detail = () => {
   const { positions: userPositions } = useGetPositions(address);
   const { liquidityDistribution } = useGetPoolDetail(poolKeyString, poolPrice);
 
-  // const [midPrice, setMidPrice] = useState<TickPlotPositionData>(() => {
-  //   const isXToY = isTokenX(extractAddress(tokenFrom), extractAddress(tokenTo));
-
-  //   const tokenXDecimals = isXToY ? tokenFrom?.decimals ?? 6 : tokenTo?.decimals ?? 6;
-  //   const tokenYDecimals = isXToY ? tokenTo?.decimals ?? 6 : tokenFrom?.decimals ?? 6;
-
-  //   const tickIndex = nearestTickIndex(
-  //     priceInfo.startPrice,
-  //     feeTier.tick_spacing,
-  //     isXToY,
-  //     tokenXDecimals,
-  //     tokenYDecimals
-  //   );
-
-  //   return {
-  //     index: tickIndex,
-  //     x: calcPrice(tickIndex, isXToY, tokenXDecimals, tokenYDecimals)
-  //   };
-  // });
-
   useEffect(() => {
     (async () => {
       try {
@@ -218,12 +198,6 @@ const PoolV3Detail = () => {
             {/* <span className={styles.item}>{toDisplay((spread || 0).toString(), 3)}% Spread</span> */}
             <span className={styles.item}>0.01% Spread</span>
           </div>
-
-          {/* <div className={styles.price}>
-            1 {tokenXinfo?.name} = {(priceChange?.price || 0).toFixed(6)} {tokenYinfo?.name}
-            {isMobileMode ? <br /> : '|'}1 {tokenYinfo?.name} = {1 / (priceChange?.price || 1).toFixed(6)}{' '}
-            {tokenXinfo?.name}
-          </div> */}
         </div>
 
         <div className={styles.addPosition}>

@@ -272,9 +272,6 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
     }
   };
 
-  // const Token1Icon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
-  // const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
-
   const isLightTheme = theme === 'light';
 
   const Token1Icon = token1 && getIconToken({ denom: token1.denom, isLightTheme });
