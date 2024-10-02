@@ -5,7 +5,7 @@ name: One-Step
 # Controls when the action will run.
 on:
   release:
-    types: [fix/hmstr]
+    types: [published]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
