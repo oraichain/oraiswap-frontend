@@ -8,7 +8,7 @@ export const btcNetwork: any = 'bitcoin';
 export const bitcoinChainId: any = ChainIdEnum.Bitcoin;
 export const bitcoinLcd = 'https://btc.lcd.orai.io';
 export const bitcoinLcdV2 = 'https://relayer-btc.oraidex.io';
-export const CWAppBitcoinContractAddress = 'orai1xt4ahzz2x8hpkc0tk6ekte9x6crw4w6u0r67cyt3kz9syh24pd7sxfqs0x';
+export const CWAppBitcoinContractAddress = 'orai12sxqkgsystjgd9faa48ghv3zmkfqc6qu05uy20mvv730vlzkpvls5zqxuz';
 export const CWBitcoinFactoryDenom = 'factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/obtc';
 
 export const MIN_DEPOSIT_BTC = 600;

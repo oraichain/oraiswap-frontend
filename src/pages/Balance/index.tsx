@@ -338,7 +338,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
     if (fromToken.name === 'BTC V2') {
-      // @ts-ignore-check
       try {
         const amountInput = BigInt(
           Decimal.fromUserInput(toAmount(transferAmount, 14).toString(), 14).atomics.toString()
@@ -346,7 +345,6 @@ const Balance: React.FC<BalanceProps> = () => {
         const amount = Decimal.fromAtomics(amountInput.toString(), 14).toString();
         let sender = await window.Keplr.getKeplrAddr(fromToken?.chainId);
         let cwBitcoinClient = new AppBitcoinClient(window.client, sender, CWAppBitcoinContractAddress);
-
         const result = await cwBitcoinClient.withdrawToBitcoin(
           {
             btcAddress: btcAddr
@@ -363,6 +361,7 @@ const Balance: React.FC<BalanceProps> = () => {
           '/bitcoin-dashboard?tab=pending_withdraws'
         );
       } catch (ex) {
+        console.log(ex);
         handleErrorTransaction(ex, {
           tokenName: from.name,
           chainName: from.chainId
@@ -414,13 +413,10 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const checkTransferBtc = async (fromAmount: number, isBTCtoOraichain: boolean, isOraichainToBTC: boolean) => {
-    if (isBTCtoOraichain || isOraichainToBTC)
-      return handleTransferBTC({
-        isBTCToOraichain: isBTCtoOraichain,
-        fromToken: from,
-        transferAmount: fromAmount
-      });
+  const checkTransferBtc = () => {
+    const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
+    const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
+    return [isBTCtoOraichain, isBTCtoOraichain || isOraichainToBTC];
   };
 
   const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
@@ -490,10 +486,14 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
-      const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
-      const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
-      if (isBTCtoOraichain || isOraichainToBTC) {
-        return await checkTransferBtc(fromAmount, isBTCtoOraichain, isOraichainToBTC);
+      // [BTC Native] <==> ORAICHAIN
+      let [isBTCToOraichain, isBtcBridge] = checkTransferBtc();
+      if (isBtcBridge) {
+        return handleTransferBTC({
+          isBTCToOraichain: isBTCToOraichain,
+          fromToken: from,
+          transferAmount: fromAmount
+        });
       }
 
       let newToToken = to;
