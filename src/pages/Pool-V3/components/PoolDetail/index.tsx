@@ -246,19 +246,19 @@ const PoolV3Detail = () => {
 
           <div className={classNames(styles.box, styles.alloc)}>
             <p>Liquidity Allocation</p>
-            <div className={styles.tokensAlloc}>
+            {/* <div className={styles.tokensAlloc}>
               <div className={styles.base} style={{ width: `50%` }}></div>
               <div className={styles.quote} style={{ width: `50%` }}></div>
-            </div>
+            </div> */}
             <div className={styles.tokens}>
               <div className={classNames(styles.tokenItem, styles[theme])}>
                 {FromTokenIcon && <FromTokenIcon />}
-                <span>{tokenXinfo?.name?.toUpperCase()}</span>
+                {/* <span>{tokenXinfo?.name?.toUpperCase()}</span> */}
                 <span className={styles.value}>{formatNumberKMB(balanceX, false)}</span>
               </div>
               <div className={classNames(styles.tokenItem, styles[theme])}>
                 {ToTokenIcon && <ToTokenIcon />}
-                <span>{tokenYinfo?.name?.toUpperCase()}</span>
+                {/* <span>{tokenYinfo?.name?.toUpperCase()}</span> */}
                 <span className={styles.value}>{formatNumberKMB(balanceY, false)}</span>
               </div>
             </div>

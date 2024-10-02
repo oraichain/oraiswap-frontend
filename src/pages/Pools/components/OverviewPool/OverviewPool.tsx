@@ -61,21 +61,15 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
 
         <div className={classNames(styles.box, styles.alloc)}>
           <p>Liquidity Allocation</p>
-          <div className={styles.tokensAlloc}>
-            <div className={styles.base} style={{ width: `50%` }}></div>
-            <div className={styles.quote} style={{ width: `50%` }}></div>
-          </div>
           <div className={styles.tokens}>
             <div className={classNames(styles.tokenItem, styles[theme])}>
               {BaseTokenIcon && <BaseTokenIcon />}
-              <span>{token1?.name?.toUpperCase()}</span>
               <span className={styles.value}>
                 {formatNumberKMB(toDisplay(pairAmountInfoData?.token1Amount || '0'), false)}
               </span>
             </div>
             <div className={classNames(styles.tokenItem, styles[theme])}>
               {QuoteTokenIcon && <QuoteTokenIcon />}
-              <span>{token2?.name?.toUpperCase()}</span>
               <span className={styles.value}>
                 {formatNumberKMB(toDisplay(pairAmountInfoData?.token2Amount || '0'), false)}
               </span>
