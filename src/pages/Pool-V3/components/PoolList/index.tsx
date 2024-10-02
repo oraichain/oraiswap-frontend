@@ -138,10 +138,10 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
         showApr = {
           ...showApr,
           apr: {
-            min: showApr['apr']['min'] / 100,
-            max: showApr['apr']['max'] / 100
+            min: (showApr['apr']?.['min'] || 0) / 100,
+            max: (showApr['apr']?.['max'] || 0) / 100
           },
-          swapFee: showApr['swapFee'] / 100
+          swapFee: (showApr['swapFee'] || 0) / 100
         };
       }
 
