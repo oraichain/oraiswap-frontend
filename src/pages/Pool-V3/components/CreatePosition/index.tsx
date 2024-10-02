@@ -986,7 +986,7 @@ const CreatePosition = () => {
             className={styles.back}
             onClick={() => {
               // navigate(-1);
-              navigate('/pools-v3');
+              navigate('/pools');
             }}
           >
             <BackIcon />

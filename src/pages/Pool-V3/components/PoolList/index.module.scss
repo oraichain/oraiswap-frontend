@@ -324,7 +324,7 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       align-self: stretch;
       flex-wrap: nowrap;
       white-space: nowrap;
@@ -336,6 +336,43 @@
       @include small-mobile {
         flex-direction: column;
         align-items: flex-start;
+      }
+
+      .title {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+
+        @include mobile {
+          gap: 8px;
+        }
+
+        .tag {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 26px;
+          height: 24px;
+          padding: 2px;
+          gap: 10px;
+          border-radius: 6px;
+
+          @include theme {
+            border: 1px solid theme-get('colors-neutral-border-border-bold');
+            color: theme-get('colors-neutral-text-body-on-row');
+          }
+
+          &.v3 {
+            @include theme {
+              border: 1px solid theme-get('primary-surface-default-dark-3');
+              color: theme-get('primary-surface-default-dark-3');
+            }
+          }
+
+          font-size: 12px;
+          font-weight: 500;
+          line-height: 150%; /* 18px */
+        }
       }
 
       .info {
@@ -368,9 +405,9 @@
       .fee {
         display: flex;
         align-items: center;
-        height: 32px;
-        padding: 0 12px;
-        border-radius: 8px;
+        height: 24px;
+        padding: 12px;
+        border-radius: 6px;
         border: 1px solid #494949;
 
         @include theme {
@@ -454,6 +491,14 @@
     .tooltipWrapper {
       margin-top: -4px;
     }
+  }
+
+  .paginate {
+    width: 100%;
+    padding: 24px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -596,5 +641,5 @@
 }
 
 .tooltipWrapper {
-  background-color: #232521;
+  // background-color: #232521;
 }

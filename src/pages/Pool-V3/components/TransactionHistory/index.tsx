@@ -12,10 +12,18 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd, reduceString } from 'libs/utils';
 import { formatDateV2, formatTime } from 'pages/CoHarvest/helpers';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { useTransactionHistory } from 'pages/Pools/hooks/useTransactionHistory';
 import styles from './index.module.scss';
+import { useTransactionHistory } from 'pages/Pool-V3/hooks/useTransactionHistory';
 
-const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemType; quoteToken: TokenItemType }) => {
+const TransactionHistory = ({
+  baseToken,
+  quoteToken,
+  poolKey
+}: {
+  baseToken: TokenItemType;
+  quoteToken: TokenItemType;
+  poolKey: string;
+}) => {
   const [theme] = useConfigReducer('theme');
   const mobileMode = isMobile();
   const { data: prices } = useCoinGeckoPrices();
@@ -25,7 +33,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
   const baseDenom = baseToken && parseTokenInfoRawDenom(baseToken);
   const quoteDenom = quoteToken && parseTokenInfoRawDenom(quoteToken);
 
-  const { txHistories, isFetched } = useTransactionHistory(baseDenom, quoteDenom);
+  const { txHistories, isFetched } = useTransactionHistory(poolKey);
 
   if (!isFetched) {
     return (
@@ -54,8 +62,8 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                   if (returnToken)
                     QuoteTokenIcon = theme === 'light' ? returnToken.IconLight || returnToken.Icon : returnToken.Icon;
 
-                  const returnUSD = getUsd(item.returnAmount, returnToken, prices);
-                  const feeUSD = getUsd(item.commissionAmount, returnToken, prices);
+                  const returnUSD = item.volumeUSD;
+                  const feeUSD = item.commissionAmount;
 
                   return (
                     <div className={styles.item} key={index}>
@@ -174,8 +182,8 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                         QuoteTokenIcon =
                           theme === 'light' ? returnToken.IconLight || returnToken.Icon : returnToken.Icon;
 
-                      const returnUSD = getUsd(item.returnAmount, returnToken, prices);
-                      const feeUSD = getUsd(item.commissionAmount, returnToken, prices);
+                      const returnUSD = item.volumeUSD;
+                      const feeUSD = item.commissionAmount;
 
                       return (
                         <tr className={styles.item} key={index}>
