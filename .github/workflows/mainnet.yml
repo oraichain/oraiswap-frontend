@@ -48,7 +48,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}/yarn/
       - name: remove @oraichain/oraidex-common
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: |
           rm -rf node_modules/@oraichain/oraidex-universal-swap/node_modules/@oraichain/oraidex-common
           rm -rf node_modules/@oraichain/oraiswap-v3/node_modules/@oraichain/oraidex-common
