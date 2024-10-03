@@ -793,7 +793,7 @@ export function simulateAprPosition(
     BigInt(positionLiquidity),
     false,
     pool.current_tick_index + tick_spacing,
-    pool.current_tick_index - tick_spacing ? pool.current_tick_index - tick_spacing : 0
+    pool.current_tick_index ? pool.current_tick_index : 0
   );
 
   const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
@@ -821,8 +821,8 @@ export function simulateAprPosition(
     BigInt(pool.sqrt_price),
     BigInt(positionLiquidity2),
     false,
-    pool.current_tick_index + tick_spacing * 20,
-    pool.current_tick_index - tick_spacing * 20 ? pool.current_tick_index - tick_spacing * 20 : 0
+    getMaxTick(tick_spacing),
+    getMinTick(tick_spacing)
   );
 
   const positionLiquidityUsdX2 = ((prices[tokenX.coinGeckoId] ?? 0) * Number(res2.x)) / 10 ** tokenX.decimals;
