@@ -351,6 +351,29 @@ export const getPoolsVolumeByTokenLatest24h = async (): Promise<PoolLiquidityAnd
   }
 };
 
+export const getChartPoolsV3ByDay = async (): Promise<any[]> => {
+  try {
+    const document = gql`
+      query PoolDayData {
+        poolDayData(orderBy: DAY_INDEX_DESC) {
+          groupedAggregates(groupBy: DAY_INDEX) {
+            keys
+            sum {
+              tvlUSD
+              volumeInUSD
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.poolDayData.groupedAggregates || [];
+  } catch (error) {
+    console.log('error getChartPoolsVolumeByDay: ', error);
+    return [];
+  }
+};
+
 export type PositionInfo = {
   liquidity: string;
   tickLower: number;
