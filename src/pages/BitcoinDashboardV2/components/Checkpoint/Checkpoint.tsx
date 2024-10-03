@@ -39,15 +39,15 @@ const Checkpoint: React.FC<{}> = ({}) => {
 
   const renderNotification = () => {
     if (checkpointIndex == checkpointQueue?.index && checkpointFee?.checkpoint_fees) {
-      if (checkpointFee.checkpoint_fees > checkpointData.fee_collected) {
+      if (checkpointFee?.checkpoint_fees > checkpointData?.fee_collected) {
         return (
           <span>{`Predict Hash: ${checkpointData?.transaction.hash}, We need at least ${toDisplay(
-            BigInt(checkpointFee.checkpoint_fees - checkpointData.fee_collected || 0),
+            BigInt(checkpointFee?.checkpoint_fees - checkpointData?.fee_collected || 0),
             8
           )} BTC fee to make this checkpoint executed. (${toDisplay(
-            BigInt(checkpointData.fee_collected || 0),
+            BigInt(checkpointData?.fee_collected || 0),
             8
-          )}/${toDisplay(BigInt(checkpointFee.checkpoint_fees || 0), 8)} BTC)`}</span>
+          )}/${toDisplay(BigInt(checkpointFee?.checkpoint_fees || 0), 8)} BTC)`}</span>
         );
       }
 
@@ -57,7 +57,7 @@ const Checkpoint: React.FC<{}> = ({}) => {
         }, Enough fee waiting for previous checkpoint to be completed (${toDisplay(
           BigInt(checkpointData?.fee_collected || 0),
           8
-        )}/${toDisplay(BigInt(checkpointFee.checkpoint_fees || 0), 8)} BTC)`}</span>
+        )}/${toDisplay(BigInt(checkpointFee?.checkpoint_fees || 0), 8)} BTC)`}</span>
       );
     } else {
       return <span>{`Hash: ${checkpointData?.transaction.hash}`}</span>;

@@ -13,8 +13,7 @@ export class CwBitcoinClient implements CwBitcoinClientInterface {
   public depositAddress: DepositSuccess | null = null;
 
   public async generateAddress(dest: Dest) {
-    const isKeplrActive = await window.Keplr.getKeplr();
-    if (isKeplrActive) {
+    try {
       // @ts-ignore-check
       const config = {
         relayers: [bitcoinLcdV2],
@@ -25,6 +24,8 @@ export class CwBitcoinClient implements CwBitcoinClientInterface {
       const btcAddressToDeposit = (await generateDepositAddress(config)) as DepositSuccess;
 
       this.depositAddress = btcAddressToDeposit;
+    } catch (err) {
+      console.log(err);
     }
   }
 }

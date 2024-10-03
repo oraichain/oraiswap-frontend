@@ -6,7 +6,8 @@ import { useSearchParams } from 'react-router-dom';
 export enum KeysFilter {
   pending_deposits = 'pending_deposits',
   pending_withdraws = 'pending_withdraws',
-  checkpoint = 'checkpoint'
+  checkpoint = 'checkpoint',
+  convert_bitcoin_v2 = 'convert_bitcoin_v2'
 }
 
 const LIST_FILTERS = [
@@ -21,6 +22,10 @@ const LIST_FILTERS = [
   {
     key: KeysFilter.checkpoint,
     text: 'Checkpoint'
+  },
+  {
+    key: KeysFilter.convert_bitcoin_v2,
+    text: 'Convert Bitcoin V2'
   }
 ];
 

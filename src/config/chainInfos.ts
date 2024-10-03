@@ -86,6 +86,7 @@ import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.sv
 import flatten from 'lodash/flatten';
 
 import { chainIconsInfos, tokensIconInfos, mapListWithIcon } from './iconInfos';
+import { CWBitcoinFactoryDenom } from 'helper/constants';
 
 export const tokensIcon = tokensIconInfos;
 export const chainIcons = chainIconsInfos;
@@ -113,24 +114,10 @@ export const bitcoinMainnet: CustomChainInfo = {
   bech32Config: defaultBech32Config('bc'),
   networkType: 'bitcoin' as any,
   currencies: [
-    // {
-    //   coinDenom: 'BTC',
-    //   coinMinimalDenom: 'btc',
-    //   coinDecimals: 8,
-    //   bridgeTo: ['Oraichain'],
-    //   prefixToken: 'oraibtc',
-    //   Icon: BTCIcon,
-    //   coinGeckoId: 'bitcoin',
-    //   coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
-    //   gasPriceStep: {
-    //     low: 0,
-    //     average: 0,
-    //     high: 0
-    //   }
-    // },
     {
       coinDenom: 'BTC V2',
       coinMinimalDenom: 'btc',
+      prefixToken: 'oraibtc',
       coinDecimals: 8 as any,
       bridgeTo: ['Oraichain'],
       Icon: BTCIcon,
@@ -203,7 +190,18 @@ export const OraiToken: BridgeAppCurrency = {
 // };
 
 export const oraichainNetwork: CustomChainInfo = {
-  ...customOraichainNetwork
+  ...customOraichainNetwork,
+  currencies: [
+    ...customOraichainNetwork.currencies,
+    {
+      coinDenom: 'BTC V2',
+      coinGeckoId: 'bitcoin',
+      coinMinimalDenom: CWBitcoinFactoryDenom,
+      bridgeTo: ['bitcoin'] as any,
+      coinDecimals: 14 as any,
+      coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
+    }
+  ]
 };
 
 /**

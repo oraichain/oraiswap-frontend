@@ -102,6 +102,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
   const nomic = useContext(NomicContext);
+  const cwBitcoinContext = useContext(CwBitcoinContext);
 
   // state internal
   const [loadingRefresh, setLoadingRefresh] = useState(false);
@@ -121,7 +122,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
-  const cwBitcoinContext = useContext(CwBitcoinContext);
 
   const ref = useRef(null);
   //@ts-ignore
@@ -277,9 +277,7 @@ const Balance: React.FC<BalanceProps> = () => {
       message: '',
       transactionFee: feeRate
     });
-    const isV2 = fromToken.name === 'BTC V2';
-
-    const { bitcoinAddress: address } = isV2 ? cwBitcoinContext.depositAddress : nomic.depositAddress;
+    const { bitcoinAddress: address } = cwBitcoinContext.depositAddress;
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
     const dataRequest = {
@@ -464,6 +462,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       await handleCheckWallet();
 
+      console.log(from, to);
       assert(from && to, 'Please choose both from and to tokens');
 
       // get & check balance
@@ -773,19 +772,11 @@ const Balance: React.FC<BalanceProps> = () => {
             setFilterNetworkUI(chainId);
           }}
         />
-        <DepositBtcModal
-          prices={prices}
-          isOpen={isDepositBtcModal}
-          addressRecovery={addressRecovery}
-          handleRecoveryAddress={handleRecoveryAddress}
-          open={() => setIsDepositBtcModal(true)}
-          close={() => setIsDepositBtcModal(false)}
-        />
         <DepositBtcModalV2
           prices={prices}
-          isOpen={isDepositBtcModalV2}
-          open={() => setIsDepositBtcModalV2(true)}
-          close={() => setIsDepositBtcModalV2(false)}
+          isOpen={isDepositBtcModal}
+          open={() => setIsDepositBtcModal(true)}
+          close={() => setIsDepositBtcModal(false)}
         />
       </div>
     </Content>

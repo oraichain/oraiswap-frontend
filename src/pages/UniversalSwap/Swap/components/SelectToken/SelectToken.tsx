@@ -77,6 +77,9 @@ export default function SelectToken({
       (textChain ? item.chainId === textChain : true) &&
       (textSearch ? item.name.toLowerCase().includes(textSearch.toLowerCase()) : true)
   );
+  console.log({
+    listItems
+  });
 
   return (
     <>

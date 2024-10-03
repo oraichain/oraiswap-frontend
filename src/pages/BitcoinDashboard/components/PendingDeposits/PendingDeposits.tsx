@@ -38,7 +38,10 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const mobile = isMobile();
   const [oraichainAddress] = useConfigReducer('address');
-  const fee = useRelayerFeeToken(btcTokens[0], oraichainTokens[19]);
+  const fee = useRelayerFeeToken(
+    btcTokens.find((item) => item.name === 'BTC V2'),
+    oraichainTokens.find((item) => item.name === 'BTC V2')
+  );
   const depositFee = useGetDepositFee();
   const fetchedPendingDeposits = useGetPendingDeposits(oraichainAddress);
   const checkpointQueue = useGetCheckpointQueue();

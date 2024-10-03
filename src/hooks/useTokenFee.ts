@@ -64,8 +64,8 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
   const [relayerFee, setRelayerFeeAmount] = useState(0);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
   const isFromPepeToken =
-    originalFromToken.contractAddress &&
-    [PEPE_BSC_CONTRACT, PEPE_ETH_CONTRACT].includes(originalFromToken.contractAddress);
+    originalFromToken?.contractAddress &&
+    [PEPE_BSC_CONTRACT, PEPE_ETH_CONTRACT].includes(originalFromToken?.contractAddress);
 
   const { data: relayerFeeAmount } = useQuery(
     ['simulate-relayer-data', originalFromToken, originalToToken, relayerFeeInOrai],

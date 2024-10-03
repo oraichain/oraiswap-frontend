@@ -97,7 +97,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, prices }) => {
         </div>
 
         <div className={styles.estimate}>
-          <Link to={'/bitcoin-dashboard?tab=pending_deposits'} className={styles.viewTxs}>
+          <Link to={'/bitcoin-dashboard-v2?tab=pending_deposits'} className={styles.viewTxs}>
             View your transactions
           </Link>
         </div>
