@@ -102,7 +102,8 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
             {formatDisplayUsdt(toDisplay(parseInt(data.totalLiquidity.toString()).toString()))}
           </span>
           <Button
-            type="primary-sm"
+            type="third-sm"
+            className={styles.add}
             onClick={(event) => {
               event.stopPropagation();
               setPairDenomsDeposit(
@@ -112,7 +113,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
               );
             }}
           >
-            Add
+            Add LP
           </Button>
         </div>
       )
@@ -124,7 +125,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
     const [firstAssetInfo, secondAssetInfo] = [JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)];
 
     navigate(
-      `/pools/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
+      `/pools/v2/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
         parseAssetOnlyDenom(secondAssetInfo)
       )}`
     );

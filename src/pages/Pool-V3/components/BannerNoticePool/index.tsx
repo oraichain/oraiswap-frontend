@@ -9,11 +9,11 @@ import styles from './index.module.scss';
 import { PEPE_ORAICHAIN_EXT_DENOM, HMSTR_ORAICHAIN_DENOM, USDC_CONTRACT } from '@oraichain/oraidex-common';
 import useTemporaryConfigReducer from 'hooks/useTemporaryConfigReducer';
 
-const urlPepe = `/pools-v3/${encodeURIComponent(PEPE_ORAICHAIN_EXT_DENOM)}-${encodeURIComponent(
+const urlPepe = `/pools/v3/${encodeURIComponent(PEPE_ORAICHAIN_EXT_DENOM)}-${encodeURIComponent(
   USDC_CONTRACT
 )}-3000000000-100`;
 
-const urlHmstr = `/pools-v3/${encodeURIComponent(HMSTR_ORAICHAIN_DENOM)}-${encodeURIComponent(
+const urlHmstr = `/pools/v3/${encodeURIComponent(HMSTR_ORAICHAIN_DENOM)}-${encodeURIComponent(
   USDC_CONTRACT
 )}-3000000000-100`;
 

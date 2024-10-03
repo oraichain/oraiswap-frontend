@@ -83,11 +83,15 @@ const CompoundModal = ({ loading, open, onClose, onConfirm, reward, oraixAmount 
             </div>
           </div>
           <div className={styles.desc}>
-            Convert {reward} USDC to {oraixAmount} ORAIX and stake
+            Convert {reward} USDC to ≈{oraixAmount} ORAIX and stake
+          </div>
+          <div className={styles.noti}>
+            Compound may not work at first try due to slippage, please retry if it happens
           </div>
         </div>
         <div className={styles.button}>
           <Button
+            disabled={!oraixAmount}
             type={btnConfirmType}
             onClick={() => {
               onConfirm();

@@ -66,11 +66,11 @@ const Sidebar: React.FC<{}> = React.memo(() => {
         {icon}
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
-          {to === `/pools-v3` && (
+          {/* {to === `/pools/v3` && (
             <span className={classNames(styles.suffix)}>
               <Lottie animationData={PoolV3Lottie} autoPlay={open} loop />
             </span>
-          )}
+          )} */}
         </span>
       </Link>
     );
@@ -85,8 +85,8 @@ const Sidebar: React.FC<{}> = React.memo(() => {
           <div className={classNames(styles.menu_items)}>
             {renderLink('/universalswap', 'Swap', setLink, <UniversalSwapIcon />)}
             {renderLink('/bridge', 'Bridge', setLink, <BridgeIcon />)}
-            {renderLink('/pools', 'Pools', setLink, <PoolIcon />)}
-            {renderLink(`/pools-v3`, 'Pools V3', setLink, <PoolV3Icon />)}
+            {/* {renderLink('/pools', 'Pools', setLink, <PoolIcon />)} */}
+            {renderLink(`/pools`, 'Pools', setLink, <PoolV3Icon />)}
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
             {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}

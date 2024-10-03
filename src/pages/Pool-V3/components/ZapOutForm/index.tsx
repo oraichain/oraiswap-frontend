@@ -188,7 +188,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
               [tokenZap.contractAddress, tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean)
             );
             onCloseModal();
-            // navigate(`/pools-v3?type=positions`);
+            // navigate(`/pools?type=positions`);
           },
           (e) => {
             console.log({ errorZap: e });
@@ -626,7 +626,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                       customLink: getTransactionUrl(network.chainId, transactionHash)
                     });
                     onCloseModal();
-                    // navigate(`/pools-v3?type=positions`);
+                    // navigate(`/pools?type=positions`);
                   }
                 } catch (error) {
                   console.log({ error });

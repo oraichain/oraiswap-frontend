@@ -113,7 +113,7 @@ const Menu: React.FC = () => {
         {Icon}
         <span className={getTextClasses()}>
           {title}
-          {to === '/pools-v3' && (
+          {to === '/pools/v3' && (
             <span className={classNames(styles.suffix)}>
               <Lottie animationData={PoolV3Lottie} autoPlay={open} loop />
             </span>
@@ -155,8 +155,8 @@ const Menu: React.FC = () => {
     <div className={classNames(styles.menu_list)}>
       {renderLink('/universalswap', 'Swap', setLink, false, <UniversalSwapIcon />)}
       {renderLink('/bridge', 'Bridge', setLink, false, <BridgeIcon />)}
+      {/* {renderLink('/pools', 'Pools', setLink, false, <PoolIcon />)} */}
       {renderLink('/pools', 'Pools', setLink, false, <PoolIcon />)}
-      {renderLink('/pools-v3', 'Pools V3', setLink, false, <PoolIcon />)}
       {renderLink('/staking', 'Staking', setLink, false, <StakingIcon />)}
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}

@@ -188,6 +188,13 @@
           color: theme-get('neutral-text-title-2');
         }
       }
+      .noti {
+        font-size: 13px;
+        text-align: left;
+        @include theme {
+          color: theme-get('neutral-9');
+        }
+      }
     }
 
     .button {

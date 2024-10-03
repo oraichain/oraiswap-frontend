@@ -22,7 +22,6 @@ import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { fetchPositionAprInfo, poolKeyToString, PositionAprInfo } from 'libs/contractSingleton';
 import {
   calculateFee,
-  formatMoney,
   formatNumbers,
   getConvertedPool,
   getConvertedPosition,
@@ -271,15 +270,9 @@ const PositionItem = ({ position }) => {
         <div className={styles.info}>
           <div className={styles.item}>
             <p>Price Range</p>
-            <span
-              className={styles.value}
-              dangerouslySetInnerHTML={{ __html: `\$${minimize(xToY ? min : 1 / max)}` }}
-            />
+            <span className={styles.value}>{minimize((xToY ? min : 1 / max).toString())}</span>
             {' - '}
-            <span
-              className={styles.value}
-              dangerouslySetInnerHTML={{ __html: `\$${minimize(xToY ? max : 1 / min)}` }}
-            />
+            <span className={styles.value}>{minimize((xToY ? max : 1 / min).toString())}</span>
 
             <span className={styles.value}>
               {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)), undefined, {

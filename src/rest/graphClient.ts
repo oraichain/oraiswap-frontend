@@ -59,6 +59,48 @@ export const getFeeClaimData = async (address: string) => {
   }
 };
 
+export const getSwapTransactionData = async (poolKey: string, limit: number = 20) => {
+  try {
+    const document = gql`
+      {
+        query {
+          transactions (
+            first: ${limit}
+            orderBy: TIMESTAMP_DESC
+            filter: { swapExist: true, swap: { every: { swapRoutes: { every: { poolId: { equalTo: "${poolKey}" } } } } } }
+          ) {
+            nodes {
+              id
+              timestamp
+              swap {
+                nodes {
+                  senderId
+                  swapRoutes {
+                    nodes {
+                      poolId
+                      amountIn
+                      amountOut
+                      volumeUSD
+                      xToY
+                      feeUSD
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+
+    return result.query.transactions.nodes || [];
+  } catch (error) {
+    console.log('error', error);
+    return [];
+  }
+};
+
 export type PoolDayDataV3 = {
   keys: string[];
   sum: {

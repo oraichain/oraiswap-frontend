@@ -31,7 +31,6 @@ import { WalletsByNetwork } from 'reducer/wallet';
 import { evmChainInfos } from 'config/evmChainInfos';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { numberWithCommas } from './format';
-import { formatMoney } from 'pages/Pool-V3/helpers/helper';
 
 export interface Tokens {
   denom?: string;
@@ -579,20 +578,43 @@ export interface GetIconInterface {
   height?: number;
 }
 
-export const minimize = (priceUsd: number) => {
-  let isNeedSub = false;
-  const replaceItem = priceUsd.toString().replace(/(?<=\.)0+/, (m) => {
-    isNeedSub = m.length > 3;
-    return isNeedSub ? `0<sub>${m.length}</sub>` : m;
-  });
+export const minimize = (priceUsd: string) => {
+  const regex = /^0\.0*(\d+)/;
+  const match = priceUsd.match(regex);
+  const getSubscript = (num) => String.fromCharCode(0x2080 + num);
 
-  if (!isNeedSub) return formatMoney(priceUsd);
+  if (match) {
+    const leadingZeros = match[0].length - match[1].length - 2;
+    const significantDigits = match[1].slice(0, leadingZeros > 0 ? 4 : 6);
+    if (leadingZeros > 0) {
+      return (
+        <>
+          0.0<span style={{ fontSize: '1.6em', verticalAlign: 'sub' }}>{getSubscript(leadingZeros)}</span>
+          {significantDigits}
+        </>
+      );
+    }
+    return `0.${significantDigits}`;
+  }
 
-  const SUB_ELEMENT_LENGTH = 5; // </sub>
-  const DECIMALS_AFTER_SUB_LENGTH = 5;
-  const decimalAfterSub = replaceItem.indexOf('</sub>') + SUB_ELEMENT_LENGTH + DECIMALS_AFTER_SUB_LENGTH;
-  return replaceItem.slice(0, decimalAfterSub);
+  return formatMoney(priceUsd);
 };
+
+export function formatMoney(num) {
+  if (num === 0) return num.toString();
+  let numStr = num.toString();
+  const decimalIndex = numStr.indexOf('.');
+  if (decimalIndex === -1) return numStr;
+  const integerPart = numStr.slice(0, decimalIndex);
+  const decimalPart = numStr.slice(decimalIndex + 1);
+  const decimalsToShow = num >= 1 ? 1 : num < 0.0001 ? 6 : 4;
+
+  const formattedDecimalPart = decimalPart.slice(0, decimalsToShow);
+  let stringArr = `.${formattedDecimalPart}`;
+  if (!formattedDecimalPart || formattedDecimalPart === '0') stringArr = '';
+
+  return `${numberWithCommas(Number(integerPart), undefined)}${stringArr}`;
+}
 
 export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, height }: GetIconInterface) => {
   if (type === 'token') {
@@ -618,4 +640,19 @@ export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, heigh
 
     return <DefaultIcon />;
   }
+};
+
+export const getIconToken = ({ isLightTheme, denom, width = 18, height = 18 }) => {
+  const tokenIcon = flattenTokensWithIcon.find((tokenWithIcon) =>
+    [tokenWithIcon.contractAddress, tokenWithIcon.denom].includes(denom)
+  );
+  if (tokenIcon) {
+    return isLightTheme ? (
+      <tokenIcon.IconLight width={width} height={height} />
+    ) : (
+      <tokenIcon.Icon width={width} height={height} />
+    );
+  }
+
+  return <DefaultIcon />;
 };
