@@ -925,7 +925,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       const upperTick = Math.max(leftRange, rightRange);
 
       const result = await zapper.processZapInPositionLiquidity({
-        pool: poolData,
+        poolKey: poolData.pool_key,
         tokenIn: tokenZap,
         amountIn: amountIn,
         lowerTick,

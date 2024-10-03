@@ -227,9 +227,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       client = await CosmWasmClient.connect(network.rpc);
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
-    } catch (error) {
-      console.error('Error handleSimulateZapOut fee:', error);
-    }
+    } catch (error) {}
 
     try {
       const zapper = new ZapConsumer({
@@ -260,7 +258,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const priceImpact = (Math.abs(inputUsd - outputUsd) / inputUsd) * 100;
 
       const totalAmountOut =
-        Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals;
+        Number(res.amountToX) / 10 ** tokenZap.decimals + Number(res.amountToY) / 10 ** tokenZap.decimals;
 
       const zapFeeX = Number(position.tokenXLiq) * zapFee;
       const zapFeeY = Number(position.tokenYLiq) * zapFee;
@@ -276,7 +274,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       setZapFeeY(zapFeeY);
       setSwapFee(swapFee);
       setZapOutResponse(res);
-      setAmountFrom(Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals);
+      setAmountFrom(Number(res.amountToX) / 10 ** tokenZap.decimals + Number(res.amountToY) / 10 ** tokenZap.decimals);
       setSimulating(false);
     } catch (error) {
       // console.error(error);
