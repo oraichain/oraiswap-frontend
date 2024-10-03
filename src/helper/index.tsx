@@ -585,18 +585,20 @@ export const minimize = (priceUsd: string) => {
 
   if (match) {
     const leadingZeros = match[0].length - match[1].length - 2;
-    const significantDigits = match[1].slice(0, leadingZeros > 0 ? 4 : 6);
-    if (leadingZeros > 0) {
+    const significantDigits = match[1];
+    if (leadingZeros === 1) return `0.0${significantDigits.slice(0, 5)}`;
+    if (leadingZeros === 2) return `0.00${significantDigits.slice(0, 4)}`;
+    if (leadingZeros === 3) return `0.000${significantDigits.slice(0, 3)}`;
+    if (leadingZeros > 3) {
       return (
         <>
           0.0<span style={{ fontSize: '1.6em', verticalAlign: 'sub' }}>{getSubscript(leadingZeros)}</span>
-          {significantDigits}
+          {significantDigits.slice(0, 4)}
         </>
       );
     }
-    return `0.${significantDigits}`;
+    return `0.${significantDigits.slice(0, 6)}`;
   }
-
   return formatMoney(priceUsd);
 };
 
