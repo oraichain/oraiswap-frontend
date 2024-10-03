@@ -48,6 +48,8 @@ import ZapOut from '../ZapOut';
 import styles from './index.module.scss';
 import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
+let intervalId = null;
+
 const PositionItem = ({ position }) => {
   const theme = useTheme();
   const ref = useRef();
@@ -94,7 +96,7 @@ const PositionItem = ({ position }) => {
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
   const { poolList, poolPrice } = useGetPoolList(price);
-  const { simulation } = useGetIncentiveSimulate(address, position.id, openCollapse);
+  const { simulation, refetchGetIncentiveSimulate } = useGetIncentiveSimulate(address, position.id, openCollapse);
 
   useOnClickOutside(ref, () => {
     setCollapse(false);
@@ -185,18 +187,30 @@ const PositionItem = ({ position }) => {
   }, [position, poolList]);
 
   useEffect(() => {
-    if (Object.keys(simulation).length > 0 && openCollapse && incentives) {
-      const intervalId = setInterval(() => {
-        const newIncentives: Record<string, number> = {};
-        for (const [key, value] of Object.entries(simulation)) {
-          newIncentives[key] = value + (incentives[key] || 0);
+    (async () => {
+      if (openCollapse && incentives) {
+        if (Object.keys(simulation).length <= 0) {
+          await refetchGetIncentiveSimulate();
+        } else {
+          intervalId = setInterval(async () => {
+            const newIncentives: Record<string, number> = {};
+            for (const [key, value] of Object.entries(simulation)) {
+              newIncentives[key] = value + (incentives[key] || 0);
+            }
+
+            setIncentives(newIncentives);
+          }, 2000);
         }
-        setIncentives(newIncentives);
-      }, 2000);
-      return () => {
+      }
+
+      if (intervalId && !openCollapse) {
         clearInterval(intervalId);
-      };
-    }
+      }
+    })();
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [openCollapse, incentives, simulation]);
 
   const earnXDisplay = toDisplay((earnX || 0).toString(), tokenXDecimal);
