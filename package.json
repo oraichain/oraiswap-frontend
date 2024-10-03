@@ -19,7 +19,6 @@
     "@nivo/line": "^0.86.0",
     "@oraichain/bitcoin-bridge-contracts-sdk": "^1.1.9",
     "@oraichain/bitcoin-bridge-lib-js": "^1.1.9",
-    "@oraichain/blsdkg": "^1.2.17",
     "@oraichain/common-contracts-sdk": "^1.0.31",
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",
@@ -28,7 +27,7 @@
     "@oraichain/oraidex-contracts-sdk": "1.0.51-beta.3",
     "@oraichain/oraidex-universal-swap": "1.1.10",
     "@reduxjs/toolkit": "^1.9.3",
-    "@sentry/react": "^7.47.1",
+    "@sentry/react": "7.99.0",
     "@tanstack/react-query": "^4.32.6",
     "@tharsis/proto": "^0.1.17",
     "@tippyjs/react": "^4.2.0",
@@ -134,6 +133,7 @@
     "bech32": "1.1.4",
     "bitcoinjs-lib": "5.2.0",
     "axios": "0.26.1",
+    "@sentry/react": "7.99.0",
     "@oraichain/oraidex-common": "1.1.21"
   },
   "engines": {
