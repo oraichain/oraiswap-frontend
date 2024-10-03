@@ -26,10 +26,11 @@ import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/no
 import { DeliverTxResponse, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { isDeliverTxFailure } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { handleErrorTransaction } from 'helper';
-import { useGetWithdrawlFeesBitcoin } from 'pages/Balance/helpers';
+import { getStorageKey, handleErrorTransaction } from 'helper';
+import { useDepositFeesBitcoinV2, useGetWithdrawlFeesBitcoin } from 'pages/Balance/helpers';
 import { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
+import { PendingWithdraws } from '../PendingWithdraws';
 
 const ConvertBitcoinV2: React.FC<{}> = ({}) => {
   const nomic = useContext(NomicContext);
@@ -42,7 +43,9 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
     enabled: true,
     bitcoinAddress: cwBitcoinContext?.depositAddress?.bitcoinAddress
   });
+  const depositFeeV2Btc = useDepositFeesBitcoinV2(true);
   const [oraiAddress] = useConfigReducer('address');
+  const PENDING_WITHDRAW_STORAGE_KEY = `PENDING_WITHDRAW_${oraiAddress}`;
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [coeff, setCoeff] = useState(0);
   const { data: prices } = useCoinGeckoPrices();
@@ -50,6 +53,7 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
   const amountUSD = getUsd(toAmount(amount), ORAIX_TOKEN_INFO, prices);
   const [loading, setLoading] = useState<boolean>(false);
   const [fee, setFee] = useState<number>(0);
+  const [cachePendingWithdrawAddrs, setCachePendingWithdrawAddrs] = useState<string[]>([]);
   //@ts-ignore
   const isOwallet = window.owallet?.isOwallet;
   let label = 'Balance';
@@ -125,14 +129,26 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
       });
     } finally {
       setLoading(false);
+      const value = JSON.parse(getStorageKey(PENDING_WITHDRAW_STORAGE_KEY) ?? '[]');
+      value.push(cwBitcoinContext.depositAddress?.bitcoinAddress);
+      setCachePendingWithdrawAddrs(value);
+      localStorage.setItem(PENDING_WITHDRAW_STORAGE_KEY, JSON.stringify(value));
     }
   };
 
   useEffect(() => {
-    if (withdrawFeeBtc?.withdrawal_fees) {
-      setFee(parseInt(withdrawFeeBtc?.withdrawal_fees ?? '0') / 10 ** 14 + relayerFee);
+    const value = JSON.parse(getStorageKey(PENDING_WITHDRAW_STORAGE_KEY) ?? '[]');
+    setCachePendingWithdrawAddrs(value);
+  }, []);
+  useEffect(() => {
+    if (withdrawFeeBtc?.withdrawal_fees && depositFeeV2Btc?.deposit_fees) {
+      setFee(
+        parseInt(depositFeeV2Btc?.deposit_fees ?? '0') / 10 ** 14 +
+          parseInt(withdrawFeeBtc?.withdrawal_fees ?? '0') / 10 ** 14 +
+          relayerFee
+      );
     }
-  }, [relayerFee, withdrawFeeBtc]);
+  }, [relayerFee, withdrawFeeBtc, depositFeeV2Btc]);
   useEffect(() => {
     // TODO: should dynamic generate address when change destination chain.
     if (oraiAddress) {
@@ -148,95 +164,98 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
   }, [oraiAddress, isOwallet]);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.inputBalance}>
-        <div className={styles.title}>
-          <span className={styles.text}>V1 BTC Amount</span>
-          <div className={styles.info}>
-            <span className={styles.balance}>
-              {label}:{' '}
-              <span className={styles.token}>
-                {numberWithCommas(toDisplay(balance), undefined, {
-                  minimumFractionDigits: 6,
-                  maximumFractionDigits: 6
-                })}{' '}
-                BTC
+    <div className={styles.wrapper}>
+      <div className={styles.container}>
+        <div className={styles.inputBalance}>
+          <div className={styles.title}>
+            <span className={styles.text}>Convert Legacy BTC to BTC V2</span>
+            <div className={styles.info}>
+              <span className={styles.balance}>
+                {label}:{' '}
+                <span className={styles.token}>
+                  {numberWithCommas(toDisplay(balance), undefined, {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                  })}{' '}
+                  BTC
+                </span>
               </span>
-            </span>
-            <span className={styles.balance}>
-              {'Fee'}:{' '}
-              <span className={styles.token}>
-                {numberWithCommas(fee, undefined, {
-                  minimumFractionDigits: 6,
-                  maximumFractionDigits: 6
-                })}{' '}
-                BTC
+              <span className={styles.balance}>
+                {'Fee'}:{' '}
+                <span className={styles.token}>
+                  {numberWithCommas(fee, undefined, {
+                    minimumFractionDigits: 6,
+                    maximumFractionDigits: 6
+                  })}{' '}
+                  BTC
+                </span>
               </span>
-            </span>
-          </div>
-        </div>
-        <div className={styles.inputWrapper}>
-          <div className={styles.input}>
-            <div className={styles.symbol}>
-              <BitcoinIcon />
             </div>
-            <NumberFormat
-              placeholder="0"
-              thousandSeparator
-              className={styles.amount}
-              decimalScale={6}
-              disabled={false}
-              type="text"
-              value={amount}
-              onChange={() => {
-                setCoeff(0);
-              }}
-              isAllowed={(values) => {
-                const { floatValue } = values;
-                // allow !floatValue to let user can clear their input
-                return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
-              }}
-              onValueChange={({ floatValue }) => {
-                setAmount(floatValue);
-              }}
-            />
-            <span className={styles.usd}>{formatDisplayUsdt(amountUSD)}</span>
           </div>
-
-          <div className={`${styles.stakeBtn} ${styles.inDesktop}`}>
-            <Button
-              type="primary"
-              disabled={loading || withdrawFeeBtc?.withdrawal_fees === undefined}
-              onClick={handleConvertBTC}
-            >
-              {loading && <Loader width={22} height={22} />}&nbsp;
-              {'Convert'}
-            </Button>
-          </div>
-        </div>
-        <div className={styles.coeff}>
-          {[0.25, 0.5, 0.75, 1].map((e) => {
-            return (
-              <button
-                key={e}
-                className={`${styles.button} ${coeff === e ? styles.active : ''}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (coeff === e) {
-                    setCoeff(0);
-                    setAmount(0);
-                    return;
-                  }
-                  setAmount(toDisplay(balance, 6) * e);
-                  setCoeff(e);
+          <div className={styles.inputWrapper}>
+            <div className={styles.input}>
+              <div className={styles.symbol}>
+                <BitcoinIcon />
+              </div>
+              <NumberFormat
+                placeholder="0"
+                thousandSeparator
+                className={styles.amount}
+                decimalScale={6}
+                disabled={false}
+                type="text"
+                value={amount}
+                onChange={() => {
+                  setCoeff(0);
                 }}
+                isAllowed={(values) => {
+                  const { floatValue } = values;
+                  // allow !floatValue to let user can clear their input
+                  return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+                }}
+                onValueChange={({ floatValue }) => {
+                  setAmount(floatValue);
+                }}
+              />
+              <span className={styles.usd}>{formatDisplayUsdt(amountUSD)}</span>
+            </div>
+
+            <div className={`${styles.stakeBtn} ${styles.inDesktop}`}>
+              <Button
+                type="primary"
+                disabled={loading || withdrawFeeBtc?.withdrawal_fees === undefined}
+                onClick={handleConvertBTC}
               >
-                {e * 100}%
-              </button>
-            );
-          })}
+                {loading && <Loader width={22} height={22} />}&nbsp;
+                {'Convert'}
+              </Button>
+            </div>
+          </div>
+          <div className={styles.coeff}>
+            {[0.25, 0.5, 0.75, 1].map((e) => {
+              return (
+                <button
+                  key={e}
+                  className={`${styles.button} ${coeff === e ? styles.active : ''}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (coeff === e) {
+                      setCoeff(0);
+                      setAmount(0);
+                      return;
+                    }
+                    setAmount(toDisplay(balance, 6) * e);
+                    setCoeff(e);
+                  }}
+                >
+                  {e * 100}%
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
+      <PendingWithdraws btcAddresses={cachePendingWithdrawAddrs} />
     </div>
   );
 };

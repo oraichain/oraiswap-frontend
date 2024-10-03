@@ -10,7 +10,6 @@ import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.sv
 import { CheckpointStatus, TransactionParsedOutput } from 'pages/BitcoinDashboard/@types';
 import { useGetCheckpointData, useGetCheckpointQueue } from 'pages/BitcoinDashboard/hooks';
 import { isMobile } from '@walletconnect/browser-utils';
-import RenderIf from '../RenderIf/RenderIf';
 import TransactionsMobile from '../Checkpoint/Transactions/TransactionMobiles/TransactionMobile';
 
 type Icons = {
@@ -29,10 +28,10 @@ const tokens = {
   } as Icons
 };
 
-export const PendingWithdraws: React.FC<{}> = ({}) => {
+export const PendingWithdraws: React.FC<{ btcAddresses?: String[] }> = ({ btcAddresses }) => {
   const [theme] = useConfigReducer('theme');
   const mobile = isMobile();
-  const btcAddress = useConfigReducer('btcAddress');
+  const fetchedBtcAddrs = useConfigReducer('btcAddress');
   const checkpointQueue = useGetCheckpointQueue();
   const buildingCheckpointIndex = checkpointQueue?.index || 0;
   const checkpointData = useGetCheckpointData(buildingCheckpointIndex);
@@ -55,7 +54,7 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
       }))
     : [];
   const finalOutputs = hasSigningCheckpoint ? [...allOutputs, ...previousOutputs] : allOutputs;
-  const data = finalOutputs.filter((item) => item.address == btcAddress[0]);
+  const data = finalOutputs.filter((item) => (btcAddresses || [fetchedBtcAddrs[0]]).includes(item.address));
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];

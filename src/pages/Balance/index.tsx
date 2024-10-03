@@ -108,7 +108,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const [isDepositBtcModal, setIsDepositBtcModal] = useState(false);
-  const [isDepositBtcModalV2, setIsDepositBtcModalV2] = useState(false);
   const [, setTxHash] = useState('');
   const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
@@ -263,6 +262,7 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferBTCToOraichain = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
+    const isV2 = fromToken.name === 'BTC V2';
     const utxos = await getUtxos(btcAddr, fromToken.rpc);
     const feeRate = await getFeeRate({
       url: from.rpc
@@ -277,7 +277,7 @@ const Balance: React.FC<BalanceProps> = () => {
       message: '',
       transactionFee: feeRate
     });
-    const { bitcoinAddress: address } = cwBitcoinContext.depositAddress;
+    const { bitcoinAddress: address } = isV2 ? cwBitcoinContext.depositAddress : nomic.depositAddress;
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
     const dataRequest = {
@@ -701,6 +701,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   amount += subAmount;
                   usd += getUsd(subAmount, t, prices);
                 }
+                console.log({ amounts });
                 // TODO: hardcode check bitcoinTestnet need update later
                 const isOwallet =
                   walletByNetworks.cosmos &&

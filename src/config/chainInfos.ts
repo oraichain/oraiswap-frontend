@@ -115,8 +115,23 @@ export const bitcoinMainnet: CustomChainInfo = {
   networkType: 'bitcoin' as any,
   currencies: [
     {
-      coinDenom: 'BTC V2',
+      coinDenom: 'BTC',
       coinMinimalDenom: 'btc',
+      prefixToken: 'oraibtc',
+      coinDecimals: 8 as any,
+      bridgeTo: ['Oraichain'],
+      Icon: BTCIcon,
+      coinGeckoId: 'bitcoin',
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+      gasPriceStep: {
+        low: 0,
+        average: 0,
+        high: 0
+      }
+    },
+    {
+      coinDenom: 'BTC V2',
+      coinMinimalDenom: 'btc-v2',
       prefixToken: 'oraibtc',
       coinDecimals: 8 as any,
       bridgeTo: ['Oraichain'],
