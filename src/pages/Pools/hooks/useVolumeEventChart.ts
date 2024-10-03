@@ -4,12 +4,19 @@ import { getInclude } from '../helpers';
 import { MINIMUM_YEAR_STATISTIC } from './useLiquidityEventChart';
 import { FILTER_DAY } from 'reducer/type';
 import { getChartPoolsV3ByDay, MILIS_PER_DAY } from 'rest/graphClient';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 export const useVolumeEventChart = (
   type: FILTER_DAY,
   onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>,
   pair?: string
 ) => {
+  const { data: price } = useCoinGeckoPrices();
+  const { poolPrice } = useGetPoolList(price);
+  const { poolVolume } = useGetPoolLiquidityVolume(poolPrice); // volumeV2, liquidityV2
+
   const [currentDataVolume, setCurrentDataVolume] = useState([]);
 
   const [currentItem, setCurrentItem] = useState<{
@@ -64,6 +71,15 @@ export const useVolumeEventChart = (
       const poolsV3VData = await getChartPoolsV3ByDay();
       const dataVolumeV3 = poolsV3VData.map((poolV3) => {
         const dayIndex = poolV3.keys[0];
+        const currentDayIndex = Math.round(new Date().getTime() / MILIS_PER_DAY);
+        if (Number(dayIndex) === currentDayIndex) {
+          const latest24hVolume = Object.values(poolVolume).reduce((acc, cur) => acc + cur, 0);
+
+          return {
+            time: new Date(dayIndex * MILIS_PER_DAY).toJSON(),
+            value: latest24hVolume
+          };
+        }
         return {
           time: new Date(dayIndex * MILIS_PER_DAY).toJSON(),
           value: poolV3.sum.volumeInUSD
@@ -90,8 +106,9 @@ export const useVolumeEventChart = (
   };
 
   useEffect(() => {
+    if (!Object.keys(poolVolume).length) return;
     onChangeRangeVolume(type);
-  }, [type]);
+  }, [type, poolVolume]);
 
   return {
     currentDataVolume,

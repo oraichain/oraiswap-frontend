@@ -1,3 +1,6 @@
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useEffect, useState } from 'react';
 import { FILTER_DAY } from 'reducer/type';
 import { getChartPoolsV3ByDay, MILIS_PER_DAY } from 'rest/graphClient';
@@ -8,6 +11,9 @@ export const useLiquidityEventChart = (
   onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>,
   pair?: string
 ) => {
+  const { data: price } = useCoinGeckoPrices();
+  const { poolPrice } = useGetPoolList(price);
+  const { poolLiquidities } = useGetPoolLiquidityVolume(poolPrice);
   const [currentDataLiquidity, setCurrentDataLiquidity] = useState([]);
   const [currentItem, setCurrentItem] = useState<{
     value: number;
@@ -39,6 +45,15 @@ export const useLiquidityEventChart = (
       const poolsV3VData = await getChartPoolsV3ByDay();
       const dataVolumeV3 = poolsV3VData.map((poolV3) => {
         const dayIndex = poolV3.keys[0];
+        const currentDayIndex = Math.round(new Date().getTime() / MILIS_PER_DAY);
+        if (Number(dayIndex) === currentDayIndex) {
+          const totalLiqudity = Object.values(poolLiquidities).reduce((acc, cur) => acc + cur, 0);
+
+          return {
+            time: new Date(dayIndex * MILIS_PER_DAY).toJSON(),
+            value: totalLiqudity
+          };
+        }
         return {
           time: new Date(dayIndex * MILIS_PER_DAY).toJSON(),
           value: poolV3.sum.tvlUSD
@@ -54,8 +69,6 @@ export const useLiquidityEventChart = (
         };
       });
 
-      console.log({ combinedData });
-
       setCurrentDataLiquidity(combinedData);
       if (combinedData.length > 0) {
         setCurrentItem({ ...combinedData[combinedData.length - 1] });
@@ -67,8 +80,9 @@ export const useLiquidityEventChart = (
   };
 
   useEffect(() => {
+    if (!Object.keys(poolLiquidities).length) return;
     onChangeRangeLiquidity(type);
-  }, [type]);
+  }, [type, poolLiquidities]);
 
   return {
     currentDataLiquidity,
