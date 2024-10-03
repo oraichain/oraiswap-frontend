@@ -54,6 +54,7 @@ const PositionItem = ({ position }) => {
   const theme = useTheme();
   const ref = useRef();
   const { data: price } = useCoinGeckoPrices();
+  const [showRemoveModal, setShowModalRemove] = useState<boolean>(false);
 
   const {
     min,
@@ -262,322 +263,341 @@ const PositionItem = ({ position }) => {
   const isIncreaseAsset = currentAsset >= principleAsset;
 
   return (
-    <div ref={ref} className={styles.positionItem}>
-      <div className={styles.trigger} onClick={() => setCollapse(!openCollapse)}>
-        <div className={styles.name}>
-          <div className={classNames(styles.icons, styles[theme])}>
-            <position.tokenXIcon />
-            <position.tokenYIcon />
+    <>
+      {/* FIXME: move position modal to route page to reduce instance modal create */}
+      {position && poolList.length > 0 && (
+        <CreateNewPosition
+          showModal={isOpenCreatePosition}
+          setShowModal={setIsOpenCreatePosition}
+          pool={poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key))}
+        />
+      )}
+      <ZapOut
+        position={position}
+        incentives={incentives}
+        showModal={showRemoveModal}
+        setShowModal={setShowModalRemove}
+      />
+      <div ref={ref} className={styles.positionItem}>
+        <div className={styles.trigger} onClick={() => setCollapse(!openCollapse)}>
+          <div className={styles.name}>
+            <div className={classNames(styles.icons, styles[theme])}>
+              <position.tokenXIcon />
+              <position.tokenYIcon />
+            </div>
+            <span>
+              {position.tokenXName} / {position.tokenYName}
+            </span>
+            <div className={styles.fee}>
+              <span className={styles.item}>Fee: {fee}%</span>
+              {statusRange !== undefined && (
+                <span className={classNames(styles.item, styles.status, { [styles.inRange]: statusRange })}>
+                  {statusRange ? 'In Range' : 'Out Range'}
+                </span>
+              )}
+            </div>
           </div>
-          <span>
-            {position.tokenXName} / {position.tokenYName}
-          </span>
-          <div className={styles.fee}>
-            <span className={styles.item}>Fee: {fee}%</span>
-            {statusRange !== undefined && (
-              <span className={classNames(styles.item, styles.status, { [styles.inRange]: statusRange })}>
-                {statusRange ? 'In Range' : 'Out Range'}
-              </span>
-            )}
-          </div>
-        </div>
 
-        <div className={styles.info}>
-          <div className={styles.item}>
-            <p>Price Range</p>
-            <span className={styles.value}>{minimize((xToY ? min : 1 / max).toString())}</span>
-            {' - '}
-            <span className={styles.value}>{minimize((xToY ? max : 1 / min).toString())}</span>
-
-            <span className={styles.value}>
-              {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)), undefined, {
-                maximumFractionDigits: 6
-              })} */}
-              {/* {formatMoney(`${xToY ? min : 1 / max}`)} */}
-              {/* {showPrefix(xToY ? min : 1 / max, shorterPrefixConfig)} */}
+          <div className={styles.info}>
+            <div className={styles.item}>
+              <p>Price Range</p>
+              <span className={styles.value}>{minimize((xToY ? min : 1 / max).toString())}</span>
               {' - '}
-              {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? max : 1 / min)), undefined, {
+              <span className={styles.value}>{minimize((xToY ? max : 1 / min).toString())}</span>
+
+              <span className={styles.value}>
+                {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? min : 1 / max)), undefined, {
                 maximumFractionDigits: 6
               })} */}
-              {/* {formatMoney(`${xToY ? max : 1 / min}`)} */}
-              {/* {showPrefix(xToY ? max : 1 / min, shorterPrefixConfig)}  */}{' '}
-              {xToY ? position.tokenYName : position.tokenXName} per {xToY ? position.tokenXName : position.tokenYName}
-            </span>
-          </div>
-          <div className={styles.item}>
-            <p>My Liquidity</p>
-            <span className={styles.value}>{formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd)}</span>
-          </div>
-          <div className={classNames(styles.item)}>
-            <p>APR</p>
-            <span className={classNames(styles.value, styles.apr)}>
-              {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%&nbsp;
-              <TooltipIcon
-                className={styles.tooltipWrapper}
-                placement="top"
-                visible={openTooltipApr}
-                icon={<IconInfo />}
-                setVisible={setOpenTooltipApr}
-                content={
-                  <div className={classNames(styles.tooltip, styles[theme])}>
-                    <div className={styles.itemInfo}>
-                      <span>Swap fee</span>
-                      <span className={styles.value}>
-                        {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 2 })}%
-                      </span>
-                    </div>
-                    <div className={styles.itemInfo}>
-                      <span>
-                        Incentives Boost&nbsp;
-                        <IconBoots />
-                      </span>
-                      <span className={styles.value}>
-                        {numberWithCommas(aprInfo.incentive * 100, undefined, { maximumFractionDigits: 2 })}%
-                      </span>
-                    </div>
-                    <div className={styles.itemInfo}>
-                      <span>Total APR</span>
-                      <span className={styles.totalApr}>
-                        {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%
-                      </span>
-                    </div>
-                  </div>
-                }
-              />
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className={classNames(styles.content, { [styles.openCollapse]: openCollapse })}>
-        <div className={styles.item}>
-          <div className={styles.title}>
-            <div>
-              <LiquidityIcon />
-            </div>
-            Liquidity
-          </div>
-          <div className={styles.row}>
-            <h4>Current Assets</h4>
-            <div className={styles.itemRow}>
-              <span
-                className={classNames(styles.usd, { [styles.green]: isIncreaseAsset, [styles.red]: !isIncreaseAsset })}
-              >
-                {formatDisplayUsdt(currentAsset, 6, 6)}
+                {/* {formatMoney(`${xToY ? min : 1 / max}`)} */}
+                {/* {showPrefix(xToY ? min : 1 / max, shorterPrefixConfig)} */}
+                {' - '}
+                {/* {numberWithCommas(Number(formatNumbers(undefined)(xToY ? max : 1 / min)), undefined, {
+                maximumFractionDigits: 6
+              })} */}
+                {/* {formatMoney(`${xToY ? max : 1 / min}`)} */}
+                {/* {showPrefix(xToY ? max : 1 / min, shorterPrefixConfig)}  */}{' '}
+                {xToY ? position.tokenYName : position.tokenXName} per{' '}
+                {xToY ? position.tokenXName : position.tokenYName}
               </span>
-              <div className={classNames(styles.itemAsset, styles[theme])}>
-                <span className={classNames(styles.token, styles[theme])}>
-                  <position.tokenXIcon />
-                  {numberWithCommas(position.tokenXLiq, undefined, {
-                    maximumFractionDigits: 6
-                  })}{' '}
-                  {position?.tokenX.name}
-                </span>
-                <span className={classNames(styles.token, styles[theme])}>
-                  <position.tokenYIcon />
-                  {numberWithCommas(position.tokenYLiq, undefined, {
-                    maximumFractionDigits: 6
-                  })}{' '}
-                  {position?.tokenY.name}
-                </span>
-              </div>
             </div>
-            <div className={styles.divider}></div>
-            <div className={styles.row}>
-              <h4>
-                Principal Assets
+            <div className={styles.item}>
+              <p>My Liquidity</p>
+              <span className={styles.value}>
+                {formatDisplayUsdt(position.tokenXLiqInUsd + position.tokenYLiqInUsd)}
+              </span>
+            </div>
+            <div className={classNames(styles.item)}>
+              <p>APR</p>
+              <span className={classNames(styles.value, styles.apr)}>
+                {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%&nbsp;
                 <TooltipIcon
                   className={styles.tooltipWrapper}
                   placement="top"
-                  visible={openTooltip}
+                  visible={openTooltipApr}
                   icon={<IconInfo />}
-                  setVisible={setOpenTooltip}
+                  setVisible={setOpenTooltipApr}
                   content={
                     <div className={classNames(styles.tooltip, styles[theme])}>
-                      Provided liquidity amount from the time of your first LP depositing or last LP removing
+                      <div className={styles.itemInfo}>
+                        <span>Swap fee</span>
+                        <span className={styles.value}>
+                          {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 2 })}%
+                        </span>
+                      </div>
+                      <div className={styles.itemInfo}>
+                        <span>
+                          Incentives Boost&nbsp;
+                          <IconBoots />
+                        </span>
+                        <span className={styles.value}>
+                          {numberWithCommas(aprInfo.incentive * 100, undefined, { maximumFractionDigits: 2 })}%
+                        </span>
+                      </div>
+                      <div className={styles.itemInfo}>
+                        <span>Total APR</span>
+                        <span className={styles.totalApr}>
+                          {numberWithCommas(aprInfo.total * 100, undefined, { maximumFractionDigits: 2 })}%
+                        </span>
+                      </div>
                     </div>
                   }
                 />
-              </h4>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className={classNames(styles.content, { [styles.openCollapse]: openCollapse })}>
+          <div className={styles.item}>
+            <div className={styles.title}>
+              <div>
+                <LiquidityIcon />
+              </div>
+              Liquidity
+            </div>
+            <div className={styles.row}>
+              <h4>Current Assets</h4>
               <div className={styles.itemRow}>
-                <span className={styles.usd}>
-                  {!principalAmountX || !principalAmountY ? '--' : formatDisplayUsdt(principleAsset, 6, 6)}
+                <span
+                  className={classNames(styles.usd, {
+                    [styles.green]: isIncreaseAsset,
+                    [styles.red]: !isIncreaseAsset
+                  })}
+                >
+                  {formatDisplayUsdt(currentAsset, 6, 6)}
                 </span>
                 <div className={classNames(styles.itemAsset, styles[theme])}>
                   <span className={classNames(styles.token, styles[theme])}>
                     <position.tokenXIcon />
-                    {!principalAmountX
-                      ? '--'
-                      : numberWithCommas(toDisplay(principalAmountX || 0, tokenXDecimal), undefined, {
-                          maximumFractionDigits: 6
-                        })}{' '}
+                    {numberWithCommas(position.tokenXLiq, undefined, {
+                      maximumFractionDigits: 6
+                    })}{' '}
                     {position?.tokenX.name}
                   </span>
                   <span className={classNames(styles.token, styles[theme])}>
                     <position.tokenYIcon />
-                    {!principalAmountY
-                      ? '--'
-                      : numberWithCommas(toDisplay(principalAmountY || 0, tokenYDecimal), undefined, {
-                          maximumFractionDigits: 6
-                        })}{' '}
+                    {numberWithCommas(position.tokenYLiq, undefined, {
+                      maximumFractionDigits: 6
+                    })}{' '}
                     {position?.tokenY.name}
                   </span>
                 </div>
               </div>
-            </div>
-            <div className={styles.btnGroup}>
-              <ZapOut position={position} incentives={incentives} />
-              <Button
-                type="primary-sm"
-                onClick={() => {
-                  setIsOpenCreatePosition(true);
-                }}
-              >
-                Add Liquidity
-              </Button>
-              {position && poolList.length > 0 && (
-                <CreateNewPosition
-                  showModal={isOpenCreatePosition}
-                  setShowModal={setIsOpenCreatePosition}
-                  pool={poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key))}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.item}>
-          <div className={styles.title}>
-            <div>
-              <RewardIcon />
-            </div>
-            Rewards
-          </div>
-          <div className={styles.row}>
-            <h4>Total Reward Earned</h4>
-            <div className={styles.itemRow}>
-              <span className={styles.usd}>
-                {formatDisplayUsdt(earnXDisplay * tokenXUsd + earnYDisplay * tokenYUsd + totalEarnIncentiveUsd, 6, 6)}
-              </span>
-              <div className={classNames(styles.itemAsset, styles[theme])}>
-                <span className={classNames(styles.token, styles[theme])}>
-                  <position.tokenXIcon />
-                  {numberWithCommas(earnXDisplay, undefined, {
-                    maximumFractionDigits: 6
-                  })}{' '}
-                  {position?.tokenX.name}
-                </span>
-                <span className={classNames(styles.token, styles[theme])}>
-                  <position.tokenYIcon />
-                  {numberWithCommas(earnYDisplay, undefined, {
-                    maximumFractionDigits: 6
-                  })}{' '}
-                  {position?.tokenY.name}
-                </span>
+              <div className={styles.divider}></div>
+              <div className={styles.row}>
+                <h4>
+                  Principal Assets
+                  <TooltipIcon
+                    className={styles.tooltipWrapper}
+                    placement="top"
+                    visible={openTooltip}
+                    icon={<IconInfo />}
+                    setVisible={setOpenTooltip}
+                    content={
+                      <div className={classNames(styles.tooltip, styles[theme])}>
+                        Provided liquidity amount from the time of your first LP depositing or last LP removing
+                      </div>
+                    }
+                  />
+                </h4>
+                <div className={styles.itemRow}>
+                  <span className={styles.usd}>
+                    {!principalAmountX || !principalAmountY ? '--' : formatDisplayUsdt(principleAsset, 6, 6)}
+                  </span>
+                  <div className={classNames(styles.itemAsset, styles[theme])}>
+                    <span className={classNames(styles.token, styles[theme])}>
+                      <position.tokenXIcon />
+                      {!principalAmountX
+                        ? '--'
+                        : numberWithCommas(toDisplay(principalAmountX || 0, tokenXDecimal), undefined, {
+                            maximumFractionDigits: 6
+                          })}{' '}
+                      {position?.tokenX.name}
+                    </span>
+                    <span className={classNames(styles.token, styles[theme])}>
+                      <position.tokenYIcon />
+                      {!principalAmountY
+                        ? '--'
+                        : numberWithCommas(toDisplay(principalAmountY || 0, tokenYDecimal), undefined, {
+                            maximumFractionDigits: 6
+                          })}{' '}
+                      {position?.tokenY.name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.btnGroup}>
+                <div className={styles.btnRemove}>
+                  <Button type="third-sm" onClick={() => setShowModalRemove(true)}>
+                    Remove Position
+                  </Button>
+                </div>
+                <Button
+                  type="primary-sm"
+                  onClick={() => {
+                    setIsOpenCreatePosition(true);
+                  }}
+                >
+                  Add Liquidity
+                </Button>
               </div>
             </div>
-            {earnIncentive && <div style={{ height: 8 }} />}
-            {earnIncentive &&
-              Object.values(earnIncentive).map((incentiveEarned: { amount: number; token: TokenItemType }, i) => {
-                const { amount, token } = incentiveEarned;
+          </div>
 
-                return (
-                  <div className={styles.itemRow} key={'incentEarned-' + i}>
-                    <span className={styles.usd}></span>
-                    <div className={classNames(styles.itemAsset, styles[theme])}>
-                      <span className={classNames(styles.token, styles[theme])}></span>
-                      <span className={classNames(styles.token, styles[theme])}>
-                        {theme === 'light' ? <token.IconLight /> : <token.Icon />}
-                        {!amount || !Number(amount)
-                          ? '--'
-                          : toDisplay(amount.toString(), token.decimals || CW20_DECIMALS)}{' '}
-                        {token?.name}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            <div className={styles.divider}></div>
+          <div className={styles.item}>
+            <div className={styles.title}>
+              <div>
+                <RewardIcon />
+              </div>
+              Rewards
+            </div>
             <div className={styles.row}>
-              <h4>Unclaimed Rewards</h4>
+              <h4>Total Reward Earned</h4>
               <div className={styles.itemRow}>
                 <span className={styles.usd}>
-                  {formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd + incentivesUSD, 6, 6)}
+                  {formatDisplayUsdt(earnXDisplay * tokenXUsd + earnYDisplay * tokenYUsd + totalEarnIncentiveUsd, 6, 6)}
                 </span>
                 <div className={classNames(styles.itemAsset, styles[theme])}>
                   <span className={classNames(styles.token, styles[theme])}>
                     <position.tokenXIcon />
-                    {tokenXClaim} {position?.tokenX.name}
+                    {numberWithCommas(earnXDisplay, undefined, {
+                      maximumFractionDigits: 6
+                    })}{' '}
+                    {position?.tokenX.name}
                   </span>
                   <span className={classNames(styles.token, styles[theme])}>
                     <position.tokenYIcon />
-                    {tokenYClaim} {position?.tokenY.name}
+                    {numberWithCommas(earnYDisplay, undefined, {
+                      maximumFractionDigits: 6
+                    })}{' '}
+                    {position?.tokenY.name}
                   </span>
                 </div>
               </div>
-              {incentives && <div style={{ height: 8 }} />}
-              {incentives &&
-                Object.keys(incentives).map((incent, i) => {
-                  const tokenIncentive = oraichainTokensWithIcon.find((orai) =>
-                    [orai.denom, orai.contractAddress].includes(incent)
-                  );
+              {earnIncentive && <div style={{ height: 8 }} />}
+              {earnIncentive &&
+                Object.values(earnIncentive).map((incentiveEarned: { amount: number; token: TokenItemType }, i) => {
+                  const { amount, token } = incentiveEarned;
 
                   return (
-                    <div className={styles.itemRow} key={i}>
+                    <div className={styles.itemRow} key={'incentEarned-' + i}>
                       <span className={styles.usd}></span>
                       <div className={classNames(styles.itemAsset, styles[theme])}>
                         <span className={classNames(styles.token, styles[theme])}></span>
                         <span className={classNames(styles.token, styles[theme])}>
-                          {theme === 'light' ? <tokenIncentive.IconLight /> : <tokenIncentive.Icon />}
-                          {toDisplay(incentives[incent].toString())} {tokenIncentive?.name}
+                          {theme === 'light' ? <token.IconLight /> : <token.Icon />}
+                          {!amount || !Number(amount)
+                            ? '--'
+                            : toDisplay(amount.toString(), token.decimals || CW20_DECIMALS)}{' '}
+                          {token?.name}
                         </span>
                       </div>
                     </div>
                   );
                 })}
-            </div>
-            <div className={styles.btnGroup}>
-              <Button
-                type="third-sm"
-                disabled={claimLoading || (!tokenXClaimInUsd && !tokenYClaimInUsd && !incentives)}
-                onClick={async () => {
-                  try {
-                    setClaimLoading(true);
-                    const { client } = window.client
-                      ? { client: window.client }
-                      : await getCosmWasmClient({ chainId: network.chainId });
-                    SingletonOraiswapV3.load(client, address);
-                    const { transactionHash } = await SingletonOraiswapV3.dex.claimFee({
-                      index: Number(position.id)
-                    });
+              <div className={styles.divider}></div>
+              <div className={styles.row}>
+                <h4>Unclaimed Rewards</h4>
+                <div className={styles.itemRow}>
+                  <span className={styles.usd}>
+                    {formatDisplayUsdt(tokenXClaimInUsd + tokenYClaimInUsd + incentivesUSD, 6, 6)}
+                  </span>
+                  <div className={classNames(styles.itemAsset, styles[theme])}>
+                    <span className={classNames(styles.token, styles[theme])}>
+                      <position.tokenXIcon />
+                      {tokenXClaim} {position?.tokenX.name}
+                    </span>
+                    <span className={classNames(styles.token, styles[theme])}>
+                      <position.tokenYIcon />
+                      {tokenYClaim} {position?.tokenY.name}
+                    </span>
+                  </div>
+                </div>
+                {incentives && <div style={{ height: 8 }} />}
+                {incentives &&
+                  Object.keys(incentives).map((incent, i) => {
+                    const tokenIncentive = oraichainTokensWithIcon.find((orai) =>
+                      [orai.denom, orai.contractAddress].includes(incent)
+                    );
 
-                    if (transactionHash) {
-                      setIsClaimSuccess(true);
-                      displayToast(TToastType.TX_SUCCESSFUL, {
-                        customLink: getTransactionUrl(network.chainId, transactionHash)
+                    return (
+                      <div className={styles.itemRow} key={i}>
+                        <span className={styles.usd}></span>
+                        <div className={classNames(styles.itemAsset, styles[theme])}>
+                          <span className={classNames(styles.token, styles[theme])}></span>
+                          <span className={classNames(styles.token, styles[theme])}>
+                            {theme === 'light' ? <tokenIncentive.IconLight /> : <tokenIncentive.Icon />}
+                            {toDisplay(incentives[incent].toString())} {tokenIncentive?.name}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+              <div className={styles.btnGroup}>
+                <Button
+                  type="third-sm"
+                  disabled={claimLoading || (!tokenXClaimInUsd && !tokenYClaimInUsd && !incentives)}
+                  onClick={async () => {
+                    try {
+                      setClaimLoading(true);
+                      const { client } = window.client
+                        ? { client: window.client }
+                        : await getCosmWasmClient({ chainId: network.chainId });
+                      SingletonOraiswapV3.load(client, address);
+                      const { transactionHash } = await SingletonOraiswapV3.dex.claimFee({
+                        index: Number(position.id)
                       });
-                      refetchPositions();
+
+                      if (transactionHash) {
+                        setIsClaimSuccess(true);
+                        displayToast(TToastType.TX_SUCCESSFUL, {
+                          customLink: getTransactionUrl(network.chainId, transactionHash)
+                        });
+                        refetchPositions();
+                      }
+                    } catch (error) {
+                      console.log({ error });
+                      handleErrorTransaction(error);
+                    } finally {
+                      setClaimLoading(false);
                     }
-                  } catch (error) {
-                    console.log({ error });
-                    handleErrorTransaction(error);
-                  } finally {
-                    setClaimLoading(false);
-                  }
-                }}
-              >
-                {claimLoading && (
-                  <>
-                    <Loader width={20} height={20} />
-                    <span style={{ width: 6 }}> </span>
-                  </>
-                )}
-                Claim Rewards
-              </Button>
+                  }}
+                >
+                  {claimLoading && (
+                    <>
+                      <Loader width={20} height={20} />
+                      <span style={{ width: 6 }}> </span>
+                    </>
+                  )}
+                  Claim Rewards
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

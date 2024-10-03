@@ -14,9 +14,18 @@ export const openInNewTab = (url: string): void => {
   if (newWindow) newWindow.opener = null;
 };
 
-const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: string]: number } }) => {
+const ZapOut = ({
+  position,
+  incentives,
+  showModal,
+  setShowModal
+}: {
+  position: any;
+  showModal: boolean;
+  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  incentives: { [key: string]: number };
+}) => {
   const [walletAddress] = useConfigReducer('address');
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [slippage, setSlippage] = useState(1);
   const refContent = useRef();
@@ -27,13 +36,7 @@ const ZapOut = ({ position, incentives }: { position: any; incentives: { [key: s
   };
 
   return (
-    <div className={styles.createNewPool}>
-      <div className={styles.btnAdd}>
-        <Button type="third-sm" onClick={() => setShowModal(true)}>
-          Remove Position
-        </Button>
-      </div>
-
+    <div className={classNames(styles.createNewPool, { [styles.activeWrapper]: showModal })}>
       <div
         onClick={() => setShowModal(false)}
         className={classNames(styles.overlay, { [styles.activeOverlay]: showModal })}
