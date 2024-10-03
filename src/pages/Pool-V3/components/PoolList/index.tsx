@@ -1,6 +1,8 @@
 import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import Loading from 'assets/gif/loading.gif';
+import { ReactComponent as UpIcon } from 'assets/icons/up-arrow.svg';
+import { ReactComponent as DownIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as SortDownIcon } from 'assets/icons/down_icon.svg';
 import { ReactComponent as IconInfo } from 'assets/icons/infomationIcon.svg';
 import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
@@ -29,6 +31,10 @@ import styles from './index.module.scss';
 import PoolItemDataMobile from './PoolItemDataMobile';
 import PoolItemTData from './PoolItemTData';
 import { AddLiquidityModal } from 'pages/Pools/components/AddLiquidityModal';
+import LiquidityChart from 'pages/Pools/components/LiquidityChart';
+import VolumeChart from 'pages/Pools/components/VolumeChart';
+import { FILTER_DAY } from 'reducer/type';
+import TokenBalance from 'components/TokenBalance';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -62,8 +68,37 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
   const [totalLiquidity, setTotalLiquidity] = useState(0);
   const { feeDailyData } = useGetFeeDailyData();
   const { poolList: dataPool, poolPrice, loading } = useGetPoolList(price);
-  const { poolLiquidities, poolVolume, volumeV2, liquidityV2 } = useGetPoolLiquidityVolume(poolPrice);
+  const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice); // volumeV2, liquidityV2
   const { poolPositionInfo } = useGetPoolPositionInfo(poolPrice);
+
+  const isMobileMode = isMobile();
+  const [openChart, setOpenChart] = useState(false); // !isMobileMode
+  const [filterDay, setFilterDay] = useState(FILTER_DAY.DAY);
+  const [liquidityDataChart, setLiquidityDataChart] = useState(0);
+  const [volumeDataChart, setVolumeDataChart] = useState(0);
+
+  const liquidityData = [
+    {
+      name: 'Total Liquidity',
+      Icon: null,
+      suffix: 5.25,
+      value: liquidityDataChart, // || statisticData.totalLiquidity,
+      isNegative: false,
+      decimal: 2,
+      chart: <LiquidityChart filterDay={filterDay} onUpdateCurrentItem={setLiquidityDataChart} />,
+      openChart: openChart
+    },
+    {
+      name: 'Volume',
+      Icon: null,
+      suffix: 3.93,
+      value: volumeDataChart,
+      isNegative: false,
+      decimal: 2,
+      chart: <VolumeChart filterDay={filterDay} onUpdateCurrentItem={setVolumeDataChart} />,
+      openChart: openChart
+    }
+  ];
 
   useEffect(() => {
     const getAPRInfo = async () => {
@@ -91,8 +126,8 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
     if (Object.values(poolVolume).length > 0) {
       const totalVolume24h = Object.values(poolVolume).reduce((acc, cur) => acc + cur, 0);
 
-      const totalAllPoolVol = new BigDecimal(totalVolume24h).add(volumeV2).toNumber();
-      setTotalVolume(totalAllPoolVol);
+      // const totalAllPoolVol = new BigDecimal(totalVolume24h).add(volumeV2).toNumber();
+      setTotalVolume(totalVolume24h);
       setVolumnePools(
         Object.keys(poolVolume).map((poolAddress) => {
           return {
@@ -113,8 +148,8 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
     if (Object.values(poolLiquidities).length > 0) {
       const totalLiqudity = Object.values(poolLiquidities).reduce((acc, cur) => acc + cur, 0);
       setLiquidityPools(poolLiquidities);
-      const totalAllPoolLiq = new BigDecimal(totalLiqudity).add(liquidityV2).toNumber();
-      setTotalLiquidity(totalAllPoolLiq);
+      // const totalAllPoolLiq = new BigDecimal(totalLiqudity).add(liquidityV2).toNumber();
+      setTotalLiquidity(totalLiqudity);
     }
   }, [poolLiquidities, dataPool]);
 
@@ -360,7 +395,7 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
     <div className={styles.poolList}>
       <div className={styles.headerTable}>
         <div className={styles.headerInfo}>
-          <div className={styles.total}>
+          {/* <div className={styles.total}>
             <p>Total liquidity</p>
             {totalLiquidity === 0 || totalLiquidity ? (
               <h1>{formatDisplayUsdt(Number(totalLiquidity) || 0)}</h1>
@@ -375,6 +410,36 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
             ) : (
               <img src={Loading} alt="loading" width={32} height={32} />
             )}
+          </div> */}
+          <div className={styles.headerInfo}>
+            {liquidityData.map((e) => (
+              <div key={e.name} className={`${styles.headerInfo_item} ${openChart ? styles.activeChart : ''}`}>
+                <div className={styles.info} onClick={() => setOpenChart((open) => !open)}>
+                  <div className={styles.content}>
+                    <span>{e.name}</span>
+                    <div className={styles.headerInfo_item_info}>
+                      {e.Icon && (
+                        <div>
+                          <e.Icon />
+                        </div>
+                      )}
+                      {!e.value ? (
+                        <img src={Loading} alt="loading_img" />
+                      ) : (
+                        <TokenBalance
+                          balance={e.value}
+                          prefix="$"
+                          className={styles.liq_value}
+                          decimalScale={e.decimal || 6}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div>{e.value && openChart ? <UpIcon /> : <DownIcon />}</div>
+                </div>
+                <div className={`${styles.chart} ${e.value && openChart ? styles.active : ''}`}>{e.chart}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

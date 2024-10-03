@@ -21,11 +21,118 @@
       width: 100%;
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      border-radius: 12px;
 
-      @include small-mobile {
-        gap: 12px;
+      @include mobile() {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      @include theme() {
+        background-color: theme-get('neutral-surface-bg-section');
+      }
+
+      &_item {
+        display: flex;
+        padding: 16px;
+        flex-direction: column;
+        flex: 1 0 0;
+
+        color: $neutron-text-body-light;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 100%;
+
+        @include mobile() {
+          width: 100%;
+        }
+
+        .info {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+
+          .content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 16px;
+          }
+        }
+
+        .chart {
+          max-height: 0px;
+          padding: 0px 16px;
+          border-radius: 12px;
+          margin-top: 0px;
+
+          overflow: hidden;
+          transition: max-height ease-in-out 0.5s, padding ease-in-out 0.5s, margin-top ease-in-out 0.5s;
+
+          @include theme {
+            background: theme-get('neutral-surface-bg-2');
+          }
+
+          &.active {
+            padding: 16px;
+            margin-top: 16px;
+            max-height: 300px;
+          }
+        }
+
+        &:nth-child(even) {
+          border-start-end-radius: 12px;
+          border-end-end-radius: 12px;
+
+          @include theme() {
+            background-color: theme-get('neutral-surface-bg-section-3');
+          }
+
+          @include mobile {
+            border-radius: unset;
+            border-end-start-radius: 12px;
+            border-end-end-radius: 12px;
+          }
+        }
+
+        &_info {
+          display: flex;
+          align-items: flex-end;
+          gap: 8px;
+          align-self: stretch;
+
+          img {
+            width: 32px;
+            height: 32px;
+          }
+
+          svg {
+            width: 18px;
+            height: 18px;
+          }
+
+          .liq_value {
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 120%;
+
+            /* 28.8px */
+            @include theme() {
+              color: theme-get('sea-stone-200');
+            }
+          }
+
+          .liq_suffix {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 150%;
+            color: $success-color;
+
+            &.negative {
+              color: $error-color;
+            }
+          }
+        }
       }
     }
 
