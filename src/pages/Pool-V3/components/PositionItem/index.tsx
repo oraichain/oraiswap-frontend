@@ -94,7 +94,7 @@ const PositionItem = ({ position }) => {
   const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
   const { refetchPositions } = useGetPositions(address);
   const { poolList, poolPrice } = useGetPoolList(price);
-  const { simulation } = useGetIncentiveSimulate(address, position.id);
+  const { simulation } = useGetIncentiveSimulate(address, position.id, openCollapse);
 
   useOnClickOutside(ref, () => {
     setCollapse(false);
@@ -133,6 +133,7 @@ const PositionItem = ({ position }) => {
 
   useEffect(() => {
     if (!openCollapse) return;
+
     (async () => {
       try {
         const { pool_key, lower_tick_index, upper_tick_index } = position;
