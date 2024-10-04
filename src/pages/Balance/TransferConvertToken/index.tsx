@@ -36,6 +36,8 @@ import {
 } from '../helpers';
 import styles from './index.module.scss';
 import { useGetContractConfig } from 'pages/BitcoinDashboardV2/hooks';
+import ToggleSwitch from 'components/ToggleSwitch';
+import { CWBitcoinFactoryDenom } from 'helper/constants';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -64,6 +66,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const { data: prices } = useCoinGeckoPrices();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const contractConfig = useGetContractConfig();
+  const [isFastMode, setIsFastMode] = useState(true);
 
   useEffect(() => {
     if (chainInfo) setConvertAmount([undefined, 0]);
@@ -381,6 +384,19 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           </div>
         </div>
         {renderBridgeFee()}
+
+        {token.denom === CWBitcoinFactoryDenom && (
+          <div className={styles.fastMode}>
+            <span>Fast Mode</span>{' '}
+            <ToggleSwitch
+              customSwitchClass={styles.switch}
+              small
+              id={'fast-mode-id'}
+              checked={isFastMode}
+              onChange={() => setIsFastMode((fastMode) => !fastMode)}
+            />
+          </div>
+        )}
       </div>
       <div className={styles.transferTab}>
         {(() => {
