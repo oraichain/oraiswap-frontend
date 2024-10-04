@@ -54,18 +54,8 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [fee, setFee] = useState<number>(0);
   const [cachePendingWithdrawAddrs, setCachePendingWithdrawAddrs] = useState<string[]>([]);
-  //@ts-ignore
-  const isOwallet = window.owallet?.isOwallet;
   let label = 'Balance';
   let balance = amounts['usat'] ?? '0';
-
-  const getAddress = async () => {
-    try {
-      await nomic.generateAddress();
-    } catch (error) {
-      console.log('🚀 ~ getAddress ~ error:', error);
-    }
-  };
 
   const processTxResult = (rpc: string, result: DeliverTxResponse, customLink?: string) => {
     if (isDeliverTxFailure(result)) {
@@ -149,19 +139,6 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
       );
     }
   }, [relayerFee, withdrawFeeBtc, depositFeeV2Btc]);
-  useEffect(() => {
-    // TODO: should dynamic generate address when change destination chain.
-    if (oraiAddress) {
-      cwBitcoinContext.generateAddress({
-        address: oraiAddress
-      });
-    }
-  }, [isOwallet, oraiAddress]);
-  useEffect(() => {
-    if (isOwallet) {
-      getAddress();
-    }
-  }, [oraiAddress, isOwallet]);
 
   return (
     <div className={styles.wrapper}>

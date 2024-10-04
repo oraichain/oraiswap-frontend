@@ -45,6 +45,8 @@ interface TransferConvertProps {
   convertKwt?: any;
   onClickTransfer: any;
   subAmounts?: object;
+  isFastMode?: boolean;
+  setIsFastMode?: Function;
 }
 
 const TransferConvertToken: FC<TransferConvertProps> = ({
@@ -52,7 +54,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   amountDetail,
   convertKwt,
   onClickTransfer,
-  subAmounts
+  subAmounts,
+  isFastMode,
+  setIsFastMode
 }) => {
   const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
@@ -66,7 +70,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const { data: prices } = useCoinGeckoPrices();
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const contractConfig = useGetContractConfig();
-  const [isFastMode, setIsFastMode] = useState(true);
 
   useEffect(() => {
     if (chainInfo) setConvertAmount([undefined, 0]);
@@ -161,14 +164,17 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     enabled: isFromOraichainToBitcoin,
     bitcoinAddress: addressTransfer
   });
-  const depositFeeBtcV2Result = useDepositFeesBitcoinV2(isFromBitcoinToOraichain);
+  const depositFeeBtcV2Result = useDepositFeesBitcoinV2(true);
   const withdrawalFeeBtcV2Result = useGetWithdrawlFeesBitcoinV2({
     enabled: isFromOraichainToBitcoin,
     bitcoinAddress: addressTransfer
   });
   const depositFeeBtc = isV2 ? depositFeeBtcV2Result : depositFeeBtcResult;
-  const withdrawalFeeBtc = isV2 ? withdrawalFeeBtcV2Result : withdrawalFeeBtcResult;
-
+  const withdrawalFeeBtc = isV2
+    ? isFastMode
+      ? { withdrawal_fees: depositFeeBtcV2Result?.deposit_fees }
+      : withdrawalFeeBtcV2Result
+    : withdrawalFeeBtcResult;
   if (isV2) {
     if (contractConfig?.token_fee.denominator != 0) {
       bridgeFee = (contractConfig?.token_fee.nominator * 100) / contractConfig?.token_fee.denominator;

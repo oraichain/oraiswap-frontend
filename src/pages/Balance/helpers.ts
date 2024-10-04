@@ -680,7 +680,11 @@ export const useGetWithdrawlFeesBitcoinV2 = ({
   bitcoinAddress: string;
 }) => {
   const getWithdrawFeeBTC = async (bitcoinAddr) => {
-    if (!bitcoinAddr) return 0;
+    if (!bitcoinAddr) {
+      return {
+        withdrawal_fees: 0
+      };
+    }
     try {
       const { data } = await axios({
         baseURL: bitcoinLcdV2,

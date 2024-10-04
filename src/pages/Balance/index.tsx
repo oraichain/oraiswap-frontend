@@ -78,7 +78,9 @@ import {
   mapUtxos,
   moveOraibToOraichain,
   transferIbcCustom,
-  transferIBCKwt
+  transferIBCKwt,
+  useDepositFeesBitcoinV2,
+  useGetWithdrawlFeesBitcoinV2
 } from './helpers';
 import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
@@ -121,6 +123,12 @@ const Balance: React.FC<BalanceProps> = () => {
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
+  const [isFastMode, setIsFastMode] = useState(true);
+  const depositV2Fee = useDepositFeesBitcoinV2(true);
+  const withdrawV2Fee = useGetWithdrawlFeesBitcoinV2({
+    enabled: true,
+    bitcoinAddress: btcAddress
+  });
 
   const ref = useRef(null);
   //@ts-ignore
@@ -337,6 +345,14 @@ const Balance: React.FC<BalanceProps> = () => {
   const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
     if (fromToken.name === 'BTC V2') {
       try {
+        if (!withdrawV2Fee?.withdrawal_fees) {
+          throw Error('Withdrawal fees are not found!');
+        }
+        if (!depositV2Fee?.deposit_fees) {
+          throw Error('Deposit fees are not found!');
+        }
+        const fee = isFastMode ? depositV2Fee?.deposit_fees : withdrawV2Fee?.withdrawal_fees;
+        console.log(fee);
         const amountInput = BigInt(
           Decimal.fromUserInput(toAmount(transferAmount, 14).toString(), 14).atomics.toString()
         );
@@ -345,7 +361,8 @@ const Balance: React.FC<BalanceProps> = () => {
         let cwBitcoinClient = new AppBitcoinClient(window.client, sender, CWAppBitcoinContractAddress);
         const result = await cwBitcoinClient.withdrawToBitcoin(
           {
-            btcAddress: btcAddr
+            btcAddress: btcAddr,
+            fee
           },
           'auto',
           '',
@@ -701,7 +718,6 @@ const Balance: React.FC<BalanceProps> = () => {
                   amount += subAmount;
                   usd += getUsd(subAmount, t, prices);
                 }
-                console.log({ amounts });
                 // TODO: hardcode check bitcoinTestnet need update later
                 const isOwallet =
                   walletByNetworks.cosmos &&
@@ -753,6 +769,8 @@ const Balance: React.FC<BalanceProps> = () => {
                           });
                         }
                       }}
+                      isFastMode={isFastMode}
+                      setIsFastMode={setIsFastMode}
                     />
                   </div>
                 );
