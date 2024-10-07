@@ -72,29 +72,24 @@ export const ConcentratedLiquidityDepthChart: FC<{
     }
   };
 
-
   return (
     <ParentSize className="flex-shrink-1 flex-1 overflow-hidden">
       {({ height, width }) => {
-        console.log('height-xyz', height, yRange, xRange);
-
         const yScale = scaleLinear({
           range: [top, height - bottom],
           domain: yRange.slice().reverse(),
           zero: false
         });
 
-        if (!height) {
-          return null;
-        }
+        const maxHeight = 290;
+        const customHeight = Math.min(height, maxHeight);
 
         return (
           <XYChart
             key="bar-chart"
             captureEvents={false}
             margin={{ top: fullRange ? top - 8.5 : top, right, bottom, left }}
-            // height={height}
-            height={340}
+            height={customHeight}
             width={width}
             xScale={{
               type: 'linear',

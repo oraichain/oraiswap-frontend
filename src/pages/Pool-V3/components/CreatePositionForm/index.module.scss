@@ -7,7 +7,8 @@
   justify-content: space-between;
 
   @include mobile {
-    padding: 24px;
+    padding: 0px;
+    flex-direction: column;
   }
 
   max-height: calc(100vh - 210px);
@@ -40,14 +41,20 @@
     display: flex;
     flex-direction: row;
     height: 340px;
+    padding: 0 0px 0 20px;
+
+    @include theme {
+      background-color: theme-get('neutral-6');
+      border-radius: 24px;
+    }
 
     .chartPrice {
       display: flex;
       padding-top: 1.75rem;
       padding-bottom: 1.75rem;
       flex-direction: column;
-      flex: 1 1 0%;
-      width: 0;
+      flex: 1;
+      margin-right: 6px;
 
       @media (min-width: 640px) {
         padding-top: 0.75rem;
@@ -61,7 +68,7 @@
       display: flex;
       position: relative;
       flex-direction: column;
-      width: 229px;
+      flex: 1;
 
       .chart {
         display: flex;

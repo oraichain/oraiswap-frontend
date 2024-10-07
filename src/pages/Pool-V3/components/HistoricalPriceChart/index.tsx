@@ -357,11 +357,14 @@ const HistoricalPriceChart: FC<{
   }) => (
     <ParentSize className={styles.parentSize}>
       {({ height, width }) => {
+        const maxHeight = 340;
+        const customHeight = Math.min(height, maxHeight);
+
         return (
           <XYChart
             key="line-chart"
             margin={minimal ? { top: 0, right: 0, bottom: 24, left: 0 } : { top: 0, right: 0, bottom: 24, left: 36 }}
-            // height={height}
+            height={customHeight}
             width={width}
             xScale={{
               type: 'time',
