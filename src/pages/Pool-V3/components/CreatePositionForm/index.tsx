@@ -79,6 +79,9 @@ import {
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
 import { PRICE_SCALE } from 'libs/contractSingleton';
+import HistoricalPriceChart from '../HistoricalPriceChart';
+import { ConcentratedLiquidityDepthChart } from '../ConcentratedLiquidityDepthChart';
+import { Dec } from '@keplr-wallet/unit';
 
 export type PriceInfo = {
   startPrice: number;
@@ -994,24 +997,25 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   return (
     <div className={styles.createPoolForm}>
-      {(isToBlocked || isFromBlocked) && (
-        <div className={classNames(styles.warning)}>
-          <div>
-            <WarningIcon />
+      <div className={styles.tab}>
+        {(isToBlocked || isFromBlocked) && (
+          <div className={classNames(styles.warning)}>
+            <div>
+              <WarningIcon />
+            </div>
+            <span>
+              Your position will not earn fees or be used in trades until the market price moves into your range.
+            </span>
           </div>
-          <span>
-            Your position will not earn fees or be used in trades until the market price moves into your range.
-          </span>
-        </div>
-      )}
-      <div className={styles.item}>
-        <div className={styles.priceSectionExisted}>
-          <div className={styles.wrapper}>
-            <div className={styles.itemTitleWrapper}>
-              <p className={styles.itemTitle}>Price Range</p>
-              <p className={styles.liquidityActive}>
-                Active Liquidity
-                {/* <TooltipIcon
+        )}
+        <div className={styles.item}>
+          <div className={styles.priceSectionExisted}>
+            <div className={styles.wrapper}>
+              <div className={styles.itemTitleWrapper}>
+                <p className={styles.itemTitle}>Price Range</p>
+                <p className={styles.liquidityActive}>
+                  Active Liquidity
+                  {/* <TooltipIcon
               className={styles.tooltipWrapper}
               placement="top"
               visible={openTooltip}
@@ -1019,599 +1023,1903 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               setVisible={setOpenTooltip}
               content={<div className={classNames(styles.tooltip, styles[theme])}>Active Liquidity</div>}
             /> */}
-              </p>
-            </div>
-            <div className={styles.itemSwitcherWrapper}>
-              <div className={styles.switcherContainer}>
-                <div
-                  className={classNames(
-                    styles.singleTabClasses,
-                    { [styles.chosen]: typeChart === TYPE_CHART.CONTINUOUS },
-                    styles[theme]
-                  )}
-                  onClick={() => {
-                    setTypeChart(TYPE_CHART.CONTINUOUS);
-                    setIsPlotDiscrete(false);
-                  }}
-                >
-                  <div className={styles.continuous}>
-                    <Continuous />
-                  </div>
-                </div>
-                <div
-                  className={classNames(
-                    styles.singleTabClasses,
-                    { [styles.chosen]: typeChart === TYPE_CHART.DISCRETE },
-                    styles[theme]
-                  )}
-                  onClick={() => {
-                    setTypeChart(TYPE_CHART.DISCRETE);
-                    setIsPlotDiscrete(true);
-                  }}
-                >
-                  <div className={styles.discrete}>
-                    <Discrete />
-                  </div>
-                </div>
+                </p>
               </div>
-            </div>
-          </div>
-
-          <div className={styles.itemChartAndPriceWrapper}>
-            <div>
-              <PriceRangePlot
-                className={styles.plot}
-                data={liquidityData}
-                onChangeRange={changeRangeHandler}
-                leftRange={{
-                  index: leftRange,
-                  x: calcPrice(
-                    leftRange,
-                    isXtoY,
-                    isXtoY ? tokenFrom.decimals : tokenTo.decimals,
-                    isXtoY ? tokenTo.decimals : tokenFrom.decimals
-                  )
-                }}
-                rightRange={{
-                  index: rightRange,
-                  x: calcPrice(
-                    rightRange,
-                    isXtoY,
-                    isXtoY ? tokenFrom.decimals : tokenTo.decimals,
-                    isXtoY ? tokenTo.decimals : tokenFrom.decimals
-                  )
-                }}
-                midPrice={midPrice}
-                plotMin={plotMin}
-                plotMax={plotMax}
-                zoomMinus={zoomMinus}
-                zoomPlus={zoomPlus}
-                loading={loading}
-                coverOnLoading={true}
-                isXtoY={isXtoY}
-                tickSpacing={poolData.pool_key.fee_tier.tick_spacing}
-                xDecimal={isXtoY ? tokenFrom.decimals : tokenTo.decimals}
-                yDecimal={isXtoY ? tokenTo.decimals : tokenFrom.decimals}
-                isDiscrete={isPlotDiscrete}
-                // disabled={positionOpeningMethod === 'concentration'}
-                disabled={false}
-                // hasError={args.hasError}
-                // reloadHandler={reloadHandler}
-                reloadHandler={() => {}}
-              />
-            </div>
-
-            <div className={styles.actions}>
-              <button onClick={resetPlot}>Reset range</button>
-              <button
-                onClick={() => {
-                  const left = isXtoY
-                    ? getMinTick(poolInfo.pool_key.fee_tier.tick_spacing)
-                    : getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing);
-                  const right = isXtoY
-                    ? getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing)
-                    : getMinTick(poolInfo.pool_key.fee_tier.tick_spacing);
-                  changeRangeHandler(left, right);
-                  autoZoomHandler(left, right);
-                }}
-              >
-                Set full range
-              </button>
-            </div>
-
-            <div className={styles.currentPrice}>
-              <p>Current Price:</p>
-              <div>
-                <div className={styles.price}>
-                  {TokenPriceFromIcon}1 {tokenFrom.name} = {minimize(midPrice.x.toString())} {tokenTo.name}
-                </div>
-
-                <div className={styles.price}>
-                  {TokenPriceToIcon} 1 {tokenTo.name} = {minimize((1 / midPrice.x).toString())} {tokenFrom.name}
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.minMaxPriceWrapper}>
-              <div className={styles.item}>
-                <div className={styles.minMaxPrice}>
-                  <div className={styles.minMaxPriceTitle}>
-                    <p>Min Price</p>
-                  </div>
-                  <div className={styles.minMaxPriceValue}>
-                    <p>
-                      <p>{minimize(leftInputRounded)}</p>
-                      {/* <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
-                      <p className={styles.pair}>
-                        {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
-                      </p>
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.percent}>
-                  <p>Min Current Price:</p>
-                  <span className={classNames(styles.value, { [styles.positive]: false })}>
-                    {(((+leftInput - midPrice.x) / midPrice.x) * 100).toLocaleString(undefined, {
-                      maximumFractionDigits: 3
-                    })}
-                    %
-                  </span>
-                </div>
-              </div>
-
-              <div className={styles.item}>
-                <div className={styles.minMaxPrice}>
-                  <div className={styles.minMaxPriceTitle}>
-                    <p>Max Price</p>
-                  </div>
-                  <div className={styles.minMaxPriceValue}>
-                    <p>
-                      {/* <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
-                      <p>{minimize(rightInputRounded)}</p>
-                      <p className={styles.pair}>
-                        {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
-                      </p>
-                    </p>
-                  </div>
-                </div>
-                <div className={classNames(styles.percent, styles.maxCurrentPrice)}>
-                  <p>Max Current Price:</p>
-                  <span className={classNames(styles.value, { [styles.positive]: true })}>
-                    {numberWithCommas(((+rightInput - midPrice.x) / midPrice.x) * 100, undefined, {
-                      maximumFractionDigits: 3
-                    })}
-                    %
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.options}>
-        <button
-          className={classNames(styles.btnOption, { [styles.activeBtn]: toggleZapIn })}
-          onClick={() => setToggleZapIn(true)}
-        >
-          Zap In
-          <span>BETA</span>
-        </button>
-        <button
-          className={classNames(styles.btnOption, { [styles.activeBtn]: !toggleZapIn })}
-          onClick={() => setToggleZapIn(false)}
-        >
-          Manual Deposit
-        </button>
-      </div>
-
-      {toggleZapIn ? (
-        <div>
-          <div className={styles.introZap}>
-            <IconInfo />
-            <span>
-              Zap In: Instantly swap your chosen token for two pool tokens and provide liquidity to the pool, all in one
-              seamless transaction.
-            </span>
-          </div>
-          <div className={classNames(styles.itemInput, { [styles.disabled]: false })}>
-            <div className={styles.balance}>
-              <p className={styles.bal}>
-                <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals))}{' '}
-                {tokenZap?.name}
-              </p>
-              <div className={styles.btnGroup}>
-                <button
-                  className=""
-                  disabled={!tokenZap}
-                  onClick={() => {
-                    const val = toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals);
-                    const haftValue = new BigDecimal(val).div(2).toNumber();
-                    setZapAmount(haftValue);
-                    setFocusId('zapper');
-                  }}
-                >
-                  50%
-                </button>
-                <button
-                  className=""
-                  disabled={!tokenZap}
-                  onClick={() => {
-                    const val = toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals);
-                    setZapAmount(val);
-                    setFocusId('zapper');
-                  }}
-                >
-                  100%
-                </button>
-              </div>
-            </div>
-            <div className={styles.tokenInfo}>
-              {/* <div className={styles.name}> */}
-              <SelectToken
-                token={tokenZap}
-                handleChangeToken={(token) => {
-                  setTokenZap(token);
-                  setZapAmount(0);
-                }}
-                otherTokenDenom={tokenZap?.denom}
-                customClassButton={styles.name}
-              />
-              {/* </div> */}
-              <div className={styles.input}>
-                <NumberFormat
-                  onFocus={() => setFocusId('zapper')}
-                  onBlur={() => setFocusId(null)}
-                  placeholder="0"
-                  thousandSeparator
-                  className={styles.amount}
-                  decimalScale={tokenZap?.decimals || 6}
-                  disabled={false}
-                  type="text"
-                  value={zapAmount}
-                  onChange={() => {}}
-                  isAllowed={(values) => {
-                    const { floatValue } = values;
-                    // allow !floatValue to let user can clear their input
-                    return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
-                  }}
-                  onValueChange={({ floatValue }) => {
-                    setZapAmount(floatValue);
-                  }}
-                />
-                <div className={styles.usd}>
-                  ≈ $
-                  {zapAmount
-                    ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: tokenZap.decimals })
-                    : 0}
-                </div>
-              </div>
-            </div>
-          </div>
-          {simulating && (
-            <div>
-              <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
-                <ZappingText text={'Finding best option to zap'} dot={5} />
-              </span>
-            </div>
-          )}
-
-          {zapError && (
-            <div className={styles.errorZap}>
-              <ErrorIcon />
-              <span>{zapError}</span>
-            </div>
-          )}
-          {!zapError && zapInResponse && !simulating && (
-            <>
-              <div className={styles.dividerOut}>
-                <div className={styles.bar}></div>
-                <div>
-                  <OutputIcon />
-                </div>
-                <div className={styles.bar}></div>
-              </div>
-              <div className={styles.tokenOutput}>
-                <div className={styles.item}>
-                  <div className={styles.info}>
-                    <div className={styles.infoIcon}>{TokenFromIcon}</div>
-                    <span>{tokenFrom.name}</span>
-                  </div>
-                  <div className={styles.value}>
-                    {simulating && <div className={styles.mask} />}
-                    <span>
-                      {zapInResponse
-                        ? numberWithCommas(Number(zapInResponse.amountX) / 10 ** tokenFrom.decimals, undefined, {
-                            maximumFractionDigits: 3
-                          })
-                        : 0}
-                    </span>
-                    <span className={styles.usd}>
-                      ≈ $
-                      {zapInResponse
-                        ? numberWithCommas(Number(xUsd) || 0, undefined, {
-                            maximumFractionDigits: 3
-                          })
-                        : 0}
-                    </span>
-                  </div>
-                </div>
-                <div className={styles.item}>
-                  <div className={styles.info}>
-                    <div className={styles.infoIcon}>{TokenToIcon}</div>
-                    <span>{tokenTo.name}</span>
-                  </div>
-                  <div className={styles.value}>
-                    {simulating && <div className={styles.mask} />}
-                    <span>
-                      {zapInResponse
-                        ? numberWithCommas(Number(zapInResponse.amountY) / 10 ** tokenTo.decimals, undefined, {
-                            maximumFractionDigits: 3
-                          })
-                        : 0}
-                    </span>
-                    <span className={styles.usd}>
-                      ≈ $
-                      {zapInResponse ? numberWithCommas(Number(yUsd) || 0, undefined, { maximumFractionDigits: 3 }) : 0}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.feeInfoWrapper}>
-                <div className={styles.item}>
-                  <div className={styles.info}>
-                    <span>Price Impact</span>
+              <div className={styles.itemSwitcherWrapper}>
+                <div className={styles.switcherContainer}>
+                  <div
+                    className={classNames(
+                      styles.singleTabClasses,
+                      { [styles.chosen]: typeChart === TYPE_CHART.CONTINUOUS },
+                      styles[theme]
+                    )}
+                    onClick={() => {
+                      setTypeChart(TYPE_CHART.CONTINUOUS);
+                      setIsPlotDiscrete(false);
+                    }}
+                  >
+                    <div className={styles.continuous}>
+                      <Continuous />
+                    </div>
                   </div>
                   <div
-                    className={cx(
-                      'valueImpact',
-                      `${zapImpactPrice >= 10 ? 'valueImpact-high' : zapImpactPrice >= 5 ? 'valueImpact-medium' : ''}`
+                    className={classNames(
+                      styles.singleTabClasses,
+                      { [styles.chosen]: typeChart === TYPE_CHART.DISCRETE },
+                      styles[theme]
                     )}
+                    onClick={() => {
+                      setTypeChart(TYPE_CHART.DISCRETE);
+                      setIsPlotDiscrete(true);
+                    }}
                   >
-                    <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 }) ?? 0}%</span>
+                    <div className={styles.discrete}>
+                      <Discrete />
+                    </div>
                   </div>
                 </div>
-                <div className={styles.item}>
-                  <div className={styles.info}>
-                    <span>Swap Fee</span>
-                  </div>
-                  <div className={styles.value}>
-                    <span>{numberWithCommas(swapFee, undefined, { maximumFractionDigits: 2 })} %</span>
-                  </div>
+              </div>
+            </div>
+
+            <div className={styles.itemChartAndPriceWrapper}>
+              <div className={styles.actions}>
+                <button onClick={resetPlot}>Reset range</button>
+                <button
+                  onClick={() => {
+                    const left = isXtoY
+                      ? getMinTick(poolInfo.pool_key.fee_tier.tick_spacing)
+                      : getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing);
+                    const right = isXtoY
+                      ? getMaxTick(poolInfo.pool_key.fee_tier.tick_spacing)
+                      : getMinTick(poolInfo.pool_key.fee_tier.tick_spacing);
+                    changeRangeHandler(left, right);
+                    autoZoomHandler(left, right);
+                  }}
+                >
+                  Set full range
+                </button>
+              </div>
+
+              <div className={styles.wrapChart}>
+                <div className={styles.chartPrice}>
+                  <HistoricalPriceChart
+                    data={PriceChartData.historicalChartData}
+                    annotations={[]}
+                    domain={PriceChartData.yRange as [number, number]}
+                    onPointerHover={PriceChartData.setHoverPrice}
+                    onPointerOut={() => {
+                      if (PriceChartData.lastChartData) {
+                        PriceChartData.setHoverPrice(Number(PriceChartData.currentPrice.toString()));
+                      }
+                    }}
+                  />
                 </div>
-                <div className={styles.item}>
-                  <div className={styles.info}>
-                    <TooltipHover
-                      isVisible={isVisible}
-                      setIsVisible={setIsVisible}
-                      content={<div>The amount of token you'll swap to provide liquidity.</div>}
-                      position="right"
-                      children={<span>Zap Fee</span>}
+                <div className={styles.chartLiquid}>
+                  <div className={styles.chart}>
+                    <ConcentratedLiquidityDepthChart
+                      yRange={LiquidityChartData.yRange as [number, number]}
+                      xRange={LiquidityChartData.xRange as [number, number]}
+                      data={LiquidityChartData.data}
+                      annotationDatum={{
+                        price: PriceChartData.currentPrice ? Number(PriceChartData.currentPrice.toString()) : PriceChartData.lastChartData?.close ?? 0,
+                        depth: LiquidityChartData.xRange[1]
+                      }}
+                      // offset={{
+                      //   top: 0,
+                      //   right: PriceChartData.currentPrice ? ((new Dec(BigInt(PriceChartData.currentPrice.int))).gt(new Dec(100)) ? 120 : 56) : 36,
+                      //   bottom: 24 + 28,
+                      //   left: 0
+                      // }}
+                      horizontal
                     />
                   </div>
-                  <div className={styles.value}>
-                    <span>
-                      {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, {
-                        maximumFractionDigits: tokenZap.decimals
-                      })}{' '}
-                      {tokenZap.name}
+                </div>
+              </div>
+
+              <div className={styles.currentPrice}>
+                <p>Current Price:</p>
+                <span>
+                  1 {tokenFrom.name} = {minimize(midPrice.x.toString())} {tokenTo.name}
+                </span>
+                <span>
+                  1 {tokenTo.name} = {minimize((1 / midPrice.x).toString())} {tokenFrom.name}
+                </span>
+              </div>
+
+              <div className={styles.minMaxPriceWrapper}>
+                <div className={styles.item}>
+                  <div className={styles.minMaxPrice}>
+                    <div className={styles.minMaxPriceTitle}>
+                      <p>Min Price</p>
+                    </div>
+                    <div className={styles.minMaxPriceValue}>
+                      <p>
+                        <p>{minimize(leftInputRounded)}</p>
+                        {/* <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
+                        <p className={styles.pair}>
+                          {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
+                        </p>
+                      </p>
+                    </div>
+                  </div>
+                  <div className={styles.percent}>
+                    <p>Min Current Price:</p>
+                    <span className={classNames(styles.value, { [styles.positive]: false })}>
+                      {(((+leftInput - midPrice.x) / midPrice.x) * 100).toLocaleString(undefined, {
+                        maximumFractionDigits: 3
+                      })}
+                      %
                     </span>
                   </div>
                 </div>
+
                 <div className={styles.item}>
-                  <div className={styles.conclusion}>
-                    <span>Total Fee</span>
+                  <div className={styles.minMaxPrice}>
+                    <div className={styles.minMaxPriceTitle}>
+                      <p>Max Price</p>
+                    </div>
+                    <div className={styles.minMaxPriceValue}>
+                      <p>
+                        {/* <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
+                        <p>{minimize(rightInputRounded)}</p>
+                        <p className={styles.pair}>
+                          {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
+                        </p>
+                      </p>
+                    </div>
                   </div>
-                  <div className={styles.value}>
-                    <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 4 }) ?? 0}</span>
-                  </div>
-                </div>
-                <div className={styles.item}>
-                  <div className={styles.conclusion}>
-                    <span>Match Rate</span>
-                  </div>
-                  <div className={styles.value}>
-                    <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 }) ?? 0} %</span>
+                  <div className={classNames(styles.percent, styles.maxCurrentPrice)}>
+                    <p>Max Current Price:</p>
+                    <span className={classNames(styles.value, { [styles.positive]: true })}>
+                      {numberWithCommas(((+rightInput - midPrice.x) / midPrice.x) * 100, undefined, {
+                        maximumFractionDigits: 3
+                      })}
+                      %
+                    </span>
                   </div>
                 </div>
               </div>
-            </>
-          )}
-          <div ref={endRef}></div>
+            </div>
+          </div>
         </div>
-      ) : (
-        <>
-          <div className={classNames(styles.itemInput, { [styles.disabled]: isFromBlocked })}>
-            <div className={styles.balance}>
-              <p className={styles.bal}>
-                <span>Balance:</span>{' '}
-                {numberWithCommas(toDisplay(amounts[tokenFrom?.denom] || '0', tokenFrom.decimals))} {tokenFrom?.name}
-              </p>
-              <div className={styles.btnGroup}>
-                <button
-                  className=""
-                  disabled={!tokenFrom}
-                  onClick={() => {
-                    const val = toDisplay(amounts[tokenFrom?.denom] || '0', tokenFrom.decimals);
-                    const haftValue = new BigDecimal(val).div(2).toNumber();
-                    setAmountFrom(haftValue);
-                    setFocusId('from');
-                  }}
-                >
-                  50%
-                </button>
-                <button
-                  className=""
-                  disabled={!tokenFrom}
-                  onClick={() => {
-                    const val = toDisplay(amounts[tokenFrom?.denom] || '0', tokenFrom.decimals);
-                    setAmountFrom(val);
-                    setFocusId('from');
-                  }}
-                >
-                  100%
-                </button>
-              </div>
+      </div>
+
+      <div className={styles.tab}>
+        <div className={styles.options}>
+          <button
+            className={classNames(styles.btnOption, { [styles.activeBtn]: toggleZapIn })}
+            onClick={() => setToggleZapIn(true)}
+          >
+            Zap In
+            <span>BETA</span>
+          </button>
+          <button
+            className={classNames(styles.btnOption, { [styles.activeBtn]: !toggleZapIn })}
+            onClick={() => setToggleZapIn(false)}
+          >
+            Manual Deposit
+          </button>
+        </div>
+
+        {toggleZapIn ? (
+          <>
+            <div className={styles.introZap}>
+              <IconInfo />
+              <span>
+                Zap In: Instantly swap your chosen token for two pool tokens and provide liquidity to the pool, all in
+                one seamless transaction.
+              </span>
             </div>
-            <div className={styles.tokenInfo}>
-              <div className={styles.name}>
-                {TokenFromIcon ? (
-                  <>
-                    {TokenFromIcon}
-                    &nbsp;{tokenFrom.name}
-                  </>
-                ) : (
-                  'Select Token'
-                )}
+            <div className={classNames(styles.itemInput, { [styles.disabled]: false })}>
+              <div className={styles.balance}>
+                <p className={styles.bal}>
+                  <span>Balance:</span>{' '}
+                  {numberWithCommas(toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals))} {tokenZap?.name}
+                </p>
+                <div className={styles.btnGroup}>
+                  <button
+                    className=""
+                    disabled={!tokenZap}
+                    onClick={() => {
+                      const val = toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals);
+                      const haftValue = new BigDecimal(val).div(2).toNumber();
+                      setZapAmount(haftValue);
+                      setFocusId('zapper');
+                    }}
+                  >
+                    50%
+                  </button>
+                  <button
+                    className=""
+                    disabled={!tokenZap}
+                    onClick={() => {
+                      const val = toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals);
+                      setZapAmount(val);
+                      setFocusId('zapper');
+                    }}
+                  >
+                    100%
+                  </button>
+                </div>
               </div>
-              <div className={styles.input}>
-                <NumberFormat
-                  onFocus={() => setFocusId('from')}
-                  onBlur={() => setFocusId(null)}
-                  placeholder="0"
-                  thousandSeparator
-                  className={styles.amount}
-                  decimalScale={tokenFrom?.decimals || 6}
-                  disabled={isFromBlocked}
-                  type="text"
-                  value={amountFrom}
-                  onChange={() => {}}
-                  isAllowed={(values) => {
-                    const { floatValue } = values;
-                    // allow !floatValue to let user can clear their input
-                    return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+              <div className={styles.tokenInfo}>
+                {/* <div className={styles.name}> */}
+                <SelectToken
+                  token={tokenZap}
+                  handleChangeToken={(token) => {
+                    setTokenZap(token);
+                    setZapAmount(0);
                   }}
-                  onValueChange={({ floatValue }) => {
-                    setAmountFrom(floatValue);
-                  }}
+                  otherTokenDenom={tokenZap?.denom}
+                  customClassButton={styles.name}
                 />
-                <div className={styles.usd}>
-                  ≈ ${amountFrom ? numberWithCommas(Number(fromUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+                {/* </div> */}
+                <div className={styles.input}>
+                  <NumberFormat
+                    onFocus={() => setFocusId('zapper')}
+                    onBlur={() => setFocusId(null)}
+                    placeholder="0"
+                    thousandSeparator
+                    className={styles.amount}
+                    decimalScale={tokenZap?.decimals || 6}
+                    disabled={false}
+                    type="text"
+                    value={zapAmount}
+                    onChange={() => {}}
+                    isAllowed={(values) => {
+                      const { floatValue } = values;
+                      // allow !floatValue to let user can clear their input
+                      return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+                    }}
+                    onValueChange={({ floatValue }) => {
+                      setZapAmount(floatValue);
+                    }}
+                  />
+                  <div className={styles.usd}>
+                    ≈ $
+                    {zapAmount
+                      ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: tokenZap.decimals })
+                      : 0}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className={classNames(styles.itemInput, { [styles.disabled]: isToBlocked })}>
-            <div className={styles.balance}>
-              <p className={styles.bal}>
-                <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenTo?.denom] || '0', tokenTo.decimals))}{' '}
-                {tokenTo?.name}
-              </p>
-              <div className={styles.btnGroup}>
-                <button
-                  className=""
-                  disabled={!tokenTo}
-                  onClick={() => {
-                    const val = toDisplay(amounts[tokenTo?.denom] || '0', tokenTo.decimals);
-                    const haftValue = new BigDecimal(val).div(2).toNumber();
-                    setAmountTo(haftValue);
-                    setFocusId('to');
-                  }}
-                >
-                  50%
-                </button>
-                <button
-                  className=""
-                  disabled={!tokenTo}
-                  onClick={() => {
-                    const val = toDisplay(amounts[tokenTo?.denom] || '0', tokenTo.decimals);
-                    setAmountTo(val);
-                    setFocusId('to');
-                  }}
-                >
-                  100%
-                </button>
+            {simulating && (
+              <div>
+                <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
+                  <ZappingText text={'Finding best option to zap'} dot={5} />
+                </span>
               </div>
-            </div>
-            <div className={styles.tokenInfo}>
-              <div className={styles.name}>
-                {TokenToIcon ? (
-                  <>
-                    {TokenToIcon}
-                    &nbsp;{tokenTo.name}
-                  </>
-                ) : (
-                  'Select Token'
-                )}
+            )}
+
+            {zapError && (
+              <div className={styles.errorZap}>
+                <ErrorIcon />
+                <span>{zapError}</span>
               </div>
-              <div className={styles.input}>
-                <NumberFormat
-                  onFocus={() => setFocusId('to')}
-                  onBlur={() => setFocusId(null)}
-                  placeholder="0"
-                  thousandSeparator
-                  className={styles.amount}
-                  decimalScale={tokenTo?.decimals || 6}
-                  disabled={isToBlocked}
-                  type="text"
-                  value={amountTo}
-                  onChange={() => {}}
-                  isAllowed={(values) => {
-                    const { floatValue } = values;
-                    // allow !floatValue to let user can clear their input
-                    return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
-                  }}
-                  onValueChange={({ floatValue }) => {
-                    setAmountTo(floatValue);
-                  }}
-                />
-                <div className={styles.usd}>
-                  ≈ ${amountTo ? numberWithCommas(Number(toUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+            )}
+            {!zapError && zapInResponse && !simulating && (
+              <>
+                <div className={styles.dividerOut}>
+                  <div className={styles.bar}></div>
+                  <div>
+                    <OutputIcon />
+                  </div>
+                  <div className={styles.bar}></div>
+                </div>
+                <div className={styles.tokenOutput}>
+                  <div className={styles.item}>
+                    <div className={styles.info}>
+                      <div className={styles.infoIcon}>{TokenFromIcon}</div>
+                      <span>{tokenFrom.name}</span>
+                    </div>
+                    <div className={styles.value}>
+                      {simulating && <div className={styles.mask} />}
+                      <span>
+                        {zapInResponse
+                          ? numberWithCommas(Number(zapInResponse.amountX) / 10 ** tokenFrom.decimals, undefined, {
+                              maximumFractionDigits: 3
+                            })
+                          : 0}
+                      </span>
+                      <span className={styles.usd}>
+                        ≈ $
+                        {zapInResponse
+                          ? numberWithCommas(Number(xUsd) || 0, undefined, {
+                              maximumFractionDigits: 3
+                            })
+                          : 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.item}>
+                    <div className={styles.info}>
+                      <div className={styles.infoIcon}>{TokenToIcon}</div>
+                      <span>{tokenTo.name}</span>
+                    </div>
+                    <div className={styles.value}>
+                      {simulating && <div className={styles.mask} />}
+                      <span>
+                        {zapInResponse
+                          ? numberWithCommas(Number(zapInResponse.amountY) / 10 ** tokenTo.decimals, undefined, {
+                              maximumFractionDigits: 3
+                            })
+                          : 0}
+                      </span>
+                      <span className={styles.usd}>
+                        ≈ $
+                        {zapInResponse
+                          ? numberWithCommas(Number(yUsd) || 0, undefined, { maximumFractionDigits: 3 })
+                          : 0}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.feeInfoWrapper}>
+                  <div className={styles.item}>
+                    <div className={styles.info}>
+                      <span>Price Impact</span>
+                    </div>
+                    <div
+                      className={cx(
+                        'valueImpact',
+                        `${zapImpactPrice >= 10 ? 'valueImpact-high' : zapImpactPrice >= 5 ? 'valueImpact-medium' : ''}`
+                      )}
+                    >
+                      <span>{numberWithCommas(zapImpactPrice, undefined, { maximumFractionDigits: 2 }) ?? 0}%</span>
+                    </div>
+                  </div>
+                  <div className={styles.item}>
+                    <div className={styles.info}>
+                      <span>Swap Fee</span>
+                    </div>
+                    <div className={styles.value}>
+                      <span>{numberWithCommas(swapFee, undefined, { maximumFractionDigits: 2 })} %</span>
+                    </div>
+                  </div>
+                  <div className={styles.item}>
+                    <div className={styles.info}>
+                      <TooltipHover
+                        isVisible={isVisible}
+                        setIsVisible={setIsVisible}
+                        content={<div>The amount of token you'll swap to provide liquidity.</div>}
+                        position="right"
+                        children={<span>Zap Fee</span>}
+                      />
+                    </div>
+                    <div className={styles.value}>
+                      <span>
+                        {numberWithCommas(zapFee / 10 ** tokenZap.decimals, undefined, {
+                          maximumFractionDigits: tokenZap.decimals
+                        })}{' '}
+                        {tokenZap.name}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.item}>
+                    <div className={styles.conclusion}>
+                      <span>Total Fee</span>
+                    </div>
+                    <div className={styles.value}>
+                      <span>${numberWithCommas(totalFee, undefined, { maximumFractionDigits: 4 }) ?? 0}</span>
+                    </div>
+                  </div>
+                  <div className={styles.item}>
+                    <div className={styles.conclusion}>
+                      <span>Match Rate</span>
+                    </div>
+                    <div className={styles.value}>
+                      <span>{numberWithCommas(matchRate, undefined, { maximumFractionDigits: 2 }) ?? 0} %</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+            <div ref={endRef}></div>
+          </>
+        ) : (
+          <>
+            <div className={classNames(styles.itemInput, { [styles.disabled]: isFromBlocked })}>
+              <div className={styles.balance}>
+                <p className={styles.bal}>
+                  <span>Balance:</span>{' '}
+                  {numberWithCommas(toDisplay(amounts[tokenFrom?.denom] || '0', tokenFrom.decimals))} {tokenFrom?.name}
+                </p>
+                <div className={styles.btnGroup}>
+                  <button
+                    className=""
+                    disabled={!tokenFrom}
+                    onClick={() => {
+                      const val = toDisplay(amounts[tokenFrom?.denom] || '0', tokenFrom.decimals);
+                      const haftValue = new BigDecimal(val).div(2).toNumber();
+                      setAmountFrom(haftValue);
+                      setFocusId('from');
+                    }}
+                  >
+                    50%
+                  </button>
+                  <button
+                    className=""
+                    disabled={!tokenFrom}
+                    onClick={() => {
+                      const val = toDisplay(amounts[tokenFrom?.denom] || '0', tokenFrom.decimals);
+                      setAmountFrom(val);
+                      setFocusId('from');
+                    }}
+                  >
+                    100%
+                  </button>
+                </div>
+              </div>
+              <div className={styles.tokenInfo}>
+                <div className={styles.name}>
+                  {TokenFromIcon ? (
+                    <>
+                      {TokenFromIcon}
+                      &nbsp;{tokenFrom.name}
+                    </>
+                  ) : (
+                    'Select Token'
+                  )}
+                </div>
+                <div className={styles.input}>
+                  <NumberFormat
+                    onFocus={() => setFocusId('from')}
+                    onBlur={() => setFocusId(null)}
+                    placeholder="0"
+                    thousandSeparator
+                    className={styles.amount}
+                    decimalScale={tokenFrom?.decimals || 6}
+                    disabled={isFromBlocked}
+                    type="text"
+                    value={amountFrom}
+                    onChange={() => {}}
+                    isAllowed={(values) => {
+                      const { floatValue } = values;
+                      // allow !floatValue to let user can clear their input
+                      return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+                    }}
+                    onValueChange={({ floatValue }) => {
+                      setAmountFrom(floatValue);
+                    }}
+                  />
+                  <div className={styles.usd}>
+                    ≈ $
+                    {amountFrom ? numberWithCommas(Number(fromUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </>
-      )}
+            <div className={classNames(styles.itemInput, { [styles.disabled]: isToBlocked })}>
+              <div className={styles.balance}>
+                <p className={styles.bal}>
+                  <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenTo?.denom] || '0', tokenTo.decimals))}{' '}
+                  {tokenTo?.name}
+                </p>
+                <div className={styles.btnGroup}>
+                  <button
+                    className=""
+                    disabled={!tokenTo}
+                    onClick={() => {
+                      const val = toDisplay(amounts[tokenTo?.denom] || '0', tokenTo.decimals);
+                      const haftValue = new BigDecimal(val).div(2).toNumber();
+                      setAmountTo(haftValue);
+                      setFocusId('to');
+                    }}
+                  >
+                    50%
+                  </button>
+                  <button
+                    className=""
+                    disabled={!tokenTo}
+                    onClick={() => {
+                      const val = toDisplay(amounts[tokenTo?.denom] || '0', tokenTo.decimals);
+                      setAmountTo(val);
+                      setFocusId('to');
+                    }}
+                  >
+                    100%
+                  </button>
+                </div>
+              </div>
+              <div className={styles.tokenInfo}>
+                <div className={styles.name}>
+                  {TokenToIcon ? (
+                    <>
+                      {TokenToIcon}
+                      &nbsp;{tokenTo.name}
+                    </>
+                  ) : (
+                    'Select Token'
+                  )}
+                </div>
+                <div className={styles.input}>
+                  <NumberFormat
+                    onFocus={() => setFocusId('to')}
+                    onBlur={() => setFocusId(null)}
+                    placeholder="0"
+                    thousandSeparator
+                    className={styles.amount}
+                    decimalScale={tokenTo?.decimals || 6}
+                    disabled={isToBlocked}
+                    type="text"
+                    value={amountTo}
+                    onChange={() => {}}
+                    isAllowed={(values) => {
+                      const { floatValue } = values;
+                      // allow !floatValue to let user can clear their input
+                      return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+                    }}
+                    onValueChange={({ floatValue }) => {
+                      setAmountTo(floatValue);
+                    }}
+                  />
+                  <div className={styles.usd}>
+                    ≈ ${amountTo ? numberWithCommas(Number(toUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
-      <div className={styles.btn}>
-        {(() => {
-          const btnText = getButtonMessage();
-          return (
-            <Button
-              type="primary"
-              disabled={
-                loading || !walletAddress || !(btnText === 'Zap in' || btnText === 'Create new position') || !!zapError
-                // true
-              }
-              onClick={async () => {
-                const lowerTick = Math.min(leftRange, rightRange);
-                const upperTick = Math.max(leftRange, rightRange);
-                const poolKeyData = newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), feeTier);
-
-                if (toggleZapIn) {
-                  await handleZapIn();
-                  return;
+        <div className={styles.btn}>
+          {(() => {
+            const btnText = getButtonMessage();
+            return (
+              <Button
+                type="primary"
+                disabled={
+                  loading ||
+                  !walletAddress ||
+                  !(btnText === 'Zap in' || btnText === 'Create new position') ||
+                  !!zapError
+                  // true
                 }
+                onClick={async () => {
+                  const lowerTick = Math.min(leftRange, rightRange);
+                  const upperTick = Math.max(leftRange, rightRange);
+                  const poolKeyData = newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), feeTier);
 
-                await addLiquidity({
-                  poolKeyData,
-                  lowerTick: lowerTick,
-                  upperTick: upperTick,
-                  liquidityDelta: liquidityRef.current,
-                  spotSqrtPrice: isPoolExist
-                    ? BigInt(poolData.pool?.sqrt_price || 0)
-                    : calculateSqrtPrice(midPrice.index),
-                  slippageTolerance: BigInt(slippage),
-                  tokenXAmount:
-                    poolKeyData.token_x === extractAddress(tokenFrom)
-                      ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
-                      : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
-                  tokenYAmount:
-                    poolKeyData.token_y === extractAddress(tokenFrom)
-                      ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
-                      : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
-                  initPool: !isPoolExist
-                });
-              }}
-            >
-              {loading && <Loader width={22} height={22} />}&nbsp;&nbsp;{btnText}
-            </Button>
-          );
-        })()}
+                  if (toggleZapIn) {
+                    await handleZapIn();
+                    return;
+                  }
+
+                  await addLiquidity({
+                    poolKeyData,
+                    lowerTick: lowerTick,
+                    upperTick: upperTick,
+                    liquidityDelta: liquidityRef.current,
+                    spotSqrtPrice: isPoolExist
+                      ? BigInt(poolData.pool?.sqrt_price || 0)
+                      : calculateSqrtPrice(midPrice.index),
+                    slippageTolerance: BigInt(slippage),
+                    tokenXAmount:
+                      poolKeyData.token_x === extractAddress(tokenFrom)
+                        ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
+                        : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
+                    tokenYAmount:
+                      poolKeyData.token_y === extractAddress(tokenFrom)
+                        ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
+                        : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
+                    initPool: !isPoolExist
+                  });
+                }}
+              >
+                {loading && <Loader width={22} height={22} />}&nbsp;&nbsp;{btnText}
+              </Button>
+            );
+          })()}
+        </div>
       </div>
     </div>
   );
+};
+
+const PriceChartData = {
+  historicalChartData: [
+    {
+      time: 1727683200000,
+      close: 0.645432804,
+      high: 0.646862394,
+      low: 0.641400047,
+      open: 0.641401486
+    },
+    {
+      time: 1727686800000,
+      close: 0.641100071,
+      high: 0.645433467,
+      low: 0.638103755,
+      open: 0.645432804
+    },
+    {
+      time: 1727690400000,
+      close: 0.632041363,
+      high: 0.641100071,
+      low: 0.632041363,
+      open: 0.641100071
+    },
+    {
+      time: 1727694000000,
+      close: 0.628485999,
+      high: 0.631949723,
+      low: 0.626078023,
+      open: 0.631587232
+    },
+    {
+      time: 1727697600000,
+      close: 0.631158218,
+      high: 0.631196468,
+      low: 0.628484964,
+      open: 0.628485999
+    },
+    {
+      time: 1727701200000,
+      close: 0.63337885,
+      high: 0.633454877,
+      low: 0.629772925,
+      open: 0.631158594
+    },
+    {
+      time: 1727704800000,
+      close: 0.632611534,
+      high: 0.634964894,
+      low: 0.63198684,
+      open: 0.63337885
+    },
+    {
+      time: 1727708400000,
+      close: 0.627001857,
+      high: 0.632611463,
+      low: 0.625349377,
+      open: 0.632611463
+    },
+    {
+      time: 1727712000000,
+      close: 0.620067857,
+      high: 0.627624116,
+      low: 0.619847941,
+      open: 0.627001966
+    },
+    {
+      time: 1727715600000,
+      close: 0.617066343,
+      high: 0.621642994,
+      low: 0.61645525,
+      open: 0.620372803
+    },
+    {
+      time: 1727719200000,
+      close: 0.619389844,
+      high: 0.619925614,
+      low: 0.616059344,
+      open: 0.616935396
+    },
+    {
+      time: 1727722800000,
+      close: 0.620385404,
+      high: 0.622050729,
+      low: 0.615602989,
+      open: 0.619389924
+    },
+    {
+      time: 1727726400000,
+      close: 0.620998589,
+      high: 0.620999906,
+      low: 0.619371213,
+      open: 0.620385601
+    },
+    {
+      time: 1727730000000,
+      close: 0.622845321,
+      high: 0.624443582,
+      low: 0.62099835,
+      open: 0.620998628
+    },
+    {
+      time: 1727733600000,
+      close: 0.620341294,
+      high: 0.623339724,
+      low: 0.620079599,
+      open: 0.622845744
+    },
+    {
+      time: 1727737200000,
+      close: 0.605342527,
+      high: 0.620341075,
+      low: 0.604703338,
+      open: 0.620341075
+    },
+    {
+      time: 1727740800000,
+      close: 0.598533458,
+      high: 0.605167665,
+      low: 0.596264815,
+      open: 0.605166396
+    },
+    {
+      time: 1727744400000,
+      close: 0.600516523,
+      high: 0.60061604,
+      low: 0.593225658,
+      open: 0.598533632
+    },
+    {
+      time: 1727748000000,
+      close: 0.603370027,
+      high: 0.6033791,
+      low: 0.600516523,
+      open: 0.600516523
+    },
+    {
+      time: 1727751600000,
+      close: 0.601739897,
+      high: 0.603370027,
+      low: 0.599020077,
+      open: 0.603370027
+    },
+    {
+      time: 1727755200000,
+      close: 0.606779312,
+      high: 0.606941747,
+      low: 0.601924926,
+      open: 0.601924926
+    },
+    {
+      time: 1727758800000,
+      close: 0.609628116,
+      high: 0.611024857,
+      low: 0.605543921,
+      open: 0.606779312
+    },
+    {
+      time: 1727762400000,
+      close: 0.606147619,
+      high: 0.609631956,
+      low: 0.605361974,
+      open: 0.609629975
+    },
+    {
+      time: 1727766000000,
+      close: 0.612089506,
+      high: 0.612341912,
+      low: 0.606147397,
+      open: 0.606147619
+    },
+    {
+      time: 1727769600000,
+      close: 0.614968711,
+      high: 0.615817002,
+      low: 0.611439341,
+      open: 0.612089683
+    },
+    {
+      time: 1727773200000,
+      close: 0.610095399,
+      high: 0.614968711,
+      low: 0.609508381,
+      open: 0.614968711
+    },
+    {
+      time: 1727776800000,
+      close: 0.611702955,
+      high: 0.612778151,
+      low: 0.609439597,
+      open: 0.610095993
+    },
+    {
+      time: 1727780400000,
+      close: 0.613504411,
+      high: 0.613504411,
+      low: 0.610840637,
+      open: 0.611702955
+    },
+    {
+      time: 1727784000000,
+      close: 0.612750455,
+      high: 0.616205315,
+      low: 0.612114273,
+      open: 0.613504411
+    },
+    {
+      time: 1727787600000,
+      close: 0.610511149,
+      high: 0.613632661,
+      low: 0.609856924,
+      open: 0.612644693
+    },
+    {
+      time: 1727791200000,
+      close: 0.599490928,
+      high: 0.61051119,
+      low: 0.592334676,
+      open: 0.610511149
+    },
+    {
+      time: 1727794800000,
+      close: 0.577520034,
+      high: 0.599497486,
+      low: 0.576225628,
+      open: 0.599490651
+    },
+    {
+      time: 1727798400000,
+      close: 0.572584208,
+      high: 0.577521971,
+      low: 0.557852418,
+      open: 0.577521971
+    },
+    {
+      time: 1727802000000,
+      close: 0.561122093,
+      high: 0.574498968,
+      low: 0.557736566,
+      open: 0.572581944
+    },
+    {
+      time: 1727805600000,
+      close: 0.553899985,
+      high: 0.561122437,
+      low: 0.537201533,
+      open: 0.561122437
+    },
+    {
+      time: 1727809200000,
+      close: 0.557028733,
+      high: 0.561197125,
+      low: 0.553890765,
+      open: 0.553899501
+    },
+    {
+      time: 1727812800000,
+      close: 0.554456796,
+      high: 0.56008123,
+      low: 0.554278236,
+      open: 0.557028733
+    },
+    {
+      time: 1727816400000,
+      close: 0.553707833,
+      high: 0.554978965,
+      low: 0.54565831,
+      open: 0.554480094
+    },
+    {
+      time: 1727820000000,
+      close: 0.554142082,
+      high: 0.555803265,
+      low: 0.54877553,
+      open: 0.553707917
+    },
+    {
+      time: 1727823600000,
+      close: 0.546444299,
+      high: 0.554915377,
+      low: 0.544758875,
+      open: 0.554142082
+    },
+    {
+      time: 1727827200000,
+      close: 0.547832966,
+      high: 0.548052305,
+      low: 0.54530266,
+      open: 0.546444299
+    },
+    {
+      time: 1727830800000,
+      close: 0.554160453,
+      high: 0.555301187,
+      low: 0.544755226,
+      open: 0.547832554
+    },
+    {
+      time: 1727834400000,
+      close: 0.558299994,
+      high: 0.558799677,
+      low: 0.553556303,
+      open: 0.554161675
+    },
+    {
+      time: 1727838000000,
+      close: 0.558499873,
+      high: 0.558954207,
+      low: 0.556622518,
+      open: 0.558299979
+    },
+    {
+      time: 1727841600000,
+      close: 0.559539057,
+      high: 0.560064205,
+      low: 0.557530875,
+      open: 0.558499873
+    },
+    {
+      time: 1727845200000,
+      close: 0.557107811,
+      high: 0.559539057,
+      low: 0.556844063,
+      open: 0.559539057
+    },
+    {
+      time: 1727848800000,
+      close: 0.556811104,
+      high: 0.560442491,
+      low: 0.55673967,
+      open: 0.557107811
+    },
+    {
+      time: 1727852400000,
+      close: 0.566232173,
+      high: 0.566467436,
+      low: 0.55574168,
+      open: 0.556811034
+    },
+    {
+      time: 1727856000000,
+      close: 0.565631659,
+      high: 0.567941839,
+      low: 0.562979753,
+      open: 0.566232124
+    },
+    {
+      time: 1727859600000,
+      close: 0.567352144,
+      high: 0.567937063,
+      low: 0.564946107,
+      open: 0.565631455
+    },
+    {
+      time: 1727863200000,
+      close: 0.554762952,
+      high: 0.570289365,
+      low: 0.554685493,
+      open: 0.567352144
+    },
+    {
+      time: 1727866800000,
+      close: 0.554763335,
+      high: 0.560138389,
+      low: 0.55462909,
+      open: 0.554762952
+    },
+    {
+      time: 1727870400000,
+      close: 0.554820934,
+      high: 0.556896568,
+      low: 0.551615241,
+      open: 0.554762453
+    },
+    {
+      time: 1727874000000,
+      close: 0.549273955,
+      high: 0.555534062,
+      low: 0.549226263,
+      open: 0.554820964
+    },
+    {
+      time: 1727877600000,
+      close: 0.550082766,
+      high: 0.550622794,
+      low: 0.540719386,
+      open: 0.549273955
+    },
+    {
+      time: 1727881200000,
+      close: 0.548197936,
+      high: 0.553058261,
+      low: 0.547636487,
+      open: 0.550082765
+    },
+    {
+      time: 1727884800000,
+      close: 0.553862419,
+      high: 0.55407009,
+      low: 0.547790195,
+      open: 0.547790308
+    },
+    {
+      time: 1727888400000,
+      close: 0.552358939,
+      high: 0.559903354,
+      low: 0.552358939,
+      open: 0.553862417
+    },
+    {
+      time: 1727892000000,
+      close: 0.550483549,
+      high: 0.553605353,
+      low: 0.548633318,
+      open: 0.552358939
+    },
+    {
+      time: 1727895600000,
+      close: 0.536168126,
+      high: 0.550483561,
+      low: 0.535874373,
+      open: 0.550483549
+    },
+    {
+      time: 1727899200000,
+      close: 0.534897709,
+      high: 0.536658369,
+      low: 0.526617871,
+      open: 0.53598542
+    },
+    {
+      time: 1727902800000,
+      close: 0.542405283,
+      high: 0.543180488,
+      low: 0.531431527,
+      open: 0.534897675
+    },
+    {
+      time: 1727906400000,
+      close: 0.538795559,
+      high: 0.543254919,
+      low: 0.537946769,
+      open: 0.542406773
+    },
+    {
+      time: 1727910000000,
+      close: 0.538356766,
+      high: 0.538795559,
+      low: 0.53409047,
+      open: 0.538795559
+    },
+    {
+      time: 1727913600000,
+      close: 0.538554943,
+      high: 0.540338136,
+      low: 0.538357865,
+      open: 0.538357865
+    },
+    {
+      time: 1727917200000,
+      close: 0.537057439,
+      high: 0.539650557,
+      low: 0.522721317,
+      open: 0.538554512
+    },
+    {
+      time: 1727920800000,
+      close: 0.540283072,
+      high: 0.542255676,
+      low: 0.53675893,
+      open: 0.53675893
+    },
+    {
+      time: 1727924400000,
+      close: 0.543476082,
+      high: 0.543848314,
+      low: 0.539481014,
+      open: 0.540282584
+    },
+    {
+      time: 1727928000000,
+      close: 0.546079759,
+      high: 0.546208391,
+      low: 0.54277009,
+      open: 0.543476515
+    },
+    {
+      time: 1727931600000,
+      close: 0.545495619,
+      high: 0.546371429,
+      low: 0.542832076,
+      open: 0.546079759
+    },
+    {
+      time: 1727935200000,
+      close: 0.540542871,
+      high: 0.54574957,
+      low: 0.540541646,
+      open: 0.545494857
+    },
+    {
+      time: 1727938800000,
+      close: 0.543477519,
+      high: 0.544199168,
+      low: 0.5402821,
+      open: 0.540542872
+    },
+    {
+      time: 1727942400000,
+      close: 0.536991097,
+      high: 0.54500843,
+      low: 0.536146016,
+      open: 0.543477519
+    },
+    {
+      time: 1727946000000,
+      close: 0.52428201,
+      high: 0.53746347,
+      low: 0.518419723,
+      open: 0.536991097
+    },
+    {
+      time: 1727949600000,
+      close: 0.53175839,
+      high: 0.533056551,
+      low: 0.519200344,
+      open: 0.52428201
+    },
+    {
+      time: 1727953200000,
+      close: 0.537364286,
+      high: 0.537478516,
+      low: 0.53175839,
+      open: 0.53175839
+    },
+    {
+      time: 1727956800000,
+      close: 0.529600807,
+      high: 0.539408661,
+      low: 0.529347459,
+      open: 0.537359815
+    },
+    {
+      time: 1727960400000,
+      close: 0.526269958,
+      high: 0.529601952,
+      low: 0.524316922,
+      open: 0.529600869
+    },
+    {
+      time: 1727964000000,
+      close: 0.522772611,
+      high: 0.527574187,
+      low: 0.519729965,
+      open: 0.526269958
+    },
+    {
+      time: 1727967600000,
+      close: 0.518853833,
+      high: 0.529839787,
+      low: 0.518799858,
+      open: 0.522772936
+    },
+    {
+      time: 1727971200000,
+      close: 0.517539747,
+      high: 0.519242699,
+      low: 0.511715661,
+      open: 0.51885381
+    },
+    {
+      time: 1727974800000,
+      close: 0.510840433,
+      high: 0.518316448,
+      low: 0.509295515,
+      open: 0.517539949
+    },
+    {
+      time: 1727978400000,
+      close: 0.514085167,
+      high: 0.518966859,
+      low: 0.507929027,
+      open: 0.510633201
+    },
+    {
+      time: 1727982000000,
+      close: 0.513559459,
+      high: 0.514897902,
+      low: 0.511826039,
+      open: 0.514085167
+    },
+    {
+      time: 1727985600000,
+      close: 0.518098451,
+      high: 0.518126009,
+      low: 0.512350388,
+      open: 0.513559219
+    },
+    {
+      time: 1727989200000,
+      close: 0.516753579,
+      high: 0.519705706,
+      low: 0.51622074,
+      open: 0.518098203
+    },
+    {
+      time: 1727992800000,
+      close: 0.518288153,
+      high: 0.518456365,
+      low: 0.514699359,
+      open: 0.516753594
+    },
+    {
+      time: 1727996400000,
+      close: 0.516739924,
+      high: 0.518519572,
+      low: 0.516122778,
+      open: 0.518288153
+    },
+    {
+      time: 1728000000000,
+      close: 0.516584144,
+      high: 0.518818974,
+      low: 0.515215682,
+      open: 0.516739924
+    },
+    {
+      time: 1728003600000,
+      close: 0.514429024,
+      high: 0.517828887,
+      low: 0.5140667,
+      open: 0.516584278
+    },
+    {
+      time: 1728007200000,
+      close: 0.524838381,
+      high: 0.525929433,
+      low: 0.514429024,
+      open: 0.514429024
+    },
+    {
+      time: 1728010800000,
+      close: 0.524696361,
+      high: 0.525674827,
+      low: 0.523092999,
+      open: 0.524838381
+    },
+    {
+      time: 1728014400000,
+      close: 0.522402737,
+      high: 0.524699755,
+      low: 0.52110367,
+      open: 0.52469644
+    },
+    {
+      time: 1728018000000,
+      close: 0.524696568,
+      high: 0.529491133,
+      low: 0.522402737,
+      open: 0.522402737
+    },
+    {
+      time: 1728021600000,
+      close: 0.52847649,
+      high: 0.528959949,
+      low: 0.524694494,
+      open: 0.524696568
+    },
+    {
+      time: 1728025200000,
+      close: 0.527790575,
+      high: 0.529617866,
+      low: 0.527640122,
+      open: 0.52847649
+    },
+    {
+      time: 1728028800000,
+      close: 0.529440555,
+      high: 0.529820453,
+      low: 0.525454745,
+      open: 0.527790575
+    },
+    {
+      time: 1728032400000,
+      close: 0.531739756,
+      high: 0.534424962,
+      low: 0.528851157,
+      open: 0.529440346
+    },
+    {
+      time: 1728036000000,
+      close: 0.531284497,
+      high: 0.535208648,
+      low: 0.531280341,
+      open: 0.531739756
+    },
+    {
+      time: 1728039600000,
+      close: 0.527580033,
+      high: 0.531284178,
+      low: 0.527556403,
+      open: 0.531284178
+    },
+    {
+      time: 1728043200000,
+      close: 0.530724525,
+      high: 0.530973753,
+      low: 0.526605906,
+      open: 0.527564826
+    },
+    {
+      time: 1728046800000,
+      close: 0.531408747,
+      high: 0.531408747,
+      low: 0.525603842,
+      open: 0.530723057
+    },
+    {
+      time: 1728050400000,
+      close: 0.529527038,
+      high: 0.533249741,
+      low: 0.528995432,
+      open: 0.531492623
+    },
+    {
+      time: 1728054000000,
+      close: 0.526574066,
+      high: 0.531505885,
+      low: 0.522682032,
+      open: 0.529633913
+    },
+    {
+      time: 1728057600000,
+      close: 0.536044085,
+      high: 0.536044085,
+      low: 0.526574066,
+      open: 0.526574066
+    },
+    {
+      time: 1728061200000,
+      close: 0.545762373,
+      high: 0.548480075,
+      low: 0.535993023,
+      open: 0.535993023
+    },
+    {
+      time: 1728064800000,
+      close: 0.546162998,
+      high: 0.547403756,
+      low: 0.543556405,
+      open: 0.545883024
+    },
+    {
+      time: 1728068400000,
+      close: 0.547789977,
+      high: 0.548345259,
+      low: 0.544780502,
+      open: 0.546161806
+    },
+    {
+      time: 1728072000000,
+      close: 0.54715659,
+      high: 0.548199668,
+      low: 0.546389535,
+      open: 0.547789823
+    },
+    {
+      time: 1728075600000,
+      close: 0.547398449,
+      high: 0.549290957,
+      low: 0.545546929,
+      open: 0.547157043
+    },
+    {
+      time: 1728079200000,
+      close: 0.546884288,
+      high: 0.54836365,
+      low: 0.546880486,
+      open: 0.547398449
+    },
+    {
+      time: 1728082800000,
+      close: 0.546890132,
+      high: 0.547053411,
+      low: 0.546452102,
+      open: 0.546884288
+    },
+    {
+      time: 1728086400000,
+      close: 0.54867838,
+      high: 0.54877694,
+      low: 0.545667019,
+      open: 0.546890132
+    },
+    {
+      time: 1728090000000,
+      close: 0.554137904,
+      high: 0.554441319,
+      low: 0.548676903,
+      open: 0.548676903
+    },
+    {
+      time: 1728093600000,
+      close: 0.55437151,
+      high: 0.555261111,
+      low: 0.552390975,
+      open: 0.554137902
+    },
+    {
+      time: 1728097200000,
+      close: 0.548063302,
+      high: 0.554408046,
+      low: 0.547661257,
+      open: 0.55437151
+    },
+    {
+      time: 1728100800000,
+      close: 0.548791599,
+      high: 0.551333839,
+      low: 0.546727511,
+      open: 0.548087826
+    },
+    {
+      time: 1728104400000,
+      close: 0.551309954,
+      high: 0.551309954,
+      low: 0.548280509,
+      open: 0.548791599
+    },
+    {
+      time: 1728108000000,
+      close: 0.554695744,
+      high: 0.554823511,
+      low: 0.551309954,
+      open: 0.551309954
+    },
+    {
+      time: 1728111600000,
+      close: 0.557297402,
+      high: 0.557882916,
+      low: 0.552932107,
+      open: 0.554695739
+    },
+    {
+      time: 1728115200000,
+      close: 0.553131896,
+      high: 0.557299532,
+      low: 0.553131783,
+      open: 0.557297402
+    },
+    {
+      time: 1728118800000,
+      close: 0.557460139,
+      high: 0.557749992,
+      low: 0.552204686,
+      open: 0.553132076
+    },
+    {
+      time: 1728122400000,
+      close: 0.56208737,
+      high: 0.562868609,
+      low: 0.557460139,
+      open: 0.557460139
+    },
+    {
+      time: 1728126000000,
+      close: 0.557510124,
+      high: 0.562087517,
+      low: 0.557510051,
+      open: 0.56208737
+    },
+    {
+      time: 1728129600000,
+      close: 0.558321799,
+      high: 0.558601644,
+      low: 0.557033762,
+      open: 0.557510124
+    },
+    {
+      time: 1728133200000,
+      close: 0.560266386,
+      high: 0.560266386,
+      low: 0.557518788,
+      open: 0.558321799
+    },
+    {
+      time: 1728136800000,
+      close: 0.553571622,
+      high: 0.560524725,
+      low: 0.55357133,
+      open: 0.560266386
+    },
+    {
+      time: 1728140400000,
+      close: 0.553518112,
+      high: 0.555184086,
+      low: 0.551785598,
+      open: 0.553571622
+    },
+    {
+      time: 1728144000000,
+      close: 0.553960901,
+      high: 0.554118112,
+      low: 0.553323099,
+      open: 0.553518349
+    },
+    {
+      time: 1728147600000,
+      close: 0.549720917,
+      high: 0.553960686,
+      low: 0.549471088,
+      open: 0.553960686
+    },
+    {
+      time: 1728151200000,
+      close: 0.551671452,
+      high: 0.551671452,
+      low: 0.548600112,
+      open: 0.549304025
+    },
+    {
+      time: 1728154800000,
+      close: 0.548572496,
+      high: 0.55213793,
+      low: 0.548572496,
+      open: 0.551241465
+    },
+    {
+      time: 1728158400000,
+      close: 0.545532851,
+      high: 0.54857268,
+      low: 0.545532851,
+      open: 0.548572496
+    },
+    {
+      time: 1728162000000,
+      close: 0.541493595,
+      high: 0.545532918,
+      low: 0.541017054,
+      open: 0.545532855
+    },
+    {
+      time: 1728165600000,
+      close: 0.545140272,
+      high: 0.546262781,
+      low: 0.541210502,
+      open: 0.541493595
+    },
+    {
+      time: 1728169200000,
+      close: 0.551089909,
+      high: 0.551940497,
+      low: 0.544760883,
+      open: 0.545140002
+    },
+    {
+      time: 1728172800000,
+      close: 0.550906309,
+      high: 0.551394726,
+      low: 0.550866771,
+      open: 0.551089909
+    },
+    {
+      time: 1728176400000,
+      close: 0.54946156,
+      high: 0.550906323,
+      low: 0.549060301,
+      open: 0.550906309
+    },
+    {
+      time: 1728180000000,
+      close: 0.551161586,
+      high: 0.552490349,
+      low: 0.549461504,
+      open: 0.54946156
+    },
+    {
+      time: 1728183600000,
+      close: 0.547770489,
+      high: 0.551162148,
+      low: 0.547770487,
+      open: 0.551161586
+    },
+    {
+      time: 1728187200000,
+      close: 0.545281721,
+      high: 0.548290323,
+      low: 0.544913474,
+      open: 0.547770489
+    },
+    {
+      time: 1728190800000,
+      close: 0.54093613,
+      high: 0.545281843,
+      low: 0.540797399,
+      open: 0.545281721
+    },
+    {
+      time: 1728194400000,
+      close: 0.541996148,
+      high: 0.54199985,
+      low: 0.54045425,
+      open: 0.54093613
+    },
+    {
+      time: 1728198000000,
+      close: 0.542470644,
+      high: 0.544258039,
+      low: 0.541996198,
+      open: 0.541996246
+    },
+    {
+      time: 1728201600000,
+      close: 0.543228807,
+      high: 0.543229256,
+      low: 0.54224129,
+      open: 0.542470644
+    },
+    {
+      time: 1728205200000,
+      close: 0.544115761,
+      high: 0.547012917,
+      low: 0.543225247,
+      open: 0.543228807
+    },
+    {
+      time: 1728208800000,
+      close: 0.545102106,
+      high: 0.546151385,
+      low: 0.54411475,
+      open: 0.544115762
+    },
+    {
+      time: 1728212400000,
+      close: 0.543382806,
+      high: 0.545102385,
+      low: 0.543380739,
+      open: 0.545102106
+    },
+    {
+      time: 1728216000000,
+      close: 0.544709051,
+      high: 0.545851838,
+      low: 0.541379316,
+      open: 0.543382831
+    },
+    {
+      time: 1728219600000,
+      close: 0.540436666,
+      high: 0.545331645,
+      low: 0.53949532,
+      open: 0.544709036
+    },
+    {
+      time: 1728223200000,
+      close: 0.54352557,
+      high: 0.543988287,
+      low: 0.540437232,
+      open: 0.540437232
+    },
+    {
+      time: 1728226800000,
+      close: 0.550759553,
+      high: 0.55103993,
+      low: 0.54265885,
+      open: 0.54352557
+    },
+    {
+      time: 1728230400000,
+      close: 0.547252676,
+      high: 0.551438494,
+      low: 0.546109215,
+      open: 0.55075943
+    },
+    {
+      time: 1728234000000,
+      close: 0.544715665,
+      high: 0.551622383,
+      low: 0.544646046,
+      open: 0.547252446
+    },
+    {
+      time: 1728237600000,
+      close: 0.543991448,
+      high: 0.545536485,
+      low: 0.543874664,
+      open: 0.544715665
+    },
+    {
+      time: 1728241200000,
+      close: 0.545722212,
+      high: 0.546016903,
+      low: 0.54399044,
+      open: 0.543991448
+    },
+    {
+      time: 1728244800000,
+      close: 0.543358761,
+      high: 0.54842222,
+      low: 0.543078007,
+      open: 0.545722212
+    },
+    {
+      time: 1728248400000,
+      close: 0.543312014,
+      high: 0.544814215,
+      low: 0.541627781,
+      open: 0.543358768
+    },
+    {
+      time: 1728252000000,
+      close: 0.539859453,
+      high: 0.543316552,
+      low: 0.539292991,
+      open: 0.543312014
+    },
+    {
+      time: 1728255600000,
+      close: 0.543126499,
+      high: 0.543126499,
+      low: 0.539246624,
+      open: 0.539859453
+    },
+    {
+      time: 1728259200000,
+      close: 0.550047628,
+      high: 0.550345492,
+      low: 0.543126499,
+      open: 0.543126499
+    },
+    {
+      time: 1728262800000,
+      close: 0.559166701,
+      high: 0.56022035,
+      low: 0.549990737,
+      open: 0.550047628
+    },
+    {
+      time: 1728266400000,
+      close: 0.565128969,
+      high: 0.56567019,
+      low: 0.558663648,
+      open: 0.559166245
+    },
+    {
+      time: 1728270000000,
+      close: 0.560940461,
+      high: 0.567283086,
+      low: 0.560656827,
+      open: 0.565128969
+    },
+    {
+      time: 1728273600000,
+      close: 0.562867829,
+      high: 0.563126602,
+      low: 0.557632407,
+      open: 0.560940466
+    },
+    {
+      time: 1728277200000,
+      close: 0.560381161,
+      high: 0.563011118,
+      low: 0.559113883,
+      open: 0.562866956
+    },
+    {
+      time: 1728280800000,
+      close: 0.559541151,
+      high: 0.561901673,
+      low: 0.55743562,
+      open: 0.56038115
+    },
+    {
+      time: 1728284400000,
+      close: 0.563255745,
+      high: 0.564475284,
+      low: 0.559446911,
+      open: 0.559446911
+    },
+    {
+      time: 1728288000000,
+      close: 0.558492065,
+      high: 0.563036973,
+      low: 0.558166991,
+      open: 0.562330574
+    },
+    {
+      time: 1728291600000,
+      close: 0.561722487,
+      high: 0.562670953,
+      low: 0.558492065,
+      open: 0.558492065
+    }
+  ],
+  yRange: [0.4865146980952381, 0.6777044442000001],
+  lastChartData: {
+    close: 0.5621860841009938,
+    high: 0.5621860841009938,
+    low: 0.5621860841009938,
+    open: 0.5621860841009938,
+    time: 1728290602314
+  },
+  currentPrice: {
+    int: '562186084100993840'
+  },
+  setHoverPrice: (price: any) => {}
+};
+
+const LiquidityChartData = {
+  yRange: [0.4865146980952381, 0.6777044442000001],
+  xRange: [0, 1205869133484.7856],
+  data: [
+    {
+      price: 0.4865146980952381,
+      depth: 420028531652.95374
+    },
+    {
+      price: 0.4960741854004762,
+      depth: 426299951971.42035
+    },
+    {
+      price: 0.5056336727057144,
+      depth: 510062982610.4979
+    },
+    {
+      price: 0.5151931600109525,
+      depth: 730758553965.1825
+    },
+    {
+      price: 0.5247526473161906,
+      depth: 792550286024.2544
+    },
+    {
+      price: 0.5343121346214288,
+      depth: 834305385043.0358
+    },
+    {
+      price: 0.5438716219266669,
+      depth: 852854912633.2798
+    },
+    {
+      price: 0.5534311092319051,
+      depth: 809204111438.5962
+    },
+    {
+      price: 0.5629905965371432,
+      depth: 733946944570.9766
+    },
+    {
+      price: 0.5725500838423814,
+      depth: 682947960784.0153
+    },
+    {
+      price: 0.5821095711476195,
+      depth: 686597851468.0262
+    },
+    {
+      price: 0.5916690584528577,
+      depth: 608624268432.5157
+    },
+    {
+      price: 0.6012285457580958,
+      depth: 743609404032.5088
+    },
+    {
+      price: 0.610788033063334,
+      depth: 753222773886.6119
+    },
+    {
+      price: 0.6203475203685721,
+      depth: 877908234159.4294
+    },
+    {
+      price: 0.6299070076738102,
+      depth: 878081624843.3722
+    },
+    {
+      price: 0.6394664949790484,
+      depth: 891297097746.3016
+    },
+    {
+      price: 0.6490259822842865,
+      depth: 889387738888.4976
+    },
+    {
+      price: 0.6585854695895247,
+      depth: 1004890944570.6547
+    },
+    {
+      price: 0.6681449568947628,
+      depth: 1004881821418.729
+    }
+  ],
+  annotationDatum: {
+    price: 0.5615442249292797,
+    depth: 1205869133484.7856
+  },
+  offset: {
+    top: 0,
+    right: 56,
+    bottom: 52,
+    left: 0
+  },
+  horizontal: true
 };
 
 export default CreatePositionForm;

@@ -1,0 +1,11 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.parentSize {
+  overflow: hidden;
+  flex: 1 1 0%;
+
+  svg {
+    overflow: visible;
+  }
+}

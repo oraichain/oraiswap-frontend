@@ -3,19 +3,25 @@
 
 .createPoolForm {
   display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-
   width: 100%;
-  gap: 12px;
-  padding: 24px;
+  justify-content: space-between;
 
   @include mobile {
-    padding: 16px;
+    padding: 24px;
   }
 
   max-height: calc(100vh - 210px);
   overflow-y: auto;
+
+  .tab {
+    flex: 1;
+    padding: 24px;
+
+    &:not(:first-of-type) {
+      width: auto;
+      border-left: 1px solid #232521;
+    }
+  }
 }
 
 .itemChartAndPriceWrapper {
@@ -28,6 +34,43 @@
     position: absolute;
     top: 0;
     left: 0;
+  }
+
+  .wrapChart {
+    display: flex;
+    flex-direction: row;
+    height: 340px;
+
+    .chartPrice {
+      display: flex;
+      padding-top: 1.75rem;
+      padding-bottom: 1.75rem;
+      flex-direction: column;
+      flex: 1 1 0%;
+      width: 0;
+
+      @media (min-width: 640px) {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+      }
+
+      // background-color: red;
+    }
+
+    .chartLiquid {
+      display: flex;
+      position: relative;
+      flex-direction: column;
+      width: 229px;
+
+      .chart {
+        display: flex;
+        margin-top: 2rem;
+        flex-direction: column;
+        flex: 1 1 0%;
+        // background-color: yellow;
+      }
+    }
   }
 }
 
@@ -119,7 +162,7 @@
   .wrapper {
     width: 100%;
     display: flex;
-    margin-bottom: 48px;
+    margin-bottom: 24px;
 
     .itemTitleWrapper {
       width: 70%;
@@ -224,9 +267,10 @@
 
     .currentPrice {
       display: flex;
+      flex: 2 1 1;
       justify-content: space-between;
       align-items: center;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 400;
 
       p {
@@ -240,6 +284,7 @@
           }
         }
       }
+
       .price {
         display: flex;
         align-items: center;
@@ -389,7 +434,6 @@
   align-items: center;
   gap: 12px;
   align-self: stretch;
-  margin-top: 16px;
 
   @include small-mobile {
     flex-direction: column;
@@ -429,10 +473,15 @@
   align-items: center;
   gap: 10px;
   align-self: stretch;
+  margin-bottom: 24px;
 
   @include small-mobile {
     flex-direction: column;
     gap: 8px;
+  }
+
+  @include theme {
+    border-bottom: 1px solid theme-get('neutral-border-border-bold');
   }
 
   .btnOption {
@@ -518,13 +567,10 @@
   gap: 12px;
   align-self: stretch;
   border-radius: 16px;
+  margin-bottom: 8px;
 
   @include theme {
     background: theme-get('neutral-6');
-  }
-
-  &:first-of-type {
-    margin-bottom: 8px;
   }
 
   &.disabled {
@@ -684,6 +730,7 @@
 }
 
 .introZap {
+  width: 100%;
   display: flex;
   padding: 16px 24px;
   flex-direction: row;

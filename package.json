@@ -58,7 +58,14 @@
     "redux-persist": "^6.0.0",
     "serialize-error": "8.0.0",
     "tronweb": "^5.1.0",
-    "urql": "^4.1.0"
+    "urql": "^4.1.0",
+    "@visx/curve": "^2.17.0",
+    "@visx/gradient": "^3.3.0",
+    "@visx/responsive": "^2.17.0",
+    "@visx/scale": "^2.18.0",
+    "@visx/xychart": "^2.18.0",
+    "dayjs": "^1.10.7",
+    "@keplr-wallet/unit": "0.10.24-ibc.go.v7.hot.fix"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
