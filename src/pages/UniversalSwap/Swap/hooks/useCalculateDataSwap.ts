@@ -10,7 +10,7 @@ import {
   getAverageRatio,
   getProtocolsSmartRoute,
   getRemoteDenom,
-  isAllowAlphaSmartRouter,
+  isAllowAlphaIbcWasm,
   isAllowIBCWasm
 } from 'pages/UniversalSwap/helpers';
 import { fetchTokenInfos } from 'rest/api';
@@ -32,11 +32,11 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
   const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
   const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
 
-  const useAlphaSmartRoute = isAllowAlphaSmartRouter();
+  const useAlphaIbcWasm = isAllowAlphaIbcWasm(originalFromToken, originalToToken);
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
 
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-  const protocols = getProtocolsSmartRoute(originalFromToken, originalToToken, useIbcWasm);
+  const protocols = getProtocolsSmartRoute(originalFromToken, originalToToken, { useIbcWasm, useAlphaIbcWasm });
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
     originalFromToken,
     originalToToken
@@ -62,9 +62,11 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
       routerClient,
       null,
       {
-        useAlphaSmartRoute,
+        useAlphaIbcWasm,
         useIbcWasm,
-        protocols
+        protocols,
+        maxSplits: useAlphaIbcWasm ? 1 : 10,
+        dontAllowSwapAfter: useAlphaIbcWasm ? [''] : undefined
       }
     );
 
@@ -77,10 +79,12 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     routerClient,
     SIMULATE_INIT_AMOUNT,
     {
-      useAlphaSmartRoute,
+      useAlphaIbcWasm,
       useIbcWasm,
       protocols,
-      isAvgSimulate: isAvgSimulate.status
+      isAvgSimulate: isAvgSimulate.status,
+      maxSplits: useAlphaIbcWasm ? 1 : 10,
+      dontAllowSwapAfter: useAlphaIbcWasm ? [] : undefined
     }
   );
 

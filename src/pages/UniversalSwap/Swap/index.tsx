@@ -59,7 +59,7 @@ import {
   getPathInfo,
   getTokenBalance,
   getTokenInfo,
-  isAllowAlphaSmartRouter,
+  isAllowAlphaIbcWasm,
   isAllowIBCWasm,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
@@ -184,7 +184,7 @@ const SwapComponent: React.FC<{
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
-  const useAlphaSmartRouter = isAllowAlphaSmartRouter();
+  const useAlphaIbcWasm = isAllowAlphaIbcWasm(originalFromToken, originalToToken);
 
   const settingRef = useRef();
   const smartRouteRef = useRef();
@@ -315,7 +315,7 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = useAlphaSmartRouter ? simulateData?.routes : undefined;
+      const alphaSmartRoutes = simulateData?.routes;
 
       const swapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -337,8 +337,9 @@ const SwapComponent: React.FC<{
         cosmosWallet: window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
-          isAlphaSmartRouter: useAlphaSmartRouter,
-          isIbcWasm: useIbcWasm
+          isAlphaIbcWasm: useAlphaIbcWasm,
+          isIbcWasm: useIbcWasm,
+          isSourceReceiverTest: true
         }
       });
 
@@ -392,7 +393,8 @@ const SwapComponent: React.FC<{
           toAmount: `${toAmountToken}`,
           fromNetwork: originalFromToken.chainId,
           toNetwork: originalToToken.chainId,
-          useAlphaSmartRouter,
+          useAlphaSmartRouter: true,
+          useAlphaIbcWasm: useAlphaIbcWasm,
           priceOfFromTokenInUsd: usdPriceShowFrom,
           priceOfToTokenInUsd: usdPriceShowTo
         };
@@ -432,9 +434,9 @@ const SwapComponent: React.FC<{
       return networks.filter((chainInfo) => chainInfo.chainId === 'Oraichain').map((chain) => chain.chainId);
     }
 
-    if (!originalFromToken.cosmosBased) {
-      return networks.filter((chainInfo) => chainInfo.chainId !== 'injective-1').map((chain) => chain.chainId);
-    }
+    // if (!originalFromToken.cosmosBased) {
+    //   return networks.filter((chainInfo) => chainInfo.chainId !== 'injective-1').map((chain) => chain.chainId);
+    // }
     return [];
   };
 

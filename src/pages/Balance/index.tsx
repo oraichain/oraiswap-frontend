@@ -79,7 +79,6 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
-import { isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
 
 interface BalanceProps {}
 
@@ -520,7 +519,6 @@ const Balance: React.FC<BalanceProps> = () => {
           cosmosWallet: window.Keplr,
           evmWallet: new Metamask(window.tronWebDapp),
           swapOptions: {
-            isAlphaSmartRouter: isAllowAlphaSmartRouter(),
             isIbcWasm: false
           }
         }
