@@ -54,7 +54,6 @@ export const ConcentratedLiquidityDepthChart: FC<{
   horizontal = true,
   fullRange = false
 }) => {
-
   console.log({
     min,
     max,
@@ -67,7 +66,7 @@ export const ConcentratedLiquidityDepthChart: FC<{
     onSubmitMin,
     onSubmitMax,
     offset,
-    fullRange,
+    fullRange
   });
 
   const xMax = xRange[1];
@@ -102,7 +101,6 @@ export const ConcentratedLiquidityDepthChart: FC<{
 
         return (
           <XYChart
-            key="bar-chart"
             captureEvents={false}
             margin={{ top: fullRange ? top - 8.5 : top, right, bottom, left }}
             height={customHeight}

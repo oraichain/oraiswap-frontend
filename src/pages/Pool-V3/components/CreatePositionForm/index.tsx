@@ -1636,10 +1636,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
 const AddLiquidityConfig = {
   fullRange: false,
-  rangeWithCurrencyDecimals: [
-    new Dec(0.484820000000000001),
-    new Dec(0.641000000000000001)
-  ],
+  rangeWithCurrencyDecimals: [new Dec(0.484820000000000001), new Dec(0.641000000000000001)],
   currentPriceWithDecimals: 0.5284821950442445
 };
 

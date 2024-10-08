@@ -362,7 +362,6 @@ const HistoricalPriceChart: FC<{
 
         return (
           <XYChart
-            key="line-chart"
             margin={minimal ? { top: 0, right: 0, bottom: 24, left: 0 } : { top: 0, right: 0, bottom: 24, left: 36 }}
             height={customHeight}
             width={width}
