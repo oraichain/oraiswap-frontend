@@ -338,8 +338,7 @@ const SwapComponent: React.FC<{
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
           isAlphaIbcWasm: useAlphaIbcWasm,
-          isIbcWasm: useIbcWasm,
-          isSourceReceiverTest: true
+          isIbcWasm: useIbcWasm
         }
       });
 
