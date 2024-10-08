@@ -55,7 +55,7 @@ import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import useZap from 'pages/Pool-V3/hooks/useZap';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -1084,33 +1084,50 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                 <div className={styles.chartPrice}>
                   <HistoricalPriceChart
                     data={PriceChartData.historicalChartData}
-                    annotations={[]}
+                    annotations={
+                      (AddLiquidityConfig.fullRange
+                        ? [new Dec(PriceChartData.yRange[0] * 1.05), new Dec(PriceChartData.yRange[1] * 0.95)]
+                        : AddLiquidityConfig.rangeWithCurrencyDecimals) as any
+                    }
                     domain={PriceChartData.yRange as [number, number]}
-                    onPointerHover={PriceChartData.setHoverPrice}
-                    onPointerOut={() => {
-                      if (PriceChartData.lastChartData) {
-                        PriceChartData.setHoverPrice(Number(PriceChartData.currentPrice.toString()));
-                      }
+                    onPointerHover={(price) => {
+                      console.log('onPointerHover', price);
                     }}
+                    onPointerOut={undefined}
                   />
                 </div>
                 <div className={styles.chartLiquid}>
                   <div className={styles.chart}>
                     <ConcentratedLiquidityDepthChart
-                      yRange={LiquidityChartData.yRange as [number, number]}
-                      xRange={LiquidityChartData.xRange as [number, number]}
-                      data={LiquidityChartData.data}
-                      annotationDatum={{
-                        price: PriceChartData.currentPrice ? Number(PriceChartData.currentPrice.toString()) : PriceChartData.lastChartData?.close ?? 0,
-                        depth: LiquidityChartData.xRange[1]
+                      min={ConcentrateChartData.min}
+                      max={ConcentrateChartData.max}
+                      yRange={ConcentrateChartData.yRange as [number, number]}
+                      xRange={ConcentrateChartData.xRange as [number, number]}
+                      data={ConcentrateChartData.data}
+                      annotationDatum={useMemo(
+                        () => ({
+                          price: AddLiquidityConfig.currentPriceWithDecimals,
+                          depth: ConcentrateChartData.xRange[1]
+                        }),
+                        [ConcentrateChartData.xRange, AddLiquidityConfig.currentPriceWithDecimals]
+                      )}
+                      // eslint-disable-next-line react-hooks/exhaustive-deps
+                      onMoveMax={(value) => {
+                        console.log('onMoveMax', value);
                       }}
-                      // offset={{
-                      //   top: 0,
-                      //   right: PriceChartData.currentPrice ? ((new Dec(BigInt(PriceChartData.currentPrice.int))).gt(new Dec(100)) ? 120 : 56) : 36,
-                      //   bottom: 24 + 28,
-                      //   left: 0
-                      // }}
+                      // eslint-disable-next-line react-hooks/exhaustive-deps
+                      onMoveMin={(value) => {
+                        console.log('onMoveMin', value);
+                      }}
+                      onSubmitMin={(value) => {
+                        console.log('onSubmitMin', value);
+                      }}
+                      onSubmitMax={(value) => {
+                        console.log('onSubmitMax', value);
+                      }}
+                      offset={{ top: 0, right: 36, bottom: 24 + 28, left: 0 }}
                       horizontal
+                      fullRange={ConcentrateChartData.fullRange}
                     />
                   </div>
                 </div>
@@ -1617,176 +1634,20 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   );
 };
 
+const AddLiquidityConfig = {
+  fullRange: false,
+  rangeWithCurrencyDecimals: [
+    new Dec(0.484820000000000001),
+    new Dec(0.641000000000000001)
+  ],
+  currentPriceWithDecimals: 0.5284821950442445
+};
+
 const PriceChartData = {
+  // range on y-axis
+  yRange: [0.4215826086956522, 0.7371500000000001],
+  // history data
   historicalChartData: [
-    {
-      time: 1727683200000,
-      close: 0.645432804,
-      high: 0.646862394,
-      low: 0.641400047,
-      open: 0.641401486
-    },
-    {
-      time: 1727686800000,
-      close: 0.641100071,
-      high: 0.645433467,
-      low: 0.638103755,
-      open: 0.645432804
-    },
-    {
-      time: 1727690400000,
-      close: 0.632041363,
-      high: 0.641100071,
-      low: 0.632041363,
-      open: 0.641100071
-    },
-    {
-      time: 1727694000000,
-      close: 0.628485999,
-      high: 0.631949723,
-      low: 0.626078023,
-      open: 0.631587232
-    },
-    {
-      time: 1727697600000,
-      close: 0.631158218,
-      high: 0.631196468,
-      low: 0.628484964,
-      open: 0.628485999
-    },
-    {
-      time: 1727701200000,
-      close: 0.63337885,
-      high: 0.633454877,
-      low: 0.629772925,
-      open: 0.631158594
-    },
-    {
-      time: 1727704800000,
-      close: 0.632611534,
-      high: 0.634964894,
-      low: 0.63198684,
-      open: 0.63337885
-    },
-    {
-      time: 1727708400000,
-      close: 0.627001857,
-      high: 0.632611463,
-      low: 0.625349377,
-      open: 0.632611463
-    },
-    {
-      time: 1727712000000,
-      close: 0.620067857,
-      high: 0.627624116,
-      low: 0.619847941,
-      open: 0.627001966
-    },
-    {
-      time: 1727715600000,
-      close: 0.617066343,
-      high: 0.621642994,
-      low: 0.61645525,
-      open: 0.620372803
-    },
-    {
-      time: 1727719200000,
-      close: 0.619389844,
-      high: 0.619925614,
-      low: 0.616059344,
-      open: 0.616935396
-    },
-    {
-      time: 1727722800000,
-      close: 0.620385404,
-      high: 0.622050729,
-      low: 0.615602989,
-      open: 0.619389924
-    },
-    {
-      time: 1727726400000,
-      close: 0.620998589,
-      high: 0.620999906,
-      low: 0.619371213,
-      open: 0.620385601
-    },
-    {
-      time: 1727730000000,
-      close: 0.622845321,
-      high: 0.624443582,
-      low: 0.62099835,
-      open: 0.620998628
-    },
-    {
-      time: 1727733600000,
-      close: 0.620341294,
-      high: 0.623339724,
-      low: 0.620079599,
-      open: 0.622845744
-    },
-    {
-      time: 1727737200000,
-      close: 0.605342527,
-      high: 0.620341075,
-      low: 0.604703338,
-      open: 0.620341075
-    },
-    {
-      time: 1727740800000,
-      close: 0.598533458,
-      high: 0.605167665,
-      low: 0.596264815,
-      open: 0.605166396
-    },
-    {
-      time: 1727744400000,
-      close: 0.600516523,
-      high: 0.60061604,
-      low: 0.593225658,
-      open: 0.598533632
-    },
-    {
-      time: 1727748000000,
-      close: 0.603370027,
-      high: 0.6033791,
-      low: 0.600516523,
-      open: 0.600516523
-    },
-    {
-      time: 1727751600000,
-      close: 0.601739897,
-      high: 0.603370027,
-      low: 0.599020077,
-      open: 0.603370027
-    },
-    {
-      time: 1727755200000,
-      close: 0.606779312,
-      high: 0.606941747,
-      low: 0.601924926,
-      open: 0.601924926
-    },
-    {
-      time: 1727758800000,
-      close: 0.609628116,
-      high: 0.611024857,
-      low: 0.605543921,
-      open: 0.606779312
-    },
-    {
-      time: 1727762400000,
-      close: 0.606147619,
-      high: 0.609631956,
-      low: 0.605361974,
-      open: 0.609629975
-    },
-    {
-      time: 1727766000000,
-      close: 0.612089506,
-      high: 0.612341912,
-      low: 0.606147397,
-      open: 0.606147619
-    },
     {
       time: 1727769600000,
       close: 0.614968711,
@@ -2804,122 +2665,296 @@ const PriceChartData = {
     },
     {
       time: 1728291600000,
-      close: 0.561722487,
-      high: 0.562670953,
+      close: 0.563282428,
+      high: 0.563414775,
       low: 0.558492065,
       open: 0.558492065
+    },
+    {
+      time: 1728295200000,
+      close: 0.550904982,
+      high: 0.563282816,
+      low: 0.549876635,
+      open: 0.563282793
+    },
+    {
+      time: 1728298800000,
+      close: 0.543989685,
+      high: 0.550647689,
+      low: 0.543053884,
+      open: 0.550647689
+    },
+    {
+      time: 1728302400000,
+      close: 0.550510796,
+      high: 0.550764493,
+      low: 0.541820548,
+      open: 0.543989685
+    },
+    {
+      time: 1728306000000,
+      close: 0.546943806,
+      high: 0.550519444,
+      low: 0.546747112,
+      open: 0.550510796
+    },
+    {
+      time: 1728309600000,
+      close: 0.551934503,
+      high: 0.552796102,
+      low: 0.543167444,
+      open: 0.546943093
+    },
+    {
+      time: 1728313200000,
+      close: 0.557322766,
+      high: 0.562251561,
+      low: 0.551934503,
+      open: 0.551934503
+    },
+    {
+      time: 1728316800000,
+      close: 0.552714144,
+      high: 0.559484052,
+      low: 0.552680576,
+      open: 0.557322369
+    },
+    {
+      time: 1728320400000,
+      close: 0.558494194,
+      high: 0.558528689,
+      low: 0.551188161,
+      open: 0.552714144
+    },
+    {
+      time: 1728324000000,
+      close: 0.558336175,
+      high: 0.559997694,
+      low: 0.556488736,
+      open: 0.558494194
+    },
+    {
+      time: 1728327600000,
+      close: 0.545811321,
+      high: 0.559374078,
+      low: 0.545203077,
+      open: 0.558336176
+    },
+    {
+      time: 1728331200000,
+      close: 0.548724409,
+      high: 0.550554672,
+      low: 0.545813688,
+      open: 0.545814627
+    },
+    {
+      time: 1728334800000,
+      close: 0.545012516,
+      high: 0.54955014,
+      low: 0.544630134,
+      open: 0.548724409
+    },
+    {
+      time: 1728338400000,
+      close: 0.548501834,
+      high: 0.550798314,
+      low: 0.545012516,
+      open: 0.545012516
+    },
+    {
+      time: 1728342000000,
+      close: 0.53982507,
+      high: 0.548502103,
+      low: 0.539655042,
+      open: 0.548501834
+    },
+    {
+      time: 1728345600000,
+      close: 0.533514925,
+      high: 0.539513407,
+      low: 0.53347319,
+      open: 0.539513407
+    },
+    {
+      time: 1728349200000,
+      close: 0.536428296,
+      high: 0.536429869,
+      low: 0.531201381,
+      open: 0.533513542
+    },
+    {
+      time: 1728352800000,
+      close: 0.536882461,
+      high: 0.537175308,
+      low: 0.532239923,
+      open: 0.536428296
+    },
+    {
+      time: 1728356400000,
+      close: 0.53538019,
+      high: 0.537767105,
+      low: 0.532561733,
+      open: 0.536882461
+    },
+    {
+      time: 1728360000000,
+      close: 0.536234726,
+      high: 0.537144524,
+      low: 0.534142083,
+      open: 0.535384672
+    },
+    {
+      time: 1728363600000,
+      close: 0.534807194,
+      high: 0.53842241,
+      low: 0.534115516,
+      open: 0.536234726
+    },
+    {
+      time: 1728367200000,
+      close: 0.530086346,
+      high: 0.536938513,
+      low: 0.527104906,
+      open: 0.534807194
+    },
+    {
+      time: 1728370800000,
+      close: 0.530178979,
+      high: 0.530179781,
+      low: 0.526475543,
+      open: 0.530086346
+    },
+    {
+      time: 1728374400000,
+      close: 0.527769582,
+      high: 0.530178994,
+      low: 0.52454041,
+      open: 0.530178967
+    },
+    {
+      time: 1728378000000,
+      close: 0.526281454,
+      high: 0.527769604,
+      low: 0.526074489,
+      open: 0.527769582
     }
   ],
-  yRange: [0.4865146980952381, 0.6777044442000001],
+  // latest chart data
   lastChartData: {
-    close: 0.5621860841009938,
-    high: 0.5621860841009938,
-    low: 0.5621860841009938,
-    open: 0.5621860841009938,
-    time: 1728290602314
-  },
-  currentPrice: {
-    int: '562186084100993840'
-  },
-  setHoverPrice: (price: any) => {}
+    close: 0.5262895941172561,
+    high: 0.5262895941172561,
+    low: 0.5262895941172561,
+    open: 0.5262895941172561,
+    time: 1728375698066
+  }
 };
 
-const LiquidityChartData = {
-  yRange: [0.4865146980952381, 0.6777044442000001],
-  xRange: [0, 1205869133484.7856],
+const ConcentrateChartData = {
+  min: 0.48482000000000003, // lower range
+  max: 0.641, // upper range
+  yRange: [0.4215826086956522, 0.7371500000000001], // y-axis range
+  xRange: [0, 1213061533758.7393], // 0 -> max liquidity of a tick
+  // tick data info
   data: [
     {
-      price: 0.4865146980952381,
-      depth: 420028531652.95374
+      price: 0.4215826086956522,
+      depth: 361588874679.61707
     },
     {
-      price: 0.4960741854004762,
-      depth: 426299951971.42035
+      price: 0.43736097826086956,
+      depth: 295157736727.5964
     },
     {
-      price: 0.5056336727057144,
-      depth: 510062982610.4979
+      price: 0.45313934782608695,
+      depth: 309347145233.94055
     },
     {
-      price: 0.5151931600109525,
-      depth: 730758553965.1825
+      price: 0.46891771739130433,
+      depth: 368820514583.27124
     },
     {
-      price: 0.5247526473161906,
-      depth: 792550286024.2544
+      price: 0.4846960869565217,
+      depth: 417105281991.9579
     },
     {
-      price: 0.5343121346214288,
-      depth: 834305385043.0358
+      price: 0.5004744565217392,
+      depth: 494405645980.23596
     },
     {
-      price: 0.5438716219266669,
-      depth: 852854912633.2798
+      price: 0.5162528260869566,
+      depth: 889552977073.7444
     },
     {
-      price: 0.5534311092319051,
-      depth: 809204111438.5962
+      price: 0.5320311956521739,
+      depth: 992309793971.4576
     },
     {
-      price: 0.5629905965371432,
-      depth: 733946944570.9766
+      price: 0.5478095652173913,
+      depth: 959832109017.2087
     },
     {
-      price: 0.5725500838423814,
-      depth: 682947960784.0153
+      price: 0.5635879347826087,
+      depth: 891904678661.5216
     },
     {
-      price: 0.5821095711476195,
-      depth: 686597851468.0262
+      price: 0.5793663043478261,
+      depth: 836913206483.5969
     },
     {
-      price: 0.5916690584528577,
-      depth: 608624268432.5157
+      price: 0.5951446739130435,
+      depth: 763700036222.9612
     },
     {
-      price: 0.6012285457580958,
-      depth: 743609404032.5088
+      price: 0.6109230434782609,
+      depth: 903270101065.6025
     },
     {
-      price: 0.610788033063334,
-      depth: 753222773886.6119
+      price: 0.6267014130434783,
+      depth: 874286673662.867
     },
     {
-      price: 0.6203475203685721,
-      depth: 877908234159.4294
+      price: 0.6424797826086956,
+      depth: 887203497670.5289
     },
     {
-      price: 0.6299070076738102,
-      depth: 878081624843.3722
+      price: 0.658258152173913,
+      depth: 1010884611465.6161
     },
     {
-      price: 0.6394664949790484,
-      depth: 891297097746.3016
+      price: 0.6740365217391304,
+      depth: 825819915528.4487
     },
     {
-      price: 0.6490259822842865,
-      depth: 889387738888.4976
+      price: 0.6898148913043478,
+      depth: 718772475791.6271
     },
     {
-      price: 0.6585854695895247,
-      depth: 1004890944570.6547
+      price: 0.7055932608695652,
+      depth: 424689731570.51654
     },
     {
-      price: 0.6681449568947628,
-      depth: 1004881821418.729
+      price: 0.7213716304347826,
+      depth: 397160923389.60565
+    },
+    {
+      price: 0.73715,
+      depth: 367246951558.62726
     }
   ],
+  // current price
   annotationDatum: {
-    price: 0.5615442249292797,
-    depth: 1205869133484.7856
+    price: 0.5277044586985559,
+    depth: 1213061533758.7393
   },
+  // position of the chart
   offset: {
     top: 0,
-    right: 56,
+    right: 36,
     bottom: 52,
     left: 0
   },
-  horizontal: true
+  // option full range
+  fullRange: false
 };
 
 export default CreatePositionForm;

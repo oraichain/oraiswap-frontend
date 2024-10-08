@@ -54,6 +54,22 @@ export const ConcentratedLiquidityDepthChart: FC<{
   horizontal = true,
   fullRange = false
 }) => {
+
+  console.log({
+    min,
+    max,
+    yRange,
+    xRange,
+    data,
+    annotationDatum,
+    onMoveMax,
+    onMoveMin,
+    onSubmitMin,
+    onSubmitMax,
+    offset,
+    fullRange,
+  });
+
   const xMax = xRange[1];
   const showMinDragHandler = min !== undefined && Boolean(onMoveMin) && Boolean(onSubmitMin);
   const showMaxDragHandler = max !== undefined && Boolean(onMoveMax) && Boolean(onSubmitMax);
