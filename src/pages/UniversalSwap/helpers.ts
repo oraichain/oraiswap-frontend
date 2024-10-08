@@ -394,6 +394,9 @@ export const isAllowAlphaIbcWasm = (fromToken: TokenItemType, toToken: TokenItem
       toToken.chainId === COSMOS_CHAIN_ID_COMMON.CELESTIA_CHAIN_ID)
   )
     return true;
+
+  // from chainId and to chainId is CELESTIA_CHAIN_ID
+  if ([toToken.chainId, fromToken.chainId].includes(COSMOS_CHAIN_ID_COMMON.CELESTIA_CHAIN_ID)) return true;
   return false;
 };
 
@@ -431,6 +434,9 @@ export const isAllowIBCWasm = (fromToken: TokenItemType, toToken: TokenItemType)
   const toTokenIsOraichain = toToken.chainId === 'Oraichain';
   const toTokenIsCosmos = toToken.cosmosBased;
 
+  // from chainId and to chainId is CELESTIA_CHAIN_ID
+  if ([toToken.chainId, fromToken.chainId].includes(COSMOS_CHAIN_ID_COMMON.CELESTIA_CHAIN_ID)) return false;
+
   // Oraichain -> Oraichain or Cosmos
   if (fromTokenIsOraichain) {
     if (toToken.chainId == 'Neutaro-1') return true;
@@ -449,6 +455,7 @@ export const isAllowIBCWasm = (fromToken: TokenItemType, toToken: TokenItemType)
     ) {
       return false;
     }
+
     return true;
   }
 
