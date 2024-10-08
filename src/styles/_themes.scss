@@ -51,9 +51,11 @@ $primary-text-highlight: #d7f5bf;
 $accent-1: #03a727;
 $warning-surface-1: #e01600;
 $colors-primary-surface-default: #aee67f;
+$neutral-4: #d1d0d0;
 
 $themes: (
-  dark: ('warning-surface-default-subtle': #383200,
+  dark: (
+    'warning-surface-default-subtle': #383200,
     'colors-neutral-text-text-token-name': #f7f7f7,
     'colors-neutral-text-body-on-section': #979995,
     'colors-neutral-text-text-btn-default': #292f23,
@@ -155,8 +157,10 @@ $themes: (
     'neutral-text-btn-default': #152703,
     'neutral-surface-bg-3': #f7f7f7,
     'neutral-surface-bg-swap': #1b1d19,
-    'neutral-surface-bg-strong': #131412),
-  light: ('warning-surface-default-subtle': #fffdeb,
+    'neutral-surface-bg-strong': #131412
+  ),
+  light: (
+    'warning-surface-default-subtle': #fffdeb,
     'colors-neutral-text-text-token-name': #181a17,
     'colors-neutral-text-body-on-section': #686a66,
     'colors-neutral-text-text-btn-default': #292f23,
@@ -258,5 +262,6 @@ $themes: (
     'bg-overlay-section': rgba(255, 255, 255, 0.5),
     'neutral-surface-bg-3': #181a17,
     'neutral-surface-bg-swap': #fff,
-    'neutral-surface-bg-strong': #f2f4f0)
+    'neutral-surface-bg-strong': #f2f4f0
+  )
 );
