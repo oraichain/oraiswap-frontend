@@ -156,7 +156,7 @@
       }
 
       @include theme {
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
         border: 1px solid theme-get('neutral-border-border-default');
         background: theme-get('neutral-surface-bg-swap');
       }
@@ -240,7 +240,7 @@
 
           @include theme {
             // color: theme-get('colors-neutral-text-text-token-name');
-            color: theme-get('neutral-9');
+            color: theme-get('neutral-8');
             border-bottom: 1px solid theme-get('neutral-border-border-default');
           }
         }
@@ -301,7 +301,7 @@
 
           .label {
             @include theme {
-              color: theme-get('neutral-9');
+              color: theme-get('neutral-8');
             }
 
             font-size: 12px;
@@ -336,6 +336,7 @@
     }
 
     table {
+
       /* required css to make the rows rounded */
       thead {
         white-space: nowrap;
@@ -401,7 +402,7 @@
         padding: 24px;
 
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
 
         font-size: 12px;
@@ -478,7 +479,8 @@
 
           font-size: 12px;
           font-weight: 500;
-          line-height: 150%; /* 18px */
+          line-height: 150%;
+          /* 18px */
         }
       }
 
@@ -705,7 +707,7 @@
 
     path {
       @include theme {
-        fill: theme-get('neutral-9');
+        fill: theme-get('neutral-8');
       }
     }
   }
