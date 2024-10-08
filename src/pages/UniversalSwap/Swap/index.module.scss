@@ -322,7 +322,9 @@
     /* identical to box height, or 24px */
 
     text-align: center;
-    font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+    font-feature-settings: 'tnum' on,
+    'lnum' on,
+    'zero' on;
 
     .token {
       cursor: pointer;
@@ -503,7 +505,7 @@
 
   @include theme() {
     background-color: theme-get('neutral-6');
-    color: theme-get('neutral-9');
+    color: theme-get('neutral-8');
   }
 
   border-radius: 8px;
@@ -790,6 +792,7 @@
     display: flex;
     width: 100%;
     border-radius: 8px;
+
     @include theme() {
       background-color: theme-get('neutral-surface-bg-tooltip');
       border: 1px solid theme-get('neutral-border-border-bold');
@@ -800,9 +803,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+
       @include theme() {
         border: 1px solid theme-get('neutral-border-border-bold');
       }
+
       margin: 10px;
       border-radius: 8px;
     }
@@ -908,13 +913,11 @@
         flex: 1;
 
         .smart-router-item-line-detail {
-          background: linear-gradient(
-            90deg,
-            rgb(115 255 11) 0%,
-            rgb(54, 93, 3) 42.71%,
-            rgb(204 255 0) 71.35%,
-            rgb(24, 43, 10) 100%
-          );
+          background: linear-gradient(90deg,
+              rgb(115 255 11) 0%,
+              rgb(54, 93, 3) 42.71%,
+              rgb(204 255 0) 71.35%,
+              rgb(24, 43, 10) 100%);
           background-size: 200% 200%;
           height: 3px;
           border-radius: 99px;

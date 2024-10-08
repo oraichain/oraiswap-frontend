@@ -58,6 +58,7 @@
     @include mobile {
       height: 430px;
     }
+
     height: 500px;
   }
 }
@@ -103,7 +104,7 @@
     svg {
       @include theme {
         path {
-          fill: theme-get('neutral-9');
+          fill: theme-get('neutral-8');
         }
       }
     }
@@ -121,7 +122,7 @@
       line-height: 150%;
 
       @include theme() {
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
       }
 
       .nodata-title {
