@@ -171,12 +171,12 @@ export const processWsResponseMsg = (message: any): string => {
       const packets = events['recv_packet.packet_data'];
       if (!packets) return null;
       let tokens = '';
-      for (let packetRaw of packets) {
+      for (const packetRaw of packets) {
         const packet = JSON.parse(packetRaw);
         // we look for the true denom information with decimals to process
         // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
         const receivedToken = cosmosTokens.find((token) => token.denom === packet.denom);
-        //TODO: Not show socket received amount with usat token;
+        // TODO: Not show socket received amount with usat token;
         if (receivedToken.denom === 'usat') {
           return null;
         }

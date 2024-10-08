@@ -71,12 +71,12 @@ export type AccountClaimFeesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 
@@ -84,12 +84,12 @@ export type AccountPoolCreationsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -97,12 +97,12 @@ export type AccountPoolsByClaimFeeOwnerIdAndPoolIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -110,12 +110,12 @@ export type AccountPoolsByPositionOwnerIdAndPoolIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -123,12 +123,12 @@ export type AccountPositionsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 
@@ -136,12 +136,12 @@ export type AccountPositionsByClaimFeeOwnerIdAndPositionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 
@@ -149,12 +149,12 @@ export type AccountSwapArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 
@@ -162,12 +162,12 @@ export type AccountTokensByPoolPoolCreatorIdAndTokenXIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -175,12 +175,12 @@ export type AccountTokensByPoolPoolCreatorIdAndTokenYIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -188,12 +188,12 @@ export type AccountTokensBySwapSenderIdAndTokenInIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -201,12 +201,12 @@ export type AccountTokensBySwapSenderIdAndTokenOutIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -214,12 +214,12 @@ export type AccountTransactionsByClaimFeeOwnerIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -227,12 +227,12 @@ export type AccountTransactionsByPoolPoolCreatorIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -240,12 +240,12 @@ export type AccountTransactionsByPositionOwnerIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -253,19 +253,19 @@ export type AccountTransactionsBySwapSenderIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 export type AccountAggregates = {
   __typename?: 'AccountAggregates';
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<AccountDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
 };
 
 export type AccountDistinctCountAggregates = {
@@ -281,7 +281,7 @@ export type AccountDistinctCountAggregates = {
 /** A filter to be used against `Account` object types. All fields are combined with a logical ‘and.’ */
 export type AccountFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<AccountFilter>>;
+  and?: InputMaybe<AccountFilter[]>;
   /** Filter by the object’s `claimFees` relation. */
   claimFees?: InputMaybe<AccountToManyClaimFeeFilter>;
   /** Some related `claimFees` exist. */
@@ -291,7 +291,7 @@ export type AccountFilter = {
   /** Negates the expression. */
   not?: InputMaybe<AccountFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<AccountFilter>>;
+  or?: InputMaybe<AccountFilter[]>;
   /** Filter by the object’s `poolCreations` relation. */
   poolCreations?: InputMaybe<AccountToManyPoolFilter>;
   /** Some related `poolCreations` exist. */
@@ -312,11 +312,11 @@ export type AccountPoolsByClaimFeeOwnerIdAndPoolIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<AccountPoolsByClaimFeeOwnerIdAndPoolIdManyToManyEdge>;
+  edges: AccountPoolsByClaimFeeOwnerIdAndPoolIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -326,7 +326,7 @@ export type AccountPoolsByClaimFeeOwnerIdAndPoolIdManyToManyConnection = {
 
 /** A connection to a list of `Pool` values, with data from `ClaimFee`. */
 export type AccountPoolsByClaimFeeOwnerIdAndPoolIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -347,12 +347,12 @@ export type AccountPoolsByClaimFeeOwnerIdAndPoolIdManyToManyEdgeClaimFeesArgs = 
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 /** A connection to a list of `Pool` values, with data from `Position`. */
@@ -361,11 +361,11 @@ export type AccountPoolsByPositionOwnerIdAndPoolIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool`, info from the `Position`, and the cursor to aid in pagination. */
-  edges: Array<AccountPoolsByPositionOwnerIdAndPoolIdManyToManyEdge>;
+  edges: AccountPoolsByPositionOwnerIdAndPoolIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -375,7 +375,7 @@ export type AccountPoolsByPositionOwnerIdAndPoolIdManyToManyConnection = {
 
 /** A connection to a list of `Pool` values, with data from `Position`. */
 export type AccountPoolsByPositionOwnerIdAndPoolIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -396,12 +396,12 @@ export type AccountPoolsByPositionOwnerIdAndPoolIdManyToManyEdgePositionsArgs = 
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 /** A connection to a list of `Position` values, with data from `ClaimFee`. */
@@ -410,11 +410,11 @@ export type AccountPositionsByClaimFeeOwnerIdAndPositionIdManyToManyConnection =
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PositionAggregates>;
   /** A list of edges which contains the `Position`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<AccountPositionsByClaimFeeOwnerIdAndPositionIdManyToManyEdge>;
+  edges: AccountPositionsByClaimFeeOwnerIdAndPositionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PositionAggregates>>;
+  groupedAggregates?: Maybe<PositionAggregates[]>;
   /** A list of `Position` objects. */
-  nodes: Array<Maybe<Position>>;
+  nodes: Maybe<Position>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Position` you could get from the connection. */
@@ -424,7 +424,7 @@ export type AccountPositionsByClaimFeeOwnerIdAndPositionIdManyToManyConnection =
 
 /** A connection to a list of `Position` values, with data from `ClaimFee`. */
 export type AccountPositionsByClaimFeeOwnerIdAndPositionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PositionsGroupBy>;
+  groupBy: PositionsGroupBy[];
   having?: InputMaybe<PositionsHavingInput>;
 };
 
@@ -445,12 +445,12 @@ export type AccountPositionsByClaimFeeOwnerIdAndPositionIdManyToManyEdgeFeesArgs
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 /** A filter to be used against many `ClaimFee` object types. All fields are combined with a logical ‘and.’ */
@@ -507,11 +507,11 @@ export type AccountTokensByPoolPoolCreatorIdAndTokenXIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<AccountTokensByPoolPoolCreatorIdAndTokenXIdManyToManyEdge>;
+  edges: AccountTokensByPoolPoolCreatorIdAndTokenXIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -521,7 +521,7 @@ export type AccountTokensByPoolPoolCreatorIdAndTokenXIdManyToManyConnection = {
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
 export type AccountTokensByPoolPoolCreatorIdAndTokenXIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -542,12 +542,12 @@ export type AccountTokensByPoolPoolCreatorIdAndTokenXIdManyToManyEdgePoolsByToke
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
@@ -556,11 +556,11 @@ export type AccountTokensByPoolPoolCreatorIdAndTokenYIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<AccountTokensByPoolPoolCreatorIdAndTokenYIdManyToManyEdge>;
+  edges: AccountTokensByPoolPoolCreatorIdAndTokenYIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -570,7 +570,7 @@ export type AccountTokensByPoolPoolCreatorIdAndTokenYIdManyToManyConnection = {
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
 export type AccountTokensByPoolPoolCreatorIdAndTokenYIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -591,12 +591,12 @@ export type AccountTokensByPoolPoolCreatorIdAndTokenYIdManyToManyEdgePoolsByToke
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
@@ -605,11 +605,11 @@ export type AccountTokensBySwapSenderIdAndTokenInIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<AccountTokensBySwapSenderIdAndTokenInIdManyToManyEdge>;
+  edges: AccountTokensBySwapSenderIdAndTokenInIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -619,7 +619,7 @@ export type AccountTokensBySwapSenderIdAndTokenInIdManyToManyConnection = {
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
 export type AccountTokensBySwapSenderIdAndTokenInIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -640,12 +640,12 @@ export type AccountTokensBySwapSenderIdAndTokenInIdManyToManyEdgeSwapsByTokenInI
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
@@ -654,11 +654,11 @@ export type AccountTokensBySwapSenderIdAndTokenOutIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<AccountTokensBySwapSenderIdAndTokenOutIdManyToManyEdge>;
+  edges: AccountTokensBySwapSenderIdAndTokenOutIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -668,7 +668,7 @@ export type AccountTokensBySwapSenderIdAndTokenOutIdManyToManyConnection = {
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
 export type AccountTokensBySwapSenderIdAndTokenOutIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -689,12 +689,12 @@ export type AccountTokensBySwapSenderIdAndTokenOutIdManyToManyEdgeSwapsByTokenOu
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `ClaimFee`. */
@@ -703,11 +703,11 @@ export type AccountTransactionsByClaimFeeOwnerIdAndTransactionIdManyToManyConnec
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<AccountTransactionsByClaimFeeOwnerIdAndTransactionIdManyToManyEdge>;
+  edges: AccountTransactionsByClaimFeeOwnerIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -717,7 +717,7 @@ export type AccountTransactionsByClaimFeeOwnerIdAndTransactionIdManyToManyConnec
 
 /** A connection to a list of `Transaction` values, with data from `ClaimFee`. */
 export type AccountTransactionsByClaimFeeOwnerIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -738,12 +738,12 @@ export type AccountTransactionsByClaimFeeOwnerIdAndTransactionIdManyToManyEdgeCl
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `Pool`. */
@@ -752,11 +752,11 @@ export type AccountTransactionsByPoolPoolCreatorIdAndTransactionIdManyToManyConn
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<AccountTransactionsByPoolPoolCreatorIdAndTransactionIdManyToManyEdge>;
+  edges: AccountTransactionsByPoolPoolCreatorIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -766,7 +766,7 @@ export type AccountTransactionsByPoolPoolCreatorIdAndTransactionIdManyToManyConn
 
 /** A connection to a list of `Transaction` values, with data from `Pool`. */
 export type AccountTransactionsByPoolPoolCreatorIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -787,12 +787,12 @@ export type AccountTransactionsByPoolPoolCreatorIdAndTransactionIdManyToManyEdge
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `Position`. */
@@ -801,11 +801,11 @@ export type AccountTransactionsByPositionOwnerIdAndTransactionIdManyToManyConnec
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `Position`, and the cursor to aid in pagination. */
-  edges: Array<AccountTransactionsByPositionOwnerIdAndTransactionIdManyToManyEdge>;
+  edges: AccountTransactionsByPositionOwnerIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -815,7 +815,7 @@ export type AccountTransactionsByPositionOwnerIdAndTransactionIdManyToManyConnec
 
 /** A connection to a list of `Transaction` values, with data from `Position`. */
 export type AccountTransactionsByPositionOwnerIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -836,12 +836,12 @@ export type AccountTransactionsByPositionOwnerIdAndTransactionIdManyToManyEdgePo
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `Swap`. */
@@ -850,11 +850,11 @@ export type AccountTransactionsBySwapSenderIdAndTransactionIdManyToManyConnectio
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<AccountTransactionsBySwapSenderIdAndTransactionIdManyToManyEdge>;
+  edges: AccountTransactionsBySwapSenderIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -864,7 +864,7 @@ export type AccountTransactionsBySwapSenderIdAndTransactionIdManyToManyConnectio
 
 /** A connection to a list of `Transaction` values, with data from `Swap`. */
 export type AccountTransactionsBySwapSenderIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -885,12 +885,12 @@ export type AccountTransactionsBySwapSenderIdAndTransactionIdManyToManyEdgeSwapA
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values. */
@@ -899,11 +899,11 @@ export type AccountsConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account` and cursor to aid in pagination. */
-  edges: Array<AccountsEdge>;
+  edges: AccountsEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -913,7 +913,7 @@ export type AccountsConnection = {
 
 /** A connection to a list of `Account` values. */
 export type AccountsConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -933,8 +933,8 @@ export enum AccountsGroupBy {
 
 /** Conditions for `Account` aggregates. */
 export type AccountsHavingInput = {
-  AND?: InputMaybe<Array<AccountsHavingInput>>;
-  OR?: InputMaybe<Array<AccountsHavingInput>>;
+  AND?: InputMaybe<AccountsHavingInput[]>;
+  OR?: InputMaybe<AccountsHavingInput[]>;
 };
 
 /** Methods to use when ordering `Account`. */
@@ -1991,7 +1991,7 @@ export type BigFloatFilter = {
   /** Greater than or equal to the specified value. */
   greaterThanOrEqualTo?: InputMaybe<Scalars['BigFloat']['input']>;
   /** Included in the specified list. */
-  in?: InputMaybe<Array<Scalars['BigFloat']['input']>>;
+  in?: InputMaybe<Scalars['BigFloat']['input'][]>;
   /** Is null (if `true` is specified) or is not null (if `false` is specified). */
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
   /** Less than the specified value. */
@@ -2003,7 +2003,7 @@ export type BigFloatFilter = {
   /** Not equal to the specified value. */
   notEqualTo?: InputMaybe<Scalars['BigFloat']['input']>;
   /** Not included in the specified list. */
-  notIn?: InputMaybe<Array<Scalars['BigFloat']['input']>>;
+  notIn?: InputMaybe<Scalars['BigFloat']['input'][]>;
 };
 
 /** A filter to be used against BigInt fields. All fields are combined with a logical ‘and.’ */
@@ -2017,7 +2017,7 @@ export type BigIntFilter = {
   /** Greater than or equal to the specified value. */
   greaterThanOrEqualTo?: InputMaybe<Scalars['BigInt']['input']>;
   /** Included in the specified list. */
-  in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  in?: InputMaybe<Scalars['BigInt']['input'][]>;
   /** Is null (if `true` is specified) or is not null (if `false` is specified). */
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
   /** Less than the specified value. */
@@ -2029,7 +2029,7 @@ export type BigIntFilter = {
   /** Not equal to the specified value. */
   notEqualTo?: InputMaybe<Scalars['BigInt']['input']>;
   /** Not included in the specified list. */
-  notIn?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  notIn?: InputMaybe<Scalars['BigInt']['input'][]>;
 };
 
 /** A filter to be used against Boolean fields. All fields are combined with a logical ‘and.’ */
@@ -2043,7 +2043,7 @@ export type BooleanFilter = {
   /** Greater than or equal to the specified value. */
   greaterThanOrEqualTo?: InputMaybe<Scalars['Boolean']['input']>;
   /** Included in the specified list. */
-  in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  in?: InputMaybe<Scalars['Boolean']['input'][]>;
   /** Is null (if `true` is specified) or is not null (if `false` is specified). */
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
   /** Less than the specified value. */
@@ -2055,7 +2055,7 @@ export type BooleanFilter = {
   /** Not equal to the specified value. */
   notEqualTo?: InputMaybe<Scalars['Boolean']['input']>;
   /** Not included in the specified list. */
-  notIn?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  notIn?: InputMaybe<Scalars['Boolean']['input'][]>;
 };
 
 export type ClaimFee = Node & {
@@ -2089,12 +2089,12 @@ export type ClaimFeeClaimFeeIncentiveTokensArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeIncentiveTokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeeIncentiveTokensOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeeIncentiveTokensOrderBy[]>;
 };
 
 
@@ -2102,12 +2102,12 @@ export type ClaimFeeTokensByClaimFeeIncentiveTokenClaimFeeIdAndTokenIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 export type ClaimFeeAggregates = {
@@ -2116,7 +2116,7 @@ export type ClaimFeeAggregates = {
   average?: Maybe<ClaimFeeAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<ClaimFeeDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<ClaimFeeMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -2216,7 +2216,7 @@ export type ClaimFeeFilter = {
   /** Filter by the object’s `amountY` field. */
   amountY?: InputMaybe<BigFloatFilter>;
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<ClaimFeeFilter>>;
+  and?: InputMaybe<ClaimFeeFilter[]>;
   /** Filter by the object’s `claimFeeIncentiveTokens` relation. */
   claimFeeIncentiveTokens?: InputMaybe<ClaimFeeToManyClaimFeeIncentiveTokenFilter>;
   /** Some related `claimFeeIncentiveTokens` exist. */
@@ -2226,7 +2226,7 @@ export type ClaimFeeFilter = {
   /** Negates the expression. */
   not?: InputMaybe<ClaimFeeFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<ClaimFeeFilter>>;
+  or?: InputMaybe<ClaimFeeFilter[]>;
   /** Filter by the object’s `owner` relation. */
   owner?: InputMaybe<AccountFilter>;
   /** Filter by the object’s `ownerId` field. */
@@ -2266,7 +2266,7 @@ export type ClaimFeeIncentiveTokenAggregates = {
   average?: Maybe<ClaimFeeIncentiveTokenAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<ClaimFeeIncentiveTokenDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<ClaimFeeIncentiveTokenMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -2351,7 +2351,7 @@ export type ClaimFeeIncentiveTokenDistinctCountAggregates = {
 /** A filter to be used against `ClaimFeeIncentiveToken` object types. All fields are combined with a logical ‘and.’ */
 export type ClaimFeeIncentiveTokenFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<ClaimFeeIncentiveTokenFilter>>;
+  and?: InputMaybe<ClaimFeeIncentiveTokenFilter[]>;
   /** Filter by the object’s `claimFee` relation. */
   claimFee?: InputMaybe<ClaimFeeFilter>;
   /** Filter by the object’s `claimFeeId` field. */
@@ -2363,7 +2363,7 @@ export type ClaimFeeIncentiveTokenFilter = {
   /** Negates the expression. */
   not?: InputMaybe<ClaimFeeIncentiveTokenFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<ClaimFeeIncentiveTokenFilter>>;
+  or?: InputMaybe<ClaimFeeIncentiveTokenFilter[]>;
   /** Filter by the object’s `rewardAmount` field. */
   rewardAmount?: InputMaybe<BigFloatFilter>;
   /** Filter by the object’s `token` relation. */
@@ -2469,11 +2469,11 @@ export type ClaimFeeIncentiveTokensConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<ClaimFeeIncentiveTokenAggregates>;
   /** A list of edges which contains the `ClaimFeeIncentiveToken` and cursor to aid in pagination. */
-  edges: Array<ClaimFeeIncentiveTokensEdge>;
+  edges: ClaimFeeIncentiveTokensEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<ClaimFeeIncentiveTokenAggregates>>;
+  groupedAggregates?: Maybe<ClaimFeeIncentiveTokenAggregates[]>;
   /** A list of `ClaimFeeIncentiveToken` objects. */
-  nodes: Array<Maybe<ClaimFeeIncentiveToken>>;
+  nodes: Maybe<ClaimFeeIncentiveToken>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `ClaimFeeIncentiveToken` you could get from the connection. */
@@ -2483,7 +2483,7 @@ export type ClaimFeeIncentiveTokensConnection = {
 
 /** A connection to a list of `ClaimFeeIncentiveToken` values. */
 export type ClaimFeeIncentiveTokensConnectionGroupedAggregatesArgs = {
-  groupBy: Array<ClaimFeeIncentiveTokensGroupBy>;
+  groupBy: ClaimFeeIncentiveTokensGroupBy[];
   having?: InputMaybe<ClaimFeeIncentiveTokensHavingInput>;
 };
 
@@ -2517,8 +2517,8 @@ export type ClaimFeeIncentiveTokensHavingDistinctCountInput = {
 
 /** Conditions for `ClaimFeeIncentiveToken` aggregates. */
 export type ClaimFeeIncentiveTokensHavingInput = {
-  AND?: InputMaybe<Array<ClaimFeeIncentiveTokensHavingInput>>;
-  OR?: InputMaybe<Array<ClaimFeeIncentiveTokensHavingInput>>;
+  AND?: InputMaybe<ClaimFeeIncentiveTokensHavingInput[]>;
+  OR?: InputMaybe<ClaimFeeIncentiveTokensHavingInput[]>;
   average?: InputMaybe<ClaimFeeIncentiveTokensHavingAverageInput>;
   distinctCount?: InputMaybe<ClaimFeeIncentiveTokensHavingDistinctCountInput>;
   max?: InputMaybe<ClaimFeeIncentiveTokensHavingMaxInput>;
@@ -2665,11 +2665,11 @@ export type ClaimFeeTokensByClaimFeeIncentiveTokenClaimFeeIdAndTokenIdManyToMany
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `ClaimFeeIncentiveToken`, and the cursor to aid in pagination. */
-  edges: Array<ClaimFeeTokensByClaimFeeIncentiveTokenClaimFeeIdAndTokenIdManyToManyEdge>;
+  edges: ClaimFeeTokensByClaimFeeIncentiveTokenClaimFeeIdAndTokenIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -2679,7 +2679,7 @@ export type ClaimFeeTokensByClaimFeeIncentiveTokenClaimFeeIdAndTokenIdManyToMany
 
 /** A connection to a list of `Token` values, with data from `ClaimFeeIncentiveToken`. */
 export type ClaimFeeTokensByClaimFeeIncentiveTokenClaimFeeIdAndTokenIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -2700,12 +2700,12 @@ export type ClaimFeeTokensByClaimFeeIncentiveTokenClaimFeeIdAndTokenIdManyToMany
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeIncentiveTokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeeIncentiveTokensOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeeIncentiveTokensOrderBy[]>;
 };
 
 export type ClaimFeeVariancePopulationAggregateFilter = {
@@ -2740,11 +2740,11 @@ export type ClaimFeesConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<ClaimFeeAggregates>;
   /** A list of edges which contains the `ClaimFee` and cursor to aid in pagination. */
-  edges: Array<ClaimFeesEdge>;
+  edges: ClaimFeesEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<ClaimFeeAggregates>>;
+  groupedAggregates?: Maybe<ClaimFeeAggregates[]>;
   /** A list of `ClaimFee` objects. */
-  nodes: Array<Maybe<ClaimFee>>;
+  nodes: Maybe<ClaimFee>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `ClaimFee` you could get from the connection. */
@@ -2754,7 +2754,7 @@ export type ClaimFeesConnection = {
 
 /** A connection to a list of `ClaimFee` values. */
 export type ClaimFeesConnectionGroupedAggregatesArgs = {
-  groupBy: Array<ClaimFeesGroupBy>;
+  groupBy: ClaimFeesGroupBy[];
   having?: InputMaybe<ClaimFeesHavingInput>;
 };
 
@@ -2791,8 +2791,8 @@ export type ClaimFeesHavingDistinctCountInput = {
 
 /** Conditions for `ClaimFee` aggregates. */
 export type ClaimFeesHavingInput = {
-  AND?: InputMaybe<Array<ClaimFeesHavingInput>>;
-  OR?: InputMaybe<Array<ClaimFeesHavingInput>>;
+  AND?: InputMaybe<ClaimFeesHavingInput[]>;
+  OR?: InputMaybe<ClaimFeesHavingInput[]>;
   average?: InputMaybe<ClaimFeesHavingAverageInput>;
   distinctCount?: InputMaybe<ClaimFeesHavingDistinctCountInput>;
   max?: InputMaybe<ClaimFeesHavingMaxInput>;
@@ -3001,7 +3001,7 @@ export type IntFilter = {
   /** Greater than or equal to the specified value. */
   greaterThanOrEqualTo?: InputMaybe<Scalars['Int']['input']>;
   /** Included in the specified list. */
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
+  in?: InputMaybe<Scalars['Int']['input'][]>;
   /** Is null (if `true` is specified) or is not null (if `false` is specified). */
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
   /** Less than the specified value. */
@@ -3013,7 +3013,7 @@ export type IntFilter = {
   /** Not equal to the specified value. */
   notEqualTo?: InputMaybe<Scalars['Int']['input']>;
   /** Not included in the specified list. */
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Scalars['Int']['input'][]>;
 };
 
 /** A filter to be used against JSON fields. All fields are combined with a logical ‘and.’ */
@@ -3023,9 +3023,9 @@ export type JsonFilter = {
   /** Contains the specified JSON. */
   contains?: InputMaybe<Scalars['JSON']['input']>;
   /** Contains all of the specified keys. */
-  containsAllKeys?: InputMaybe<Array<Scalars['String']['input']>>;
+  containsAllKeys?: InputMaybe<Scalars['String']['input'][]>;
   /** Contains any of the specified keys. */
-  containsAnyKeys?: InputMaybe<Array<Scalars['String']['input']>>;
+  containsAnyKeys?: InputMaybe<Scalars['String']['input'][]>;
   /** Contains the specified key. */
   containsKey?: InputMaybe<Scalars['String']['input']>;
   /** Not equal to the specified value, treating null like an ordinary value. */
@@ -3037,7 +3037,7 @@ export type JsonFilter = {
   /** Greater than or equal to the specified value. */
   greaterThanOrEqualTo?: InputMaybe<Scalars['JSON']['input']>;
   /** Included in the specified list. */
-  in?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  in?: InputMaybe<Scalars['JSON']['input'][]>;
   /** Is null (if `true` is specified) or is not null (if `false` is specified). */
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
   /** Less than the specified value. */
@@ -3049,7 +3049,7 @@ export type JsonFilter = {
   /** Not equal to the specified value. */
   notEqualTo?: InputMaybe<Scalars['JSON']['input']>;
   /** Not included in the specified list. */
-  notIn?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  notIn?: InputMaybe<Scalars['JSON']['input'][]>;
 };
 
 /** An object with a globally unique `ID`. */
@@ -3142,12 +3142,12 @@ export type PoolAccountsByClaimFeePoolIdAndOwnerIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -3155,12 +3155,12 @@ export type PoolAccountsByPositionPoolIdAndOwnerIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -3168,12 +3168,12 @@ export type PoolClaimFeesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 
@@ -3181,12 +3181,12 @@ export type PoolPoolDayDataArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Day_Data_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Day_Data_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolDayDatumFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolDayDataOrderBy>>;
+  orderBy?: InputMaybe<PoolDayDataOrderBy[]>;
 };
 
 
@@ -3194,12 +3194,12 @@ export type PoolPoolHourDataArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Hour_Data_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Hour_Data_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolHourDatumFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolHourDataOrderBy>>;
+  orderBy?: InputMaybe<PoolHourDataOrderBy[]>;
 };
 
 
@@ -3207,12 +3207,12 @@ export type PoolPoolTokenIncentivesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 
@@ -3220,12 +3220,12 @@ export type PoolPositionsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 
@@ -3233,12 +3233,12 @@ export type PoolPositionsByClaimFeePoolIdAndPositionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 
@@ -3246,12 +3246,12 @@ export type PoolSwapsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swap_Routes_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swap_Routes_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapRouteFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapRoutesOrderBy>>;
+  orderBy?: InputMaybe<SwapRoutesOrderBy[]>;
 };
 
 
@@ -3259,12 +3259,12 @@ export type PoolSwapsBySwapRoutePoolIdAndSwapIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 
@@ -3272,12 +3272,12 @@ export type PoolTokensByPoolTokenIncentivePoolIdAndTokenIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -3285,12 +3285,12 @@ export type PoolTransactionsByClaimFeePoolIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -3298,12 +3298,12 @@ export type PoolTransactionsByPoolTokenIncentivePoolIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -3311,12 +3311,12 @@ export type PoolTransactionsByPositionPoolIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `ClaimFee`. */
@@ -3325,11 +3325,11 @@ export type PoolAccountsByClaimFeePoolIdAndOwnerIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<PoolAccountsByClaimFeePoolIdAndOwnerIdManyToManyEdge>;
+  edges: PoolAccountsByClaimFeePoolIdAndOwnerIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -3339,7 +3339,7 @@ export type PoolAccountsByClaimFeePoolIdAndOwnerIdManyToManyConnection = {
 
 /** A connection to a list of `Account` values, with data from `ClaimFee`. */
 export type PoolAccountsByClaimFeePoolIdAndOwnerIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -3360,12 +3360,12 @@ export type PoolAccountsByClaimFeePoolIdAndOwnerIdManyToManyEdgeClaimFeesArgs = 
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `Position`. */
@@ -3374,11 +3374,11 @@ export type PoolAccountsByPositionPoolIdAndOwnerIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `Position`, and the cursor to aid in pagination. */
-  edges: Array<PoolAccountsByPositionPoolIdAndOwnerIdManyToManyEdge>;
+  edges: PoolAccountsByPositionPoolIdAndOwnerIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -3388,7 +3388,7 @@ export type PoolAccountsByPositionPoolIdAndOwnerIdManyToManyConnection = {
 
 /** A connection to a list of `Account` values, with data from `Position`. */
 export type PoolAccountsByPositionPoolIdAndOwnerIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -3409,12 +3409,12 @@ export type PoolAccountsByPositionPoolIdAndOwnerIdManyToManyEdgePositionsArgs = 
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 export type PoolAggregates = {
@@ -3423,7 +3423,7 @@ export type PoolAggregates = {
   average?: Maybe<PoolAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<PoolDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<PoolMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -3522,11 +3522,11 @@ export type PoolDayDataConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolDayDatumAggregates>;
   /** A list of edges which contains the `PoolDayDatum` and cursor to aid in pagination. */
-  edges: Array<PoolDayDataEdge>;
+  edges: PoolDayDataEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolDayDatumAggregates>>;
+  groupedAggregates?: Maybe<PoolDayDatumAggregates[]>;
   /** A list of `PoolDayDatum` objects. */
-  nodes: Array<Maybe<PoolDayDatum>>;
+  nodes: Maybe<PoolDayDatum>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `PoolDayDatum` you could get from the connection. */
@@ -3536,7 +3536,7 @@ export type PoolDayDataConnection = {
 
 /** A connection to a list of `PoolDayDatum` values. */
 export type PoolDayDataConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolDayDataGroupBy>;
+  groupBy: PoolDayDataGroupBy[];
   having?: InputMaybe<PoolDayDataHavingInput>;
 };
 
@@ -3587,8 +3587,8 @@ export type PoolDayDataHavingDistinctCountInput = {
 
 /** Conditions for `PoolDayDatum` aggregates. */
 export type PoolDayDataHavingInput = {
-  AND?: InputMaybe<Array<PoolDayDataHavingInput>>;
-  OR?: InputMaybe<Array<PoolDayDataHavingInput>>;
+  AND?: InputMaybe<PoolDayDataHavingInput[]>;
+  OR?: InputMaybe<PoolDayDataHavingInput[]>;
   average?: InputMaybe<PoolDayDataHavingAverageInput>;
   distinctCount?: InputMaybe<PoolDayDataHavingDistinctCountInput>;
   max?: InputMaybe<PoolDayDataHavingMaxInput>;
@@ -3727,7 +3727,7 @@ export type PoolDayDatumAggregates = {
   average?: Maybe<PoolDayDatumAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<PoolDayDatumDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<PoolDayDatumMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -3848,7 +3848,7 @@ export type PoolDayDatumDistinctCountAggregates = {
 /** A filter to be used against `PoolDayDatum` object types. All fields are combined with a logical ‘and.’ */
 export type PoolDayDatumFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<PoolDayDatumFilter>>;
+  and?: InputMaybe<PoolDayDatumFilter[]>;
   /** Filter by the object’s `currentTick` field. */
   currentTick?: InputMaybe<BigFloatFilter>;
   /** Filter by the object’s `dayIndex` field. */
@@ -3862,7 +3862,7 @@ export type PoolDayDatumFilter = {
   /** Negates the expression. */
   not?: InputMaybe<PoolDayDatumFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<PoolDayDatumFilter>>;
+  or?: InputMaybe<PoolDayDatumFilter[]>;
   /** Filter by the object’s `pool` relation. */
   pool?: InputMaybe<PoolFilter>;
   /** Filter by the object’s `poolId` field. */
@@ -4165,7 +4165,7 @@ export type PoolDistinctCountAggregates = {
 /** A filter to be used against `Pool` object types. All fields are combined with a logical ‘and.’ */
 export type PoolFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<PoolFilter>>;
+  and?: InputMaybe<PoolFilter[]>;
   /** Filter by the object’s `claimFees` relation. */
   claimFees?: InputMaybe<PoolToManyClaimFeeFilter>;
   /** Some related `claimFees` exist. */
@@ -4193,7 +4193,7 @@ export type PoolFilter = {
   /** Negates the expression. */
   not?: InputMaybe<PoolFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<PoolFilter>>;
+  or?: InputMaybe<PoolFilter[]>;
   /** Filter by the object’s `poolCreator` relation. */
   poolCreator?: InputMaybe<AccountFilter>;
   /** A related `poolCreator` exists. */
@@ -4262,11 +4262,11 @@ export type PoolHourDataConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolHourDatumAggregates>;
   /** A list of edges which contains the `PoolHourDatum` and cursor to aid in pagination. */
-  edges: Array<PoolHourDataEdge>;
+  edges: PoolHourDataEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolHourDatumAggregates>>;
+  groupedAggregates?: Maybe<PoolHourDatumAggregates[]>;
   /** A list of `PoolHourDatum` objects. */
-  nodes: Array<Maybe<PoolHourDatum>>;
+  nodes: Maybe<PoolHourDatum>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `PoolHourDatum` you could get from the connection. */
@@ -4276,7 +4276,7 @@ export type PoolHourDataConnection = {
 
 /** A connection to a list of `PoolHourDatum` values. */
 export type PoolHourDataConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolHourDataGroupBy>;
+  groupBy: PoolHourDataGroupBy[];
   having?: InputMaybe<PoolHourDataHavingInput>;
 };
 
@@ -4327,8 +4327,8 @@ export type PoolHourDataHavingDistinctCountInput = {
 
 /** Conditions for `PoolHourDatum` aggregates. */
 export type PoolHourDataHavingInput = {
-  AND?: InputMaybe<Array<PoolHourDataHavingInput>>;
-  OR?: InputMaybe<Array<PoolHourDataHavingInput>>;
+  AND?: InputMaybe<PoolHourDataHavingInput[]>;
+  OR?: InputMaybe<PoolHourDataHavingInput[]>;
   average?: InputMaybe<PoolHourDataHavingAverageInput>;
   distinctCount?: InputMaybe<PoolHourDataHavingDistinctCountInput>;
   max?: InputMaybe<PoolHourDataHavingMaxInput>;
@@ -4467,7 +4467,7 @@ export type PoolHourDatumAggregates = {
   average?: Maybe<PoolHourDatumAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<PoolHourDatumDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<PoolHourDatumMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -4588,7 +4588,7 @@ export type PoolHourDatumDistinctCountAggregates = {
 /** A filter to be used against `PoolHourDatum` object types. All fields are combined with a logical ‘and.’ */
 export type PoolHourDatumFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<PoolHourDatumFilter>>;
+  and?: InputMaybe<PoolHourDatumFilter[]>;
   /** Filter by the object’s `currentTick` field. */
   currentTick?: InputMaybe<BigFloatFilter>;
   /** Filter by the object’s `feesUSD` field. */
@@ -4602,7 +4602,7 @@ export type PoolHourDatumFilter = {
   /** Negates the expression. */
   not?: InputMaybe<PoolHourDatumFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<PoolHourDatumFilter>>;
+  or?: InputMaybe<PoolHourDatumFilter[]>;
   /** Filter by the object’s `pool` relation. */
   pool?: InputMaybe<PoolFilter>;
   /** Filter by the object’s `poolId` field. */
@@ -4927,11 +4927,11 @@ export type PoolPositionsByClaimFeePoolIdAndPositionIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PositionAggregates>;
   /** A list of edges which contains the `Position`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<PoolPositionsByClaimFeePoolIdAndPositionIdManyToManyEdge>;
+  edges: PoolPositionsByClaimFeePoolIdAndPositionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PositionAggregates>>;
+  groupedAggregates?: Maybe<PositionAggregates[]>;
   /** A list of `Position` objects. */
-  nodes: Array<Maybe<Position>>;
+  nodes: Maybe<Position>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Position` you could get from the connection. */
@@ -4941,7 +4941,7 @@ export type PoolPositionsByClaimFeePoolIdAndPositionIdManyToManyConnection = {
 
 /** A connection to a list of `Position` values, with data from `ClaimFee`. */
 export type PoolPositionsByClaimFeePoolIdAndPositionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PositionsGroupBy>;
+  groupBy: PositionsGroupBy[];
   having?: InputMaybe<PositionsHavingInput>;
 };
 
@@ -4962,12 +4962,12 @@ export type PoolPositionsByClaimFeePoolIdAndPositionIdManyToManyEdgeFeesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 export type PoolStddevPopulationAggregateFilter = {
@@ -5132,11 +5132,11 @@ export type PoolSwapsBySwapRoutePoolIdAndSwapIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<SwapAggregates>;
   /** A list of edges which contains the `Swap`, info from the `SwapRoute`, and the cursor to aid in pagination. */
-  edges: Array<PoolSwapsBySwapRoutePoolIdAndSwapIdManyToManyEdge>;
+  edges: PoolSwapsBySwapRoutePoolIdAndSwapIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<SwapAggregates>>;
+  groupedAggregates?: Maybe<SwapAggregates[]>;
   /** A list of `Swap` objects. */
-  nodes: Array<Maybe<Swap>>;
+  nodes: Maybe<Swap>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Swap` you could get from the connection. */
@@ -5146,7 +5146,7 @@ export type PoolSwapsBySwapRoutePoolIdAndSwapIdManyToManyConnection = {
 
 /** A connection to a list of `Swap` values, with data from `SwapRoute`. */
 export type PoolSwapsBySwapRoutePoolIdAndSwapIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<SwapsGroupBy>;
+  groupBy: SwapsGroupBy[];
   having?: InputMaybe<SwapsHavingInput>;
 };
 
@@ -5167,12 +5167,12 @@ export type PoolSwapsBySwapRoutePoolIdAndSwapIdManyToManyEdgeSwapRoutesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swap_Routes_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swap_Routes_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapRouteFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapRoutesOrderBy>>;
+  orderBy?: InputMaybe<SwapRoutesOrderBy[]>;
 };
 
 /** A filter to be used against many `ClaimFee` object types. All fields are combined with a logical ‘and.’ */
@@ -5273,7 +5273,7 @@ export type PoolTokenIncentiveAggregates = {
   average?: Maybe<PoolTokenIncentiveAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<PoolTokenIncentiveDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<PoolTokenIncentiveMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -5370,7 +5370,7 @@ export type PoolTokenIncentiveDistinctCountAggregates = {
 /** A filter to be used against `PoolTokenIncentive` object types. All fields are combined with a logical ‘and.’ */
 export type PoolTokenIncentiveFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<PoolTokenIncentiveFilter>>;
+  and?: InputMaybe<PoolTokenIncentiveFilter[]>;
   /** Filter by the object’s `id` field. */
   id?: InputMaybe<StringFilter>;
   /** Filter by the object’s `index` field. */
@@ -5378,7 +5378,7 @@ export type PoolTokenIncentiveFilter = {
   /** Negates the expression. */
   not?: InputMaybe<PoolTokenIncentiveFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<PoolTokenIncentiveFilter>>;
+  or?: InputMaybe<PoolTokenIncentiveFilter[]>;
   /** Filter by the object’s `pool` relation. */
   pool?: InputMaybe<PoolFilter>;
   /** Filter by the object’s `poolId` field. */
@@ -5519,11 +5519,11 @@ export type PoolTokenIncentivesConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolTokenIncentiveAggregates>;
   /** A list of edges which contains the `PoolTokenIncentive` and cursor to aid in pagination. */
-  edges: Array<PoolTokenIncentivesEdge>;
+  edges: PoolTokenIncentivesEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolTokenIncentiveAggregates>>;
+  groupedAggregates?: Maybe<PoolTokenIncentiveAggregates[]>;
   /** A list of `PoolTokenIncentive` objects. */
-  nodes: Array<Maybe<PoolTokenIncentive>>;
+  nodes: Maybe<PoolTokenIncentive>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `PoolTokenIncentive` you could get from the connection. */
@@ -5533,7 +5533,7 @@ export type PoolTokenIncentivesConnection = {
 
 /** A connection to a list of `PoolTokenIncentive` values. */
 export type PoolTokenIncentivesConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolTokenIncentivesGroupBy>;
+  groupBy: PoolTokenIncentivesGroupBy[];
   having?: InputMaybe<PoolTokenIncentivesHavingInput>;
 };
 
@@ -5572,8 +5572,8 @@ export type PoolTokenIncentivesHavingDistinctCountInput = {
 
 /** Conditions for `PoolTokenIncentive` aggregates. */
 export type PoolTokenIncentivesHavingInput = {
-  AND?: InputMaybe<Array<PoolTokenIncentivesHavingInput>>;
-  OR?: InputMaybe<Array<PoolTokenIncentivesHavingInput>>;
+  AND?: InputMaybe<PoolTokenIncentivesHavingInput[]>;
+  OR?: InputMaybe<PoolTokenIncentivesHavingInput[]>;
   average?: InputMaybe<PoolTokenIncentivesHavingAverageInput>;
   distinctCount?: InputMaybe<PoolTokenIncentivesHavingDistinctCountInput>;
   max?: InputMaybe<PoolTokenIncentivesHavingMaxInput>;
@@ -5656,11 +5656,11 @@ export type PoolTokensByPoolTokenIncentivePoolIdAndTokenIdManyToManyConnection =
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `PoolTokenIncentive`, and the cursor to aid in pagination. */
-  edges: Array<PoolTokensByPoolTokenIncentivePoolIdAndTokenIdManyToManyEdge>;
+  edges: PoolTokensByPoolTokenIncentivePoolIdAndTokenIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -5670,7 +5670,7 @@ export type PoolTokensByPoolTokenIncentivePoolIdAndTokenIdManyToManyConnection =
 
 /** A connection to a list of `Token` values, with data from `PoolTokenIncentive`. */
 export type PoolTokensByPoolTokenIncentivePoolIdAndTokenIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -5691,12 +5691,12 @@ export type PoolTokensByPoolTokenIncentivePoolIdAndTokenIdManyToManyEdgePoolToke
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `ClaimFee`. */
@@ -5705,11 +5705,11 @@ export type PoolTransactionsByClaimFeePoolIdAndTransactionIdManyToManyConnection
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<PoolTransactionsByClaimFeePoolIdAndTransactionIdManyToManyEdge>;
+  edges: PoolTransactionsByClaimFeePoolIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -5719,7 +5719,7 @@ export type PoolTransactionsByClaimFeePoolIdAndTransactionIdManyToManyConnection
 
 /** A connection to a list of `Transaction` values, with data from `ClaimFee`. */
 export type PoolTransactionsByClaimFeePoolIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -5740,12 +5740,12 @@ export type PoolTransactionsByClaimFeePoolIdAndTransactionIdManyToManyEdgeClaimF
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `PoolTokenIncentive`. */
@@ -5754,11 +5754,11 @@ export type PoolTransactionsByPoolTokenIncentivePoolIdAndTransactionIdManyToMany
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `PoolTokenIncentive`, and the cursor to aid in pagination. */
-  edges: Array<PoolTransactionsByPoolTokenIncentivePoolIdAndTransactionIdManyToManyEdge>;
+  edges: PoolTransactionsByPoolTokenIncentivePoolIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -5768,7 +5768,7 @@ export type PoolTransactionsByPoolTokenIncentivePoolIdAndTransactionIdManyToMany
 
 /** A connection to a list of `Transaction` values, with data from `PoolTokenIncentive`. */
 export type PoolTransactionsByPoolTokenIncentivePoolIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -5789,12 +5789,12 @@ export type PoolTransactionsByPoolTokenIncentivePoolIdAndTransactionIdManyToMany
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `Position`. */
@@ -5803,11 +5803,11 @@ export type PoolTransactionsByPositionPoolIdAndTransactionIdManyToManyConnection
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `Position`, and the cursor to aid in pagination. */
-  edges: Array<PoolTransactionsByPositionPoolIdAndTransactionIdManyToManyEdge>;
+  edges: PoolTransactionsByPositionPoolIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -5817,7 +5817,7 @@ export type PoolTransactionsByPositionPoolIdAndTransactionIdManyToManyConnection
 
 /** A connection to a list of `Transaction` values, with data from `Position`. */
 export type PoolTransactionsByPositionPoolIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -5838,12 +5838,12 @@ export type PoolTransactionsByPositionPoolIdAndTransactionIdManyToManyEdgePositi
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 export type PoolVariancePopulationAggregateFilter = {
@@ -5956,11 +5956,11 @@ export type PoolsConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool` and cursor to aid in pagination. */
-  edges: Array<PoolsEdge>;
+  edges: PoolsEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -5970,7 +5970,7 @@ export type PoolsConnection = {
 
 /** A connection to a list of `Pool` values. */
 export type PoolsConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -6049,8 +6049,8 @@ export type PoolsHavingDistinctCountInput = {
 
 /** Conditions for `Pool` aggregates. */
 export type PoolsHavingInput = {
-  AND?: InputMaybe<Array<PoolsHavingInput>>;
-  OR?: InputMaybe<Array<PoolsHavingInput>>;
+  AND?: InputMaybe<PoolsHavingInput[]>;
+  OR?: InputMaybe<PoolsHavingInput[]>;
   average?: InputMaybe<PoolsHavingAverageInput>;
   distinctCount?: InputMaybe<PoolsHavingDistinctCountInput>;
   max?: InputMaybe<PoolsHavingMaxInput>;
@@ -7589,12 +7589,12 @@ export type PositionAccountsByClaimFeePositionIdAndOwnerIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -7602,12 +7602,12 @@ export type PositionFeesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 
@@ -7615,12 +7615,12 @@ export type PositionPoolsByClaimFeePositionIdAndPoolIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -7628,12 +7628,12 @@ export type PositionTransactionsByClaimFeePositionIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `ClaimFee`. */
@@ -7642,11 +7642,11 @@ export type PositionAccountsByClaimFeePositionIdAndOwnerIdManyToManyConnection =
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<PositionAccountsByClaimFeePositionIdAndOwnerIdManyToManyEdge>;
+  edges: PositionAccountsByClaimFeePositionIdAndOwnerIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -7656,7 +7656,7 @@ export type PositionAccountsByClaimFeePositionIdAndOwnerIdManyToManyConnection =
 
 /** A connection to a list of `Account` values, with data from `ClaimFee`. */
 export type PositionAccountsByClaimFeePositionIdAndOwnerIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -7677,12 +7677,12 @@ export type PositionAccountsByClaimFeePositionIdAndOwnerIdManyToManyEdgeClaimFee
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 export type PositionAggregates = {
@@ -7691,7 +7691,7 @@ export type PositionAggregates = {
   average?: Maybe<PositionAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<PositionDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<PositionMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -7818,7 +7818,7 @@ export type PositionDistinctCountAggregates = {
 /** A filter to be used against `Position` object types. All fields are combined with a logical ‘and.’ */
 export type PositionFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<PositionFilter>>;
+  and?: InputMaybe<PositionFilter[]>;
   /** Filter by the object’s `closedAt` field. */
   closedAt?: InputMaybe<BigFloatFilter>;
   /** Filter by the object’s `createdAt` field. */
@@ -7834,7 +7834,7 @@ export type PositionFilter = {
   /** Negates the expression. */
   not?: InputMaybe<PositionFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<PositionFilter>>;
+  or?: InputMaybe<PositionFilter[]>;
   /** Filter by the object’s `owner` relation. */
   owner?: InputMaybe<AccountFilter>;
   /** Filter by the object’s `ownerId` field. */
@@ -7931,11 +7931,11 @@ export type PositionPoolsByClaimFeePositionIdAndPoolIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<PositionPoolsByClaimFeePositionIdAndPoolIdManyToManyEdge>;
+  edges: PositionPoolsByClaimFeePositionIdAndPoolIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -7945,7 +7945,7 @@ export type PositionPoolsByClaimFeePositionIdAndPoolIdManyToManyConnection = {
 
 /** A connection to a list of `Pool` values, with data from `ClaimFee`. */
 export type PositionPoolsByClaimFeePositionIdAndPoolIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -7966,12 +7966,12 @@ export type PositionPoolsByClaimFeePositionIdAndPoolIdManyToManyEdgeClaimFeesArg
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 export type PositionStddevPopulationAggregateFilter = {
@@ -8085,11 +8085,11 @@ export type PositionTransactionsByClaimFeePositionIdAndTransactionIdManyToManyCo
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<PositionTransactionsByClaimFeePositionIdAndTransactionIdManyToManyEdge>;
+  edges: PositionTransactionsByClaimFeePositionIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -8099,7 +8099,7 @@ export type PositionTransactionsByClaimFeePositionIdAndTransactionIdManyToManyCo
 
 /** A connection to a list of `Transaction` values, with data from `ClaimFee`. */
 export type PositionTransactionsByClaimFeePositionIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -8120,12 +8120,12 @@ export type PositionTransactionsByClaimFeePositionIdAndTransactionIdManyToManyEd
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 export type PositionVariancePopulationAggregateFilter = {
@@ -8196,11 +8196,11 @@ export type PositionsConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PositionAggregates>;
   /** A list of edges which contains the `Position` and cursor to aid in pagination. */
-  edges: Array<PositionsEdge>;
+  edges: PositionsEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PositionAggregates>>;
+  groupedAggregates?: Maybe<PositionAggregates[]>;
   /** A list of `Position` objects. */
-  nodes: Array<Maybe<Position>>;
+  nodes: Maybe<Position>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Position` you could get from the connection. */
@@ -8210,7 +8210,7 @@ export type PositionsConnection = {
 
 /** A connection to a list of `Position` values. */
 export type PositionsConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PositionsGroupBy>;
+  groupBy: PositionsGroupBy[];
   having?: InputMaybe<PositionsHavingInput>;
 };
 
@@ -8264,8 +8264,8 @@ export type PositionsHavingDistinctCountInput = {
 
 /** Conditions for `Position` aggregates. */
 export type PositionsHavingInput = {
-  AND?: InputMaybe<Array<PositionsHavingInput>>;
-  OR?: InputMaybe<Array<PositionsHavingInput>>;
+  AND?: InputMaybe<PositionsHavingInput[]>;
+  OR?: InputMaybe<PositionsHavingInput[]>;
   average?: InputMaybe<PositionsHavingAverageInput>;
   distinctCount?: InputMaybe<PositionsHavingDistinctCountInput>;
   max?: InputMaybe<PositionsHavingMaxInput>;
@@ -8650,7 +8650,7 @@ export type QueryAccountArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryAccountByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8660,12 +8660,12 @@ export type QueryAccountsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -8678,7 +8678,7 @@ export type QueryClaimFeeArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryClaimFeeByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8692,7 +8692,7 @@ export type QueryClaimFeeIncentiveTokenArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryClaimFeeIncentiveTokenByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8702,12 +8702,12 @@ export type QueryClaimFeeIncentiveTokensArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeIncentiveTokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeeIncentiveTokensOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeeIncentiveTokensOrderBy[]>;
 };
 
 
@@ -8716,12 +8716,12 @@ export type QueryClaimFeesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 
@@ -8740,7 +8740,7 @@ export type QueryPoolArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryPoolByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8750,12 +8750,12 @@ export type QueryPoolDayDataArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Day_Data_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Day_Data_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolDayDatumFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolDayDataOrderBy>>;
+  orderBy?: InputMaybe<PoolDayDataOrderBy[]>;
 };
 
 
@@ -8768,7 +8768,7 @@ export type QueryPoolDayDatumArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryPoolDayDatumByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Day_Data_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Day_Data_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8778,12 +8778,12 @@ export type QueryPoolHourDataArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Hour_Data_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Hour_Data_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolHourDatumFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolHourDataOrderBy>>;
+  orderBy?: InputMaybe<PoolHourDataOrderBy[]>;
 };
 
 
@@ -8796,7 +8796,7 @@ export type QueryPoolHourDatumArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryPoolHourDatumByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Hour_Data_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Hour_Data_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8810,7 +8810,7 @@ export type QueryPoolTokenIncentiveArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryPoolTokenIncentiveByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8820,12 +8820,12 @@ export type QueryPoolTokenIncentivesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 
@@ -8834,12 +8834,12 @@ export type QueryPoolsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -8852,7 +8852,7 @@ export type QueryPositionArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryPositionByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8862,12 +8862,12 @@ export type QueryPositionsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 
@@ -8880,7 +8880,7 @@ export type QuerySwapArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QuerySwapByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8894,7 +8894,7 @@ export type QuerySwapRouteArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QuerySwapRouteByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Swap_Routes_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swap_Routes_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8904,12 +8904,12 @@ export type QuerySwapRoutesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swap_Routes_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swap_Routes_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapRouteFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapRoutesOrderBy>>;
+  orderBy?: InputMaybe<SwapRoutesOrderBy[]>;
 };
 
 
@@ -8918,12 +8918,12 @@ export type QuerySwapsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 
@@ -8936,7 +8936,7 @@ export type QueryTokenArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryTokenByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8946,12 +8946,12 @@ export type QueryTokensArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -8964,7 +8964,7 @@ export type QueryTransactionArgs = {
 
 /** The root query type which gives access points into the data universe. */
 export type QueryTransactionByNodeIdArgs = {
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   nodeId: Scalars['ID']['input'];
 };
 
@@ -8974,12 +8974,12 @@ export type QueryTransactionsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 /** A filter to be used against String fields. All fields are combined with a logical ‘and.’ */
@@ -9005,9 +9005,9 @@ export type StringFilter = {
   /** Greater than or equal to the specified value (case-insensitive). */
   greaterThanOrEqualToInsensitive?: InputMaybe<Scalars['String']['input']>;
   /** Included in the specified list. */
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
+  in?: InputMaybe<Scalars['String']['input'][]>;
   /** Included in the specified list (case-insensitive). */
-  inInsensitive?: InputMaybe<Array<Scalars['String']['input']>>;
+  inInsensitive?: InputMaybe<Scalars['String']['input'][]>;
   /** Contains the specified string (case-sensitive). */
   includes?: InputMaybe<Scalars['String']['input']>;
   /** Contains the specified string (case-insensitive). */
@@ -9039,9 +9039,9 @@ export type StringFilter = {
   /** Not equal to the specified value (case-insensitive). */
   notEqualToInsensitive?: InputMaybe<Scalars['String']['input']>;
   /** Not included in the specified list. */
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
+  notIn?: InputMaybe<Scalars['String']['input'][]>;
   /** Not included in the specified list (case-insensitive). */
-  notInInsensitive?: InputMaybe<Array<Scalars['String']['input']>>;
+  notInInsensitive?: InputMaybe<Scalars['String']['input'][]>;
   /** Does not contain the specified string (case-sensitive). */
   notIncludes?: InputMaybe<Scalars['String']['input']>;
   /** Does not contain the specified string (case-insensitive). */
@@ -9091,12 +9091,12 @@ export type SwapPoolsBySwapRouteSwapIdAndPoolIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -9104,12 +9104,12 @@ export type SwapSwapRoutesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swap_Routes_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swap_Routes_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapRouteFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapRoutesOrderBy>>;
+  orderBy?: InputMaybe<SwapRoutesOrderBy[]>;
 };
 
 export type SwapAggregates = {
@@ -9118,7 +9118,7 @@ export type SwapAggregates = {
   average?: Maybe<SwapAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<SwapDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<SwapMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -9216,7 +9216,7 @@ export type SwapFilter = {
   /** Filter by the object’s `amountOut` field. */
   amountOut?: InputMaybe<BigFloatFilter>;
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<SwapFilter>>;
+  and?: InputMaybe<SwapFilter[]>;
   /** Filter by the object’s `feeUSD` field. */
   feeUSD?: InputMaybe<StringFilter>;
   /** Filter by the object’s `id` field. */
@@ -9224,7 +9224,7 @@ export type SwapFilter = {
   /** Negates the expression. */
   not?: InputMaybe<SwapFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<SwapFilter>>;
+  or?: InputMaybe<SwapFilter[]>;
   /** Filter by the object’s `sender` relation. */
   sender?: InputMaybe<AccountFilter>;
   /** Filter by the object’s `senderId` field. */
@@ -9279,11 +9279,11 @@ export type SwapPoolsBySwapRouteSwapIdAndPoolIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool`, info from the `SwapRoute`, and the cursor to aid in pagination. */
-  edges: Array<SwapPoolsBySwapRouteSwapIdAndPoolIdManyToManyEdge>;
+  edges: SwapPoolsBySwapRouteSwapIdAndPoolIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -9293,7 +9293,7 @@ export type SwapPoolsBySwapRouteSwapIdAndPoolIdManyToManyConnection = {
 
 /** A connection to a list of `Pool` values, with data from `SwapRoute`. */
 export type SwapPoolsBySwapRouteSwapIdAndPoolIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -9314,12 +9314,12 @@ export type SwapPoolsBySwapRouteSwapIdAndPoolIdManyToManyEdgeSwapsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swap_Routes_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swap_Routes_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapRouteFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapRoutesOrderBy>>;
+  orderBy?: InputMaybe<SwapRoutesOrderBy[]>;
 };
 
 export type SwapRoute = Node & {
@@ -9351,7 +9351,7 @@ export type SwapRouteAggregates = {
   average?: Maybe<SwapRouteAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<SwapRouteDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<SwapRouteMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -9479,7 +9479,7 @@ export type SwapRouteFilter = {
   /** Filter by the object’s `amountOut` field. */
   amountOut?: InputMaybe<BigFloatFilter>;
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<SwapRouteFilter>>;
+  and?: InputMaybe<SwapRouteFilter[]>;
   /** Filter by the object’s `currentTickIndex` field. */
   currentTickIndex?: InputMaybe<BigFloatFilter>;
   /** Filter by the object’s `eventIndex` field. */
@@ -9495,7 +9495,7 @@ export type SwapRouteFilter = {
   /** Negates the expression. */
   not?: InputMaybe<SwapRouteFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<SwapRouteFilter>>;
+  or?: InputMaybe<SwapRouteFilter[]>;
   /** Filter by the object’s `pool` relation. */
   pool?: InputMaybe<PoolFilter>;
   /** Filter by the object’s `poolId` field. */
@@ -9714,11 +9714,11 @@ export type SwapRoutesConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<SwapRouteAggregates>;
   /** A list of edges which contains the `SwapRoute` and cursor to aid in pagination. */
-  edges: Array<SwapRoutesEdge>;
+  edges: SwapRoutesEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<SwapRouteAggregates>>;
+  groupedAggregates?: Maybe<SwapRouteAggregates[]>;
   /** A list of `SwapRoute` objects. */
-  nodes: Array<Maybe<SwapRoute>>;
+  nodes: Maybe<SwapRoute>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `SwapRoute` you could get from the connection. */
@@ -9728,7 +9728,7 @@ export type SwapRoutesConnection = {
 
 /** A connection to a list of `SwapRoute` values. */
 export type SwapRoutesConnectionGroupedAggregatesArgs = {
-  groupBy: Array<SwapRoutesGroupBy>;
+  groupBy: SwapRoutesGroupBy[];
   having?: InputMaybe<SwapRoutesHavingInput>;
 };
 
@@ -9780,8 +9780,8 @@ export type SwapRoutesHavingDistinctCountInput = {
 
 /** Conditions for `SwapRoute` aggregates. */
 export type SwapRoutesHavingInput = {
-  AND?: InputMaybe<Array<SwapRoutesHavingInput>>;
-  OR?: InputMaybe<Array<SwapRoutesHavingInput>>;
+  AND?: InputMaybe<SwapRoutesHavingInput[]>;
+  OR?: InputMaybe<SwapRoutesHavingInput[]>;
   average?: InputMaybe<SwapRoutesHavingAverageInput>;
   distinctCount?: InputMaybe<SwapRoutesHavingDistinctCountInput>;
   max?: InputMaybe<SwapRoutesHavingMaxInput>;
@@ -9979,11 +9979,11 @@ export type SwapsConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<SwapAggregates>;
   /** A list of edges which contains the `Swap` and cursor to aid in pagination. */
-  edges: Array<SwapsEdge>;
+  edges: SwapsEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<SwapAggregates>>;
+  groupedAggregates?: Maybe<SwapAggregates[]>;
   /** A list of `Swap` objects. */
-  nodes: Array<Maybe<Swap>>;
+  nodes: Maybe<Swap>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Swap` you could get from the connection. */
@@ -9993,7 +9993,7 @@ export type SwapsConnection = {
 
 /** A connection to a list of `Swap` values. */
 export type SwapsConnectionGroupedAggregatesArgs = {
-  groupBy: Array<SwapsGroupBy>;
+  groupBy: SwapsGroupBy[];
   having?: InputMaybe<SwapsHavingInput>;
 };
 
@@ -10030,8 +10030,8 @@ export type SwapsHavingDistinctCountInput = {
 
 /** Conditions for `Swap` aggregates. */
 export type SwapsHavingInput = {
-  AND?: InputMaybe<Array<SwapsHavingInput>>;
-  OR?: InputMaybe<Array<SwapsHavingInput>>;
+  AND?: InputMaybe<SwapsHavingInput[]>;
+  OR?: InputMaybe<SwapsHavingInput[]>;
   average?: InputMaybe<SwapsHavingAverageInput>;
   distinctCount?: InputMaybe<SwapsHavingDistinctCountInput>;
   max?: InputMaybe<SwapsHavingMaxInput>;
@@ -10424,12 +10424,12 @@ export type TokenAccountsByPoolTokenXIdAndPoolCreatorIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -10437,12 +10437,12 @@ export type TokenAccountsByPoolTokenYIdAndPoolCreatorIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -10450,12 +10450,12 @@ export type TokenAccountsBySwapTokenInIdAndSenderIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -10463,12 +10463,12 @@ export type TokenAccountsBySwapTokenOutIdAndSenderIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -10476,12 +10476,12 @@ export type TokenClaimFeeIncentiveTokensArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeIncentiveTokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeeIncentiveTokensOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeeIncentiveTokensOrderBy[]>;
 };
 
 
@@ -10489,12 +10489,12 @@ export type TokenClaimFeesByClaimFeeIncentiveTokenTokenIdAndClaimFeeIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 
@@ -10502,12 +10502,12 @@ export type TokenPoolTokenIncentivesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 
@@ -10515,12 +10515,12 @@ export type TokenPoolsByPoolTokenIncentiveTokenIdAndPoolIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -10528,12 +10528,12 @@ export type TokenPoolsByTokenXIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -10541,12 +10541,12 @@ export type TokenPoolsByTokenYIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -10554,12 +10554,12 @@ export type TokenSwapsByTokenInIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 
@@ -10567,12 +10567,12 @@ export type TokenSwapsByTokenOutIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 
@@ -10580,12 +10580,12 @@ export type TokenTokensByPoolTokenXIdAndTokenYIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -10593,12 +10593,12 @@ export type TokenTokensByPoolTokenYIdAndTokenXIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -10606,12 +10606,12 @@ export type TokenTokensBySwapTokenInIdAndTokenOutIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -10619,12 +10619,12 @@ export type TokenTokensBySwapTokenOutIdAndTokenInIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -10632,12 +10632,12 @@ export type TokenTransactionsByPoolTokenIncentiveTokenIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -10645,12 +10645,12 @@ export type TokenTransactionsByPoolTokenXIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -10658,12 +10658,12 @@ export type TokenTransactionsByPoolTokenYIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -10671,12 +10671,12 @@ export type TokenTransactionsBySwapTokenInIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 
@@ -10684,12 +10684,12 @@ export type TokenTransactionsBySwapTokenOutIdAndTransactionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Transactions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Transactions_Distinct_Enum>[]>;
   filter?: InputMaybe<TransactionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TransactionsOrderBy>>;
+  orderBy?: InputMaybe<TransactionsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `Pool`. */
@@ -10698,11 +10698,11 @@ export type TokenAccountsByPoolTokenXIdAndPoolCreatorIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TokenAccountsByPoolTokenXIdAndPoolCreatorIdManyToManyEdge>;
+  edges: TokenAccountsByPoolTokenXIdAndPoolCreatorIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -10712,7 +10712,7 @@ export type TokenAccountsByPoolTokenXIdAndPoolCreatorIdManyToManyConnection = {
 
 /** A connection to a list of `Account` values, with data from `Pool`. */
 export type TokenAccountsByPoolTokenXIdAndPoolCreatorIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -10733,12 +10733,12 @@ export type TokenAccountsByPoolTokenXIdAndPoolCreatorIdManyToManyEdgePoolCreatio
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `Pool`. */
@@ -10747,11 +10747,11 @@ export type TokenAccountsByPoolTokenYIdAndPoolCreatorIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TokenAccountsByPoolTokenYIdAndPoolCreatorIdManyToManyEdge>;
+  edges: TokenAccountsByPoolTokenYIdAndPoolCreatorIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -10761,7 +10761,7 @@ export type TokenAccountsByPoolTokenYIdAndPoolCreatorIdManyToManyConnection = {
 
 /** A connection to a list of `Account` values, with data from `Pool`. */
 export type TokenAccountsByPoolTokenYIdAndPoolCreatorIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -10782,12 +10782,12 @@ export type TokenAccountsByPoolTokenYIdAndPoolCreatorIdManyToManyEdgePoolCreatio
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `Swap`. */
@@ -10796,11 +10796,11 @@ export type TokenAccountsBySwapTokenInIdAndSenderIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TokenAccountsBySwapTokenInIdAndSenderIdManyToManyEdge>;
+  edges: TokenAccountsBySwapTokenInIdAndSenderIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -10810,7 +10810,7 @@ export type TokenAccountsBySwapTokenInIdAndSenderIdManyToManyConnection = {
 
 /** A connection to a list of `Account` values, with data from `Swap`. */
 export type TokenAccountsBySwapTokenInIdAndSenderIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -10831,12 +10831,12 @@ export type TokenAccountsBySwapTokenInIdAndSenderIdManyToManyEdgeSwapArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `Swap`. */
@@ -10845,11 +10845,11 @@ export type TokenAccountsBySwapTokenOutIdAndSenderIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TokenAccountsBySwapTokenOutIdAndSenderIdManyToManyEdge>;
+  edges: TokenAccountsBySwapTokenOutIdAndSenderIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -10859,7 +10859,7 @@ export type TokenAccountsBySwapTokenOutIdAndSenderIdManyToManyConnection = {
 
 /** A connection to a list of `Account` values, with data from `Swap`. */
 export type TokenAccountsBySwapTokenOutIdAndSenderIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -10880,12 +10880,12 @@ export type TokenAccountsBySwapTokenOutIdAndSenderIdManyToManyEdgeSwapArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 export type TokenAggregates = {
@@ -10894,7 +10894,7 @@ export type TokenAggregates = {
   average?: Maybe<TokenAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<TokenDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<TokenMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -10927,11 +10927,11 @@ export type TokenClaimFeesByClaimFeeIncentiveTokenTokenIdAndClaimFeeIdManyToMany
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<ClaimFeeAggregates>;
   /** A list of edges which contains the `ClaimFee`, info from the `ClaimFeeIncentiveToken`, and the cursor to aid in pagination. */
-  edges: Array<TokenClaimFeesByClaimFeeIncentiveTokenTokenIdAndClaimFeeIdManyToManyEdge>;
+  edges: TokenClaimFeesByClaimFeeIncentiveTokenTokenIdAndClaimFeeIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<ClaimFeeAggregates>>;
+  groupedAggregates?: Maybe<ClaimFeeAggregates[]>;
   /** A list of `ClaimFee` objects. */
-  nodes: Array<Maybe<ClaimFee>>;
+  nodes: Maybe<ClaimFee>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `ClaimFee` you could get from the connection. */
@@ -10941,7 +10941,7 @@ export type TokenClaimFeesByClaimFeeIncentiveTokenTokenIdAndClaimFeeIdManyToMany
 
 /** A connection to a list of `ClaimFee` values, with data from `ClaimFeeIncentiveToken`. */
 export type TokenClaimFeesByClaimFeeIncentiveTokenTokenIdAndClaimFeeIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<ClaimFeesGroupBy>;
+  groupBy: ClaimFeesGroupBy[];
   having?: InputMaybe<ClaimFeesHavingInput>;
 };
 
@@ -10962,12 +10962,12 @@ export type TokenClaimFeesByClaimFeeIncentiveTokenTokenIdAndClaimFeeIdManyToMany
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fee_Incentive_Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeIncentiveTokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeeIncentiveTokensOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeeIncentiveTokensOrderBy[]>;
 };
 
 export type TokenDistinctCountAggregates = {
@@ -11001,7 +11001,7 @@ export type TokenDistinctCountAggregates = {
 /** A filter to be used against `Token` object types. All fields are combined with a logical ‘and.’ */
 export type TokenFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<TokenFilter>>;
+  and?: InputMaybe<TokenFilter[]>;
   /** Filter by the object’s `claimFeeIncentiveTokens` relation. */
   claimFeeIncentiveTokens?: InputMaybe<TokenToManyClaimFeeIncentiveTokenFilter>;
   /** Some related `claimFeeIncentiveTokens` exist. */
@@ -11023,7 +11023,7 @@ export type TokenFilter = {
   /** Negates the expression. */
   not?: InputMaybe<TokenFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<TokenFilter>>;
+  or?: InputMaybe<TokenFilter[]>;
   /** Filter by the object’s `poolTokenIncentives` relation. */
   poolTokenIncentives?: InputMaybe<TokenToManyPoolTokenIncentiveFilter>;
   /** Some related `poolTokenIncentives` exist. */
@@ -11078,11 +11078,11 @@ export type TokenPoolsByPoolTokenIncentiveTokenIdAndPoolIdManyToManyConnection =
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool`, info from the `PoolTokenIncentive`, and the cursor to aid in pagination. */
-  edges: Array<TokenPoolsByPoolTokenIncentiveTokenIdAndPoolIdManyToManyEdge>;
+  edges: TokenPoolsByPoolTokenIncentiveTokenIdAndPoolIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -11092,7 +11092,7 @@ export type TokenPoolsByPoolTokenIncentiveTokenIdAndPoolIdManyToManyConnection =
 
 /** A connection to a list of `Pool` values, with data from `PoolTokenIncentive`. */
 export type TokenPoolsByPoolTokenIncentiveTokenIdAndPoolIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -11113,12 +11113,12 @@ export type TokenPoolsByPoolTokenIncentiveTokenIdAndPoolIdManyToManyEdgePoolToke
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 export type TokenStddevPopulationAggregates = {
@@ -11205,11 +11205,11 @@ export type TokenTokensByPoolTokenXIdAndTokenYIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TokenTokensByPoolTokenXIdAndTokenYIdManyToManyEdge>;
+  edges: TokenTokensByPoolTokenXIdAndTokenYIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -11219,7 +11219,7 @@ export type TokenTokensByPoolTokenXIdAndTokenYIdManyToManyConnection = {
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
 export type TokenTokensByPoolTokenXIdAndTokenYIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -11240,12 +11240,12 @@ export type TokenTokensByPoolTokenXIdAndTokenYIdManyToManyEdgePoolsByTokenYIdArg
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
@@ -11254,11 +11254,11 @@ export type TokenTokensByPoolTokenYIdAndTokenXIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TokenTokensByPoolTokenYIdAndTokenXIdManyToManyEdge>;
+  edges: TokenTokensByPoolTokenYIdAndTokenXIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -11268,7 +11268,7 @@ export type TokenTokensByPoolTokenYIdAndTokenXIdManyToManyConnection = {
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
 export type TokenTokensByPoolTokenYIdAndTokenXIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -11289,12 +11289,12 @@ export type TokenTokensByPoolTokenYIdAndTokenXIdManyToManyEdgePoolsByTokenXIdArg
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
@@ -11303,11 +11303,11 @@ export type TokenTokensBySwapTokenInIdAndTokenOutIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TokenTokensBySwapTokenInIdAndTokenOutIdManyToManyEdge>;
+  edges: TokenTokensBySwapTokenInIdAndTokenOutIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -11317,7 +11317,7 @@ export type TokenTokensBySwapTokenInIdAndTokenOutIdManyToManyConnection = {
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
 export type TokenTokensBySwapTokenInIdAndTokenOutIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -11338,12 +11338,12 @@ export type TokenTokensBySwapTokenInIdAndTokenOutIdManyToManyEdgeSwapsByTokenOut
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
@@ -11352,11 +11352,11 @@ export type TokenTokensBySwapTokenOutIdAndTokenInIdManyToManyConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TokenTokensBySwapTokenOutIdAndTokenInIdManyToManyEdge>;
+  edges: TokenTokensBySwapTokenOutIdAndTokenInIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -11366,7 +11366,7 @@ export type TokenTokensBySwapTokenOutIdAndTokenInIdManyToManyConnection = {
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
 export type TokenTokensBySwapTokenOutIdAndTokenInIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -11387,12 +11387,12 @@ export type TokenTokensBySwapTokenOutIdAndTokenInIdManyToManyEdgeSwapsByTokenInI
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `PoolTokenIncentive`. */
@@ -11401,11 +11401,11 @@ export type TokenTransactionsByPoolTokenIncentiveTokenIdAndTransactionIdManyToMa
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `PoolTokenIncentive`, and the cursor to aid in pagination. */
-  edges: Array<TokenTransactionsByPoolTokenIncentiveTokenIdAndTransactionIdManyToManyEdge>;
+  edges: TokenTransactionsByPoolTokenIncentiveTokenIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -11415,7 +11415,7 @@ export type TokenTransactionsByPoolTokenIncentiveTokenIdAndTransactionIdManyToMa
 
 /** A connection to a list of `Transaction` values, with data from `PoolTokenIncentive`. */
 export type TokenTransactionsByPoolTokenIncentiveTokenIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -11436,12 +11436,12 @@ export type TokenTransactionsByPoolTokenIncentiveTokenIdAndTransactionIdManyToMa
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `Pool`. */
@@ -11450,11 +11450,11 @@ export type TokenTransactionsByPoolTokenXIdAndTransactionIdManyToManyConnection 
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TokenTransactionsByPoolTokenXIdAndTransactionIdManyToManyEdge>;
+  edges: TokenTransactionsByPoolTokenXIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -11464,7 +11464,7 @@ export type TokenTransactionsByPoolTokenXIdAndTransactionIdManyToManyConnection 
 
 /** A connection to a list of `Transaction` values, with data from `Pool`. */
 export type TokenTransactionsByPoolTokenXIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -11485,12 +11485,12 @@ export type TokenTransactionsByPoolTokenXIdAndTransactionIdManyToManyEdgePoolCre
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `Pool`. */
@@ -11499,11 +11499,11 @@ export type TokenTransactionsByPoolTokenYIdAndTransactionIdManyToManyConnection 
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TokenTransactionsByPoolTokenYIdAndTransactionIdManyToManyEdge>;
+  edges: TokenTransactionsByPoolTokenYIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -11513,7 +11513,7 @@ export type TokenTransactionsByPoolTokenYIdAndTransactionIdManyToManyConnection 
 
 /** A connection to a list of `Transaction` values, with data from `Pool`. */
 export type TokenTransactionsByPoolTokenYIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -11534,12 +11534,12 @@ export type TokenTransactionsByPoolTokenYIdAndTransactionIdManyToManyEdgePoolCre
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `Swap`. */
@@ -11548,11 +11548,11 @@ export type TokenTransactionsBySwapTokenInIdAndTransactionIdManyToManyConnection
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TokenTransactionsBySwapTokenInIdAndTransactionIdManyToManyEdge>;
+  edges: TokenTransactionsBySwapTokenInIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -11562,7 +11562,7 @@ export type TokenTransactionsBySwapTokenInIdAndTransactionIdManyToManyConnection
 
 /** A connection to a list of `Transaction` values, with data from `Swap`. */
 export type TokenTransactionsBySwapTokenInIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -11583,12 +11583,12 @@ export type TokenTransactionsBySwapTokenInIdAndTransactionIdManyToManyEdgeSwapAr
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 /** A connection to a list of `Transaction` values, with data from `Swap`. */
@@ -11597,11 +11597,11 @@ export type TokenTransactionsBySwapTokenOutIdAndTransactionIdManyToManyConnectio
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TokenTransactionsBySwapTokenOutIdAndTransactionIdManyToManyEdge>;
+  edges: TokenTransactionsBySwapTokenOutIdAndTransactionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -11611,7 +11611,7 @@ export type TokenTransactionsBySwapTokenOutIdAndTransactionIdManyToManyConnectio
 
 /** A connection to a list of `Transaction` values, with data from `Swap`. */
 export type TokenTransactionsBySwapTokenOutIdAndTransactionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -11632,12 +11632,12 @@ export type TokenTransactionsBySwapTokenOutIdAndTransactionIdManyToManyEdgeSwapA
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 export type TokenVariancePopulationAggregates = {
@@ -11666,11 +11666,11 @@ export type TokensConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token` and cursor to aid in pagination. */
-  edges: Array<TokensEdge>;
+  edges: TokensEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -11680,7 +11680,7 @@ export type TokensConnection = {
 
 /** A connection to a list of `Token` values. */
 export type TokensConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -11721,8 +11721,8 @@ export type TokensHavingDistinctCountInput = {
 
 /** Conditions for `Token` aggregates. */
 export type TokensHavingInput = {
-  AND?: InputMaybe<Array<TokensHavingInput>>;
-  OR?: InputMaybe<Array<TokensHavingInput>>;
+  AND?: InputMaybe<TokensHavingInput[]>;
+  OR?: InputMaybe<TokensHavingInput[]>;
   average?: InputMaybe<TokensHavingAverageInput>;
   distinctCount?: InputMaybe<TokensHavingDistinctCountInput>;
   max?: InputMaybe<TokensHavingMaxInput>;
@@ -13361,12 +13361,12 @@ export type TransactionAccountsByClaimFeeTransactionIdAndOwnerIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -13374,12 +13374,12 @@ export type TransactionAccountsByPoolTransactionIdAndPoolCreatorIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -13387,12 +13387,12 @@ export type TransactionAccountsByPositionTransactionIdAndOwnerIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -13400,12 +13400,12 @@ export type TransactionAccountsBySwapTransactionIdAndSenderIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Accounts_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Accounts_Distinct_Enum>[]>;
   filter?: InputMaybe<AccountFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<AccountsOrderBy>>;
+  orderBy?: InputMaybe<AccountsOrderBy[]>;
 };
 
 
@@ -13413,12 +13413,12 @@ export type TransactionClaimFeesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 
@@ -13426,12 +13426,12 @@ export type TransactionPoolCreationsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -13439,12 +13439,12 @@ export type TransactionPoolTokenIncentivesArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 
@@ -13452,12 +13452,12 @@ export type TransactionPoolsByClaimFeeTransactionIdAndPoolIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -13465,12 +13465,12 @@ export type TransactionPoolsByPoolTokenIncentiveTransactionIdAndPoolIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -13478,12 +13478,12 @@ export type TransactionPoolsByPositionTransactionIdAndPoolIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 
@@ -13491,12 +13491,12 @@ export type TransactionPositionsArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 
@@ -13504,12 +13504,12 @@ export type TransactionPositionsByClaimFeeTransactionIdAndPositionIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 
@@ -13517,12 +13517,12 @@ export type TransactionSwapArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 
@@ -13530,12 +13530,12 @@ export type TransactionTokensByPoolTokenIncentiveTransactionIdAndTokenIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -13543,12 +13543,12 @@ export type TransactionTokensByPoolTransactionIdAndTokenXIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -13556,12 +13556,12 @@ export type TransactionTokensByPoolTransactionIdAndTokenYIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -13569,12 +13569,12 @@ export type TransactionTokensBySwapTransactionIdAndTokenInIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 
@@ -13582,12 +13582,12 @@ export type TransactionTokensBySwapTransactionIdAndTokenOutIdArgs = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Tokens_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Tokens_Distinct_Enum>[]>;
   filter?: InputMaybe<TokenFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<TokensOrderBy>>;
+  orderBy?: InputMaybe<TokensOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `ClaimFee`. */
@@ -13596,11 +13596,11 @@ export type TransactionAccountsByClaimFeeTransactionIdAndOwnerIdManyToManyConnec
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<TransactionAccountsByClaimFeeTransactionIdAndOwnerIdManyToManyEdge>;
+  edges: TransactionAccountsByClaimFeeTransactionIdAndOwnerIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -13610,7 +13610,7 @@ export type TransactionAccountsByClaimFeeTransactionIdAndOwnerIdManyToManyConnec
 
 /** A connection to a list of `Account` values, with data from `ClaimFee`. */
 export type TransactionAccountsByClaimFeeTransactionIdAndOwnerIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -13631,12 +13631,12 @@ export type TransactionAccountsByClaimFeeTransactionIdAndOwnerIdManyToManyEdgeCl
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `Pool`. */
@@ -13645,11 +13645,11 @@ export type TransactionAccountsByPoolTransactionIdAndPoolCreatorIdManyToManyConn
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TransactionAccountsByPoolTransactionIdAndPoolCreatorIdManyToManyEdge>;
+  edges: TransactionAccountsByPoolTransactionIdAndPoolCreatorIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -13659,7 +13659,7 @@ export type TransactionAccountsByPoolTransactionIdAndPoolCreatorIdManyToManyConn
 
 /** A connection to a list of `Account` values, with data from `Pool`. */
 export type TransactionAccountsByPoolTransactionIdAndPoolCreatorIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -13680,12 +13680,12 @@ export type TransactionAccountsByPoolTransactionIdAndPoolCreatorIdManyToManyEdge
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `Position`. */
@@ -13694,11 +13694,11 @@ export type TransactionAccountsByPositionTransactionIdAndOwnerIdManyToManyConnec
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `Position`, and the cursor to aid in pagination. */
-  edges: Array<TransactionAccountsByPositionTransactionIdAndOwnerIdManyToManyEdge>;
+  edges: TransactionAccountsByPositionTransactionIdAndOwnerIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -13708,7 +13708,7 @@ export type TransactionAccountsByPositionTransactionIdAndOwnerIdManyToManyConnec
 
 /** A connection to a list of `Account` values, with data from `Position`. */
 export type TransactionAccountsByPositionTransactionIdAndOwnerIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -13729,12 +13729,12 @@ export type TransactionAccountsByPositionTransactionIdAndOwnerIdManyToManyEdgePo
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 /** A connection to a list of `Account` values, with data from `Swap`. */
@@ -13743,11 +13743,11 @@ export type TransactionAccountsBySwapTransactionIdAndSenderIdManyToManyConnectio
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<AccountAggregates>;
   /** A list of edges which contains the `Account`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TransactionAccountsBySwapTransactionIdAndSenderIdManyToManyEdge>;
+  edges: TransactionAccountsBySwapTransactionIdAndSenderIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<AccountAggregates>>;
+  groupedAggregates?: Maybe<AccountAggregates[]>;
   /** A list of `Account` objects. */
-  nodes: Array<Maybe<Account>>;
+  nodes: Maybe<Account>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Account` you could get from the connection. */
@@ -13757,7 +13757,7 @@ export type TransactionAccountsBySwapTransactionIdAndSenderIdManyToManyConnectio
 
 /** A connection to a list of `Account` values, with data from `Swap`. */
 export type TransactionAccountsBySwapTransactionIdAndSenderIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<AccountsGroupBy>;
+  groupBy: AccountsGroupBy[];
   having?: InputMaybe<AccountsHavingInput>;
 };
 
@@ -13778,12 +13778,12 @@ export type TransactionAccountsBySwapTransactionIdAndSenderIdManyToManyEdgeSwapA
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 export type TransactionAggregates = {
@@ -13792,7 +13792,7 @@ export type TransactionAggregates = {
   average?: Maybe<TransactionAverageAggregates>;
   /** Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset) */
   distinctCount?: Maybe<TransactionDistinctCountAggregates>;
-  keys?: Maybe<Array<Scalars['String']['output']>>;
+  keys?: Maybe<Scalars['String']['output'][]>;
   /** Maximum aggregates across the matching connection (ignoring before/after/first/last/offset) */
   max?: Maybe<TransactionMaxAggregates>;
   /** Minimum aggregates across the matching connection (ignoring before/after/first/last/offset) */
@@ -13840,7 +13840,7 @@ export type TransactionDistinctCountAggregates = {
 /** A filter to be used against `Transaction` object types. All fields are combined with a logical ‘and.’ */
 export type TransactionFilter = {
   /** Checks for all expressions in this list. */
-  and?: InputMaybe<Array<TransactionFilter>>;
+  and?: InputMaybe<TransactionFilter[]>;
   /** Filter by the object’s `blockNumber` field. */
   blockNumber?: InputMaybe<BigFloatFilter>;
   /** Filter by the object’s `claimFees` relation. */
@@ -13856,7 +13856,7 @@ export type TransactionFilter = {
   /** Negates the expression. */
   not?: InputMaybe<TransactionFilter>;
   /** Checks for any expressions in this list. */
-  or?: InputMaybe<Array<TransactionFilter>>;
+  or?: InputMaybe<TransactionFilter[]>;
   /** Filter by the object’s `poolCreations` relation. */
   poolCreations?: InputMaybe<TransactionToManyPoolFilter>;
   /** Some related `poolCreations` exist. */
@@ -13903,11 +13903,11 @@ export type TransactionPoolsByClaimFeeTransactionIdAndPoolIdManyToManyConnection
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<TransactionPoolsByClaimFeeTransactionIdAndPoolIdManyToManyEdge>;
+  edges: TransactionPoolsByClaimFeeTransactionIdAndPoolIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -13917,7 +13917,7 @@ export type TransactionPoolsByClaimFeeTransactionIdAndPoolIdManyToManyConnection
 
 /** A connection to a list of `Pool` values, with data from `ClaimFee`. */
 export type TransactionPoolsByClaimFeeTransactionIdAndPoolIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -13938,12 +13938,12 @@ export type TransactionPoolsByClaimFeeTransactionIdAndPoolIdManyToManyEdgeClaimF
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 /** A connection to a list of `Pool` values, with data from `PoolTokenIncentive`. */
@@ -13952,11 +13952,11 @@ export type TransactionPoolsByPoolTokenIncentiveTransactionIdAndPoolIdManyToMany
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool`, info from the `PoolTokenIncentive`, and the cursor to aid in pagination. */
-  edges: Array<TransactionPoolsByPoolTokenIncentiveTransactionIdAndPoolIdManyToManyEdge>;
+  edges: TransactionPoolsByPoolTokenIncentiveTransactionIdAndPoolIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -13966,7 +13966,7 @@ export type TransactionPoolsByPoolTokenIncentiveTransactionIdAndPoolIdManyToMany
 
 /** A connection to a list of `Pool` values, with data from `PoolTokenIncentive`. */
 export type TransactionPoolsByPoolTokenIncentiveTransactionIdAndPoolIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -13987,12 +13987,12 @@ export type TransactionPoolsByPoolTokenIncentiveTransactionIdAndPoolIdManyToMany
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 /** A connection to a list of `Pool` values, with data from `Position`. */
@@ -14001,11 +14001,11 @@ export type TransactionPoolsByPositionTransactionIdAndPoolIdManyToManyConnection
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PoolAggregates>;
   /** A list of edges which contains the `Pool`, info from the `Position`, and the cursor to aid in pagination. */
-  edges: Array<TransactionPoolsByPositionTransactionIdAndPoolIdManyToManyEdge>;
+  edges: TransactionPoolsByPositionTransactionIdAndPoolIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PoolAggregates>>;
+  groupedAggregates?: Maybe<PoolAggregates[]>;
   /** A list of `Pool` objects. */
-  nodes: Array<Maybe<Pool>>;
+  nodes: Maybe<Pool>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Pool` you could get from the connection. */
@@ -14015,7 +14015,7 @@ export type TransactionPoolsByPositionTransactionIdAndPoolIdManyToManyConnection
 
 /** A connection to a list of `Pool` values, with data from `Position`. */
 export type TransactionPoolsByPositionTransactionIdAndPoolIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PoolsGroupBy>;
+  groupBy: PoolsGroupBy[];
   having?: InputMaybe<PoolsHavingInput>;
 };
 
@@ -14036,12 +14036,12 @@ export type TransactionPoolsByPositionTransactionIdAndPoolIdManyToManyEdgePositi
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Positions_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Positions_Distinct_Enum>[]>;
   filter?: InputMaybe<PositionFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PositionsOrderBy>>;
+  orderBy?: InputMaybe<PositionsOrderBy[]>;
 };
 
 /** A connection to a list of `Position` values, with data from `ClaimFee`. */
@@ -14050,11 +14050,11 @@ export type TransactionPositionsByClaimFeeTransactionIdAndPositionIdManyToManyCo
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<PositionAggregates>;
   /** A list of edges which contains the `Position`, info from the `ClaimFee`, and the cursor to aid in pagination. */
-  edges: Array<TransactionPositionsByClaimFeeTransactionIdAndPositionIdManyToManyEdge>;
+  edges: TransactionPositionsByClaimFeeTransactionIdAndPositionIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<PositionAggregates>>;
+  groupedAggregates?: Maybe<PositionAggregates[]>;
   /** A list of `Position` objects. */
-  nodes: Array<Maybe<Position>>;
+  nodes: Maybe<Position>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Position` you could get from the connection. */
@@ -14064,7 +14064,7 @@ export type TransactionPositionsByClaimFeeTransactionIdAndPositionIdManyToManyCo
 
 /** A connection to a list of `Position` values, with data from `ClaimFee`. */
 export type TransactionPositionsByClaimFeeTransactionIdAndPositionIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<PositionsGroupBy>;
+  groupBy: PositionsGroupBy[];
   having?: InputMaybe<PositionsHavingInput>;
 };
 
@@ -14085,12 +14085,12 @@ export type TransactionPositionsByClaimFeeTransactionIdAndPositionIdManyToManyEd
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Claim_Fees_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Claim_Fees_Distinct_Enum>[]>;
   filter?: InputMaybe<ClaimFeeFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<ClaimFeesOrderBy>>;
+  orderBy?: InputMaybe<ClaimFeesOrderBy[]>;
 };
 
 export type TransactionStddevPopulationAggregates = {
@@ -14189,11 +14189,11 @@ export type TransactionTokensByPoolTokenIncentiveTransactionIdAndTokenIdManyToMa
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `PoolTokenIncentive`, and the cursor to aid in pagination. */
-  edges: Array<TransactionTokensByPoolTokenIncentiveTransactionIdAndTokenIdManyToManyEdge>;
+  edges: TransactionTokensByPoolTokenIncentiveTransactionIdAndTokenIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -14203,7 +14203,7 @@ export type TransactionTokensByPoolTokenIncentiveTransactionIdAndTokenIdManyToMa
 
 /** A connection to a list of `Token` values, with data from `PoolTokenIncentive`. */
 export type TransactionTokensByPoolTokenIncentiveTransactionIdAndTokenIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -14224,12 +14224,12 @@ export type TransactionTokensByPoolTokenIncentiveTransactionIdAndTokenIdManyToMa
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pool_Token_Incentives_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pool_Token_Incentives_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolTokenIncentiveFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolTokenIncentivesOrderBy>>;
+  orderBy?: InputMaybe<PoolTokenIncentivesOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
@@ -14238,11 +14238,11 @@ export type TransactionTokensByPoolTransactionIdAndTokenXIdManyToManyConnection 
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TransactionTokensByPoolTransactionIdAndTokenXIdManyToManyEdge>;
+  edges: TransactionTokensByPoolTransactionIdAndTokenXIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -14252,7 +14252,7 @@ export type TransactionTokensByPoolTransactionIdAndTokenXIdManyToManyConnection 
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
 export type TransactionTokensByPoolTransactionIdAndTokenXIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -14273,12 +14273,12 @@ export type TransactionTokensByPoolTransactionIdAndTokenXIdManyToManyEdgePoolsBy
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
@@ -14287,11 +14287,11 @@ export type TransactionTokensByPoolTransactionIdAndTokenYIdManyToManyConnection 
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Pool`, and the cursor to aid in pagination. */
-  edges: Array<TransactionTokensByPoolTransactionIdAndTokenYIdManyToManyEdge>;
+  edges: TransactionTokensByPoolTransactionIdAndTokenYIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -14301,7 +14301,7 @@ export type TransactionTokensByPoolTransactionIdAndTokenYIdManyToManyConnection 
 
 /** A connection to a list of `Token` values, with data from `Pool`. */
 export type TransactionTokensByPoolTransactionIdAndTokenYIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -14322,12 +14322,12 @@ export type TransactionTokensByPoolTransactionIdAndTokenYIdManyToManyEdgePoolsBy
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Pools_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Pools_Distinct_Enum>[]>;
   filter?: InputMaybe<PoolFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<PoolsOrderBy>>;
+  orderBy?: InputMaybe<PoolsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
@@ -14336,11 +14336,11 @@ export type TransactionTokensBySwapTransactionIdAndTokenInIdManyToManyConnection
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TransactionTokensBySwapTransactionIdAndTokenInIdManyToManyEdge>;
+  edges: TransactionTokensBySwapTransactionIdAndTokenInIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -14350,7 +14350,7 @@ export type TransactionTokensBySwapTransactionIdAndTokenInIdManyToManyConnection
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
 export type TransactionTokensBySwapTransactionIdAndTokenInIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -14371,12 +14371,12 @@ export type TransactionTokensBySwapTransactionIdAndTokenInIdManyToManyEdgeSwapsB
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
@@ -14385,11 +14385,11 @@ export type TransactionTokensBySwapTransactionIdAndTokenOutIdManyToManyConnectio
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TokenAggregates>;
   /** A list of edges which contains the `Token`, info from the `Swap`, and the cursor to aid in pagination. */
-  edges: Array<TransactionTokensBySwapTransactionIdAndTokenOutIdManyToManyEdge>;
+  edges: TransactionTokensBySwapTransactionIdAndTokenOutIdManyToManyEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TokenAggregates>>;
+  groupedAggregates?: Maybe<TokenAggregates[]>;
   /** A list of `Token` objects. */
-  nodes: Array<Maybe<Token>>;
+  nodes: Maybe<Token>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Token` you could get from the connection. */
@@ -14399,7 +14399,7 @@ export type TransactionTokensBySwapTransactionIdAndTokenOutIdManyToManyConnectio
 
 /** A connection to a list of `Token` values, with data from `Swap`. */
 export type TransactionTokensBySwapTransactionIdAndTokenOutIdManyToManyConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TokensGroupBy>;
+  groupBy: TokensGroupBy[];
   having?: InputMaybe<TokensHavingInput>;
 };
 
@@ -14420,12 +14420,12 @@ export type TransactionTokensBySwapTransactionIdAndTokenOutIdManyToManyEdgeSwaps
   after?: InputMaybe<Scalars['Cursor']['input']>;
   before?: InputMaybe<Scalars['Cursor']['input']>;
   blockHeight?: InputMaybe<Scalars['String']['input']>;
-  distinct?: InputMaybe<Array<InputMaybe<Swaps_Distinct_Enum>>>;
+  distinct?: InputMaybe<InputMaybe<Swaps_Distinct_Enum>[]>;
   filter?: InputMaybe<SwapFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Array<SwapsOrderBy>>;
+  orderBy?: InputMaybe<SwapsOrderBy[]>;
 };
 
 export type TransactionVariancePopulationAggregates = {
@@ -14454,11 +14454,11 @@ export type TransactionsConnection = {
   /** Aggregates across the matching connection (ignoring before/after/first/last/offset) */
   aggregates?: Maybe<TransactionAggregates>;
   /** A list of edges which contains the `Transaction` and cursor to aid in pagination. */
-  edges: Array<TransactionsEdge>;
+  edges: TransactionsEdge[];
   /** Grouped aggregates across the matching connection (ignoring before/after/first/last/offset) */
-  groupedAggregates?: Maybe<Array<TransactionAggregates>>;
+  groupedAggregates?: Maybe<TransactionAggregates[]>;
   /** A list of `Transaction` objects. */
-  nodes: Array<Maybe<Transaction>>;
+  nodes: Maybe<Transaction>[];
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   /** The count of *all* `Transaction` you could get from the connection. */
@@ -14468,7 +14468,7 @@ export type TransactionsConnection = {
 
 /** A connection to a list of `Transaction` values. */
 export type TransactionsConnectionGroupedAggregatesArgs = {
-  groupBy: Array<TransactionsGroupBy>;
+  groupBy: TransactionsGroupBy[];
   having?: InputMaybe<TransactionsHavingInput>;
 };
 
@@ -14504,8 +14504,8 @@ export type TransactionsHavingDistinctCountInput = {
 
 /** Conditions for `Transaction` aggregates. */
 export type TransactionsHavingInput = {
-  AND?: InputMaybe<Array<TransactionsHavingInput>>;
-  OR?: InputMaybe<Array<TransactionsHavingInput>>;
+  AND?: InputMaybe<TransactionsHavingInput[]>;
+  OR?: InputMaybe<TransactionsHavingInput[]>;
   average?: InputMaybe<TransactionsHavingAverageInput>;
   distinctCount?: InputMaybe<TransactionsHavingDistinctCountInput>;
   max?: InputMaybe<TransactionsHavingMaxInput>;
@@ -15779,7 +15779,7 @@ export type _Metadata = {
   chain?: Maybe<Scalars['String']['output']>;
   dbSize?: Maybe<Scalars['BigInt']['output']>;
   deployments?: Maybe<Scalars['JSON']['output']>;
-  dynamicDatasources?: Maybe<Array<Maybe<Scalars['JSON']['output']>>>;
+  dynamicDatasources?: Maybe<Maybe<Scalars['JSON']['output']>[]>;
   evmChainId?: Maybe<Scalars['String']['output']>;
   genesisHash?: Maybe<Scalars['String']['output']>;
   indexerHealthy?: Maybe<Scalars['Boolean']['output']>;
@@ -15790,7 +15790,7 @@ export type _Metadata = {
   lastProcessedTimestamp?: Maybe<Scalars['Date']['output']>;
   latestSyncedPoiHeight?: Maybe<Scalars['Int']['output']>;
   queryNodeVersion?: Maybe<Scalars['String']['output']>;
-  rowCountEstimate?: Maybe<Array<Maybe<TableEstimate>>>;
+  rowCountEstimate?: Maybe<Maybe<TableEstimate>[]>;
   specName?: Maybe<Scalars['String']['output']>;
   startHeight?: Maybe<Scalars['Int']['output']>;
   targetHeight?: Maybe<Scalars['Int']['output']>;
@@ -15799,7 +15799,7 @@ export type _Metadata = {
 
 export type _Metadatas = {
   __typename?: '_Metadatas';
-  nodes: Array<Maybe<_Metadata>>;
+  nodes: Maybe<_Metadata>[];
   totalCount: Scalars['Int']['output'];
 };
 

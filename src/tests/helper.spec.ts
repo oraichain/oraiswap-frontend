@@ -44,7 +44,7 @@ describe('should utils functions in libs/utils run exactly', () => {
     [0.0000064, '0.000006']
   ])('should formate number decimals auto run correctly', (price: number, expectedFormat: string) => {
     const priceFormated = formateNumberDecimalsAuto({
-      price: price,
+      price,
       maxDecimal: 6,
       minDecimal: 2,
       unit: '',

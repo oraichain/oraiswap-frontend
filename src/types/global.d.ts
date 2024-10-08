@@ -99,7 +99,7 @@ declare global {
   }
 
   interface TronLink {
-    ready: Bool; //Initialize to false, true after user authorization
+    ready: Bool; // Initialize to false, true after user authorization
     request: ({ method }: { method: 'tron_requestAccounts' }) => Promise<{ code: number; message: string }>; // The method of tuning plugins for dapp website
     sunWeb: sunWeb;
     tronWeb: _TronWeb;

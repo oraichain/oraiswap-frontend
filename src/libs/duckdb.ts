@@ -78,13 +78,13 @@ export class DuckDb {
     } else {
       await this.conn.send(`create table trans_history_${userAddress}
       (
-        initialTxHash varchar primary key, 
-        fromCoingeckoId varchar, 
-        toCoingeckoId varchar, 
-        fromChainId varchar, 
-        toChainId varchar, 
-        fromAmount varchar, 
-        toAmount varchar, 
+        initialTxHash varchar primary key,
+        fromCoingeckoId varchar,
+        toCoingeckoId varchar,
+        fromChainId varchar,
+        toChainId varchar,
+        fromAmount varchar,
+        toAmount varchar,
         fromAmountInUsdt varchar,
         toAmountInUsdt varchar,
         status varchar,

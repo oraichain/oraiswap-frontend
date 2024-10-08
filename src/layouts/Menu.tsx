@@ -115,7 +115,7 @@ const Menu: React.FC = () => {
           {title}
           {to === '/pools/v3' && (
             <span className={classNames(styles.suffix)}>
-              <Lottie animationData={PoolV3Lottie} autoPlay={open} loop />
+              <Lottie animationData={PoolV3Lottie} autoPlay={open} loop={true} />
             </span>
           )}
         </span>
@@ -123,7 +123,7 @@ const Menu: React.FC = () => {
     );
 
     return title === 'Feedbacks' ? (
-      <button onClick={handleClick} className={getButtonClasses()} data-featurebase-feedback>
+      <button onClick={handleClick} className={getButtonClasses()} data-featurebase-feedback={true}>
         {renderContent()}
       </button>
     ) : (
@@ -161,10 +161,10 @@ const Menu: React.FC = () => {
       {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
       {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, false, <BtcDashboardIcon />)}
       {!isBeta && renderLink('https://beta.oraidex.io', 'OraiDEX Beta', setLink, true, <OraidexBetaIcon />)}
-      <div className={styles.divider}></div>
+      <div className={styles.divider}/>
       {renderLink('https://orderbook.oraidex.io', 'Order Book', () => {}, true, <OrderbookIcon />)}
       {renderLink('https://futures.oraidex.io', 'Futures Trading', () => {}, true, <FuturesIcon />)}
-      <div className={styles.divider}></div>
+      <div className={styles.divider}/>
       <div
         onClick={() => {
           setIsOpenSubMenuMobile(!isOpenSubMenuMobile);
@@ -223,7 +223,7 @@ const Menu: React.FC = () => {
               <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
                 <img src={imgLogo} alt="logo" />
               </Link>
-              <div className={styles.divider}></div>
+              <div className={styles.divider}/>
             </div>
             {menuList}
           </div>
@@ -266,7 +266,7 @@ const Menu: React.FC = () => {
               )}
             </div>
 
-            <div className={styles.divider}></div>
+            <div className={styles.divider}/>
             <div className={classNames(styles.connect_wallet_wrapper)}>
               <span>
                 <WalletManagement />

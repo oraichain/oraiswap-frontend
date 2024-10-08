@@ -15,7 +15,7 @@ const Content: React.FC<ContentProps> = ({ children, nonBackground, otherBackgro
     <div
       className={classNames(styles.content, styles[theme], {
         non_background: nonBackground,
-        otherBackground: otherBackground
+        otherBackground
       })}
     >
       {children}

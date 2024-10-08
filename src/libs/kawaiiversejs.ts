@@ -192,7 +192,7 @@ export default class KawaiiverseJs {
 
       const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
-      let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
+      const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
       const params = {
         contractAddress: contractAddr,
@@ -301,7 +301,7 @@ export default class KawaiiverseJs {
       const { wallet, accounts } = await getWallet(subnetwork.chainId as string);
 
       const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
-      let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
+      const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
       const params = {
         ...ibcInfo,

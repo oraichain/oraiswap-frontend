@@ -41,13 +41,13 @@ const assertKeyValue = (event: Event, key: string, value: string) => {
 
 describe.only('IBCModule', () => {
   let oraiPort: string;
-  let oraiIbcDenom: string = 'tron-testnet0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
-  let airiIbcDenom: string = 'tron-testnet0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
-  let cosmosPort: string = 'transfer';
-  let channel = 'channel-0';
+  const oraiIbcDenom: string = 'tron-testnet0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
+  const airiIbcDenom: string = 'tron-testnet0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
+  const cosmosPort: string = 'transfer';
+  const channel = 'channel-0';
   let ics20Contract: CwIcs20LatestClient;
   let airiToken: OraiswapTokenClient;
-  let packetData = {
+  const packetData = {
     src: {
       port_id: cosmosPort,
       channel_id: channel
@@ -160,7 +160,7 @@ describe.only('IBCModule', () => {
 
     const ics20Contract = await deployIcs20Token(oraiClient, { swap_router_contract: routerContractAddress });
     const oraiPort = 'wasm.' + ics20Contract.contractAddress;
-    let newPacketData = {
+    const newPacketData = {
       src: {
         port_id: cosmosPort,
         channel_id: channel
@@ -262,9 +262,9 @@ describe.only('IBCModule', () => {
     });
 
     const { channels } = await ics20Contract.listChannels();
-    for (let channel of channels) {
+    for (const channel of channels) {
       const { balances } = await ics20Contract.channel({ id: channel.id });
-      for (let balance of balances) {
+      for (const balance of balances) {
         if ('native' in balance) {
           const pairMapping = await ics20Contract.pairMapping({ key: balance.native.denom });
           const { balance: channelBalance } = await ics20Contract.channelWithKey({
@@ -335,7 +335,7 @@ describe.only('IBCModule', () => {
       'cw-ics20-fail-transfer-cw20-fail-insufficient-funds-should-not-send-balance-remote-to-local'
     ]
   ])(
-    'bridge-test-cw-ics20-transfer-remote-to-local-given %j %s %s should return expected amount %j', //reference: https://jestjs.io/docs/api#1-testeachtablename-fn-timeout
+    'bridge-test-cw-ics20-transfer-remote-to-local-given %j %s %s should return expected amount %j', // reference: https://jestjs.io/docs/api#1-testeachtablename-fn-timeout
     async (
       assetInfo: AssetInfo,
       transferAmount: string,
@@ -496,7 +496,7 @@ describe.only('IBCModule', () => {
     let oracleContract: OraiswapOracleClient;
     let assetInfos: AssetInfo[];
     let lpId: number;
-    let icsPackage: FungibleTokenPacketData = {
+    const icsPackage: FungibleTokenPacketData = {
       amount: ibcTransferAmount,
       denom: airiIbcDenom,
       receiver: bobAddress,
@@ -991,7 +991,7 @@ describe.only('IBCModule', () => {
         localChannelId: channel
       });
 
-      let packetData = {
+      const packetData = {
         src: {
           port_id: cosmosPort,
           channel_id: channel
@@ -1016,7 +1016,7 @@ describe.only('IBCModule', () => {
         memo: `${bobAddress}:${airiToken.contractAddress}`
       };
       // transfer from cosmos to oraichain, should pass
-      let result = await cosmosChain.ibc.sendPacketReceive({
+      const result = await cosmosChain.ibc.sendPacketReceive({
         packet: {
           data: toBinary(icsPackage),
           ...packetData
@@ -1049,7 +1049,7 @@ describe.only('IBCModule', () => {
         localChannelId: channel
       });
 
-      let packetData = {
+      const packetData = {
         src: {
           port_id: cosmosPort,
           channel_id: channel
@@ -1074,7 +1074,7 @@ describe.only('IBCModule', () => {
         memo: `${bobAddress}:orai`
       };
       // transfer from cosmos to oraichain, should pass
-      let result = await cosmosChain.ibc.sendPacketReceive({
+      const result = await cosmosChain.ibc.sendPacketReceive({
         packet: {
           data: toBinary(icsPackage),
           ...packetData
@@ -1193,7 +1193,7 @@ describe.only('IBCModule', () => {
           localChannelId: channel
         });
 
-        let packetData = {
+        const packetData = {
           src: {
             port_id: cosmosPort,
             channel_id: channel
@@ -1218,7 +1218,7 @@ describe.only('IBCModule', () => {
           memo: `${unknownChannel}/${bobAddress}:orai`
         };
         // transfer from cosmos to oraichain, should pass
-        let result = await cosmosChain.ibc.sendPacketReceive({
+        const result = await cosmosChain.ibc.sendPacketReceive({
           packet: {
             data: toBinary(icsPackage),
             ...packetData
@@ -1254,7 +1254,7 @@ describe.only('IBCModule', () => {
         localChannelId: channel
       });
 
-      let packetData = {
+      const packetData = {
         src: {
           port_id: cosmosPort,
           channel_id: channel
@@ -1279,7 +1279,7 @@ describe.only('IBCModule', () => {
         memo: `${unknownChannel}/${bobAddress}:orai`
       };
       // transfer from cosmos to oraichain, should pass
-      let result = await cosmosChain.ibc.sendPacketReceive({
+      const result = await cosmosChain.ibc.sendPacketReceive({
         packet: {
           data: toBinary(icsPackage),
           ...packetData
@@ -1316,7 +1316,7 @@ describe.only('IBCModule', () => {
         memo: `${channel}/${bobAddress}:orai`
       };
       // transfer from cosmos to oraichain, should pass
-      let result = await cosmosChain.ibc.sendPacketReceive({
+      const result = await cosmosChain.ibc.sendPacketReceive({
         packet: {
           data: toBinary(icsPackage),
           ...packetData
@@ -1354,7 +1354,7 @@ describe.only('IBCModule', () => {
           memo
         };
         // transfer from cosmos to oraichain, should pass
-        let result = await cosmosChain.ibc.sendPacketReceive({
+        const result = await cosmosChain.ibc.sendPacketReceive({
           packet: {
             data: toBinary(icsPackage),
             ...packetData
@@ -1395,7 +1395,7 @@ describe.only('IBCModule', () => {
           memo
         };
         // transfer from cosmos to oraichain, should pass
-        let result = await cosmosChain.ibc.sendPacketReceive({
+        const result = await cosmosChain.ibc.sendPacketReceive({
           packet: {
             data: toBinary(icsPackage),
             ...packetData
@@ -1445,7 +1445,7 @@ describe.only('IBCModule', () => {
           memo: `${bobAddress}:orai`
         };
         // transfer from cosmos to oraichain, should pass
-        let result = await cosmosChain.ibc.sendPacketReceive({
+        const result = await cosmosChain.ibc.sendPacketReceive({
           packet: {
             data: toBinary(icsPackage),
             ...packetData

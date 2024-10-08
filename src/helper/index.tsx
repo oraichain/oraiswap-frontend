@@ -35,7 +35,7 @@ import { numberWithCommas } from './format';
 export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
-  bridgeTo?: Array<NetworkChainId>;
+  bridgeTo?: NetworkChainId[];
 }
 
 export interface InfoError {
@@ -132,7 +132,7 @@ export const getNetworkGasPrice = async (chainId): Promise<number> => {
   return 0;
 };
 
-//hardcode fee
+// hardcode fee
 export const feeEstimate = (tokenInfo: TokenItemType, gasDefault: number) => {
   if (!tokenInfo) return 0;
   const MULTIPLIER_ESTIMATE_OSMOSIS = 3.8;
@@ -302,7 +302,7 @@ export const checkVersionWallet = () => {
   return window.keplr && window.keplr.version.slice(0, 3) === '0.9'; // TODO: hardcode version of owallet
 };
 
-//@ts-ignore
+// @ts-ignore
 const walletIsOwallet = window?.keplr?.isOwallet;
 export const keplrCheck = (type: WalletCosmosType) => {
   return type === 'keplr' && window.keplr && window.keplr.mode === 'extension' && !walletIsOwallet;
@@ -475,7 +475,7 @@ export const getAddressBySnap = async (chainId) => {
         request: {
           method: 'getKey',
           params: {
-            chainId: chainId
+            chainId
           }
         }
       }
@@ -487,7 +487,7 @@ export const getAddressBySnap = async (chainId) => {
 };
 
 type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'IconLight' | 'bech32Config'> & {
-  currencies: Array<Omit<CustomChainInfo['currencies'][number], 'Icon' | 'IconLight'>>;
+  currencies: Omit<CustomChainInfo['currencies'][number], 'Icon' | 'IconLight'>[];
   bech32Config: Bech32Config;
 };
 const checkErrorObj = (info) => {
@@ -504,7 +504,7 @@ const checkErrorObj = (info) => {
   return info;
 };
 export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
-  let chainInfoData = [...chainInfos];
+  const chainInfoData = [...chainInfos];
   return chainInfoData.map((info) => {
     const infoWithoutIcon = checkErrorObj(info);
 
@@ -529,7 +529,7 @@ export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
   });
 };
 export const getListAddressCosmosByLeapSnap = async () => {
-  let listAddressCosmos = {};
+  const listAddressCosmos = {};
   const cosmosNetworksFilter = cosmosNetworks.filter(
     (item, index) => item.chainId !== 'kawaii_6886-1' && item.chainId !== 'injective-1'
   );
@@ -605,7 +605,7 @@ export const minimize = (priceUsd: string) => {
 export function formatMoney(num) {
   if (num === 0) return num.toString();
 
-  let numStr = num.toString();
+  const numStr = num.toString();
   const decimalIndex = numStr.indexOf('.');
 
   if (decimalIndex === -1) return numStr;

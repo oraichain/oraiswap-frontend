@@ -89,7 +89,7 @@ const App = () => {
     });
   }, [theme]);
 
-  //Public API that will echo messages sent to it back to the client
+  // Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
     {

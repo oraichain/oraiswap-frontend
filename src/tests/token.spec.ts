@@ -3,7 +3,7 @@ import { OraiswapTokenQueryClient, OraiswapTokenTypes } from '@oraichain/oraidex
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 
 describe('token', () => {
-  let senderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
+  const senderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
   let airiContractAddress = '';
 
   beforeAll(async () => {

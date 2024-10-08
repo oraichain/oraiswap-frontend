@@ -19,7 +19,7 @@ const CheckBox: FC<{
           onCheck(e.target.checked);
         }}
       />
-      <span className={classNames(styles.checkmark, radioBox && styles.radioBox)}></span>
+      <span className={classNames(styles.checkmark, radioBox && styles.radioBox)}/>
     </label >
   );
 };

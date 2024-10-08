@@ -42,10 +42,10 @@ export default class Keplr extends CosmosWallet {
   }
 
   async getChainInfosWithoutEndpoints(chainId): Promise<
-    Array<{
+    {
       chainId: string;
       feeCurrencies: FeeCurrency[];
-    }>
+    }[]
   > {
     // TODO: need check
     const isKeplr = await this.getKeplr();

@@ -16,7 +16,7 @@ export type ChainInfoType = {
 };
 
 export type RewardPoolType = {
-  reward: Array<string>;
+  reward: string[];
   liquidity_token: string;
 };
 
@@ -47,7 +47,7 @@ export interface ConfigState {
   persistVersion: number;
   bannerTime?: number;
   AIRoute?: boolean;
-  //pool v3
+  // pool v3
   liquidityPools?: {
     [key: string]: number;
   };

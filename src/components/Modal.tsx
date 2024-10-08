@@ -11,7 +11,7 @@ const Modal: FC<Modal> = ({ className, isOpen, close, children, isCloseBtn = fal
   <ModalSafeForReact18
     className={`${styles.modal} ${className || ''}`}
     overlayClassName={`${styles.overlay} ${className || ''}`}
-    preventScroll
+    preventScroll={true}
     htmlOpenClassName={styles.open}
     isOpen={isOpen}
     onRequestClose={close}

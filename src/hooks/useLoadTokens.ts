@@ -42,7 +42,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
     const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
 
-    let amountDetails: AmountDetails = {};
+    const amountDetails: AmountDetails = {};
 
     // reset native balances
     cosmosTokens
@@ -267,7 +267,7 @@ async function loadEvmEntries(
 
     const results: ContractCallResults = await multicall.call(input as any);
     const nativeBalance = nativeEvmToken ? await loadNativeEvmBalance(address, chain) : 0;
-    let entries: [string, string][] = tokens.map((token) => {
+    const entries: [string, string][] = tokens.map((token) => {
       const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
       return [token.denom, amount];
     });
@@ -275,7 +275,7 @@ async function loadEvmEntries(
     return entries;
   } catch (error) {
     console.log('error querying EVM balance: ', error);
-    let retry = retryCount ? retryCount + 1 : 1;
+    const retry = retryCount ? retryCount + 1 : 1;
     if (retry >= EVM_BALANCE_RETRY_COUNT) console.error(`Cannot query EVM balance with error: ${error}`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return loadEvmEntries(address, chain, multicallCustomContractAddress, retry);
@@ -291,11 +291,11 @@ async function loadBtcEntries(
     const nativeBtc = btcTokens.find((t) => chain.chainId === t.chainId);
 
     const nativeBalance = await loadNativeBtcBalance(address, chain);
-    let entries: [string, string][] = [[nativeBtc.denom, nativeBalance.toString()]];
+    const entries: [string, string][] = [[nativeBtc.denom, nativeBalance.toString()]];
     return entries;
   } catch (error) {
     console.log('error querying BTC balance: ', error);
-    let retry = retryCount ? retryCount + 1 : 1;
+    const retry = retryCount ? retryCount + 1 : 1;
     if (retry >= EVM_BALANCE_RETRY_COUNT) throw generateError(`Cannot query BTC balance with error: ${error}`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return loadBtcEntries(address, chain, retry);
@@ -329,7 +329,7 @@ async function loadKawaiiSubnetAmount(dispatch: Dispatch, kwtAddress: string) {
 
   const kwtSubnetAddress = getEvmAddress(kwtAddress);
   const kawaiiEvmInfo = chainInfos.find((c) => c.chainId === '0x1ae6');
-  let amountDetails = Object.fromEntries(await loadEvmEntries(kwtSubnetAddress, kawaiiEvmInfo));
+  const amountDetails = Object.fromEntries(await loadEvmEntries(kwtSubnetAddress, kawaiiEvmInfo));
   // update amounts
   dispatch(updateAmounts(amountDetails));
 }

@@ -23,7 +23,7 @@ describe('operator overloading', () => {
 
     const c = ((a + b) / 2n + 15 * (a - b)) * 20.12;
     const d = 10 + 12 - 5;
-    const e = c + d;    
+    const e = c + d;
     console.log(c, d, e, c ** 2);
     const decimals = 6;
     console.log(new BigDecimal(totalStaked) / 10 ** decimals)

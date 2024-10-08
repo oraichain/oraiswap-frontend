@@ -37,4 +37,3 @@ export const network: CustomChainInfo & NetworkConfig & { pool_v3: string; index
   pool_v3: AMM_V3_CONTRACT,
   indexer_v3: 'https://ammv3-indexer.oraidex.io/'
 };
-  

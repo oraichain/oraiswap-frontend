@@ -120,7 +120,7 @@ export const stringToPoolKey = (str: string): PoolKey => {
     const [token_x, token_y, fee, tick_spacing] = str.split('-');
 
     if (!token_x || !token_y || !fee || !tick_spacing) {
-      throw 'Cannot convert string to pool_key';
+      throw new Error('Cannot convert string to pool_key');
     }
 
     return {
@@ -242,7 +242,7 @@ export default class SingletonOraiswapV3 {
           const balance = address ? BigInt(await this.queryBalance(address, token)) : 0n;
           return {
             address: token,
-            balance: balance,
+            balance,
             symbol: token == 'orai' ? 'ORAI' : 'IBC',
             decimals: 6,
             name: token == 'orai' ? 'ORAI' : 'IBC Token'
@@ -250,7 +250,7 @@ export default class SingletonOraiswapV3 {
         }
 
         const queryClient = new OraiswapTokenQueryClient(this._cosmwasmClient, token);
-        const balance = address ? await queryClient.balance({ address: address }) : { balance: '0' };
+        const balance = address ? await queryClient.balance({ address }) : { balance: '0' };
         const tokenInfo = await queryClient.tokenInfo();
         const symbol = tokenInfo.symbol;
         const decimals = tokenInfo.decimals;
@@ -259,9 +259,9 @@ export default class SingletonOraiswapV3 {
         return {
           address: token,
           balance: BigInt(balance.balance),
-          symbol: symbol,
+          symbol,
           decimals,
-          name: name
+          name
         };
       })
     );
@@ -685,7 +685,7 @@ function calculateLiquidityForRanges(liquidityChanges: LiquidityTick[], tickRang
   return rangeLiquidity.map((liquidity, index) => ({
     lower_tick_index: tickRanges[index].lowerTick,
     upper_tick_index: tickRanges[index].upperTick,
-    liquidity: liquidity
+    liquidity
   }));
 }
 

@@ -119,7 +119,7 @@ describe('bridge', () => {
   it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
     const fromToken = cosmosTokens.find((item) => item.name === 'ORAI' && item.chainId === 'Oraichain');
     const toToken = cosmosTokens.find((item) => item.name === 'ORAI' && item.chainId === 'oraibridge-subnet-2');
-    let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+    const ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
     expect(ibcWasmContractAddress).toBe(IBC_WASM_CONTRACT);
   });

@@ -122,7 +122,7 @@ export async function fetchPairPriceWithStablecoin(
       routerClient
     })
   ]).then((results) => {
-    for (let res of results) {
+    for (const res of results) {
       if (res.status === 'fulfilled') return res.value; // only collect the result of the actual existing pool. If both exist then we only need data from one pool
     }
   });
@@ -189,8 +189,8 @@ async function fetchPairInfo(tokenTypes: [TokenItemType, TokenItemType]): Promis
   const factoryAddr = isFactoryV1([parseTokenInfo(tokenTypes[0]).info, parseTokenInfo(tokenTypes[1]).info])
     ? network.factory
     : network.factory_v2;
-  let { info: firstAsset } = parseTokenInfo(tokenTypes[0]);
-  let { info: secondAsset } = parseTokenInfo(tokenTypes[1]);
+  const { info: firstAsset } = parseTokenInfo(tokenTypes[0]);
+  const { info: secondAsset } = parseTokenInfo(tokenTypes[1]);
   const factoryContract = new OraiswapFactoryQueryClient(window.client, factoryAddr);
   const data = await factoryContract.pair({
     assetInfos: [firstAsset, secondAsset]
@@ -262,7 +262,7 @@ function generateConvertCw20Erc20Message(
 ): ExecuteInstruction[] {
   if (!tokenInfo.evmDenoms) return [];
   // we convert all mapped tokens to cw20 to unify the token
-  for (let denom of tokenInfo.evmDenoms) {
+  for (const denom of tokenInfo.evmDenoms) {
     // optimize. Only convert if not enough balance & match denom
     if (denom !== sendCoin.denom) continue;
 
@@ -378,7 +378,7 @@ export type IncreaseAllowanceQuery = {
   amount: number | string;
   sender: string;
   spender: string;
-  token: string; //token contract addr
+  token: string; // token contract addr
 };
 
 function generateContractMessages(
@@ -395,7 +395,7 @@ function generateContractMessages(
       const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(swapQuery.fromInfo, swapQuery.amount.toString());
       const { fund: askSentFund, info: askInfo } = parseTokenInfo(swapQuery.toInfo);
       funds = handleSentFunds(offerSentFund, askSentFund);
-      let inputTemp = {
+      const inputTemp = {
         execute_swap_operations: {
           operations: generateSwapOperationMsgs(offerInfo, askInfo),
           minimum_receive: swapQuery.minimumReceive
@@ -576,7 +576,7 @@ function generateConvertMsgs(data: Convert | ConvertReverse): ExecuteInstruction
   switch (type) {
     case Type.CONVERT_TOKEN: {
       // currently only support cw20 token pool
-      let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
+      const { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
       // native case
       if ('native_token' in assetInfo) {
         input = {
@@ -602,8 +602,8 @@ function generateConvertMsgs(data: Convert | ConvertReverse): ExecuteInstruction
       const { outputToken } = data as ConvertReverse;
 
       // currently only support cw20 token pool
-      let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
-      let { info: outputAssetInfo } = parseTokenInfo(outputToken, '0');
+      const { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
+      const { info: outputAssetInfo } = parseTokenInfo(outputToken, '0');
       // native case
       if ('native_token' in assetInfo) {
         input = {
@@ -657,7 +657,7 @@ function generateMoveOraib2OraiMessages(
   toAddress: string
 ) {
   const [, toTokens] = tokens;
-  let transferMsgs: MsgTransfer[] = [];
+  const transferMsgs: MsgTransfer[] = [];
   for (const fromToken of remainingOraib) {
     const toToken = toTokens.find((t) => t.chainId === 'Oraichain' && t.name === fromToken.name);
     let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
