@@ -1761,10 +1761,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@chain-registry/types@^0.43.7":
-  version "0.43.7"
-  resolved "https://registry.yarnpkg.com/@chain-registry/types/-/types-0.43.7.tgz#4d8d5018217d7c298c840ce08ce8f793fa3be761"
-  integrity sha512-8lWskU5DyA7IGDU/4S3mQktlPmHUjlFFYIdSCfacN6OLJeeU0reQ6dqY41XCk4UxGAFCVWWPyM2214damiIc1A==
+"@chain-registry/types@^0.46.11":
+  version "0.46.11"
+  resolved "https://registry.yarnpkg.com/@chain-registry/types/-/types-0.46.11.tgz#68efa85ba5ed4d451218a515a06239594b4125dd"
+  integrity sha512-ASeCtZ3i6g4buyP/43qRnkJo2w50bpX6hsZOapkwOYqAGY83ZE+NZMUcv0UUsiVBHKqC3hAWTLjFNF5q7GR4Gg==
 
 "@colors/colors@1.5.0":
   version "1.5.0"
@@ -4421,10 +4421,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.45.tgz#42dae0fdd9e005f920ba305b987009f791acc365"
   integrity sha512-/nYztdxEX5LQM4DMJQmi9HvZrBVoY3nLAmYqSKZGZ0U1h1SxU7O/o22R3/pQwB+sAJdcibaI8ygC0ov7jC8paA==
 
-"@oraichain/oraidex-universal-swap@1.1.13-beta.8":
-  version "1.1.13-beta.8"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.13-beta.8.tgz#9f23455a9273b2bc224c3d049a10afc6a538c22f"
-  integrity sha512-7h8DIu1UN4UaKy2mt4kDJJuQVQSQa1tLYFgoSuPlkDqUlOT5sN3x2zDmdaWKg7RMEZwiUnbJwNSFWaJb9fp12Q==
+"@oraichain/oraidex-universal-swap@1.1.13-beta.12":
+  version "1.1.13-beta.12"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.13-beta.12.tgz#19fed21f02e24a9079ce2b867c85307b12a55718"
+  integrity sha512-JsCDWm3wDbPTFwIaAEvo6i7gm+taIcv5rDZ747inUfqfysLOwp4gcqbhuPQg09OQD43vB/yBH1ZAoRbLtHzrog==
   dependencies:
     "@oraichain/common" "^1.0.3"
     "@oraichain/oraidex-common" "^1.1.21"
@@ -7744,11 +7744,11 @@ catharsis@^0.9.0:
     lodash "^4.17.15"
 
 chain-registry@^1.61.7:
-  version "1.61.7"
-  resolved "https://registry.yarnpkg.com/chain-registry/-/chain-registry-1.61.7.tgz#be00aca3206e351157bb189d8297248cb22ac550"
-  integrity sha512-+K54ZgLjkSFEFz+harMU+N4HMQi6nysad5ILUjCSINbJFzQQuSVAUJc5CfXofItvhcXOebiOsIQjt3WSm2ZitA==
+  version "1.64.13"
+  resolved "https://registry.yarnpkg.com/chain-registry/-/chain-registry-1.64.13.tgz#86aac5d802eba03163a601c1e0e6313e20666540"
+  integrity sha512-FNdWpcK6K/7p5JXf80ULVNYIqBLnz3R5Ml04lb9+mqbBKhIyEXwbFuvPIlk7fUMnWA0LR5CifMLK0IfIlmxHbQ==
   dependencies:
-    "@chain-registry/types" "^0.43.7"
+    "@chain-registry/types" "^0.46.11"
 
 chalk-template@^0.4.0:
   version "0.4.0"

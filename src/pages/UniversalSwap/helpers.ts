@@ -500,88 +500,11 @@ export const transformSwapInfo = (data) => {
   return transformedData;
 };
 
-export const getTokenInfo = (action, path, assetList) => {
-  let info;
-  let [TokenInIcon, TokenOutIcon] = [DefaultIcon, DefaultIcon];
-
-  const tokenInAction = action.tokenIn;
-  const tokenOutAction = action.tokenOut;
-
-  const tokenInChainId = path.chainId;
-  const tokenOutChainId = path.tokenOutChainId;
-
-  if (action.type === 'Swap') {
-    let tokenInInfo, tokenOutInfo;
-    if (tokenInChainId === 'Oraichain') {
-      const getLowerString = (string) => string?.toLowerCase();
-      tokenInInfo = flattenTokensWithIcon.find((flatToken) =>
-        [getLowerString(flatToken.contractAddress), getLowerString(flatToken.denom)].includes(
-          getLowerString(tokenInAction)
-        )
-      );
-      tokenOutInfo = flattenTokensWithIcon.find((flatToken) =>
-        [getLowerString(flatToken.contractAddress), getLowerString(flatToken.denom)].includes(
-          getLowerString(tokenOutAction)
-        )
-      );
-
-      if (tokenInInfo?.Icon) {
-        TokenInIcon = tokenInInfo.Icon;
-      }
-      if (tokenOutInfo?.Icon) {
-        TokenOutIcon = tokenOutInfo.Icon;
-      }
-      info = {
-        tokenIn: tokenInInfo?.name,
-        tokenOut: tokenOutInfo?.name
-      };
-    } else {
-      tokenInInfo = assetList.assets.find((asset) => asset.base === tokenInAction);
-      tokenOutInfo = assetList.assets.find((asset) => asset.base === tokenOutAction);
-
-      info = {
-        tokenInInfo,
-        tokenOutInfo,
-        tokenIn: tokenInInfo.symbol,
-        tokenOut: tokenOutInfo.symbol
-      };
-    }
-  }
-
-  if (action.type === 'Bridge') {
-    const getTokenInfoBridge = (token, chainId) => {
-      if (chainId === 'Oraichain') {
-        const getLowerString = (string) => string?.toLowerCase();
-        return flattenTokensWithIcon.find((flatToken) =>
-          [getLowerString(flatToken.contractAddress), getLowerString(flatToken.denom)].includes(getLowerString(token))
-        );
-      }
-      return assetList.assets.find((asset) => asset.base === token);
-    };
-
-    const tokenInInfo = getTokenInfoBridge(tokenInAction, tokenInChainId);
-    const tokenOutInfo = getTokenInfoBridge(tokenOutAction, tokenOutChainId);
-    console.log({ tokenInAction, tokenInChainId, tokenInInfo, tokenOutInfo });
-
-    info = {
-      tokenIn: tokenInChainId === 'Oraichain' ? tokenInInfo?.name : tokenInInfo?.symbol,
-      tokenOut: tokenOutChainId === 'Oraichain' ? tokenOutInfo?.name : tokenOutInfo?.symbol,
-      tokenInInfo,
-      tokenOutInfo
-    };
-
-    if (tokenInChainId === 'Oraichain') TokenInIcon = tokenInInfo.Icon;
-    if (tokenOutChainId === 'Oraichain') TokenOutIcon = tokenOutInfo.Icon;
-  }
-
-  return { info, TokenInIcon, TokenOutIcon };
-};
-
 export const getPathInfo = (path, chainIcons, assets) => {
   let [NetworkFromIcon, NetworkToIcon] = [DefaultIcon, DefaultIcon];
 
   const pathChainId = path.chainId.split('-')[0].toLowerCase();
-  const pathTokenOut = path.tokenOutChainId.split('-')[0].toLowerCase();
+  // const pathTokenOut = path.tokenOutChainId.split('-')[0].toLowerCase();
 
   if (path.chainId) {
     const chainFrom = chainIcons.find((cosmos) => cosmos.chainId === path.chainId);
@@ -593,11 +516,11 @@ export const getPathInfo = (path, chainIcons, assets) => {
     NetworkToIcon = chainTo ? chainTo.Icon : DefaultIcon;
   }
 
-  const getAssetsByChainName = (chainName) => assets.find(({ chain_name }) => chain_name === chainName)?.assets || [];
+  // const getAssetsByChainName = (chainName) => assets.find(({ chain_name }) => chain_name === chainName)?.assets || [];
 
-  const assetList = {
-    assets: [...getAssetsByChainName(pathChainId), ...getAssetsByChainName(pathTokenOut)]
-  };
+  // const assetList = {
+  //   assets: [...getAssetsByChainName(pathChainId), ...getAssetsByChainName(pathTokenOut)]
+  // };
 
-  return { NetworkFromIcon, NetworkToIcon, assetList, pathChainId };
+  return { NetworkFromIcon, NetworkToIcon, pathChainId };
 };
