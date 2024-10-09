@@ -830,7 +830,7 @@ const SwapComponent: React.FC<{
               <button
                 className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
                 onClick={() => {
-                  if (impactWarning > 10) return setOpenSwapWarning(true);
+                  if (impactWarning > 5) return setOpenSwapWarning(true);
                   handleSubmit();
                 }}
                 disabled={disabledSwapBtn}
