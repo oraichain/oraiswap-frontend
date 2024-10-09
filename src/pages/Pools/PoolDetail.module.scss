@@ -79,7 +79,8 @@
 
           font-size: 12px;
           font-weight: 500;
-          line-height: 150%; /* 18px */
+          line-height: 150%;
+          /* 18px */
         }
 
         .icons {
@@ -119,14 +120,15 @@
 
       font-size: 14px;
       font-weight: 400;
-      line-height: 150%; /* 21px */
+      line-height: 150%;
+      /* 21px */
 
       .divider {
         padding: 0 6px;
         opacity: 0.3;
 
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
       }
 
@@ -143,6 +145,7 @@
           path {
             fill: $text-btn-default;
           }
+
           vertical-align: text-bottom;
         }
       }

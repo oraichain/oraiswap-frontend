@@ -94,6 +94,7 @@
           0% {
             background-position: right;
           }
+
           100% {
             background-position: left;
           }
@@ -130,6 +131,7 @@
 
       .impact {
         padding-left: 6px;
+
         &-ten {
           color: #ec7871 !important;
         }
@@ -267,12 +269,12 @@
 
       .prefix {
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
       }
     }
 
-    & > span {
+    &>span {
       text-align: right;
     }
 
@@ -306,7 +308,7 @@
 
 .input-swap-fee {
   @include theme() {
-    color: theme-get('neutral-9');
+    color: theme-get('neutral-8');
   }
 
   padding-top: 6px;

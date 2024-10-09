@@ -34,12 +34,13 @@
 
       @include theme {
         background: theme-get('neutral-surface-bg-modal');
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
       }
 
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
+      /* 24px */
 
       @include small-mobile {
         width: 100%;
@@ -123,7 +124,8 @@
 
         font-size: 14px;
         font-weight: 500;
-        line-height: 150%; /* 21px */
+        line-height: 150%;
+        /* 21px */
 
         cursor: pointer;
 
@@ -164,6 +166,7 @@
             filter: brightness(1.5);
           }
         }
+
         border: 1px solid #494949;
 
         @include theme() {
@@ -191,6 +194,7 @@
         background: theme-get('colors-neutral-surface-bg-section-3');
         color: theme-get('colors-neutral-text-body-on-row');
       }
+
       text-align: center;
       font-size: 16px;
       font-weight: 500;

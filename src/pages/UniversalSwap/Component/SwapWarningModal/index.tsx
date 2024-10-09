@@ -21,7 +21,7 @@ const SwapWarningModal = ({ open, onClose, onConfirm, impact }: SwapWarningModal
   });
 
   const btnConfirmType = mobileMode ? 'primary-sm' : 'primary';
-  const btnCancelType = mobileMode ? 'secondary-sm' : 'secondary';
+  const btnCancelType = mobileMode ? 'third-sm' : 'third';
 
   if (!open) {
     return null;
@@ -45,12 +45,11 @@ const SwapWarningModal = ({ open, onClose, onConfirm, impact }: SwapWarningModal
           </div>
         </div>
         <div className={styles.button}>
-          <Button type={btnConfirmType} onClick={onConfirm}>
-            Yes, I have reviewed
-          </Button>
-
           <Button type={btnCancelType} onClick={onClose}>
             Cancel
+          </Button>
+          <Button type={btnConfirmType} onClick={onConfirm}>
+            Yes, I have reviewed
           </Button>
         </div>
       </div>

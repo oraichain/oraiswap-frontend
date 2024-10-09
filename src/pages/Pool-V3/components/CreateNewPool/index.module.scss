@@ -146,7 +146,7 @@
 
         path {
           @include theme {
-            fill: theme-get('neutral-9');
+            fill: theme-get('neutral-8');
           }
         }
 
@@ -168,15 +168,18 @@
       @include theme {
         color: theme-get('colors-neutral-text-text-token-name');
       }
+
       font-size: 16px;
       font-weight: 600;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
+      /* 24px */
     }
 
     .step {
       @include theme {
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
       }
+
       font-size: 14px;
       font-weight: 500;
       line-height: 150%;
@@ -227,7 +230,7 @@
             background-color: theme-get('neutral-6');
           }
 
-          & > span {
+          &>span {
             svg {
               width: 32px;
               height: 32px;
@@ -265,7 +268,8 @@
           text-align: center;
           font-size: 14px;
           font-weight: 400;
-          line-height: 150%; /* 21px */
+          line-height: 150%;
+          /* 21px */
 
           &:hover {
             svg {
@@ -276,6 +280,7 @@
 
           svg {
             transform: rotate(0deg);
+
             path {
               @include theme {
                 stroke: theme-get('primary-surface-default-dark-3');
@@ -295,12 +300,13 @@
 
             font-size: 12px;
             font-weight: 400;
-            line-height: 150%; /* 18px */
+            line-height: 150%;
+            /* 18px */
             letter-spacing: 0.012px;
 
             .descFee {
               @include theme {
-                color: theme-get('neutral-9');
+                color: theme-get('neutral-8');
               }
             }
           }
@@ -327,10 +333,11 @@
 
         font-size: 14px;
         font-weight: 500;
-        line-height: 150%; /* 21px */
+        line-height: 150%;
+        /* 21px */
 
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
           border: 1px solid theme-get('neutral-border-border-default');
         }
 

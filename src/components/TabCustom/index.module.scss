@@ -13,20 +13,20 @@
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
-    line-height: 150%; /* 24px */
+    line-height: 150%;
     width: 100%;
 
     .item {
       @include theme {
         border-bottom: 1px solid transparent;
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
       }
 
       cursor: pointer;
       text-align: center;
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
 
       white-space: nowrap;
       padding: 0 12px 12px 12px;

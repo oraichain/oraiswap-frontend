@@ -113,12 +113,17 @@
 
         font-size: 14px;
         font-weight: 400;
-        line-height: 150%; /* 21px */
+        line-height: 150%;
+
+        @include mobile {
+          font-size: 12px;
+        }
 
         .impact {
-          font-size: 18px;
+          font-weight: 600;
           color: $warning-10-color;
         }
+
         @include theme {
           color: theme-get('neutral-text-title-2');
         }
@@ -129,14 +134,19 @@
       width: 100%;
       display: flex;
       gap: 16px;
+
       @include small-mobile {
         gap: 8px;
-        flex-direction: column;
+        flex-direction: column-reverse;
       }
 
       button {
-        @include desktop {
-          font-size: 13px;
+        height: 44px;
+        padding: 6px 10px;
+
+        @include mobile {
+          font-size: 12px;
+          height: 30px;
         }
         width: 100%;
       }
