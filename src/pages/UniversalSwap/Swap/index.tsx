@@ -31,7 +31,7 @@ import LoadingBox from 'components/LoadingBox';
 import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
-import { chainIcons } from 'config/chainInfos';
+import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import {
   assert,
@@ -58,7 +58,6 @@ import {
   getDisableSwap,
   getPathInfo,
   getTokenBalance,
-  getTokenInfo,
   isAllowAlphaIbcWasm,
   isAllowIBCWasm,
   refreshBalances
@@ -900,18 +899,19 @@ const SwapComponent: React.FC<{
             {openSmartRoute &&
               [routersSwapData?.routes[indSmartRoute[0]]?.paths[indSmartRoute[1]]].map((path) => {
                 if (!path) return null;
-                const { NetworkFromIcon, NetworkToIcon, assetList, pathChainId } = getPathInfo(
-                  path,
-                  chainIcons,
-                  assets
-                );
+                const { NetworkFromIcon, NetworkToIcon, pathChainId } = getPathInfo(path, chainIcons, assets);
                 return path.actions?.map((action, index, actions) => {
-                  const { info, TokenInIcon, TokenOutIcon } = getTokenInfo(action, path, assetList);
-                  const tokenInChainId = path.chainId;
-                  const tokenOutChainId = path.tokenOutChainId;
+                  const { Icon: TokenInIcon, name: symbolIn } = flattenTokensWithIcon.find((flat) =>
+                    [flat.denom, flat.contractAddress].filter(Boolean).includes(action.tokenIn)
+                  );
+                  const { Icon: TokenOutIcon, name: symbolOut } = flattenTokensWithIcon.find((flat) =>
+                    [flat.denom, flat.contractAddress].filter(Boolean).includes(action.tokenOut)
+                  );
+
                   const hasTypeConvert = actions.find((act) => act.type === 'Convert');
                   const width = hasTypeConvert ? actions.length - 1 : actions.length;
                   if (action.type === 'Convert') return null;
+
                   return (
                     <div
                       key={index}
@@ -923,13 +923,12 @@ const SwapComponent: React.FC<{
                       <TooltipSwapBridge
                         type={action.type}
                         pathChainId={pathChainId}
-                        tokenInChainId={tokenInChainId}
-                        tokenOutChainId={tokenOutChainId}
                         TokenInIcon={TokenInIcon}
                         TokenOutIcon={TokenOutIcon}
                         NetworkFromIcon={NetworkFromIcon}
                         NetworkToIcon={NetworkToIcon}
-                        info={info}
+                        symbolOut={symbolOut}
+                        symbolIn={symbolIn}
                       />
                     </div>
                   );
