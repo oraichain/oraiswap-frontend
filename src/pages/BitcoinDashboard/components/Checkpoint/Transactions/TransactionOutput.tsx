@@ -46,8 +46,8 @@ export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = 
     );
   };
 
-  const handleNavigate = (txid: String) => {
-    window.open(`https://blockstream.info/address/${txid}`, '_blank');
+  const handleNavigate = (hash: String) => {
+    window.open(`https://blockstream.info/address/${hash}`, '_blank');
   };
 
   const headers: TableHeaderProps<TransactionParsedOutput> = {
