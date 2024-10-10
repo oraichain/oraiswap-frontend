@@ -31,9 +31,9 @@ import { useDepositFeesBitcoinV2, useGetWithdrawlFeesBitcoin } from 'pages/Balan
 import { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
 import { PendingWithdraws } from '../PendingWithdraws';
+import { useGetPendingDeposits } from 'pages/BitcoinDashboardV2/hooks';
 
 const ConvertBitcoinV2: React.FC<{}> = ({}) => {
-  const nomic = useContext(NomicContext);
   const cwBitcoinContext = useContext(CwBitcoinContext);
   const { relayerFee } = useRelayerFeeToken(
     btcTokens.find((item) => item.name === 'BTC V2'),
@@ -45,6 +45,7 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
   });
   const depositFeeV2Btc = useDepositFeesBitcoinV2(true);
   const [oraiAddress] = useConfigReducer('address');
+  const fetchedPendingDeposits = useGetPendingDeposits(oraiAddress);
   const PENDING_WITHDRAW_STORAGE_KEY = `PENDING_WITHDRAW_${oraiAddress}`;
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [coeff, setCoeff] = useState(0);
@@ -126,10 +127,35 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
     }
   };
 
+  const getBitcoinAddress = async (txid: string, vout: number): Promise<string> => {
+    const data = await fetch(`https://blockstream.info/api/tx/${txid}`).then((res) => res.json());
+    return data.vout[vout].scriptpubkey_address;
+  };
+
   useEffect(() => {
-    const value = JSON.parse(getStorageKey(PENDING_WITHDRAW_STORAGE_KEY) ?? '[]');
-    setCachePendingWithdrawAddrs(value);
-  }, []);
+    console.log('Yield', fetchedPendingDeposits);
+    (async () => {
+      if (!fetchedPendingDeposits) return;
+
+      const value = JSON.parse(getStorageKey(PENDING_WITHDRAW_STORAGE_KEY) ?? '[]') as string[];
+      let pendingAddrs = await Promise.all(
+        fetchedPendingDeposits.map(async (item) => {
+          try {
+            return getBitcoinAddress(item.txid, item.vout);
+          } catch (err) {
+            console.log('Troi oi toi bi loi roi');
+            // console.log('getBitcoinAddress', err?.message);
+            return '';
+          }
+        })
+      );
+      setCachePendingWithdrawAddrs([
+        ...value,
+        ...pendingAddrs.filter((item) => item !== '' && value.includes(item) == false)
+      ]);
+    })();
+  }, [fetchedPendingDeposits]);
+
   useEffect(() => {
     if (withdrawFeeBtc?.withdrawal_fees && depositFeeV2Btc?.deposit_fees) {
       setFee(
@@ -232,7 +258,11 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
           </div>
         </div>
       </div>
-      <PendingWithdraws btcAddresses={cachePendingWithdrawAddrs} />
+      <PendingWithdraws
+        btcAddresses={cachePendingWithdrawAddrs}
+        withdrawFee={BigInt(Math.floor(parseInt(depositFeeV2Btc?.deposit_fees ?? '0') / 1_000_000))}
+        showTx={false}
+      />
     </div>
   );
 };

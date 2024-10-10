@@ -28,7 +28,11 @@ const tokens = {
   } as Icons
 };
 
-export const PendingWithdraws: React.FC<{ btcAddresses?: String[] }> = ({ btcAddresses }) => {
+export const PendingWithdraws: React.FC<{ btcAddresses?: String[]; withdrawFee?: bigint; showTx?: boolean }> = ({
+  btcAddresses,
+  withdrawFee = 0n,
+  showTx = true
+}) => {
   const [theme] = useConfigReducer('theme');
   const mobile = isMobile();
   const fetchedBtcAddrs = useConfigReducer('btcAddress');
@@ -70,8 +74,8 @@ export const PendingWithdraws: React.FC<{ btcAddresses?: String[] }> = ({ btcAdd
     );
   };
 
-  const handleNavigate = (txid: String) => {
-    window.open(`https://blockstream.info/address/${txid}`, '_blank');
+  const handleNavigate = (hash: String) => {
+    window.open(showTx ? `https://blockstream.info/tx/${hash}` : `https://blockstream.info/address/${hash}`, '_blank');
   };
 
   const headers: TableHeaderProps<TransactionParsedOutput> = {
@@ -86,11 +90,11 @@ export const PendingWithdraws: React.FC<{ btcAddresses?: String[] }> = ({ btcAdd
       align: 'left'
     },
     txid: {
-      name: 'Txid',
+      name: showTx ? 'Txid' : 'Address',
       width: '60%',
       accessor: (data) => (
         <div onClick={() => handleNavigate(data.txid)}>
-          <span>{`${data.txid}`}</span>
+          <span>{`${showTx ? data.txid : data.address}`}</span>
         </div>
       ),
       sortField: 'txid',
@@ -101,7 +105,7 @@ export const PendingWithdraws: React.FC<{ btcAddresses?: String[] }> = ({ btcAdd
       width: '21%',
       align: 'right',
       sortField: 'value',
-      accessor: (data) => <span>{toDisplay(BigInt(data.value || 0), 8)} BTC</span>
+      accessor: (data) => <span>{toDisplay(BigInt(data.value || 0) - withdrawFee, 8)} BTC</span>
     }
   };
   const checkRenderUI = () => {
