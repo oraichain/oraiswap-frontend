@@ -80,7 +80,10 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     originalToToken,
     routerClient,
     SIMULATE_INIT_AMOUNT,
-    simulateOption
+    {
+      ...simulateOption,
+      ignoreFee: true
+    }
   );
 
   useEffect(() => {

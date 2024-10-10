@@ -11,13 +11,15 @@ export const getRouterConfig = (options?: {
   protocols?: string[];
   dontAllowSwapAfter?: string[];
   maxSplits?: number;
+  ignoreFee?: boolean;
 }) => {
   return {
     url: 'https://osor.oraidex.io',
     path: options?.path ?? '/smart-router/alpha-router',
     protocols: options?.protocols ?? ['Oraidex', 'OraidexV3'],
     dontAllowSwapAfter: options?.dontAllowSwapAfter ?? ['Oraidex', 'OraidexV3'],
-    maxSplits: options?.maxSplits
+    maxSplits: options?.maxSplits,
+    ignoreFee: options?.ignoreFee ?? false
   };
 };
 
@@ -46,6 +48,7 @@ export const useSimulate = (
     protocols?: string[];
     dontAllowSwapAfter?: string[];
     maxSplits?: number;
+    ignoreFee?: boolean;
   }
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
