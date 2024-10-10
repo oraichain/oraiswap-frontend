@@ -5,12 +5,6 @@
   z-index: 9;
   flex: 1 0 0;
 
-  // .btnAdd {
-  //   button {
-  //     height: 36px;
-  //     white-space: nowrap;
-  //   }
-
   &.activeWrapper {
     z-index: 998;
   }
@@ -42,41 +36,16 @@
     }
   }
 
-  //   @include mobile {
-  //     // position: fixed;
-  //     // z-index: 10;
-  //     bottom: 16px;
-  //     left: 50%;
-  //     // transform: translateX(-50%);
-  //     padding: 12px 16px;
-  //     width: calc(80% - 20px);
-
-  //     @include theme {
-  //       background: theme-get('neutral-surface-bg-tooltip');
-  //       border: 1px solid theme-get('neutral-border-border-default');
-  //       border-radius: 99px;
-  //     }
-
-  //     & button {
-  //       width: 100%;
-  //     }
-  //   }
-
-  //   @include small-mobile {
-  //     width: calc(100% - 20px);
-  //   }
-  // }
-
   .overlay {
-    z-index: 999998;
+    z-index: 999;
     position: fixed;
     top: 0;
     left: 0;
 
     background: #000;
 
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
 
     opacity: 0;
     visibility: hidden;
@@ -89,7 +58,7 @@
   }
 
   .modalWrapper {
-    z-index: 999999;
+    z-index: 1000;
     width: 100%;
     height: 100%;
     padding-top: 86px;
@@ -153,6 +122,7 @@
 
         .setting {
           transform: translateY(3px);
+
           svg {
             width: 24px;
             height: 24px;
@@ -168,7 +138,7 @@
 
           path {
             @include theme {
-              fill: theme-get('neutral-9');
+              fill: theme-get('neutral-8');
             }
           }
 
@@ -182,28 +152,31 @@
         display: flex;
         align-items: center;
         justify-content: center;
+
         .infoPoolName {
           @include theme {
             color: 1px solid theme-get('colors-neutral-text-body-on-row');
           }
+
           font-size: 16px;
           font-weight: 600;
+
           span {
             border-radius: 6px;
             width: 26px;
             height: 24px;
             font-size: 12px;
-            @include theme {
-              border: 1px solid theme-get('colors-primary-surface-default');
-            }
+            border: 1px solid $colors-primary-surface-default;
             text-align: center;
             text-transform: uppercase;
           }
         }
+
         .infoPoolfee {
           display: flex;
           align-items: center;
           justify-content: center;
+
           span {
             border-radius: 6px;
             height: 24px;
@@ -221,8 +194,10 @@
         font-size: 12px;
         display: flex;
         align-items: center;
+
         span {
           cursor: pointer;
+
           svg {
             width: 16px;
             height: 16px;
@@ -290,15 +265,18 @@
       @include theme {
         color: theme-get('colors-neutral-text-text-token-name');
       }
+
       font-size: 16px;
       font-weight: 600;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
+      /* 24px */
     }
 
     .step {
       @include theme {
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
       }
+
       font-size: 14px;
       font-weight: 500;
       line-height: 150%;
@@ -349,7 +327,7 @@
             background-color: theme-get('neutral-6');
           }
 
-          & > span {
+          &>span {
             svg {
               width: 32px;
               height: 32px;
@@ -387,7 +365,8 @@
           text-align: center;
           font-size: 14px;
           font-weight: 400;
-          line-height: 150%; /* 21px */
+          line-height: 150%;
+          /* 21px */
 
           &:hover {
             svg {
@@ -398,6 +377,7 @@
 
           svg {
             transform: rotate(0deg);
+
             path {
               @include theme {
                 stroke: theme-get('primary-surface-default-dark-3');
@@ -417,12 +397,13 @@
 
             font-size: 12px;
             font-weight: 400;
-            line-height: 150%; /* 18px */
+            line-height: 150%;
+            /* 18px */
             letter-spacing: 0.012px;
 
             .descFee {
               @include theme {
-                color: theme-get('neutral-9');
+                color: theme-get('neutral-8');
               }
             }
           }
@@ -449,10 +430,11 @@
 
         font-size: 14px;
         font-weight: 500;
-        line-height: 150%; /* 21px */
+        line-height: 150%;
+        /* 21px */
 
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
           border: 1px solid theme-get('neutral-border-border-default');
         }
 

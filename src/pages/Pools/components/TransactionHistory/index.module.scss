@@ -21,7 +21,7 @@
     margin-bottom: 8px;
 
     @include theme {
-      color: theme-get('neutral-9');
+      color: theme-get('neutral-8');
     }
 
     font-size: 16px;
@@ -53,6 +53,7 @@
   }
 
   table {
+
     /* required css to make the rows rounded */
     thead {
       white-space: nowrap;
@@ -98,7 +99,7 @@
       padding: 18px 24px;
 
       @include theme {
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
       }
 
       font-size: 12px;
@@ -170,10 +171,10 @@
 
   .time {
     @include theme {
-      color: theme-get('neutral-9');
+      color: theme-get('neutral-8');
     }
 
-    & > div {
+    &>div {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
@@ -196,14 +197,14 @@
 
     .symbol {
       @include theme {
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
       }
     }
   }
 
   .detailPrice {
     @include theme {
-      color: theme-get('neutral-9');
+      color: theme-get('neutral-8');
     }
 
     font-size: 14px;
@@ -246,7 +247,7 @@
         margin-bottom: 12px;
 
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
       }
 

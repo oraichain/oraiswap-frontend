@@ -32,6 +32,7 @@ import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
 import { chainIcons } from 'config/chainInfos';
+import { EVENT_CONFIG_THEME } from 'config/eventConfig';
 import { ethers } from 'ethers';
 import {
   assert,
@@ -42,11 +43,13 @@ import {
   networks
 } from 'helper';
 import { RELAYER_DECIMAL } from 'helper/constants';
+import { isNegative } from 'helper/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useOnClickOutside from 'hooks/useOnClickOutside';
+import useTemporaryConfigReducer from 'hooks/useTemporaryConfigReducer';
 import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Metamask from 'libs/metamask';
@@ -68,10 +71,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentAddressBookStep, setCurrentAddressBookStep } from 'reducer/addressBook';
 import { AddressManagementStep } from 'reducer/type';
 import { RootState } from 'store/configure';
+import SwapWarningModal from '../Component/SwapWarningModal';
 import { SlippageModal } from '../Modals';
 import { SmartRouteModal } from '../Modals/SmartRouteModal';
 import { checkEvmAddress, getSwapType } from '../helpers';
-import AIRouteSwitch from './components/AIRouteSwitch/AIRouteSwitch';
 import AddressBook from './components/AddressBook';
 import InputCommon from './components/InputCommon';
 import InputSwap from './components/InputSwap/InputSwap';
@@ -83,8 +86,6 @@ import useCalculateDataSwap, { SIMULATE_INIT_AMOUNT } from './hooks/useCalculate
 import { useFillToken } from './hooks/useFillToken';
 import useHandleEffectTokenChange from './hooks/useHandleEffectTokenChange';
 import styles from './index.module.scss';
-import { isNegative } from 'helper/format';
-// import SwapWarningModal from '../Component/SwapWarningModal';
 
 const cx = cn.bind(styles);
 
@@ -103,6 +104,9 @@ const SwapComponent: React.FC<{
   const currentAddressManagementStep = useSelector(selectCurrentAddressBookStep);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const dispatch = useDispatch();
+
+  const [event] = useTemporaryConfigReducer('event');
+  const configTheme = EVENT_CONFIG_THEME[theme][event];
 
   const loadTokenAmounts = useLoadTokens();
   const { refetchTransHistory } = useGetTransHistory();
@@ -124,7 +128,7 @@ const SwapComponent: React.FC<{
   const [openSmartRoute, setOpenSmartRoute] = useState(false);
   const [indSmartRoute, setIndSmartRoute] = useState([0, 0]);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
-  // const [openSwapWarning, setOpenSwapWarning] = useState(false);
+  const [openSwapWarning, setOpenSwapWarning] = useState(false);
 
   // value state
   const [coe, setCoe] = useState(0);
@@ -829,11 +833,21 @@ const SwapComponent: React.FC<{
               <button
                 className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
                 onClick={() => {
-                  // if (impactWarning > 10) return setOpenSwapWarning(true);
+                  if (impactWarning > 5) return setOpenSwapWarning(true);
                   handleSubmit();
                 }}
                 disabled={disabledSwapBtn}
               >
+                {!disabledSwapBtn && (
+                  <div className={styles.eventItem}>
+                    {configTheme.swapBox.inner.button.leftImg && (
+                      <img className={styles.left} src={configTheme.swapBox.inner.button.leftImg} alt="" />
+                    )}
+                    {configTheme.swapBox.inner.button.rightImg && (
+                      <img className={styles.right} src={configTheme.swapBox.inner.button.rightImg} alt="" />
+                    )}
+                  </div>
+                )}
                 {swapLoading && <Loader width={20} height={20} />}
                 {/* hardcode check minimum tron */}
                 {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
@@ -955,7 +969,7 @@ const SwapComponent: React.FC<{
         openSlippage={() => setOpenSetting(true)}
         closeSlippage={() => setOpenSetting(false)}
       />
-      {/* 
+
       <SwapWarningModal
         onClose={() => setOpenSwapWarning(false)}
         open={openSwapWarning}
@@ -964,7 +978,7 @@ const SwapComponent: React.FC<{
           handleSubmit();
         }}
         impact={impactWarning}
-      /> */}
+      />
     </div>
   );
 };
