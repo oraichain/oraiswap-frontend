@@ -31,7 +31,6 @@ import LoadingBox from 'components/LoadingBox';
 import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
-import { EVENT_CONFIG_THEME } from 'config/eventConfig';
 import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 import { EVENT_CONFIG_THEME } from 'config/eventConfig';
 import { ethers } from 'ethers';
