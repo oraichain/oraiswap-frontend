@@ -37,6 +37,14 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
 
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const protocols = getProtocolsSmartRoute(originalFromToken, originalToToken, { useIbcWasm, useAlphaIbcWasm });
+  const simulateOption = {
+    useAlphaIbcWasm,
+    useIbcWasm,
+    protocols,
+    maxSplits: useAlphaIbcWasm && originalFromToken.cosmosBased !== originalToToken.cosmosBased ? 1 : 10,
+    dontAllowSwapAfter: useAlphaIbcWasm ? [''] : undefined
+  };
+
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
     originalFromToken,
     originalToToken
@@ -61,13 +69,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
       originalToToken,
       routerClient,
       null,
-      {
-        useAlphaIbcWasm,
-        useIbcWasm,
-        protocols,
-        maxSplits: useAlphaIbcWasm ? 1 : 10,
-        dontAllowSwapAfter: useAlphaIbcWasm ? [''] : undefined
-      }
+      simulateOption
     );
 
   const { simulateData: averageSimulateData } = useSimulate(
@@ -78,14 +80,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     originalToToken,
     routerClient,
     SIMULATE_INIT_AMOUNT,
-    {
-      useAlphaIbcWasm,
-      useIbcWasm,
-      protocols,
-      isAvgSimulate: isAvgSimulate.status,
-      maxSplits: useAlphaIbcWasm ? 1 : 10,
-      dontAllowSwapAfter: useAlphaIbcWasm ? [] : undefined
-    }
+    simulateOption
   );
 
   useEffect(() => {

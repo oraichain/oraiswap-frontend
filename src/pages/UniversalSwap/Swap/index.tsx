@@ -909,12 +909,16 @@ const SwapComponent: React.FC<{
                 ]);
 
                 return flattenSmartRouters?.map((action, index, actions) => {
-                  const { Icon: TokenInIcon, name: symbolIn } = flattenTokensWithIcon.find((flat) =>
+                  const tokenInData = flattenTokensWithIcon.find((flat) =>
                     [flat.denom, flat.contractAddress].filter(Boolean).includes(action.tokenIn)
                   );
-                  const { Icon: TokenOutIcon, name: symbolOut } = flattenTokensWithIcon.find((flat) =>
+                  const TokenInIcon = tokenInData?.Icon;
+                  const symbolIn = tokenInData?.name;
+                  const tokenOutData = flattenTokensWithIcon.find((flat) =>
                     [flat.denom, flat.contractAddress].filter(Boolean).includes(action.tokenOut)
                   );
+                  const TokenOutIcon = tokenOutData?.Icon;
+                  const symbolOut = tokenOutData?.name;
 
                   const hasTypeConvert = actions.find((act) => act.type === 'Convert');
                   const width = hasTypeConvert ? actions.length - 1 : actions.length;
