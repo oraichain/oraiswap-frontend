@@ -58,7 +58,8 @@ export const PendingWithdraws: React.FC<{ btcAddresses?: String[]; withdrawFee?:
       }))
     : [];
   const finalOutputs = hasSigningCheckpoint ? [...allOutputs, ...previousOutputs] : allOutputs;
-  const data = finalOutputs.filter((item) => (btcAddresses || [fetchedBtcAddrs[0]]).includes(item.address));
+  const defaultBtcAddress = fetchedBtcAddrs?.[0] || '';
+  const data = finalOutputs.filter((item) => (btcAddresses || [defaultBtcAddress]).includes(item.address));
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
