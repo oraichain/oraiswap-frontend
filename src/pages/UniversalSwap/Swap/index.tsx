@@ -900,7 +900,15 @@ const SwapComponent: React.FC<{
               [routersSwapData?.routes[indSmartRoute[0]]?.paths[indSmartRoute[1]]].map((path) => {
                 if (!path) return null;
                 const { NetworkFromIcon, NetworkToIcon, pathChainId } = getPathInfo(path, chainIcons, assets);
-                return path.actions?.map((action, index, actions) => {
+                const flattenSmartRouters = UniversalSwapHelper.flattenSmartRouters([
+                  {
+                    swapAmount: '0',
+                    returnAmount: '0',
+                    paths: [path]
+                  }
+                ]);
+
+                return flattenSmartRouters?.map((action, index, actions) => {
                   const { Icon: TokenInIcon, name: symbolIn } = flattenTokensWithIcon.find((flat) =>
                     [flat.denom, flat.contractAddress].filter(Boolean).includes(action.tokenIn)
                   );
