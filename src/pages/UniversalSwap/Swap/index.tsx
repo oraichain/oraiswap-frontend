@@ -31,7 +31,7 @@ import LoadingBox from 'components/LoadingBox';
 import PowerByOBridge from 'components/PowerByOBridge';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { flattenTokens } from 'config/bridgeTokens';
-import { chainIcons } from 'config/chainInfos';
+import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 import { EVENT_CONFIG_THEME } from 'config/eventConfig';
 import { ethers } from 'ethers';
 import {
@@ -61,8 +61,7 @@ import {
   getDisableSwap,
   getPathInfo,
   getTokenBalance,
-  getTokenInfo,
-  isAllowAlphaSmartRouter,
+  isAllowAlphaIbcWasm,
   isAllowIBCWasm,
   refreshBalances
 } from 'pages/UniversalSwap/helpers';
@@ -188,7 +187,7 @@ const SwapComponent: React.FC<{
   const toTokenBalance = getTokenBalance(originalToToken, amounts, subAmountTo);
 
   const useIbcWasm = isAllowIBCWasm(originalFromToken, originalToToken);
-  const useAlphaSmartRouter = isAllowAlphaSmartRouter();
+  const useAlphaIbcWasm = isAllowAlphaIbcWasm(originalFromToken, originalToToken);
 
   const settingRef = useRef();
   const smartRouteRef = useRef();
@@ -319,7 +318,7 @@ const SwapComponent: React.FC<{
       }
 
       const isCustomRecipient = validAddress.isValid && addressTransfer !== initAddressTransfer;
-      const alphaSmartRoutes = useAlphaSmartRouter ? simulateData?.routes : undefined;
+      const alphaSmartRoutes = simulateData?.routes;
 
       const swapData = {
         sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -341,7 +340,7 @@ const SwapComponent: React.FC<{
         cosmosWallet: window.Keplr,
         evmWallet: new Metamask(window.tronWebDapp),
         swapOptions: {
-          isAlphaSmartRouter: useAlphaSmartRouter,
+          isAlphaIbcWasm: useAlphaIbcWasm,
           isIbcWasm: useIbcWasm
         }
       });
@@ -396,7 +395,8 @@ const SwapComponent: React.FC<{
           toAmount: `${toAmountToken}`,
           fromNetwork: originalFromToken.chainId,
           toNetwork: originalToToken.chainId,
-          useAlphaSmartRouter,
+          useAlphaSmartRouter: true,
+          useAlphaIbcWasm: useAlphaIbcWasm,
           priceOfFromTokenInUsd: usdPriceShowFrom,
           priceOfToTokenInUsd: usdPriceShowTo
         };
@@ -436,9 +436,9 @@ const SwapComponent: React.FC<{
       return networks.filter((chainInfo) => chainInfo.chainId === 'Oraichain').map((chain) => chain.chainId);
     }
 
-    if (!originalFromToken.cosmosBased) {
-      return networks.filter((chainInfo) => chainInfo.chainId !== 'injective-1').map((chain) => chain.chainId);
-    }
+    // if (!originalFromToken.cosmosBased) {
+    //   return networks.filter((chainInfo) => chainInfo.chainId !== 'injective-1').map((chain) => chain.chainId);
+    // }
     return [];
   };
 
@@ -913,18 +913,31 @@ const SwapComponent: React.FC<{
             {openSmartRoute &&
               [routersSwapData?.routes[indSmartRoute[0]]?.paths[indSmartRoute[1]]].map((path) => {
                 if (!path) return null;
-                const { NetworkFromIcon, NetworkToIcon, assetList, pathChainId } = getPathInfo(
-                  path,
-                  chainIcons,
-                  assets
-                );
-                return path.actions?.map((action, index, actions) => {
-                  const { info, TokenInIcon, TokenOutIcon } = getTokenInfo(action, path, assetList);
-                  const tokenInChainId = path.chainId;
-                  const tokenOutChainId = path.tokenOutChainId;
+                const { NetworkFromIcon, NetworkToIcon, pathChainId } = getPathInfo(path, chainIcons, assets);
+                const flattenSmartRouters = UniversalSwapHelper.flattenSmartRouters([
+                  {
+                    swapAmount: '0',
+                    returnAmount: '0',
+                    paths: [path]
+                  }
+                ]);
+
+                return flattenSmartRouters?.map((action, index, actions) => {
+                  const tokenInData = flattenTokensWithIcon.find((flat) =>
+                    [flat.denom, flat.contractAddress].filter(Boolean).includes(action.tokenIn)
+                  );
+                  const TokenInIcon = tokenInData?.Icon;
+                  const symbolIn = tokenInData?.name;
+                  const tokenOutData = flattenTokensWithIcon.find((flat) =>
+                    [flat.denom, flat.contractAddress].filter(Boolean).includes(action.tokenOut)
+                  );
+                  const TokenOutIcon = tokenOutData?.Icon;
+                  const symbolOut = tokenOutData?.name;
+
                   const hasTypeConvert = actions.find((act) => act.type === 'Convert');
                   const width = hasTypeConvert ? actions.length - 1 : actions.length;
                   if (action.type === 'Convert') return null;
+
                   return (
                     <div
                       key={index}
@@ -936,13 +949,12 @@ const SwapComponent: React.FC<{
                       <TooltipSwapBridge
                         type={action.type}
                         pathChainId={pathChainId}
-                        tokenInChainId={tokenInChainId}
-                        tokenOutChainId={tokenOutChainId}
                         TokenInIcon={TokenInIcon}
                         TokenOutIcon={TokenOutIcon}
                         NetworkFromIcon={NetworkFromIcon}
                         NetworkToIcon={NetworkToIcon}
-                        info={info}
+                        symbolOut={symbolOut}
+                        symbolIn={symbolIn}
                       />
                     </div>
                   );

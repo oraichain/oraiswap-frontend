@@ -67,7 +67,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
-import DepositBtcModal from './DepositBtcModal';
 import {
   calculatorTotalFeeBtc,
   convertKwt,
@@ -87,7 +86,6 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
-import { isAllowAlphaSmartRouter, isAllowIBCWasm } from 'pages/UniversalSwap/helpers';
 import DepositBtcModalV2 from './DepositBtcModalV2';
 import { CwBitcoinContext } from 'context/cw-bitcoin-context';
 import { AppBitcoinClient } from '@oraichain/bitcoin-bridge-contracts-sdk';
@@ -592,7 +590,6 @@ const Balance: React.FC<BalanceProps> = () => {
           cosmosWallet: window.Keplr,
           evmWallet: new Metamask(window.tronWebDapp),
           swapOptions: {
-            isAlphaSmartRouter: isAllowAlphaSmartRouter(),
             isIbcWasm: false
           }
         }
