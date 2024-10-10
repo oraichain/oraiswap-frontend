@@ -114,7 +114,7 @@ const getDepositFee = async (checkpointIndex?: number): Promise<DepositFeeInterf
   try {
     const res = await axios.get('/checkpoint/deposit_fee', {
       params: {
-        checkpoint_index: checkpointIndex
+        index: checkpointIndex
       }
     });
     return { deposit_fees: res.data.data };

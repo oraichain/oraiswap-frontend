@@ -97,7 +97,7 @@ export const PendingWithdraws: React.FC<{
       name: showTx ? 'Txid' : 'Address',
       width: '60%',
       accessor: (data) => (
-        <div onClick={() => handleNavigate(data.txid)}>
+        <div onClick={() => handleNavigate(showTx ? data.txid : data.address)}>
           <span>{`${showTx ? data.txid : data.address}`}</span>
         </div>
       ),
