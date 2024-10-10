@@ -7,8 +7,8 @@ import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
-import { CheckpointStatus, TransactionParsedOutput } from 'pages/BitcoinDashboard/@types';
-import { useGetCheckpointData, useGetCheckpointQueue } from 'pages/BitcoinDashboard/hooks';
+import { CheckpointStatus, TransactionParsedOutput } from 'pages/BitcoinDashboardV2/@types';
+import { useGetCheckpointData, useGetCheckpointQueue } from 'pages/BitcoinDashboardV2/hooks';
 import { isMobile } from '@walletconnect/browser-utils';
 import TransactionsMobile from '../Checkpoint/Transactions/TransactionMobiles/TransactionMobile';
 
@@ -28,11 +28,12 @@ const tokens = {
   } as Icons
 };
 
-export const PendingWithdraws: React.FC<{ btcAddresses?: String[]; withdrawFee?: bigint; showTx?: boolean }> = ({
-  btcAddresses,
-  withdrawFee = 0n,
-  showTx = true
-}) => {
+export const PendingWithdraws: React.FC<{
+  btcAddresses?: String[];
+  withdrawFee?: bigint;
+  showTx?: boolean;
+  additionOutputs?: TransactionParsedOutput[];
+}> = ({ btcAddresses, withdrawFee = 0n, showTx = true, additionOutputs = [] }) => {
   const [theme] = useConfigReducer('theme');
   const mobile = isMobile();
   const fetchedBtcAddrs = useConfigReducer('btcAddress');
@@ -59,7 +60,9 @@ export const PendingWithdraws: React.FC<{ btcAddresses?: String[]; withdrawFee?:
     : [];
   const finalOutputs = hasSigningCheckpoint ? [...allOutputs, ...previousOutputs] : allOutputs;
   const defaultBtcAddress = fetchedBtcAddrs?.[0] || '';
-  const data = finalOutputs.filter((item) => (btcAddresses || [defaultBtcAddress]).includes(item.address));
+  const data = [...finalOutputs, ...additionOutputs].filter((item) =>
+    (btcAddresses || [defaultBtcAddress]).includes(item.address)
+  );
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];

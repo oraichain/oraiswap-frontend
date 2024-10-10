@@ -19,7 +19,6 @@ import { Button } from 'components/Button';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { NomicContext } from 'context/nomic-context';
 import { CwBitcoinContext } from 'context/cw-bitcoin-context';
 import { Decimal } from '@cosmjs/math';
 import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
@@ -30,7 +29,7 @@ import { getStorageKey, handleErrorTransaction } from 'helper';
 import { useDepositFeesBitcoinV2, useGetWithdrawlFeesBitcoin } from 'pages/Balance/helpers';
 import { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
-import { PendingWithdraws } from '../PendingWithdraws';
+import { PendingWithdraws } from 'pages/BitcoinDashboard/components/PendingWithdraws';
 import { useGetPendingDeposits } from 'pages/BitcoinDashboardV2/hooks';
 
 const ConvertBitcoinV2: React.FC<{}> = ({}) => {
@@ -127,34 +126,35 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
     }
   };
 
-  const getBitcoinAddress = async (txid: string, vout: number): Promise<string> => {
-    const data = await fetch(`https://blockstream.info/api/tx/${txid}`).then((res) => res.json());
-    return data.vout[vout].scriptpubkey_address;
-  };
+  // const getBitcoinAddress = async (txid: string, vout: number): Promise<string> => {
+  //   const data = await fetch(`https://blockstream.info/api/tx/${txid}`).then((res) => res.json());
+  //   return data.vout[vout].scriptpubkey_address;
+  // };
+
+  // useEffect(() => {
+  //   (async () => {
+  //     let pendingAddrs = await Promise.all(
+  //       fetchedPendingDeposits.map(async (item) => {
+  //         try {
+  //           const address = await getBitcoinAddress(item.txid, item.vout);
+  //           return {
+  //             txid: item.txid,
+  //             address,
+  //             value: item.amount / 1_000_000
+  //           };
+  //         } catch (err) {
+  //           return undefined;
+  //         }
+  //       })
+  //     );
+  //     setPendingDepositV2Addrs(pendingAddrs.filter((item) => item !== undefined));
+  //   })();
+  // }, [fetchedPendingDeposits]);
 
   useEffect(() => {
-    console.log('Yield', fetchedPendingDeposits);
-    (async () => {
-      if (!fetchedPendingDeposits) return;
-
-      const value = JSON.parse(getStorageKey(PENDING_WITHDRAW_STORAGE_KEY) ?? '[]') as string[];
-      let pendingAddrs = await Promise.all(
-        fetchedPendingDeposits.map(async (item) => {
-          try {
-            return getBitcoinAddress(item.txid, item.vout);
-          } catch (err) {
-            console.log('Troi oi toi bi loi roi');
-            // console.log('getBitcoinAddress', err?.message);
-            return '';
-          }
-        })
-      );
-      setCachePendingWithdrawAddrs([
-        ...value,
-        ...pendingAddrs.filter((item) => item !== '' && value.includes(item) == false)
-      ]);
-    })();
-  }, [fetchedPendingDeposits]);
+    const value = JSON.parse(getStorageKey(PENDING_WITHDRAW_STORAGE_KEY) ?? '[]') as string[];
+    setCachePendingWithdrawAddrs([...value]);
+  }, []);
 
   useEffect(() => {
     if (withdrawFeeBtc?.withdrawal_fees && depositFeeV2Btc?.deposit_fees) {
