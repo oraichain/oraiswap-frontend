@@ -815,6 +815,15 @@ const SwapComponent: React.FC<{
               </span>
             </div>
           </div>
+
+          <div className={styles.eventItem}>
+            {configTheme.swapBox.inner.bottomLeft && (
+              <img className={styles.left} src={configTheme.swapBox.inner.bottomLeft} alt="" />
+            )}
+            {configTheme.swapBox.inner.bottomRight && (
+              <img className={styles.right} src={configTheme.swapBox.inner.bottomRight} alt="" />
+            )}
+          </div>
           {(() => {
             const { disabledSwapBtn, disableMsg } = getDisableSwap({
               originalToToken,
