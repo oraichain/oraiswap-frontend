@@ -322,7 +322,7 @@ const Balance: React.FC<BalanceProps> = () => {
       if (rs?.rawTxHex) {
         setTxHash(rs.rawTxHex);
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `/bitcoin-dashboard?tab=pending_deposits`
+          customLink: `/bitcoin-dashboard${isV2 ? '-v2' : ''}?tab=pending_deposits`
         });
         setTimeout(async () => {
           await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress: btcAddr });
@@ -371,7 +371,7 @@ const Balance: React.FC<BalanceProps> = () => {
           fromToken.rpc,
           // @ts-ignore-check
           result,
-          '/bitcoin-dashboard?tab=pending_withdraws'
+          '/bitcoin-dashboard-v2?tab=pending_withdraws'
         );
       } catch (ex) {
         console.log(ex);
