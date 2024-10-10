@@ -41,7 +41,7 @@ const useCalculateDataSwap = ({ originalFromToken, originalToToken, fromToken, t
     useAlphaIbcWasm,
     useIbcWasm,
     protocols,
-    maxSplits: useAlphaIbcWasm && originalFromToken.cosmosBased !== originalToToken.cosmosBased ? 1 : 10,
+    maxSplits: useAlphaIbcWasm ? 1 : 10,
     dontAllowSwapAfter: useAlphaIbcWasm ? [''] : undefined
   };
 
