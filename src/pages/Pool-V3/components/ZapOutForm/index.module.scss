@@ -56,7 +56,7 @@
 
 //     path {
 //       @include theme {
-//         fill: theme-get('neutral-9');
+//         fill: theme-get('neutral-8');
 //       }
 //     }
 //   }
@@ -87,7 +87,8 @@
 
   font-size: 12px;
   font-weight: 400;
-  line-height: 150%; /* 18px */
+  line-height: 150%;
+  /* 18px */
   letter-spacing: 0.012px;
 }
 
@@ -109,7 +110,8 @@
     text-align: center;
     font-size: 16px;
     font-weight: 600;
-    line-height: 150%; /* 24px */
+    line-height: 150%;
+    /* 24px */
 
     display: flex;
     justify-content: center;
@@ -128,14 +130,16 @@
         @include theme {
           color: theme-get('colors-neutral-text-text-token-name');
         }
+
         font-weight: 600;
         font-size: 16px;
       }
 
       .liquidityActive {
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
+
         font-size: 12px;
         font-weight: 400;
         line-height: 18px;
@@ -226,16 +230,19 @@
       border-radius: 8px;
       padding: 12px;
       display: flex;
+
       @include theme {
         background-color: theme-get('neutral-6');
       }
+
       align-items: center;
       justify-content: space-between;
 
       .currentPriceTitle {
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
+
         font-size: 13px;
         font-weight: 400;
         line-height: 18px;
@@ -245,6 +252,7 @@
         @include theme {
           color: theme-get('colors-neutral-text-text-token-name');
         }
+
         text-align: end;
         font-size: 18px;
         font-weight: 600;
@@ -252,8 +260,9 @@
 
         .pair {
           @include theme {
-            color: theme-get('neutral-9');
+            color: theme-get('neutral-8');
           }
+
           font-size: 12px;
           font-weight: 400;
           line-height: 18px;
@@ -280,19 +289,21 @@
         margin-top: 6px;
 
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
 
         font-size: 13px;
         font-weight: 400;
-        line-height: 150%; /* 19.5px */
+        line-height: 150%;
+        /* 19.5px */
         letter-spacing: 0.013px;
 
         .value {
           color: var(--chart-bear, #ff4d52);
           font-size: 13px;
           font-weight: 400;
-          line-height: 150%; /* 19.5px */
+          line-height: 150%;
+          /* 19.5px */
           letter-spacing: 0.013px;
 
           &.positive {
@@ -311,13 +322,15 @@
         @include theme {
           background-color: theme-get('neutral-6');
         }
+
         width: 100%;
         padding: 12px;
 
         .minMaxPriceTitle {
           @include theme {
-            color: theme-get('neutral-9');
+            color: theme-get('neutral-8');
           }
+
           font-size: 13px;
           text-align: end;
           font-weight: 400;
@@ -328,6 +341,7 @@
           @include theme {
             color: theme-get('colors-neutral-text-text-token-name');
           }
+
           font-size: 18px;
           text-align: end;
           font-weight: 600;
@@ -335,8 +349,9 @@
 
           .pair {
             @include theme {
-              color: theme-get('neutral-9');
+              color: theme-get('neutral-8');
             }
+
             font-size: 12px;
             font-weight: 400;
             line-height: 18px;
@@ -383,7 +398,8 @@
 
     font-size: 14px;
     font-weight: 500;
-    line-height: 150%; /* 21px */
+    line-height: 150%;
+    /* 21px */
   }
 }
 
@@ -427,17 +443,20 @@
 
     font-size: 14px;
     font-weight: 700;
-    line-height: 150%; /* 21px */
+    line-height: 150%;
+    /* 21px */
 
     @keyframes greenLighter {
       0% {
         transform: scale(1);
         opacity: 0.7;
       }
+
       50% {
         transform: scale(1.1);
         opacity: 1;
       }
+
       100% {
         transform: scale(1);
         opacity: 0.7;
@@ -465,7 +484,8 @@
 
       font-size: 12px;
       font-weight: 400;
-      line-height: 150%; /* 18px */
+      line-height: 150%;
+      /* 18px */
       letter-spacing: 0.012px;
       cursor: pointer;
       transition: all ease-in-out 0.3s;
@@ -524,10 +544,7 @@
 
     .valueImpact {
       font-weight: 500;
-
-      @include theme {
-        color: theme-get('accent-1');
-      }
+      color: $accent-1;
 
       &-medium {
         @include theme {
@@ -536,9 +553,7 @@
       }
 
       &-high {
-        @include theme {
-          color: theme-get('warning-surface-1');
-        }
+        color: $warning-surface-1;
       }
     }
 
@@ -607,7 +622,8 @@
 
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
+      /* 24px */
 
       svg {
         width: 28px;
@@ -636,6 +652,7 @@
           0% {
             background-position: right;
           }
+
           100% {
             background-position: left;
           }
@@ -677,12 +694,13 @@
     width: 100%;
 
     @include theme {
-      color: theme-get('neutral-9');
+      color: theme-get('neutral-8');
     }
 
     font-size: 12px;
     font-weight: 400;
-    line-height: 150%; /* 18px */
+    line-height: 150%;
+    /* 18px */
     letter-spacing: 0.012px;
 
     display: flex;
@@ -691,6 +709,7 @@
 
     .bal {
       margin-right: 8px;
+
       p {
         @include theme {
           color: theme-get('colors-neutral-text-text-token-name');
@@ -703,6 +722,7 @@
       flex-wrap: nowrap;
       gap: 4px;
     }
+
     button {
       display: flex;
       width: 40px;
@@ -720,7 +740,8 @@
 
       font-size: 12px;
       font-weight: 400;
-      line-height: 150%; /* 18px */
+      line-height: 150%;
+      /* 18px */
       letter-spacing: 0.012px;
       cursor: pointer;
       transition: all ease-in-out 0.3s;
@@ -757,9 +778,11 @@
   .item {
     display: flex;
     padding: 16px;
+
     @include mobile {
       padding: 8px;
     }
+
     justify-content: space-between;
     gap: 8px;
     flex: 1;
@@ -774,11 +797,14 @@
 
       color: var(--Colors-Neutral-Text-title, #efefef);
       font-size: 18px;
+
       @include mobile {
         font-size: 13px;
       }
+
       font-weight: 500;
-      line-height: 150%; /* 27px */
+      line-height: 150%;
+      /* 27px */
 
       svg {
         width: 24px;
@@ -794,17 +820,22 @@
 
       color: var(--Colors-Neutral-Text-title, #efefef);
       font-size: 18px;
+
       @include mobile {
         font-size: 16px;
       }
+
       font-weight: 500;
-      line-height: 150%; /* 27px */
+      line-height: 150%;
+      /* 27px */
 
       .usd {
         font-size: 14px;
+
         @include mobile {
           font-size: 12px;
         }
+
         color: #979995;
         font-weight: 400;
       }
@@ -817,6 +848,7 @@
     @include theme {
       color: theme-get('colors-neutral-text-text-token-name');
     }
+
     font-size: 16px;
     font-weight: 600;
     line-height: 150%;
@@ -837,6 +869,7 @@
   @include theme {
     color: theme-get('colors-neutral-text-text-token-name');
   }
+
   font-size: 14px;
   font-weight: 400;
   line-height: 3rem;
@@ -870,7 +903,8 @@
       color: var(--Colors-Neutral-Text-title, #efefef);
       font-size: 18px;
       font-weight: 500;
-      line-height: 150%; /* 27px */
+      line-height: 150%;
+      /* 27px */
 
       svg {
         width: 24px;
@@ -887,7 +921,8 @@
       color: var(--Colors-Neutral-Text-title, #efefef);
       font-size: 18px;
       font-weight: 500;
-      line-height: 150%; /* 27px */
+      line-height: 150%;
+      /* 27px */
 
       .usd {
         font-size: 14px;

@@ -41,7 +41,7 @@
 
     .title {
       @include theme() {
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
       }
 
       font-size: 14px;
@@ -60,7 +60,7 @@
 
         path {
           @include theme() {
-            fill: theme-get('neutral-9');
+            fill: theme-get('neutral-8');
           }
         }
       }
@@ -94,7 +94,7 @@
 
       .amountLp {
         @include theme() {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
 
         font-size: 14px;

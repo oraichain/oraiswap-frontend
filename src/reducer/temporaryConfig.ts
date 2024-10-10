@@ -1,13 +1,20 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-// import { PERSIST_VERSION } from 'store/configure';
+
+export enum EVENT_ENUM {
+  normal = 'normal',
+  halloween = 'halloween'
+  // christmas = 'christmas'
+}
 
 export interface TemporaryConfigState {
   customBanner: boolean;
+  event: EVENT_ENUM;
 }
 
 const initialState: TemporaryConfigState = {
-  customBanner: true
+  customBanner: true,
+  event: EVENT_ENUM.halloween
 };
 
 export const temporaryConfigSlice = createSlice({
