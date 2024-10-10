@@ -126,9 +126,11 @@
 
         th {
           padding: 0 12px;
+
           @include theme {
-            color: theme-get('neutral-9');
+            color: theme-get('neutral-8');
           }
+
           font-size: 12px;
           font-weight: 500;
           line-height: 150%;
@@ -159,8 +161,7 @@
       right: 10px;
     }
 
-    &_left {
-    }
+    &_left {}
   }
 
   &_name {
