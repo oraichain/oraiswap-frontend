@@ -12,20 +12,10 @@ const PowerByOBridge: React.FC<{ theme: string }> = ({ theme }) => {
   const configTheme = EVENT_CONFIG_THEME[theme][event] as ConfigTheme;
 
   return (
-    <>
-      <div className={styles.eventItem}>
-        {configTheme.swapBox.inner.bottomLeft && (
-          <img className={styles.left} src={configTheme.swapBox.inner.bottomLeft} alt="" />
-        )}
-        {configTheme.swapBox.inner.bottomRight && (
-          <img className={styles.right} src={configTheme.swapBox.inner.bottomRight} alt="" />
-        )}
-      </div>
-      <div className={styles.powered}>
-        <div>Powered by</div>
-        {theme === 'light' ? <ObridgeDarkImg /> : <ObridgeLightImg />}
-      </div>
-    </>
+    <div className={styles.powered}>
+      <div>Powered by</div>
+      {theme === 'light' ? <ObridgeDarkImg /> : <ObridgeLightImg />}
+    </div>
   );
 };
 
