@@ -23,9 +23,9 @@
     "@oraichain/orai-bitcoin": "2.0.0",
     "@oraichain/oraidex-common-ui": "1.0.11",
     "@oraichain/oraidex-contracts-sdk": "1.0.51-beta.3",
-    "@oraichain/oraidex-universal-swap": "1.1.12",
+    "@oraichain/oraidex-universal-swap": "1.1.14",
     "@reduxjs/toolkit": "^1.9.3",
-    "@sentry/react": "^7.47.1",
+    "@sentry/react": "7.99.0",
     "@tanstack/react-query": "^4.32.6",
     "@tharsis/proto": "^0.1.17",
     "@tippyjs/react": "^4.2.0",
@@ -140,7 +140,8 @@
     "bech32": "1.1.4",
     "bitcoinjs-lib": "5.2.0",
     "axios": "0.26.1",
-    "@oraichain/oraidex-common": "1.1.21"
+    "@sentry/react": "7.99.0",
+    "@oraichain/oraidex-common": "1.1.23"
   },
   "engines": {
     "node": "^18 || ^20"

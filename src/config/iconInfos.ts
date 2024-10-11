@@ -162,7 +162,7 @@ export const tokensIconInfos: TokenIcon[] = [
     IconLight: CatIcon
   },
   {
-    coinGeckoId: 'hamster-kombat' as any,
+    coinGeckoId: 'hamster-kombat',
     Icon: HmstrIcon,
     IconLight: HmstrIcon
   }
@@ -233,6 +233,11 @@ export const chainIconsInfos: ChainIcon[] = [
     chainId: 'oraibtc-mainnet-1',
     Icon: BitcoinIcon,
     IconLight: BitcoinIcon
+  },
+  {
+    chainId: 'celestia',
+    Icon: CelestiaIcon,
+    IconLight: CelestiaIcon
   }
 ];
 

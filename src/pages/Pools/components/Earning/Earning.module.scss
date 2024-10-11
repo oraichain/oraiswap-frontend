@@ -64,7 +64,7 @@
 
       .title {
         @include theme() {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
 
         display: flex;
@@ -116,7 +116,7 @@
 
       .amountOrai {
         @include theme() {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
 
         font-size: 14px;

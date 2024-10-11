@@ -6,12 +6,20 @@ import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
 import { useDebounce } from 'hooks/useDebounce';
 
-export const getRouterConfig = (options?: { path?: string; protocols?: string[]; dontAllowSwapAfter?: string[] }) => {
+export const getRouterConfig = (options?: {
+  path?: string;
+  protocols?: string[];
+  dontAllowSwapAfter?: string[];
+  maxSplits?: number;
+  ignoreFee?: boolean;
+}) => {
   return {
     url: 'https://osor.oraidex.io',
     path: options?.path ?? '/smart-router/alpha-router',
     protocols: options?.protocols ?? ['Oraidex', 'OraidexV3'],
-    dontAllowSwapAfter: options?.dontAllowSwapAfter ?? ['Oraidex', 'OraidexV3']
+    dontAllowSwapAfter: options?.dontAllowSwapAfter ?? ['Oraidex', 'OraidexV3'],
+    maxSplits: options?.maxSplits,
+    ignoreFee: options?.ignoreFee ?? false
   };
 };
 
@@ -34,10 +42,13 @@ export const useSimulate = (
   simulateOption?: {
     useAlphaSmartRoute?: boolean;
     useIbcWasm?: boolean;
+    useAlphaIbcWasm?: boolean;
     isAvgSimulate?: boolean;
     path?: string;
     protocols?: string[];
     dontAllowSwapAfter?: string[];
+    maxSplits?: number;
+    ignoreFee?: boolean;
   }
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
@@ -53,7 +64,7 @@ export const useSimulate = (
         originalAmount: debouncedFromAmount,
         routerClient,
         routerOption: {
-          useAlphaSmartRoute: simulateOption?.useAlphaSmartRoute,
+          useAlphaIbcWasm: simulateOption?.useAlphaIbcWasm,
           useIbcWasm: simulateOption?.useIbcWasm
         },
         routerConfig: getRouterConfig(simulateOption)
