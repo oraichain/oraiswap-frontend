@@ -12,6 +12,7 @@ import {
 } from '@visx/xychart';
 import { FC } from 'react';
 import { theme } from '../HistoricalPriceChart';
+import styles from './index.module.scss';
 
 export type DepthData = {
   price: number;
@@ -54,21 +55,6 @@ export const ConcentratedLiquidityDepthChart: FC<{
   horizontal = true,
   fullRange = false
 }) => {
-  console.log({
-    min,
-    max,
-    yRange,
-    xRange,
-    data,
-    annotationDatum,
-    onMoveMax,
-    onMoveMin,
-    onSubmitMin,
-    onSubmitMax,
-    offset,
-    fullRange
-  });
-
   const xMax = xRange[1];
   const showMinDragHandler = min !== undefined && Boolean(onMoveMin) && Boolean(onSubmitMin);
   const showMaxDragHandler = max !== undefined && Boolean(onMoveMax) && Boolean(onSubmitMax);
@@ -88,13 +74,14 @@ export const ConcentratedLiquidityDepthChart: FC<{
   };
 
   return (
-    <ParentSize className="flex-shrink-1 flex-1 overflow-hidden">
+    <ParentSize className={styles.parentSize}>
       {({ height, width }) => {
         const yScale = scaleLinear({
           range: [top, height - bottom],
           domain: yRange.slice().reverse(),
           zero: false
         });
+        console.log('height', height);
 
         const maxHeight = 290;
         const customHeight = Math.min(height, maxHeight);
@@ -207,7 +194,7 @@ export const ConcentratedLiquidityDepthChart: FC<{
                 defaultValue={fullRange ? yRange[0] * 1.05 : min}
                 length={xMax}
                 scale={yScale}
-                stroke={theme.colors.bullish['500']}
+                stroke={theme.colors.wosmongton['500']}
                 onMove={onMoveMinBoundary}
                 onSubmit={onSubmitMin}
               />

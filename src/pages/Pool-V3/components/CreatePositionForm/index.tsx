@@ -18,6 +18,7 @@ import {
   getLiquidityByY,
   getMaxTick,
   getMinTick,
+  getTickAtSqrtPrice,
   isTokenX,
   newPoolKey,
   poolKeyToString,
@@ -33,6 +34,9 @@ import { ReactComponent as WarningIcon } from 'assets/icons/warning-fill-ic.svg'
 import { ReactComponent as OutputIcon } from 'assets/icons/zapOutput-ic.svg';
 import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
 import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
+import { ReactComponent as RefreshIcon } from 'assets/icons/refresh-ccw.svg';
+import { ReactComponent as ZoomInIcon } from 'assets/icons/zoom-in.svg';
+import { ReactComponent as ZoomOutIcon } from 'assets/icons/zoom-out.svg';
 import classNames from 'classnames';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -79,9 +83,12 @@ import {
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
 import { PRICE_SCALE } from 'libs/contractSingleton';
-import HistoricalPriceChart from '../HistoricalPriceChart';
+import HistoricalPriceChart, { formatPretty } from '../HistoricalPriceChart';
 import { ConcentratedLiquidityDepthChart } from '../ConcentratedLiquidityDepthChart';
 import { Dec } from '@keplr-wallet/unit';
+import { useHistoricalAndLiquidityData } from 'pages/Pool-V3/hooks/useHistoricalAndLiquidityData';
+import { reaction } from 'mobx';
+import { set } from 'lodash';
 
 export type PriceInfo = {
   startPrice: number;
@@ -129,6 +136,11 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   const { data: prices } = useCoinGeckoPrices();
   const { poolList, poolPrice: extendPrices } = useGetPoolList(prices);
+  const chartConfig = useHistoricalAndLiquidityData(poolData.pool_key);
+
+  useEffect(() => {
+    console.log('chart config', { chartConfig });
+  }, [chartConfig]);
 
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -447,7 +459,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           calcPrice(
             Math.max(
               getMinTick(poolData.pool_key.fee_tier.tick_spacing),
-              Number(midPrice.index) - poolData.pool_key.fee_tier.tick_spacing * 15
+              Number(midPrice.index) - poolData.pool_key.fee_tier.tick_spacing * 6
             ),
             isXtoY,
             tokenXDecimals,
@@ -457,12 +469,12 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
       const higherTick = Math.max(
         Number(getMinTick(Number(poolData.pool_key.fee_tier.tick_spacing))),
-        Number(midPrice.index) - Number(poolData.pool_key.fee_tier.tick_spacing) * 10
+        Number(midPrice.index) - Number(poolData.pool_key.fee_tier.tick_spacing) * 3
       );
 
       const lowerTick = Math.min(
         Number(getMaxTick(Number(poolData.pool_key.fee_tier.tick_spacing))),
-        Number(midPrice.index) + Number(poolData.pool_key.fee_tier.tick_spacing) * 10
+        Number(midPrice.index) + Number(poolData.pool_key.fee_tier.tick_spacing) * 3
       );
 
       changeRangeHandler(isXtoY ? higherTick : lowerTick, isXtoY ? lowerTick : higherTick);
@@ -980,6 +992,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   }, [zapInResponse]);
 
   useEffect(() => {
+    console.log(leftRange, rightRange);
     // console.log("debounceZapAmount", debounceZapAmount);
     if (Number(zapAmount) > 0 && toggleZapIn) {
       handleSimulateZapIn();
@@ -994,6 +1007,72 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       setZapInResponse(null);
     }
   }, [zapAmount, debounceZapAmount]);
+
+  const [formattedPrice, setFormattedPrice] = useState<string>('');
+
+  // const getFormattedPrice = useCallback(
+  //   (additionalFormatOpts?: Partial<Intl.NumberFormatOptions & { disabledTrimZeros: boolean }>) => {
+  //     console.log("change")
+  //     return (
+  //       formatPretty(new Dec(chartConfig.hoverPrice), {
+  //         maxDecimals: 4,
+  //         notation: 'compact',
+  //         ...additionalFormatOpts
+  //       }) || ''
+  //     );
+  //   },
+  //   [chartConfig.hoverPrice]
+  // );
+
+  useEffect(() => {
+    const dispose = reaction(
+      () => chartConfig.hoverPrice, // The observable to track
+      (hoverPrice) => {
+        // Side effect when hoverPrice changes
+        console.log('hoverPrice changed:', hoverPrice);
+        setFormattedPrice(
+          formatPretty(new Dec(hoverPrice), {
+            maxDecimals: 4,
+            notation: 'compact'
+          }) || ''
+        );
+        // Add any additional logic here
+      }
+    );
+  
+    // Cleanup the reaction when the component unmounts
+    return () => dispose();
+  }, [chartConfig]);
+
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(0);
+
+  useEffect(() => {
+    if (leftRange && rightRange) {
+      const pricePointMin = calcPrice(leftRange, isXtoY, tokenFrom.decimals, tokenTo.decimals);
+      const pricePointMax = calcPrice(rightRange, isXtoY, tokenFrom.decimals, tokenTo.decimals);
+      console.log('pricePointMin', pricePointMin);
+      console.log('pricePointMax', pricePointMax);
+      setMinPrice(pricePointMin);
+      setMaxPrice(pricePointMax);
+    }
+  }, [leftRange, rightRange]);
+
+  const correspondTick = (price: number) => {
+    const sqrtP = Math.sqrt(price);
+    const sqrtPBigInt = BigInt(sqrtP * 1e24);
+    const tick = getTickAtSqrtPrice(sqrtPBigInt, poolData.pool_key.fee_tier.tick_spacing);
+    return tick;
+  }
+
+  useEffect(() => {
+    if (minPrice && maxPrice) {
+      const left = correspondTick(minPrice);
+      const right = correspondTick(maxPrice);
+      changeRangeHandler(left, right);
+      autoZoomHandler(left, right);
+    }
+  }, [minPrice, maxPrice]);
 
   return (
     <div className={styles.createPoolForm}>
@@ -1082,48 +1161,80 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
               <div className={styles.wrapChart}>
                 <div className={styles.chartPrice}>
+                  <div className={styles.chartOptions}>
+                    <div className={styles.priceWrapper}>
+                      <div>
+                        <h4 className={styles.price}>{formattedPrice}</h4>
+                      </div>
+                      {chartConfig.tokenX && chartConfig.tokenY ? (
+                        <div className={styles.text}>
+                          <div className={styles.currentPrice}>current price</div>
+                          <div className={styles.xPerY}>
+                            {chartConfig.tokenY.name} per {chartConfig.tokenX.name}
+                          </div>
+                        </div>
+                      ) : undefined}
+                    </div>
+
+                    <div className={styles.time}>
+                      <button onClick={() => chartConfig.setHistoricalRange('1d')}>1D</button>
+                      <button onClick={() => chartConfig.setHistoricalRange('7d')}>1W</button>
+                      <button onClick={() => chartConfig.setHistoricalRange('1mo')}>1M</button>
+                      <button onClick={() => chartConfig.setHistoricalRange('1y')}>1Y</button>
+                    </div>
+                  </div>
+
                   <HistoricalPriceChart
-                    data={PriceChartData.historicalChartData}
+                    data={chartConfig.historicalChartData}
                     annotations={
                       (AddLiquidityConfig.fullRange
-                        ? [new Dec(PriceChartData.yRange[0] * 1.05), new Dec(PriceChartData.yRange[1] * 0.95)]
-                        : AddLiquidityConfig.rangeWithCurrencyDecimals) as any
+                        ? [new Dec(chartConfig.yRange[0] * 1.05), new Dec(chartConfig.yRange[1] * 0.95)]
+                        : [minPrice, maxPrice]) as any
                     }
-                    domain={PriceChartData.yRange as [number, number]}
-                    onPointerHover={(price) => {
-                      console.log('onPointerHover', price);
+                    domain={chartConfig.yRange as [number, number]}
+                    onPointerHover={chartConfig.setHoverPrice}
+                    onPointerOut={() => {
+                      chartConfig.setHoverPrice(chartConfig.currentPrice);
                     }}
-                    onPointerOut={undefined}
                   />
                 </div>
                 <div className={styles.chartLiquid}>
                   <div className={styles.chart}>
+                    <div className={styles.actions}>
+                      <RefreshIcon onClick={() => console.log('refresh')} />
+                      <ZoomOutIcon onClick={() => console.log('zoom-out')} />
+                      <ZoomInIcon onClick={() => console.log('zoom-in')} />
+                    </div>
                     <ConcentratedLiquidityDepthChart
-                      min={ConcentrateChartData.min}
-                      max={ConcentrateChartData.max}
-                      yRange={ConcentrateChartData.yRange as [number, number]}
-                      xRange={ConcentrateChartData.xRange as [number, number]}
-                      data={ConcentrateChartData.data}
+                      min={minPrice}
+                      max={maxPrice}
+                      yRange={chartConfig.yRange as [number, number]}
+                      xRange={chartConfig.xRange as [number, number]}
+                      data={chartConfig.depthChartData}
                       annotationDatum={useMemo(
                         () => ({
-                          price: AddLiquidityConfig.currentPriceWithDecimals,
-                          depth: ConcentrateChartData.xRange[1]
+                          price: chartConfig.currentPrice,
+                          depth: chartConfig.xRange[1]
                         }),
-                        [ConcentrateChartData.xRange, AddLiquidityConfig.currentPriceWithDecimals]
+                        [chartConfig.xRange, chartConfig.currentPrice]
                       )}
                       // eslint-disable-next-line react-hooks/exhaustive-deps
                       onMoveMax={(value) => {
                         console.log('onMoveMax', value);
+                        setMaxPrice(value);
                       }}
                       // eslint-disable-next-line react-hooks/exhaustive-deps
                       onMoveMin={(value) => {
                         console.log('onMoveMin', value);
+                        setMinPrice(value);
                       }}
                       onSubmitMin={(value) => {
                         console.log('onSubmitMin', value);
+                        setMinPrice(value);
                       }}
                       onSubmitMax={(value) => {
                         console.log('onSubmitMax', value);
+                        setMaxPrice(value);
                       }}
                       offset={{ top: 0, right: 36, bottom: 24 + 28, left: 0 }}
                       horizontal
@@ -1647,1203 +1758,691 @@ const PriceChartData = {
   historicalChartData: [
     {
       time: 1727769600000,
-      close: 0.614968711,
-      high: 0.615817002,
-      low: 0.611439341,
-      open: 0.612089683
+      close: 0.614968711
     },
     {
       time: 1727773200000,
-      close: 0.610095399,
-      high: 0.614968711,
-      low: 0.609508381,
-      open: 0.614968711
+      close: 0.610095399
     },
     {
       time: 1727776800000,
-      close: 0.611702955,
-      high: 0.612778151,
-      low: 0.609439597,
-      open: 0.610095993
+      close: 0.611702955
     },
     {
       time: 1727780400000,
-      close: 0.613504411,
-      high: 0.613504411,
-      low: 0.610840637,
-      open: 0.611702955
+      close: 0.613504411
     },
     {
       time: 1727784000000,
-      close: 0.612750455,
-      high: 0.616205315,
-      low: 0.612114273,
-      open: 0.613504411
+      close: 0.612750455
     },
     {
       time: 1727787600000,
-      close: 0.610511149,
-      high: 0.613632661,
-      low: 0.609856924,
-      open: 0.612644693
+      close: 0.610511149
     },
     {
       time: 1727791200000,
-      close: 0.599490928,
-      high: 0.61051119,
-      low: 0.592334676,
-      open: 0.610511149
+      close: 0.599490928
     },
     {
       time: 1727794800000,
-      close: 0.577520034,
-      high: 0.599497486,
-      low: 0.576225628,
-      open: 0.599490651
+      close: 0.577520034
     },
     {
       time: 1727798400000,
-      close: 0.572584208,
-      high: 0.577521971,
-      low: 0.557852418,
-      open: 0.577521971
+      close: 0.572584208
     },
     {
       time: 1727802000000,
-      close: 0.561122093,
-      high: 0.574498968,
-      low: 0.557736566,
-      open: 0.572581944
+      close: 0.561122093
     },
     {
       time: 1727805600000,
-      close: 0.553899985,
-      high: 0.561122437,
-      low: 0.537201533,
-      open: 0.561122437
+      close: 0.553899985
     },
     {
       time: 1727809200000,
-      close: 0.557028733,
-      high: 0.561197125,
-      low: 0.553890765,
-      open: 0.553899501
+      close: 0.557028733
     },
     {
       time: 1727812800000,
-      close: 0.554456796,
-      high: 0.56008123,
-      low: 0.554278236,
-      open: 0.557028733
+      close: 0.554456796
     },
     {
       time: 1727816400000,
-      close: 0.553707833,
-      high: 0.554978965,
-      low: 0.54565831,
-      open: 0.554480094
+      close: 0.553707833
     },
     {
       time: 1727820000000,
-      close: 0.554142082,
-      high: 0.555803265,
-      low: 0.54877553,
-      open: 0.553707917
+      close: 0.554142082
     },
     {
       time: 1727823600000,
-      close: 0.546444299,
-      high: 0.554915377,
-      low: 0.544758875,
-      open: 0.554142082
+      close: 0.546444299
     },
     {
       time: 1727827200000,
-      close: 0.547832966,
-      high: 0.548052305,
-      low: 0.54530266,
-      open: 0.546444299
+      close: 0.547832966
     },
     {
       time: 1727830800000,
-      close: 0.554160453,
-      high: 0.555301187,
-      low: 0.544755226,
-      open: 0.547832554
+      close: 0.554160453
     },
     {
       time: 1727834400000,
-      close: 0.558299994,
-      high: 0.558799677,
-      low: 0.553556303,
-      open: 0.554161675
+      close: 0.558299994
     },
     {
       time: 1727838000000,
-      close: 0.558499873,
-      high: 0.558954207,
-      low: 0.556622518,
-      open: 0.558299979
+      close: 0.558499873
     },
     {
       time: 1727841600000,
-      close: 0.559539057,
-      high: 0.560064205,
-      low: 0.557530875,
-      open: 0.558499873
+      close: 0.559539057
     },
     {
       time: 1727845200000,
-      close: 0.557107811,
-      high: 0.559539057,
-      low: 0.556844063,
-      open: 0.559539057
+      close: 0.557107811
     },
     {
       time: 1727848800000,
-      close: 0.556811104,
-      high: 0.560442491,
-      low: 0.55673967,
-      open: 0.557107811
+      close: 0.556811104
     },
     {
       time: 1727852400000,
-      close: 0.566232173,
-      high: 0.566467436,
-      low: 0.55574168,
-      open: 0.556811034
+      close: 0.566232173
     },
     {
       time: 1727856000000,
-      close: 0.565631659,
-      high: 0.567941839,
-      low: 0.562979753,
-      open: 0.566232124
+      close: 0.565631659
     },
     {
       time: 1727859600000,
-      close: 0.567352144,
-      high: 0.567937063,
-      low: 0.564946107,
-      open: 0.565631455
+      close: 0.567352144
     },
     {
       time: 1727863200000,
-      close: 0.554762952,
-      high: 0.570289365,
-      low: 0.554685493,
-      open: 0.567352144
+      close: 0.554762952
     },
     {
       time: 1727866800000,
-      close: 0.554763335,
-      high: 0.560138389,
-      low: 0.55462909,
-      open: 0.554762952
+      close: 0.554763335
     },
     {
       time: 1727870400000,
-      close: 0.554820934,
-      high: 0.556896568,
-      low: 0.551615241,
-      open: 0.554762453
+      close: 0.554820934
     },
     {
       time: 1727874000000,
-      close: 0.549273955,
-      high: 0.555534062,
-      low: 0.549226263,
-      open: 0.554820964
+      close: 0.549273955
     },
     {
       time: 1727877600000,
-      close: 0.550082766,
-      high: 0.550622794,
-      low: 0.540719386,
-      open: 0.549273955
+      close: 0.550082766
     },
     {
       time: 1727881200000,
-      close: 0.548197936,
-      high: 0.553058261,
-      low: 0.547636487,
-      open: 0.550082765
+      close: 0.548197936
     },
     {
       time: 1727884800000,
-      close: 0.553862419,
-      high: 0.55407009,
-      low: 0.547790195,
-      open: 0.547790308
+      close: 0.553862419
     },
     {
       time: 1727888400000,
-      close: 0.552358939,
-      high: 0.559903354,
-      low: 0.552358939,
-      open: 0.553862417
+      close: 0.552358939
     },
     {
       time: 1727892000000,
-      close: 0.550483549,
-      high: 0.553605353,
-      low: 0.548633318,
-      open: 0.552358939
+      close: 0.550483549
     },
     {
       time: 1727895600000,
-      close: 0.536168126,
-      high: 0.550483561,
-      low: 0.535874373,
-      open: 0.550483549
+      close: 0.536168126
     },
     {
       time: 1727899200000,
-      close: 0.534897709,
-      high: 0.536658369,
-      low: 0.526617871,
-      open: 0.53598542
+      close: 0.534897709
     },
     {
       time: 1727902800000,
-      close: 0.542405283,
-      high: 0.543180488,
-      low: 0.531431527,
-      open: 0.534897675
+      close: 0.542405283
     },
     {
       time: 1727906400000,
-      close: 0.538795559,
-      high: 0.543254919,
-      low: 0.537946769,
-      open: 0.542406773
+      close: 0.538795559
     },
     {
       time: 1727910000000,
-      close: 0.538356766,
-      high: 0.538795559,
-      low: 0.53409047,
-      open: 0.538795559
+      close: 0.538356766
     },
     {
       time: 1727913600000,
-      close: 0.538554943,
-      high: 0.540338136,
-      low: 0.538357865,
-      open: 0.538357865
+      close: 0.538554943
     },
     {
       time: 1727917200000,
-      close: 0.537057439,
-      high: 0.539650557,
-      low: 0.522721317,
-      open: 0.538554512
+      close: 0.537057439
     },
     {
       time: 1727920800000,
-      close: 0.540283072,
-      high: 0.542255676,
-      low: 0.53675893,
-      open: 0.53675893
+      close: 0.540283072
     },
     {
       time: 1727924400000,
-      close: 0.543476082,
-      high: 0.543848314,
-      low: 0.539481014,
-      open: 0.540282584
+      close: 0.543476082
     },
     {
       time: 1727928000000,
-      close: 0.546079759,
-      high: 0.546208391,
-      low: 0.54277009,
-      open: 0.543476515
+      close: 0.546079759
     },
     {
       time: 1727931600000,
-      close: 0.545495619,
-      high: 0.546371429,
-      low: 0.542832076,
-      open: 0.546079759
+      close: 0.545495619
     },
     {
       time: 1727935200000,
-      close: 0.540542871,
-      high: 0.54574957,
-      low: 0.540541646,
-      open: 0.545494857
+      close: 0.540542871
     },
     {
       time: 1727938800000,
-      close: 0.543477519,
-      high: 0.544199168,
-      low: 0.5402821,
-      open: 0.540542872
+      close: 0.543477519
     },
     {
       time: 1727942400000,
-      close: 0.536991097,
-      high: 0.54500843,
-      low: 0.536146016,
-      open: 0.543477519
+      close: 0.536991097
     },
     {
       time: 1727946000000,
-      close: 0.52428201,
-      high: 0.53746347,
-      low: 0.518419723,
-      open: 0.536991097
+      close: 0.52428201
     },
     {
       time: 1727949600000,
-      close: 0.53175839,
-      high: 0.533056551,
-      low: 0.519200344,
-      open: 0.52428201
+      close: 0.53175839
     },
     {
       time: 1727953200000,
-      close: 0.537364286,
-      high: 0.537478516,
-      low: 0.53175839,
-      open: 0.53175839
+      close: 0.537364286
     },
     {
       time: 1727956800000,
-      close: 0.529600807,
-      high: 0.539408661,
-      low: 0.529347459,
-      open: 0.537359815
+      close: 0.529600807
     },
     {
       time: 1727960400000,
-      close: 0.526269958,
-      high: 0.529601952,
-      low: 0.524316922,
-      open: 0.529600869
+      close: 0.526269958
     },
     {
       time: 1727964000000,
-      close: 0.522772611,
-      high: 0.527574187,
-      low: 0.519729965,
-      open: 0.526269958
+      close: 0.522772611
     },
     {
       time: 1727967600000,
-      close: 0.518853833,
-      high: 0.529839787,
-      low: 0.518799858,
-      open: 0.522772936
+      close: 0.518853833
     },
     {
       time: 1727971200000,
-      close: 0.517539747,
-      high: 0.519242699,
-      low: 0.511715661,
-      open: 0.51885381
+      close: 0.517539747
     },
     {
       time: 1727974800000,
-      close: 0.510840433,
-      high: 0.518316448,
-      low: 0.509295515,
-      open: 0.517539949
+      close: 0.510840433
     },
     {
       time: 1727978400000,
-      close: 0.514085167,
-      high: 0.518966859,
-      low: 0.507929027,
-      open: 0.510633201
+      close: 0.514085167
     },
     {
       time: 1727982000000,
-      close: 0.513559459,
-      high: 0.514897902,
-      low: 0.511826039,
-      open: 0.514085167
+      close: 0.513559459
     },
     {
       time: 1727985600000,
-      close: 0.518098451,
-      high: 0.518126009,
-      low: 0.512350388,
-      open: 0.513559219
+      close: 0.518098451
     },
     {
       time: 1727989200000,
-      close: 0.516753579,
-      high: 0.519705706,
-      low: 0.51622074,
-      open: 0.518098203
+      close: 0.516753579
     },
     {
       time: 1727992800000,
-      close: 0.518288153,
-      high: 0.518456365,
-      low: 0.514699359,
-      open: 0.516753594
+      close: 0.518288153
     },
     {
       time: 1727996400000,
-      close: 0.516739924,
-      high: 0.518519572,
-      low: 0.516122778,
-      open: 0.518288153
+      close: 0.516739924
     },
     {
       time: 1728000000000,
-      close: 0.516584144,
-      high: 0.518818974,
-      low: 0.515215682,
-      open: 0.516739924
+      close: 0.516584144
     },
     {
       time: 1728003600000,
-      close: 0.514429024,
-      high: 0.517828887,
-      low: 0.5140667,
-      open: 0.516584278
+      close: 0.514429024
     },
     {
       time: 1728007200000,
-      close: 0.524838381,
-      high: 0.525929433,
-      low: 0.514429024,
-      open: 0.514429024
+      close: 0.524838381
     },
     {
       time: 1728010800000,
-      close: 0.524696361,
-      high: 0.525674827,
-      low: 0.523092999,
-      open: 0.524838381
+      close: 0.524696361
     },
     {
       time: 1728014400000,
-      close: 0.522402737,
-      high: 0.524699755,
-      low: 0.52110367,
-      open: 0.52469644
+      close: 0.522402737
     },
     {
       time: 1728018000000,
-      close: 0.524696568,
-      high: 0.529491133,
-      low: 0.522402737,
-      open: 0.522402737
+      close: 0.524696568
     },
     {
       time: 1728021600000,
-      close: 0.52847649,
-      high: 0.528959949,
-      low: 0.524694494,
-      open: 0.524696568
+      close: 0.52847649
     },
     {
       time: 1728025200000,
-      close: 0.527790575,
-      high: 0.529617866,
-      low: 0.527640122,
-      open: 0.52847649
+      close: 0.527790575
     },
     {
       time: 1728028800000,
-      close: 0.529440555,
-      high: 0.529820453,
-      low: 0.525454745,
-      open: 0.527790575
+      close: 0.529440555
     },
     {
       time: 1728032400000,
-      close: 0.531739756,
-      high: 0.534424962,
-      low: 0.528851157,
-      open: 0.529440346
+      close: 0.531739756
     },
     {
       time: 1728036000000,
-      close: 0.531284497,
-      high: 0.535208648,
-      low: 0.531280341,
-      open: 0.531739756
+      close: 0.531284497
     },
     {
       time: 1728039600000,
-      close: 0.527580033,
-      high: 0.531284178,
-      low: 0.527556403,
-      open: 0.531284178
+      close: 0.527580033
     },
     {
       time: 1728043200000,
-      close: 0.530724525,
-      high: 0.530973753,
-      low: 0.526605906,
-      open: 0.527564826
+      close: 0.530724525
     },
     {
       time: 1728046800000,
-      close: 0.531408747,
-      high: 0.531408747,
-      low: 0.525603842,
-      open: 0.530723057
+      close: 0.531408747
     },
     {
       time: 1728050400000,
-      close: 0.529527038,
-      high: 0.533249741,
-      low: 0.528995432,
-      open: 0.531492623
+      close: 0.529527038
     },
     {
       time: 1728054000000,
-      close: 0.526574066,
-      high: 0.531505885,
-      low: 0.522682032,
-      open: 0.529633913
+      close: 0.526574066
     },
     {
       time: 1728057600000,
-      close: 0.536044085,
-      high: 0.536044085,
-      low: 0.526574066,
-      open: 0.526574066
+      close: 0.536044085
     },
     {
       time: 1728061200000,
-      close: 0.545762373,
-      high: 0.548480075,
-      low: 0.535993023,
-      open: 0.535993023
+      close: 0.545762373
     },
     {
       time: 1728064800000,
-      close: 0.546162998,
-      high: 0.547403756,
-      low: 0.543556405,
-      open: 0.545883024
+      close: 0.546162998
     },
     {
       time: 1728068400000,
-      close: 0.547789977,
-      high: 0.548345259,
-      low: 0.544780502,
-      open: 0.546161806
+      close: 0.547789977
     },
     {
       time: 1728072000000,
-      close: 0.54715659,
-      high: 0.548199668,
-      low: 0.546389535,
-      open: 0.547789823
+      close: 0.54715659
     },
     {
       time: 1728075600000,
-      close: 0.547398449,
-      high: 0.549290957,
-      low: 0.545546929,
-      open: 0.547157043
+      close: 0.547398449
     },
     {
       time: 1728079200000,
-      close: 0.546884288,
-      high: 0.54836365,
-      low: 0.546880486,
-      open: 0.547398449
+      close: 0.546884288
     },
     {
       time: 1728082800000,
-      close: 0.546890132,
-      high: 0.547053411,
-      low: 0.546452102,
-      open: 0.546884288
+      close: 0.546890132
     },
     {
       time: 1728086400000,
-      close: 0.54867838,
-      high: 0.54877694,
-      low: 0.545667019,
-      open: 0.546890132
+      close: 0.54867838
     },
     {
       time: 1728090000000,
-      close: 0.554137904,
-      high: 0.554441319,
-      low: 0.548676903,
-      open: 0.548676903
+      close: 0.554137904
     },
     {
       time: 1728093600000,
-      close: 0.55437151,
-      high: 0.555261111,
-      low: 0.552390975,
-      open: 0.554137902
+      close: 0.55437151
     },
     {
       time: 1728097200000,
-      close: 0.548063302,
-      high: 0.554408046,
-      low: 0.547661257,
-      open: 0.55437151
+      close: 0.548063302
     },
     {
       time: 1728100800000,
-      close: 0.548791599,
-      high: 0.551333839,
-      low: 0.546727511,
-      open: 0.548087826
+      close: 0.548791599
     },
     {
       time: 1728104400000,
-      close: 0.551309954,
-      high: 0.551309954,
-      low: 0.548280509,
-      open: 0.548791599
+      close: 0.551309954
     },
     {
       time: 1728108000000,
-      close: 0.554695744,
-      high: 0.554823511,
-      low: 0.551309954,
-      open: 0.551309954
+      close: 0.554695744
     },
     {
       time: 1728111600000,
-      close: 0.557297402,
-      high: 0.557882916,
-      low: 0.552932107,
-      open: 0.554695739
+      close: 0.557297402
     },
     {
       time: 1728115200000,
-      close: 0.553131896,
-      high: 0.557299532,
-      low: 0.553131783,
-      open: 0.557297402
+      close: 0.553131896
     },
     {
       time: 1728118800000,
-      close: 0.557460139,
-      high: 0.557749992,
-      low: 0.552204686,
-      open: 0.553132076
+      close: 0.557460139
     },
     {
       time: 1728122400000,
-      close: 0.56208737,
-      high: 0.562868609,
-      low: 0.557460139,
-      open: 0.557460139
+      close: 0.56208737
     },
     {
       time: 1728126000000,
-      close: 0.557510124,
-      high: 0.562087517,
-      low: 0.557510051,
-      open: 0.56208737
+      close: 0.557510124
     },
     {
       time: 1728129600000,
-      close: 0.558321799,
-      high: 0.558601644,
-      low: 0.557033762,
-      open: 0.557510124
+      close: 0.558321799
     },
     {
       time: 1728133200000,
-      close: 0.560266386,
-      high: 0.560266386,
-      low: 0.557518788,
-      open: 0.558321799
+      close: 0.560266386
     },
     {
       time: 1728136800000,
-      close: 0.553571622,
-      high: 0.560524725,
-      low: 0.55357133,
-      open: 0.560266386
+      close: 0.553571622
     },
     {
       time: 1728140400000,
-      close: 0.553518112,
-      high: 0.555184086,
-      low: 0.551785598,
-      open: 0.553571622
+      close: 0.553518112
     },
     {
       time: 1728144000000,
-      close: 0.553960901,
-      high: 0.554118112,
-      low: 0.553323099,
-      open: 0.553518349
+      close: 0.553960901
     },
     {
       time: 1728147600000,
-      close: 0.549720917,
-      high: 0.553960686,
-      low: 0.549471088,
-      open: 0.553960686
+      close: 0.549720917
     },
     {
       time: 1728151200000,
-      close: 0.551671452,
-      high: 0.551671452,
-      low: 0.548600112,
-      open: 0.549304025
+      close: 0.551671452
     },
     {
       time: 1728154800000,
-      close: 0.548572496,
-      high: 0.55213793,
-      low: 0.548572496,
-      open: 0.551241465
+      close: 0.548572496
     },
     {
       time: 1728158400000,
-      close: 0.545532851,
-      high: 0.54857268,
-      low: 0.545532851,
-      open: 0.548572496
+      close: 0.545532851
     },
     {
       time: 1728162000000,
-      close: 0.541493595,
-      high: 0.545532918,
-      low: 0.541017054,
-      open: 0.545532855
+      close: 0.541493595
     },
     {
       time: 1728165600000,
-      close: 0.545140272,
-      high: 0.546262781,
-      low: 0.541210502,
-      open: 0.541493595
+      close: 0.545140272
     },
     {
       time: 1728169200000,
-      close: 0.551089909,
-      high: 0.551940497,
-      low: 0.544760883,
-      open: 0.545140002
+      close: 0.551089909
     },
     {
       time: 1728172800000,
-      close: 0.550906309,
-      high: 0.551394726,
-      low: 0.550866771,
-      open: 0.551089909
+      close: 0.550906309
     },
     {
       time: 1728176400000,
-      close: 0.54946156,
-      high: 0.550906323,
-      low: 0.549060301,
-      open: 0.550906309
+      close: 0.54946156
     },
     {
       time: 1728180000000,
-      close: 0.551161586,
-      high: 0.552490349,
-      low: 0.549461504,
-      open: 0.54946156
+      close: 0.551161586
     },
     {
       time: 1728183600000,
-      close: 0.547770489,
-      high: 0.551162148,
-      low: 0.547770487,
-      open: 0.551161586
+      close: 0.547770489
     },
     {
       time: 1728187200000,
-      close: 0.545281721,
-      high: 0.548290323,
-      low: 0.544913474,
-      open: 0.547770489
+      close: 0.545281721
     },
     {
       time: 1728190800000,
-      close: 0.54093613,
-      high: 0.545281843,
-      low: 0.540797399,
-      open: 0.545281721
+      close: 0.54093613
     },
     {
       time: 1728194400000,
-      close: 0.541996148,
-      high: 0.54199985,
-      low: 0.54045425,
-      open: 0.54093613
+      close: 0.541996148
     },
     {
       time: 1728198000000,
-      close: 0.542470644,
-      high: 0.544258039,
-      low: 0.541996198,
-      open: 0.541996246
+      close: 0.542470644
     },
     {
       time: 1728201600000,
-      close: 0.543228807,
-      high: 0.543229256,
-      low: 0.54224129,
-      open: 0.542470644
+      close: 0.543228807
     },
     {
       time: 1728205200000,
-      close: 0.544115761,
-      high: 0.547012917,
-      low: 0.543225247,
-      open: 0.543228807
+      close: 0.544115761
     },
     {
       time: 1728208800000,
-      close: 0.545102106,
-      high: 0.546151385,
-      low: 0.54411475,
-      open: 0.544115762
+      close: 0.545102106
     },
     {
       time: 1728212400000,
-      close: 0.543382806,
-      high: 0.545102385,
-      low: 0.543380739,
-      open: 0.545102106
+      close: 0.543382806
     },
     {
       time: 1728216000000,
-      close: 0.544709051,
-      high: 0.545851838,
-      low: 0.541379316,
-      open: 0.543382831
+      close: 0.544709051
     },
     {
       time: 1728219600000,
-      close: 0.540436666,
-      high: 0.545331645,
-      low: 0.53949532,
-      open: 0.544709036
+      close: 0.540436666
     },
     {
       time: 1728223200000,
-      close: 0.54352557,
-      high: 0.543988287,
-      low: 0.540437232,
-      open: 0.540437232
+      close: 0.54352557
     },
     {
       time: 1728226800000,
-      close: 0.550759553,
-      high: 0.55103993,
-      low: 0.54265885,
-      open: 0.54352557
+      close: 0.550759553
     },
     {
       time: 1728230400000,
-      close: 0.547252676,
-      high: 0.551438494,
-      low: 0.546109215,
-      open: 0.55075943
+      close: 0.547252676
     },
     {
       time: 1728234000000,
-      close: 0.544715665,
-      high: 0.551622383,
-      low: 0.544646046,
-      open: 0.547252446
+      close: 0.544715665
     },
     {
       time: 1728237600000,
-      close: 0.543991448,
-      high: 0.545536485,
-      low: 0.543874664,
-      open: 0.544715665
+      close: 0.543991448
     },
     {
       time: 1728241200000,
-      close: 0.545722212,
-      high: 0.546016903,
-      low: 0.54399044,
-      open: 0.543991448
+      close: 0.545722212
     },
     {
       time: 1728244800000,
-      close: 0.543358761,
-      high: 0.54842222,
-      low: 0.543078007,
-      open: 0.545722212
+      close: 0.543358761
     },
     {
       time: 1728248400000,
-      close: 0.543312014,
-      high: 0.544814215,
-      low: 0.541627781,
-      open: 0.543358768
+      close: 0.543312014
     },
     {
       time: 1728252000000,
-      close: 0.539859453,
-      high: 0.543316552,
-      low: 0.539292991,
-      open: 0.543312014
+      close: 0.539859453
     },
     {
       time: 1728255600000,
-      close: 0.543126499,
-      high: 0.543126499,
-      low: 0.539246624,
-      open: 0.539859453
+      close: 0.543126499
     },
     {
       time: 1728259200000,
-      close: 0.550047628,
-      high: 0.550345492,
-      low: 0.543126499,
-      open: 0.543126499
+      close: 0.550047628
     },
     {
       time: 1728262800000,
-      close: 0.559166701,
-      high: 0.56022035,
-      low: 0.549990737,
-      open: 0.550047628
+      close: 0.559166701
     },
     {
       time: 1728266400000,
-      close: 0.565128969,
-      high: 0.56567019,
-      low: 0.558663648,
-      open: 0.559166245
+      close: 0.565128969
     },
     {
       time: 1728270000000,
-      close: 0.560940461,
-      high: 0.567283086,
-      low: 0.560656827,
-      open: 0.565128969
+      close: 0.560940461
     },
     {
       time: 1728273600000,
-      close: 0.562867829,
-      high: 0.563126602,
-      low: 0.557632407,
-      open: 0.560940466
+      close: 0.562867829
     },
     {
       time: 1728277200000,
-      close: 0.560381161,
-      high: 0.563011118,
-      low: 0.559113883,
-      open: 0.562866956
+      close: 0.560381161
     },
     {
       time: 1728280800000,
-      close: 0.559541151,
-      high: 0.561901673,
-      low: 0.55743562,
-      open: 0.56038115
+      close: 0.559541151
     },
     {
       time: 1728284400000,
-      close: 0.563255745,
-      high: 0.564475284,
-      low: 0.559446911,
-      open: 0.559446911
+      close: 0.563255745
     },
     {
       time: 1728288000000,
-      close: 0.558492065,
-      high: 0.563036973,
-      low: 0.558166991,
-      open: 0.562330574
+      close: 0.558492065
     },
     {
       time: 1728291600000,
-      close: 0.563282428,
-      high: 0.563414775,
-      low: 0.558492065,
-      open: 0.558492065
+      close: 0.563282428
     },
     {
       time: 1728295200000,
-      close: 0.550904982,
-      high: 0.563282816,
-      low: 0.549876635,
-      open: 0.563282793
+      close: 0.550904982
     },
     {
       time: 1728298800000,
-      close: 0.543989685,
-      high: 0.550647689,
-      low: 0.543053884,
-      open: 0.550647689
+      close: 0.543989685
     },
     {
       time: 1728302400000,
-      close: 0.550510796,
-      high: 0.550764493,
-      low: 0.541820548,
-      open: 0.543989685
+      close: 0.550510796
     },
     {
       time: 1728306000000,
-      close: 0.546943806,
-      high: 0.550519444,
-      low: 0.546747112,
-      open: 0.550510796
+      close: 0.546943806
     },
     {
       time: 1728309600000,
-      close: 0.551934503,
-      high: 0.552796102,
-      low: 0.543167444,
-      open: 0.546943093
+      close: 0.551934503
     },
     {
       time: 1728313200000,
-      close: 0.557322766,
-      high: 0.562251561,
-      low: 0.551934503,
-      open: 0.551934503
+      close: 0.557322766
     },
     {
       time: 1728316800000,
-      close: 0.552714144,
-      high: 0.559484052,
-      low: 0.552680576,
-      open: 0.557322369
+      close: 0.552714144
     },
     {
       time: 1728320400000,
-      close: 0.558494194,
-      high: 0.558528689,
-      low: 0.551188161,
-      open: 0.552714144
+      close: 0.558494194
     },
     {
       time: 1728324000000,
-      close: 0.558336175,
-      high: 0.559997694,
-      low: 0.556488736,
-      open: 0.558494194
+      close: 0.558336175
     },
     {
       time: 1728327600000,
-      close: 0.545811321,
-      high: 0.559374078,
-      low: 0.545203077,
-      open: 0.558336176
+      close: 0.545811321
     },
     {
       time: 1728331200000,
-      close: 0.548724409,
-      high: 0.550554672,
-      low: 0.545813688,
-      open: 0.545814627
+      close: 0.548724409
     },
     {
       time: 1728334800000,
-      close: 0.545012516,
-      high: 0.54955014,
-      low: 0.544630134,
-      open: 0.548724409
+      close: 0.545012516
     },
     {
       time: 1728338400000,
-      close: 0.548501834,
-      high: 0.550798314,
-      low: 0.545012516,
-      open: 0.545012516
+      close: 0.548501834
     },
     {
       time: 1728342000000,
-      close: 0.53982507,
-      high: 0.548502103,
-      low: 0.539655042,
-      open: 0.548501834
+      close: 0.53982507
     },
     {
       time: 1728345600000,
-      close: 0.533514925,
-      high: 0.539513407,
-      low: 0.53347319,
-      open: 0.539513407
+      close: 0.533514925
     },
     {
       time: 1728349200000,
-      close: 0.536428296,
-      high: 0.536429869,
-      low: 0.531201381,
-      open: 0.533513542
+      close: 0.536428296
     },
     {
       time: 1728352800000,
-      close: 0.536882461,
-      high: 0.537175308,
-      low: 0.532239923,
-      open: 0.536428296
+      close: 0.536882461
     },
     {
       time: 1728356400000,
-      close: 0.53538019,
-      high: 0.537767105,
-      low: 0.532561733,
-      open: 0.536882461
+      close: 0.53538019
     },
     {
       time: 1728360000000,
-      close: 0.536234726,
-      high: 0.537144524,
-      low: 0.534142083,
-      open: 0.535384672
+      close: 0.536234726
     },
     {
       time: 1728363600000,
-      close: 0.534807194,
-      high: 0.53842241,
-      low: 0.534115516,
-      open: 0.536234726
+      close: 0.534807194
     },
     {
       time: 1728367200000,
-      close: 0.530086346,
-      high: 0.536938513,
-      low: 0.527104906,
-      open: 0.534807194
+      close: 0.530086346
     },
     {
       time: 1728370800000,
-      close: 0.530178979,
-      high: 0.530179781,
-      low: 0.526475543,
-      open: 0.530086346
+      close: 0.530178979
     },
     {
       time: 1728374400000,
-      close: 0.527769582,
-      high: 0.530178994,
-      low: 0.52454041,
-      open: 0.530178967
+      close: 0.527769582
     },
     {
       time: 1728378000000,
-      close: 0.526281454,
-      high: 0.527769604,
-      low: 0.526074489,
-      open: 0.527769582
+      close: 0.526281454
     }
   ],
   // latest chart data
   lastChartData: {
     close: 0.5262895941172561,
-    high: 0.5262895941172561,
-    low: 0.5262895941172561,
-    open: 0.5262895941172561,
     time: 1728375698066
-  }
+  },
+  historicalRange: '7D'
 };
 
 const ConcentrateChartData = {

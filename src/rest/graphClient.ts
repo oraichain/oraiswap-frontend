@@ -1,6 +1,10 @@
 import { network } from 'config/networks';
 import { gql, GraphQLClient } from 'graphql-request';
 import axios from './request';
+import { TimeDuration, TokenPairHistoricalPrice } from 'pages/Pool-V3/hooks/useHistoricalAndLiquidityData';
+import { printBigint } from 'pages/Pool-V3/components/PriceRangePlot/utils';
+import { calculateSqrtPrice } from '@oraichain/oraiswap-v3';
+import { PRICE_SCALE } from 'libs/contractSingleton';
 
 export const INDEXER_V3_URL = network.indexer_v3 ?? 'https://staging-ammv3-indexer.oraidex.io/';
 export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
@@ -528,5 +532,102 @@ export const getPoolDetailFromBackend = async (poolId: string): Promise<PoolDeta
   } catch (error) {
     console.log('error getPoolDetail', error);
     return null;
+  }
+};
+
+export type HistoricalPriceResponse = {
+  poolId: string;
+  sqrtPrice: string;
+  hourIndex: number;
+  pool: {
+    tokenX: {
+      decimals: number;
+    };
+    tokenY: {
+      decimals: number;
+    };
+  };
+};
+
+export const getHistoricalPriceData = async (
+  poolId: string,
+  timeRange: TimeDuration = '7d'
+): Promise<TokenPairHistoricalPrice[]> => {
+  try {
+    let hourIndex = 0;
+    switch (timeRange) {
+      case '1d':
+        hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24;
+        break;
+      case '7d':
+        hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24 * 7;
+        break;
+      case '1mo':
+        hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24 * 30;
+        break;
+      case '1y':
+        hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24 * 365 ;
+        break;
+      default:
+        hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24 * 7;
+    }
+
+    const finalResult = [];
+
+    let hourIndexStart = hourIndex;
+    let result = [];
+    while (true) {
+      const document = gql`
+      {
+        query {
+          poolHourData(
+            filter: {
+              poolId: { equalTo: "${poolId}" }
+              hourIndex: { greaterThanOrEqualTo: ${hourIndexStart} }
+              }
+              orderBy: [HOUR_INDEX_ASC]
+              ) {
+                nodes {
+                  poolId
+                  sqrtPrice
+                  hourIndex
+                  pool {
+                    tokenX {
+                        decimals
+                      }
+                      tokenY {
+                        decimals
+                      }
+                    }
+                  }
+                }
+              }
+          }
+                        `;
+      const response = await graphqlClient.request<any>(document);
+      result = response.query.poolHourData.nodes || null;
+      finalResult.push(...result);
+
+      if (result.length === 0) {
+        break;
+      }
+      hourIndexStart = result[result.length - 1].hourIndex + 1;
+    }
+
+    return finalResult.map((item: HistoricalPriceResponse) => {
+      const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
+
+      const proportion = sqrt * sqrt;
+
+      const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
+
+      return {
+        close: price,
+        time: item.hourIndex * MILIS_PER_HOUR
+      };
+    });
+  } catch (error) {
+    console.log('error getHistoricalPriceData', error);
+    return [];
   }
 };

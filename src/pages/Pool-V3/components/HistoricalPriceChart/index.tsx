@@ -32,10 +32,10 @@ export const theme = {
     },
     wosmongton: {
       100: '#D3D1FF',
-      200: '#B3B1FD',
-      300: '#8C8AF9',
+      200: '#AEE67F',
+      300: '#AEE67F',
       400: '#6A67EA',
-      500: '#5B57FA',
+      500: '#FFF27A',
       700: '#462ADF',
       800: '#361FB2',
       900: '#2D1B8F'
@@ -57,10 +57,10 @@ export const theme = {
     osmoverse: {
       100: '#E4E1FB',
       200: '#CEC8F3',
-      300: '#B0AADC',
+      300: '#373F31',
       400: '#958FC0',
       500: '#736CA3',
-      600: '#565081',
+      600: '#979995',
       700: '#3C356D',
       800: '#282750',
       810: '#241E4B',
@@ -103,9 +103,9 @@ export const theme = {
     transparent: 'transparent',
     black: 'black',
     inherit: 'inherit',
-    barFill: '#4f4aa2',
-    chartGradientPrimary: '#C41BFF',
-    chartGradientSecondary: '#1867FF',
+    barFill: '#373F31',
+    chartGradientPrimary: '#AEE67F',
+    chartGradientSecondary: '#AEE67F',
     yourBalanceActionButton: '#2A2553'
   },
   fontSize: {
@@ -389,12 +389,12 @@ const HistoricalPriceChart: FC<{
               gridColor: theme.colors.osmoverse['600'],
               gridColorDark: theme.colors.osmoverse['300'],
               svgLabelSmall: {
-                fill: theme.colors.osmoverse['300'],
+                fill: '#979995',
                 fontSize: 12,
                 fontWeight: 500
               },
               svgLabelBig: {
-                fill: theme.colors.osmoverse['300'],
+                fill: '#979995',
                 fontSize: 12,
                 fontWeight: 500
               },
@@ -471,18 +471,19 @@ const HistoricalPriceChart: FC<{
                 strokeWidth: 2,
                 strokeDasharray: '5 5',
                 opacity: 0.17,
-                stroke: theme.colors.osmoverse[300]
+                stroke: theme.colors.osmoverse['300']
               }}
               verticalCrosshairStyle={{
                 strokeWidth: 2,
                 strokeDasharray: '5 5',
                 opacity: 0.17,
-                stroke: theme.colors.osmoverse[300]
+                stroke: theme.colors.osmoverse['300']
               }}
               showVerticalCrosshair={true}
               renderTooltip={({ tooltipData }: any) => {
                 const close = tooltipData?.nearestDatum?.datum?.close;
                 const time = tooltipData?.nearestDatum?.datum?.time;
+                console.log('render tooltip', close, time);
 
                 if (showTooltip && time && close) {
                   const date = dayjs(time).format('MMM Do, hh:mma');
