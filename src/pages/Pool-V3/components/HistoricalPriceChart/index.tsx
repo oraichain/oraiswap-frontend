@@ -474,41 +474,13 @@ const HistoricalPriceChart: FC<{
                 stroke: theme.colors.osmoverse['300']
               }}
               verticalCrosshairStyle={{
-                strokeWidth: 2,
+                strokeWidth: 1,
                 strokeDasharray: '5 5',
-                opacity: 0.17,
-                stroke: theme.colors.osmoverse['300']
+                opacity: 0.3,
+                stroke: '#cccccc'
               }}
               showVerticalCrosshair={true}
               renderTooltip={({ tooltipData }: any) => {
-                const close = tooltipData?.nearestDatum?.datum?.close;
-                const time = tooltipData?.nearestDatum?.datum?.time;
-                console.log('render tooltip', close, time);
-
-                if (showTooltip && time && close) {
-                  const date = dayjs(time).format('MMM Do, hh:mma');
-                  const minimumDecimals = 2;
-                  const maxDecimals = Math.max(getDecimalCount(close), minimumDecimals);
-
-                  const closeDec = new Dec(close);
-
-                  const formatOpts = getPriceExtendedFormatOptions(closeDec);
-
-                  return (
-                    <div className={styles.toolTip}>
-                      <h6 className="text-h6 font-semibold text-white-full">
-                        {fiatSymbol}
-                        {formatPretty(closeDec, {
-                          maxDecimals,
-                          ...formatOpts
-                        }) || ''}
-                      </h6>
-
-                      <p className="text-caption font-medium text-osmoverse-200">{date}</p>
-                    </div>
-                  );
-                }
-
                 return <div></div>;
               }}
             />

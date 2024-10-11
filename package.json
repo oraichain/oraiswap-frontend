@@ -63,7 +63,7 @@
     "@visx/gradient": "^3.3.0",
     "@visx/responsive": "^2.17.0",
     "@visx/scale": "^2.18.0",
-    "@visx/xychart": "^2.18.0",
+    "@visx/xychart": "^3.11.0",
     "dayjs": "^1.10.7",
     "@keplr-wallet/unit": "0.10.24-ibc.go.v7.hot.fix",
     "mobx": "^6.3.10",
