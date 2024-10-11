@@ -49,6 +49,10 @@
     @include theme() {
       color: theme-get('neutral-text-body');
     }
+
+    @include mobile {
+      font-size: 12px;
+    }
   }
 
   .filter_active {
@@ -56,6 +60,10 @@
 
     @include theme() {
       color: #163300;
+    }
+
+    @include mobile {
+      font-size: 12px;
     }
   }
 
