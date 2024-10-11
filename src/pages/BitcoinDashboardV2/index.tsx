@@ -28,17 +28,17 @@ const BitcoinDashboard: React.FC<{}> = () => {
       console.log('🚀 ~ getAddress ~ error:', error);
     }
   };
+
+  const tabComponents = {
+    [KeysFilter.pending_deposits]: PendingDeposits,
+    [KeysFilter.checkpoint]: Checkpoint,
+    [KeysFilter.pending_withdraws]: PendingWithdraws,
+    [KeysFilter.convert_bitcoin_v2]: ConvertBitcoinV2
+  };
+
   const renderTabs = () => {
-    switch (tab) {
-      case KeysFilter.pending_deposits:
-        return <PendingDeposits />;
-      case KeysFilter.checkpoint:
-        return <Checkpoint />;
-      case KeysFilter.pending_withdraws:
-        return <PendingWithdraws />;
-      case KeysFilter.convert_bitcoin_v2:
-        return <ConvertBitcoinV2 />;
-    }
+    const TabComponent = tabComponents[tab as keyof typeof tabComponents];
+    return TabComponent ? <TabComponent /> : null;
   };
 
   useEffect(() => {

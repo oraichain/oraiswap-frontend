@@ -188,18 +188,17 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     }
   };
   const checkRenderUI = () => {
-    if (allPendingDeposits?.[oraichainAddress]?.length > 0) {
-      if (mobile)
-        return (
-          <TransactionsMobile
-            generateIcon={() => generateIcon(tokens.bitcoin, tokens.oraichain)}
-            symbols={'BTC/ORAI'}
-            transactions={allPendingDeposits?.[oraichainAddress]}
-          />
-        );
-      return <Table headers={headers} data={allPendingDeposits?.[oraichainAddress]} defaultSorted="confirmations" />;
-    }
-    return <FallbackEmptyData />;
+    if (!allPendingDeposits?.[oraichainAddress]?.length) return <FallbackEmptyData />;
+
+    return mobile ? (
+      <TransactionsMobile
+        generateIcon={() => generateIcon(tokens.bitcoin, tokens.oraichain)}
+        symbols={'BTC/ORAI'}
+        transactions={allPendingDeposits?.[oraichainAddress]}
+      />
+    ) : (
+      <Table headers={headers} data={allPendingDeposits?.[oraichainAddress]} defaultSorted="confirmations" />
+    );
   };
   return (
     <div className={styles.pending_deposits}>

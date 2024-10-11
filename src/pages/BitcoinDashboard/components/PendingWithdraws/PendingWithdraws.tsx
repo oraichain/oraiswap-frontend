@@ -78,7 +78,7 @@ export const PendingWithdraws: React.FC<{
     );
   };
 
-  const handleNavigate = (hash: String) => {
+  const handleNavigate = (hash: string) => {
     window.open(showTx ? `https://blockstream.info/tx/${hash}` : `https://blockstream.info/address/${hash}`, '_blank');
   };
 
@@ -113,18 +113,17 @@ export const PendingWithdraws: React.FC<{
     }
   };
   const checkRenderUI = () => {
-    if (data?.length > 0) {
-      if (mobile)
-        return (
-          <TransactionsMobile
-            generateIcon={() => generateIcon(tokens.oraichain, tokens.bitcoin)}
-            symbols={'ORAI/BTC'}
-            transactions={data}
-          />
-        );
-      return <Table headers={headers} data={data} defaultSorted="txid" />;
-    }
-    return <FallbackEmptyData />;
+    if (!data?.length) return <FallbackEmptyData />;
+
+    return mobile ? (
+      <TransactionsMobile
+        generateIcon={() => generateIcon(tokens.oraichain, tokens.bitcoin)}
+        symbols={'ORAI/BTC'}
+        transactions={data}
+      />
+    ) : (
+      <Table headers={headers} data={data} defaultSorted="txid" />
+    );
   };
   return (
     <div className={styles.pending_withdraws}>

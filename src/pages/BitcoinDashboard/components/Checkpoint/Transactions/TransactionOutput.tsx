@@ -46,7 +46,7 @@ export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = 
     );
   };
 
-  const handleNavigate = (hash: String) => {
+  const handleNavigate = (hash: string) => {
     window.open(`https://blockstream.info/address/${hash}`, '_blank');
   };
 
@@ -81,18 +81,17 @@ export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = 
     }
   };
   const checkRenderUI = () => {
-    if (data?.length > 0) {
-      if (mobile)
-        return (
-          <TransactionsMobile
-            generateIcon={() => generateIcon(tokens.oraichain, tokens.bitcoin)}
-            symbols={'ORAI/BTC'}
-            transactions={data}
-          />
-        );
-      return <Table headers={headers} data={data} defaultSorted="address" />;
-    }
-    return <FallbackEmptyData />;
+    if (!data?.length) return <FallbackEmptyData />;
+
+    return mobile ? (
+      <TransactionsMobile
+        generateIcon={() => generateIcon(tokens.oraichain, tokens.bitcoin)}
+        symbols={'ORAI/BTC'}
+        transactions={data}
+      />
+    ) : (
+      <Table headers={headers} data={data} defaultSorted="address" />
+    );
   };
   return (
     <div className={styles.transactions}>
