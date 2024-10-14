@@ -23,7 +23,7 @@ import {
 } from '@oraichain/oraidex-universal-swap';
 import { isMobile } from '@walletconnect/browser-utils';
 import { swapFromTokens, swapToTokens, tokenMap } from 'config/bridgeTokens';
-import { flattenTokensWithIcon, oraichainTokensWithIcon } from 'config/chainInfos';
+import { flattenTokensWithIcon, oraichainTokensWithIcon, tokensWithIcon } from 'config/chainInfos';
 import { PAIRS_CHART } from 'config/pools';
 import { networks } from 'helper';
 import { generateError } from 'libs/utils';
@@ -32,6 +32,7 @@ import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDate, formatTimeWithPeriod } from 'pages/CoHarvest/helpers';
 import { endOfMonth, endOfWeek } from 'pages/Pools/helpers';
 import { FILTER_TIME_CHART, PairToken } from 'reducer/type';
+import { assets } from 'chain-registry';
 
 export enum SwapDirection {
   From,
@@ -523,4 +524,43 @@ export const getPathInfo = (path, chainIcons, assets) => {
   // };
 
   return { NetworkFromIcon, NetworkToIcon, pathChainId };
+};
+
+export const getTokenIconWithChainRegistry = (baseDenom: string) => {
+  if (!baseDenom) return undefined;
+
+  const supportedChains = new Set([
+    'osmosis',
+    'cosmoshub',
+    'injective',
+    'noble',
+    'celestia',
+    'oraichain',
+    'neutaro',
+    'binancesmartchain',
+    'bitcoin',
+    'ethereum',
+    'tron',
+    'ton'
+  ]);
+
+  const baseDenomUpper = baseDenom.toUpperCase();
+
+  const assetList = assets.flatMap(({ chain_name, assets }) => (supportedChains.has(chain_name) ? assets : []));
+
+  const isMatchingAsset = (asset) => {
+    const [token, tokenCw20] = asset.base.split(':');
+    const tokenAddressMatch = asset?.address?.toUpperCase() === baseDenomUpper;
+    const denomMatch = (tokenCw20 || token).toUpperCase() === baseDenomUpper;
+
+    return denomMatch || tokenAddressMatch;
+  };
+
+  return assetList.find(isMatchingAsset);
+};
+
+export const getTokenIconWithCommon = (baseDenom: string) => {
+  return flattenTokensWithIcon.find((token) =>
+    [token?.contractAddress, token.denom].filter(Boolean).includes(baseDenom)
+  );
 };
