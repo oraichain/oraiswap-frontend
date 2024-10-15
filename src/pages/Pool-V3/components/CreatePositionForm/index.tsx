@@ -86,7 +86,6 @@ import { PRICE_SCALE } from 'libs/contractSingleton';
 import HistoricalPriceChart, { formatPretty } from '../HistoricalPriceChart';
 import { ConcentratedLiquidityDepthChart } from '../ConcentratedLiquidityDepthChart';
 import { Dec } from '@keplr-wallet/unit';
-import { useHistoricalAndLiquidityData } from 'pages/Pool-V3/hooks/useHistoricalAndLiquidityData';
 import { set } from 'lodash';
 import useAddLiquidityNew from 'pages/Pool-V3/hooks/useAddLiquidityNew';
 import HistoricalChartDataWrapper from '../HistoricalChartDataWrapper';

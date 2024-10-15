@@ -14,7 +14,7 @@ import {
 import { TokenItemType } from '@oraichain/oraidex-common';
 import SingletonOraiswapV3, { Token } from 'libs/contractSingleton';
 import { PlotTickData } from './PriceRangePlot';
-import { ActiveLiquidityPerTickRange } from 'pages/Pool-V3/hooks/useHistoricalAndLiquidityData';
+import { ActiveLiquidityPerTickRange } from 'reducer/poolDetailV3';
 
 export const PRICE_SCALE = getPriceScale();
 export const CONCENTRATION_FACTOR = 1.00001526069123;

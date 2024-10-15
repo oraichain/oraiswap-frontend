@@ -1,10 +1,10 @@
 import { network } from 'config/networks';
 import { gql, GraphQLClient } from 'graphql-request';
 import axios from './request';
-import { TimeDuration, TokenPairHistoricalPrice } from 'pages/Pool-V3/hooks/useHistoricalAndLiquidityData';
 import { printBigint } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import { calculateSqrtPrice } from '@oraichain/oraiswap-v3';
 import { PRICE_SCALE } from 'libs/contractSingleton';
+import { TimeDuration, TokenPairHistoricalPrice } from 'reducer/poolDetailV3';
 
 export const INDEXER_V3_URL = network.indexer_v3 ?? 'https://staging-ammv3-indexer.oraidex.io/';
 export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
