@@ -56,7 +56,7 @@
       padding-top: 1.75rem;
       padding-bottom: 1.75rem;
       flex-direction: column;
-      flex: 2;
+      flex: 1;
       margin-right: 6px;
       // background-color: yellow;
 
@@ -71,10 +71,10 @@
         display: flex;
         flex-direction: row;
 
-        @media (min-width: 640px) {
+        // @media (min-width: 640px) {
           row-gap: 1rem;
           align-items: flex-end;
-        }
+        // }
 
         .priceWrapper {
           display: flex;

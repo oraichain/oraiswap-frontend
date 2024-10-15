@@ -87,8 +87,10 @@ import HistoricalPriceChart, { formatPretty } from '../HistoricalPriceChart';
 import { ConcentratedLiquidityDepthChart } from '../ConcentratedLiquidityDepthChart';
 import { Dec } from '@keplr-wallet/unit';
 import { useHistoricalAndLiquidityData } from 'pages/Pool-V3/hooks/useHistoricalAndLiquidityData';
-import { reaction } from 'mobx';
 import { set } from 'lodash';
+import useAddLiquidityNew from 'pages/Pool-V3/hooks/useAddLiquidityNew';
+import HistoricalChartDataWrapper from '../HistoricalChartDataWrapper';
+import LiquidityChartWrapper from '../LiquidityChartWrapper';
 
 export type PriceInfo = {
   startPrice: number;
@@ -136,11 +138,33 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
   const { data: prices } = useCoinGeckoPrices();
   const { poolList, poolPrice: extendPrices } = useGetPoolList(prices);
-  const chartConfig = useHistoricalAndLiquidityData(poolData.pool_key);
 
-  useEffect(() => {
-    console.log('chart config', { chartConfig });
-  }, [chartConfig]);
+  const {
+    pool,
+    poolKey,
+    tokenX,
+    tokenY,
+    historicalChartData,
+    fullRange,
+    xRange,
+    yRange,
+    currentPrice,
+    liquidityChartData,
+    hoverPrice,
+    minPrice,
+    maxPrice,
+    lowerTick,
+    higherTick,
+    setLowerTick,
+    setHigherTick,
+    setHoverPrice,
+    changeHistoricalRange,
+    zoomIn,
+    zoomOut,
+    resetRange,
+    setMinPrice,
+    setMaxPrice
+  } = useAddLiquidityNew(poolKeyToString(poolData.pool_key));
 
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -1025,29 +1049,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   // );
 
   useEffect(() => {
-    const dispose = reaction(
-      () => chartConfig.hoverPrice, // The observable to track
-      (hoverPrice) => {
-        // Side effect when hoverPrice changes
-        console.log('hoverPrice changed:', hoverPrice);
-        setFormattedPrice(
-          formatPretty(new Dec(hoverPrice), {
-            maxDecimals: 4,
-            notation: 'compact'
-          }) || ''
-        );
-        // Add any additional logic here
-      }
-    );
-  
-    // Cleanup the reaction when the component unmounts
-    return () => dispose();
-  }, [chartConfig]);
-
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(0);
-
-  useEffect(() => {
     if (leftRange && rightRange) {
       const pricePointMin = calcPrice(leftRange, isXtoY, tokenFrom.decimals, tokenTo.decimals);
       const pricePointMax = calcPrice(rightRange, isXtoY, tokenFrom.decimals, tokenTo.decimals);
@@ -1063,7 +1064,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     const sqrtPBigInt = BigInt(sqrtP * 1e24);
     const tick = getTickAtSqrtPrice(sqrtPBigInt, poolData.pool_key.fee_tier.tick_spacing);
     return tick;
-  }
+  };
 
   useEffect(() => {
     if (minPrice && maxPrice) {
@@ -1092,9 +1093,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
             <div className={styles.wrapper}>
               <div className={styles.itemTitleWrapper}>
                 <p className={styles.itemTitle}>Price Range</p>
-                <p className={styles.liquidityActive}>
-                  Active Liquidity
-                  {/* <TooltipIcon
+                {/* <p className={styles.liquidityActive}>
+                  Active Liquidity */}
+                {/* <TooltipIcon
               className={styles.tooltipWrapper}
               placement="top"
               visible={openTooltip}
@@ -1102,9 +1103,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               setVisible={setOpenTooltip}
               content={<div className={classNames(styles.tooltip, styles[theme])}>Active Liquidity</div>}
             /> */}
-                </p>
+                {/* </p> */}
               </div>
-              <div className={styles.itemSwitcherWrapper}>
+              {/* <div className={styles.itemSwitcherWrapper}>
                 <div className={styles.switcherContainer}>
                   <div
                     className={classNames(
@@ -1121,7 +1122,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                       <Continuous />
                     </div>
                   </div>
-                  <div
+                  {/* <div
                     className={classNames(
                       styles.singleTabClasses,
                       { [styles.chosen]: typeChart === TYPE_CHART.DISCRETE },
@@ -1135,9 +1136,9 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
                     <div className={styles.discrete}>
                       <Discrete />
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </div> */}
+              {/* </div> */}
+              {/* </div>  */}
             </div>
 
             <div className={styles.itemChartAndPriceWrapper}>
@@ -1160,88 +1161,41 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
               </div>
 
               <div className={styles.wrapChart}>
-                <div className={styles.chartPrice}>
-                  <div className={styles.chartOptions}>
-                    <div className={styles.priceWrapper}>
-                      <div>
-                        <h4 className={styles.price}>{formattedPrice}</h4>
-                      </div>
-                      {chartConfig.tokenX && chartConfig.tokenY ? (
-                        <div className={styles.text}>
-                          <div className={styles.currentPrice}>current price</div>
-                          <div className={styles.xPerY}>
-                            {chartConfig.tokenY.name} per {chartConfig.tokenX.name}
-                          </div>
-                        </div>
-                      ) : undefined}
-                    </div>
-
-                    <div className={styles.time}>
-                      <button onClick={() => chartConfig.setHistoricalRange('1d')}>1D</button>
-                      <button onClick={() => chartConfig.setHistoricalRange('7d')}>1W</button>
-                      <button onClick={() => chartConfig.setHistoricalRange('1mo')}>1M</button>
-                      <button onClick={() => chartConfig.setHistoricalRange('1y')}>1Y</button>
-                    </div>
-                  </div>
-
-                  <HistoricalPriceChart
-                    data={chartConfig.historicalChartData}
-                    annotations={
-                      (AddLiquidityConfig.fullRange
-                        ? [new Dec(chartConfig.yRange[0] * 1.05), new Dec(chartConfig.yRange[1] * 0.95)]
-                        : [minPrice, maxPrice]) as any
-                    }
-                    domain={chartConfig.yRange as [number, number]}
-                    onPointerHover={chartConfig.setHoverPrice}
-                    onPointerOut={() => {
-                      chartConfig.setHoverPrice(chartConfig.currentPrice);
-                    }}
+                {historicalChartData && yRange ? (
+                  <HistoricalChartDataWrapper
+                    hoverPrice={hoverPrice}
+                    tokenX={tokenX}
+                    tokenY={tokenY}
+                    historicalChartData={historicalChartData}
+                    fullRange={fullRange}
+                    yRange={yRange}
+                    addRange={[minPrice, maxPrice]}
+                    currentPrice={currentPrice}
+                    setHoverPrice={setHoverPrice}
+                    setHistoricalRange={changeHistoricalRange}
                   />
-                </div>
-                <div className={styles.chartLiquid}>
-                  <div className={styles.chart}>
-                    <div className={styles.actions}>
-                      <RefreshIcon onClick={() => console.log('refresh')} />
-                      <ZoomOutIcon onClick={() => console.log('zoom-out')} />
-                      <ZoomInIcon onClick={() => console.log('zoom-in')} />
-                    </div>
-                    <ConcentratedLiquidityDepthChart
-                      min={minPrice}
-                      max={maxPrice}
-                      yRange={chartConfig.yRange as [number, number]}
-                      xRange={chartConfig.xRange as [number, number]}
-                      data={chartConfig.depthChartData}
-                      annotationDatum={useMemo(
-                        () => ({
-                          price: chartConfig.currentPrice,
-                          depth: chartConfig.xRange[1]
-                        }),
-                        [chartConfig.xRange, chartConfig.currentPrice]
-                      )}
-                      // eslint-disable-next-line react-hooks/exhaustive-deps
-                      onMoveMax={(value) => {
-                        console.log('onMoveMax', value);
-                        setMaxPrice(value);
-                      }}
-                      // eslint-disable-next-line react-hooks/exhaustive-deps
-                      onMoveMin={(value) => {
-                        console.log('onMoveMin', value);
-                        setMinPrice(value);
-                      }}
-                      onSubmitMin={(value) => {
-                        console.log('onSubmitMin', value);
-                        setMinPrice(value);
-                      }}
-                      onSubmitMax={(value) => {
-                        console.log('onSubmitMax', value);
-                        setMaxPrice(value);
-                      }}
-                      offset={{ top: 0, right: 36, bottom: 24 + 28, left: 0 }}
-                      horizontal
-                      fullRange={ConcentrateChartData.fullRange}
-                    />
-                  </div>
-                </div>
+                ) : (
+                  <span>Loading</span>
+                )}
+
+                {liquidityChartData && yRange && xRange ? (
+                  <LiquidityChartWrapper
+                    minPrice={minPrice}
+                    maxPrice={maxPrice}
+                    yRange={yRange}
+                    xRange={xRange}
+                    liquidityChartData={liquidityChartData}
+                    currentPrice={currentPrice}
+                    fullRange={fullRange}
+                    setMaxPrice={setMaxPrice}
+                    setMinPrice={setMinPrice}
+                    zoomIn={zoomIn}
+                    zoomOut={zoomOut}
+                    resetRange={resetRange}
+                  />
+                ) : (
+                  <span>Loading</span>
+                )}
               </div>
 
               <div className={styles.currentPrice}>

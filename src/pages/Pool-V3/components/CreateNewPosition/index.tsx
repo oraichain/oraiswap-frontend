@@ -7,13 +7,14 @@ import { oraichainTokens } from '@oraichain/oraidex-common';
 import { getIcon } from 'helper';
 import useTheme from 'hooks/useTheme';
 import { useRef, useState } from 'react';
-import CreatePositionForm from '../CreatePositionForm';
+import CreatePositionFormNew from '../CreatePositionFormNew';
 import styles from './index.module.scss';
 import cn from 'classnames/bind';
 import { reduceString } from 'libs/utils';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { extractAddress } from 'pages/Pool-V3/helpers/format';
+import CreatePositionForm from '../CreatePositionForm';
 
 const cx = cn.bind(styles);
 export const openInNewTab = (url: string): void => {
@@ -122,12 +123,12 @@ const CreateNewPosition = ({
             </div>
           </div>
           <CreatePositionForm
-            showModal={showModal}
-            slippage={slippage}
-            tokenFrom={oraichainTokens.find((e) => extractAddress(e) === pool.pool_key.token_x)}
-            tokenTo={oraichainTokens.find((e) => extractAddress(e) === pool.pool_key.token_y)}
+            tokenFrom={tokenFrom}
+            tokenTo={tokenTo}
             feeTier={pool.pool_key.fee_tier}
             poolData={pool}
+            showModal={showModal}
+            slippage={slippage}
             onCloseModal={async () => {
               onCloseModal();
               await refetchPositions();

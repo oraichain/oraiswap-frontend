@@ -357,17 +357,17 @@ const HistoricalPriceChart: FC<{
   }) => (
     <ParentSize className={styles.parentSize}>
       {({ height, width }) => {
-        const maxHeight = 340;
-        const customHeight = Math.min(height, maxHeight);
+        // const maxHeight = 340;
+        // const customHeight = Math.min(height, maxHeight);
 
         return (
           <XYChart
             margin={minimal ? { top: 0, right: 0, bottom: 24, left: 0 } : { top: 0, right: 0, bottom: 24, left: 36 }}
-            height={customHeight}
+            height={height}
             width={width}
             xScale={{
               type: 'time',
-              paddingInner: 0.5
+              paddingInner: 0.6
             }}
             yScale={{
               type: 'linear',
@@ -458,7 +458,7 @@ const HistoricalPriceChart: FC<{
                 <AnnotationConnector />
                 <AnnotationLineSubject
                   orientation="horizontal"
-                  stroke={theme.colors.wosmongton['200']}
+                  stroke={theme.colors.wosmongton['500']}
                   strokeWidth={2}
                   strokeDasharray={4}
                 />
@@ -481,7 +481,13 @@ const HistoricalPriceChart: FC<{
               }}
               showVerticalCrosshair={true}
               renderTooltip={({ tooltipData }: any) => {
-                return <div></div>;
+                return (
+                  <div
+                    style={{
+                      visibility: 'hidden'
+                    }}
+                  ></div>
+                );
               }}
             />
           </XYChart>

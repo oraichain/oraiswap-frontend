@@ -1,6 +1,7 @@
 import { ParentSize } from '@visx/responsive';
 import { scaleLinear } from '@visx/scale';
 import {
+  AnimatedAxis,
   AnimatedGrid,
   Annotation,
   AnnotationCircleSubject,
@@ -76,22 +77,27 @@ export const ConcentratedLiquidityDepthChart: FC<{
   return (
     <ParentSize className={styles.parentSize}>
       {({ height, width }) => {
+        // const maxHeight = 290;
+        // const customHeight = Math.min(height, maxHeight);
+
+
         const yScale = scaleLinear({
           range: [top, height - bottom],
           domain: yRange.slice().reverse(),
-          zero: false
-        });
-        console.log('height', height);
+          zero: false,
+          
 
-        const maxHeight = 290;
-        const customHeight = Math.min(height, maxHeight);
+        });
+        // console.log('height', height);
+
 
         return (
           <XYChart
             captureEvents={false}
             margin={{ top: fullRange ? top - 8.5 : top, right, bottom, left }}
-            height={customHeight}
+            height={height }
             width={width}
+
             xScale={{
               type: 'linear',
               domain: xRange
@@ -101,7 +107,6 @@ export const ConcentratedLiquidityDepthChart: FC<{
               domain: yRange,
               zero: false
             }}
-            // yScale={yScale}
             theme={buildChartTheme({
               backgroundColor: 'transparent',
               colors: ['white'],
@@ -130,6 +135,8 @@ export const ConcentratedLiquidityDepthChart: FC<{
             })}
             horizontal={horizontal}
           >
+            <AnimatedAxis orientation="right" numTicks={5} strokeWidth={0} />
+            <AnimatedGrid columns={false} numTicks={5} />
             <AnimatedGrid columns={false} rows={false} numTicks={5} />
             <BarSeries
               dataKey="depth"
@@ -155,7 +162,7 @@ export const ConcentratedLiquidityDepthChart: FC<{
                 <AnnotationLineSubject
                   orientation="horizontal"
                   stroke={theme.colors.wosmongton['200']}
-                  strokeWidth={3}
+                  strokeWidth={2.2}
                 />
               </Annotation>
             )}

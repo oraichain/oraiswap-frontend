@@ -134,7 +134,6 @@ export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, y
   const sqrt = +printBigint(calculateSqrtPrice(tickIndex), Number(PRICE_SCALE));
 
   const proportion = sqrt * sqrt;
-  
 
   return proportion / 10 ** (yDecimal - xDecimal);
 };
@@ -473,17 +472,22 @@ export async function handleGetCurrentPlotTicks({ poolKey, isXtoY, xDecimal, yDe
   }
 }
 
-export async function convertPlotTicks({ poolKey, isXtoY, xDecimal, yDecimal }): Promise<ActiveLiquidityPerTickRange[]> {
-  const plotTicks = await handleGetCurrentPlotTicks({ poolKey, isXtoY, xDecimal, yDecimal });
+export async function convertPlotTicks({
+  poolKey,
+  isXToY,
+  xDecimal,
+  yDecimal
+}): Promise<ActiveLiquidityPerTickRange[]> {
+  const plotTicks = await handleGetCurrentPlotTicks({ poolKey, isXtoY: isXToY, xDecimal, yDecimal });
   const activeLiquidity: ActiveLiquidityPerTickRange[] = [] as any;
   for (const plotTick of plotTicks) {
     const { y, index } = plotTick;
     activeLiquidity.push({
       lowerTick: index,
       upperTick: index + poolKey.fee_tier.tick_spacing,
-      liquidityAmount: y,
+      liquidityAmount: y
     });
-  };
+  }
 
   return activeLiquidity;
 }
