@@ -348,6 +348,7 @@ export const createLiquidityPlot = (
   tokenXDecimal: number,
   tokenYDecimal: number
 ): PlotTickData[] => {
+  // sort tick 
   const sortedTicks = rawTicks.sort((a, b) => Number(a.index - b.index));
   const parsedTicks = rawTicks.length ? calculateLiquidityBreakpoints(sortedTicks) : [];
 
@@ -480,14 +481,26 @@ export async function convertPlotTicks({
 }): Promise<ActiveLiquidityPerTickRange[]> {
   const plotTicks = await handleGetCurrentPlotTicks({ poolKey, isXtoY: isXToY, xDecimal, yDecimal });
   const activeLiquidity: ActiveLiquidityPerTickRange[] = [] as any;
-  for (const plotTick of plotTicks) {
-    const { y, index } = plotTick;
+  console.log('plotTicks', plotTicks);
+  const maxTick = getMaxTick(poolKey.fee_tier.tick_spacing);
+  plotTicks.forEach((plotTick, index) => {
+    const { y, index: tickIndex } = plotTick;
     activeLiquidity.push({
-      lowerTick: index,
-      upperTick: index + poolKey.fee_tier.tick_spacing,
+      lowerTick: tickIndex,
+      upperTick: plotTicks[index + 1] ? plotTicks[index + 1].index : maxTick,
       liquidityAmount: y
     });
-  }
+  });
+  // for (const plotTick of plotTicks) {
+  //   const { y, index } = plotTick;
+  //   activeLiquidity.push({
+  //     lowerTick: index,
+  //     upperTick: index + poolKey.fee_tier.tick_spacing,
+  //     liquidityAmount: y
+  //   });
+  // }
 
   return activeLiquidity;
 }
+
+

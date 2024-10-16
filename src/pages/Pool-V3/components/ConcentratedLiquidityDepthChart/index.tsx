@@ -80,24 +80,19 @@ export const ConcentratedLiquidityDepthChart: FC<{
         // const maxHeight = 290;
         // const customHeight = Math.min(height, maxHeight);
 
-
         const yScale = scaleLinear({
-          range: [top, height - bottom],
+          range: [top, height * 0.9986 - bottom],
           domain: yRange.slice().reverse(),
-          zero: false,
-          
-
+          zero: false
         });
         // console.log('height', height);
-
 
         return (
           <XYChart
             captureEvents={false}
             margin={{ top: fullRange ? top - 8.5 : top, right, bottom, left }}
-            height={height }
+            height={height * 0.9986}
             width={width}
-
             xScale={{
               type: 'linear',
               domain: xRange
@@ -135,8 +130,8 @@ export const ConcentratedLiquidityDepthChart: FC<{
             })}
             horizontal={horizontal}
           >
-            <AnimatedAxis orientation="right" numTicks={5} strokeWidth={0} />
-            <AnimatedGrid columns={false} numTicks={5} />
+            {/* <AnimatedAxis orientation="right" numTicks={5} strokeWidth={0} />
+            <AnimatedGrid columns={false} numTicks={5} /> */}
             <AnimatedGrid columns={false} rows={false} numTicks={5} />
             <BarSeries
               dataKey="depth"

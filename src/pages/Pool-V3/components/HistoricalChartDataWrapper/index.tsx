@@ -14,6 +14,7 @@ interface HistoricalChartDataWrapperProps {
   addRange: [number, number];
   currentPrice: number;
   hoverPrice: number;
+  isXToY: boolean;
   setHoverPrice: (price: number) => void;
   setHistoricalRange: (range: TimeDuration) => void;
 }
@@ -27,14 +28,23 @@ const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
   yRange,
   addRange,
   currentPrice,
+  isXToY,
   setHoverPrice,
   setHistoricalRange
 }) => {
   const formattedPrice =
     formatPretty(new Dec(hoverPrice), {
-      maxDecimals: 4,
-      notation: 'compact'
+      maxDecimals: 8,
+      notation: 'standard'
     }) || '';
+
+  const chartDataToNow = [...historicalChartData];
+  if (historicalChartData.length > 0) {
+    chartDataToNow.push({
+      close: currentPrice,
+      time: Date.now()
+    });
+  }
 
   return (
     <div className={styles.chartPrice}>
@@ -47,7 +57,7 @@ const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
             <div className={styles.text}>
               <div className={styles.currentPrice}>current price</div>
               <div className={styles.xPerY}>
-                {tokenY.name} per {tokenX.name}
+                {isXToY ? `${tokenY.name} per ${tokenX.name}` : `${tokenX.name} per ${tokenY.name}`}
               </div>
             </div>
           ) : undefined}
@@ -62,13 +72,14 @@ const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
       </div>
 
       <HistoricalPriceChart
-        data={historicalChartData}
+        data={chartDataToNow}
         annotations={(fullRange ? [new Dec(yRange[0] * 1.05), new Dec(yRange[1] * 0.95)] : addRange) as any}
         domain={yRange as [number, number]}
         onPointerHover={setHoverPrice}
         onPointerOut={() => {
           setHoverPrice(currentPrice);
         }}
+        extendLeft={historicalChartData[0]?.close <= 0.001 ? 30 : 10}
       />
     </div>
   );

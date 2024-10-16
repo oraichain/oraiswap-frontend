@@ -552,7 +552,7 @@ export type HistoricalPriceResponse = {
 export const getHistoricalPriceData = async (
   poolId: string,
   timeRange: TimeDuration = '7d'
-): Promise<TokenPairHistoricalPrice[]> => {
+): Promise<{ data: TokenPairHistoricalPrice[]; poolId: string }> => {
   try {
     let hourIndex = 0;
     switch (timeRange) {
@@ -566,7 +566,7 @@ export const getHistoricalPriceData = async (
         hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24 * 30;
         break;
       case '1y':
-        hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24 * 365 ;
+        hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24 * 365;
         break;
       default:
         hourIndex = Math.floor(Date.now() / MILIS_PER_HOUR) - 24 * 7;
@@ -614,20 +614,26 @@ export const getHistoricalPriceData = async (
       hourIndexStart = result[result.length - 1].hourIndex + 1;
     }
 
-    return finalResult.map((item: HistoricalPriceResponse) => {
-      const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
+    return {
+      data: finalResult.map((item: HistoricalPriceResponse) => {
+        const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
 
-      const proportion = sqrt * sqrt;
+        const proportion = sqrt * sqrt;
 
-      const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
+        const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
 
-      return {
-        close: price,
-        time: item.hourIndex * MILIS_PER_HOUR
-      };
-    });
+        return {
+          close: price,
+          time: item.hourIndex * MILIS_PER_HOUR
+        };
+      }),
+      poolId
+    };
   } catch (error) {
     console.log('error getHistoricalPriceData', error);
-    return [];
+    return {
+      data: [],
+      poolId
+    };
   }
 };

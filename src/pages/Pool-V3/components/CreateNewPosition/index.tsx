@@ -14,7 +14,8 @@ import { reduceString } from 'libs/utils';
 import { useGetPositions } from 'pages/Pool-V3/hooks/useGetPosition';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { extractAddress } from 'pages/Pool-V3/helpers/format';
-import CreatePositionForm from '../CreatePositionForm';
+import { useDispatch } from 'react-redux';
+import { setToDefault } from 'reducer/poolDetailV3';
 
 const cx = cn.bind(styles);
 export const openInNewTab = (url: string): void => {
@@ -31,6 +32,7 @@ const CreateNewPosition = ({
   showModal?: boolean;
   setShowModal?: (isModal: boolean) => void;
 }) => {
+  const dispatch = useDispatch();
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [slippage, setSlippage] = useState(1);
   const refContent = useRef();
@@ -40,6 +42,7 @@ const CreateNewPosition = ({
 
   const onCloseModal = () => {
     setShowModal(false);
+    dispatch(setToDefault());
   };
 
   const tokenFrom = oraichainTokens.find((e) => extractAddress(e) === pool.pool_key.token_x);
@@ -122,16 +125,14 @@ const CreateNewPosition = ({
               </div>
             </div>
           </div>
-          <CreatePositionForm
-            tokenFrom={tokenFrom}
-            tokenTo={tokenTo}
-            feeTier={pool.pool_key.fee_tier}
-            poolData={pool}
+          <CreatePositionFormNew
+            poolId={poolKeyToString(pool.pool_key)}
             showModal={showModal}
             slippage={slippage}
             onCloseModal={async () => {
               onCloseModal();
               await refetchPositions();
+              dispatch(setToDefault());
             }}
           />
         </div>

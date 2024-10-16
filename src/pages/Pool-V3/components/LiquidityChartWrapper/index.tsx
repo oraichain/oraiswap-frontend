@@ -58,32 +58,24 @@ const LiquidityChartWrapper: FC<LiquidityChartWrapperProps> = ({
             [xRange, currentPrice]
           )}
           // eslint-disable-next-line react-hooks/exhaustive-deps
-        //   onMoveMax={useCallback(
-        //     debounce((num: number) => setMaxPrice(num), 250),
-        //     []
-        //   )}
-        //   // eslint-disable-next-line react-hooks/exhaustive-deps
-        //   onMoveMin={useCallback(
-        //     debounce((num: number) => setMinPrice(num), 250),
-        //     []
-        //   )}
-        onMoveMax={() => {}}
-        onMoveMin={(val: number) => {
-            console.log("move min", val);
-        }}
-          onSubmitMin={useCallback(
-            (val: number) => {
-              console.log("submit min", val);
-              setMinPrice(val);
-            },
-            [setMinPrice]
-          )}
-          onSubmitMax={useCallback(
-            (val: number) => {
-              setMaxPrice(val);
-            },
-            [setMaxPrice]
-          )}
+          //   onMoveMax={useCallback(
+          //     debounce((num: number) => setMaxPrice(num), 2),
+          //     []
+          //   )}
+          //   // eslint-disable-next-line react-hooks/exhaustive-deps
+          //   onMoveMin={useCallback(
+          //     debounce((num: number) => setMinPrice(num), 2),
+          //     []
+          //   )}
+          onMoveMax={() => {}}
+          onMoveMin={() => {}}
+          onSubmitMin={(val: number) => {
+            console.log('submit min', val);
+            setMinPrice(val);
+          }}
+          onSubmitMax={(val: number) => {
+            setMaxPrice(val);
+          }}
           offset={{ top: 0, right: 36, bottom: 24 + 28, left: 0 }}
           horizontal
           fullRange={fullRange}

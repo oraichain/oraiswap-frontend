@@ -1,11 +1,16 @@
-import { extractAddress } from '@oraichain/oraiswap-v3';
+import { extractAddress, LiquidityTick, Tickmap } from '@oraichain/oraiswap-v3';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { TokenItemType } from '@oraichain/oraidex-common';
 import SingletonOraiswapV3, { PRICE_SCALE, stringToPoolKey } from 'libs/contractSingleton';
 import { oraichainTokens } from '@oraichain/oraidex-common';
 import { Pool, PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { convertPlotTicks, printBigint } from 'pages/Pool-V3/components/PriceRangePlot/utils';
+import {
+  convertPlotTicks,
+  createLiquidityPlot,
+  handleGetCurrentPlotTicks,
+  printBigint
+} from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import { getHistoricalPriceData } from 'rest/graphClient';
 
 export const AvailableTimeDurations = ['1d', '7d', '1mo', '1y'] as const;
@@ -36,6 +41,7 @@ export interface PoolDetailV3State {
   pool: Pool;
   tokenX: TokenItemType; //
   tokenY: TokenItemType; //
+  isXToY: boolean; //
   historicalRange: TimeDuration; //
   cache1Day: TokenPairHistoricalPrice[]; //
   cache7Day: TokenPairHistoricalPrice[]; //
@@ -46,7 +52,8 @@ export interface PoolDetailV3State {
   xRange: [number, number]; //
   yRange: [number, number]; //
   currentPrice: number; //
-  activeLiquidity: ActiveLiquidityPerTickRange[]; //
+  fullTickMap: Tickmap;
+  liquidityTicks: LiquidityTick[];
   liquidityChartData: LiquidityChartData[];
   zoom: number;
   range: [number, number];
@@ -58,18 +65,20 @@ const initialState: PoolDetailV3State = {
   pool: null,
   tokenX: null,
   tokenY: null,
+  isXToY: true,
   historicalRange: '7d',
-  cache1Day: [],
-  cache7Day: [],
-  cache1Month: [],
-  cache1Year: [],
-  historicalChartData: [],
+  cache1Day: null,
+  cache7Day: null,
+  cache1Month: null,
+  cache1Year: null,
+  historicalChartData: null,
   fullRange: false,
-  xRange: [0, 0],
-  yRange: [0, 0],
-  currentPrice: 1,
-  activeLiquidity: [],
-  liquidityChartData: [],
+  xRange: null,
+  yRange: null,
+  currentPrice: null,
+  fullTickMap: null,
+  liquidityTicks: null,
+  liquidityChartData: null,
   zoom: 1.05,
   range: undefined
 };
@@ -79,7 +88,6 @@ export const poolDetailV3Slice = createSlice({
   initialState,
   reducers: {
     setPoolId: (state, action: PayloadAction<string>) => {
-      console.log('set pool id');
       state.poolId = action.payload;
       const poolKey = stringToPoolKey(action.payload);
       state.poolKey = poolKey;
@@ -94,21 +102,73 @@ export const poolDetailV3Slice = createSlice({
     setXRange: (state, action: PayloadAction<[number, number]>) => {
       state.xRange = action.payload;
     },
-    setLiquidityChartData: (state, action: PayloadAction<LiquidityChartData[]>) => {
-      state.liquidityChartData = action.payload;
+    setLiquidityChartData: (state) => {
+      if (!state.liquidityTicks || !state.poolKey || !state.tokenX || !state.tokenY || !state.yRange) return;
+      const plots = createLiquidityPlot(
+        state.liquidityTicks,
+        state.poolKey.fee_tier.tick_spacing,
+        state.isXToY,
+        state.tokenX.decimals,
+        state.tokenY.decimals
+      );
+      const fullData = plots.map((tick) => {
+        return {
+          price: tick.x,
+          depth: tick.y
+        };
+      });
+
+      // just get data has price in yRange
+      state.liquidityChartData = fullData.filter(
+        (data) => data.price >= state.yRange[0] && data.price <= state.yRange[1]
+      );
     },
     setHistoricalChartData: (state, action: PayloadAction<TokenPairHistoricalPrice[]>) => {
       let data = action.payload;
-      if (state.currentPrice) {
-        data = [...data, { time: Date.now(), close: state.currentPrice }];
-      }
       state.historicalChartData = data;
     },
     setHistoricalRange: (state, action: PayloadAction<TimeDuration>) => {
       state.historicalRange = action.payload;
+      switch (state.historicalRange) {
+        case '1d':
+          state.historicalChartData = state.cache1Day;
+          break;
+        case '7d':
+          state.historicalChartData = state.cache7Day;
+          break;
+        case '1mo':
+          state.historicalChartData = state.cache1Month;
+          break;
+        case '1y':
+          state.historicalChartData = state.cache1Year;
+          break;
+        default:
+          state.historicalChartData = state.cache7Day;
+      }
     },
     setZoom: (state, action: PayloadAction<number>) => {
       state.zoom = action.payload;
+    },
+    setFullTickMap: (state, action: PayloadAction<Tickmap>) => {
+      state.fullTickMap = action.payload;
+    },
+    setAllLiquidityTicks: (state, action: PayloadAction<LiquidityTick[]>) => {
+      state.liquidityTicks = action.payload;
+    },
+    setToDefault: () => ({ ...initialState }),
+    setIsXToY: (state, action: PayloadAction<boolean>) => {
+      state.isXToY = action.payload;
+      state.currentPrice = 1 / state.currentPrice;
+      if (state.historicalRange) {
+        state.historicalChartData = revertHistoricalChartData(state.historicalChartData);
+        state.cache1Day = revertHistoricalChartData(state.cache1Day);
+        state.cache7Day = revertHistoricalChartData(state.cache7Day);
+        state.cache1Month = revertHistoricalChartData(state.cache1Month);
+        state.cache1Year = revertHistoricalChartData(state.cache1Year);
+      }
+      if (state.liquidityChartData) {
+        state.liquidityChartData = revertLiquidityChartData(state.liquidityChartData);
+      }
     }
   },
   extraReducers: (builder) => {
@@ -118,26 +178,55 @@ export const poolDetailV3Slice = createSlice({
       const price = (sqrtPrice * sqrtPrice) / 10 ** ((state.tokenY.decimals ?? 0) - (state.tokenX.decimals ?? 0));
       state.currentPrice = price;
     });
-    builder.addCase(fetchActiveLiquidityData.fulfilled, (state, action) => {
-      state.activeLiquidity = action.payload;
-    });
     builder.addCase(fetchHistoricalPriceData1D.fulfilled, (state, action) => {
-      state.cache1Day = action.payload;
+      if (action.payload.poolId !== state.poolId) return;
+      state.cache1Day = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      if (state.historicalRange === '1d') {
+        state.historicalChartData = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      }
     });
     builder.addCase(fetchHistoricalPriceData7D.fulfilled, (state, action) => {
-      state.cache7Day = action.payload;
+      if (action.payload.poolId !== state.poolId) return;
+      state.cache7Day = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      if (state.historicalRange === '7d') {
+        state.historicalChartData = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      }
     });
     builder.addCase(fetchHistoricalPriceData1M.fulfilled, (state, action) => {
-      state.cache1Month = action.payload;
+      if (action.payload.poolId !== state.poolId) return;
+      state.cache1Month = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      if (state.historicalRange === '1mo') {
+        state.historicalChartData = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      }
     });
     builder.addCase(fetchHistoricalPriceData1Y.fulfilled, (state, action) => {
-      state.cache1Year = action.payload;
+      if (action.payload.poolId !== state.poolId) return;
+      state.cache1Year = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      if (state.historicalRange === '1y') {
+        state.historicalChartData = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      }
+    });
+    builder.addCase(fetchTickMap.fulfilled, (state, action) => {
+      state.fullTickMap = action.payload;
+    });
+    builder.addCase(fetchLiquidityTicks.fulfilled, (state, action) => {
+      state.liquidityTicks = action.payload;
     });
   }
 });
 
+export const fetchTickMap = createAsyncThunk('poolDetailV3/fetchTickMap', async (poolKey: PoolKey) => {
+  return await SingletonOraiswapV3.getFullTickmap(poolKey);
+});
+
+export const fetchLiquidityTicks = createAsyncThunk(
+  'poolDetailV3/fetchLiquidityTicks',
+  async ({ poolKey, tickMap }: { poolKey: PoolKey; tickMap: Tickmap }) => {
+    return await SingletonOraiswapV3.getAllLiquidityTicks(poolKey, tickMap);
+  }
+);
+
 export const fetchPool = createAsyncThunk('poolDetailV3/fetchPool', async (poolKey: PoolKey) => {
-  console.log('get pool');
   return (await SingletonOraiswapV3.getPool(poolKey)).pool;
 });
 
@@ -192,6 +281,26 @@ export const fetchHistoricalPriceData1Y = createAsyncThunk(
   }
 );
 
+const revertLiquidityChartData = (data: LiquidityChartData[]) => {
+  if (!data) return [];
+  return data.map((item) => {
+    return {
+      price: 1 / item.price,
+      depth: item.depth
+    };
+  });
+};
+
+const revertHistoricalChartData = (data: TokenPairHistoricalPrice[]) => {
+  if (!data) return [];
+  return data.map((item) => {
+    return {
+      time: item.time,
+      close: 1 / item.close
+    };
+  });
+};
+
 export const {
   setPoolId,
   setXRange,
@@ -199,7 +308,9 @@ export const {
   setLiquidityChartData,
   setHistoricalChartData,
   setHistoricalRange,
-  setZoom
+  setZoom,
+  setToDefault,
+  setIsXToY
 } = poolDetailV3Slice.actions;
 
 export default poolDetailV3Slice.reducer;

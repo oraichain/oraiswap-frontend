@@ -21,10 +21,10 @@
     display: flex;
     flex-direction: row;
 
-    @media (min-width: 640px) {
+    // @media (min-width: 640px) {
       row-gap: 1rem;
       align-items: flex-end;
-    }
+    // }
 
     .priceWrapper {
       display: flex;

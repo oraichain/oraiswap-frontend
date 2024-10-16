@@ -82,7 +82,7 @@ import {
 } from '../PriceRangePlot/utils';
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
-import { PRICE_SCALE } from 'libs/contractSingleton';
+import { fetchPositionAprInfo, PRICE_SCALE } from 'libs/contractSingleton';
 import HistoricalPriceChart, { formatPretty } from '../HistoricalPriceChart';
 import { ConcentratedLiquidityDepthChart } from '../ConcentratedLiquidityDepthChart';
 import { Dec } from '@keplr-wallet/unit';
@@ -90,6 +90,7 @@ import { set } from 'lodash';
 import useAddLiquidityNew from 'pages/Pool-V3/hooks/useAddLiquidityNew';
 import HistoricalChartDataWrapper from '../HistoricalChartDataWrapper';
 import LiquidityChartWrapper from '../LiquidityChartWrapper';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 
 export type PriceInfo = {
   startPrice: number;
@@ -125,6 +126,7 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
   showModal,
   onCloseModal
 }) => {
+
   const [tokenZap, setTokenZap] = useState<TokenItemType>(TOKEN_ZAP);
   const [zapAmount, setZapAmount] = useState<number | string>('');
   const [zapInResponse, setZapInResponse] = useState<ZapInLiquidityResponse>(null);
@@ -1074,6 +1076,60 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
     }
   }, [minPrice, maxPrice]);
 
+  const [simulatedAPR, setSimulatedAPR] = useState<number>(0);
+
+  const { feeDailyData, refetchfeeDailyData } = useGetFeeDailyData();
+
+  useEffect(() => {
+    (async () => {
+      const buttonMessage = getButtonMessage();
+
+      if (toggleZapIn) {
+        if (buttonMessage === 'Zap in' && zapInResponse) {
+          // set new APR
+          const xUsd = Number(zapInResponse.amountX) * extendPrices[tokenFrom.coinGeckoId];
+          const yUsd = Number(zapInResponse.amountY) * extendPrices[tokenTo.coinGeckoId];
+          const apr = await fetchPositionAprInfo(
+            poolData,
+            {
+              liquidity: liquidityRef.current,
+              pool_key: poolKey
+            } as any,
+            extendPrices,
+            xUsd,
+            yUsd,
+            !isFromBlocked && !isToBlocked,
+            feeDailyData
+          );
+          setSimulatedAPR(apr.total);
+        } else {
+          setSimulatedAPR(0);
+        }
+      } else {
+        if (buttonMessage === 'Create new position') {
+          // set new APR
+          const xUsd = Number(amountFrom) * extendPrices[tokenFrom.coinGeckoId];
+          const yUsd = Number(amountTo) * extendPrices[tokenTo.coinGeckoId];
+          const apr = await fetchPositionAprInfo(
+            poolData,
+            {
+              liquidity: liquidityRef.current,
+              pool_key: poolKey
+            } as any,
+            extendPrices,
+            Number(xUsd),
+            Number(yUsd),
+            !isFromBlocked && !isToBlocked,
+            feeDailyData
+          );
+          setSimulatedAPR(apr.total);
+        } else {
+          setSimulatedAPR(0);
+        }
+      }
+    })();
+  }, [amountFrom, amountTo, zapAmount, toggleZapIn, leftRange, rightRange, xUsd, yUsd, zapInResponse]);
+
   return (
     <div className={styles.createPoolForm}>
       <div className={styles.tab}>
@@ -1161,18 +1217,19 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
 
               <div className={styles.wrapChart}>
                 {historicalChartData && yRange ? (
-                  <HistoricalChartDataWrapper
-                    hoverPrice={hoverPrice}
-                    tokenX={tokenX}
-                    tokenY={tokenY}
-                    historicalChartData={historicalChartData}
-                    fullRange={fullRange}
-                    yRange={yRange}
-                    addRange={[minPrice, maxPrice]}
-                    currentPrice={currentPrice}
-                    setHoverPrice={setHoverPrice}
-                    setHistoricalRange={changeHistoricalRange}
-                  />
+                  // <HistoricalChartDataWrapper
+                  //   hoverPrice={hoverPrice}
+                  //   tokenX={tokenX}
+                  //   tokenY={tokenY}
+                  //   historicalChartData={historicalChartData}
+                  //   fullRange={fullRange}
+                  //   yRange={yRange}
+                  //   addRange={[minPrice, maxPrice]}
+                  //   currentPrice={currentPrice}
+                  //   setHoverPrice={setHoverPrice}
+                  //   setHistoricalRange={changeHistoricalRange}
+                  // />
+                  <></>
                 ) : (
                   <span>Loading</span>
                 )}
@@ -1644,6 +1701,12 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
           </>
         )}
 
+        {simulatedAPR !== 0 && (
+          <div>
+            <span>Simulate APR: {numberWithCommas(simulatedAPR * 100, undefined, { maximumFractionDigits: 2 })}%</span>
+          </div>
+        )}
+
         <div className={styles.btn}>
           {(() => {
             const btnText = getButtonMessage();
@@ -1696,814 +1759,6 @@ const CreatePositionForm: FC<CreatePoolFormProps> = ({
       </div>
     </div>
   );
-};
-
-const AddLiquidityConfig = {
-  fullRange: false,
-  rangeWithCurrencyDecimals: [new Dec(0.484820000000000001), new Dec(0.641000000000000001)],
-  currentPriceWithDecimals: 0.5284821950442445
-};
-
-const PriceChartData = {
-  // range on y-axis
-  yRange: [0.4215826086956522, 0.7371500000000001],
-  // history data
-  historicalChartData: [
-    {
-      time: 1727769600000,
-      close: 0.614968711
-    },
-    {
-      time: 1727773200000,
-      close: 0.610095399
-    },
-    {
-      time: 1727776800000,
-      close: 0.611702955
-    },
-    {
-      time: 1727780400000,
-      close: 0.613504411
-    },
-    {
-      time: 1727784000000,
-      close: 0.612750455
-    },
-    {
-      time: 1727787600000,
-      close: 0.610511149
-    },
-    {
-      time: 1727791200000,
-      close: 0.599490928
-    },
-    {
-      time: 1727794800000,
-      close: 0.577520034
-    },
-    {
-      time: 1727798400000,
-      close: 0.572584208
-    },
-    {
-      time: 1727802000000,
-      close: 0.561122093
-    },
-    {
-      time: 1727805600000,
-      close: 0.553899985
-    },
-    {
-      time: 1727809200000,
-      close: 0.557028733
-    },
-    {
-      time: 1727812800000,
-      close: 0.554456796
-    },
-    {
-      time: 1727816400000,
-      close: 0.553707833
-    },
-    {
-      time: 1727820000000,
-      close: 0.554142082
-    },
-    {
-      time: 1727823600000,
-      close: 0.546444299
-    },
-    {
-      time: 1727827200000,
-      close: 0.547832966
-    },
-    {
-      time: 1727830800000,
-      close: 0.554160453
-    },
-    {
-      time: 1727834400000,
-      close: 0.558299994
-    },
-    {
-      time: 1727838000000,
-      close: 0.558499873
-    },
-    {
-      time: 1727841600000,
-      close: 0.559539057
-    },
-    {
-      time: 1727845200000,
-      close: 0.557107811
-    },
-    {
-      time: 1727848800000,
-      close: 0.556811104
-    },
-    {
-      time: 1727852400000,
-      close: 0.566232173
-    },
-    {
-      time: 1727856000000,
-      close: 0.565631659
-    },
-    {
-      time: 1727859600000,
-      close: 0.567352144
-    },
-    {
-      time: 1727863200000,
-      close: 0.554762952
-    },
-    {
-      time: 1727866800000,
-      close: 0.554763335
-    },
-    {
-      time: 1727870400000,
-      close: 0.554820934
-    },
-    {
-      time: 1727874000000,
-      close: 0.549273955
-    },
-    {
-      time: 1727877600000,
-      close: 0.550082766
-    },
-    {
-      time: 1727881200000,
-      close: 0.548197936
-    },
-    {
-      time: 1727884800000,
-      close: 0.553862419
-    },
-    {
-      time: 1727888400000,
-      close: 0.552358939
-    },
-    {
-      time: 1727892000000,
-      close: 0.550483549
-    },
-    {
-      time: 1727895600000,
-      close: 0.536168126
-    },
-    {
-      time: 1727899200000,
-      close: 0.534897709
-    },
-    {
-      time: 1727902800000,
-      close: 0.542405283
-    },
-    {
-      time: 1727906400000,
-      close: 0.538795559
-    },
-    {
-      time: 1727910000000,
-      close: 0.538356766
-    },
-    {
-      time: 1727913600000,
-      close: 0.538554943
-    },
-    {
-      time: 1727917200000,
-      close: 0.537057439
-    },
-    {
-      time: 1727920800000,
-      close: 0.540283072
-    },
-    {
-      time: 1727924400000,
-      close: 0.543476082
-    },
-    {
-      time: 1727928000000,
-      close: 0.546079759
-    },
-    {
-      time: 1727931600000,
-      close: 0.545495619
-    },
-    {
-      time: 1727935200000,
-      close: 0.540542871
-    },
-    {
-      time: 1727938800000,
-      close: 0.543477519
-    },
-    {
-      time: 1727942400000,
-      close: 0.536991097
-    },
-    {
-      time: 1727946000000,
-      close: 0.52428201
-    },
-    {
-      time: 1727949600000,
-      close: 0.53175839
-    },
-    {
-      time: 1727953200000,
-      close: 0.537364286
-    },
-    {
-      time: 1727956800000,
-      close: 0.529600807
-    },
-    {
-      time: 1727960400000,
-      close: 0.526269958
-    },
-    {
-      time: 1727964000000,
-      close: 0.522772611
-    },
-    {
-      time: 1727967600000,
-      close: 0.518853833
-    },
-    {
-      time: 1727971200000,
-      close: 0.517539747
-    },
-    {
-      time: 1727974800000,
-      close: 0.510840433
-    },
-    {
-      time: 1727978400000,
-      close: 0.514085167
-    },
-    {
-      time: 1727982000000,
-      close: 0.513559459
-    },
-    {
-      time: 1727985600000,
-      close: 0.518098451
-    },
-    {
-      time: 1727989200000,
-      close: 0.516753579
-    },
-    {
-      time: 1727992800000,
-      close: 0.518288153
-    },
-    {
-      time: 1727996400000,
-      close: 0.516739924
-    },
-    {
-      time: 1728000000000,
-      close: 0.516584144
-    },
-    {
-      time: 1728003600000,
-      close: 0.514429024
-    },
-    {
-      time: 1728007200000,
-      close: 0.524838381
-    },
-    {
-      time: 1728010800000,
-      close: 0.524696361
-    },
-    {
-      time: 1728014400000,
-      close: 0.522402737
-    },
-    {
-      time: 1728018000000,
-      close: 0.524696568
-    },
-    {
-      time: 1728021600000,
-      close: 0.52847649
-    },
-    {
-      time: 1728025200000,
-      close: 0.527790575
-    },
-    {
-      time: 1728028800000,
-      close: 0.529440555
-    },
-    {
-      time: 1728032400000,
-      close: 0.531739756
-    },
-    {
-      time: 1728036000000,
-      close: 0.531284497
-    },
-    {
-      time: 1728039600000,
-      close: 0.527580033
-    },
-    {
-      time: 1728043200000,
-      close: 0.530724525
-    },
-    {
-      time: 1728046800000,
-      close: 0.531408747
-    },
-    {
-      time: 1728050400000,
-      close: 0.529527038
-    },
-    {
-      time: 1728054000000,
-      close: 0.526574066
-    },
-    {
-      time: 1728057600000,
-      close: 0.536044085
-    },
-    {
-      time: 1728061200000,
-      close: 0.545762373
-    },
-    {
-      time: 1728064800000,
-      close: 0.546162998
-    },
-    {
-      time: 1728068400000,
-      close: 0.547789977
-    },
-    {
-      time: 1728072000000,
-      close: 0.54715659
-    },
-    {
-      time: 1728075600000,
-      close: 0.547398449
-    },
-    {
-      time: 1728079200000,
-      close: 0.546884288
-    },
-    {
-      time: 1728082800000,
-      close: 0.546890132
-    },
-    {
-      time: 1728086400000,
-      close: 0.54867838
-    },
-    {
-      time: 1728090000000,
-      close: 0.554137904
-    },
-    {
-      time: 1728093600000,
-      close: 0.55437151
-    },
-    {
-      time: 1728097200000,
-      close: 0.548063302
-    },
-    {
-      time: 1728100800000,
-      close: 0.548791599
-    },
-    {
-      time: 1728104400000,
-      close: 0.551309954
-    },
-    {
-      time: 1728108000000,
-      close: 0.554695744
-    },
-    {
-      time: 1728111600000,
-      close: 0.557297402
-    },
-    {
-      time: 1728115200000,
-      close: 0.553131896
-    },
-    {
-      time: 1728118800000,
-      close: 0.557460139
-    },
-    {
-      time: 1728122400000,
-      close: 0.56208737
-    },
-    {
-      time: 1728126000000,
-      close: 0.557510124
-    },
-    {
-      time: 1728129600000,
-      close: 0.558321799
-    },
-    {
-      time: 1728133200000,
-      close: 0.560266386
-    },
-    {
-      time: 1728136800000,
-      close: 0.553571622
-    },
-    {
-      time: 1728140400000,
-      close: 0.553518112
-    },
-    {
-      time: 1728144000000,
-      close: 0.553960901
-    },
-    {
-      time: 1728147600000,
-      close: 0.549720917
-    },
-    {
-      time: 1728151200000,
-      close: 0.551671452
-    },
-    {
-      time: 1728154800000,
-      close: 0.548572496
-    },
-    {
-      time: 1728158400000,
-      close: 0.545532851
-    },
-    {
-      time: 1728162000000,
-      close: 0.541493595
-    },
-    {
-      time: 1728165600000,
-      close: 0.545140272
-    },
-    {
-      time: 1728169200000,
-      close: 0.551089909
-    },
-    {
-      time: 1728172800000,
-      close: 0.550906309
-    },
-    {
-      time: 1728176400000,
-      close: 0.54946156
-    },
-    {
-      time: 1728180000000,
-      close: 0.551161586
-    },
-    {
-      time: 1728183600000,
-      close: 0.547770489
-    },
-    {
-      time: 1728187200000,
-      close: 0.545281721
-    },
-    {
-      time: 1728190800000,
-      close: 0.54093613
-    },
-    {
-      time: 1728194400000,
-      close: 0.541996148
-    },
-    {
-      time: 1728198000000,
-      close: 0.542470644
-    },
-    {
-      time: 1728201600000,
-      close: 0.543228807
-    },
-    {
-      time: 1728205200000,
-      close: 0.544115761
-    },
-    {
-      time: 1728208800000,
-      close: 0.545102106
-    },
-    {
-      time: 1728212400000,
-      close: 0.543382806
-    },
-    {
-      time: 1728216000000,
-      close: 0.544709051
-    },
-    {
-      time: 1728219600000,
-      close: 0.540436666
-    },
-    {
-      time: 1728223200000,
-      close: 0.54352557
-    },
-    {
-      time: 1728226800000,
-      close: 0.550759553
-    },
-    {
-      time: 1728230400000,
-      close: 0.547252676
-    },
-    {
-      time: 1728234000000,
-      close: 0.544715665
-    },
-    {
-      time: 1728237600000,
-      close: 0.543991448
-    },
-    {
-      time: 1728241200000,
-      close: 0.545722212
-    },
-    {
-      time: 1728244800000,
-      close: 0.543358761
-    },
-    {
-      time: 1728248400000,
-      close: 0.543312014
-    },
-    {
-      time: 1728252000000,
-      close: 0.539859453
-    },
-    {
-      time: 1728255600000,
-      close: 0.543126499
-    },
-    {
-      time: 1728259200000,
-      close: 0.550047628
-    },
-    {
-      time: 1728262800000,
-      close: 0.559166701
-    },
-    {
-      time: 1728266400000,
-      close: 0.565128969
-    },
-    {
-      time: 1728270000000,
-      close: 0.560940461
-    },
-    {
-      time: 1728273600000,
-      close: 0.562867829
-    },
-    {
-      time: 1728277200000,
-      close: 0.560381161
-    },
-    {
-      time: 1728280800000,
-      close: 0.559541151
-    },
-    {
-      time: 1728284400000,
-      close: 0.563255745
-    },
-    {
-      time: 1728288000000,
-      close: 0.558492065
-    },
-    {
-      time: 1728291600000,
-      close: 0.563282428
-    },
-    {
-      time: 1728295200000,
-      close: 0.550904982
-    },
-    {
-      time: 1728298800000,
-      close: 0.543989685
-    },
-    {
-      time: 1728302400000,
-      close: 0.550510796
-    },
-    {
-      time: 1728306000000,
-      close: 0.546943806
-    },
-    {
-      time: 1728309600000,
-      close: 0.551934503
-    },
-    {
-      time: 1728313200000,
-      close: 0.557322766
-    },
-    {
-      time: 1728316800000,
-      close: 0.552714144
-    },
-    {
-      time: 1728320400000,
-      close: 0.558494194
-    },
-    {
-      time: 1728324000000,
-      close: 0.558336175
-    },
-    {
-      time: 1728327600000,
-      close: 0.545811321
-    },
-    {
-      time: 1728331200000,
-      close: 0.548724409
-    },
-    {
-      time: 1728334800000,
-      close: 0.545012516
-    },
-    {
-      time: 1728338400000,
-      close: 0.548501834
-    },
-    {
-      time: 1728342000000,
-      close: 0.53982507
-    },
-    {
-      time: 1728345600000,
-      close: 0.533514925
-    },
-    {
-      time: 1728349200000,
-      close: 0.536428296
-    },
-    {
-      time: 1728352800000,
-      close: 0.536882461
-    },
-    {
-      time: 1728356400000,
-      close: 0.53538019
-    },
-    {
-      time: 1728360000000,
-      close: 0.536234726
-    },
-    {
-      time: 1728363600000,
-      close: 0.534807194
-    },
-    {
-      time: 1728367200000,
-      close: 0.530086346
-    },
-    {
-      time: 1728370800000,
-      close: 0.530178979
-    },
-    {
-      time: 1728374400000,
-      close: 0.527769582
-    },
-    {
-      time: 1728378000000,
-      close: 0.526281454
-    }
-  ],
-  // latest chart data
-  lastChartData: {
-    close: 0.5262895941172561,
-    time: 1728375698066
-  },
-  historicalRange: '7D'
-};
-
-const ConcentrateChartData = {
-  min: 0.48482000000000003, // lower range
-  max: 0.641, // upper range
-  yRange: [0.4215826086956522, 0.7371500000000001], // y-axis range
-  xRange: [0, 1213061533758.7393], // 0 -> max liquidity of a tick
-  // tick data info
-  data: [
-    {
-      price: 0.4215826086956522,
-      depth: 361588874679.61707
-    },
-    {
-      price: 0.43736097826086956,
-      depth: 295157736727.5964
-    },
-    {
-      price: 0.45313934782608695,
-      depth: 309347145233.94055
-    },
-    {
-      price: 0.46891771739130433,
-      depth: 368820514583.27124
-    },
-    {
-      price: 0.4846960869565217,
-      depth: 417105281991.9579
-    },
-    {
-      price: 0.5004744565217392,
-      depth: 494405645980.23596
-    },
-    {
-      price: 0.5162528260869566,
-      depth: 889552977073.7444
-    },
-    {
-      price: 0.5320311956521739,
-      depth: 992309793971.4576
-    },
-    {
-      price: 0.5478095652173913,
-      depth: 959832109017.2087
-    },
-    {
-      price: 0.5635879347826087,
-      depth: 891904678661.5216
-    },
-    {
-      price: 0.5793663043478261,
-      depth: 836913206483.5969
-    },
-    {
-      price: 0.5951446739130435,
-      depth: 763700036222.9612
-    },
-    {
-      price: 0.6109230434782609,
-      depth: 903270101065.6025
-    },
-    {
-      price: 0.6267014130434783,
-      depth: 874286673662.867
-    },
-    {
-      price: 0.6424797826086956,
-      depth: 887203497670.5289
-    },
-    {
-      price: 0.658258152173913,
-      depth: 1010884611465.6161
-    },
-    {
-      price: 0.6740365217391304,
-      depth: 825819915528.4487
-    },
-    {
-      price: 0.6898148913043478,
-      depth: 718772475791.6271
-    },
-    {
-      price: 0.7055932608695652,
-      depth: 424689731570.51654
-    },
-    {
-      price: 0.7213716304347826,
-      depth: 397160923389.60565
-    },
-    {
-      price: 0.73715,
-      depth: 367246951558.62726
-    }
-  ],
-  // current price
-  annotationDatum: {
-    price: 0.5277044586985559,
-    depth: 1213061533758.7393
-  },
-  // position of the chart
-  offset: {
-    top: 0,
-    right: 36,
-    bottom: 52,
-    left: 0
-  },
-  // option full range
-  fullRange: false
 };
 
 export default CreatePositionForm;

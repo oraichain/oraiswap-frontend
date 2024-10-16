@@ -8,9 +8,12 @@ import {
   fetchHistoricalPriceData1M,
   fetchHistoricalPriceData1Y,
   fetchHistoricalPriceData7D,
+  fetchLiquidityTicks,
   fetchPool,
+  fetchTickMap,
   setHistoricalChartData,
   setHistoricalRange,
+  setIsXToY,
   setLiquidityChartData,
   setPoolId,
   setXRange,
@@ -21,7 +24,7 @@ import {
 import { BigDecimal } from '@oraichain/oraidex-common';
 import { PRICE_SCALE } from 'libs/contractSingleton';
 import { getMaxTick, getMinTick, getTickAtSqrtPrice } from '@oraichain/oraiswap-v3';
-import { calcPrice } from '../components/PriceRangePlot/utils';
+import { calcPrice, handleGetCurrentPlotTicks } from '../components/PriceRangePlot/utils';
 
 const ZOOM_STEP = 0.05;
 
@@ -48,16 +51,18 @@ const useAddLiquidityNew = (poolString: string) => {
   const xRange = usePoolDetailV3Reducer('xRange');
   const yRange = usePoolDetailV3Reducer('yRange');
   const currentPrice = usePoolDetailV3Reducer('currentPrice');
-  const activeLiquidity = usePoolDetailV3Reducer('activeLiquidity');
   const liquidityChartData = usePoolDetailV3Reducer('liquidityChartData');
+  const fullTickMap = usePoolDetailV3Reducer('fullTickMap');
+  const liquidityTicks = usePoolDetailV3Reducer('liquidityTicks');
   const zoom = usePoolDetailV3Reducer('zoom');
   const range = usePoolDetailV3Reducer('range');
+  const isXToY = usePoolDetailV3Reducer('isXToY');
 
   // when have pool string, we set to pool id
   // can get: poolKey, tokenX, tokenY
   useEffect(() => {
     if (poolString) {
-      console.log('change pool', poolString);
+      console.log('set new pool id', poolString);
       dispatch(setPoolId(poolString));
     }
   }, [poolString, dispatch]);
@@ -66,14 +71,34 @@ const useAddLiquidityNew = (poolString: string) => {
   // pool, currentPrice,
   useEffect(() => {
     if (poolKey) {
+      console.log('fetch new pool');
       dispatch<any>(fetchPool(poolKey));
+      dispatch<any>(fetchTickMap(poolKey));
     }
   }, [poolKey, dispatch]);
+
+  useEffect(() => {
+    if (fullTickMap) {
+      dispatch<any>(
+        fetchLiquidityTicks({
+          poolKey,
+          tickMap: fullTickMap
+        })
+      );
+    }
+  }, [fullTickMap, poolKey, dispatch]);
+
+  useEffect(() => {
+    if (liquidityTicks && poolKey && tokenX && tokenY && yRange) {
+      dispatch(setLiquidityChartData());
+    }
+  }, [liquidityTicks, isXToY, poolKey, tokenX, tokenY, yRange, dispatch]);
 
   // when we have poolId, poolKey, tokenX, tokenY, we can get:
   // historicalChartData, activeLiquidity, cache1Day, cache7Day, cache1Month, cache1Year
   useEffect(() => {
     if (poolKey && tokenX && tokenY) {
+      console.log('fetch new historical data, active liquidity');
       dispatch<any>(fetchHistoricalPriceData1D(poolId));
       dispatch<any>(fetchHistoricalPriceData7D(poolId));
       dispatch<any>(fetchHistoricalPriceData1M(poolId));
@@ -83,15 +108,16 @@ const useAddLiquidityNew = (poolString: string) => {
           poolKey,
           xDecimal: tokenX.decimals,
           yDecimal: tokenY.decimals,
-          isXToY: true
+          isXToY: isXToY
         })
       );
     }
-  }, [poolId, poolKey, tokenX, tokenY, dispatch]);
+  }, [poolId, poolKey, tokenX, tokenY, isXToY, dispatch]);
 
   // when have historicalChartData, currentPrice, we can get yRange
   useEffect(() => {
     if (historicalChartData && currentPrice) {
+      console.log('set y range');
       const data = historicalChartData?.map(({ time, close }) => ({
         time,
         price: close
@@ -124,66 +150,14 @@ const useAddLiquidityNew = (poolString: string) => {
     }
   }, [historicalChartData, zoom, currentPrice, range, dispatch]);
 
-  // when have activeLiquidity, yRange, poolKey, tokenX, tokenY, we can get liquidityChartData
-  useEffect(() => {
-    if (activeLiquidity && yRange && poolKey && tokenX && tokenY) {
-      const data = activeLiquidity;
-      const [min, max] = yRange;
-      const multiplicationQuoteOverBase = tokenY.decimals - tokenX.decimals;
-
-      if (min !== max) {
-        const depths: { price: number; depth: number }[] = [];
-
-        for (let price = min; price <= max; price += (max - min) / 20) {
-          //   if (multiplicationQuoteOverBase === 0) continue;
-
-          const sqrtPrice = BigInt(
-            new BigDecimal(price)
-              .mul(new BigDecimal(10 ** multiplicationQuoteOverBase))
-              .sqrt()
-              .mul(new BigDecimal(10n ** PRICE_SCALE))
-              .toString()
-          );
-
-          depths.push({
-            price,
-            depth: getLiqFrom(getTickAtSqrtPrice(sqrtPrice, poolKey.fee_tier.tick_spacing), data)
-          });
-        }
-        dispatch(setLiquidityChartData(depths));
-      }
-    }
-  }, [activeLiquidity, yRange, poolKey, tokenX, tokenY, dispatch]);
-
   // when have liquidityChartData, we can get xRange
   useEffect(() => {
-    if (liquidityChartData.length > 0) {
-      const xRange = [0, Math.max(...liquidityChartData.map((d) => d.depth)) * 1.2];
+    if (liquidityChartData) {
+      console.log('set x range', Math.max(...liquidityChartData.map((d) => d.depth)));
+      const xRange = [0, Math.max(...liquidityChartData.map((d) => d.depth))];
       dispatch(setXRange(xRange as [number, number]));
     }
   }, [liquidityChartData, dispatch]);
-
-  useEffect(() => {
-    if (historicalRange) {
-      console.log('setHistoricalChartData', historicalRange);
-      switch (historicalRange) {
-        case '1d':
-          dispatch<any>(setHistoricalChartData(cache1Day));
-          break;
-        case '7d':
-          dispatch<any>(setHistoricalChartData(cache7Day));
-          break;
-        case '1mo':
-          dispatch<any>(setHistoricalChartData(cache1Month));
-          break;
-        case '1y':
-          dispatch<any>(setHistoricalChartData(cache1Year));
-          break;
-        default:
-          break;
-      }
-    }
-  }, [historicalRange, cache1Day, cache7Day, cache1Month, cache1Year, dispatch]);
 
   useEffect(() => {
     if (currentPrice) {
@@ -195,14 +169,14 @@ const useAddLiquidityNew = (poolString: string) => {
     if (poolKey && pool && tokenX && tokenY) {
       resetPlot();
     }
-  }, [poolKey, pool, tokenX, tokenY]);
-
-  useEffect(() => {
-
-  }, [minPrice, maxPrice]);
+  }, [poolKey, pool, tokenX, tokenY, isXToY]);
 
   const changeHistoricalRange = (range: TimeDuration) => {
     dispatch(setHistoricalRange(range));
+  };
+
+  const flipToken = () => {
+    dispatch(setIsXToY(!isXToY));
   };
 
   const zoomIn = () => {
@@ -228,8 +202,8 @@ const useAddLiquidityNew = (poolString: string) => {
       Number(pool.current_tick_index) - Number(poolKey.fee_tier.tick_spacing) * 3
     );
 
-    const minPrice = calcPrice(lowerTick, true, tokenX.decimals, tokenY.decimals);
-    const maxPrice = calcPrice(higherTick, true, tokenX.decimals, tokenY.decimals);
+    const minPrice = calcPrice(lowerTick, isXToY, tokenX.decimals, tokenY.decimals);
+    const maxPrice = calcPrice(higherTick, isXToY, tokenX.decimals, tokenY.decimals);
 
     setLowerTick(lowerTick);
     setHigherTick(higherTick);
@@ -253,7 +227,6 @@ const useAddLiquidityNew = (poolString: string) => {
     xRange,
     yRange,
     currentPrice,
-    activeLiquidity,
     liquidityChartData,
     zoom,
     range,
@@ -262,6 +235,7 @@ const useAddLiquidityNew = (poolString: string) => {
     maxPrice,
     lowerTick,
     higherTick,
+    isXToY,
     setLowerTick,
     setHigherTick,
     setMinPrice,
@@ -270,7 +244,8 @@ const useAddLiquidityNew = (poolString: string) => {
     changeHistoricalRange,
     zoomIn,
     zoomOut,
-    resetRange
+    resetRange,
+    flipToken
   };
 };
 
