@@ -44,8 +44,8 @@ const CreateNewPool = ({ pools }: { pools: PoolWithPoolKey[] }) => {
       (pools || []).find(
         (p) =>
           [extractDenom(tokenFrom), extractDenom(tokenTo)].every((e) =>
-            [p.pool_key.token_x, p.pool_key.token_y].includes(e)
-          ) && fee.fee === p.pool_key.fee_tier.fee
+            [p.pool_key?.token_x, p.pool_key?.token_y].includes(e)
+          ) && fee.fee === p.pool_key?.fee_tier?.fee
       ),
     [pools, tokenFrom, tokenTo]
   );

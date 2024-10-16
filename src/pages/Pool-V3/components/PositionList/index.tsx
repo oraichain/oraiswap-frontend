@@ -19,12 +19,15 @@ const PositionList = () => {
   const [cachePrices] = useConfigReducer('coingecko');
   const [address] = useConfigReducer('address');
 
+  const [loading, setLoading] = useState(false);
   const [dataPosition, setDataPosition] = useState<any[]>([]);
   const { positions, isFetchingPositions } = useGetPositions(address);
   const { poolList, poolPrice } = useGetPoolList(cachePrices);
+
   useEffect(() => {
     (async () => {
       try {
+        // setLoading(true);
         if (!address) {
           setDataPosition([]);
           return;
@@ -47,6 +50,8 @@ const PositionList = () => {
         setDataPosition(positionsMap);
       } catch (error) {
         console.error('Failed to fetch data:', error);
+      } finally {
+        // setLoading(false);
       }
     })();
 
@@ -55,22 +60,22 @@ const PositionList = () => {
 
   return (
     <div className={styles.positionList}>
-      {/* <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}> */}
-      {dataPosition.length ? (
-        dataPosition.map((position, key) => {
-          return (
-            <div className={styles.item} key={`position-list-item-${key}`}>
-              <PositionItem position={position} />
-            </div>
-          );
-        })
-      ) : (
-        <div className={styles.nodata}>
-          {theme === 'light' ? <NoData /> : <NoDataDark />}
-          <span>No Positions!</span>
-        </div>
-      )}
-      {/* </LoadingBox> */}
+      <LoadingBox loading={loading} styles={{ minHeight: '60vh', height: 'fit-content' }}>
+        {dataPosition.length ? (
+          dataPosition.map((position, key) => {
+            return (
+              <div className={styles.item} key={`position-list-item-${key}`}>
+                <PositionItem position={position} />
+              </div>
+            );
+          })
+        ) : (
+          <div className={styles.nodata}>
+            {theme === 'light' ? <NoData /> : <NoDataDark />}
+            <span>No Positions!</span>
+          </div>
+        )}
+      </LoadingBox>
     </div>
   );
 };

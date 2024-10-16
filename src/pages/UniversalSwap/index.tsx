@@ -1,8 +1,8 @@
-import { TVChartContainer } from '@oraichain/oraidex-common-ui';
 import { isMobile } from '@walletconnect/browser-utils';
-import NoChartData from 'assets/images/nochart_data.svg?react';
 import cn from 'classnames/bind';
-import { PAIRS_CHART } from 'config/pools';
+import ModalCustom from 'components/ModalCustom';
+import { EVENT_CONFIG_THEME } from 'config/eventConfig';
+import useTemporaryConfigReducer from 'hooks/useTemporaryConfigReducer';
 import useTheme from 'hooks/useTheme';
 import Content from 'layouts/Content';
 import { DuckDb } from 'libs/duckdb';
@@ -18,7 +18,7 @@ import {
   selectCurrentToken,
   setChartTimeFrame
 } from 'reducer/tradingSlice';
-import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
+import { FILTER_TIME_CHART } from 'reducer/type';
 import { AssetsTab, HeaderTab, HeaderTop, HistoryTab, TabsTxs } from './Component';
 import ChartUsdPrice from './Component/ChartUsdPrice';
 import { TransactionProcess } from './Modals';
@@ -27,8 +27,6 @@ import { initPairSwap } from './Swap/hooks/useFillToken';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import { ChartTokenType, useChartUsdPrice } from './hooks/useChartUsdPrice';
 import styles from './index.module.scss';
-import ModalCustom from 'components/ModalCustom';
-import LuckyDraw from 'components/LuckyDraw';
 
 const cx = cn.bind(styles);
 
@@ -38,6 +36,8 @@ const Swap: React.FC = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const mobileMode = isMobile();
   const [searchParams] = useSearchParams();
+  const [event] = useTemporaryConfigReducer('event');
+  const theme = useTheme();
 
   let tab = searchParams.get('type');
 
@@ -72,61 +72,81 @@ const Swap: React.FC = () => {
     if (!window.duckDb) initDuckdb();
   }, [window.duckDb]);
 
+  const configTheme = EVENT_CONFIG_THEME[theme][event];
+
   return (
-    <Content nonBackground>
-      <div className={cx('swap-container')}>
-        <div className={cx('swap-col', 'w60')}>
-          <div>
-            {!mobileMode && (
-              <Chart
-                toTokenDenom={toTokenDenom}
-                setPriceUsd={setPriceUsd}
-                priceUsd={priceUsd}
-                setPercentChangeUsd={setPercentChangeUsd}
-                percentChangeUsd={percentChangeUsd}
+    <>
+      {(configTheme.animation.topImg || configTheme.animation.bottomImg) && (
+        <div className={styles.wrapperEvent}>
+          {configTheme.animation.topImg && <img className={styles.top} src={configTheme.animation.topImg} alt="" />}
+          {configTheme.animation.bottomImg && (
+            <img className={styles.bottom} src={configTheme.animation.bottomImg} alt="" />
+          )}
+        </div>
+      )}
+      <Content nonBackground>
+        <div className={cx('swap-container')}>
+          <div className={cx('swap-col', 'w60')}>
+            <div>
+              {!mobileMode && (
+                <Chart
+                  toTokenDenom={toTokenDenom}
+                  setPriceUsd={setPriceUsd}
+                  priceUsd={priceUsd}
+                  setPercentChangeUsd={setPercentChangeUsd}
+                  percentChangeUsd={percentChangeUsd}
+                />
+              )}
+
+              {/* <RoutingSection /> */}
+              <TabsTxs setNetworkFilter={setNetworkFilter} networkFilter={networkFilter} />
+              {tab === TYPE_TAB_HISTORY.HISTORY ? (
+                <HistoryTab networkFilter={networkFilter.value} />
+              ) : (
+                <AssetsTab networkFilter={networkFilter.value} />
+              )}
+            </div>
+          </div>
+          <div className={cx('swap-col', 'w40')}>
+            {/* {mobileMode && (
+              <div className={styles.luckyDraw}>
+                <LuckyDraw />
+              </div>
+            )} */}
+            {mobileMode && (
+              <HeaderTop
+                hideChart
+                priceUsd={initPriceUsd}
+                priceChange={priceChange}
+                percentChangeUsd={initPercentChangeUsd}
+                chartTokenType={ChartTokenType.Price}
+                onClickAction={() => setOpenModal(true)}
               />
             )}
-
-            {/* <RoutingSection /> */}
-            <TabsTxs setNetworkFilter={setNetworkFilter} networkFilter={networkFilter} />
-            {tab === TYPE_TAB_HISTORY.HISTORY ? (
-              <HistoryTab networkFilter={networkFilter.value} />
-            ) : (
-              <AssetsTab networkFilter={networkFilter.value} />
+            {configTheme.swapBox.top && (
+              <div className={styles.wrapperTop}>
+                <img className={styles.swapTop} src={configTheme.swapBox.top} alt="" />
+              </div>
+            )}
+            <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
+            {configTheme.swapBox.bottom && (
+              <img className={styles.swapBottom} src={configTheme.swapBox.bottom} alt="" />
             )}
           </div>
         </div>
-        <div className={cx('swap-col', 'w40')}>
-          {/* {mobileMode && (
-            <div className={styles.luckyDraw}>
-              <LuckyDraw />
-            </div>
-          )} */}
-          {mobileMode && (
-            <HeaderTop
-              hideChart
-              priceUsd={initPriceUsd}
-              priceChange={priceChange}
-              percentChangeUsd={initPercentChangeUsd}
-              chartTokenType={ChartTokenType.Price}
-              onClickAction={() => setOpenModal(true)}
-            />
-          )}
-          <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
-        </div>
-      </div>
 
-      <ModalCustom open={openModal} onClose={() => setOpenModal(false)} title="Chart" showOnBottom>
-        <Chart
-          toTokenDenom={toTokenDenom}
-          setPriceUsd={setPriceUsd}
-          priceUsd={priceUsd}
-          setPercentChangeUsd={setPercentChangeUsd}
-          percentChangeUsd={percentChangeUsd}
-          showTokenInfo={false}
-        />
-      </ModalCustom>
-    </Content>
+        <ModalCustom open={openModal} onClose={() => setOpenModal(false)} title="Chart" showOnBottom>
+          <Chart
+            toTokenDenom={toTokenDenom}
+            setPriceUsd={setPriceUsd}
+            priceUsd={priceUsd}
+            setPercentChangeUsd={setPercentChangeUsd}
+            percentChangeUsd={percentChangeUsd}
+            showTokenInfo={false}
+          />
+        </ModalCustom>
+      </Content>
+    </>
   );
 };
 

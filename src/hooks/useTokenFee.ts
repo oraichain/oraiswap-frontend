@@ -1,18 +1,23 @@
 import {
+  BigDecimal,
   NetworkChainId,
+  ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   TokenItemType,
   network,
-  oraichainTokens,
-  toDisplay,
   toAmount,
-  BigDecimal,
-  ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-  ORAI_BRIDGE_EVM_DENOM_PREFIX
+  // oraichainTokens,
+  toDisplay,
+  PEPE_ORAICHAIN_EXT_DENOM,
+  PEPE_BSC_CONTRACT,
+  PEPE_ETH_CONTRACT
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { handleSimulateSwap, isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
+import { oraichainTokens } from 'config/bridgeTokens';
 import { EVM_CHAIN_ID } from 'helper';
+import { getRouterConfig } from 'pages/UniversalSwap/Swap/hooks';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateFeeConfig } from 'reducer/token';
@@ -58,6 +63,9 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
   const [relayerFeeInOrai, setRelayerFeeInOrai] = useState(0);
   const [relayerFee, setRelayerFeeAmount] = useState(0);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
+  const isFromPepeToken =
+    originalFromToken?.contractAddress &&
+    [PEPE_BSC_CONTRACT, PEPE_ETH_CONTRACT].includes(originalFromToken?.contractAddress);
 
   const { data: relayerFeeAmount } = useQuery(
     ['simulate-relayer-data', originalFromToken, originalToToken, relayerFeeInOrai],
@@ -68,16 +76,21 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
         originalFromInfo: oraiToken,
         originalToInfo: originalToToken,
         originalAmount: relayerFeeInOrai,
-        routerClient
+        routerClient,
+        routerOption: {
+          useIbcWasm: true
+        },
+        routerConfig: getRouterConfig()
       });
     },
     {
-      enabled: !!originalFromToken && !!originalToToken && relayerFeeInOrai > 0
+      enabled: !!originalFromToken && !!originalToToken && relayerFeeInOrai > 0 && !isFromPepeToken
     }
   );
 
   // get relayer fee in token, by simulate orai vs to token.
   useEffect(() => {
+    if (isFromPepeToken) return setRelayerFeeAmount(0);
     if (relayerFeeAmount) setRelayerFeeAmount(new BigDecimal(relayerFeeAmount?.displayAmount || 0).toNumber());
   }, [relayerFeeAmount]);
 
@@ -123,7 +136,11 @@ export const useUsdtToBtc = (amount) => {
         originalFromInfo: originalToToken,
         originalToInfo: originalFromToken,
         originalAmount: amount,
-        routerClient
+        routerClient,
+        routerOption: {
+          useIbcWasm: true
+        },
+        routerConfig: getRouterConfig()
       });
     },
     {

@@ -1,48 +1,52 @@
-import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS, ZAPPER_CONTRACT } from '@oraichain/oraidex-common';
-import { FeeTier, PoolWithPoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import {
-  extractAddress,
+  MULTICALL_CONTRACT,
+  oraichainTokens,
+  toDisplay,
+  TokenItemType,
+  USDT_CONTRACT,
+  ZAPPER_CONTRACT
+} from '@oraichain/oraidex-common';
+import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import {
   poolKeyToString,
   RouteNoLiquidity,
   RouteNotFoundError,
   SpamTooManyRequestsError,
+  ZapConsumer,
   ZapOutLiquidityResponse,
   ZapOutResult
 } from '@oraichain/oraiswap-v3';
+import ErrorIcon from 'assets/icons/error-fill-icon.svg?react';
+import OutputIcon from 'assets/icons/zapOutput-ic.svg?react';
 import classNames from 'classnames';
+import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import TooltipHover from 'components/TooltipHover';
+import ZappingText from 'components/Zapping';
+import { network } from 'config/networks';
 import { getIcon, getTransactionUrl } from 'helper';
 import { formatDisplayUsdt, numberWithCommas } from 'helper/format';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useDebounce } from 'hooks/useDebounce';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
+import SingletonOraiswapV3 from 'libs/contractSingleton';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import mixpanel from 'mixpanel-browser';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import useZap from 'pages/Pool-V3/hooks/useZap';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
-import { RootState } from 'store/configure';
-import styles from './index.module.scss';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { USDT_CONTRACT, MULTICALL_CONTRACT } from '@oraichain/oraidex-common';
-import ErrorIcon from 'assets/icons/error-fill-icon.svg?react';
-import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
-import { ZapConsumer } from '@oraichain/oraiswap-v3';
-import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { network } from 'config/networks';
-import OutputIcon from 'assets/icons/zapOutput-ic.svg?react';
-import { useDebounce } from 'hooks/useDebounce';
-import useZap from 'pages/Pool-V3/hooks/useZap';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
-import SelectToken from '../SelectToken';
 import { useNavigate } from 'react-router-dom';
-import cn from 'classnames/bind';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import SingletonOraiswapV3 from 'libs/contractSingleton';
-import TooltipHover from 'components/TooltipHover';
-import { ZapperQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import ZappingText from 'components/Zapping';
-import mixpanel from 'mixpanel-browser';
+import { RootState } from 'store/configure';
+import SelectToken from '../SelectToken';
+import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -184,7 +188,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
               [tokenZap.contractAddress, tokenFrom.contractAddress, tokenTo.contractAddress].filter(Boolean)
             );
             onCloseModal();
-            // navigate(`/pools-v3?type=positions`);
+            // navigate(`/pools?type=positions`);
           },
           (e) => {
             console.log({ errorZap: e });
@@ -254,7 +258,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       const priceImpact = (Math.abs(inputUsd - outputUsd) / inputUsd) * 100;
 
       const totalAmountOut =
-        Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals;
+        Number(res.amountToX) / 10 ** tokenZap.decimals + Number(res.amountToY) / 10 ** tokenZap.decimals;
 
       const zapFeeX = Number(position.tokenXLiq) * zapFee;
       const zapFeeY = Number(position.tokenYLiq) * zapFee;
@@ -270,7 +274,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       setZapFeeY(zapFeeY);
       setSwapFee(swapFee);
       setZapOutResponse(res);
-      setAmountFrom(Number(res.amountToX) / 10 ** tokenFrom.decimals + Number(res.amountToY) / 10 ** tokenTo.decimals);
+      setAmountFrom(Number(res.amountToX) / 10 ** tokenZap.decimals + Number(res.amountToY) / 10 ** tokenZap.decimals);
       setSimulating(false);
     } catch (error) {
       // console.error(error);
@@ -279,9 +283,12 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
       if (error instanceof RouteNotFoundError) {
         setZapError('No route found, try other tokens or other amount');
       } else if (error instanceof RouteNoLiquidity) {
-        setZapError("The route swap found has no liquidity, can't swap");
+        setZapError('No liquidity found for the swap route. Cannot proceed with the swap.');
       } else if (error instanceof SpamTooManyRequestsError) {
         setZapError('Too many requests, please try again later, after 1 minute');
+      } else {
+        console.error('Unexpected error during zap simulation:', error);
+        setZapError('An unexpected error occurred, please try again later.');
       }
     } finally {
       setSimulating(false);
@@ -366,7 +373,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
           className={classNames(styles.btnOption, { [styles.activeBtn]: !toggleZapOut })}
           onClick={() => setToggleZapOut(false)}
         >
-          Manual Deposit
+          Manual Withdraw
         </button>
       </div>
 
@@ -617,7 +624,7 @@ const ZapOutForm: FC<ZapOutFormProps> = ({
                       customLink: getTransactionUrl(network.chainId, transactionHash)
                     });
                     onCloseModal();
-                    // navigate(`/pools-v3?type=positions`);
+                    // navigate(`/pools?type=positions`);
                   }
                 } catch (error) {
                   console.log({ error });

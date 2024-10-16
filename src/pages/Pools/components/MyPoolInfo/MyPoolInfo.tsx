@@ -20,10 +20,15 @@ import { StakeLPModal } from '../StakeLPModal';
 import { UnstakeLPModal } from '../UnstakeLPModal';
 import { WithdrawLiquidityModal } from '../WithdrawLiquidityModal';
 import styles from './MyPoolInfo.module.scss';
+import { TooltipIcon } from 'components/Tooltip';
+import classNames from 'classnames';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
 type Props = { myLpBalance: bigint; onLiquidityChange: () => void };
+
 export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
+  const [openTooltipLiq, setOpenTooltipLiq] = useState(false);
+  const [openTooltipStake, setOpenTooltipStake] = useState(false);
   const theme = useTheme();
   const isMobileMode = isMobile();
   const { poolUrl } = useParams();
@@ -61,23 +66,28 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
   const totalBondAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.bond_amount || '0');
   const totalBondAmountInUsdt = BigInt(Math.trunc(lpBalance.lpPrice ? Number(totalBondAmount) * lpBalance.lpPrice : 0));
 
-  const secondaryType = isMobileMode ? 'third-sm' : 'third';
-  const primaryType = isMobileMode ? 'primary-sm' : 'primary';
+  const thirdType = 'secondary-sm';
+  const secondaryType = 'third-sm';
 
   return (
     <section className={styles.myPoolInfo}>
       <div className={styles.liquidity}>
-        <div className={styles.dividerWrapper}>
-          <div className={styles.divider}></div>
-          {/* <ArrowRightIcon /> */}
-        </div>
         <div>
-          <div className={styles.title}>My Liquidity</div>
-          <div className={styles.description}>Swap your tokens into Liquidity Points</div>
-        </div>
-        <div className={styles.amount}>
-          <div className={styles.amountUsdt}>${toDisplay(lpBalance.myLiquidityInUsdt)}</div>
-          <div className={styles.amountLp}>{toDisplay(myLpBalance)} LP</div>
+          <div className={styles.title}>
+            My Liquidity
+            <TooltipIcon
+              className={styles.tooltipWrapperApr}
+              placement="top"
+              visible={openTooltipLiq}
+              icon={<IconInfo />}
+              setVisible={setOpenTooltipLiq}
+              content={<div className={styles.descriptionTooltip}>Swap your tokens into Liquidity Points</div>}
+            />
+          </div>
+          <div className={styles.amount}>
+            <div className={styles.amountUsdt}>${toDisplay(lpBalance.myLiquidityInUsdt)}</div>
+            <div className={styles.amountLp}>{toDisplay(myLpBalance)} LP</div>
+          </div>
         </div>
         <div className={styles.cta}>
           <Button
@@ -87,20 +97,26 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           >
             Withdraw LP
           </Button>
-          <Button type={primaryType} onClick={() => setModal('deposit')} icon={<DepositIcon />}>
+          <Button type={thirdType} onClick={() => setModal('deposit')} icon={<DepositIcon />}>
             Deposit
           </Button>
         </div>
       </div>
 
       <div className={styles.stake}>
-        <div className={styles.stakeContent}>
-          <div className={styles.bgCoin}>
-            <img src={img_coin} alt="img-coin" />
-          </div>
-          <div>
-            <div className={styles.title}>My Staked</div>
-            <div className={styles.description}>Stake your Liquidity Provider token to earn rewards</div>
+        <div>
+          <div className={styles.title}>
+            My Staked
+            <TooltipIcon
+              className={styles.tooltipWrapperApr}
+              placement="top"
+              visible={openTooltipStake}
+              icon={<IconInfo />}
+              setVisible={setOpenTooltipStake}
+              content={
+                <div className={styles.descriptionTooltip}>Stake your Liquidity Provider token to earn rewards</div>
+              }
+            />
           </div>
           <div className={styles.amount}>
             <div className={styles.amountUsdt}>
@@ -124,18 +140,18 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
               />
             </div>
           </div>
-          <div className={styles.cta}>
-            <Button
-              type={secondaryType}
-              onClick={() => setModal('unstake')}
-              icon={theme === 'dark' ? <UnstakeIcon /> : <UnstakeLightIcon />}
-            >
-              Unstake LP
-            </Button>
-            <Button type={primaryType} onClick={() => setModal('stake')} icon={<StakingIcon />}>
-              Stake LP
-            </Button>{' '}
-          </div>
+        </div>
+        <div className={styles.cta}>
+          <Button
+            type={secondaryType}
+            onClick={() => setModal('unstake')}
+            icon={theme === 'dark' ? <UnstakeIcon /> : <UnstakeLightIcon />}
+          >
+            Unstake LP
+          </Button>
+          <Button type={thirdType} onClick={() => setModal('stake')} icon={<StakingIcon />}>
+            Stake LP
+          </Button>
         </div>
       </div>
 

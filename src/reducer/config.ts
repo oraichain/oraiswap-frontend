@@ -38,6 +38,7 @@ export interface ConfigState {
   hideOraichainSmallAmount: boolean;
   theme: Themes;
   coingecko: CoinGeckoPrices<string>;
+  tokenRank: Record<string, number>;
   apr: {
     [key: string]: number;
   };
@@ -83,6 +84,7 @@ const initialState: ConfigState = {
   hideOraichainSmallAmount: false,
   theme: 'dark',
   coingecko: {},
+  tokenRank: {},
   apr: {},
   rewardPools: [],
   liquidityPools: {},

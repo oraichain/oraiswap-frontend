@@ -24,6 +24,7 @@ import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
 import { calculateFinalPriceChange } from '../helpers';
 import { ChartTokenType } from '../hooks/useChartUsdPrice';
 import styles from './HeaderTab.module.scss';
+import { minimize } from 'helper';
 
 const cx = cn.bind(styles);
 
@@ -111,7 +112,7 @@ export const UsdPrice = ({
   const headerTabSimple = () => {
     return (
       <div>
-        <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+        <span>${minimize(priceUsd.toString())}</span>
         <span
           className={cx('percent', isIncrementUsd ? 'increment' : 'decrement', {
             hidePercent: chartTokenType === ChartTokenType.Volume

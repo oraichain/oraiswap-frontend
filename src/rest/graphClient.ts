@@ -1,5 +1,6 @@
 import { network } from 'config/networks';
 import { gql, GraphQLClient } from 'graphql-request';
+import axios from './request';
 
 export const INDEXER_V3_URL = network.indexer_v3 ?? 'https://staging-ammv3-indexer.oraidex.io/';
 export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
@@ -52,6 +53,48 @@ export const getFeeClaimData = async (address: string) => {
       `;
     const result = await graphqlClient.request<any>(document);
     return result.query.positions.nodes || [];
+  } catch (error) {
+    console.log('error', error);
+    return [];
+  }
+};
+
+export const getSwapTransactionData = async (poolKey: string, limit: number = 20) => {
+  try {
+    const document = gql`
+      {
+        query {
+          transactions (
+            first: ${limit}
+            orderBy: TIMESTAMP_DESC
+            filter: { swapExist: true, swap: { every: { swapRoutes: { every: { poolId: { equalTo: "${poolKey}" } } } } } }
+          ) {
+            nodes {
+              id
+              timestamp
+              swap {
+                nodes {
+                  senderId
+                  swapRoutes {
+                    nodes {
+                      poolId
+                      amountIn
+                      amountOut
+                      volumeUSD
+                      xToY
+                      feeUSD
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+
+    return result.query.transactions.nodes || [];
   } catch (error) {
     console.log('error', error);
     return [];
@@ -308,6 +351,29 @@ export const getPoolsVolumeByTokenLatest24h = async (): Promise<PoolLiquidityAnd
   }
 };
 
+export const getChartPoolsV3ByDay = async (): Promise<any[]> => {
+  try {
+    const document = gql`
+      query PoolDayData {
+        poolDayData(orderBy: DAY_INDEX_DESC) {
+          groupedAggregates(groupBy: DAY_INDEX) {
+            keys
+            sum {
+              tvlUSD
+              volumeInUSD
+            }
+          }
+        }
+      }
+    `;
+    const result = await graphqlClient.request<any>(document);
+    return result.poolDayData.groupedAggregates || [];
+  } catch (error) {
+    console.log('error getChartPoolsVolumeByDay: ', error);
+    return [];
+  }
+};
+
 export type PositionInfo = {
   liquidity: string;
   tickLower: number;
@@ -449,6 +515,16 @@ export const getPoolDetail = async (poolId: string): Promise<PoolDetail> => {
     `;
     const result = await graphqlClient.request<any>(document);
     return result.query.pools.nodes[0] || null;
+  } catch (error) {
+    console.log('error getPoolDetail', error);
+    return null;
+  }
+};
+
+export const getPoolDetailFromBackend = async (poolId: string): Promise<PoolDetail> => {
+  try {
+    const res = await axios.get<PoolDetail[]>(`/v1/pool-v3/liquidity`);
+    return res.data.find((pool) => pool.id === poolId) || null;
   } catch (error) {
     console.log('error getPoolDetail', error);
     return null;

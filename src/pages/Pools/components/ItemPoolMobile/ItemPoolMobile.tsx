@@ -22,7 +22,7 @@ export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDen
     const [firstAssetInfo, secondAssetInfo] = [JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)];
 
     navigate(
-      `/pools/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
+      `/pools/v2/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
         parseAssetOnlyDenom(secondAssetInfo)
       )}`
     );
@@ -72,7 +72,7 @@ export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDen
       </div>
       <div className={styles.btnAddLp}>
         <Button
-          type="primary-sm"
+          type="third-sm"
           onClick={(event) => {
             event.stopPropagation();
             setPairDenomsDeposit(

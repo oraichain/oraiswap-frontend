@@ -10,13 +10,12 @@ import SettingIcon from 'assets/icons/setting.svg?react';
 import Continuous from 'assets/images/continuous.svg?react';
 import Discrete from 'assets/images/discrete.svg?react';
 import classNames from 'classnames';
-import { oraichainTokens } from 'config/bridgeTokens';
+import { oraichainTokens } from '@oraichain/oraidex-common';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useTheme from 'hooks/useTheme';
 import SingletonOraiswapV3, { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import {
   calculateSqrtPrice,
-  extractAddress,
   getLiquidityByX,
   getLiquidityByY,
   getMaxTick,
@@ -47,6 +46,8 @@ import styles from './index.module.scss';
 import { convertBalanceToBigint } from 'pages/Pool-V3/helpers/number';
 import { calculateTokenAmountsWithSlippage, calcYPerXPriceBySqrtPrice } from 'pages/Pool-V3/helpers/helper';
 import { numberWithCommas } from 'helper/format';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
+import { minimize } from 'helper';
 
 export type PriceInfo = {
   startPrice: number;
@@ -889,7 +890,8 @@ const CreatePosition = () => {
               </div>
               <div className={styles.minMaxPriceValue}>
                 <p>
-                  <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
+                  {/* <p>{numberWithCommas(Number(leftInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
+                  <p>{minimize(leftInputRounded)}</p>
                   <p className={styles.pair}>
                     {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
                   </p>
@@ -914,7 +916,8 @@ const CreatePosition = () => {
               </div>
               <div className={styles.minMaxPriceValue}>
                 <p>
-                  <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p>
+                  <p>{minimize(rightInputRounded)}</p>
+                  {/* <p>{numberWithCommas(Number(rightInputRounded), undefined, { maximumFractionDigits: 6 })}</p> */}
                   <p className={styles.pair}>
                     {tokenTo.name.toUpperCase()} / {tokenFrom.name.toUpperCase()}
                   </p>
@@ -983,7 +986,7 @@ const CreatePosition = () => {
             className={styles.back}
             onClick={() => {
               // navigate(-1);
-              navigate('/pools-v3');
+              navigate('/pools');
             }}
           >
             <BackIcon />

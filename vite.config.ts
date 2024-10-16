@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
@@ -19,5 +19,23 @@ export default defineConfig({
     // here is the main update
     global: 'globalThis',
     exports: {}
+  },
+  test: {
+    server: {
+      deps: {
+        inline: ['@cosmjs/tendermint-rpc']
+      }
+    },
+    globals: true,
+    setupFiles: './setupTest.ts',
+    environment: 'jsdom',
+    // coverage: {
+    //   enabled: false,
+    //   reporter: ['cobertura', 'html'],
+    //   provider: 'v8',
+    //   reportsDirectory: './coverage',
+    //   exclude: []
+    // },
+    exclude: []
   }
 });

@@ -31,45 +31,6 @@
   }
 }
 
-// .header {
-//   width: 100%;
-//   position: relative;
-//   display: none;
-//   justify-content: space-between;
-//   align-items: center;
-//   padding-bottom: 24px;
-//   @include theme {
-//     border-bottom: 1px solid theme-get('neutral-border-border-default');
-//   }
-
-//   h1 {
-//     @include theme {
-//       color: theme-get('colors-neutral-text-text-token-name');
-//     }
-//     font-size: 18px;
-//     font-weight: 600;
-//     line-height: 150%; /* 27px */
-//   }
-
-//   svg {
-//     cursor: pointer;
-
-//     path {
-//       @include theme {
-//         fill: theme-get('neutral-9');
-//       }
-//     }
-//   }
-
-//   .setting {
-//     svg {
-//       width: 20px;
-//       height: 20px;
-//       cursor: pointer;
-//     }
-//   }
-// }
-
 .warning {
   display: flex;
   padding: 12px 16px;
@@ -87,7 +48,7 @@
 
   font-size: 12px;
   font-weight: 400;
-  line-height: 150%; /* 18px */
+  line-height: 150%;
   letter-spacing: 0.012px;
 }
 
@@ -109,7 +70,7 @@
     text-align: center;
     font-size: 16px;
     font-weight: 600;
-    line-height: 150%; /* 24px */
+    line-height: 150%;
 
     display: flex;
     justify-content: center;
@@ -128,14 +89,16 @@
         @include theme {
           color: theme-get('colors-neutral-text-text-token-name');
         }
+
         font-weight: 600;
         font-size: 16px;
       }
 
       .liquidityActive {
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
+
         font-size: 12px;
         font-weight: 400;
         line-height: 18px;
@@ -231,7 +194,7 @@
 
       p {
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
 
         &:not(:first-of-type) {
@@ -240,22 +203,35 @@
           }
         }
       }
+
+      .price {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        svg {
+          margin-right: 4px;
+        }
+      }
     }
 
     .currentPriceWrapper {
       border-radius: 8px;
       padding: 12px;
       display: flex;
+
       @include theme {
         background-color: theme-get('neutral-6');
       }
+
       align-items: center;
       justify-content: space-between;
 
       .currentPriceTitle {
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
+
         font-size: 13px;
         font-weight: 400;
         line-height: 18px;
@@ -265,6 +241,7 @@
         @include theme {
           color: theme-get('colors-neutral-text-text-token-name');
         }
+
         text-align: end;
         font-size: 18px;
         font-weight: 600;
@@ -272,8 +249,9 @@
 
         .pair {
           @include theme {
-            color: theme-get('neutral-9');
+            color: theme-get('neutral-8');
           }
+
           font-size: 12px;
           font-weight: 400;
           line-height: 18px;
@@ -304,19 +282,21 @@
         }
 
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
 
         font-size: 13px;
         font-weight: 400;
-        line-height: 150%; /* 19.5px */
+        line-height: 150%;
+        /* 19.5px */
         letter-spacing: 0.013px;
 
         .value {
           color: var(--chart-bear, #ff4d52);
           font-size: 13px;
           font-weight: 400;
-          line-height: 150%; /* 19.5px */
+          line-height: 150%;
+          /* 19.5px */
           letter-spacing: 0.013px;
 
           &.positive {
@@ -339,13 +319,15 @@
         @include theme {
           background-color: theme-get('neutral-6');
         }
+
         width: 100%;
         padding: 12px;
 
         .minMaxPriceTitle {
           @include theme {
-            color: theme-get('neutral-9');
+            color: theme-get('neutral-8');
           }
+
           font-size: 13px;
           text-align: end;
           font-weight: 400;
@@ -356,6 +338,7 @@
           @include theme {
             color: theme-get('colors-neutral-text-text-token-name');
           }
+
           font-size: 18px;
           text-align: end;
           font-weight: 600;
@@ -363,8 +346,9 @@
 
           .pair {
             @include theme {
-              color: theme-get('neutral-9');
+              color: theme-get('neutral-8');
             }
+
             font-size: 12px;
             font-weight: 400;
             line-height: 18px;
@@ -411,7 +395,8 @@
 
     font-size: 14px;
     font-weight: 500;
-    line-height: 150%; /* 21px */
+    line-height: 150%;
+    /* 21px */
   }
 }
 
@@ -455,22 +440,26 @@
 
     font-size: 14px;
     font-weight: 700;
-    line-height: 150%; /* 21px */
+    line-height: 150%;
+    /* 21px */
 
     @keyframes greenLighter {
       0% {
         transform: scale(1);
         opacity: 0.7;
       }
+
       50% {
         transform: scale(1.1);
         opacity: 1;
       }
+
       100% {
         transform: scale(1);
         opacity: 0.7;
       }
     }
+
     span {
       background-color: #aee67f;
       display: flex;
@@ -492,7 +481,8 @@
 
       font-size: 12px;
       font-weight: 400;
-      line-height: 150%; /* 18px */
+      line-height: 150%;
+      /* 18px */
       letter-spacing: 0.012px;
       cursor: pointer;
       transition: all ease-in-out 0.3s;
@@ -552,7 +542,7 @@
 
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
 
       svg {
         width: 28px;
@@ -604,12 +594,13 @@
     width: 100%;
 
     @include theme {
-      color: theme-get('neutral-9');
+      color: theme-get('neutral-8');
     }
 
     font-size: 12px;
     font-weight: 400;
-    line-height: 150%; /* 18px */
+    line-height: 150%;
+    /* 18px */
     letter-spacing: 0.012px;
 
     display: flex;
@@ -618,6 +609,7 @@
 
     .bal {
       margin-right: 8px;
+
       p {
         @include theme {
           color: theme-get('colors-neutral-text-text-token-name');
@@ -630,6 +622,7 @@
       flex-wrap: nowrap;
       gap: 4px;
     }
+
     button {
       display: flex;
       width: 40px;
@@ -647,7 +640,7 @@
 
       font-size: 12px;
       font-weight: 400;
-      line-height: 150%; /* 18px */
+      line-height: 150%;
       letter-spacing: 0.012px;
       cursor: pointer;
       transition: all ease-in-out 0.3s;
@@ -723,18 +716,22 @@
 .tokenOutput {
   display: flex;
   align-items: flex-start;
+
   @include mobile {
     flex-direction: column;
   }
+
   gap: 12px;
   align-self: stretch;
 
   .item {
     display: flex;
     padding: 16px;
+
     @include mobile {
       width: 100%;
     }
+
     justify-content: space-between;
     gap: 8px;
     flex: 1;
@@ -750,7 +747,8 @@
       color: var(--Colors-Neutral-Text-title, #efefef);
       font-size: 18px;
       font-weight: 500;
-      line-height: 150%; /* 27px */
+      line-height: 150%;
+      /* 27px */
 
       .infoIcon {
         display: flex;
@@ -773,7 +771,8 @@
       color: var(--Colors-Neutral-Text-title, #efefef);
       font-size: 20px;
       font-weight: 500;
-      line-height: 120%; /* 27px */
+      line-height: 120%;
+      /* 27px */
 
       .mask {
         position: absolute;
@@ -789,6 +788,7 @@
           0% {
             background-position: right;
           }
+
           100% {
             background-position: left;
           }
@@ -853,10 +853,7 @@
 
     .valueImpact {
       font-weight: 500;
-
-      @include theme {
-        color: theme-get('accent-1');
-      }
+      color: $accent-1;
 
       &-medium {
         @include theme {
@@ -865,9 +862,7 @@
       }
 
       &-high {
-        @include theme {
-          color: theme-get('warning-surface-1');
-        }
+        color: $warning-surface-1;
       }
     }
 

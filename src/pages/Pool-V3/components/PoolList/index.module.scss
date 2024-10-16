@@ -21,10 +21,118 @@
       width: 100%;
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      @include small-mobile {
-        gap: 12px;
+      border-radius: 12px;
+
+      @include mobile() {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      @include theme() {
+        background-color: theme-get('neutral-surface-bg-section');
+      }
+
+      &_item {
+        display: flex;
+        padding: 16px;
+        flex-direction: column;
+        flex: 1 0 0;
+
+        color: $neutron-text-body-light;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 100%;
+
+        @include mobile() {
+          width: 100%;
+        }
+
+        .info {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+
+          .content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 16px;
+          }
+        }
+
+        .chart {
+          max-height: 0px;
+          padding: 0px 16px;
+          border-radius: 12px;
+          margin-top: 0px;
+
+          overflow: hidden;
+          transition: max-height ease-in-out 0.5s, padding ease-in-out 0.5s, margin-top ease-in-out 0.5s;
+
+          @include theme {
+            background: theme-get('neutral-surface-bg-2');
+          }
+
+          &.active {
+            padding: 16px;
+            margin-top: 16px;
+            max-height: 300px;
+          }
+        }
+
+        &:nth-child(even) {
+          border-start-end-radius: 12px;
+          border-end-end-radius: 12px;
+
+          @include theme() {
+            background-color: theme-get('neutral-surface-bg-section-3');
+          }
+
+          @include mobile {
+            border-radius: unset;
+            border-end-start-radius: 12px;
+            border-end-end-radius: 12px;
+          }
+        }
+
+        &_info {
+          display: flex;
+          align-items: flex-end;
+          gap: 8px;
+          align-self: stretch;
+
+          img {
+            width: 32px;
+            height: 32px;
+          }
+
+          svg {
+            width: 18px;
+            height: 18px;
+          }
+
+          .liq_value {
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 120%;
+
+            /* 28.8px */
+            @include theme() {
+              color: theme-get('sea-stone-200');
+            }
+          }
+
+          .liq_suffix {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 150%;
+            color: $success-color;
+
+            &.negative {
+              color: $error-color;
+            }
+          }
+        }
       }
     }
 
@@ -48,7 +156,7 @@
       }
 
       @include theme {
-        color: theme-get('neutral-9');
+        color: theme-get('neutral-8');
         border: 1px solid theme-get('neutral-border-border-default');
         background: theme-get('neutral-surface-bg-swap');
       }
@@ -91,6 +199,10 @@
       gap: 16px;
 
       .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
         @include theme {
           color: theme-get('colors-neutral-text-text-token-name');
         }
@@ -99,6 +211,66 @@
         font-weight: 500;
         line-height: 120%;
         /* 28.8px */
+      }
+
+      .sortMobileWrapper {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+
+        .sortBtn {
+          padding: 2px 4px;
+          border-radius: 4px;
+
+          svg {
+            vertical-align: middle;
+          }
+
+          @include theme {
+            border-color: theme-get('neutral-border-border-default');
+            background: theme-get('neutral-surface-bg-swap');
+          }
+        }
+
+        .labelSort {
+          position: relative;
+          font-weight: 400;
+          font-size: 14px;
+          padding: 0 2px 2px 0px;
+
+          @include theme {
+            // color: theme-get('colors-neutral-text-text-token-name');
+            color: theme-get('neutral-8');
+            border-bottom: 1px solid theme-get('neutral-border-border-default');
+          }
+        }
+
+        .sortList {
+          position: absolute;
+          display: none;
+          flex-direction: column;
+          gap: 4px;
+          border-radius: 4px;
+          padding: 8px;
+
+          width: 150px;
+          right: 0;
+          top: 30px;
+
+          @include theme {
+            border-color: theme-get('neutral-border-border-default');
+            background: theme-get('neutral-surface-bg-swap');
+          }
+
+          &.active {
+            display: flex;
+          }
+
+          .item {
+            padding: 6px 12px;
+            text-align: left;
+          }
+        }
       }
 
       .mobilePoolItem {
@@ -129,7 +301,7 @@
 
           .label {
             @include theme {
-              color: theme-get('neutral-9');
+              color: theme-get('neutral-8');
             }
 
             font-size: 12px;
@@ -164,6 +336,7 @@
     }
 
     table {
+
       /* required css to make the rows rounded */
       thead {
         white-space: nowrap;
@@ -229,7 +402,7 @@
         padding: 24px;
 
         @include theme {
-          color: theme-get('neutral-9');
+          color: theme-get('neutral-8');
         }
 
         font-size: 12px;
@@ -259,7 +432,7 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       align-self: stretch;
       flex-wrap: nowrap;
       white-space: nowrap;
@@ -271,6 +444,44 @@
       @include small-mobile {
         flex-direction: column;
         align-items: flex-start;
+      }
+
+      .title {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+
+        @include mobile {
+          gap: 8px;
+        }
+
+        .tag {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 26px;
+          height: 24px;
+          padding: 2px;
+          gap: 10px;
+          border-radius: 6px;
+
+          @include theme {
+            border: 1px solid theme-get('colors-neutral-border-border-bold');
+            color: theme-get('colors-neutral-text-body-on-row');
+          }
+
+          &.v3 {
+            @include theme {
+              border: 1px solid theme-get('primary-surface-default-dark-3');
+              color: theme-get('primary-surface-default-dark-3');
+            }
+          }
+
+          font-size: 12px;
+          font-weight: 500;
+          line-height: 150%;
+          /* 18px */
+        }
       }
 
       .info {
@@ -303,9 +514,9 @@
       .fee {
         display: flex;
         align-items: center;
-        height: 32px;
-        padding: 0 12px;
-        border-radius: 8px;
+        height: 24px;
+        padding: 12px;
+        border-radius: 6px;
         border: 1px solid #494949;
 
         @include theme {
@@ -389,6 +600,14 @@
     .tooltipWrapper {
       margin-top: -4px;
     }
+  }
+
+  .paginate {
+    width: 100%;
+    padding: 24px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -488,7 +707,7 @@
 
     path {
       @include theme {
-        fill: theme-get('neutral-9');
+        fill: theme-get('neutral-8');
       }
     }
   }
@@ -531,5 +750,5 @@
 }
 
 .tooltipWrapper {
-  background-color: #232521;
+  // background-color: #232521;
 }

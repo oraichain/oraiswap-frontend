@@ -13,7 +13,7 @@ import useTheme from 'hooks/useTheme';
 import { ALL_FEE_TIERS_DATA } from 'libs/contractSingleton';
 import { InitPositionData } from 'pages/Pool-V3/helpers/helper';
 import useAddLiquidity from 'pages/Pool-V3/hooks/useAddLiquidity';
-import { calculateSqrtPrice, extractAddress, newPoolKey, PoolKey } from '@oraichain/oraiswap-v3';
+import { calculateSqrtPrice, newPoolKey, PoolKey } from '@oraichain/oraiswap-v3';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -23,6 +23,7 @@ import { determinePositionTokenBlock, extractDenom, PositionTokenBlock } from '.
 import SelectToken from '../SelectToken';
 import styles from './index.module.scss';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
 
 export interface InputState {
   value: string;

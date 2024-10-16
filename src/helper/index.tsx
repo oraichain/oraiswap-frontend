@@ -29,6 +29,8 @@ import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
 import { WalletsByNetwork } from 'reducer/wallet';
 import { evmChainInfos } from 'config/evmChainInfos';
+import DefaultIcon from 'assets/icons/tokens.svg?react';
+import { numberWithCommas } from './format';
 
 export interface Tokens {
   denom?: string;
@@ -576,20 +578,86 @@ export interface GetIconInterface {
   height?: number;
 }
 
+export const minimize = (priceUsd: string) => {
+  const regex = /^0\.0*(\d+)/;
+  const match = priceUsd.match(regex);
+  const getSubscript = (num) => String.fromCharCode(0x2080 + num);
+
+  if (match) {
+    const leadingZeros = match[0].length - match[1].length - 2;
+    const significantDigits = match[1];
+    if (leadingZeros === 1) return `0.0${significantDigits.slice(0, 5)}`;
+    if (leadingZeros === 2) return `0.00${significantDigits.slice(0, 4)}`;
+    if (leadingZeros === 3) return `0.000${significantDigits.slice(0, 3)}`;
+    if (leadingZeros > 3) {
+      return (
+        <>
+          0.0<span style={{ fontSize: '1.6em', verticalAlign: 'sub' }}>{getSubscript(leadingZeros)}</span>
+          {significantDigits.slice(0, 4)}
+        </>
+      );
+    }
+    return `0.${significantDigits.slice(0, 6)}`;
+  }
+  return formatMoney(priceUsd);
+};
+
+export function formatMoney(num) {
+  if (num === 0) return num.toString();
+
+  let numStr = num.toString();
+  const decimalIndex = numStr.indexOf('.');
+
+  if (decimalIndex === -1) return numStr;
+
+  const integerPart = numStr.slice(0, decimalIndex);
+  const decimalPart = numStr.slice(decimalIndex + 1);
+  const decimalsToShow = num >= 1 ? 3 : num < 0.0001 ? 6 : 4;
+  const formattedDecimalPart = decimalPart.slice(0, decimalsToShow);
+
+  let stringArr = `.${formattedDecimalPart}`;
+  if (!formattedDecimalPart || formattedDecimalPart === '0') stringArr = '';
+
+  return `${numberWithCommas(Number(integerPart), undefined)}${stringArr}`;
+}
+
 export const getIcon = ({ isLightTheme, type, chainId, coinGeckoId, width, height }: GetIconInterface) => {
   if (type === 'token') {
     const tokenIcon = flattenTokensWithIcon.find((tokenWithIcon) => tokenWithIcon.coinGeckoId === coinGeckoId);
+    if (tokenIcon) {
+      return isLightTheme ? (
+        <tokenIcon.IconLight width={width} height={height} />
+      ) : (
+        <tokenIcon.Icon width={width} height={height} />
+      );
+    }
+
+    return <DefaultIcon />;
+  } else {
+    const networkIcon = chainIcons.find((chain) => chain.chainId === chainId);
+    if (networkIcon) {
+      return isLightTheme ? (
+        <networkIcon.IconLight width={width} height={height} />
+      ) : (
+        <networkIcon.Icon width={width} height={height} />
+      );
+    }
+
+    return <DefaultIcon />;
+  }
+};
+
+export const getIconToken = ({ isLightTheme, denom, width = 18, height = 18 }) => {
+  const tokenIcon = flattenTokensWithIcon.find((tokenWithIcon) =>
+    [tokenWithIcon.contractAddress, tokenWithIcon.denom].includes(denom)
+  );
+  if (tokenIcon) {
     return isLightTheme ? (
       <tokenIcon.IconLight width={width} height={height} />
     ) : (
       <tokenIcon.Icon width={width} height={height} />
     );
-  } else {
-    const networkIcon = chainIcons.find((chain) => chain.chainId === chainId);
-    return isLightTheme ? (
-      <networkIcon.IconLight width={width} height={height} />
-    ) : (
-      <networkIcon.Icon width={width} height={height} />
-    );
   }
+
+  return <DefaultIcon />;
 };

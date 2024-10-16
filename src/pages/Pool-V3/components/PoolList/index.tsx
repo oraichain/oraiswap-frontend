@@ -1,34 +1,43 @@
 import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { isMobile } from '@walletconnect/browser-utils';
 import Loading from 'assets/gif/loading.gif';
 import BootsIconDark from 'assets/icons/boost-icon-dark.svg?react';
 import BootsIcon from 'assets/icons/boost-icon.svg?react';
 import SortDownIcon from 'assets/icons/down_icon.svg?react';
 import IconInfo from 'assets/icons/infomationIcon.svg?react';
+import UpIcon from 'assets/icons/up-arrow.svg?react';
+import DownIcon from 'assets/icons/down-arrow-v2.svg?react';
 import AddLPIcon from 'assets/icons/addLP_ic.svg?react';
 import SortUpIcon from 'assets/icons/up_icon.svg?react';
 import NoDataDark from 'assets/images/NoDataPool.svg?react';
 import NoData from 'assets/images/NoDataPoolLight.svg?react';
 import classNames from 'classnames';
 import LoadingBox from 'components/LoadingBox';
+import Pagination from 'components/Pagination';
+import usePagination from 'components/Pagination/usePagination';
 import { CoefficientBySort, SortType } from 'components/Table';
 import { TooltipIcon } from 'components/Tooltip';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import useTheme from 'hooks/useTheme';
 import { fetchPoolAprInfo } from 'libs/contractSingleton';
-import { formatPoolData } from 'pages/Pool-V3/helpers/format';
+import { POOL_TYPE } from 'pages/Pool-V3';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 import { useGetPoolLiquidityVolume } from 'pages/Pool-V3/hooks/useGetPoolLiquidityVolume';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import { useGetPoolPositionInfo } from 'pages/Pool-V3/hooks/useGetPoolPositionInfo';
-import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { useEffect, useRef, useState } from 'react';
 import CreateNewPosition from '../CreateNewPosition';
 import styles from './index.module.scss';
-import isEqual from 'lodash/isEqual';
-import { Button } from 'components/Button';
-import { isMobile } from '@walletconnect/browser-utils';
+import PoolItemDataMobile from './PoolItemDataMobile';
+import PoolItemTData from './PoolItemTData';
+import { AddLiquidityModal } from 'pages/Pools/components/AddLiquidityModal';
+import LiquidityChart from 'pages/Pools/components/LiquidityChart';
+import VolumeChart from 'pages/Pools/components/VolumeChart';
+import { FILTER_DAY } from 'reducer/type';
+import TokenBalance from 'components/TokenBalance';
 
 export enum PoolColumnHeader {
   POOL_NAME = 'Pool name',
@@ -37,64 +46,62 @@ export enum PoolColumnHeader {
   APR = 'Apr'
 }
 
-const PoolList = ({ search }) => {
+const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYPE }) => {
+  const theme = useTheme();
   const { data: price } = useCoinGeckoPrices();
-  const [liquidityPools, setLiquidityPools] = useConfigReducer('liquidityPools');
+  const [, setLiquidityPools] = useConfigReducer('liquidityPools');
   const [volumnePools, setVolumnePools] = useConfigReducer('volumnePools');
   const [aprInfo, setAprInfo] = useConfigReducer('aprPools');
   const [openTooltip, setOpenTooltip] = useState(false);
+  const [openSort, setOpenSort] = useState(false);
   const mobileMode = isMobile();
+  const sortRef = useRef();
 
   const [sort, setSort] = useState<Record<PoolColumnHeader, SortType>>({
-    [PoolColumnHeader.LIQUIDITY]: SortType.DESC
+    [PoolColumnHeader.VOLUME]: SortType.DESC
   } as Record<PoolColumnHeader, SortType>);
-
-  const theme = useTheme();
+  const [sortField, sortOrder] = Object.entries(sort)[0];
 
   const [currentPool, setCurrentPool] = useState(null);
   const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
+  const [pairDenomsDeposit, setPairDenomsDeposit] = useState('');
 
-  const [loading, setLoading] = useState(false);
-  const [dataPool, setDataPool] = useState([...Array(0)]);
+  // const [dataPool, setDataPool] = useState([...Array(0)]);
   const [totalVolume, setTotalVolume] = useState(0);
   const [totalLiquidity, setTotalLiquidity] = useState(0);
   const { feeDailyData } = useGetFeeDailyData();
-  const { poolList, poolPrice } = useGetPoolList(price);
-  const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice);
+  const { poolList: dataPool, poolPrice, loading } = useGetPoolList(price);
+  const { poolLiquidities, poolVolume } = useGetPoolLiquidityVolume(poolPrice); // volumeV2, liquidityV2
   const { poolPositionInfo } = useGetPoolPositionInfo(poolPrice);
 
-  const prevPoolListRef = useRef<any>();
-  const prevPoolPriceRef = useRef<any>();
+  const isMobileMode = isMobile();
+  const [openChart, setOpenChart] = useState(false); // !isMobileMode
+  const [filterDay, setFilterDay] = useState(FILTER_DAY.DAY);
+  const [liquidityDataChart, setLiquidityDataChart] = useState(0);
+  const [volumeDataChart, setVolumeDataChart] = useState(0);
 
-  const formatPoolDataCallback = useCallback(
-    (p) => {
-      const isLight = theme === 'light';
-      return formatPoolData(p, isLight);
+  const liquidityData = [
+    {
+      name: 'Total Liquidity',
+      Icon: null,
+      suffix: 5.25,
+      value: liquidityDataChart, // || statisticData.totalLiquidity,
+      isNegative: false,
+      decimal: 2,
+      chart: <LiquidityChart filterDay={filterDay} onUpdateCurrentItem={setLiquidityDataChart} />,
+      openChart: openChart
     },
-    [theme]
-  );
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-
-        if (!poolList?.length) return;
-        if (poolList.length > 0 && isEqual(prevPoolListRef.current, poolList)) return;
-        const fmtPools = (poolList || []).map(formatPoolDataCallback).filter((e) => e.isValid);
-
-        setDataPool(fmtPools);
-      } catch (error) {
-        console.log('error: SingletonOraiswapV3 getPools', error);
-      } finally {
-        prevPoolListRef.current = poolList ?? [];
-        prevPoolPriceRef.current = poolPrice ?? {};
-        setLoading(false);
-      }
-    })();
-
-    return () => {};
-  }, [theme, poolList, poolPrice, formatPoolDataCallback]);
+    {
+      name: 'Volume',
+      Icon: null,
+      suffix: 3.93,
+      value: volumeDataChart,
+      isNegative: false,
+      decimal: 2,
+      chart: <VolumeChart filterDay={filterDay} onUpdateCurrentItem={setVolumeDataChart} />,
+      openChart: openChart
+    }
+  ];
 
   useEffect(() => {
     const getAPRInfo = async () => {
@@ -106,68 +113,23 @@ const PoolList = ({ search }) => {
     }
   }, [dataPool, Object.keys(poolPositionInfo).length, poolPrice]);
 
-  const [sortField, sortOrder] = Object.entries(sort)[0];
-
   const handleClickSort = (sortField: PoolColumnHeader) => {
     let newSort = { [sortField]: SortType.DESC } as Record<PoolColumnHeader, SortType>;
 
     if (sort[sortField] === SortType.DESC) {
       newSort = { [sortField]: SortType.ASC } as Record<PoolColumnHeader, SortType>;
       setSort(newSort);
-      sortDataSource(newSort);
       return;
     }
 
     setSort(newSort);
-    sortDataSource(newSort);
-  };
-
-  const sortDataSource = (sort: Record<PoolColumnHeader, SortType>) => {
-    const [sortField, sortOrder] = Object.entries(sort)[0];
-
-    const sortedData = dataPool
-      // .sort((a, b) => (liquidityPools?.[b?.poolKey] || 0) - (liquidityPools?.[a?.poolKey] || 0))
-      .map((item) => {
-        let volumn = 0;
-        if (item?.poolKey) {
-          const findPool = volumnePools && volumnePools.find((vo) => vo.poolAddress === item?.poolKey);
-          if (findPool) volumn = findPool.volume24;
-        }
-
-        return {
-          ...item,
-          volumn
-        };
-      })
-      .sort((a, b) => {
-        switch (sortField) {
-          case PoolColumnHeader.LIQUIDITY:
-            return (
-              Number(CoefficientBySort[sortOrder]) *
-              ((poolLiquidities?.[a?.poolKey] || 0) - (poolLiquidities?.[b?.poolKey] || 0))
-            );
-          case PoolColumnHeader.POOL_NAME:
-            return CoefficientBySort[sortOrder] * (a?.tokenXinfo?.name || '').localeCompare(b.tokenXinfo?.name || '');
-          case PoolColumnHeader.VOLUME:
-            return new BigDecimal(CoefficientBySort[sortOrder]).mul(a.volumn - b.volumn).toNumber();
-          case PoolColumnHeader.APR:
-            return new BigDecimal(CoefficientBySort[sortOrder])
-              .mul((aprInfo?.[a?.poolKey].apr.max || 0) - (aprInfo?.[b?.poolKey].apr.max || 0))
-              .toNumber();
-
-          default:
-            return 0;
-        }
-      });
-
-    setDataPool(sortedData);
-
-    return sortedData;
   };
 
   useEffect(() => {
     if (Object.values(poolVolume).length > 0) {
       const totalVolume24h = Object.values(poolVolume).reduce((acc, cur) => acc + cur, 0);
+
+      // const totalAllPoolVol = new BigDecimal(totalVolume24h).add(volumeV2).toNumber();
       setTotalVolume(totalVolume24h);
       setVolumnePools(
         Object.keys(poolVolume).map((poolAddress) => {
@@ -189,50 +151,148 @@ const PoolList = ({ search }) => {
     if (Object.values(poolLiquidities).length > 0) {
       const totalLiqudity = Object.values(poolLiquidities).reduce((acc, cur) => acc + cur, 0);
       setLiquidityPools(poolLiquidities);
+      // const totalAllPoolLiq = new BigDecimal(totalLiqudity).add(liquidityV2).toNumber();
       setTotalLiquidity(totalLiqudity);
     }
   }, [poolLiquidities, dataPool]);
 
-  useEffect(() => {
-    if (Object.values(poolLiquidities).length > 0) {
-      sortDataSource({
-        [PoolColumnHeader.LIQUIDITY]: SortType.DESC
-      } as any);
-    }
-  }, [poolLiquidities]);
+  const filteredPool = dataPool
+    .map((item) => {
+      let volumeV3 = 0;
+      if (item?.poolKey) {
+        const findPool = volumnePools && volumnePools.find((vo) => vo.poolAddress === item?.poolKey);
+        if (findPool) volumeV3 = findPool.volume24;
+      }
 
-  const filteredPool = dataPool.filter((p) => {
-    if (!search) return true;
+      const { type, totalLiquidity: liquidityV2, volume24Hour: volumeV2, liquidityAddr, poolKey } = item || {};
 
-    const { tokenXinfo, tokenYinfo } = p;
+      const showLiquidity =
+        type === POOL_TYPE.V3 ? poolLiquidities?.[item?.poolKey] : toDisplay(Math.trunc(liquidityV2 || 0).toString());
+      const showVolume = type === POOL_TYPE.V3 ? volumeV3 : toDisplay(volumeV2 || 0);
 
-    return (
-      (tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
-      (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase()))
-    );
+      let showApr = aprInfo?.[poolKey] || aprInfo?.[liquidityAddr] || {};
+
+      if (type === POOL_TYPE.V2) {
+        showApr = {
+          ...showApr,
+          apr: {
+            min: (showApr['apr']?.['min'] || 0) / 100,
+            max: (showApr['apr']?.['max'] || 0) / 100
+          },
+          swapFee: (showApr['swapFee'] || 0) / 100
+        };
+      }
+
+      return {
+        ...item,
+        showVolume,
+        showLiquidity,
+        showApr
+      };
+    })
+    .sort((a, b) => {
+      switch (sortField) {
+        case PoolColumnHeader.LIQUIDITY:
+          // return (
+          //   Number(CoefficientBySort[sortOrder]) *
+          //   ((poolLiquidities?.[a?.poolKey] || 0) - (poolLiquidities?.[b?.poolKey] || 0))
+          // );
+          return Number(CoefficientBySort[sortOrder]) * ((a.showLiquidity || 0) - (b.showLiquidity || 0));
+        case PoolColumnHeader.POOL_NAME:
+          return CoefficientBySort[sortOrder] * (a?.tokenXinfo?.name || '').localeCompare(b.tokenXinfo?.name || '');
+        case PoolColumnHeader.VOLUME:
+          return new BigDecimal(CoefficientBySort[sortOrder]).mul(a.showVolume - b.showVolume).toNumber();
+        case PoolColumnHeader.APR:
+          return new BigDecimal(CoefficientBySort[sortOrder])
+            .mul((a?.showApr.apr.max || 0) - (b?.showApr.apr.max || 0))
+            .toNumber();
+
+        default:
+          return 0;
+      }
+    })
+    .filter((p) => {
+      const { tokenXinfo, tokenYinfo, type } = p;
+      let conditions = true;
+
+      if (search) {
+        conditions =
+          conditions &&
+          ((tokenXinfo && tokenXinfo.name.toLowerCase().includes(search.toLowerCase())) ||
+            (tokenYinfo && tokenYinfo.name.toLowerCase().includes(search.toLowerCase())));
+      }
+
+      if (filterType && filterType !== POOL_TYPE.ALL) {
+        conditions = conditions && type === filterType;
+      }
+
+      return conditions;
+    });
+
+  const { setPage, page, handleNext, handlePrev, totalPages, indexOfLastItem, indexOfFirstItem } = usePagination({
+    data: filteredPool
+  });
+
+  useOnClickOutside(sortRef, () => {
+    setOpenSort(false);
   });
 
   const renderList = () => {
     return mobileMode ? (
       <div className={styles.listMobile}>
-        <div className={styles.header}>List Pools</div>
-        {filteredPool.map((item, index) => {
+        <div className={styles.header}>
+          <span>List Pools</span>
+
+          <div className={styles.sortMobileWrapper}>
+            <div
+              className={styles.sortBtn}
+              onClick={() => {
+                const [sortField] = Object.entries(sort)[0];
+
+                handleClickSort(sortField as PoolColumnHeader);
+              }}
+            >
+              {sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />}
+            </div>
+            <div className={styles.labelSort} ref={sortRef} onClick={() => setOpenSort(!openSort)}>
+              {sortField}
+              <div className={classNames(styles.sortList, { [styles.active]: openSort })}>
+                {Object.values(PoolColumnHeader).map((item, k) => {
+                  return (
+                    <span
+                      key={`${k}-sort-item-${item}`}
+                      className={styles.item}
+                      onClick={() => {
+                        handleClickSort(item);
+                      }}
+                    >
+                      {item}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+        {filteredPool.slice(indexOfFirstItem, indexOfLastItem).map((item, index) => {
+          const { showLiquidity, showVolume, showApr } = item || {};
           return (
             <PoolItemDataMobile
               key={`${index}-item-mobile-${item?.id}`}
               item={item}
               theme={theme}
-              volume={poolVolume?.[item?.poolKey] ?? 0}
-              liquidity={poolLiquidities?.[item?.poolKey] ?? 0}
+              volume={showVolume ?? 0}
+              liquidity={showLiquidity ?? 0}
               aprInfo={{
                 apr: 0,
                 incentives: [],
                 swapFee: 0,
                 incentivesApr: 0,
-                ...aprInfo?.[item?.poolKey]
+                ...showApr
               }}
               setCurrentPool={setCurrentPool}
               setIsOpenCreatePosition={setIsOpenCreatePosition}
+              setPairDenomsDeposit={setPairDenomsDeposit}
             />
           );
         })}
@@ -297,23 +357,33 @@ const PoolList = ({ search }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredPool.map((item, index) => {
+            {filteredPool.slice(indexOfFirstItem, indexOfLastItem).map((item, index) => {
+              const { showLiquidity, showVolume, showApr } = item || {};
+
+              // const { type, totalLiquidity: liquidityV2, volume24Hour: volumeV2, liquidityAddr, poolKey } = item || {};
+
+              // const showLiquidity =
+              //   type === POOL_TYPE.V3 ? poolLiquidities?.[item?.poolKey] : toDisplay(Math.trunc(liquidityV2 || 0).toString());
+              // const showVolume = type === POOL_TYPE.V3 ? volumeV3 : toDisplay(volumeV2 || 0);
+              // const showApr = aprInfo?.[poolKey] || aprInfo?.[liquidityAddr];
+
               return (
                 <tr className={styles.item} key={`${index}-pool-${item?.id}`}>
                   <PoolItemTData
                     item={item}
                     theme={theme}
-                    volume={poolVolume?.[item?.poolKey] ?? 0}
-                    liquidity={poolLiquidities?.[item?.poolKey] ?? 0}
+                    volume={showVolume ?? 0}
+                    liquidity={showLiquidity ?? 0}
                     aprInfo={{
                       apr: 0,
                       incentives: [],
                       swapFee: 0,
                       incentivesApr: 0,
-                      ...aprInfo?.[item?.poolKey]
+                      ...showApr
                     }}
                     setCurrentPool={setCurrentPool}
                     setIsOpenCreatePosition={setIsOpenCreatePosition}
+                    setPairDenomsDeposit={setPairDenomsDeposit}
                   />
                 </tr>
               );
@@ -328,7 +398,7 @@ const PoolList = ({ search }) => {
     <div className={styles.poolList}>
       <div className={styles.headerTable}>
         <div className={styles.headerInfo}>
-          <div className={styles.total}>
+          {/* <div className={styles.total}>
             <p>Total liquidity</p>
             {totalLiquidity === 0 || totalLiquidity ? (
               <h1>{formatDisplayUsdt(Number(totalLiquidity) || 0)}</h1>
@@ -343,6 +413,36 @@ const PoolList = ({ search }) => {
             ) : (
               <img src={Loading} alt="loading" width={32} height={32} />
             )}
+          </div> */}
+          <div className={styles.headerInfo}>
+            {liquidityData.map((e) => (
+              <div key={e.name} className={`${styles.headerInfo_item} ${openChart ? styles.activeChart : ''}`}>
+                <div className={styles.info} onClick={() => setOpenChart((open) => !open)}>
+                  <div className={styles.content}>
+                    <span>{e.name}</span>
+                    <div className={styles.headerInfo_item_info}>
+                      {e.Icon && (
+                        <div>
+                          <e.Icon />
+                        </div>
+                      )}
+                      {!e.value ? (
+                        <img src={Loading} alt="loading_img" />
+                      ) : (
+                        <TokenBalance
+                          balance={e.value}
+                          prefix="$"
+                          className={styles.liq_value}
+                          decimalScale={e.decimal || 6}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div>{e.value && openChart ? <UpIcon /> : <DownIcon />}</div>
+                </div>
+                <div className={`${styles.chart} ${e.value && openChart ? styles.active : ''}`}>{e.chart}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -358,6 +458,18 @@ const PoolList = ({ search }) => {
               )}
         </div>
 
+        <div className={styles.paginate}>
+          {totalPages > 1 && (
+            <Pagination
+              totalPages={totalPages}
+              paginate={setPage}
+              currentPage={page}
+              handleNext={handleNext}
+              handlePrev={handlePrev}
+            />
+          )}
+        </div>
+
         {isOpenCreatePosition && currentPool && (
           <CreateNewPosition
             showModal={isOpenCreatePosition}
@@ -365,234 +477,15 @@ const PoolList = ({ search }) => {
             pool={currentPool}
           />
         )}
+
+        {pairDenomsDeposit && (
+          <AddLiquidityModal
+            isOpen={!!pairDenomsDeposit}
+            close={() => setPairDenomsDeposit('')}
+            pairDenoms={pairDenomsDeposit}
+          />
+        )}
       </LoadingBox>
-    </div>
-  );
-};
-
-const PoolItemTData = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreatePosition, setCurrentPool }) => {
-  const navigate = useNavigate();
-  const [openTooltip, setOpenTooltip] = useState(false);
-
-  const isLight = theme === 'light';
-  const IconBoots = isLight ? BootsIcon : BootsIconDark;
-  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey } = item;
-
-  return (
-    <>
-      <td>
-        <div className={styles.name} onClick={() => navigate(`/pools-v3/${encodeURIComponent(poolKey)}`)}>
-          <div className={classNames(styles.icons, styles[theme])}>
-            <FromTokenIcon />
-            <ToTokenIcon />
-          </div>
-          <span>
-            {tokenXinfo?.name} / {tokenYinfo?.name}
-          </span>
-
-          <div>
-            <span className={styles.fee}>Fee: {toDisplay(BigInt(feeTier), 10)}%</span>
-          </div>
-        </div>
-      </td>
-      <td className={styles.textRight}>
-        <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
-          {liquidity || liquidity === 0 ? (
-            formatDisplayUsdt(liquidity)
-          ) : (
-            <img src={Loading} alt="loading" width={30} height={30} />
-          )}
-        </span>
-      </td>
-      <td className={styles.textRight}>
-        <span className={styles.amount}>{formatDisplayUsdt(volume)}</span>
-      </td>
-      <td>
-        <div className={styles.apr}>
-          <span className={styles.amount}>
-            {aprInfo.apr.min === aprInfo.apr.max
-              ? `${numberWithCommas(aprInfo.apr.min * 100, undefined, { maximumFractionDigits: 1 })}`
-              : `${numberWithCommas(aprInfo.apr.min * 100, undefined, {
-                  maximumFractionDigits: 1
-                })} - ${numberWithCommas(aprInfo.apr.max * 100, undefined, { maximumFractionDigits: 1 })}`}
-            %
-          </span>
-          <TooltipIcon
-            className={styles.tooltipWrapper}
-            placement="top"
-            visible={openTooltip}
-            icon={<IconInfo />}
-            setVisible={setOpenTooltip}
-            content={
-              <div className={classNames(styles.tooltip, styles[theme])}>
-                <div className={styles.itemInfo}>
-                  <span>Swap fee</span>
-                  <span className={styles.value}>
-                    {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 1 })}%
-                  </span>
-                </div>
-                <div className={styles.itemInfo}>
-                  <span>
-                    Incentives Boost&nbsp;
-                    <IconBoots />
-                  </span>
-                  <span className={styles.value}>
-                    {aprInfo.incentivesApr.min === aprInfo.incentivesApr.max
-                      ? `${numberWithCommas(aprInfo.incentivesApr.min * 100, undefined, { maximumFractionDigits: 1 })}`
-                      : `${numberWithCommas(aprInfo.incentivesApr.min * 100, undefined, {
-                          maximumFractionDigits: 1
-                        })} - ${numberWithCommas(aprInfo.incentivesApr.max * 100, undefined, {
-                          maximumFractionDigits: 1
-                        })}`}
-                    %
-                  </span>
-                </div>
-                <div className={styles.itemInfo}>
-                  <span>Total APR</span>
-                  <span className={styles.totalApr}>
-                    {aprInfo.apr.min === aprInfo.apr.max
-                      ? `${numberWithCommas(aprInfo.apr.min * 100, undefined, { maximumFractionDigits: 1 })}`
-                      : `${numberWithCommas(aprInfo.apr.min * 100, undefined, {
-                          maximumFractionDigits: 1
-                        })} - ${numberWithCommas(aprInfo.apr.max * 100, undefined, { maximumFractionDigits: 1 })}`}
-                    %
-                  </span>
-                </div>
-              </div>
-            }
-          />
-        </div>
-      </td>
-
-      <td className={styles.actions}>
-        <Button
-          className="newPosition"
-          type="third-sm"
-          onClick={() => {
-            setIsOpenCreatePosition(true);
-            setCurrentPool(item);
-          }}
-        >
-          Add Position
-        </Button>
-      </td>
-    </>
-  );
-};
-
-const PoolItemDataMobile = ({ item, theme, liquidity, volume, aprInfo, setIsOpenCreatePosition, setCurrentPool }) => {
-  const navigate = useNavigate();
-  const [openTooltip, setOpenTooltip] = useState(false);
-
-  const isLight = theme === 'light';
-  const IconBoots = isLight ? BootsIcon : BootsIconDark;
-  const { FromTokenIcon, ToTokenIcon, feeTier, tokenXinfo, tokenYinfo, poolKey } = item;
-
-  return (
-    <div className={styles.mobilePoolItem}>
-      <div className={classNames(styles.itemMobile, styles.flexStart)}>
-        <div className={styles.name} onClick={() => navigate(`/pools-v3/${encodeURIComponent(poolKey)}`)}>
-          <div className={styles.info}>
-            <div className={classNames(styles.icons, styles[theme])}>
-              <FromTokenIcon />
-              <ToTokenIcon />
-            </div>
-            <span>
-              {tokenXinfo?.name} / {tokenYinfo?.name}
-            </span>
-          </div>
-
-          <div>
-            <span className={styles.fee}>Fee: {toDisplay(BigInt(feeTier), 10)}%</span>
-          </div>
-        </div>
-        <div
-          title="Add Position"
-          className={classNames('newPosition')}
-          onClick={() => {
-            setIsOpenCreatePosition(true);
-            setCurrentPool(item);
-          }}
-        >
-          <AddLPIcon />
-        </div>
-      </div>
-      <div className={styles.itemMobile}>
-        <div className={styles.label}>Liquidity</div>
-        <div className={styles.textRight}>
-          <span className={classNames(styles.amount, { [styles.loading]: !liquidity })}>
-            {liquidity || liquidity === 0 ? (
-              formatDisplayUsdt(liquidity)
-            ) : (
-              <img src={Loading} alt="loading" width={30} height={30} />
-            )}
-          </span>
-        </div>
-      </div>
-
-      <div className={styles.itemMobile}>
-        <div className={styles.label}>Volume (24H)</div>
-        <div className={styles.textRight}>
-          <span className={styles.amount}>{formatDisplayUsdt(volume)}</span>
-        </div>
-      </div>
-      <div className={styles.itemMobile}>
-        <div className={styles.label}>APR</div>
-        <div className={styles.apr}>
-          <span className={styles.amount}>
-            {aprInfo.apr.min === aprInfo.apr.max
-              ? `${numberWithCommas(aprInfo.apr.min * 100, undefined, { maximumFractionDigits: 1 })}`
-              : `${numberWithCommas(aprInfo.apr.min * 100, undefined, {
-                  maximumFractionDigits: 1
-                })} - ${numberWithCommas(aprInfo.apr.max * 100, undefined, { maximumFractionDigits: 1 })}`}
-            %
-          </span>
-          <TooltipIcon
-            className={styles.tooltipWrapper}
-            placement="top"
-            visible={openTooltip}
-            icon={<IconInfo />}
-            setVisible={setOpenTooltip}
-            content={
-              <div className={classNames(styles.tooltip, styles[theme])}>
-                <div className={styles.itemInfo}>
-                  <span>Swap fee</span>
-                  <span className={styles.value}>
-                    {numberWithCommas(aprInfo.swapFee * 100, undefined, { maximumFractionDigits: 1 })}%
-                  </span>
-                </div>
-                <div className={styles.itemInfo}>
-                  <span>
-                    Incentives Boost&nbsp;
-                    <IconBoots />
-                  </span>
-                  <span className={styles.value}>
-                    {aprInfo.incentivesApr.min === aprInfo.incentivesApr.max
-                      ? `${numberWithCommas(aprInfo.incentivesApr.min * 100, undefined, { maximumFractionDigits: 1 })}`
-                      : `${numberWithCommas(aprInfo.incentivesApr.min * 100, undefined, {
-                          maximumFractionDigits: 1
-                        })} - ${numberWithCommas(aprInfo.incentivesApr.max * 100, undefined, {
-                          maximumFractionDigits: 1
-                        })}`}
-                    %
-                  </span>
-                </div>
-                <div className={styles.itemInfo}>
-                  <span>Total APR</span>
-                  <span className={styles.totalApr}>
-                    {aprInfo.apr.min === aprInfo.apr.max
-                      ? `${numberWithCommas(aprInfo.apr.min * 100, undefined, { maximumFractionDigits: 1 })}`
-                      : `${numberWithCommas(aprInfo.apr.min * 100, undefined, {
-                          maximumFractionDigits: 1
-                        })} - ${numberWithCommas(aprInfo.apr.max * 100, undefined, { maximumFractionDigits: 1 })}`}
-                    %
-                  </span>
-                </div>
-              </div>
-            }
-          />
-        </div>
-      </div>
     </div>
   );
 };

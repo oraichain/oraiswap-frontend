@@ -67,7 +67,6 @@ window.client = new CosmWasmClient(new Tendermint37Client(rpcClient));
 const initApp = async () => {
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
-    // <UrqlProvider value={client}>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ToastProvider>
@@ -83,7 +82,6 @@ const initApp = async () => {
         </ToastProvider>
       </PersistGate>
     </Provider>
-    // </UrqlProvider>
   );
 
   // init cosmwasm client when user connected cosmos wallet

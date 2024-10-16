@@ -38,11 +38,11 @@ import Axios from 'axios';
 import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions';
 import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD, toDisplay } from '@oraichain/oraidex-common';
 import { CoinGeckoId } from '@oraichain/oraidex-common';
-import { extractAddress, extractDenom } from 'pages/Pool-V3/components/PriceRangePlot/utils';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { calculateTokenAmounts } from 'pages/Pool-V3/helpers/helper';
-import { getFeeDailyData, getPools } from 'rest/graphClient';
+import { oraichainTokens } from '@oraichain/oraidex-common';
+import { getPools } from 'rest/graphClient';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { extractAddress } from 'pages/Pool-V3/helpers/format';
+import { PoolInfoResponse } from 'types/pool';
 
 export const ALL_FEE_TIERS_DATA: FeeTier[] = [
   { fee: 100000000, tick_spacing: 1 },
@@ -793,13 +793,14 @@ export function simulateAprPosition(
     BigInt(positionLiquidity),
     false,
     pool.current_tick_index + tick_spacing,
-    pool.current_tick_index - tick_spacing ? pool.current_tick_index - tick_spacing : 0
+    pool.current_tick_index ? pool.current_tick_index : 0
   );
 
   const tokenX = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_x);
   const tokenY = oraichainTokens.find((token) => extractAddress(token) === poolKey.token_y);
-  const positionLiquidityUsdX = ((prices[tokenX.coinGeckoId] ?? 0) * Number(res.x)) / 10 ** tokenX.decimals;
-  const positionLiquidityUsdY = ((prices[tokenY.coinGeckoId] ?? 0) * Number(res.y)) / 10 ** tokenY.decimals;
+
+  const positionLiquidityUsdX = ((prices[tokenX?.coinGeckoId] ?? 0) * Number(res.x)) / 10 ** tokenX.decimals;
+  const positionLiquidityUsdY = ((prices[tokenY?.coinGeckoId] ?? 0) * Number(res.y)) / 10 ** tokenY.decimals;
   const totalPositionLiquidityUsd = positionLiquidityUsdX + positionLiquidityUsdY;
 
   for (const incentive of incentives) {
@@ -820,8 +821,8 @@ export function simulateAprPosition(
     BigInt(pool.sqrt_price),
     BigInt(positionLiquidity2),
     false,
-    pool.current_tick_index + tick_spacing * 20,
-    pool.current_tick_index - tick_spacing * 20 ? pool.current_tick_index - tick_spacing * 20 : 0
+    getMaxTick(tick_spacing),
+    getMinTick(tick_spacing)
   );
 
   const positionLiquidityUsdX2 = ((prices[tokenX.coinGeckoId] ?? 0) * Number(res2.x)) / 10 ** tokenX.decimals;
@@ -857,7 +858,7 @@ export type PoolAprInfo = {
 };
 
 export async function fetchPoolAprInfo(
-  pools: PoolWithPoolKey[],
+  pools: (PoolWithPoolKey | PoolInfoResponse)[],
   prices: CoinGeckoPrices<CoinGeckoId>,
   poolLiquidities: Record<string, number>,
   feeAndLiquidityInfo: PoolFeeAndLiquidityDaily[]
@@ -871,7 +872,26 @@ export async function fetchPoolAprInfo(
   });
 
   const poolAprs: Record<string, PoolAprInfo> = {};
-  for (const { pool, pool_key } of pools) {
+  for (const item of pools) {
+    if ('liquidityAddr' in item) {
+      const { apr, aprBoost, liquidityAddr } = item;
+
+      poolAprs[liquidityAddr] = {
+        apr: {
+          min: aprBoost || 0,
+          max: aprBoost || 0
+        },
+        incentives: [],
+        swapFee: apr,
+        incentivesApr: {
+          min: 0,
+          max: 0
+        }
+      };
+      continue;
+    }
+
+    const { pool, pool_key } = item;
     const feeAPR = avgFeeAPRs.find((fee) => fee.poolKey === poolKeyToString(pool_key))?.feeAPR;
 
     if (pool.incentives === undefined) {

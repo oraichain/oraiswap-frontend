@@ -5,7 +5,6 @@ import EthIcon from 'assets/icons/ethereum.svg?react';
 import KwtIcon from 'assets/icons/kwt.svg?react';
 import MilkyIcon from 'assets/icons/milky-token.svg?react';
 import OraiIcon from 'assets/icons/oraichain.svg?react';
-
 import BTCIcon from 'assets/icons/btc-icon.svg?react';
 import OraiLightIcon from 'assets/icons/oraichain_light.svg?react';
 import OraixIcon from 'assets/icons/oraix.svg?react';
@@ -27,7 +26,7 @@ import CelestiaIcon from 'assets/icons/celestia.svg?react';
 import TonIcon from 'assets/icons/ton.svg?react';
 import PepeIcon from 'assets/icons/pepe.svg?react';
 import CatIcon from 'assets/icons/icon-simoncat.svg?react';
-
+import HmstrIcon from 'assets/icons/hmstr.svg?react';
 import { CustomChainInfo, TokenItemType } from '@oraichain/oraidex-common';
 import { bitcoinChainId } from 'helper/constants';
 
@@ -159,6 +158,11 @@ export const tokensIconInfos: TokenIcon[] = [
     coinGeckoId: 'simon-s-cat',
     Icon: CatIcon,
     IconLight: CatIcon
+  },
+  {
+    coinGeckoId: 'hamster-kombat',
+    Icon: HmstrIcon,
+    IconLight: HmstrIcon
   }
 ];
 
@@ -227,6 +231,11 @@ export const chainIconsInfos: ChainIcon[] = [
     chainId: 'oraibtc-mainnet-1',
     Icon: BitcoinIcon,
     IconLight: BitcoinIcon
+  },
+  {
+    chainId: 'celestia',
+    Icon: CelestiaIcon,
+    IconLight: CelestiaIcon
   }
 ];
 

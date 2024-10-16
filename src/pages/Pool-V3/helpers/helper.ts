@@ -1,29 +1,28 @@
-import { BigDecimal, toDisplay, TokenItemType, CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { Coin } from '@cosmjs/proto-signing';
+import { BigDecimal, CW20_DECIMALS, oraichainTokens, TokenItemType } from '@oraichain/oraidex-common';
+import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
 import { PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { oraichainTokens } from 'config/bridgeTokens';
-import SingletonOraiswapV3, { poolKeyToString } from 'libs/contractSingleton';
-import { PRICE_SCALE, printBigint } from '../components/PriceRangePlot/utils';
 import {
   AmountDeltaResult,
+  calculateAmountDelta,
+  calculateSqrtPrice,
+  getPercentageDenominator,
+  getSqrtPriceDenominator,
+  getTickAtSqrtPrice,
   Pool,
   Position,
   Tick,
   TokenAmounts,
-  calculateAmountDelta,
-  calculateSqrtPrice,
-  extractAddress,
-  getPercentageDenominator,
-  getSqrtPriceDenominator,
-  getTickAtSqrtPrice,
   calculateFee as wasmCalculateFee
 } from '@oraichain/oraiswap-v3';
-import { getIconPoolData } from './format';
-import { network } from 'config/networks';
-import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
-import { Position as PositionsNode } from 'gql/graphql';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
+import { network } from 'config/networks';
+import { Position as PositionsNode } from 'gql/graphql';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import SingletonOraiswapV3, { poolKeyToString } from 'libs/contractSingleton';
+import { PRICE_SCALE, printBigint } from '../components/PriceRangePlot/utils';
+import { extractAddress, getIconPoolData } from './format';
+import { numberWithCommas } from 'helper/format';
 
 export interface InitPositionData {
   poolKeyData: PoolKey;
@@ -150,9 +149,7 @@ export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, y
 
 export const calcYPerXPriceBySqrtPrice = (sqrtPrice: bigint, xDecimal: number, yDecimal: number): number => {
   const sqrt = +printBigint(sqrtPrice, Number(PRICE_SCALE));
-
   const proportion = sqrt * sqrt;
-
   return proportion / 10 ** (yDecimal - xDecimal);
 };
 
@@ -170,6 +167,7 @@ export const _calculateTokenAmounts = (pool: Pool, position: Position, sign: boo
     position.lower_tick_index
   );
 };
+// 8e-6 usdt = 1 pepe
 
 export const calculateFee = (pool: Pool, position: Position, lowerTick: Tick, upperTick: Tick): TokenAmounts => {
   return wasmCalculateFee(
@@ -326,10 +324,12 @@ export const executeMultiple = async (msg: any, address: string): Promise<string
   return result.transactionHash;
 };
 
-export const genMsgAllowance = (datas: {
-  token: string;
-  amount: bigint;
-}[]) => {
+export const genMsgAllowance = (
+  datas: {
+    token: string;
+    amount: bigint;
+  }[]
+) => {
   // const MAX_ALLOWANCE_AMOUNT = '18446744073709551615';
   const spender = network.pool_v3;
 
@@ -374,7 +374,7 @@ export const createPoolMsg = (poolKey: PoolKey, initSqrtPrice: string) => {
       }
     }
   };
-}
+};
 
 export const createPositionTx = async (
   poolKey: PoolKey,
@@ -428,7 +428,7 @@ export const createPositionMsg = (
       }
     }
   };
-}
+};
 
 export const createPositionWithNativeTx = async (
   poolKey: PoolKey,
@@ -518,7 +518,7 @@ export const createPositionWithNativeMsg = (
     },
     funds: fund
   };
-}
+};
 
 export const formatClaimFeeData = (feeClaimData: PositionsNode[]) => {
   const fmtFeeClaimData = feeClaimData.reduce((acc, cur) => {
