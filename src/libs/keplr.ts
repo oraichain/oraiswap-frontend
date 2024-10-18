@@ -118,7 +118,7 @@ export default class Keplr extends CosmosWallet {
 
       const keplr = await this.getKeplr();
       if (keplr) {
-        if (chainId !== 'bitcoin') {
+        if (!['oraibtc-mainnet-1', 'bitcoin'].includes(chainId)) {
           const keplrKey = await keplr.getKey(chainId);
           if (!keplrKey?.bech32Address) return undefined;
           const { isValid } = checkValidateAddressWithNetwork(keplrKey?.bech32Address, chainId as NetworkChainId);
