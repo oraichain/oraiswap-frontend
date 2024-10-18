@@ -39,7 +39,7 @@ export default () => (
       <Route path="/" element={<UniversalSwap />} />
       <Route path="/bridge" element={<Balance />} />
       <Route path="/bitcoin-dashboard" element={<BitcoinDashboard />} />
-      {/* <Route path="/bitcoin-dashboard-v2" element={<BitcoinDashboardV2 />} /> */}
+      <Route path="/bitcoin-dashboard-v2" element={<BitcoinDashboardV2 />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/swap" element={<UniversalSwap />} />
       {/* <Route path="/pools" element={<Pools />} /> */}
