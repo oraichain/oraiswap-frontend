@@ -81,7 +81,7 @@ export const ConcentratedLiquidityDepthChart: FC<{
         // const customHeight = Math.min(height, maxHeight);
 
         const yScale = scaleLinear({
-          range: [top, height * 0.9986 - bottom],
+          range: [top, height * 1.134 - bottom],
           domain: yRange.slice().reverse(),
           zero: false
         });
@@ -91,7 +91,7 @@ export const ConcentratedLiquidityDepthChart: FC<{
           <XYChart
             captureEvents={false}
             margin={{ top: fullRange ? top - 8.5 : top, right, bottom, left }}
-            height={height * 0.9986}
+            height={height * 1.134}
             width={width}
             xScale={{
               type: 'linear',
@@ -130,9 +130,9 @@ export const ConcentratedLiquidityDepthChart: FC<{
             })}
             horizontal={horizontal}
           >
-            {/* <AnimatedAxis orientation="right" numTicks={5} strokeWidth={0} />
-            <AnimatedGrid columns={false} numTicks={5} /> */}
-            <AnimatedGrid columns={false} rows={false} numTicks={5} />
+            {/* <AnimatedAxis orientation="right" numTicks={7} strokeWidth={0} />
+            <AnimatedGrid columns={false} numTicks={7} /> */}
+            <AnimatedGrid columns={false} rows={false} numTicks={7} />
             <BarSeries
               dataKey="depth"
               data={data}
@@ -149,14 +149,14 @@ export const ConcentratedLiquidityDepthChart: FC<{
               >
                 <AnnotationConnector />
                 <AnnotationCircleSubject
-                  stroke={theme.colors.wosmongton['200']}
+                  stroke={'#A6BE93'}
                   // @ts-ignore
                   strokeWidth={4}
                   radius={2}
                 />
                 <AnnotationLineSubject
                   orientation="horizontal"
-                  stroke={theme.colors.wosmongton['200']}
+                  stroke={'#A6BE93'}
                   strokeWidth={2.2}
                 />
               </Annotation>
@@ -185,7 +185,7 @@ export const ConcentratedLiquidityDepthChart: FC<{
                 defaultValue={fullRange ? yRange[1] * 0.95 : max}
                 length={xMax}
                 scale={yScale}
-                stroke={theme.colors.wosmongton['500']}
+                stroke={'#FFF27A'}
                 onMove={onMoveMaxBoundary}
                 onSubmit={onSubmitMax}
               />
@@ -196,7 +196,7 @@ export const ConcentratedLiquidityDepthChart: FC<{
                 defaultValue={fullRange ? yRange[0] * 1.05 : min}
                 length={xMax}
                 scale={yScale}
-                stroke={theme.colors.wosmongton['500']}
+                stroke={'#8A54EB'}
                 onMove={onMoveMinBoundary}
                 onSubmit={onSubmitMin}
               />
@@ -243,7 +243,7 @@ const DragContainer: FC<{
     }}
     editable
   >
-    <AnnotationLineSubject orientation="horizontal" stroke={props.stroke} strokeWidth={3} />
+    <AnnotationLineSubject orientation="horizontal" stroke={props.stroke} strokeWidth={2} />
     <AnnotationCircleSubject
       stroke={props.stroke}
       // @ts-ignore

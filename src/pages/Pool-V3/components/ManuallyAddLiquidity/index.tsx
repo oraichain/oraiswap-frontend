@@ -4,6 +4,7 @@ import { FC } from 'react';
 import classNames from 'classnames';
 import { numberWithCommas } from 'helper/format';
 import NumberFormat from 'react-number-format';
+import { ReactComponent as LeafIcon } from 'assets/icons/leaf.svg';
 
 interface ManuallyAddLiquidityProps {
   isFromBlocked: boolean;
@@ -178,6 +179,13 @@ const ManuallyAddLiquidity: FC<ManuallyAddLiquidityProps> = ({
               ≈ ${amountTo ? numberWithCommas(Number(toUsd) || 0, undefined, { maximumFractionDigits: 6 }) : 0}
             </div>
           </div>
+        </div>
+      </div>
+      <div className={styles.aprWrapper}>
+        <p className={styles.title}>Est APR</p>
+        <div className={styles.amountWrap}>
+          <p className={styles.amount}>~81.2%</p>
+          <LeafIcon />
         </div>
       </div>
     </>

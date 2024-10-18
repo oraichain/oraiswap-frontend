@@ -1,19 +1,21 @@
 import { extractAddress, LiquidityTick, Tickmap } from '@oraichain/oraiswap-v3';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { TokenItemType } from '@oraichain/oraidex-common';
+import { BigDecimal, TokenItemType } from '@oraichain/oraidex-common';
 import SingletonOraiswapV3, { PRICE_SCALE, stringToPoolKey } from 'libs/contractSingleton';
 import { oraichainTokens } from '@oraichain/oraidex-common';
 import { Pool, PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import {
+  calculateLiquidityBreakpoints,
   convertPlotTicks,
   createLiquidityPlot,
   handleGetCurrentPlotTicks,
   printBigint
 } from 'pages/Pool-V3/components/PriceRangePlot/utils';
-import { getHistoricalPriceData } from 'rest/graphClient';
+import { getHistoricalPriceDataInDay, getHistoricalPriceDataInHour } from 'rest/graphClient';
+import { getLiqFrom } from 'pages/Pool-V3/hooks/useAddLiquidityNew';
 
-export const AvailableTimeDurations = ['1d', '7d', '1mo', '1y'] as const;
+export const AvailableTimeDurations = ['7d', '1mo', '3mo', '1y'] as const;
 
 export type TimeDuration = (typeof AvailableTimeDurations)[number];
 
@@ -43,9 +45,9 @@ export interface PoolDetailV3State {
   tokenY: TokenItemType; //
   isXToY: boolean; //
   historicalRange: TimeDuration; //
-  cache1Day: TokenPairHistoricalPrice[]; //
   cache7Day: TokenPairHistoricalPrice[]; //
   cache1Month: TokenPairHistoricalPrice[]; //
+  cache3Month: TokenPairHistoricalPrice[]; //
   cache1Year: TokenPairHistoricalPrice[]; //
   historicalChartData: TokenPairHistoricalPrice[]; //
   fullRange: boolean; //
@@ -67,9 +69,9 @@ const initialState: PoolDetailV3State = {
   tokenY: null,
   isXToY: true,
   historicalRange: '7d',
-  cache1Day: null,
   cache7Day: null,
   cache1Month: null,
+  cache3Month: null,
   cache1Year: null,
   historicalChartData: null,
   fullRange: false,
@@ -102,26 +104,79 @@ export const poolDetailV3Slice = createSlice({
     setXRange: (state, action: PayloadAction<[number, number]>) => {
       state.xRange = action.payload;
     },
+
+    /*
+    get depthChartData(): { price: number; depth: number }[] {
+      const data = this.activeLiquidity;
+      
+      const [min, max] = this.yRange;
+      if (min === max) return [];
+      
+      const depths: { price: number; depth: number }[] = [];
+      
+      for (let price = min; price <= max; price += (max - min) / 20) {
+        if (this.multiplicationQuoteOverBase.isZero()) continue;
+        
+        const spotPriceToConvert = new Dec(price).quo(
+          this.multiplicationQuoteOverBase
+          );
+          
+          depths.push({
+            price,
+            depth: getLiqFrom(
+              priceToTick(
+                spotPriceToConvert.gt(maxSpotPrice)
+                ? maxSpotPrice
+                : spotPriceToConvert.lt(minSpotPrice)
+                ? minSpotPrice
+              : spotPriceToConvert
+          ),
+          data
+        ),
+      });
+    }
+
+    return depths;
+  }
+    */
+
     setLiquidityChartData: (state) => {
       if (!state.liquidityTicks || !state.poolKey || !state.tokenX || !state.tokenY || !state.yRange) return;
-      const plots = createLiquidityPlot(
-        state.liquidityTicks,
-        state.poolKey.fee_tier.tick_spacing,
-        state.isXToY,
-        state.tokenX.decimals,
-        state.tokenY.decimals
-      );
-      const fullData = plots.map((tick) => {
-        return {
-          price: tick.x,
-          depth: tick.y
-        };
-      });
 
-      // just get data has price in yRange
-      state.liquidityChartData = fullData.filter(
-        (data) => data.price >= state.yRange[0] && data.price <= state.yRange[1]
-      );
+      const [min, max] = state.yRange;
+
+      if (min === max) state.liquidityChartData = [];
+      else {
+        const plots = createLiquidityPlot(
+          state.liquidityTicks,
+          state.poolKey.fee_tier.tick_spacing,
+          state.isXToY,
+          state.tokenX.decimals,
+          state.tokenY.decimals
+        );
+        const fullData = plots.map((tick) => {
+          return {
+            price: tick.x,
+            depth: tick.y
+          };
+        });
+        const depths: { price: number; depth: number }[] = [];
+
+        for (let price = min; price <= max; price += (max - min) / 20) {
+          const liquidityItem = fullData.find(
+            (item, index) => price >= item.price && price <= fullData[index + 1]?.price
+          );
+
+          let depth = liquidityItem ? liquidityItem.depth : 0;
+
+          depths.push({
+            price,
+            depth
+          });
+        }
+
+        state.liquidityChartData = depths;
+      }
     },
     setHistoricalChartData: (state, action: PayloadAction<TokenPairHistoricalPrice[]>) => {
       let data = action.payload;
@@ -130,14 +185,14 @@ export const poolDetailV3Slice = createSlice({
     setHistoricalRange: (state, action: PayloadAction<TimeDuration>) => {
       state.historicalRange = action.payload;
       switch (state.historicalRange) {
-        case '1d':
-          state.historicalChartData = state.cache1Day;
-          break;
         case '7d':
           state.historicalChartData = state.cache7Day;
           break;
         case '1mo':
           state.historicalChartData = state.cache1Month;
+          break;
+        case '3mo':
+          state.historicalChartData = state.cache3Month;
           break;
         case '1y':
           state.historicalChartData = state.cache1Year;
@@ -161,7 +216,7 @@ export const poolDetailV3Slice = createSlice({
       state.currentPrice = 1 / state.currentPrice;
       if (state.historicalRange) {
         state.historicalChartData = revertHistoricalChartData(state.historicalChartData);
-        state.cache1Day = revertHistoricalChartData(state.cache1Day);
+        state.cache3Month = revertHistoricalChartData(state.cache3Month);
         state.cache7Day = revertHistoricalChartData(state.cache7Day);
         state.cache1Month = revertHistoricalChartData(state.cache1Month);
         state.cache1Year = revertHistoricalChartData(state.cache1Year);
@@ -178,10 +233,10 @@ export const poolDetailV3Slice = createSlice({
       const price = (sqrtPrice * sqrtPrice) / 10 ** ((state.tokenY.decimals ?? 0) - (state.tokenX.decimals ?? 0));
       state.currentPrice = price;
     });
-    builder.addCase(fetchHistoricalPriceData1D.fulfilled, (state, action) => {
+    builder.addCase(fetchHistoricalPriceData3M.fulfilled, (state, action) => {
       if (action.payload.poolId !== state.poolId) return;
-      state.cache1Day = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
-      if (state.historicalRange === '1d') {
+      state.cache3Month = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
+      if (state.historicalRange === '3mo') {
         state.historicalChartData = state.isXToY ? action.payload.data : revertHistoricalChartData(action.payload.data);
       }
     });
@@ -253,31 +308,31 @@ export const fetchActiveLiquidityData = createAsyncThunk(
 );
 
 // separate to 4 actions for better caching and performance
-export const fetchHistoricalPriceData1D = createAsyncThunk(
-  'poolDetailV3/fetchHistoricalPriceData1D',
+export const fetchHistoricalPriceData3M = createAsyncThunk(
+  'poolDetailV3/fetchHistoricalPriceData3M',
   async (poolId: string) => {
-    return await getHistoricalPriceData(poolId, '1d');
+    return await getHistoricalPriceDataInDay(poolId, '3mo');
   }
 );
 
 export const fetchHistoricalPriceData7D = createAsyncThunk(
   'poolDetailV3/fetchHistoricalPriceData7D',
   async (poolId: string) => {
-    return await getHistoricalPriceData(poolId, '7d');
+    return await getHistoricalPriceDataInHour(poolId, '7d');
   }
 );
 
 export const fetchHistoricalPriceData1M = createAsyncThunk(
   'poolDetailV3/fetchHistoricalPriceData1M',
   async (poolId: string) => {
-    return await getHistoricalPriceData(poolId, '1mo');
+    return await getHistoricalPriceDataInHour(poolId, '1mo');
   }
 );
 
 export const fetchHistoricalPriceData1Y = createAsyncThunk(
   'poolDetailV3/fetchHistoricalPriceData1Y',
   async (poolId: string) => {
-    return await getHistoricalPriceData(poolId, '1y');
+    return await getHistoricalPriceDataInDay(poolId, '1y');
   }
 );
 

@@ -5,6 +5,7 @@ import { TokenItemType } from '@oraichain/oraidex-common';
 import { TimeDuration, TokenPairHistoricalPrice } from 'reducer/poolDetailV3';
 import { Dec } from '@keplr-wallet/unit';
 
+
 interface HistoricalChartDataWrapperProps {
   tokenX: TokenItemType;
   tokenY: TokenItemType;
@@ -17,6 +18,7 @@ interface HistoricalChartDataWrapperProps {
   isXToY: boolean;
   setHoverPrice: (price: number) => void;
   setHistoricalRange: (range: TimeDuration) => void;
+
 }
 
 const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
@@ -30,7 +32,7 @@ const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
   currentPrice,
   isXToY,
   setHoverPrice,
-  setHistoricalRange
+  setHistoricalRange,
 }) => {
   const formattedPrice =
     formatPretty(new Dec(hoverPrice), {
@@ -48,29 +50,6 @@ const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
 
   return (
     <div className={styles.chartPrice}>
-      <div className={styles.chartOptions}>
-        <div className={styles.priceWrapper}>
-          <div>
-            <h4 className={styles.price}>{formattedPrice}</h4>
-          </div>
-          {tokenX && tokenY ? (
-            <div className={styles.text}>
-              <div className={styles.currentPrice}>current price</div>
-              <div className={styles.xPerY}>
-                {isXToY ? `${tokenY.name} per ${tokenX.name}` : `${tokenX.name} per ${tokenY.name}`}
-              </div>
-            </div>
-          ) : undefined}
-        </div>
-
-        <div className={styles.time}>
-          <button onClick={() => setHistoricalRange('1d')}>1D</button>
-          <button onClick={() => setHistoricalRange('7d')}>1W</button>
-          <button onClick={() => setHistoricalRange('1mo')}>1M</button>
-          <button onClick={() => setHistoricalRange('1y')}>1Y</button>
-        </div>
-      </div>
-
       <HistoricalPriceChart
         data={chartDataToNow}
         annotations={(fullRange ? [new Dec(yRange[0] * 1.05), new Dec(yRange[1] * 0.95)] : addRange) as any}

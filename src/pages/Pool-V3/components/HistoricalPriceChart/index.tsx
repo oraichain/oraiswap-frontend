@@ -107,8 +107,8 @@ export const theme = {
     black: 'black',
     inherit: 'inherit',
     barFill: '#373F31',
-    chartGradientPrimary: '#AEE67F',
-    chartGradientSecondary: '#AEE67F',
+    chartGradientPrimary: 'rgba(174, 230, 127, 0.3)',
+    chartGradientSecondary: 'rgba(174, 230, 127, 0)',
     yourBalanceActionButton: '#2A2553'
   },
   fontSize: {
@@ -363,25 +363,19 @@ const HistoricalPriceChart: FC<{
     onPointerOut,
     showGradient = true,
     minimal = false,
-    xNumTicks = 4,
+    xNumTicks = 5,
     showTooltip = false,
     fiatSymbol,
     extendLeft = 0
   }) => (
     <ParentSize className={styles.parentSize}>
       {({ height, width }) => {
-        // const maxHeight = 340;
-        // const customHeight = Math.min(height, maxHeight);
-        // if (isMobile()) {
-        //   width = width * 0.5;
-        // }
-
         return (
           <XYChart
             margin={
               minimal
                 ? { top: 0, right: 0, bottom: 24, left: 0 }
-                : { top: 0, right: 0, bottom: 24, left: 36 + extendLeft }
+                : { top: 0, right: 0, bottom: 24, left: 20 + extendLeft }
             }
             height={height}
             width={width}
@@ -405,18 +399,17 @@ const HistoricalPriceChart: FC<{
             }}
             theme={buildChartTheme({
               backgroundColor: 'transparent',
-              colors: showGradient ? [theme.colors.wosmongton['300']] : ['white'],
-              gridColor: theme.colors.osmoverse['600'],
-              gridColorDark: theme.colors.osmoverse['300'],
+              colors: ['#A6BE93'],
+              gridColor: '#232521',
+              gridColorDark: '#232521',
               svgLabelSmall: {
                 fill: '#979995',
-                fontSize: 12,
-                fontWeight: 500
+                fontSize: 9,
+                fontWeight: 400
               },
               svgLabelBig: {
-                fill: '#979995',
-                fontSize: 12,
-                fontWeight: 500
+                fontSize: 9,
+                fontWeight: 400
               },
               tickLength: 1,
               xAxisLineStyles: {
@@ -431,8 +424,8 @@ const HistoricalPriceChart: FC<{
             })}
           >
             <AnimatedAxis orientation="bottom" numTicks={xNumTicks} hideTicks={minimal} hideZero={minimal} />
-            {!minimal && <AnimatedAxis orientation="left" numTicks={5} strokeWidth={0} tickFormat={yAxisFormatter} />}
-            {!minimal && <AnimatedGrid columns={false} numTicks={5} />}
+            {!minimal && <AnimatedAxis orientation="left" numTicks={7} strokeWidth={0} tickFormat={yAxisFormatter} />}
+            {!minimal && <AnimatedGrid columns={false} numTicks={7} />}
 
             {showGradient ? (
               <>
@@ -467,23 +460,38 @@ const HistoricalPriceChart: FC<{
                 stroke={theme.colors.wosmongton['200']}
               />
             )}
-            {annotations.map((dec, i) => (
-              <Annotation
-                key={`historical-${i}`}
-                dataKey="depth"
-                xAccessor={(d: { close: number; time: number }) => d.time}
-                yAccessor={(d: { close: number; time: number }) => d.close}
-                datum={{ close: Number(dec.toString()), time: 0 }}
-              >
-                <AnnotationConnector />
-                <AnnotationLineSubject
-                  orientation="horizontal"
-                  stroke={theme.colors.wosmongton['500']}
-                  strokeWidth={2}
-                  strokeDasharray={4}
-                />
-              </Annotation>
-            ))}
+
+            <Annotation
+              key={`historical-1`}
+              dataKey="depth"
+              xAccessor={(d: { close: number; time: number }) => d.time}
+              yAccessor={(d: { close: number; time: number }) => d.close}
+              datum={{ close: Number(annotations[0].toString()), time: 0 }}
+            >
+              <AnnotationConnector />
+              <AnnotationLineSubject
+                orientation="horizontal"
+                stroke={'#8A54EB'}
+                strokeWidth={2}
+                // strokeDasharray={4}
+              />
+            </Annotation>
+            <Annotation
+              key={`historical-2`}
+              dataKey="depth"
+              xAccessor={(d: { close: number; time: number }) => d.time}
+              yAccessor={(d: { close: number; time: number }) => d.close}
+              datum={{ close: Number(annotations[1].toString()), time: 0 }}
+            >
+              <AnnotationConnector />
+              <AnnotationLineSubject
+                orientation="horizontal"
+                stroke={'#FFF27A'}
+                strokeWidth={2}
+                // strokeDasharray={4}
+              />
+            </Annotation>
+
             <Tooltip
               detectBounds
               showDatumGlyph

@@ -4,9 +4,9 @@ import { useDispatch } from 'react-redux';
 import {
   ActiveLiquidityPerTickRange,
   fetchActiveLiquidityData,
-  fetchHistoricalPriceData1D,
   fetchHistoricalPriceData1M,
   fetchHistoricalPriceData1Y,
+  fetchHistoricalPriceData3M,
   fetchHistoricalPriceData7D,
   fetchLiquidityTicks,
   fetchPool,
@@ -28,6 +28,13 @@ import { calcPrice, handleGetCurrentPlotTicks } from '../components/PriceRangePl
 
 const ZOOM_STEP = 0.05;
 
+export enum OptionType {
+  CUSTOM,
+  WIDE,
+  NARROW,
+  FULL_RANGE
+}
+
 const useAddLiquidityNew = (poolString: string) => {
   const dispatch = useDispatch();
   const [hoverPrice, setHoverPrice] = useState<number>(0);
@@ -35,6 +42,7 @@ const useAddLiquidityNew = (poolString: string) => {
   const [maxPrice, setMaxPrice] = useState<number>(0);
   const [lowerTick, setLowerTick] = useState<number>(0);
   const [higherTick, setHigherTick] = useState<number>(0);
+  const [optionType, setOptionType] = useState<OptionType>(OptionType.CUSTOM);
 
   const poolId = usePoolDetailV3Reducer('poolId');
   const poolKey = usePoolDetailV3Reducer('poolKey');
@@ -42,7 +50,7 @@ const useAddLiquidityNew = (poolString: string) => {
   const tokenX = usePoolDetailV3Reducer('tokenX');
   const tokenY = usePoolDetailV3Reducer('tokenY');
   const historicalRange = usePoolDetailV3Reducer('historicalRange');
-  const cache1Day = usePoolDetailV3Reducer('cache1Day');
+  const cache3Month = usePoolDetailV3Reducer('cache3Month');
   const cache7Day = usePoolDetailV3Reducer('cache7Day');
   const cache1Month = usePoolDetailV3Reducer('cache1Month');
   const cache1Year = usePoolDetailV3Reducer('cache1Year');
@@ -95,13 +103,13 @@ const useAddLiquidityNew = (poolString: string) => {
   }, [liquidityTicks, isXToY, poolKey, tokenX, tokenY, yRange, dispatch]);
 
   // when we have poolId, poolKey, tokenX, tokenY, we can get:
-  // historicalChartData, activeLiquidity, cache1Day, cache7Day, cache1Month, cache1Year
+  // historicalChartData, activeLiquidity, cache3Month, cache7Day, cache1Month, cache1Year
   useEffect(() => {
     if (poolKey && tokenX && tokenY) {
       console.log('fetch new historical data, active liquidity');
-      dispatch<any>(fetchHistoricalPriceData1D(poolId));
       dispatch<any>(fetchHistoricalPriceData7D(poolId));
       dispatch<any>(fetchHistoricalPriceData1M(poolId));
+      dispatch<any>(fetchHistoricalPriceData3M(poolId));
       dispatch<any>(fetchHistoricalPriceData1Y(poolId));
       dispatch<any>(
         fetchActiveLiquidityData({
@@ -191,6 +199,18 @@ const useAddLiquidityNew = (poolString: string) => {
     dispatch(setZoom(1.05));
   };
 
+  const swapBaseToX = () => {
+    if (!isXToY) {
+      dispatch(setIsXToY(true));
+    }
+  };
+
+  const swapBaseToY = () => {
+    if (isXToY) {
+      dispatch(setIsXToY(false));
+    }
+  };
+
   const resetPlot = () => {
     const higherTick = Math.max(
       Number(getMinTick(Number(poolKey.fee_tier.tick_spacing))),
@@ -218,7 +238,7 @@ const useAddLiquidityNew = (poolString: string) => {
     tokenX,
     tokenY,
     historicalRange,
-    cache1Day,
+    cache3Month,
     cache7Day,
     cache1Month,
     cache1Year,
@@ -236,6 +256,8 @@ const useAddLiquidityNew = (poolString: string) => {
     lowerTick,
     higherTick,
     isXToY,
+    optionType,
+    setOptionType,
     setLowerTick,
     setHigherTick,
     setMinPrice,
@@ -245,11 +267,13 @@ const useAddLiquidityNew = (poolString: string) => {
     zoomIn,
     zoomOut,
     resetRange,
-    flipToken
+    flipToken,
+    swapBaseToX,
+    swapBaseToY
   };
 };
 
-function getLiqFrom(target: number, list: ActiveLiquidityPerTickRange[]): number {
+export function getLiqFrom(target: number, list: ActiveLiquidityPerTickRange[]): number {
   for (let i = 0; i < list.length; i++) {
     if (list[i].lowerTick <= target && list[i].upperTick >= target) {
       return Number(list[i].liquidityAmount.toString());

@@ -1,11 +1,7 @@
 import { FC, useCallback, useMemo } from 'react';
 import styles from './index.module.scss';
-import { ReactComponent as RefreshIcon } from 'assets/icons/refresh-ccw.svg';
-import { ReactComponent as ZoomInIcon } from 'assets/icons/zoom-in.svg';
-import { ReactComponent as ZoomOutIcon } from 'assets/icons/zoom-out.svg';
 import { ConcentratedLiquidityDepthChart } from '../ConcentratedLiquidityDepthChart';
 import { LiquidityChartData } from 'reducer/poolDetailV3';
-import { debounce } from 'lodash';
 
 interface LiquidityChartWrapperProps {
   minPrice: number;
@@ -39,11 +35,7 @@ const LiquidityChartWrapper: FC<LiquidityChartWrapperProps> = ({
   return (
     <div className={styles.chartLiquid}>
       <div className={styles.chart}>
-        <div className={styles.actions}>
-          <RefreshIcon onClick={resetRange} />
-          <ZoomOutIcon onClick={zoomOut} />
-          <ZoomInIcon onClick={zoomIn} />
-        </div>
+        
         <ConcentratedLiquidityDepthChart
           min={minPrice}
           max={maxPrice}
