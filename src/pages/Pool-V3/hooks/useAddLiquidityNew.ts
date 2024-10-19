@@ -22,9 +22,11 @@ import {
   TimeDuration
 } from 'reducer/poolDetailV3';
 import { BigDecimal } from '@oraichain/oraidex-common';
-import { PRICE_SCALE } from 'libs/contractSingleton';
+import { PoolFeeAndLiquidityDaily, PRICE_SCALE } from 'libs/contractSingleton';
 import { getMaxTick, getMinTick, getTickAtSqrtPrice } from '@oraichain/oraiswap-v3';
 import { calcPrice, handleGetCurrentPlotTicks } from '../components/PriceRangePlot/utils';
+import useCreatePosition from './useCreatePosition';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 const ZOOM_STEP = 0.05;
 
@@ -35,7 +37,12 @@ export enum OptionType {
   FULL_RANGE
 }
 
-const useAddLiquidityNew = (poolString: string) => {
+const useAddLiquidityNew = (
+  poolString: string,
+  slippage: number,
+  extendPrices: CoinGeckoPrices<string>,
+  feeDailyData: PoolFeeAndLiquidityDaily[]
+) => {
   const dispatch = useDispatch();
   const [hoverPrice, setHoverPrice] = useState<number>(0);
   const [minPrice, setMinPrice] = useState<number>(0);
@@ -65,6 +72,22 @@ const useAddLiquidityNew = (poolString: string) => {
   const zoom = usePoolDetailV3Reducer('zoom');
   const range = usePoolDetailV3Reducer('range');
   const isXToY = usePoolDetailV3Reducer('isXToY');
+
+  const {
+    amountX,
+    amountY,
+    isXBlocked,
+    isYBlocked,
+    focusId,
+    liquidity,
+    loading,
+    apr,
+    addLiquidity,
+    changeRangeHandler,
+    setAmountX,
+    setAmountY,
+    setFocusId
+  } = useCreatePosition(pool, poolKey, lowerTick, higherTick, isXToY, tokenX, tokenY, slippage, extendPrices, feeDailyData);
 
   // when have pool string, we set to pool id
   // can get: poolKey, tokenX, tokenY
@@ -179,6 +202,15 @@ const useAddLiquidityNew = (poolString: string) => {
     }
   }, [poolKey, pool, tokenX, tokenY, isXToY]);
 
+  // when change min max price of range, get the corresponding tick
+  useEffect(() => {
+    if (minPrice !== 0 || maxPrice !== 0) {
+      const minPriceTrue = isXToY ? minPrice : 1 / maxPrice;
+      const maxPriceTrue = isXToY ? maxPrice : 1 / minPrice;
+      getCorrespondingTickRange(minPriceTrue, maxPriceTrue);
+    }
+  }, [minPrice, maxPrice]);
+
   const changeHistoricalRange = (range: TimeDuration) => {
     dispatch(setHistoricalRange(range));
   };
@@ -197,6 +229,7 @@ const useAddLiquidityNew = (poolString: string) => {
 
   const resetRange = () => {
     dispatch(setZoom(1.05));
+    resetPlot();
   };
 
   const swapBaseToX = () => {
@@ -225,10 +258,21 @@ const useAddLiquidityNew = (poolString: string) => {
     const minPrice = calcPrice(lowerTick, isXToY, tokenX.decimals, tokenY.decimals);
     const maxPrice = calcPrice(higherTick, isXToY, tokenX.decimals, tokenY.decimals);
 
-    setLowerTick(lowerTick);
-    setHigherTick(higherTick);
     setMinPrice(minPrice);
     setMaxPrice(maxPrice);
+
+    setAmountX(0);
+    setAmountY(0);
+  };
+
+  const getCorrespondingTickRange = (priceMin: number, priceMax: number) => {
+    const sqrtPriceMin = priceToSqrtPriceBigInt(priceMin);
+    const sqrtPriceMax = priceToSqrtPriceBigInt(priceMax);
+
+    const lowerTick = getTickAtSqrtPrice(sqrtPriceMin, poolKey.fee_tier.tick_spacing);
+    const higherTick = getTickAtSqrtPrice(sqrtPriceMax, poolKey.fee_tier.tick_spacing);
+    setLowerTick(Math.min(lowerTick, higherTick));
+    setHigherTick(Math.max(lowerTick, higherTick));
   };
 
   return {
@@ -257,6 +301,19 @@ const useAddLiquidityNew = (poolString: string) => {
     higherTick,
     isXToY,
     optionType,
+    amountX,
+    amountY,
+    isXBlocked,
+    isYBlocked,
+    focusId,
+    liquidity,
+    loading,
+    apr,
+    addLiquidity,
+    changeRangeHandler,
+    setAmountX,
+    setAmountY,
+    setFocusId,
     setOptionType,
     setLowerTick,
     setHigherTick,
@@ -282,4 +339,19 @@ export function getLiqFrom(target: number, list: ActiveLiquidityPerTickRange[]):
   return 0;
 }
 
+export function priceToSqrtPriceBigInt(price: number): bigint {
+  const priceBigInt = new BigDecimal(price, 0)
+    .sqrt()
+    .mul(10n ** PRICE_SCALE)
+    .toString();
+  return BigInt(trimDecimals(priceBigInt));
+}
+
+export function trimDecimals(number: string): string {
+  return number.split('.')[0];
+}
+
 export default useAddLiquidityNew;
+
+//42090119052344998000000000
+//2516351480980328714980500

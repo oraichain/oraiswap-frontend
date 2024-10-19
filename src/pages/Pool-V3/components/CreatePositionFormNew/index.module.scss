@@ -222,6 +222,7 @@
             width: 24px;
             height: 24px;
             padding: 4px 5px;
+            cursor: pointer;
 
             @include theme {
               background-color: theme-get('bg-section-05');

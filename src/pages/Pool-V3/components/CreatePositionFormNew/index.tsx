@@ -1,4 +1,4 @@
-import { oraichainTokens } from '@oraichain/oraidex-common';
+import { CW20_DECIMALS, oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as CustomIcon } from 'assets/icons/custom.svg';
 import { ReactComponent as FullRangeIcon } from 'assets/icons/full-range.svg';
 import { ReactComponent as NarrowIcon } from 'assets/icons/narrow.svg';
@@ -8,7 +8,7 @@ import { ReactComponent as ZoomInIcon } from 'assets/icons/zoom-in.svg';
 import { ReactComponent as ZoomOutIcon } from 'assets/icons/zoom-out.svg';
 import classNames from 'classnames';
 import { Button } from 'components/Button';
-import { getIcon } from 'helper';
+import { getIcon, getTransactionUrl } from 'helper';
 import { numberWithCommas } from 'helper/format';
 import useTheme from 'hooks/useTheme';
 import useAddLiquidityNew, { OptionType } from 'pages/Pool-V3/hooks/useAddLiquidityNew';
@@ -21,6 +21,16 @@ import ManuallyAddLiquidity from '../ManuallyAddLiquidity';
 import PriceDetail from '../PriceDetail';
 import ZapInTab from '../ZapInTab';
 import styles from './index.module.scss';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { extractAddress, newPoolKey, poolKeyToString } from '@oraichain/oraiswap-v3';
+import { extractDenom } from '../PriceRangePlot/utils';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
+import { useNavigate } from 'react-router-dom';
+import Loader from 'components/Loader';
+import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
 
 interface CreatePositionFormProps {
   poolId: string;
@@ -32,10 +42,18 @@ interface CreatePositionFormProps {
 const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, showModal, onCloseModal }) => {
   const theme = useTheme();
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  const { data: prices } = useCoinGeckoPrices();
+  const { poolList, poolPrice: extendPrices } = useGetPoolList(prices);
+  const [walletAddress] = useConfigReducer('address');
+  const loadOraichainToken = useLoadOraichainTokens();
+  const navigate = useNavigate();
+  const { feeDailyData } = useGetFeeDailyData();
 
   const [toggleZap, setToggleZap] = useState(false);
 
   const {
+    pool,
+    poolKey,
     tokenX,
     tokenY,
     historicalChartData,
@@ -50,6 +68,21 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     historicalRange,
     isXToY,
     optionType,
+    amountX,
+    amountY,
+    isXBlocked,
+    isYBlocked,
+    focusId,
+    liquidity,
+    loading,
+    lowerTick,
+    higherTick,
+    apr,
+    addLiquidity,
+    changeRangeHandler,
+    setAmountX,
+    setAmountY,
+    setFocusId,
     setOptionType,
     setHoverPrice,
     changeHistoricalRange,
@@ -61,7 +94,7 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     flipToken,
     swapBaseToX,
     swapBaseToY
-  } = useAddLiquidityNew(poolId);
+  } = useAddLiquidityNew(poolId, slippage, extendPrices, feeDailyData);
 
   const isLightTheme = theme === 'light';
 
@@ -77,6 +110,76 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
 
   const TokenFromIcon = tokenX && getIcon(renderTokenObj(tokenX.coinGeckoId));
   const TokenToIcon = tokenY && getIcon(renderTokenObj(tokenY.coinGeckoId));
+
+  const fromUsd = extendPrices?.[tokenX?.coinGeckoId]
+    ? (extendPrices[tokenX.coinGeckoId] * Number(amountX || 0)).toFixed(6)
+    : '0';
+  const toUsd = extendPrices?.[tokenY?.coinGeckoId]
+    ? (extendPrices[tokenY.coinGeckoId] * Number(amountY || 0)).toFixed(6)
+    : '0';
+
+  // const xUsd =
+  //   // zapInResponse &&
+  //   ((extendPrices?.[tokenX?.coinGeckoId] * (amountX || 0)) / 10 ** tokenX.decimals).toFixed(6);
+  // const yUsd =
+  //   // zapInResponse &&
+  //   ((extendPrices?.[tokenY?.coinGeckoId] * (amountY || 0)) / 10 ** tokenY.decimals).toFixed(6);
+
+  const getButtonMessage = () => {
+    if (!walletAddress) {
+      return 'Connect wallet';
+    }
+
+    if (!toggleZap) {
+      const isInsufficientTo =
+        amountY && Number(amountY) > toDisplay(amounts[tokenY?.denom], tokenY?.decimals || CW20_DECIMALS);
+      const isInsufficientFrom =
+        amountX && Number(amountX) > toDisplay(amounts[tokenX?.denom], tokenX?.decimals || CW20_DECIMALS);
+
+      if (!tokenX || !tokenY) {
+        return 'Select tokens';
+      }
+
+      if (tokenX?.denom === tokenY?.denom) {
+        return 'Select different tokens';
+      }
+
+      if (isInsufficientFrom) {
+        return `Insufficient ${tokenX.name.toUpperCase()}`;
+      }
+
+      if (isInsufficientTo) {
+        return `Insufficient ${tokenY.name.toUpperCase()}`;
+      }
+
+      if ((!isXBlocked && (!amountX || +amountX === 0)) || (!isYBlocked && (!amountY || +amountY === 0))) {
+        return 'Liquidity must be greater than 0';
+      }
+      return 'Create new position';
+    }
+    // else {
+    //   const isInsufficientZap =
+    //     zapAmount && Number(zapAmount) > toDisplay(amounts[tokenZap.denom], tokenZap.decimals || CW20_DECIMALS);
+
+    //   if (!tokenZap) {
+    //     return 'Select token';
+    //   }
+
+    //   if (!zapAmount || +zapAmount === 0) {
+    //     return 'Zap amount must be greater than 0';
+    //   }
+
+    //   if (simulating) {
+    //     return 'Simulating';
+    //   }
+
+    //   if (isInsufficientZap) {
+    //     return `Insufficient ${tokenZap.name.toUpperCase()}`;
+    //   }
+
+    //   return 'Zap in';
+    // }
+  };
 
   // console.log({minPrice, maxPrice})
 
@@ -301,20 +404,21 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
             <div className={styles.manuallyWrapper}>
               {tokenX && tokenY && (
                 <ManuallyAddLiquidity
-                  TokenFromIcon={TokenFromIcon}
-                  TokenToIcon={TokenToIcon}
-                  amountFrom={0}
-                  amountTo={0}
-                  amounts={amounts}
-                  fromUsd={0}
-                  toUsd={0}
-                  isFromBlocked={false}
-                  isToBlocked={false}
-                  setAmountFrom={() => {}}
-                  setAmountTo={() => {}}
-                  setFocusId={() => {}}
-                  tokenFrom={tokenX}
-                  tokenTo={tokenY}
+                  apr={apr} //
+                  TokenFromIcon={TokenFromIcon} //
+                  TokenToIcon={TokenToIcon} //
+                  amountFrom={amountX} //
+                  amountTo={amountY} //
+                  amounts={amounts} //
+                  fromUsd={fromUsd} //
+                  toUsd={toUsd} //
+                  isFromBlocked={isXBlocked} //
+                  isToBlocked={isYBlocked} //
+                  setAmountFrom={setAmountX} //
+                  setAmountTo={setAmountY} //
+                  setFocusId={setFocusId} //
+                  tokenFrom={tokenX} //
+                  tokenTo={tokenY} //
                 />
               )}
             </div>
@@ -323,50 +427,67 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
 
         <div className={styles.submit}>
           {(() => {
-            const btnText = 'Create new position';
+            const btnText = getButtonMessage();
             return (
               <Button
-                onClick={() => {}}
+                // onClick={() => {}}
                 type="primary"
-                // disabled={
-                //   loading ||
-                //   !walletAddress ||
-                //   !(btnText === 'Zap in' || btnText === 'Create new position') ||
-                //   !!zapError
-                //   // true
-                // }
-                // onClick={async () => {
-                //   const lowerTick = Math.min(leftRange, rightRange);
-                //   const upperTick = Math.max(leftRange, rightRange);
-                //   const poolKeyData = newPoolKey(extractDenom(tokenFrom), extractDenom(tokenTo), feeTier);
+                disabled={
+                  loading || !walletAddress || !(btnText === 'Zap in' || btnText === 'Create new position')
+                  // !!zapError
+                  // true
+                }
+                onClick={async () => {
+                  // const lowerTickIndex = Math.min(leftRange, rightRange);
+                  // const upperTickIndex = Math.max(leftRange, rightRange);
+                  // const poolKeyData = newPoolKey(extractDenom(tokenX), extractDenom(tokenY), poolKey);
 
-                //   if (toggleZapIn) {
-                //     await handleZapIn();
-                //     return;
-                //   }
+                  // if (toggleZapIn) {
+                  //   await handleZapIn();
+                  //   return;
+                  // }
 
-                //   await addLiquidity({
-                //     poolKeyData,
-                //     lowerTick: lowerTick,
-                //     upperTick: upperTick,
-                //     liquidityDelta: liquidityRef.current,
-                //     spotSqrtPrice: isPoolExist
-                //       ? BigInt(poolData.pool?.sqrt_price || 0)
-                //       : calculateSqrtPrice(midPrice.index),
-                //     slippageTolerance: BigInt(slippage),
-                //     tokenXAmount:
-                //       poolKeyData.token_x === extractAddress(tokenFrom)
-                //         ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
-                //         : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
-                //     tokenYAmount:
-                //       poolKeyData.token_y === extractAddress(tokenFrom)
-                //         ? BigInt(Math.round(Number(amountFrom) * 10 ** (tokenFrom.decimals || 6)))
-                //         : BigInt(Math.round(Number(amountTo) * 10 ** (tokenTo.decimals || 6))),
-                //     initPool: !isPoolExist
-                //   });
-                // }}
+                  await addLiquidity({
+                    data: {
+                      poolKeyData: poolKey,
+                      lowerTick: lowerTick,
+                      upperTick: higherTick,
+                      liquidityDelta: liquidity,
+                      spotSqrtPrice: BigInt(pool?.sqrt_price),
+                      slippageTolerance: BigInt(slippage),
+                      tokenXAmount:
+                        poolKey.token_x === extractAddress(tokenX)
+                          ? BigInt(Math.round(Number(amountX) * 10 ** (tokenX.decimals || 6)))
+                          : BigInt(Math.round(Number(amountY) * 10 ** (tokenY.decimals || 6))),
+                      tokenYAmount:
+                        poolKey.token_y === extractAddress(tokenX)
+                          ? BigInt(Math.round(Number(amountX) * 10 ** (tokenX.decimals || 6)))
+                          : BigInt(Math.round(Number(amountY) * 10 ** (tokenY.decimals || 6))),
+                      initPool: false
+                    },
+                    walletAddress,
+                    callBackSuccess: (tx: string) => {
+                      displayToast(TToastType.TX_SUCCESSFUL, {
+                        customLink: getTransactionUrl('Oraichain', tx)
+                      });
+                      // handleSuccessAdd();
+                      loadOraichainToken(
+                        walletAddress,
+                        [tokenX.contractAddress, tokenY.contractAddress].filter(Boolean)
+                      );
+                      onCloseModal();
+                      navigate(`/pools/v3/${encodeURIComponent(poolKeyToString(poolKey))}`);
+                    },
+                    callBackFailed: (e) => {
+                      console.log({ errorZap: e });
+                      displayToast(TToastType.TX_FAILED, {
+                        message: 'Add liquidity failed!'
+                      });
+                    }
+                  });
+                }}
               >
-                {/* {loading && <Loader width={22} height={22} />}&nbsp;&nbsp; */}
+                {loading && <Loader width={22} height={22} />}&nbsp;&nbsp;
                 {btnText}
               </Button>
             );
