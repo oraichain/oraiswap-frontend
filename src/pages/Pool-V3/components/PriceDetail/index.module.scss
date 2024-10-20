@@ -70,7 +70,7 @@
         }
 
         font-size: 13px;
-        text-align: end;
+        // text-align: end;
         font-weight: 400;
         line-height: 18px;
       }
@@ -94,6 +94,7 @@
           @include theme {
             color: theme-get('neutral-8');
           }
+          text-align: end;
         }
       }
     }

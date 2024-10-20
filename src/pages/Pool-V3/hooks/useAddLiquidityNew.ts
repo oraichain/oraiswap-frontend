@@ -23,8 +23,8 @@ import {
 } from 'reducer/poolDetailV3';
 import { BigDecimal } from '@oraichain/oraidex-common';
 import { PoolFeeAndLiquidityDaily, PRICE_SCALE } from 'libs/contractSingleton';
-import { getMaxTick, getMinTick, getTickAtSqrtPrice } from '@oraichain/oraiswap-v3';
-import { calcPrice, handleGetCurrentPlotTicks } from '../components/PriceRangePlot/utils';
+import { getMaxSqrtPrice, getMaxTick, getMinTick, getTickAtSqrtPrice, shiftDecimal } from '@oraichain/oraiswap-v3';
+import { calcPrice, handleGetCurrentPlotTicks, printBigint } from '../components/PriceRangePlot/utils';
 import useCreatePosition from './useCreatePosition';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
@@ -303,6 +303,57 @@ const useAddLiquidityNew = (
     setAmountY(0);
   };
 
+  const handleOptionCustom = () => {
+    changeHistoricalRange('7d');
+    resetPlot();
+  };
+
+  // wide: take the price range of prices in 3m
+  const handleOptionWide = () => {
+    changeHistoricalRange('3mo');
+    const data = cache3Month?.map(({ time, close }) => ({
+      time,
+      price: close
+    }));
+    const prices = data.map((d) => d.price);
+
+    const chartMin = cache3Month?.length > 0 ? Math.max(0, Math.min(...prices)) : currentPrice * 0.5;
+    const chartMax = cache3Month?.length > 0 ? Math.max(...prices) : currentPrice * 1.5;
+
+    setMinPrice(chartMin);
+    setMaxPrice(chartMax);
+  };
+
+  // narrow: take the price range of prices in 7d
+  const handleOptionNarrow = () => {
+    changeHistoricalRange('7d');
+    const data = cache7Day?.map(({ time, close }) => ({
+      time,
+      price: close
+    }));
+    const prices = data.map((d) => d.price);
+
+    const chartMin = cache7Day?.length > 0 ? Math.max(0, Math.min(...prices)) : currentPrice * 0.5;
+    const chartMax = cache7Day?.length > 0 ? Math.max(...prices) : currentPrice * 1.5;
+
+    setMinPrice(chartMin);
+    setMaxPrice(chartMax);
+  };
+
+  // full range: just set full range
+  const handleOptionFullRange = () => {
+    const maxTick = getMaxTick(Number(poolKey.fee_tier.tick_spacing));
+    const minTick = getMinTick(Number(poolKey.fee_tier.tick_spacing));
+
+    // const maxSqrtPrice = getMaxSqrtPrice(poolKey.fee_tier.tick_spacing);
+    // const maxPrice = calcPrice(maxTick, );
+
+    setLowerTick(minTick);
+    setHigherTick(maxTick);
+    setMinPrice(0);
+    // setMaxPrice(maxPrice);
+  };
+
   const getCorrespondingTickRange = (priceMin: number, priceMax: number) => {
     const sqrtPriceMin = priceToSqrtPriceBigInt(priceMin);
     const sqrtPriceMax = priceToSqrtPriceBigInt(priceMax);
@@ -312,6 +363,26 @@ const useAddLiquidityNew = (
     setLowerTick(Math.min(lowerTick, higherTick));
     setHigherTick(Math.max(lowerTick, higherTick));
   };
+
+  useEffect(() => {
+    if (!pool || !tokenX || !tokenY) return;
+    switch (optionType) {
+      case OptionType.CUSTOM:
+        handleOptionCustom();
+        break;
+      case OptionType.WIDE:
+        handleOptionWide();
+        break;
+      case OptionType.NARROW:
+        handleOptionNarrow();
+        break;
+      case OptionType.FULL_RANGE:
+        handleOptionFullRange();
+        break;
+      default:
+        break;
+    }
+  }, [optionType]);
 
   return {
     poolId,
@@ -365,6 +436,10 @@ const useAddLiquidityNew = (
     zapYUsd,
     zapUsd,
     zapApr,
+    handleOptionCustom,
+    handleOptionWide,
+    handleOptionNarrow,
+    handleOptionFullRange,
     setTokenZap,
     setZapAmount,
     setAmountXZap,

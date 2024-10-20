@@ -31,6 +31,7 @@ import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import { useNavigate } from 'react-router-dom';
 import Loader from 'components/Loader';
 import { useGetFeeDailyData } from 'pages/Pool-V3/hooks/useGetFeeDailyData';
+import { isMobile } from '@walletconnect/browser-utils';
 
 interface CreatePositionFormProps {
   poolId: string;
@@ -126,7 +127,11 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     flipToken,
     swapBaseToX,
     swapBaseToY,
-    setLoading
+    setLoading,
+    handleOptionCustom,
+    handleOptionWide,
+    handleOptionNarrow,
+    handleOptionFullRange
   } = useAddLiquidityNew(poolId, slippage, extendPrices, feeDailyData, toggleZap);
 
   console.log({ zapXUsd, zapYUsd, zapUsd });
@@ -385,7 +390,7 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
         )}
       </div>
 
-      <div className={styles.line}></div>
+      {!isMobile() && <div className={styles.line}></div>}
 
       <div className={styles.depositTab}>
         <div className={styles.depositInput}>

@@ -7,12 +7,21 @@
   justify-content: space-between;
   max-height: calc(100vh - 200px);
   overflow-y: auto;
+  flex: 1 1 auto;
+
+  @media only screen and (max-width: 600px) {
+    flex-direction: column;
+  }
 
   .infoTab {
     // flex: 2;
     width: 550px;
     padding: 24px;
     // background-color: rgb(188, 134, 134);
+
+    @media only screen and (max-width: 600px) {
+      width: 100%;
+    }
 
     &:not(:first-of-type) {
       width: 450px;
@@ -137,13 +146,18 @@
         .btn {
           text-align: center;
           flex: 1;
-          padding: 16px 16px 18px 16px;
+          padding: 16px 16px 16px 16px;
           // gap: 12px;
           // align-items: center;
           // justify-content: center;
           height: 88px;
           border-radius: 15px;
           cursor: pointer;
+
+          @media only screen and (max-width: 600px) {
+            padding: 8px 8px 8px 8px;
+            font-size: 10px;
+          }
 
           // svg {
           //   width: 60px;
@@ -357,6 +371,10 @@
 
     @include theme {
       border-left: theme-get('colors-neutral-surface-bg-section');
+    }
+
+    @media only screen and (max-width: 600px) {
+      width: 100%;
     }
 
     .depositInput {
