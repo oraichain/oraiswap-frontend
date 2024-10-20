@@ -17,6 +17,7 @@ import { getTransactionUrl } from 'helper';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import { fetchPositionAprInfo, PoolFeeAndLiquidityDaily } from 'libs/contractSingleton';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import useZapIn from './useZapIn';
 
 const useCreatePosition = (
   pool: Pool,
@@ -28,7 +29,8 @@ const useCreatePosition = (
   tokenY: TokenItemType,
   slippage: number,
   extendPrices: CoinGeckoPrices<string>,
-  feeDailyData: PoolFeeAndLiquidityDaily[]
+  feeDailyData: PoolFeeAndLiquidityDaily[],
+  toggleZap: boolean
 ) => {
   const [amountX, setAmountX] = useState<number>(0);
   const [amountY, setAmountY] = useState<number>(0);
@@ -153,6 +155,33 @@ const useCreatePosition = (
       changeRangeHandler();
     }
   }, [minTick, maxTick, pool, tokenX, tokenY]);
+
+  const {
+    tokenZap,
+    zapAmount,
+    zapInResponse,
+    zapImpactPrice,
+    matchRate,
+    isVisible,
+    zapFee,
+    totalFee,
+    swapFee,
+    zapApr,
+    amountX: amountXZap,
+    amountY: amountYZap,
+    xUsd: zapXUsd,
+    yUsd: zapYUsd,
+    zapUsd,
+    zapLoading,
+    zapError,
+    simulating,
+    setTokenZap,
+    setZapAmount,
+    setAmountX: setAmountXZap,
+    setAmountY: setAmountYZap,
+    handleZapIn,
+    handleSimulateZapIn
+  } = useZapIn(pool, poolKey, extendPrices, tokenX, tokenY, toggleZap, minTick, maxTick, feeDailyData); 
 
   const changeRangeHandler = () => {
     if (tokenX && (isXToY ? maxTick > pool.current_tick_index : maxTick < pool.current_tick_index)) {
@@ -297,11 +326,36 @@ const useCreatePosition = (
     liquidity,
     loading,
     apr,
+    tokenZap,
+    zapAmount,
+    zapInResponse,
+    zapImpactPrice,
+    matchRate,
+    isVisible,
+    zapFee,
+    totalFee,
+    swapFee,
+    amountXZap,
+    amountYZap,
+    zapLoading,
+    zapError,
+    simulating,
+    zapXUsd,
+    zapYUsd,
+    zapUsd,
+    zapApr,
+    setLoading,
     addLiquidity,
     changeRangeHandler,
     setAmountX,
     setAmountY,
-    setFocusId
+    setFocusId,
+    setTokenZap,
+    setZapAmount,
+    setAmountXZap,
+    setAmountYZap,
+    handleZapIn,
+    handleSimulateZapIn
   };
 };
 

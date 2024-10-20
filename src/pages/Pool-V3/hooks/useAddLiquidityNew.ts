@@ -41,7 +41,8 @@ const useAddLiquidityNew = (
   poolString: string,
   slippage: number,
   extendPrices: CoinGeckoPrices<string>,
-  feeDailyData: PoolFeeAndLiquidityDaily[]
+  feeDailyData: PoolFeeAndLiquidityDaily[],
+  toggleZap: boolean
 ) => {
   const dispatch = useDispatch();
   const [hoverPrice, setHoverPrice] = useState<number>(0);
@@ -82,12 +83,49 @@ const useAddLiquidityNew = (
     liquidity,
     loading,
     apr,
+    tokenZap,
+    zapAmount,
+    zapInResponse,
+    zapImpactPrice,
+    matchRate,
+    isVisible,
+    zapFee,
+    totalFee,
+    swapFee,
+    amountXZap,
+    amountYZap,
+    zapLoading,
+    zapError,
+    simulating,
+    zapXUsd,
+    zapYUsd,
+    zapUsd,
+    zapApr,
     addLiquidity,
     changeRangeHandler,
     setAmountX,
     setAmountY,
-    setFocusId
-  } = useCreatePosition(pool, poolKey, lowerTick, higherTick, isXToY, tokenX, tokenY, slippage, extendPrices, feeDailyData);
+    setFocusId,
+    setTokenZap,
+    setZapAmount,
+    setAmountXZap,
+    setAmountYZap,
+    handleZapIn,
+    handleSimulateZapIn,
+    setLoading
+  } = useCreatePosition(
+    pool,
+    poolKey,
+    lowerTick,
+    higherTick,
+    isXToY,
+    tokenX,
+    tokenY,
+    slippage,
+    extendPrices,
+    feeDailyData,
+    toggleZap
+  );
 
   // when have pool string, we set to pool id
   // can get: poolKey, tokenX, tokenY
@@ -309,6 +347,30 @@ const useAddLiquidityNew = (
     liquidity,
     loading,
     apr,
+    tokenZap,
+    zapAmount,
+    zapInResponse,
+    zapImpactPrice,
+    matchRate,
+    isVisible,
+    zapFee,
+    totalFee,
+    swapFee,
+    amountXZap,
+    amountYZap,
+    zapLoading,
+    zapError,
+    simulating,
+    zapXUsd,
+    zapYUsd,
+    zapUsd,
+    zapApr,
+    setTokenZap,
+    setZapAmount,
+    setAmountXZap,
+    setAmountYZap,
+    handleZapIn,
+    handleSimulateZapIn,
     addLiquidity,
     changeRangeHandler,
     setAmountX,
@@ -326,7 +388,8 @@ const useAddLiquidityNew = (
     resetRange,
     flipToken,
     swapBaseToX,
-    swapBaseToY
+    swapBaseToY,
+    setLoading
   };
 };
 

@@ -24,7 +24,7 @@ import styles from './index.module.scss';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { useGetPoolList } from 'pages/Pool-V3/hooks/useGetPoolList';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { extractAddress, newPoolKey, poolKeyToString } from '@oraichain/oraiswap-v3';
+import { extractAddress, newPoolKey, poolKeyToString, ZapInResult } from '@oraichain/oraiswap-v3';
 import { extractDenom } from '../PriceRangePlot/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
@@ -52,20 +52,28 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
   const [toggleZap, setToggleZap] = useState(false);
 
   const {
-    pool,
     poolKey,
+    pool,
     tokenX,
     tokenY,
+    historicalRange,
+    cache3Month,
+    cache7Day,
+    cache1Month,
+    cache1Year,
     historicalChartData,
     fullRange,
     xRange,
     yRange,
     currentPrice,
     liquidityChartData,
+    zoom,
+    range,
     hoverPrice,
     minPrice,
     maxPrice,
-    historicalRange,
+    lowerTick,
+    higherTick,
     isXToY,
     optionType,
     amountX,
@@ -75,26 +83,53 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     focusId,
     liquidity,
     loading,
-    lowerTick,
-    higherTick,
     apr,
+    tokenZap,
+    zapAmount,
+    zapInResponse,
+    zapImpactPrice,
+    matchRate,
+    isVisible,
+    zapFee,
+    totalFee,
+    swapFee,
+    amountXZap,
+    amountYZap,
+    zapLoading,
+    zapError,
+    simulating,
+    zapXUsd,
+    zapYUsd,
+    zapUsd,
+    zapApr,
+    setTokenZap,
+    setZapAmount,
+    setAmountXZap,
+    setAmountYZap,
+    handleZapIn,
+    handleSimulateZapIn,
     addLiquidity,
     changeRangeHandler,
     setAmountX,
     setAmountY,
     setFocusId,
     setOptionType,
+    setLowerTick,
+    setHigherTick,
+    setMinPrice,
+    setMaxPrice,
     setHoverPrice,
     changeHistoricalRange,
     zoomIn,
     zoomOut,
     resetRange,
-    setMinPrice,
-    setMaxPrice,
     flipToken,
     swapBaseToX,
-    swapBaseToY
-  } = useAddLiquidityNew(poolId, slippage, extendPrices, feeDailyData);
+    swapBaseToY,
+    setLoading
+  } = useAddLiquidityNew(poolId, slippage, extendPrices, feeDailyData, toggleZap);
+
+  console.log({ zapXUsd, zapYUsd, zapUsd });
 
   const isLightTheme = theme === 'light';
 
@@ -156,29 +191,28 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
         return 'Liquidity must be greater than 0';
       }
       return 'Create new position';
+    } else {
+      const isInsufficientZap =
+        zapAmount && Number(zapAmount) > toDisplay(amounts[tokenZap.denom], tokenZap.decimals || CW20_DECIMALS);
+
+      if (!tokenZap) {
+        return 'Select token';
+      }
+
+      if (!zapAmount || +zapAmount === 0) {
+        return 'Zap amount must be greater than 0';
+      }
+
+      if (simulating) {
+        return 'Simulating';
+      }
+
+      if (isInsufficientZap) {
+        return `Insufficient ${tokenZap.name.toUpperCase()}`;
+      }
+
+      return 'Zap in';
     }
-    // else {
-    //   const isInsufficientZap =
-    //     zapAmount && Number(zapAmount) > toDisplay(amounts[tokenZap.denom], tokenZap.decimals || CW20_DECIMALS);
-
-    //   if (!tokenZap) {
-    //     return 'Select token';
-    //   }
-
-    //   if (!zapAmount || +zapAmount === 0) {
-    //     return 'Zap amount must be greater than 0';
-    //   }
-
-    //   if (simulating) {
-    //     return 'Simulating';
-    //   }
-
-    //   if (isInsufficientZap) {
-    //     return `Insufficient ${tokenZap.name.toUpperCase()}`;
-    //   }
-
-    //   return 'Zap in';
-    // }
   };
 
   // console.log({minPrice, maxPrice})
@@ -374,30 +408,29 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
           {toggleZap ? (
             <div className={styles.zapWrapper}>
               <ZapInTab
-                amounts={amounts}
-                endRef={null}
-                isVisible={true}
-                matchRate={0}
-                setFocusId={() => {}}
-                setIsVisible={() => {}}
-                setTokenZap={() => {}}
-                setZapAmount={() => {}}
-                simulating={false}
-                swapFee={0}
+                apr={zapApr}
+                amounts={amounts} //
+                matchRate={matchRate} //
+                setFocusId={setFocusId} //
+                setTokenZap={setTokenZap} //
+                setZapAmount={setZapAmount} //
+                simulating={simulating} //
+                swapFee={swapFee} //
                 tokenFrom={tokenX}
                 tokenFromIcon={TokenFromIcon}
                 tokenTo={tokenY}
                 tokenToIcon={TokenToIcon}
-                tokenZap={oraichainTokens.find((token) => token.name === 'USDT')}
-                zapAmount={0}
-                totalFee={0}
-                xUsd={0}
-                yUsd={0}
-                zapError={null}
-                zapFee={0}
-                zapImpactPrice={0}
-                zapInResponse={null}
-                zapUsd={0}
+                tokenZap={tokenZap}
+                zapAmount={zapAmount} //
+                totalFee={totalFee}
+                xUsd={Number(zapXUsd)}
+                yUsd={Number(zapYUsd)}
+                zapError={zapError}
+                zapFee={zapFee}
+                zapImpactPrice={zapImpactPrice}
+                zapInResponse={zapInResponse}
+                zapUsd={Number(zapUsd)}
+                extendedPrice={extendPrices}
               />
             </div>
           ) : (
@@ -430,22 +463,40 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
             const btnText = getButtonMessage();
             return (
               <Button
-                // onClick={() => {}}
                 type="primary"
                 disabled={
-                  loading || !walletAddress || !(btnText === 'Zap in' || btnText === 'Create new position')
-                  // !!zapError
-                  // true
+                  loading ||
+                  !walletAddress ||
+                  !(btnText === 'Zap in' || btnText === 'Create new position') ||
+                  !!zapError
                 }
                 onClick={async () => {
-                  // const lowerTickIndex = Math.min(leftRange, rightRange);
-                  // const upperTickIndex = Math.max(leftRange, rightRange);
-                  // const poolKeyData = newPoolKey(extractDenom(tokenX), extractDenom(tokenY), poolKey);
-
-                  // if (toggleZapIn) {
-                  //   await handleZapIn();
-                  //   return;
-                  // }
+                  if (toggleZap) {
+                    setLoading(true);
+                    await handleZapIn(
+                      walletAddress,
+                      (tx: string) => {
+                        displayToast(TToastType.TX_SUCCESSFUL, {
+                          customLink: getTransactionUrl('Oraichain', tx)
+                        });
+                        // handleSuccessAdd();
+                        loadOraichainToken(
+                          walletAddress,
+                          [tokenX.contractAddress, tokenY.contractAddress].filter(Boolean)
+                        );
+                        onCloseModal();
+                        navigate(`/pools/v3/${encodeURIComponent(poolKeyToString(poolKey))}`);
+                      },
+                      (e) => {
+                        console.log({ errorZap: e });
+                        displayToast(TToastType.TX_FAILED, {
+                          message: 'Add liquidity failed!'
+                        });
+                      }
+                    );
+                    setLoading(false);
+                    return;
+                  }
 
                   await addLiquidity({
                     data: {
