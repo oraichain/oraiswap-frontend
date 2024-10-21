@@ -14,6 +14,7 @@ import {
 import { TokenItemType } from '@oraichain/oraidex-common';
 import SingletonOraiswapV3, { Token } from 'libs/contractSingleton';
 import { PlotTickData } from './PriceRangePlot';
+import { ActiveLiquidityPerTickRange } from 'reducer/poolDetailV3';
 
 export const PRICE_SCALE = getPriceScale();
 export const CONCENTRATION_FACTOR = 1.00001526069123;
@@ -133,7 +134,6 @@ export const calcYPerXPriceByTickIndex = (tickIndex: number, xDecimal: number, y
   const sqrt = +printBigint(calculateSqrtPrice(tickIndex), Number(PRICE_SCALE));
 
   const proportion = sqrt * sqrt;
-  
 
   return proportion / 10 ** (yDecimal - xDecimal);
 };
@@ -348,6 +348,7 @@ export const createLiquidityPlot = (
   tokenXDecimal: number,
   tokenYDecimal: number
 ): PlotTickData[] => {
+  // sort tick 
   const sortedTicks = rawTicks.sort((a, b) => Number(a.index - b.index));
   const parsedTicks = rawTicks.length ? calculateLiquidityBreakpoints(sortedTicks) : [];
 
@@ -471,3 +472,34 @@ export async function handleGetCurrentPlotTicks({ poolKey, isXtoY, xDecimal, yDe
     return data;
   }
 }
+
+export async function convertPlotTicks({
+  poolKey,
+  isXToY,
+  xDecimal,
+  yDecimal
+}): Promise<ActiveLiquidityPerTickRange[]> {
+  const plotTicks = await handleGetCurrentPlotTicks({ poolKey, isXtoY: isXToY, xDecimal, yDecimal });
+  const activeLiquidity: ActiveLiquidityPerTickRange[] = [] as any;
+  const maxTick = getMaxTick(poolKey.fee_tier.tick_spacing);
+  plotTicks.forEach((plotTick, index) => {
+    const { y, index: tickIndex } = plotTick;
+    activeLiquidity.push({
+      lowerTick: tickIndex,
+      upperTick: plotTicks[index + 1] ? plotTicks[index + 1].index : maxTick,
+      liquidityAmount: y
+    });
+  });
+  // for (const plotTick of plotTicks) {
+  //   const { y, index } = plotTick;
+  //   activeLiquidity.push({
+  //     lowerTick: index,
+  //     upperTick: index + poolKey.fee_tier.tick_spacing,
+  //     liquidityAmount: y
+  //   });
+  // }
+
+  return activeLiquidity;
+}
+
+

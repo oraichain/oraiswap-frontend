@@ -7,6 +7,7 @@ import walletReducer from '../reducer/wallet';
 import chartReducer from '../reducer/chartSlice';
 import AddressBookReducer from '../reducer/addressBook';
 import TemporaryConfigReducer from '../reducer/temporaryConfig';
+import poolDetailV3Reducer from 'reducer/poolDetailV3';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import { PERSIST_CONFIG_KEY } from './constants';
@@ -14,7 +15,7 @@ import { PERSIST_CONFIG_KEY } from './constants';
 const rootPersistConfig = {
   key: PERSIST_CONFIG_KEY,
   storage,
-  blacklist: ['temporaryConfig']
+  blacklist: ['temporaryConfig', 'poolDetailV3']
 };
 
 const rootReducer = combineReducers({
@@ -25,7 +26,8 @@ const rootReducer = combineReducers({
   wallet: walletReducer,
   chartSlice: chartReducer,
   addressBook: AddressBookReducer,
-  temporaryConfig: TemporaryConfigReducer
+  temporaryConfig: TemporaryConfigReducer,
+  poolDetailV3: poolDetailV3Reducer
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);
