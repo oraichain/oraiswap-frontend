@@ -36,7 +36,7 @@ export enum OptionType {
   FULL_RANGE
 }
 
-const useAddLiquidityNew = (
+const useCreatePositionForm = (
   poolString: string,
   slippage: number,
   extendPrices: CoinGeckoPrices<string>,
@@ -498,7 +498,4 @@ export function trimDecimals(number: string): string {
   return number.split('.')[0];
 }
 
-export default useAddLiquidityNew;
-
-//42090119052344998000000000
-//2516351480980328714980500
+export default useCreatePositionForm;

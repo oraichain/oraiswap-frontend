@@ -1,19 +1,11 @@
+import { oraichainTokens, TokenItemType } from '@oraichain/oraidex-common';
+import { Pool, PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
 import { extractAddress, LiquidityTick, Tickmap } from '@oraichain/oraiswap-v3';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { BigDecimal, TokenItemType } from '@oraichain/oraidex-common';
 import SingletonOraiswapV3, { PRICE_SCALE, stringToPoolKey } from 'libs/contractSingleton';
-import { oraichainTokens } from '@oraichain/oraidex-common';
-import { Pool, PoolKey } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import {
-  calculateLiquidityBreakpoints,
-  convertPlotTicks,
-  createLiquidityPlot,
-  handleGetCurrentPlotTicks,
-  printBigint
-} from 'pages/Pool-V3/components/PriceRangePlot/utils';
+import { convertPlotTicks, createLiquidityPlot, printBigint } from 'pages/Pool-V3/components/PriceRangePlot/utils';
 import { getHistoricalPriceDataInDay, getHistoricalPriceDataInHour } from 'rest/graphClient';
-import { getLiqFrom } from 'pages/Pool-V3/hooks/useAddLiquidityNew';
 
 export const AvailableTimeDurations = ['7d', '1mo', '3mo', '1y'] as const;
 

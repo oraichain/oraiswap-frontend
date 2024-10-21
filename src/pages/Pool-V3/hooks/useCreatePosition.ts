@@ -11,10 +11,6 @@ import { extractAddress, getLiquidityByX, getLiquidityByY } from '@oraichain/ora
 import { calculateTokenAmountsWithSlippage, InitPositionData } from '../helpers/helper';
 import { convertBalanceToBigint } from '../helpers/number';
 import useAddLiquidity from './useAddLiquidity';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { getTransactionUrl } from 'helper';
-import { useLoadOraichainTokens } from 'hooks/useLoadTokens';
 import { fetchPositionAprInfo, PoolFeeAndLiquidityDaily } from 'libs/contractSingleton';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useZapIn from './useZapIn';
