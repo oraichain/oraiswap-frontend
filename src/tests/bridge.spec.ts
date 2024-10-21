@@ -34,6 +34,7 @@ import {
   generateConvertErc20Cw20Message,
   generateMoveOraib2OraiMessages
 } from 'rest/api';
+import { describe, expect, it } from 'vitest';
 
 // @ts-ignore
 window.Networks = require('@oraichain/ethereum-multicall').Networks;

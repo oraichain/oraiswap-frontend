@@ -308,10 +308,6 @@ export const keplrCheck = (type: WalletCosmosType) => {
   return type === 'keplr' && window.keplr && window.keplr.mode === 'extension' && !walletIsOwallet;
 };
 
-export const owalletCheck = (type: WalletCosmosType) => {
-  return type === 'owallet' && walletIsOwallet;
-};
-
 export const isUnlockMetamask = async (): Promise<boolean> => {
   const ethereum = window.ethereum;
   if (!ethereum?.isMetaMask || !ethereum._metamask) return false;

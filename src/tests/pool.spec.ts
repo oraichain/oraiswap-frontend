@@ -1,3 +1,4 @@
+// @vitest-environment node
 import {
   ORAI,
   buildMultipleExecuteMessages,
@@ -11,6 +12,7 @@ import { getPoolTokens } from 'config/pools';
 import { estimateShare, formatDisplayUsdt, getSymbolPools, toFixedIfNecessary } from 'pages/Pools/helpers';
 import { ProvideQuery, Type, generateContractMessages } from 'rest/api';
 import { constants } from './listing-simulate';
+import { describe, expect, it } from 'vitest';
 
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.

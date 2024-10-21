@@ -81,14 +81,13 @@
     "@sentry/webpack-plugin": "^2.10.3",
     "@testing-library/jest-dom": "^6.5.0",
     "@types/classnames": "^2.2.10",
-    "@types/jest": "^29.5.10",
     "@types/lodash": "^4.14.182",
     "@types/node": "^18.15.11",
     "@types/react": "^18.0.34",
     "@types/react-dom": "^18.0.11",
     "@types/react-modal": "^3.13.1",
     "@types/react-router-dom": "^5.3.3",
-    "@vitest/coverage-v8": "2.0.2",
+    "commonizer": "^1.1.3",
     "crypto-browserify": "^3.12.0",
     "firebase-tools": "^11.30.0",
     "graphql": "^16.9.0",
@@ -102,7 +101,6 @@
     "source-map-explorer": "^2.5.3",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "ts-jest": "^29.1.1",
     "typed-scss-modules": "^7.1.4",
     "typescript": "^5.1.6",
     "vite-plugin-node-polyfills": "^0.22.0",
@@ -112,6 +110,7 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "vite",
+    "build": "vite build",
     "ts-check": "tsc --noEmit",
     "postinstall": "patch-package",
     "prepare": "husky install",
@@ -143,6 +142,9 @@
     "@sentry/react": "7.99.0",
     "@oraichain/oraidex-common": "1.1.23"
   },
+  "commonizer": [
+    "node_modules/@cosmjs/tendermint-rpc"
+  ],
   "engines": {
     "node": "^18 || ^20"
   },
