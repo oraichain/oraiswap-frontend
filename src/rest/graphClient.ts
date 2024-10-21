@@ -1,6 +1,10 @@
 import { network } from 'config/networks';
 import { gql, GraphQLClient } from 'graphql-request';
 import axios from './request';
+import { printBigint } from 'pages/Pool-V3/components/PriceRangePlot/utils';
+import { calculateSqrtPrice } from '@oraichain/oraiswap-v3';
+import { PRICE_SCALE } from 'libs/contractSingleton';
+import { TimeDuration, TokenPairHistoricalPrice } from 'reducer/poolDetailV3';
 
 export const INDEXER_V3_URL = network.indexer_v3 ?? 'https://staging-ammv3-indexer.oraidex.io/';
 export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
@@ -8,6 +12,8 @@ export const graphqlClient = new GraphQLClient(INDEXER_V3_URL);
 export const HOURS_PER_DAY = 24;
 export const MILIS_PER_HOUR = 60 * 60 * 1000;
 export const MILIS_PER_DAY = HOURS_PER_DAY * MILIS_PER_HOUR;
+
+const CHUNK_QUERY = 100;
 
 export const getFeeClaimData = async (address: string) => {
   try {
@@ -528,5 +534,233 @@ export const getPoolDetailFromBackend = async (poolId: string): Promise<PoolDeta
   } catch (error) {
     console.log('error getPoolDetail', error);
     return null;
+  }
+};
+
+export type HistoricalPriceResponse = {
+  poolId: string;
+  sqrtPrice: string;
+  hourIndex: number;
+  pool: {
+    tokenX: {
+      decimals: number;
+    };
+    tokenY: {
+      decimals: number;
+    };
+  };
+};
+
+export const getHistoricalPriceDataInHour = async (
+  poolId: string,
+  timeRange: TimeDuration = '7d'
+): Promise<{ data: TokenPairHistoricalPrice[]; poolId: string }> => {
+  try {
+    let hourIndex = 0;
+    const currentIndex = Math.floor(Date.now() / MILIS_PER_HOUR);
+    switch (timeRange) {
+      case '7d':
+        hourIndex = currentIndex - 24 * 7;
+        break;
+      case '1mo':
+        hourIndex = currentIndex - 24 * 30;
+        break;
+      case '3mo':
+        hourIndex = currentIndex - 24 * 90;
+        break;
+      case '1y':
+        hourIndex = currentIndex - 24 * 365;
+        break;
+      default:
+        hourIndex = currentIndex - 24 * 7;
+    }
+
+    // create array of chunkOffset: [hourIndex, hourIndex + CHUNK_QUERY, ...] to current Index
+    const length = Math.ceil((currentIndex - hourIndex) / CHUNK_QUERY);
+    const chunkOffset = Array.from({ length }, (_, i) => hourIndex + i * CHUNK_QUERY);
+    if (currentIndex > chunkOffset[length - 1]) chunkOffset.push(currentIndex);
+
+    let finalResult = [];
+
+    // const before = performance.now();
+    const historicalData = await Promise.all(
+      chunkOffset.map((offset) => {
+        const document = gql`
+      {
+        query {
+          poolHourData(
+            filter: {
+              poolId: { equalTo: "${poolId}" }
+              hourIndex: { greaterThanOrEqualTo: ${offset} lessThan: ${offset + CHUNK_QUERY} }
+              }
+              orderBy: [HOUR_INDEX_ASC]
+              distinct: [HOUR_INDEX]
+              ) {
+                nodes {
+                  poolId
+                  sqrtPrice
+                  hourIndex
+                  pool {
+                    tokenX {
+                        decimals
+                      }
+                      tokenY {
+                        decimals
+                      }
+                    }
+                  }
+                }
+              }
+          }
+        `;
+        return graphqlClient.request<any>(document);
+      })
+    );
+    // const after = performance.now();
+
+    finalResult = historicalData.flatMap((item) => item.query.poolHourData.nodes);
+
+    // if (timeRange === '1y') console.log('getHistoricalPriceData', after - before);
+
+    const res = {
+      data: finalResult
+        .map((item: HistoricalPriceResponse) => {
+          const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
+
+          const proportion = sqrt * sqrt;
+
+          const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
+
+          return {
+            close: price,
+            time: item.hourIndex * MILIS_PER_HOUR
+          };
+        })
+        .sort((a, b) => a.time - b.time), // sort by time
+      poolId
+    };
+
+    console.log({ res });
+
+    return res;
+  } catch (error) {
+    console.log('error getHistoricalPriceData', error);
+    return {
+      data: [],
+      poolId
+    };
+  }
+};
+
+export type HistoricalPriceInDayResponse = {
+  poolId: string;
+  sqrtPrice: string;
+  dayIndex: number;
+  pool: {
+    tokenX: {
+      decimals: number;
+    };
+    tokenY: {
+      decimals: number;
+    };
+  };
+};
+
+export const getHistoricalPriceDataInDay = async (
+  poolId: string,
+  timeRange: TimeDuration = '7d'
+): Promise<{ data: TokenPairHistoricalPrice[]; poolId: string }> => {
+  try {
+    let dayIndex = 0;
+    const currentIndex = Math.floor(Date.now() / MILIS_PER_DAY);
+    switch (timeRange) {
+      case '7d':
+        dayIndex = currentIndex - 7;
+        break;
+      case '1mo':
+        dayIndex = currentIndex - 30;
+        break;
+      case '3mo':
+        dayIndex = currentIndex - 90;
+        break;
+      case '1y':
+        dayIndex = currentIndex - 365;
+        break;
+      default:
+        dayIndex = currentIndex - 7;
+    }
+
+    // create array of chunkOffset: [dayIndex, dayIndex + CHUNK_QUERY, ...] to current Index
+    const length = Math.ceil((currentIndex - dayIndex) / CHUNK_QUERY);
+    const chunkOffset = Array.from({ length }, (_, i) => dayIndex + i * CHUNK_QUERY);
+    if (currentIndex > chunkOffset[length - 1]) chunkOffset.push(currentIndex);
+
+    let finalResult = [];
+
+    // const before = performance.now();
+    const historicalData = await Promise.all(
+      chunkOffset.map((offset) => {
+        const document = gql`
+      {
+        query {
+          poolDayData(
+            filter: {
+              poolId: { equalTo: "${poolId}" }
+              dayIndex: { greaterThanOrEqualTo: ${offset} lessThan: ${offset + CHUNK_QUERY} }
+              }
+              orderBy: [DAY_INDEX_ASC]
+              distinct: [DAY_INDEX]
+              ) {
+                nodes {
+                  poolId
+                  sqrtPrice
+                  dayIndex
+                  pool {
+                    tokenX {
+                        decimals
+                      }
+                      tokenY {
+                        decimals
+                      }
+                    }
+                  }
+                }
+              }
+          }
+        `;
+        return graphqlClient.request<any>(document);
+      })
+    );
+    // const after = performance.now();
+
+    finalResult = historicalData.flatMap((item) => item.query.poolDayData.nodes);
+
+    // if (timeRange === '1y') console.log('getHistoricalPriceData', after - before);
+
+    const res = {
+      data: finalResult
+        .map((item: HistoricalPriceInDayResponse) => {
+          const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
+
+          const proportion = sqrt * sqrt;
+
+          const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
+
+          return {
+            close: price,
+            time: item.dayIndex * MILIS_PER_DAY
+          };
+        })
+        .sort((a, b) => a.time - b.time), // sort by time
+      poolId
+    };
+
+    return res;
+  } catch (error) {
+    console.log('error getHistoricalPriceData', error);
+    return {
+      data: [],
+      poolId
+    };
   }
 };
