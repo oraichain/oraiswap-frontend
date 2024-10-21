@@ -388,14 +388,8 @@ export const getProtocolsSmartRoute = (
 };
 
 export const isAllowAlphaIbcWasm = (fromToken: TokenItemType, toToken: TokenItemType) => {
-  if (
-    !fromToken.cosmosBased &&
-    (toToken.chainId === COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID ||
-      toToken.chainId === COSMOS_CHAIN_ID_COMMON.CELESTIA_CHAIN_ID)
-  )
-    return true;
-
-  // from chainId and to chainId is CELESTIA_CHAIN_ID
+  // from chainId and to chainId is CELESTIA_CHAIN_ID & INJECTVE_CHAIN_ID
+  if ([toToken.chainId, fromToken.chainId].includes(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID)) return true;
   if ([toToken.chainId, fromToken.chainId].includes(COSMOS_CHAIN_ID_COMMON.CELESTIA_CHAIN_ID)) return true;
   return false;
 };
@@ -434,8 +428,9 @@ export const isAllowIBCWasm = (fromToken: TokenItemType, toToken: TokenItemType)
   const toTokenIsOraichain = toToken.chainId === 'Oraichain';
   const toTokenIsCosmos = toToken.cosmosBased;
 
-  // from chainId and to chainId is CELESTIA_CHAIN_ID
+  // from chainId and to chainId is CELESTIA_CHAIN_ID or INJECTVE_CHAIN_ID
   if ([toToken.chainId, fromToken.chainId].includes(COSMOS_CHAIN_ID_COMMON.CELESTIA_CHAIN_ID)) return false;
+  if ([toToken.chainId, fromToken.chainId].includes(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID)) return false;
 
   // Oraichain -> Oraichain or Cosmos
   if (fromTokenIsOraichain) {
@@ -447,17 +442,7 @@ export const isAllowIBCWasm = (fromToken: TokenItemType, toToken: TokenItemType)
   // Evm -> EVM
   if (!fromTokenIsCosmos && !toTokenIsCosmos && toToken.chainId === fromToken.chainId) return false;
   // Evm -> Oraichain or Cosmos
-  if (!fromTokenIsCosmos) {
-    // Evm -> INJ or TIA
-    if (
-      toToken.chainId === COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID ||
-      toToken.chainId === COSMOS_CHAIN_ID_COMMON.CELESTIA_CHAIN_ID
-    ) {
-      return false;
-    }
-
-    return true;
-  }
+  if (!fromTokenIsCosmos) return true;
 
   // Cosmos -> Cosmos or Oraichain
   if (fromTokenIsCosmos && toTokenIsCosmos) {
