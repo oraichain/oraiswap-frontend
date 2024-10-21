@@ -36,6 +36,12 @@ export enum OptionType {
   FULL_RANGE
 }
 
+const TICK_SPACING_TO_RANGE = {
+  '100': 3,
+  '10': 300,
+  '1': 2000
+};
+
 const useCreatePositionForm = (
   poolString: string,
   slippage: number,
@@ -160,6 +166,7 @@ const useCreatePositionForm = (
 
   useEffect(() => {
     if (liquidityTicks && poolKey && tokenX && tokenY && yRange) {
+      console.log({ yRange });
       dispatch(setLiquidityChartData());
     }
   }, [liquidityTicks, isXToY, poolKey, tokenX, tokenY, yRange, dispatch]);
@@ -167,7 +174,7 @@ const useCreatePositionForm = (
   // when we have poolId, poolKey, tokenX, tokenY, we can get:
   // historicalChartData, activeLiquidity, cache3Month, cache7Day, cache1Month, cache1Year
   useEffect(() => {
-    if (poolKey && tokenX && tokenY) {
+    if (poolKey && tokenX && tokenY && currentPrice) {
       dispatch<any>(fetchHistoricalPriceData7D(poolId));
       dispatch<any>(fetchHistoricalPriceData1M(poolId));
       dispatch<any>(fetchHistoricalPriceData3M(poolId));
@@ -181,7 +188,7 @@ const useCreatePositionForm = (
         })
       );
     }
-  }, [poolId, poolKey, tokenX, tokenY, isXToY, dispatch]);
+  }, [poolId, poolKey, tokenX, tokenY, isXToY, currentPrice, dispatch]);
 
   // when have historicalChartData, currentPrice, we can get yRange
   useEffect(() => {
@@ -190,12 +197,17 @@ const useCreatePositionForm = (
         time,
         price: close
       }));
-      const padding = 0.2;
+      const padding = 0.1;
 
       const prices = data.map((d) => d.price);
 
-      const chartMin = historicalChartData?.length > 0 ? Math.max(0, Math.min(...prices)) : currentPrice * 0.5;
-      const chartMax = historicalChartData?.length > 0 ? Math.max(...prices) : currentPrice * 1.5;
+      let chartMin = historicalChartData?.length > 0 ? Math.max(0, Math.min(...prices)) : currentPrice * 0.5;
+      let chartMax = historicalChartData?.length > 0 ? Math.max(...prices) : currentPrice * 1.5;
+
+      if (chartMin === chartMax) {
+        chartMin = currentPrice * 0.5;
+        chartMax = currentPrice * 1.5;
+      }
 
       const absMax = range ? Math.max(Number(range[1].toString()), chartMax) : chartMax;
       const absMin = range ? Math.min(Number(range[0].toString()), chartMin) : chartMin;
@@ -244,7 +256,6 @@ const useCreatePositionForm = (
       const minPriceTrue = isXToY ? minPrice : 1 / maxPrice;
       const maxPriceTrue = isXToY ? maxPrice : 1 / minPrice;
       getCorrespondingTickRange(minPriceTrue, maxPriceTrue);
-      
     }
   }, [minPrice, maxPrice]);
 
@@ -288,17 +299,19 @@ const useCreatePositionForm = (
     changeHistoricalRange('7d');
     const higherTick = Math.max(
       Number(getMinTick(Number(poolKey.fee_tier.tick_spacing))),
-      Number(pool.current_tick_index) + Number(poolKey.fee_tier.tick_spacing) * 3
+      Number(pool.current_tick_index) +
+        Number(poolKey.fee_tier.tick_spacing) * TICK_SPACING_TO_RANGE[poolKey.fee_tier.tick_spacing]
     );
 
     const lowerTick = Math.min(
       Number(getMaxTick(Number(poolKey.fee_tier.tick_spacing))),
-      Number(pool.current_tick_index) - Number(poolKey.fee_tier.tick_spacing) * 3
+      Number(pool.current_tick_index) -
+        Number(poolKey.fee_tier.tick_spacing) * TICK_SPACING_TO_RANGE[poolKey.fee_tier.tick_spacing]
     );
 
     const minPrice = calcPrice(lowerTick, isXToY, tokenX.decimals, tokenY.decimals);
     const maxPrice = calcPrice(higherTick, isXToY, tokenX.decimals, tokenY.decimals);
-
+    console.log({ minPrice, maxPrice });
     setMinPrice(minPrice);
     setMaxPrice(maxPrice);
 
@@ -321,7 +334,7 @@ const useCreatePositionForm = (
     data.push({
       time: Date.now(),
       price: currentPrice
-    })
+    });
     const prices = data.map((d) => d.price);
 
     const chartMin = cache3Month?.length > 0 ? Math.max(0, Math.min(...prices)) : currentPrice * 0.5;
@@ -346,7 +359,7 @@ const useCreatePositionForm = (
     data.push({
       time: Date.now(),
       price: currentPrice
-    })
+    });
     const prices = data.map((d) => d.price);
 
     const chartMin = cache7Day?.length > 0 ? Math.max(0, Math.min(...prices)) : currentPrice * 0.5;
@@ -521,7 +534,7 @@ const useCreatePositionForm = (
     flipToken,
     swapBaseToX,
     swapBaseToY,
-    setLoading,
+    setLoading
   };
 };
 

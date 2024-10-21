@@ -623,20 +623,24 @@ export const getHistoricalPriceDataInHour = async (
     // if (timeRange === '1y') console.log('getHistoricalPriceData', after - before);
 
     const res = {
-      data: finalResult.map((item: HistoricalPriceResponse) => {
-        const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
+      data: finalResult
+        .map((item: HistoricalPriceResponse) => {
+          const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
 
-        const proportion = sqrt * sqrt;
+          const proportion = sqrt * sqrt;
 
-        const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
+          const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
 
-        return {
-          close: price,
-          time: item.hourIndex * MILIS_PER_HOUR
-        };
-      }).sort((a, b) => a.time - b.time), // sort by time
+          return {
+            close: price,
+            time: item.hourIndex * MILIS_PER_HOUR
+          };
+        })
+        .sort((a, b) => a.time - b.time), // sort by time
       poolId
     };
+
+    console.log({ res });
 
     return res;
   } catch (error) {
@@ -734,18 +738,20 @@ export const getHistoricalPriceDataInDay = async (
     // if (timeRange === '1y') console.log('getHistoricalPriceData', after - before);
 
     const res = {
-      data: finalResult.map((item: HistoricalPriceInDayResponse) => {
-        const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
+      data: finalResult
+        .map((item: HistoricalPriceInDayResponse) => {
+          const sqrt = +printBigint(BigInt(item.sqrtPrice), Number(PRICE_SCALE));
 
-        const proportion = sqrt * sqrt;
+          const proportion = sqrt * sqrt;
 
-        const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
+          const price = proportion / 10 ** (item.pool.tokenY.decimals - item.pool.tokenX.decimals);
 
-        return {
-          close: price,
-          time: item.dayIndex * MILIS_PER_DAY
-        };
-      }).sort((a, b) => a.time - b.time), // sort by time
+          return {
+            close: price,
+            time: item.dayIndex * MILIS_PER_DAY
+          };
+        })
+        .sort((a, b) => a.time - b.time), // sort by time
       poolId
     };
 

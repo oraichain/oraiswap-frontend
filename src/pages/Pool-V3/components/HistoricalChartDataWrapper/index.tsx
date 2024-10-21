@@ -35,19 +35,19 @@ const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
   setHoverPrice,
   setHistoricalRange,
 }) => {
-  const formattedPrice =
-    formatPretty(new Dec(hoverPrice), {
-      maxDecimals: 8,
-      notation: 'standard'
-    }) || '';
+  // const formattedPrice =
+  //   formatPretty(new Dec(hoverPrice), {
+  //     maxDecimals: 8,
+  //     notation: 'standard'
+  //   }) || '';
 
   const chartDataToNow = [...historicalChartData];
-  if (historicalChartData.length > 0) {
+  // if (historicalChartData.length > 0) {
     chartDataToNow.push({
       close: currentPrice,
       time: Date.now()
     });
-  }
+  // }
 
   return (
     <div className={styles.chartPrice}>
