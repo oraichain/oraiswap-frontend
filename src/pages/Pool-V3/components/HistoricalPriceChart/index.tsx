@@ -363,7 +363,7 @@ const HistoricalPriceChart: FC<{
     onPointerOut,
     showGradient = true,
     minimal = false,
-    xNumTicks = 5,
+    xNumTicks = 3,
     showTooltip = false,
     fiatSymbol,
     extendLeft = 0

@@ -80,6 +80,7 @@ const useAddLiquidity = () => {
   };
 
   const handleInitPosition = async (data: InitPositionData, walletAddress: string, onSuccess, onError) => {
+    console.log({ data });
     const { client } = await getCosmWasmClient({ chainId: network.chainId });
     await SingletonOraiswapV3.load(client, walletAddress);
 

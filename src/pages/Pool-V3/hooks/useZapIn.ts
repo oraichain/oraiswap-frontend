@@ -159,7 +159,7 @@ const useZapIn = (
       const zap = new ZapperQueryClient(client, ZAPPER_CONTRACT);
       zapFee = Number((await zap.protocolFee()).percent);
     } catch (error) {
-      console.error('Error handleSimulateZapIn fee:', error);
+      // console.error('Error handleSimulateZapIn fee:', error);
     }
 
     try {

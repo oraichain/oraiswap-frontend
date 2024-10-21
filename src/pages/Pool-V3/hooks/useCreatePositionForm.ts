@@ -190,7 +190,7 @@ const useCreatePositionForm = (
         time,
         price: close
       }));
-      const padding = 0.1;
+      const padding = 0.2;
 
       const prices = data.map((d) => d.price);
 
@@ -244,6 +244,7 @@ const useCreatePositionForm = (
       const minPriceTrue = isXToY ? minPrice : 1 / maxPrice;
       const maxPriceTrue = isXToY ? maxPrice : 1 / minPrice;
       getCorrespondingTickRange(minPriceTrue, maxPriceTrue);
+      
     }
   }, [minPrice, maxPrice]);
 
@@ -256,27 +257,29 @@ const useCreatePositionForm = (
   };
 
   const zoomIn = () => {
-    dispatch(setZoom(zoom + ZOOM_STEP));
-  };
-
-  const zoomOut = () => {
     dispatch(setZoom(zoom - ZOOM_STEP));
   };
 
+  const zoomOut = () => {
+    dispatch(setZoom(zoom + ZOOM_STEP));
+  };
+
   const resetRange = () => {
-    dispatch(setZoom(1.05));
+    dispatch(setZoom(1.1));
     resetPlot();
   };
 
   const swapBaseToX = () => {
     if (!isXToY) {
       dispatch(setIsXToY(true));
+      handleOptionCustom();
     }
   };
 
   const swapBaseToY = () => {
     if (isXToY) {
       dispatch(setIsXToY(false));
+      handleOptionCustom();
     }
   };
 
@@ -314,13 +317,22 @@ const useCreatePositionForm = (
       time,
       price: close
     }));
+    data.push({
+      time: Date.now(),
+      price: currentPrice
+    })
     const prices = data.map((d) => d.price);
 
     const chartMin = cache3Month?.length > 0 ? Math.max(0, Math.min(...prices)) : currentPrice * 0.5;
     const chartMax = cache3Month?.length > 0 ? Math.max(...prices) : currentPrice * 1.5;
 
-    setMinPrice(chartMin);
-    setMaxPrice(chartMax);
+    if (isXToY) {
+      setMinPrice(chartMin);
+      setMaxPrice(chartMax);
+    } else {
+      setMinPrice(chartMax);
+      setMaxPrice(chartMin);
+    }
   };
 
   // narrow: take the price range of prices in 7d
@@ -330,25 +342,39 @@ const useCreatePositionForm = (
       time,
       price: close
     }));
+    data.push({
+      time: Date.now(),
+      price: currentPrice
+    })
     const prices = data.map((d) => d.price);
 
     const chartMin = cache7Day?.length > 0 ? Math.max(0, Math.min(...prices)) : currentPrice * 0.5;
     const chartMax = cache7Day?.length > 0 ? Math.max(...prices) : currentPrice * 1.5;
 
-    setMinPrice(chartMin);
-    setMaxPrice(chartMax);
+    if (isXToY) {
+      setMinPrice(chartMin);
+      setMaxPrice(chartMax);
+    } else {
+      setMinPrice(chartMax);
+      setMaxPrice(chartMin);
+    }
   };
 
   // full range: just set full range
   const handleOptionFullRange = () => {
     const maxTick = getMaxTick(Number(poolKey.fee_tier.tick_spacing));
     const maxPrice = calcPrice(maxTick, isXToY, tokenX.decimals, tokenY.decimals);
-    setMinPrice(0);
-    setMaxPrice(maxPrice);
+    if (isXToY) {
+      setMinPrice(0);
+      setMaxPrice(maxPrice);
+    } else {
+      setMinPrice(maxPrice);
+      setMaxPrice(0);
+    }
   };
 
   const getCorrespondingTickRange = (priceMin: number, priceMax: number) => {
-    if (minPrice === 0) {
+    if (minPrice === 0 || maxPrice === 0) {
       setLowerTick(getMinTick(Number(poolKey.fee_tier.tick_spacing)));
       setHigherTick(getMaxTick(Number(poolKey.fee_tier.tick_spacing)));
       return;
@@ -360,11 +386,25 @@ const useCreatePositionForm = (
     const lowerTick = getTickAtSqrtPrice(sqrtPriceMin, poolKey.fee_tier.tick_spacing);
     const higherTick = getTickAtSqrtPrice(sqrtPriceMax, poolKey.fee_tier.tick_spacing);
 
-    if (lowerTick >= higherTick) {
-      // set lower tick: higher tick - tick spacing, change to corresponding price
-      const minPrice = calcPrice(lowerTick - poolKey.fee_tier.tick_spacing, isXToY, tokenX.decimals, tokenY.decimals);
-      setMinPrice(minPrice);
-      return;
+    if (isXToY) {
+      if (lowerTick >= higherTick) {
+        // set lower tick: higher tick - tick spacing, change to corresponding price
+        const minPrice = calcPrice(lowerTick - poolKey.fee_tier.tick_spacing, isXToY, tokenX.decimals, tokenY.decimals);
+        setMinPrice(minPrice);
+        return;
+      }
+    } else {
+      if (lowerTick <= higherTick) {
+        // set higher tick: lower tick + tick spacing, change to corresponding price
+        const maxPrice = calcPrice(
+          higherTick + poolKey.fee_tier.tick_spacing,
+          isXToY,
+          tokenX.decimals,
+          tokenY.decimals
+        );
+        setMaxPrice(maxPrice);
+        return;
+      }
     }
 
     setLowerTick(Math.min(lowerTick, higherTick));
@@ -372,24 +412,31 @@ const useCreatePositionForm = (
   };
 
   useEffect(() => {
-    if (!pool || !tokenX || !tokenY) return;
-    switch (optionType) {
-      case OptionType.CUSTOM:
-        handleOptionCustom();
-        break;
-      case OptionType.WIDE:
-        handleOptionWide();
-        break;
-      case OptionType.NARROW:
-        handleOptionNarrow();
-        break;
-      case OptionType.FULL_RANGE:
-        handleOptionFullRange();
-        break;
-      default:
-        break;
+    if (isXBlocked || isYBlocked) {
+      setApr(0);
+      setZapApr(0);
     }
-  }, [optionType]);
+  }, [isXBlocked, isYBlocked]);
+
+  // useEffect(() => {
+  //   if (!pool || !tokenX || !tokenY) return;
+  //   switch (optionType) {
+  //     case OptionType.CUSTOM:
+  //       handleOptionCustom();
+  //       break;
+  //     case OptionType.WIDE:
+  //       handleOptionWide();
+  //       break;
+  //     case OptionType.NARROW:
+  //       handleOptionNarrow();
+  //       break;
+  //     case OptionType.FULL_RANGE:
+  //       handleOptionFullRange();
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }, [optionType]);
 
   return {
     poolId,
@@ -443,7 +490,7 @@ const useCreatePositionForm = (
     zapYUsd,
     zapUsd,
     zapApr,
-    setApr, 
+    setApr,
     setZapApr,
     handleOptionCustom,
     handleOptionWide,
@@ -473,7 +520,7 @@ const useCreatePositionForm = (
     flipToken,
     swapBaseToX,
     swapBaseToY,
-    setLoading
+    setLoading,
   };
 };
 

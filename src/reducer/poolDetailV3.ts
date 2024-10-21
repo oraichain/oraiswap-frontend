@@ -73,7 +73,7 @@ const initialState: PoolDetailV3State = {
   fullTickMap: null,
   liquidityTicks: null,
   liquidityChartData: null,
-  zoom: 1.05,
+  zoom: 1.1,
   range: undefined
 };
 

@@ -188,6 +188,7 @@
     }
 
     .wrapChart {
+      touch-action: none;
       display: flex;
       flex-direction: column;
       height: 250px;

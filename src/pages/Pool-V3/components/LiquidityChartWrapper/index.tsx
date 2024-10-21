@@ -2,6 +2,7 @@ import { FC, useCallback, useMemo } from 'react';
 import styles from './index.module.scss';
 import { ConcentratedLiquidityDepthChart } from '../ConcentratedLiquidityDepthChart';
 import { LiquidityChartData } from 'reducer/poolDetailV3';
+import { OptionType } from 'pages/Pool-V3/hooks/useCreatePositionForm';
 
 interface LiquidityChartWrapperProps {
   minPrice: number;
@@ -16,6 +17,7 @@ interface LiquidityChartWrapperProps {
   zoomIn: () => void;
   zoomOut: () => void;
   resetRange: () => void;
+  setOptionType: (option: OptionType) => void;
 }
 
 const LiquidityChartWrapper: FC<LiquidityChartWrapperProps> = ({
@@ -30,7 +32,8 @@ const LiquidityChartWrapper: FC<LiquidityChartWrapperProps> = ({
   setMinPrice,
   zoomIn,
   zoomOut,
-  resetRange
+  resetRange,
+  setOptionType
 }) => {
   return (
     <div className={styles.chartLiquid}>
@@ -62,10 +65,12 @@ const LiquidityChartWrapper: FC<LiquidityChartWrapperProps> = ({
           onMoveMax={() => {}}
           onMoveMin={() => {}}
           onSubmitMin={(val: number) => {
+            setOptionType(OptionType.CUSTOM);
             console.log('submit min', val);
             setMinPrice(val);
           }}
           onSubmitMax={(val: number) => {
+            setOptionType(OptionType.CUSTOM);
             setMaxPrice(val);
           }}
           offset={{ top: 0, right: 36, bottom: 24 + 28, left: 0 }}

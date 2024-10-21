@@ -91,6 +91,8 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
     zapYUsd,
     zapUsd,
     zapApr,
+    cache3Month,
+    cache7Day,
     setApr,
     setZapApr,
     setTokenZap,
@@ -110,7 +112,11 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
     resetRange,
     swapBaseToX,
     swapBaseToY,
-    setLoading
+    setLoading,
+    handleOptionCustom,
+    handleOptionWide,
+    handleOptionNarrow,
+    handleOptionFullRange
   } = useAddLiquidityNew(poolId, slippage, extendPrices, feeDailyData, toggleZap);
 
   const isLightTheme = theme === 'light';
@@ -231,7 +237,11 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
           {historicalChartData && (
             <div className={styles.strategyBtnList}>
               <div
-                onClick={() => setOptionType(OptionType.CUSTOM)}
+                onClick={() => {
+                  if (!cache7Day) return; 
+                  setOptionType(OptionType.CUSTOM);
+                  handleOptionCustom();
+                }}
                 className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.CUSTOM })}
               >
                 <CustomIcon />
@@ -239,7 +249,11 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
                 <span>Custom</span>
               </div>
               <div
-                onClick={() => setOptionType(OptionType.WIDE)}
+                onClick={() => {
+                  if (!cache3Month) return;
+                  setOptionType(OptionType.WIDE);
+                  handleOptionWide();
+                }}
                 className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.WIDE })}
               >
                 <WideIcon />
@@ -247,7 +261,11 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
                 <span>Wide</span>
               </div>
               <div
-                onClick={() => setOptionType(OptionType.NARROW)}
+                onClick={() => {
+                  if (!cache7Day) return;
+                  setOptionType(OptionType.NARROW);
+                  handleOptionNarrow();
+                }}
                 className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.NARROW })}
               >
                 <NarrowIcon />
@@ -255,7 +273,10 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
                 <span>Narrow</span>
               </div>
               <div
-                onClick={() => setOptionType(OptionType.FULL_RANGE)}
+                onClick={() => {
+                  setOptionType(OptionType.FULL_RANGE);
+                  handleOptionFullRange();
+                }}
                 className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.FULL_RANGE })}
               >
                 <FullRangeIcon />
@@ -317,7 +338,7 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
                 historicalChartData={historicalChartData}
                 fullRange={fullRange}
                 yRange={yRange}
-                addRange={minPrice !== 0 ? [minPrice, maxPrice] : [yRange[0], yRange[1]]}
+                addRange={minPrice === 0 || maxPrice === 0 ? [yRange[0], yRange[1]] : [minPrice, maxPrice]}
                 currentPrice={currentPrice}
                 isXToY={isXToY}
                 setHoverPrice={setHoverPrice}
@@ -329,8 +350,9 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
 
             {liquidityChartData && yRange && xRange ? (
               <LiquidityChartWrapper
-                minPrice={minPrice !== 0 ? minPrice : yRange[0]}
-                maxPrice={minPrice !== 0 ? maxPrice : yRange[1]}
+              setOptionType={setOptionType}
+                minPrice={minPrice === 0 || maxPrice === 0 ? yRange[0] : minPrice}
+                maxPrice={minPrice === 0 || maxPrice === 0 ? yRange[1] : maxPrice}
                 yRange={yRange}
                 xRange={xRange}
                 liquidityChartData={liquidityChartData}
@@ -348,7 +370,7 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
           </div>
         </div>
 
-        {maxPrice && currentPrice && tokenX && tokenY ? (
+        {currentPrice && tokenX && tokenY ? (
           <PriceDetail
             leftInput={isXToY ? minPrice : maxPrice}
             rightInput={isXToY ? maxPrice : minPrice}

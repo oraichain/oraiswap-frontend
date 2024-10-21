@@ -4,6 +4,7 @@ import styles from './index.module.scss';
 import { TokenItemType } from '@oraichain/oraidex-common';
 import { TimeDuration, TokenPairHistoricalPrice } from 'reducer/poolDetailV3';
 import { Dec } from '@keplr-wallet/unit';
+import { isMobile } from '@walletconnect/browser-utils';
 
 
 interface HistoricalChartDataWrapperProps {
@@ -59,6 +60,7 @@ const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
           setHoverPrice(currentPrice);
         }}
         extendLeft={historicalChartData[0]?.close <= 0.001 ? 30 : 10}
+        xNumTicks={isMobile() ? 3 : 5}
       />
     </div>
   );

@@ -14,6 +14,7 @@ import {
 import { FC } from 'react';
 import { theme } from '../HistoricalPriceChart';
 import styles from './index.module.scss';
+import { max, min } from 'lodash';
 
 export type DepthData = {
   price: number;
@@ -64,7 +65,6 @@ export const ConcentratedLiquidityDepthChart: FC<{
 
   // these callbacks only invoke the onMove/onSubmit callbacks if the bounds are correct
   const onMoveMinBoundary = (value: number) => {
-    console.log('onMoveMinBoundary', value < max);
     if (onMoveMin && max && value < max) {
       onMoveMin(value);
     }
@@ -232,12 +232,16 @@ const DragContainer: FC<{
     canEditSubject
     canEditLabel={false}
     onDragMove={({ event, ...nextPos }) => {
+      event.preventDefault()
+      event.stopPropagation()
       if (props.onMove) {
         const val = props.scale.invert(nextPos.y);
         props.onMove(+Math.max(0, val));
       }
     }}
     onDragEnd={({ event, ...nextPos }) => {
+      event.preventDefault()
+      event.stopPropagation()
       if (props.onSubmit) {
         const val = props.scale.invert(nextPos.y);
         props.onSubmit(+Math.max(0, val));
