@@ -522,18 +522,18 @@ const HistoricalPriceChart: FC<{
                   const formatOpts = getPriceExtendedFormatOptions(closeDec);
 
                   return (
-                    // <div className={styles.toolTipWrapper}>
-                    //   <h6>
-                    //     {fiatSymbol}
-                    //     {formatPretty(closeDec, {
-                    //       maxDecimals,
-                    //       ...formatOpts
-                    //     }) || ''}
-                    //   </h6>
+                    <div className={styles.toolTipWrapper}>
+                      <h6>
+                        {fiatSymbol}
+                        {formatPretty(closeDec, {
+                          maxDecimals,
+                          ...formatOpts
+                        }) || ''}
+                      </h6>
 
-                    //   <p>{date}</p>
-                    // </div>
-                    <div></div>
+                      <p>{date}</p>
+                    </div>
+                    // <div></div>
                   );
                 }
 
