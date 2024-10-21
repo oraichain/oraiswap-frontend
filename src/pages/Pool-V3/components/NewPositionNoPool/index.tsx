@@ -1,7 +1,6 @@
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
 import { TokenItemType, BigDecimal } from '@oraichain/oraidex-common';
-import { PriceInfo } from '../CreatePosition';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { numberWithCommas } from 'helper/format';
 import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
@@ -16,6 +15,7 @@ import {
   nearestTickIndex,
   toMaxNumericPlaces
 } from '../PriceRangePlot/utils';
+import { PriceInfo } from '../CreatePoolForm';
 
 const NewPositionNoPool = ({
   fromToken,
