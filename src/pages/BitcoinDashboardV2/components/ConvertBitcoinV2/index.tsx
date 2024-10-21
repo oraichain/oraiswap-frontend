@@ -3,17 +3,9 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import React, { useContext, useEffect, useState } from 'react';
 import styles from './index.module.scss';
 import { formatDisplayUsdt, numberWithCommas } from 'helper/format';
-import {
-  BridgeAppCurrency,
-  calculateTimeoutTimestamp,
-  getTokensFromNetwork,
-  toAmount,
-  toDisplay,
-  TokenItemType
-} from '@oraichain/oraidex-common';
+import { calculateTimeoutTimestamp, toAmount, toDisplay } from '@oraichain/oraidex-common';
 import BitcoinIcon from 'assets/icons/bitcoin.svg?react';
 import { getUsd } from 'libs/utils';
-import { ORAIX_DECIMAL, ORAIX_TOKEN_INFO } from 'pages/Staking/constants';
 import Loader from 'components/Loader';
 import { Button } from 'components/Button';
 import NumberFormat from 'react-number-format';
@@ -32,6 +24,7 @@ import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
 import { PendingWithdraws } from 'pages/BitcoinDashboard/components/PendingWithdraws';
 import { useGetPendingDeposits } from 'pages/BitcoinDashboardV2/hooks';
 
+export const BTC_TOKEN = oraichainTokens.find((e) => e.coinGeckoId === 'bitcoin');
 const ConvertBitcoinV2: React.FC<{}> = ({}) => {
   const cwBitcoinContext = useContext(CwBitcoinContext);
   const { relayerFee } = useRelayerFeeToken(
@@ -44,13 +37,12 @@ const ConvertBitcoinV2: React.FC<{}> = ({}) => {
   });
   const depositFeeV2Btc = useDepositFeesBitcoinV2(true);
   const [oraiAddress] = useConfigReducer('address');
-  const fetchedPendingDeposits = useGetPendingDeposits(oraiAddress);
   const PENDING_WITHDRAW_STORAGE_KEY = `PENDING_WITHDRAW_${oraiAddress}`;
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [coeff, setCoeff] = useState(0);
   const { data: prices } = useCoinGeckoPrices();
   const [amount, setAmount] = useState<number>(0);
-  const amountUSD = getUsd(toAmount(amount), ORAIX_TOKEN_INFO, prices);
+  const amountUSD = getUsd(toAmount(amount), BTC_TOKEN, prices);
   const [loading, setLoading] = useState<boolean>(false);
   const [fee, setFee] = useState<number>(0);
   const [cachePendingWithdrawAddrs, setCachePendingWithdrawAddrs] = useState<string[]>([]);
