@@ -62,11 +62,10 @@ const LiquidityChartWrapper: FC<LiquidityChartWrapperProps> = ({
           //     debounce((num: number) => setMinPrice(num), 2),
           //     []
           //   )}
-          onMoveMax={() => {}}
-          onMoveMin={() => {}}
+          onMoveMax={(val: number) => {}}
+          onMoveMin={(val: number) => {}}
           onSubmitMin={(val: number) => {
             setOptionType(OptionType.CUSTOM);
-            console.log('submit min', val);
             setMinPrice(val);
           }}
           onSubmitMax={(val: number) => {

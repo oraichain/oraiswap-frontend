@@ -97,7 +97,6 @@ const useCreatePosition = (
 
   useEffect(() => {
     if (!(pool && minTick && maxTick)) return;
-    // console.log({ pool, minTick, maxTick, isXToY });
     const fromBlocked =
       determinePositionTokenBlock(BigInt(pool.sqrt_price), minTick, maxTick, isXToY) === PositionTokenBlock.A;
 

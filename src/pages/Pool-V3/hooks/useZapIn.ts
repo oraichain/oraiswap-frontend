@@ -71,7 +71,6 @@ const useZapIn = (
     (async () => {
       if (!zapInResponse) return;
       if (pool && poolKey && tokenX && tokenY) {
-        console.log({ pool, poolKey, tokenX, tokenY, xUsd, yUsd, amountX, amountY });
 
         const apr = await fetchPositionAprInfo(
           {
@@ -88,7 +87,6 @@ const useZapIn = (
           zapInResponse.amountX !== '0' && zapInResponse.amountY !== '0',
           feeDailyData
         );
-        console.log({ apr });
         if (apr.total && zapInResponse.amountX !== '0' && zapInResponse.amountY !== '0') {
           setZapApr(apr.total * 100);
         }

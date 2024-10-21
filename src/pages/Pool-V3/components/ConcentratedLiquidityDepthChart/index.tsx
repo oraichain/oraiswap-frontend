@@ -70,7 +70,6 @@ export const ConcentratedLiquidityDepthChart: FC<{
     }
   };
   const onMoveMaxBoundary = (value: number) => {
-    console.log('onMoveMaxBoundary', value > min);
     if (onMoveMax && min && value > min) {
       onMoveMax(value);
     }
