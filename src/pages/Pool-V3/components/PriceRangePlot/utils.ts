@@ -13,8 +13,40 @@ import {
 } from '@oraichain/oraiswap-v3';
 import { TokenItemType } from '@oraichain/oraidex-common';
 import SingletonOraiswapV3, { Token } from 'libs/contractSingleton';
-import { PlotTickData } from './PriceRangePlot';
 import { ActiveLiquidityPerTickRange } from 'reducer/poolDetailV3';
+
+export interface PlotTickData {
+  x: number;
+  y: number;
+  index: number;
+}
+
+export type TickPlotPositionData = Omit<PlotTickData, 'y'>;
+
+export interface IPriceRangePlot {
+  data: PlotTickData[];
+  midPrice?: TickPlotPositionData;
+  leftRange: TickPlotPositionData;
+  rightRange: TickPlotPositionData;
+  onChangeRange?: (left: number, right: number) => void;
+  style?: React.CSSProperties;
+  className?: string;
+  disabled?: boolean;
+  plotMin: number;
+  plotMax: number;
+  zoomMinus: () => void;
+  zoomPlus: () => void;
+  loading?: boolean;
+  isXtoY: boolean;
+  xDecimal: number;
+  yDecimal: number;
+  tickSpacing: number;
+  isDiscrete?: boolean;
+  coverOnLoading?: boolean;
+  hasError?: boolean;
+  reloadHandler: () => void;
+  showOnCreatePool?: boolean;
+}
 
 export const PRICE_SCALE = getPriceScale();
 export const CONCENTRATION_FACTOR = 1.00001526069123;
@@ -348,7 +380,7 @@ export const createLiquidityPlot = (
   tokenXDecimal: number,
   tokenYDecimal: number
 ): PlotTickData[] => {
-  // sort tick 
+  // sort tick
   const sortedTicks = rawTicks.sort((a, b) => Number(a.index - b.index));
   const parsedTicks = rawTicks.length ? calculateLiquidityBreakpoints(sortedTicks) : [];
 
@@ -501,5 +533,3 @@ export async function convertPlotTicks({
 
   return activeLiquidity;
 }
-
-
