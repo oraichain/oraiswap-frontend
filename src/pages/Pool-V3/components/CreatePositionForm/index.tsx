@@ -31,6 +31,7 @@ import ManuallyAddLiquidity from '../ManuallyAddLiquidity';
 import PriceDetail from '../PriceDetail';
 import ZapInTab from '../ZapInTab';
 import styles from './index.module.scss';
+import LoadingBox from 'components/LoadingBox';
 
 interface CreatePositionFormProps {
   poolId: string;
@@ -238,7 +239,7 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
             <div className={styles.strategyBtnList}>
               <div
                 onClick={() => {
-                  if (!cache7Day) return; 
+                  if (!cache7Day) return;
                   setOptionType(OptionType.CUSTOM);
                   handleOptionCustom();
                 }}
@@ -330,47 +331,47 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
           </div>
 
           <div className={styles.chartContent}>
-            {historicalChartData && yRange ? (
-              <HistoricalChartDataWrapper
-                hoverPrice={hoverPrice}
-                tokenX={tokenX}
-                tokenY={tokenY}
-                historicalChartData={historicalChartData}
-                fullRange={fullRange}
-                yRange={yRange}
-                addRange={minPrice === 0 || maxPrice === 0 ? [yRange[0], yRange[1]] : [minPrice, maxPrice]}
-                currentPrice={currentPrice}
-                isXToY={isXToY}
-                setHoverPrice={setHoverPrice}
-                setHistoricalRange={changeHistoricalRange}
-              />
-            ) : (
-              <span>Loading</span>
-            )}
+            <LoadingBox loading={!(historicalChartData && liquidityChartData)}>
+              <>
+                {xRange && yRange && (
+                  <HistoricalChartDataWrapper
+                    hoverPrice={hoverPrice}
+                    tokenX={tokenX}
+                    tokenY={tokenY}
+                    historicalChartData={historicalChartData}
+                    fullRange={fullRange}
+                    yRange={yRange}
+                    addRange={minPrice === 0 || maxPrice === 0 ? [yRange[0], yRange[1]] : [minPrice, maxPrice]}
+                    currentPrice={currentPrice}
+                    isXToY={isXToY}
+                    setHoverPrice={setHoverPrice}
+                    setHistoricalRange={changeHistoricalRange}
+                  />
+                )}
 
-            {liquidityChartData && yRange && xRange ? (
-              <LiquidityChartWrapper
-              setOptionType={setOptionType}
-                minPrice={minPrice === 0 || maxPrice === 0 ? yRange[0] : minPrice}
-                maxPrice={minPrice === 0 || maxPrice === 0 ? yRange[1] : maxPrice}
-                yRange={yRange}
-                xRange={xRange}
-                liquidityChartData={liquidityChartData}
-                currentPrice={currentPrice}
-                fullRange={fullRange}
-                setMaxPrice={setMaxPrice}
-                setMinPrice={setMinPrice}
-                zoomIn={zoomIn}
-                zoomOut={zoomOut}
-                resetRange={resetRange}
-              />
-            ) : (
-              <span>Loading</span>
-            )}
+                {xRange && yRange && (
+                  <LiquidityChartWrapper
+                    setOptionType={setOptionType}
+                    minPrice={minPrice === 0 || maxPrice === 0 ? yRange[0] : minPrice}
+                    maxPrice={minPrice === 0 || maxPrice === 0 ? yRange[1] : maxPrice}
+                    yRange={yRange}
+                    xRange={xRange}
+                    liquidityChartData={liquidityChartData}
+                    currentPrice={currentPrice}
+                    fullRange={fullRange}
+                    setMaxPrice={setMaxPrice}
+                    setMinPrice={setMinPrice}
+                    zoomIn={zoomIn}
+                    zoomOut={zoomOut}
+                    resetRange={resetRange}
+                  />
+                )}
+              </>
+            </LoadingBox>
           </div>
         </div>
 
-        {currentPrice && tokenX && tokenY ? (
+        {currentPrice && tokenX && tokenY && (
           <PriceDetail
             leftInput={isXToY ? minPrice : maxPrice}
             rightInput={isXToY ? maxPrice : minPrice}
@@ -379,8 +380,6 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
             tokenY={tokenY}
             isXToY={isXToY}
           />
-        ) : (
-          <span>Loading...</span>
         )}
       </div>
 

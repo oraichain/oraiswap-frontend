@@ -267,6 +267,7 @@ const useCreatePositionForm = (
   const resetRange = () => {
     dispatch(setZoom(1.1));
     resetPlot();
+    setOptionType(OptionType.CUSTOM);
   };
 
   const swapBaseToX = () => {
