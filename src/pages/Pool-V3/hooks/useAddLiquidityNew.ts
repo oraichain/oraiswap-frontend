@@ -11,7 +11,6 @@ import {
   fetchLiquidityTicks,
   fetchPool,
   fetchTickMap,
-  setHistoricalChartData,
   setHistoricalRange,
   setIsXToY,
   setLiquidityChartData,
@@ -23,11 +22,10 @@ import {
 } from 'reducer/poolDetailV3';
 import { BigDecimal } from '@oraichain/oraidex-common';
 import { PoolFeeAndLiquidityDaily, PRICE_SCALE } from 'libs/contractSingleton';
-import { getMaxSqrtPrice, getMaxTick, getMinTick, getTickAtSqrtPrice, shiftDecimal } from '@oraichain/oraiswap-v3';
-import { calcPrice, handleGetCurrentPlotTicks, printBigint } from '../components/PriceRangePlot/utils';
+import { getMaxTick, getMinTick, getTickAtSqrtPrice } from '@oraichain/oraiswap-v3';
+import { calcPrice } from '../components/PriceRangePlot/utils';
 import useCreatePosition from './useCreatePosition';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { get } from 'lodash';
 
 const ZOOM_STEP = 0.05;
 
@@ -102,6 +100,8 @@ const useAddLiquidityNew = (
     zapYUsd,
     zapUsd,
     zapApr,
+    setZapApr,
+    setApr,
     addLiquidity,
     changeRangeHandler,
     setAmountX,
@@ -132,6 +132,8 @@ const useAddLiquidityNew = (
   // can get: poolKey, tokenX, tokenY
   useEffect(() => {
     if (poolString) {
+      setApr(0);
+      setZapApr(0);
       dispatch(setPoolId(poolString));
     }
   }, [poolString, dispatch]);
@@ -279,6 +281,7 @@ const useAddLiquidityNew = (
   };
 
   const resetPlot = () => {
+    changeHistoricalRange('7d');
     const higherTick = Math.max(
       Number(getMinTick(Number(poolKey.fee_tier.tick_spacing))),
       Number(pool.current_tick_index) + Number(poolKey.fee_tier.tick_spacing) * 3
@@ -356,6 +359,14 @@ const useAddLiquidityNew = (
 
     const lowerTick = getTickAtSqrtPrice(sqrtPriceMin, poolKey.fee_tier.tick_spacing);
     const higherTick = getTickAtSqrtPrice(sqrtPriceMax, poolKey.fee_tier.tick_spacing);
+
+    if (lowerTick >= higherTick) {
+      // set lower tick: higher tick - tick spacing, change to corresponding price
+      const minPrice = calcPrice(lowerTick - poolKey.fee_tier.tick_spacing, isXToY, tokenX.decimals, tokenY.decimals);
+      setMinPrice(minPrice);
+      return;
+    }
+
     setLowerTick(Math.min(lowerTick, higherTick));
     setHigherTick(Math.max(lowerTick, higherTick));
   };
@@ -432,6 +443,8 @@ const useAddLiquidityNew = (
     zapYUsd,
     zapUsd,
     zapApr,
+    setApr, 
+    setZapApr,
     handleOptionCustom,
     handleOptionWide,
     handleOptionNarrow,

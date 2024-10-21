@@ -44,7 +44,7 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
   const theme = useTheme();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
-  const { poolList, poolPrice: extendPrices } = useGetPoolList(prices);
+  const { poolPrice: extendPrices } = useGetPoolList(prices);
   const [walletAddress] = useConfigReducer('address');
   const loadOraichainToken = useLoadOraichainTokens();
   const navigate = useNavigate();
@@ -58,18 +58,12 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     tokenX,
     tokenY,
     historicalRange,
-    cache3Month,
-    cache7Day,
-    cache1Month,
-    cache1Year,
     historicalChartData,
     fullRange,
     xRange,
     yRange,
     currentPrice,
     liquidityChartData,
-    zoom,
-    range,
     hoverPrice,
     minPrice,
     maxPrice,
@@ -81,7 +75,6 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     amountY,
     isXBlocked,
     isYBlocked,
-    focusId,
     liquidity,
     loading,
     apr,
@@ -90,33 +83,25 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     zapInResponse,
     zapImpactPrice,
     matchRate,
-    isVisible,
     zapFee,
     totalFee,
     swapFee,
-    amountXZap,
-    amountYZap,
-    zapLoading,
     zapError,
     simulating,
     zapXUsd,
     zapYUsd,
     zapUsd,
     zapApr,
+    setApr,
+    setZapApr,
     setTokenZap,
     setZapAmount,
-    setAmountXZap,
-    setAmountYZap,
     handleZapIn,
-    handleSimulateZapIn,
     addLiquidity,
-    changeRangeHandler,
     setAmountX,
     setAmountY,
     setFocusId,
     setOptionType,
-    setLowerTick,
-    setHigherTick,
     setMinPrice,
     setMaxPrice,
     setHoverPrice,
@@ -124,14 +109,9 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     zoomIn,
     zoomOut,
     resetRange,
-    flipToken,
     swapBaseToX,
     swapBaseToY,
-    setLoading,
-    handleOptionCustom,
-    handleOptionWide,
-    handleOptionNarrow,
-    handleOptionFullRange
+    setLoading
   } = useAddLiquidityNew(poolId, slippage, extendPrices, feeDailyData, toggleZap);
 
   const isLightTheme = theme === 'light';
@@ -249,40 +229,42 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
 
         <div className={styles.actionWrapper}>
           <p className={styles.title}>Select Volatility Strategy</p>
-          {historicalChartData && <div className={styles.strategyBtnList}>
-            <div
-              onClick={() => setOptionType(OptionType.CUSTOM)}
-              className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.CUSTOM })}
-            >
-              <CustomIcon />
-              <br />
-              <span>Custom</span>
+          {historicalChartData && (
+            <div className={styles.strategyBtnList}>
+              <div
+                onClick={() => setOptionType(OptionType.CUSTOM)}
+                className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.CUSTOM })}
+              >
+                <CustomIcon />
+                <br />
+                <span>Custom</span>
+              </div>
+              <div
+                onClick={() => setOptionType(OptionType.WIDE)}
+                className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.WIDE })}
+              >
+                <WideIcon />
+                <br />
+                <span>Wide</span>
+              </div>
+              <div
+                onClick={() => setOptionType(OptionType.NARROW)}
+                className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.NARROW })}
+              >
+                <NarrowIcon />
+                <br />
+                <span>Narrow</span>
+              </div>
+              <div
+                onClick={() => setOptionType(OptionType.FULL_RANGE)}
+                className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.FULL_RANGE })}
+              >
+                <FullRangeIcon />
+                <br />
+                <span>Full range</span>
+              </div>
             </div>
-            <div
-              onClick={() => setOptionType(OptionType.WIDE)}
-              className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.WIDE })}
-            >
-              <WideIcon />
-              <br />
-              <span>Wide</span>
-            </div>
-            <div
-              onClick={() => setOptionType(OptionType.NARROW)}
-              className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.NARROW })}
-            >
-              <NarrowIcon />
-              <br />
-              <span>Narrow</span>
-            </div>
-            <div
-              onClick={() => setOptionType(OptionType.FULL_RANGE)}
-              className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.FULL_RANGE })}
-            >
-              <FullRangeIcon />
-              <br />
-              <span>Full range</span>
-            </div>
-          </div>}
+          )}
           <div className={styles.explain}>
             <p>
               Add liquidity to a specific price range. Earns the most fees when the price stays in range but stops
@@ -481,6 +463,7 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
                           [tokenX.contractAddress, tokenY.contractAddress].filter(Boolean)
                         );
                         onCloseModal();
+                        setZapApr(0);
                         navigate(`/pools/v3/${encodeURIComponent(poolKeyToString(poolKey))}`);
                       },
                       (e) => {
@@ -523,6 +506,7 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
                         [tokenX.contractAddress, tokenY.contractAddress].filter(Boolean)
                       );
                       onCloseModal();
+                      setApr(0);
                       navigate(`/pools/v3/${encodeURIComponent(poolKeyToString(poolKey))}`);
                     },
                     callBackFailed: (e) => {

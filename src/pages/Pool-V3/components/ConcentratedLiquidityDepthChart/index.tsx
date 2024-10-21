@@ -64,11 +64,13 @@ export const ConcentratedLiquidityDepthChart: FC<{
 
   // these callbacks only invoke the onMove/onSubmit callbacks if the bounds are correct
   const onMoveMinBoundary = (value: number) => {
+    console.log('onMoveMinBoundary', value < max);
     if (onMoveMin && max && value < max) {
       onMoveMin(value);
     }
   };
   const onMoveMaxBoundary = (value: number) => {
+    console.log('onMoveMaxBoundary', value > min);
     if (onMoveMax && min && value > min) {
       onMoveMax(value);
     }

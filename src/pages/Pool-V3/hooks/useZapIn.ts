@@ -255,6 +255,7 @@ const useZapIn = (
     yUsd,
     zapUsd,
     zapApr,
+    setZapApr,
     setTokenZap,
     setZapAmount,
     setAmountX,
