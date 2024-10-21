@@ -11,7 +11,6 @@ import { getMaxTick, getMinTick, Price } from '@oraichain/oraiswap-v3';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   calcPrice,
-  getTickAtSqrtPriceFromBalance,
   nearestTickIndex,
   toMaxNumericPlaces
 } from '../PriceRangePlot/utils';
