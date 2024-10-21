@@ -60,7 +60,7 @@ const HistoricalChartDataWrapper: FC<HistoricalChartDataWrapperProps> = ({
           setHoverPrice(currentPrice);
         }}
         extendLeft={historicalChartData[0]?.close <= 0.001 ? 30 : 10}
-        xNumTicks={isMobile() ? 3 : 5}
+        xNumTicks={2}
       />
     </div>
   );
