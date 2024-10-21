@@ -93,6 +93,7 @@
 
           @include theme {
             background: theme-get('colors-neutral-surface-bg');
+            color: theme-get('sea-stone-900');
           }
         }
       }
@@ -173,6 +174,7 @@
         .chosen {
           @include theme {
             border: 1.5px solid theme-get('basic-primary-surface-default');
+            color: theme-get('neutral-surface-bg-3');
           }
         }
       }
@@ -221,6 +223,8 @@
           .chosen {
             @include theme {
               background-color: theme-get('neutral-surface-bg-section-active');
+              color: theme-get('neutral-surface-bg-3');
+              border: 1px solid theme-get('neutral-surface-bg-3');
             }
           }
         }
@@ -238,10 +242,15 @@
             height: 24px;
             padding: 4px 5px;
             cursor: pointer;
-
             @include theme {
               background-color: theme-get('bg-section-05');
               border: 1px solid theme-get('neutral-border-border-bold');
+              color: theme-get('neutral-surface-bg-3');
+            }
+            path {
+              @include theme {
+                stroke: theme-get('neutral-surface-bg-3');
+              }
             }
           }
         }

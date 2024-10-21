@@ -238,7 +238,7 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
             <div className={styles.strategyBtnList}>
               <div
                 onClick={() => {
-                  if (!cache7Day) return; 
+                  if (!cache7Day) return;
                   setOptionType(OptionType.CUSTOM);
                   handleOptionCustom();
                 }}
@@ -350,7 +350,7 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
 
             {liquidityChartData && yRange && xRange ? (
               <LiquidityChartWrapper
-              setOptionType={setOptionType}
+                setOptionType={setOptionType}
                 minPrice={minPrice === 0 || maxPrice === 0 ? yRange[0] : minPrice}
                 maxPrice={minPrice === 0 || maxPrice === 0 ? yRange[1] : maxPrice}
                 yRange={yRange}
