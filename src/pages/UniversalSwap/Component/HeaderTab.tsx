@@ -1,7 +1,7 @@
 import { isMobile } from '@walletconnect/browser-utils';
-import ChartImg from 'assets/icons/chart.svg';
-import HideImg from 'assets/icons/show.svg';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import ChartImg from 'assets/icons/chart.svg?react';
+import HideImg from 'assets/icons/show.svg?react';
+import DefaultIcon from 'assets/icons/tokens.svg?react';
 import cn from 'classnames/bind';
 import { flattenTokensWithIcon } from 'config/chainInfos';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';

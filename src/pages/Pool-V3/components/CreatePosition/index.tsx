@@ -5,10 +5,10 @@ import {
   PoolWithPoolKey,
   TokenAmount
 } from '@oraichain/oraidex-contracts-sdk/build/OraiswapV3.types';
-import { ReactComponent as BackIcon } from 'assets/icons/back.svg';
-import { ReactComponent as SettingIcon } from 'assets/icons/setting.svg';
-import { ReactComponent as Continuous } from 'assets/images/continuous.svg';
-import { ReactComponent as Discrete } from 'assets/images/discrete.svg';
+import BackIcon from 'assets/icons/back.svg?react';
+import SettingIcon from 'assets/icons/setting.svg?react';
+import Continuous from 'assets/images/continuous.svg?react';
+import Discrete from 'assets/images/discrete.svg?react';
 import classNames from 'classnames';
 import { oraichainTokens } from '@oraichain/oraidex-common';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';

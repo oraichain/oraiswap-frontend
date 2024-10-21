@@ -6,83 +6,11 @@ import {
   BridgeAppCurrency,
   CustomChainInfo,
   defaultBech32Config
-  // PEPE_ORAICHAIN_EXT_DENOM as PEPE_ORAICHAIN_DENOM
-  // PEPE_ETH_CONTRACT,
-  // PEPE_BSC_CONTRACT,
-  // TokenItemType,
-  // OsmoToken,
-  // AtomToken,
-  // InjectiveToken,
-  // AIRI_BSC_CONTRACT,
-  // AIRI_CONTRACT,
-  // ATOM_ORAICHAIN_DENOM,
-  // INJECTIVE_CONTRACT,
-  // INJECTIVE_ORAICHAIN_DENOM,
-  // KWTBSC_ORAICHAIN_DENOM,
-  // KWT_BSC_CONTRACT,
-  // KWT_CONTRACT,
-  // KWT_DENOM,
-  // KWT_SUB_NETWORK_DENOM,
-  // MILKYBSC_ORAICHAIN_DENOM,
-  // MILKY_BSC_CONTRACT,
-  // MILKY_CONTRACT,
-  // MILKY_DENOM,
-  // MILKY_ERC_CONTRACT,
-  // MILKY_SUB_NETWORK_DENOM,
-  // ORAIIBC_INJECTIVE_DENOM,
-  // ORAIX_CONTRACT,
-  // ORAI_BRIDGE_EVM_DENOM_PREFIX,
-  // ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-  // ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
-  // ORAI_BSC_CONTRACT,
-  // ORAI_ETH_CONTRACT,
-  // OSMOSIS_ORAICHAIN_DENOM,
-  // SCATOM_CONTRACT,
-  // SCORAI_CONTRACT,
-  // TRX_CONTRACT,
-  // USDC_CONTRACT,
-  // USDC_ETH_CONTRACT,
-  // USDT_BSC_CONTRACT,
-  // USDT_CONTRACT,
-  // USDT_TRON_CONTRACT,
-  // WRAP_BNB_CONTRACT,
-  // WRAP_ETH_CONTRACT,
-  // WRAP_TRON_TRX_CONTRACT,
-  // WETH_CONTRACT,
-  // USDT_ETH_CONTRACT,
-  // NEUTARO_ORAICHAIN_DENOM,
-  // OCH_CONTRACT,
-  // OCH_ETH_CONTRACT,
-  // ORAIX_ETH_CONTRACT,
-  // TON_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
-// import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
-// import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
-// import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
-// import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
-// import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
-// import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
-// import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
-// import { ReactComponent as OraixLightIcon } from 'assets/icons/oraix_light.svg';
-// import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis_light.svg';
-// import { ReactComponent as ScOraiIcon } from 'assets/icons/orchai.svg';
-// import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
-// import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
-// import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-// import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
-// import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
-// import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
-// import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
-// import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
-// import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
-// import { bitcoinChainId } from 'helper/constants';
-// import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
-// import { listOsmosisToken } from './alphaNetwwork';
-
-import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as BTCIcon } from 'assets/icons/btc-icon.svg';
-import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
+import BitcoinIcon from 'assets/icons/bitcoin.svg?react';
+import OraiIcon from 'assets/icons/oraichain.svg?react';
+import BTCIcon from 'assets/icons/btc-icon.svg?react';
+import OraiLightIcon from 'assets/icons/oraichain_light.svg?react';
 import flatten from 'lodash/flatten';
 
 import { chainIconsInfos, tokensIconInfos, mapListWithIcon } from './iconInfos';
