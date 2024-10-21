@@ -58,7 +58,6 @@ const useCreatePosition = (
     callBackFailed: (e: any) => void;
   }) => {
     setLoading(true);
-
     try {
       await handleInitPosition(data, walletAddress, callBackSuccess, callBackFailed);
     } catch (error) {
@@ -78,8 +77,6 @@ const useCreatePosition = (
   useEffect(() => {
     (async () => {
       if (pool && poolKey && tokenX && tokenY) {
-        console.log({ pool, poolKey, tokenX, tokenY, xUsd, yUsd, amountX, amountY });
-
         const apr = await fetchPositionAprInfo(
           {
             pool,
@@ -95,7 +92,6 @@ const useCreatePosition = (
           !isXBlocked && !isYBlocked,
           feeDailyData
         );
-        console.log({ apr });
         if (apr.total && !isXBlocked && !isYBlocked) {
           setApr(apr.total * 100);
         }

@@ -481,7 +481,6 @@ export async function convertPlotTicks({
 }): Promise<ActiveLiquidityPerTickRange[]> {
   const plotTicks = await handleGetCurrentPlotTicks({ poolKey, isXtoY: isXToY, xDecimal, yDecimal });
   const activeLiquidity: ActiveLiquidityPerTickRange[] = [] as any;
-  console.log('plotTicks', plotTicks);
   const maxTick = getMaxTick(poolKey.fee_tier.tick_spacing);
   plotTicks.forEach((plotTick, index) => {
     const { y, index: tickIndex } = plotTick;

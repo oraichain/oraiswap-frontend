@@ -59,9 +59,9 @@ const PriceDetail: FC<PriceDetailProps> = ({ leftInput, rightInput, currentPrice
         <div className={classNames(styles.percent, styles.maxCurrentPrice)}>
           <p>Max Current Price:</p>
           <span className={classNames(styles.value, { [styles.positive]: true })}>
-            {numberWithCommas(((+rightInput - currentPrice) / currentPrice) * 100, undefined, {
+            {leftInput !== 0 ? numberWithCommas(((+rightInput - currentPrice) / currentPrice) * 100, undefined, {
               maximumFractionDigits: 3
-            })}
+            }) : '9999999'}
             %
           </span>
         </div>

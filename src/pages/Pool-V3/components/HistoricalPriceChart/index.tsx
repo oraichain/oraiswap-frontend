@@ -471,7 +471,7 @@ const HistoricalPriceChart: FC<{
               <AnnotationConnector />
               <AnnotationLineSubject
                 orientation="horizontal"
-                stroke={'#8A54EB'}
+                stroke={'#0ECB81'}
                 strokeWidth={2}
                 // strokeDasharray={4}
               />

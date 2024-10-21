@@ -134,8 +134,6 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
     handleOptionFullRange
   } = useAddLiquidityNew(poolId, slippage, extendPrices, feeDailyData, toggleZap);
 
-  console.log({ zapXUsd, zapYUsd, zapUsd });
-
   const isLightTheme = theme === 'light';
 
   const renderTokenObj = (coinGeckoId, size: number = 30) => {
@@ -157,13 +155,6 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
   const toUsd = extendPrices?.[tokenY?.coinGeckoId]
     ? (extendPrices[tokenY.coinGeckoId] * Number(amountY || 0)).toFixed(6)
     : '0';
-
-  // const xUsd =
-  //   // zapInResponse &&
-  //   ((extendPrices?.[tokenX?.coinGeckoId] * (amountX || 0)) / 10 ** tokenX.decimals).toFixed(6);
-  // const yUsd =
-  //   // zapInResponse &&
-  //   ((extendPrices?.[tokenY?.coinGeckoId] * (amountY || 0)) / 10 ** tokenY.decimals).toFixed(6);
 
   const getButtonMessage = () => {
     if (!walletAddress) {
@@ -258,7 +249,7 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
 
         <div className={styles.actionWrapper}>
           <p className={styles.title}>Select Volatility Strategy</p>
-          <div className={styles.strategyBtnList}>
+          {historicalChartData && <div className={styles.strategyBtnList}>
             <div
               onClick={() => setOptionType(OptionType.CUSTOM)}
               className={classNames(styles.btn, { [styles.chosen]: optionType === OptionType.CUSTOM })}
@@ -291,7 +282,7 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
               <br />
               <span>Full range</span>
             </div>
-          </div>
+          </div>}
           <div className={styles.explain}>
             <p>
               Add liquidity to a specific price range. Earns the most fees when the price stays in range but stops
@@ -345,7 +336,7 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
                 historicalChartData={historicalChartData}
                 fullRange={fullRange}
                 yRange={yRange}
-                addRange={[minPrice, maxPrice]}
+                addRange={minPrice !== 0 ? [minPrice, maxPrice] : [yRange[0], yRange[1]]}
                 currentPrice={currentPrice}
                 isXToY={isXToY}
                 setHoverPrice={setHoverPrice}
@@ -357,8 +348,8 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
 
             {liquidityChartData && yRange && xRange ? (
               <LiquidityChartWrapper
-                minPrice={minPrice}
-                maxPrice={maxPrice}
+                minPrice={minPrice !== 0 ? minPrice : yRange[0]}
+                maxPrice={minPrice !== 0 ? maxPrice : yRange[1]}
                 yRange={yRange}
                 xRange={xRange}
                 liquidityChartData={liquidityChartData}
@@ -376,10 +367,10 @@ const CreatePositionFormNew: FC<CreatePositionFormProps> = ({ poolId, slippage, 
           </div>
         </div>
 
-        {minPrice && maxPrice && currentPrice && tokenX && tokenY ? (
+        {maxPrice && currentPrice && tokenX && tokenY ? (
           <PriceDetail
-            leftInput={minPrice}
-            rightInput={maxPrice}
+            leftInput={isXToY ? minPrice : maxPrice}
+            rightInput={isXToY ? maxPrice : minPrice}
             currentPrice={currentPrice}
             tokenX={tokenX}
             tokenY={tokenY}

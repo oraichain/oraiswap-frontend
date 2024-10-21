@@ -579,7 +579,6 @@ export const getHistoricalPriceDataInHour = async (
     const length = Math.ceil((currentIndex - hourIndex) / CHUNK_QUERY);
     const chunkOffset = Array.from({ length }, (_, i) => hourIndex + i * CHUNK_QUERY);
     if (currentIndex > chunkOffset[length - 1]) chunkOffset.push(currentIndex);
-    console.log('chunkOffset', chunkOffset);
 
     let finalResult = [];
 
@@ -691,8 +690,6 @@ export const getHistoricalPriceDataInDay = async (
     const length = Math.ceil((currentIndex - dayIndex) / CHUNK_QUERY);
     const chunkOffset = Array.from({ length }, (_, i) => dayIndex + i * CHUNK_QUERY);
     if (currentIndex > chunkOffset[length - 1]) chunkOffset.push(currentIndex);
-
-    console.log('chunkOffset', chunkOffset);
 
     let finalResult = [];
 

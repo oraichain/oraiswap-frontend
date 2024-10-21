@@ -196,7 +196,7 @@ export const ConcentratedLiquidityDepthChart: FC<{
                 defaultValue={fullRange ? yRange[0] * 1.05 : min}
                 length={xMax}
                 scale={yScale}
-                stroke={'#8A54EB'}
+                stroke={'#0ECB81'}
                 onMove={onMoveMinBoundary}
                 onSubmit={onSubmitMin}
               />

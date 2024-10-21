@@ -730,7 +730,6 @@ export async function fetchPositionAprInfo(
   isInRange: boolean,
   feeAndLiquidityInfo: PoolFeeAndLiquidityDaily[]
 ): Promise<PositionAprInfo> {
-  console.log({ pool, position, prices, tokenXLiquidityInUsd, tokenYLiquidityInUsd, isInRange, feeAndLiquidityInfo });
   const avgFeeAPRs = feeAndLiquidityInfo.map((pool) => {
     const feeAPR = (pool.feeDaily * 365) / pool.liquidityDaily;
     return {

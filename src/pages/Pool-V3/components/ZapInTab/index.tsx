@@ -270,11 +270,11 @@ const ZapInTab: FC<ZapInTabProps> = ({
               </div>
             </div>
             <div className={styles.item}>
-              <div className={styles.info}>
+              <div className={styles.itemHasTooltip}>
                 <TooltipHover
                   isVisible={isVisible}
                   setIsVisible={setIsVisible}
-                  content={<div>The amount of token you'll swap to provide liquidity.</div>}
+                  content={<div>Protocol fee, and it's free now!</div>}
                   position="right"
                   children={<span>Zap Fee</span>}
                 />

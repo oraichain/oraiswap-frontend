@@ -27,6 +27,7 @@ import { getMaxSqrtPrice, getMaxTick, getMinTick, getTickAtSqrtPrice, shiftDecim
 import { calcPrice, handleGetCurrentPlotTicks, printBigint } from '../components/PriceRangePlot/utils';
 import useCreatePosition from './useCreatePosition';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { get } from 'lodash';
 
 const ZOOM_STEP = 0.05;
 
@@ -131,7 +132,6 @@ const useAddLiquidityNew = (
   // can get: poolKey, tokenX, tokenY
   useEffect(() => {
     if (poolString) {
-      console.log('set new pool id', poolString);
       dispatch(setPoolId(poolString));
     }
   }, [poolString, dispatch]);
@@ -140,7 +140,6 @@ const useAddLiquidityNew = (
   // pool, currentPrice,
   useEffect(() => {
     if (poolKey) {
-      console.log('fetch new pool');
       dispatch<any>(fetchPool(poolKey));
       dispatch<any>(fetchTickMap(poolKey));
     }
@@ -167,7 +166,6 @@ const useAddLiquidityNew = (
   // historicalChartData, activeLiquidity, cache3Month, cache7Day, cache1Month, cache1Year
   useEffect(() => {
     if (poolKey && tokenX && tokenY) {
-      console.log('fetch new historical data, active liquidity');
       dispatch<any>(fetchHistoricalPriceData7D(poolId));
       dispatch<any>(fetchHistoricalPriceData1M(poolId));
       dispatch<any>(fetchHistoricalPriceData3M(poolId));
@@ -186,7 +184,6 @@ const useAddLiquidityNew = (
   // when have historicalChartData, currentPrice, we can get yRange
   useEffect(() => {
     if (historicalChartData && currentPrice) {
-      console.log('set y range');
       const data = historicalChartData?.map(({ time, close }) => ({
         time,
         price: close
@@ -222,7 +219,6 @@ const useAddLiquidityNew = (
   // when have liquidityChartData, we can get xRange
   useEffect(() => {
     if (liquidityChartData) {
-      console.log('set x range', Math.max(...liquidityChartData.map((d) => d.depth)));
       const xRange = [0, Math.max(...liquidityChartData.map((d) => d.depth))];
       dispatch(setXRange(xRange as [number, number]));
     }
@@ -343,18 +339,18 @@ const useAddLiquidityNew = (
   // full range: just set full range
   const handleOptionFullRange = () => {
     const maxTick = getMaxTick(Number(poolKey.fee_tier.tick_spacing));
-    const minTick = getMinTick(Number(poolKey.fee_tier.tick_spacing));
-
-    // const maxSqrtPrice = getMaxSqrtPrice(poolKey.fee_tier.tick_spacing);
-    // const maxPrice = calcPrice(maxTick, );
-
-    setLowerTick(minTick);
-    setHigherTick(maxTick);
+    const maxPrice = calcPrice(maxTick, isXToY, tokenX.decimals, tokenY.decimals);
     setMinPrice(0);
-    // setMaxPrice(maxPrice);
+    setMaxPrice(maxPrice);
   };
 
   const getCorrespondingTickRange = (priceMin: number, priceMax: number) => {
+    if (minPrice === 0) {
+      setLowerTick(getMinTick(Number(poolKey.fee_tier.tick_spacing)));
+      setHigherTick(getMaxTick(Number(poolKey.fee_tier.tick_spacing)));
+      return;
+    }
+
     const sqrtPriceMin = priceToSqrtPriceBigInt(priceMin);
     const sqrtPriceMax = priceToSqrtPriceBigInt(priceMax);
 

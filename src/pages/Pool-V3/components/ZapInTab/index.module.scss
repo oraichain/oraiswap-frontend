@@ -410,6 +410,18 @@
 
         @include theme {
           color: theme-get('neutral-8');
+          // border-bottom: 1px dashed theme-get('neutral-5');
+        }
+      }
+    }
+
+    .itemHasTooltip {
+      span {
+        display: inline-block;
+        padding-bottom: 2px;
+
+        @include theme {
+          color: theme-get('neutral-8');
           border-bottom: 1px dashed theme-get('neutral-5');
         }
       }
