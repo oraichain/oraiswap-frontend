@@ -17,7 +17,6 @@ import DownloadApp from 'pages/DownloadApp';
 import SwapPoolV3 from 'pages/Pool-V3/components/Swap';
 import PositionDetail from 'pages/Pool-V3/components/PositionDetail';
 import PoolV3Detail from 'pages/Pool-V3/components/PoolDetail';
-import CreatePosition from 'pages/Pool-V3/components/CreatePosition';
 
 export default () => (
   <Suspense
@@ -47,7 +46,7 @@ export default () => (
       <Route path="/pools-v3" element={<Navigate to="/pools" replace />} />
       <Route path="/pools/v3/:poolId" element={<PoolV3Detail />} />
       <Route path="/pools/v2/:poolUrl" element={<PoolDetail />} />
-      <Route path="/new-position/:item" element={<CreatePosition />} />
+      {/* <Route path="/new-position/:item" element={<CreatePosition />} /> */}
       <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/download-owallet" element={<DownloadApp />} />
