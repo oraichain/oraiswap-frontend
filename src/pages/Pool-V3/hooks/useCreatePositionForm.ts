@@ -39,7 +39,7 @@ export enum OptionType {
 const TICK_SPACING_TO_RANGE = {
   '100': 3,
   '10': 300,
-  '1': 2000
+  '1': 500
 };
 
 const useCreatePositionForm = (
@@ -279,19 +279,20 @@ const useCreatePositionForm = (
     dispatch(setZoom(1.1));
     resetPlot();
     setOptionType(OptionType.CUSTOM);
+    setApr(0);
   };
 
   const swapBaseToX = () => {
     if (!isXToY) {
+      setOptionType(OptionType.CUSTOM);
       dispatch(setIsXToY(true));
-      handleOptionCustom();
     }
   };
 
   const swapBaseToY = () => {
     if (isXToY) {
+      setOptionType(OptionType.CUSTOM);
       dispatch(setIsXToY(false));
-      handleOptionCustom();
     }
   };
 
@@ -310,7 +311,7 @@ const useCreatePositionForm = (
     );
 
     const minPrice = calcPrice(lowerTick, isXToY, tokenX.decimals, tokenY.decimals);
-    
+
     const maxPrice = calcPrice(higherTick, isXToY, tokenX.decimals, tokenY.decimals);
 
     setMinPrice(minPrice);
@@ -389,40 +390,48 @@ const useCreatePositionForm = (
   };
 
   const getCorrespondingTickRange = (priceMin: number, priceMax: number) => {
-    if (minPrice === 0 || maxPrice === 0) {
-      setLowerTick(getMinTick(Number(poolKey.fee_tier.tick_spacing)));
-      setHigherTick(getMaxTick(Number(poolKey.fee_tier.tick_spacing)));
-      return;
-    }
-
-    const sqrtPriceMin = priceToSqrtPriceBigInt(priceMin, tokenX.decimals - tokenY.decimals);
-    const sqrtPriceMax = priceToSqrtPriceBigInt(priceMax, tokenX.decimals - tokenY.decimals);
-
-    const lowerTick = getTickAtSqrtPrice(sqrtPriceMin, poolKey.fee_tier.tick_spacing);
-    const higherTick = getTickAtSqrtPrice(sqrtPriceMax, poolKey.fee_tier.tick_spacing);
-    if (isXToY) {
-      if (lowerTick >= higherTick) {
-        // set lower tick: higher tick - tick spacing, change to corresponding price
-        const minPrice = calcPrice(lowerTick - poolKey.fee_tier.tick_spacing * 10, isXToY, tokenX.decimals, tokenY.decimals);
-        setMinPrice(minPrice);
+    try {
+      if (minPrice === 0 || maxPrice === 0) {
+        setLowerTick(getMinTick(Number(poolKey.fee_tier.tick_spacing)));
+        setHigherTick(getMaxTick(Number(poolKey.fee_tier.tick_spacing)));
         return;
       }
-    } else {
-      if (lowerTick <= higherTick) {
-        // set higher tick: lower tick + tick spacing, change to corresponding price
-        const maxPrice = calcPrice(
-          higherTick + poolKey.fee_tier.tick_spacing * 10,
-          isXToY,
-          tokenX.decimals,
-          tokenY.decimals
-        );
-        setMaxPrice(maxPrice);
-        return;
-      }
-    }
 
-    setLowerTick(Math.min(lowerTick, higherTick));
-    setHigherTick(Math.max(lowerTick, higherTick));
+      const sqrtPriceMin = priceToSqrtPriceBigInt(priceMin, tokenX.decimals - tokenY.decimals);
+      const sqrtPriceMax = priceToSqrtPriceBigInt(priceMax, tokenX.decimals - tokenY.decimals);
+      const lowerTick = getTickAtSqrtPrice(sqrtPriceMin, poolKey.fee_tier.tick_spacing);
+      const higherTick = getTickAtSqrtPrice(sqrtPriceMax, poolKey.fee_tier.tick_spacing);
+      if (isXToY) {
+        if (lowerTick >= higherTick) {
+          // set lower tick: higher tick - tick spacing, change to corresponding price
+          const minPrice = calcPrice(
+            lowerTick - poolKey.fee_tier.tick_spacing * 10,
+            isXToY,
+            tokenX.decimals,
+            tokenY.decimals
+          );
+          setMinPrice(minPrice);
+          return;
+        }
+      } else {
+        if (lowerTick <= higherTick) {
+          // set higher tick: lower tick + tick spacing, change to corresponding price
+          const maxPrice = calcPrice(
+            higherTick + poolKey.fee_tier.tick_spacing * 10,
+            isXToY,
+            tokenX.decimals,
+            tokenY.decimals
+          );
+          setMaxPrice(maxPrice);
+          return;
+        }
+      }
+
+      setLowerTick(Math.min(lowerTick, higherTick));
+      setHigherTick(Math.max(lowerTick, higherTick));
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   useEffect(() => {
@@ -548,38 +557,37 @@ export function getLiqFrom(target: number, list: ActiveLiquidityPerTickRange[]):
 }
 
 function numberExponentToLarge(numIn) {
-  numIn += ""; // To cater to numric entries
-  var sign = ""; // To remember the number sign
+  numIn += ''; // To cater to numric entries
+  var sign = ''; // To remember the number sign
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  numIn.charAt(0) == "-" && ((numIn = numIn.substring(1)), (sign = "-")); // remove - sign & remember it
+  numIn.charAt(0) == '-' && ((numIn = numIn.substring(1)), (sign = '-')); // remove - sign & remember it
   var str = numIn.split(/[eE]/g); // Split numberic string at e or E
   if (str.length < 2) return sign + numIn; // Not an Exponent Number? Exit with orginal Num back
   var power = str[1]; // Get Exponent (Power) (could be + or -)
 
   var deciSp = (1.1).toLocaleString().substring(1, 2); // Get Deciaml Separator
   str = str[0].split(deciSp); // Split the Base Number into LH and RH at the decimal point
-  var baseRH = str[1] || "", // RH Base part. Make sure we have a RH fraction else ""
+  var baseRH = str[1] || '', // RH Base part. Make sure we have a RH fraction else ""
     baseLH = str[0]; // LH base part.
 
   if (power >= 0) {
     // ------- Positive Exponents (Process the RH Base Part)
-    if (power > baseRH.length) baseRH += "0".repeat(power - baseRH.length); // Pad with "0" at RH
+    if (power > baseRH.length) baseRH += '0'.repeat(power - baseRH.length); // Pad with "0" at RH
     baseRH = baseRH.slice(0, power) + deciSp + baseRH.slice(power); // Insert decSep at the correct place into RH base
-    if (baseRH.charAt(baseRH.length - 1) == deciSp)
-      baseRH = baseRH.slice(0, -1); // If decSep at RH end? => remove it
+    if (baseRH.charAt(baseRH.length - 1) == deciSp) baseRH = baseRH.slice(0, -1); // If decSep at RH end? => remove it
   } else {
     // ------- Negative exponents (Process the LH Base Part)
     let num = Math.abs(power) - baseLH.length; // Delta necessary 0's
-    if (num > 0) baseLH = "0".repeat(num) + baseLH; // Pad with "0" at LH
+    if (num > 0) baseLH = '0'.repeat(num) + baseLH; // Pad with "0" at LH
     baseLH = baseLH.slice(0, power) + deciSp + baseLH.slice(power); // Insert "." at the correct place into LH base
-    if (baseLH.charAt(0) == deciSp) baseLH = "0" + baseLH; // If decSep at LH most? => add "0"
+    if (baseLH.charAt(0) == deciSp) baseLH = '0' + baseLH; // If decSep at LH most? => add "0"
   }
   // Remove leading and trailing 0's and Return the long number (with sign)
-  return sign + (baseLH + baseRH).replace(/^0*(\d+|\d+\.\d+?)\.?0*$/, "$1");
+  return sign + (baseLH + baseRH).replace(/^0*(\d+|\d+\.\d+?)\.?0*$/, '$1');
 }
 
 export function priceToSqrtPriceBigInt(price: number, diffDecimal: number): bigint {
-  const priceBigInt = new BigDecimal(numberExponentToLarge(price * (10 ** diffDecimal)), 0)
+  const priceBigInt = new BigDecimal(numberExponentToLarge(price * 10 ** diffDecimal), 0)
     .sqrt()
     .mul(10n ** PRICE_SCALE)
     .div(10 ** diffDecimal)

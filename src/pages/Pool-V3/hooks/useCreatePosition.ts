@@ -65,10 +65,10 @@ const useCreatePosition = (
 
   const xUsd =
     // zapInResponse &&
-    tokenX && ((extendPrices?.[tokenX?.coinGeckoId] * amountX)).toFixed(6);
+    tokenX && (extendPrices?.[tokenX?.coinGeckoId] * amountX).toFixed(6);
   const yUsd =
     // zapInResponse &&
-    tokenY && ((extendPrices?.[tokenY?.coinGeckoId] * amountY)).toFixed(6);
+    tokenY && (extendPrices?.[tokenY?.coinGeckoId] * amountY).toFixed(6);
 
   useEffect(() => {
     (async () => {
@@ -173,10 +173,10 @@ const useCreatePosition = (
     setAmountY: setAmountYZap,
     handleZapIn,
     handleSimulateZapIn
-  } = useZapIn(pool, poolKey, extendPrices, tokenX, tokenY, toggleZap, minTick, maxTick, feeDailyData); 
+  } = useZapIn(pool, poolKey, extendPrices, tokenX, tokenY, toggleZap, minTick, maxTick, feeDailyData);
 
   const changeRangeHandler = () => {
-    if (tokenX && (isXToY ? maxTick > pool.current_tick_index : maxTick < pool.current_tick_index)) {
+    if (tokenX && maxTick > pool.current_tick_index) {
       const deposit = amountX;
       const amount = getOtherTokenAmount(
         convertBalanceToBigint((deposit || '0').toString(), tokenX.decimals).toString(),
@@ -192,7 +192,7 @@ const useCreatePosition = (
       }
     }
 
-    if (tokenY && (isXToY ? minTick < pool.current_tick_index : minTick > pool.current_tick_index)) {
+    if (tokenY && minTick < pool.current_tick_index) {
       const deposit = amountY;
       const amount = getOtherTokenAmount(
         convertBalanceToBigint((deposit || '0').toString(), tokenY.decimals).toString(),
