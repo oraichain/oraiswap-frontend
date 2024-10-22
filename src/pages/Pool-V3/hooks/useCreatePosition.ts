@@ -63,12 +63,8 @@ const useCreatePosition = (
     }
   };
 
-  const xUsd =
-    // zapInResponse &&
-    tokenX && (extendPrices?.[tokenX?.coinGeckoId] * amountX).toFixed(6);
-  const yUsd =
-    // zapInResponse &&
-    tokenY && (extendPrices?.[tokenY?.coinGeckoId] * amountY).toFixed(6);
+  const xUsd = tokenX && (extendPrices?.[tokenX.coinGeckoId] * amountX).toFixed(6);
+  const yUsd = tokenY && (extendPrices?.[tokenY.coinGeckoId] * amountY).toFixed(6);
 
   useEffect(() => {
     (async () => {
