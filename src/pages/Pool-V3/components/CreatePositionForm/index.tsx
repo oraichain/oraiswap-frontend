@@ -45,7 +45,9 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const { poolPrice: extendPrices } = useGetPoolList(prices);
+
   const [walletAddress] = useConfigReducer('address');
+  
   const loadOraichainToken = useLoadOraichainTokens();
   const navigate = useNavigate();
   const { feeDailyData } = useGetFeeDailyData();
