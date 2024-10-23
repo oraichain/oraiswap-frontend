@@ -3,7 +3,6 @@ import { getSpecialCoingecko, isEmptyObject } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
 import { calculateFinalPriceChange } from 'pages/UniversalSwap/helpers';
-import { describe, expect, it } from 'vitest';
 import { getTotalUsd, reduceString } from './../libs/utils';
 
 describe('should utils functions in libs/utils run exactly', () => {

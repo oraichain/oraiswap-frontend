@@ -14,7 +14,6 @@ import {
   filterNonPoolEvmTokens,
   getSwapType
 } from 'pages/UniversalSwap/helpers';
-import { expect, describe, it } from 'vitest';
 
 describe('universal-swap', () => {
   it.skip.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
