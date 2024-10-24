@@ -329,7 +329,6 @@ export const fetchHistoricalPriceData3M = createAsyncThunk(
 export const fetchHistoricalPriceData7D = createAsyncThunk(
   'poolDetailV3/fetchHistoricalPriceData7D',
   async (poolId: string) => {
-    console.time('fetchHistoricalPriceData7D');
     return await getHistoricalPriceDataInHour(poolId, '7d');
   }
 );
