@@ -233,6 +233,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     return buttonName;
   };
 
+  const isDisable = token.name === 'BTC' && token.chainId === 'Oraichain';
+
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
       <div className={styles.tokenSubAmouts}>
@@ -413,7 +415,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           ) {
             return (
               <button
-                disabled={transferLoading || !addressTransfer || receivedAmount < 0}
+                disabled={isDisable || transferLoading || !addressTransfer || receivedAmount < 0}
                 className={classNames(styles.tfBtn, styles[theme])}
                 onClick={onTransferConvert}
               >
