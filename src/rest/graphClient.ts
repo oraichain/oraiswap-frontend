@@ -637,8 +637,6 @@ export const getHistoricalPriceDataInHour = async (
       poolId
     };
 
-    console.log({ res });
-
     return res;
   } catch (error) {
     console.log('error getHistoricalPriceData', error);
