@@ -266,6 +266,7 @@
     .menuWrapper {
       width: 100%;
       display: flex;
+      flex-direction: row;
       align-items: center;
       gap: 10px;
       align-self: stretch;
@@ -285,7 +286,7 @@
         display: flex;
         height: 48px;
         padding: 4px;
-        // flex-direction: column;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         gap: 5px;
@@ -396,10 +397,10 @@
         align-self: stretch;
         margin-bottom: 24px;
 
-        @include small-mobile {
-          flex-direction: column;
-          gap: 8px;
-        }
+        // @include small-mobile {
+        //   flex-direction: column;
+        //   gap: 8px;
+        // }
 
         @include theme {
           border-bottom: 1px solid theme-get('neutral-border-border-bold');

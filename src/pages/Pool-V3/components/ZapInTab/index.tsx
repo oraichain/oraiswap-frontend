@@ -82,37 +82,6 @@ const ZapInTab: FC<ZapInTabProps> = ({
     // </div>
     <>
       <div className={classNames(styles.itemInput, { [styles.disabled]: false })}>
-        <div className={styles.balance}>
-          <p className={styles.bal}>
-            <span>Balance:</span> {numberWithCommas(toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals))}{' '}
-            {tokenZap?.name}
-          </p>
-          <div className={styles.btnGroup}>
-            <button
-              className=""
-              disabled={!tokenZap}
-              onClick={() => {
-                const val = toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals);
-                const haftValue = new BigDecimal(val).div(2).toNumber();
-                setZapAmount(haftValue);
-                setFocusId('zap');
-              }}
-            >
-              50%
-            </button>
-            <button
-              className=""
-              disabled={!tokenZap}
-              onClick={() => {
-                const val = toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals);
-                setZapAmount(val);
-                setFocusId('zap');
-              }}
-            >
-              100%
-            </button>
-          </div>
-        </div>
         <div className={styles.tokenInfo}>
           {/* <div className={styles.name}> */}
           <SelectToken
@@ -135,7 +104,7 @@ const ZapInTab: FC<ZapInTabProps> = ({
               decimalScale={tokenZap?.decimals || 6}
               disabled={false}
               type="text"
-              value={zapAmount}
+              value={zapAmount === 0 ? '' : zapAmount}
               onChange={() => {}}
               isAllowed={(values) => {
                 const { floatValue } = values;
@@ -146,18 +115,36 @@ const ZapInTab: FC<ZapInTabProps> = ({
                 setZapAmount(floatValue);
               }}
             />
-            <div className={styles.usd}>
-              ≈ $
-              {zapAmount
-                ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: tokenZap.decimals })
-                : 0}
-            </div>
+          </div>
+        </div>
+        <div className={styles.balance}>
+          <p className={styles.bal}>
+            <span>Balance:</span>{' '}
+            <span className={styles.value}>
+              {numberWithCommas(toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals))} {tokenZap?.name}
+            </span>
+            <span
+              className={styles.max}
+              onClick={() => {
+                const val = toDisplay(amounts[tokenZap?.denom] || '0', tokenZap.decimals);
+                setZapAmount(val);
+                setFocusId('zap');
+              }}
+            >
+              Max
+            </span>
+          </p>
+          <div className={styles.usd}>
+            ≈ $
+            {zapAmount
+              ? numberWithCommas(Number(zapUsd) || 0, undefined, { maximumFractionDigits: tokenZap.decimals })
+              : 0}
           </div>
         </div>
       </div>
       {simulating && (
         <div>
-          <span style={{ fontStyle: 'italic', fontSize: 'small', color: 'white' }}>
+          <span className={styles.simulating}>
             <ZappingText text={'Finding best option to zap'} dot={5} />
           </span>
         </div>

@@ -39,8 +39,8 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   const mobile = isMobile();
   const [oraichainAddress] = useConfigReducer('address');
   const fee = useRelayerFeeToken(
-    btcTokens.find((item) => item.name === 'BTC V2'),
-    oraichainTokens.find((item) => item.name === 'BTC V2')
+    btcTokens.find((item) => item.name === 'BTC'),
+    oraichainTokens.find((item) => item.name === 'BTC')
   );
   const depositFee = useGetDepositFee();
   const fetchedPendingDeposits = useGetPendingDeposits(oraichainAddress);
