@@ -4300,10 +4300,10 @@
     react-use "^17.4.0"
     react-use-websocket "^4.5.0"
 
-"@oraichain/oraidex-common@1.1.23", "@oraichain/oraidex-common@^1.1.21":
-  version "1.1.23"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.23.tgz#7f9b57182972dc4f2f3a9a1fe103c0b12b24fec8"
-  integrity sha512-f7JYAWZH0Hb0UAH1df5oORWZXeiEIX3gN1a5e+udUDuTqexzC2kVJ5TZyj4KDgJo6JyEjVr10zrzWm+tcFR4fg==
+"@oraichain/oraidex-common@1.1.26", "@oraichain/oraidex-common@^1.1.21", "@oraichain/oraidex-common@^1.1.24":
+  version "1.1.26"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.26.tgz#f333cbe144adc050c50997706cd2020cb63dc55c"
+  integrity sha512-RNnFc/thR4KXkI2vzH6qDVV9ojm2L3SqUTLyCmMWUFG98zTQ0mdZC1fXze0ijKiGQsvnZ9IBexbbeiDh96p41w==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"
@@ -4347,13 +4347,13 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.45.tgz#42dae0fdd9e005f920ba305b987009f791acc365"
   integrity sha512-/nYztdxEX5LQM4DMJQmi9HvZrBVoY3nLAmYqSKZGZ0U1h1SxU7O/o22R3/pQwB+sAJdcibaI8ygC0ov7jC8paA==
 
-"@oraichain/oraidex-universal-swap@1.1.15":
-  version "1.1.15"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.15.tgz#e1c987b896ec0cd56de1ba94cbddcf96f9b5c184"
-  integrity sha512-iK0nKrGC81MEBVKz4sTkFndjAPEvHXhHObZHtcJtYp7GIvmonHTFWIJWyw1rufAJYonfp5m/XFdm+Ai3ebxkjw==
+"@oraichain/oraidex-universal-swap@1.1.15-beta.1":
+  version "1.1.15-beta.1"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.15-beta.1.tgz#2c6df3f87590e3d1c9e53dbbe81ed54a59ae0066"
+  integrity sha512-wxfasH9Bz+plwZ/g0Zr261nxLiP6qVT5IXKsC9TrBQMfTDV/4qhse9hZ1rfmDOZMLXHuuYDFEoROfkxz5KNSWQ==
   dependencies:
     "@oraichain/common" "^1.0.3"
-    "@oraichain/oraidex-common" "^1.1.21"
+    "@oraichain/oraidex-common" "^1.1.24"
     "@oraichain/oraidex-contracts-sdk" "^1.0.49"
     "@oraichain/osor-api-contracts-sdk" "^1.0.2"
     bech32 "1.1.4"
