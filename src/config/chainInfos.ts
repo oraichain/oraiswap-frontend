@@ -70,7 +70,7 @@ export const bitcoinMainnet: CustomChainInfo = {
   Icon: BTCIcon,
   IconLight: BTCIcon,
   stakeCurrency: {
-    coinDenom: 'BTC',
+    coinDenom: 'BTC (Legacy)',
     coinMinimalDenom: 'btc',
     coinDecimals: 8,
     coinGeckoId: 'bitcoin',
@@ -80,7 +80,7 @@ export const bitcoinMainnet: CustomChainInfo = {
   networkType: 'bitcoin' as any,
   currencies: [
     {
-      coinDenom: 'BTC',
+      coinDenom: 'BTC (Legacy)',
       coinMinimalDenom: 'btc',
       prefixToken: 'oraibtc',
       coinDecimals: 8 as any,
@@ -95,7 +95,7 @@ export const bitcoinMainnet: CustomChainInfo = {
       }
     },
     {
-      coinDenom: 'BTC V2',
+      coinDenom: 'BTC',
       coinMinimalDenom: 'btc-v2',
       prefixToken: 'oraibtc',
       coinDecimals: 8 as any,
@@ -109,21 +109,6 @@ export const bitcoinMainnet: CustomChainInfo = {
         high: 0
       }
     }
-    // {
-    //   coinDenom: 'BTC V2',
-    //   coinMinimalDenom: 'btc-v2',
-    //   prefixToken: 'oraibtc',
-    //   coinDecimals: 8 as any,
-    //   bridgeTo: ['Oraichain'],
-    //   Icon: BTCIcon,
-    //   coinGeckoId: 'bitcoin',
-    //   coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
-    //   gasPriceStep: {
-    //     low: 0,
-    //     average: 0,
-    //     high: 0
-    //   }
-    // }
   ],
   get feeCurrencies() {
     return this.currencies;
