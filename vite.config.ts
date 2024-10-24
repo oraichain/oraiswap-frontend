@@ -33,5 +33,9 @@ export default defineConfig({
       '@visx/shape/lib/util/accessors': path.resolve(__dirname, 'node_modules/@visx/shape/esm/util/accessors'),
       '@visx/shape/lib/util/getBandwidth': path.resolve(__dirname, 'node_modules/@visx/shape/esm/util/getBandwidth')
     }
+  },
+  build: {
+    outDir: path.resolve(__dirname, 'build'),
+    rollupOptions: {}
   }
 });
