@@ -47,7 +47,7 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
   const { poolPrice: extendPrices } = useGetPoolList(prices);
 
   const [walletAddress] = useConfigReducer('address');
-  
+
   const loadOraichainToken = useLoadOraichainTokens();
   const navigate = useNavigate();
   const { feeDailyData } = useGetFeeDailyData();
@@ -209,7 +209,7 @@ const CreatePositionForm: FC<CreatePositionFormProps> = ({ poolId, slippage, sho
             <p className={styles.title}>Current pool price</p>
             {tokenX && tokenY && currentPrice && (
               <p className={styles.content}>
-                {numberWithCommas(currentPrice, undefined, { maximumFractionDigits: 2 })}{' '}
+                {numberWithCommas(currentPrice, undefined, { maximumFractionDigits: currentPrice >= 0.01 ? 2 : 9 })}{' '}
                 {isXToY ? `${tokenY.name} per ${tokenX.name}` : `${tokenX.name} per ${tokenY.name}`}
               </p>
             )}
