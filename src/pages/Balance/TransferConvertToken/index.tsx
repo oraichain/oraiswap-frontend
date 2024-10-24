@@ -157,7 +157,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const isFromOraichainToBitcoin = token.chainId === 'Oraichain' && toNetworkChainId === ('bitcoin' as any);
   const isFromBitcoinToOraichain = token.chainId === ('bitcoin' as string) && toNetworkChainId === 'Oraichain';
-  const isV2 = token.name === 'BTC V2';
+  const isV2 = token.name === 'BTC';
   let { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
   const depositFeeBtcResult = useDepositFeesBitcoin(isFromBitcoinToOraichain);
   const withdrawalFeeBtcResult = useGetWithdrawlFeesBitcoin({

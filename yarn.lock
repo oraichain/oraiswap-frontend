@@ -4300,10 +4300,10 @@
     react-use "^17.4.0"
     react-use-websocket "^4.5.0"
 
-"@oraichain/oraidex-common@1.1.23", "@oraichain/oraidex-common@^1.1.21":
-  version "1.1.23"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.23.tgz#7f9b57182972dc4f2f3a9a1fe103c0b12b24fec8"
-  integrity sha512-f7JYAWZH0Hb0UAH1df5oORWZXeiEIX3gN1a5e+udUDuTqexzC2kVJ5TZyj4KDgJo6JyEjVr10zrzWm+tcFR4fg==
+"@oraichain/oraidex-common@1.1.27", "@oraichain/oraidex-common@^1.1.27":
+  version "1.1.27"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.1.27.tgz#446c35441c450e9db0c035b300a51c6cab916701"
+  integrity sha512-u4MiZYk3e7W1a/EaKhMQG/6RHImG6DsuuxNeDbuF7Ndv0h2of5BK8Bhc9D57fb+fYWzQcJFmaes1gMYTj4QJ2g==
   dependencies:
     "@cosmjs/amino" "0.31.3"
     "@cosmjs/cosmwasm-stargate" "0.31.3"
@@ -4332,28 +4332,28 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.51-beta.3.tgz#cb7c369081bcb036cc78d91a35a51ff4fb2b42d0"
   integrity sha512-r1g0Ikzi21TAVIrB4I3MVF6rVTPdSHeBiQnwZTZuv0tw/muciuZHsiGSF5O2M5rcyMVHWjck9cQ3VVbAN+gFLg==
 
-"@oraichain/oraidex-contracts-sdk@1.0.53-beta.2":
-  version "1.0.53-beta.2"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.53-beta.2.tgz#67e70c81e86f6b3efe8c77a291844a20c8768413"
-  integrity sha512-qOJZWkYx8mTWKdkqpjaV2GowLHBq6z/+v7jP1UTx1c1Vz6MchnePFLgKS115oSkC5VjD5N1Zl9kv9le9g28a8g==
-
 "@oraichain/oraidex-contracts-sdk@^1.0.49":
   version "1.0.49"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.49.tgz#093221564552e92901c73f6043ce4dc72208d857"
   integrity sha512-J15JR0+wueYMLMFjz/Omg5ADSKOmmTvsBstVf76NQjrvYpekzdlIGvoTIUCGjyf+DOdzu8MevOk5HDAnOrj3Fw==
+
+"@oraichain/oraidex-contracts-sdk@^1.0.53":
+  version "1.0.53"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.53.tgz#82fb40a1e1acb2b603c054b3eccaefa69079fa33"
+  integrity sha512-w7LA2SjcyPNu8PWx3IuxA+vG41bSHdv1M/oQ2Eu2hrH49mC4VOuXeqVjhrOYr5nb/w/Byb0vXX4sxrA96TAgqA==
 
 "@oraichain/oraidex-contracts-sdk@latest":
   version "1.0.45"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.45.tgz#42dae0fdd9e005f920ba305b987009f791acc365"
   integrity sha512-/nYztdxEX5LQM4DMJQmi9HvZrBVoY3nLAmYqSKZGZ0U1h1SxU7O/o22R3/pQwB+sAJdcibaI8ygC0ov7jC8paA==
 
-"@oraichain/oraidex-universal-swap@1.1.15":
-  version "1.1.15"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.15.tgz#e1c987b896ec0cd56de1ba94cbddcf96f9b5c184"
-  integrity sha512-iK0nKrGC81MEBVKz4sTkFndjAPEvHXhHObZHtcJtYp7GIvmonHTFWIJWyw1rufAJYonfp5m/XFdm+Ai3ebxkjw==
+"@oraichain/oraidex-universal-swap@1.1.16":
+  version "1.1.16"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.1.16.tgz#3fbc00b0773c82728e55f0ef6b551e5e7b97cd37"
+  integrity sha512-hv0D6CZ1udLN21g/zcsZ9iwC5o1Ws7Yc4cHqbT1Wyw3Vsom6hIJ0S8bZ5pkA2hysuO9F5TpO585oiBurBCHUyQ==
   dependencies:
     "@oraichain/common" "^1.0.3"
-    "@oraichain/oraidex-common" "^1.1.21"
+    "@oraichain/oraidex-common" "^1.1.27"
     "@oraichain/oraidex-contracts-sdk" "^1.0.49"
     "@oraichain/osor-api-contracts-sdk" "^1.0.2"
     bech32 "1.1.4"
@@ -4361,14 +4361,14 @@
     tronweb "5.3.2"
     ts-protoc-gen "^0.15.0"
 
-"@oraichain/oraiswap-v3@0.1.20-beta.2":
-  version "0.1.20-beta.2"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.20-beta.2.tgz#a5721f961b77ab8d0b69285d096e1d5c6b04ea14"
-  integrity sha512-BCW/P/BWrKo52C1kQLpoTevVAcAAccVOvQg/QQYImMc+XexGyiwlK7O4P/f+EWxb7rJYCJqJ9vwzunCsIgWaow==
+"@oraichain/oraiswap-v3@0.1.22":
+  version "0.1.22"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraiswap-v3/-/oraiswap-v3-0.1.22.tgz#25239c54a875f2a05179597290849415aa94b9ad"
+  integrity sha512-D9+u2B2N5t4bmP1wiamOPYPiXAB0QMFhhnbxDYxZHwvbNKw0k6p0fSZWcsqPneYESI8lDdRlqOuV9oW3oUJ1TQ==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
-    "@oraichain/oraidex-common" "^1.1.21"
-    "@oraichain/oraidex-contracts-sdk" "1.0.53-beta.2"
+    "@oraichain/oraidex-common" "^1.1.27"
+    "@oraichain/oraidex-contracts-sdk" "^1.0.53"
 
 "@oraichain/osor-api-contracts-sdk@^1.0.2":
   version "1.0.2"
