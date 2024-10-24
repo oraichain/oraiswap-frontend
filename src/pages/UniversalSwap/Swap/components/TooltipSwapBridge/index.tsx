@@ -1,5 +1,5 @@
 import styles from './index.module.scss';
-import ArrowImg from 'assets/icons/arrow_right.svg';
+import ArrowImg from 'assets/icons/arrow_right.svg?react';
 
 export const TooltipSwapBridge = ({
   type,
