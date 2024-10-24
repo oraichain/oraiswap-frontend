@@ -230,7 +230,8 @@ const PoolList = ({ search, filterType }: { search: string; filterType: POOL_TYP
     });
 
   const { setPage, page, handleNext, handlePrev, totalPages, indexOfLastItem, indexOfFirstItem } = usePagination({
-    data: filteredPool
+    data: filteredPool,
+    search
   });
 
   useOnClickOutside(sortRef, () => {

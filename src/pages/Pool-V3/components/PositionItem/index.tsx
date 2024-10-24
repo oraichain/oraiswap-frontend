@@ -89,7 +89,7 @@ const PositionItem = ({ position }) => {
   const [incentives, setIncentives] = useState<{ [key: string]: number }>();
   const [claimLoading, setClaimLoading] = useState<boolean>(false);
   const [isClaimSuccess, setIsClaimSuccess] = useState<boolean>(false);
-  const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
+  // const [isOpenCreatePosition, setIsOpenCreatePosition] = useState(false);
   const [statusRange, setStatusRange] = useState(undefined);
   const [xToY, _] = useState<boolean>(
     initialXtoY(tickerToAddress(position?.pool_key.token_x), tickerToAddress(position?.pool_key.token_y))
@@ -266,13 +266,13 @@ const PositionItem = ({ position }) => {
   return (
     <>
       {/* FIXME: move position modal to route page to reduce instance modal create */}
-      {position && poolList.length > 0 && (
+      {/* {position && poolList.length > 0 && (
         <CreateNewPosition
           showModal={isOpenCreatePosition}
           setShowModal={setIsOpenCreatePosition}
           pool={poolList.find((e) => poolKeyToString(e.pool_key) === poolKeyToString(position.pool_key))}
         />
-      )}
+      )} */}
       <ZapOut
         position={position}
         incentives={incentives}
@@ -453,14 +453,14 @@ const PositionItem = ({ position }) => {
                     Remove Position
                   </Button>
                 </div>
-                <Button
+                {/* <Button
                   type="primary-sm"
                   onClick={() => {
                     setIsOpenCreatePosition(true);
                   }}
                 >
                   Add Liquidity
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
