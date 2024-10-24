@@ -28,8 +28,8 @@ export const BTC_TOKEN = oraichainTokens.find((e) => e.coinGeckoId === 'bitcoin'
 const ConvertBitcoinV2: React.FC<{}> = ({}) => {
   const cwBitcoinContext = useContext(CwBitcoinContext);
   const { relayerFee } = useRelayerFeeToken(
-    btcTokens.find((item) => item.name === 'BTC V2'),
-    oraichainTokens.find((item) => item.name === 'BTC V2')
+    btcTokens.find((item) => item.name === 'BTC'),
+    oraichainTokens.find((item) => item.name === 'BTC')
   );
   const withdrawFeeBtc = useGetWithdrawlFeesBitcoin({
     enabled: true,
