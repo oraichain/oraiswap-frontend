@@ -366,8 +366,7 @@ export const getProtocolsSmartRoute = (
   toToken: TokenItemType,
   { useAlphaIbcWasm, useIbcWasm }
 ) => {
-  const protocols = ['Oraidex'];
-  // const protocols = ['Oraidex', 'OraidexV3'];
+  const protocols = ['Oraidex', 'OraidexV3'];
   if (useIbcWasm && !useAlphaIbcWasm) return protocols;
   if (fromToken?.chainId === 'noble-1' || toToken?.chainId === 'noble-1') return protocols;
 
